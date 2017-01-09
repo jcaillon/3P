@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 
 namespace YamuiFramework.Forms {
 
@@ -37,14 +38,11 @@ namespace YamuiFramework.Forms {
             get { return true; }
         }
 
-        private const int WsExTopmost = 0x00000008;
-        private const int WsExToolwindow = 0x80;
-
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
-                createParams.ExStyle |= WsExTopmost;
-                createParams.ExStyle |= WsExToolwindow;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return createParams;
             }
         }

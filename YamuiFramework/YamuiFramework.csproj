@@ -194,7 +194,7 @@
     <Compile Include="Forms\YamuiFormButtons.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\YamuiMenuPopup.cs">
+    <Compile Include="Forms\YamuiMenu.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiNotification.cs">
@@ -203,7 +203,7 @@
     <Compile Include="Forms\YamuiNotification.Designer.cs">
       <DependentUpon>YamuiNotification.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\YamuiMenu.cs">
+    <Compile Include="Forms\YamuiWaterfallMenu.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiInput.cs">

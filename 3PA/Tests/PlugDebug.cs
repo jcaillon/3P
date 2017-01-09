@@ -36,6 +36,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Images;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli.Pages.Options;
@@ -185,7 +186,6 @@ namespace _3PA.Tests {
             return outList;
         }
 
-
         public static void DebugTest1() {
 
             /*
@@ -198,6 +198,7 @@ namespace _3PA.Tests {
             };
             webServiceJson.Execute();
             */
+            /*
             var list = AppliMenu.Instance._mainMenuList.ToList();
             foreach (var menuItem in list) {
                 menuItem.ItemType = -1;
@@ -205,9 +206,26 @@ namespace _3PA.Tests {
             var popup = new YamuiMenuPopup {
                 HtmlTitle = "<div align='center'>Yop</div>",
                 SpawnLocation = Cursor.Position,
-                MenuList = list.Cast<YamuiMenuItem>().ToList()
+                MenuList = list.Cast<YamuiMenuItem>().ToList(),
+                DisplayNbItems = true
             };
-            popup.Show();
+            popup.Show(new WindowWrapper(Npp.HandleNpp));
+            */
+
+            var popup2 = new YamuiMenu {
+                SpawnLocation = Cursor.Position,
+                MenuList = new List<YamuiMenuItem> {
+                    new YamuiMenuItem { DisplayText = "numero 1"},
+                    new YamuiMenuItem { DisplayText = "numero 2", IsSelectedByDefault = true},
+                },
+                DisplayFilterBox = false
+            };
+            popup2.ClicItemWrapper = item => {
+                UserCommunication.Notify(item.DisplayText);
+                popup2.Close();
+                popup2.Dispose();
+            };
+            popup2.Show(new WindowWrapper(Npp.HandleNpp));
 
             //UserCommunication.Notify("test");
             //UserCommunication.Notify("test");

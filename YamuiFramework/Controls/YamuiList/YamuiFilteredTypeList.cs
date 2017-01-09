@@ -27,6 +27,7 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
+using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
@@ -38,6 +39,13 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region constants
 
+        public const string TypeButtonTooltipText = @"Left click to <b>filter on/off</b> this type<br>Right click to <b>filter for this type only</b><br><i>(A consecutive right click reactivate all the types)</i><br><i>You can use <b>ALT+RIGHT/LEFT ARROW</b> key to quickly activate one type</i>";
+
+        protected const string MoreButtonTooltipText = @"Click to show more item types";
+
+        protected const string PaintShowingText = @"Showing";
+        protected const string PaintItemsText = @" items";
+
         protected const int DefaultBottomHeight = 28;
 
         protected const int MinItemLabelWidth = 45;
@@ -48,11 +56,13 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected const int BottomPadding = 2;
 
-        protected const int TypeButtonWidth = 22;
+        public const int TypeButtonWidth = 22;
 
         #endregion
 
         #region private fields
+
+        protected HtmlToolTip _tooltip = new HtmlToolTip();
 
         protected Dictionary<int, SelectorButton> _typeButtons = new Dictionary<int, SelectorButton>();
 
@@ -79,13 +89,6 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region public properties
-
-        /// <summary>
-        /// Should return the image to use for the corresponding type, it used for the bottom buttons
-        /// (type buttons) and it is used as a default item.Image if the later is null
-        /// </summary>
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Func<int, Image> GetTypeImage { get; set; }
 
         /// <summary>
         /// The image to display for the button "display more type"
@@ -152,7 +155,19 @@ namespace YamuiFramework.Controls.YamuiList {
             }
             set { _filterPredicate = value; }
         }
-        
+
+        /// <summary>
+        /// Stores a correspondance between type number and image to use for the button
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Dictionary<int, Image> TypeImages { get; private set; }
+
+        /// <summary>
+        /// Stores a correspondance between type number and text to use for the tooltip of the button
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Dictionary<int, string> TypeText { get; private set; }
+
         #endregion
 
         #region Paint
@@ -163,8 +178,8 @@ namespace YamuiFramework.Controls.YamuiList {
             // text
             if (BottomHeight > 0) {
                 var textHeight = (BottomHeight - BottomPadding*2)/2;
-                TextRenderer.DrawText(e.Graphics, "Showing", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - BottomHeight + BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
-                TextRenderer.DrawText(e.Graphics, _nbItems + " items", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - textHeight - BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+                TextRenderer.DrawText(e.Graphics, PaintShowingText, FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - BottomHeight + BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+                TextRenderer.DrawText(e.Graphics, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - textHeight - BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
             }
         }
 
@@ -184,7 +199,7 @@ namespace YamuiFramework.Controls.YamuiList {
             // measure the space taken by the label "showing x items"
             using (var gImg = new Bitmap(1, 1))
             using (var g = Graphics.FromImage(gImg)) {
-                _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + " items", FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
+                _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
             }
 
             // set the type buttons needed
@@ -195,7 +210,22 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected void ComputeTypeButtonsNeeded(List<ListItem> listItems) {
             // set the type buttons needed
-            _typeList = listItems.Select(x => ((FilteredTypeListItem)x).ItemType).Where(i => i >= 0).Distinct().ToList();
+            if (TypeImages == null)
+                TypeImages = new Dictionary<int, Image>();
+            else
+                TypeImages.Clear();
+            if (TypeText == null)
+                TypeText = new Dictionary<int, string>();
+            else
+                TypeText.Clear();
+            _typeList.Clear();
+            foreach (var item in listItems.Cast<FilteredTypeListItem>().Where(item => item.ItemType >= 0)) {
+                if (!TypeImages.ContainsKey(item.ItemType)) {
+                    _typeList.Add(item.ItemType);
+                    TypeImages.Add(item.ItemType, item.ItemTypeImage);
+                    TypeText.Add(item.ItemType, item.ItemTypeText);
+                }
+            }            
         }
 
         #endregion
@@ -229,10 +259,10 @@ namespace YamuiFramework.Controls.YamuiList {
                         AcceptsRightClick = true,
                         HideFocusedIndicator = true,
                         Activated = true,
-                        BackGrndImage = GetTypeImage != null ? GetTypeImage(type) : null
+                        BackGrndImage = TypeImages.ContainsKey(type) ? TypeImages[type] : null
                     });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
-                    //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                    _tooltip.SetToolTip(_typeButtons[type], (TypeText.ContainsKey(type) && TypeText[type] != null ? TypeText + "<br>" : "") + TypeButtonTooltipText);
                 }
 
                 _typeButtons[type].Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
@@ -286,7 +316,7 @@ namespace YamuiFramework.Controls.YamuiList {
                             HideFocusedIndicator = true
                         };
                         _moreButton.ButtonPressed += HandleMoreTypeClick;
-                        //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                        _tooltip.SetToolTip(_moreButton, MoreButtonTooltipText);
                     }
 
                     _moreButton.Location = new Point(xPos, Height - BottomHeight / 2 - _moreButton.Height / 2);
@@ -337,8 +367,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // Image icon
             Image img = item.ItemImage;
-            if (img == null && GetTypeImage != null)
-                img = GetTypeImage(item.ItemType);
+            if (img == null && item.ItemTypeImage != null)
+                img = item.ItemTypeImage;
             if (img != null) {
                 var recImg = new Rectangle(new Point(drawRect.X + 1, drawRect.Y + (drawRect.Height - img.Height) / 2), new Size(img.Width, img.Height));
                 g.DrawImage(img, recImg);
@@ -400,13 +430,13 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override void OnKeyDown(KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.Left:
-                    LeftRight(true);
-                    e.Handled = true;
+                    if (ModifierKeys.HasFlag(Keys.Alt))
+                        e.Handled = LeftRight(true);
                     break;
 
                 case Keys.Right:
-                    LeftRight(false);
-                    e.Handled = true;
+                    if (ModifierKeys.HasFlag(Keys.Alt))
+                        e.Handled = LeftRight(false);
                     break;
             }
             if (!e.Handled)
@@ -416,9 +446,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Handles the left/right buttons
         /// </summary>
-        protected void LeftRight(bool isLeft) {
-            if (_typeButtons.Count == 0)
-                return;
+        protected bool LeftRight(bool isLeft) {
+            if (_typeButtons.Count <= 0)
+                return false;
 
             // only 1 type is active
             if (_typeButtons.Count(b => b.Value.Activated) == 1) {
@@ -435,6 +465,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
             SetActiveType(new List<int> { _typeButtons.ElementAt(_currentButtonIndex).Key });
 
+            return true;
         }
 
         #endregion
@@ -457,10 +488,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 nBut++;
             }
 
-            _moreForm = new MoreTypesForm() {
-                ButtonSize = new Size(TypeButtonWidth, DefaultBottomHeight),
-                GetObjectTypeImage = GetTypeImage,
-            };
+            _moreForm = new MoreTypesForm();
             _moreForm.Build(MousePosition, typesSubList, HandleTypeClick, this);
             _moreForm.Show();
         }

@@ -100,7 +100,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     if (Plug.PluginIsReady)
                         Form.RefreshParserAndCodeExplorer();
                 } else {
-                    WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
+                    Win32Api.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
                 Form.RefreshPosAndLoc();
                 if (FakeForm == null) return;
@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public static void UpdateMenuItemChecked() {
             if (FakeForm == null) return;
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
+            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
             Config.Instance.CodeExplorerVisible = FakeForm.Visible;
         }
 
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             };
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
             Form = new CodeExplorerForm(FakeForm);
         }
 

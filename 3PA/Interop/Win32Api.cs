@@ -30,7 +30,7 @@ namespace _3PA.Interop {
 
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal class WinApi {
+    internal class Win32Api {
 
         #region SendMessage
 
@@ -162,12 +162,20 @@ namespace _3PA.Interop {
         [DllImport("user32.dll")]
         public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
 
+        /// <summary>
+        /// Returns a rectangle representing the topleft / bottomright corners of the window
+        /// </summary>
         [DllImport("user32.dll")]
         public static extern long GetWindowRect(IntPtr hWnd, ref Rectangle lpRect);
 
+        /// <summary>
+        /// Returns a rectangle reprsenting the location + width of the given window
+        /// </summary>
         public static Rectangle GetWindowRect(IntPtr hWnd) {
             Rectangle output = new Rectangle();
             GetWindowRect(hWnd, ref output);
+            output.Width -= output.X;
+            output.Height -= output.Y;
             return output;
         }
 

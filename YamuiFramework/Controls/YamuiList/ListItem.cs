@@ -35,16 +35,18 @@ namespace YamuiFramework.Controls.YamuiList {
         private bool _isDisabled;
 
         #endregion
-        
+
+        #region Virtual properties
+
         /// <summary>
         /// The piece of text displayed in the list
         /// </summary>
-        public string DisplayText { get; set; }
+        public virtual string DisplayText { get; set; }
 
         /// <summary>
         /// The item is disabled or not (a separator is necesseraly disabled)
         /// </summary>
-        public bool IsDisabled {
+        public virtual bool IsDisabled {
             get { return _isDisabled; }
             set { _isDisabled = _isSeparator || value; }
         }
@@ -52,7 +54,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// true if the item is a separator
         /// </summary>
-        public bool IsSeparator {
+        public virtual bool IsSeparator {
             get { return _isSeparator; }
             set {
                 _isSeparator = value;
@@ -60,6 +62,9 @@ namespace YamuiFramework.Controls.YamuiList {
                     IsDisabled = true;
             }
         }
+
+        #endregion
+
     }
 
     #endregion
@@ -80,7 +85,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region Filter
+        #region internal mechanism
 
         /// <summary>
         /// The dispertion level with which the lowerCaseFilterString matches the DisplayText
@@ -175,6 +180,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
+
     }
 
     #endregion
@@ -186,7 +192,15 @@ namespace YamuiFramework.Controls.YamuiList {
     /// be used to quickly filter the items through a set of "type" buttons
     /// </summary>
     public class FilteredTypeListItem : FilteredListItem {
-        
+
+        #region Virtual properties
+
+        /// <summary>
+        /// to override, should return the image to display for this item
+        /// If null, the image corresponding to ItemTypeImage will be used instead
+        /// </summary>
+        public virtual Image ItemImage { get; set; }
+
         /// <summary>
         /// to override, should return this item type (a unique int for each item type)
         /// if the value is strictly inferior to 0, the button for this type will not appear
@@ -195,10 +209,17 @@ namespace YamuiFramework.Controls.YamuiList {
         public virtual int ItemType { get; set; }
 
         /// <summary>
-        /// to override, should return the image to display for this item
-        /// If null, the image corresponding to ItemType will be used instead
+        /// to override, should return the image that will be used to identify this item
+        /// type, it will be used for the bottom buttons of the list
+        /// All items of a given type should return the same image! The image used for the 
+        /// bottom buttons will be that of the first item found for the given type
         /// </summary>
-        public virtual Image ItemImage { get; set; }
+        public virtual Image ItemTypeImage { get; set; }
+
+        /// <summary>
+        /// The text that will displayed in the tooltip of the button corresponding to this item's type
+        /// </summary>
+        public virtual string ItemTypeText { get; set; }
 
         /// <summary>
         /// to override, should return true if the item is to be highlighted
@@ -215,6 +236,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public virtual List<Image> TagImages { get; set; }
 
+        #endregion
+
     }
 
     #endregion
@@ -226,22 +249,28 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class FilteredTypeTreeListItem : FilteredTypeListItem {
 
+        #region constant
+
+        // used for the PathDescriptor property
         public const string TreePathSeparator = "||";
 
-        /// <summary>
-        /// to override, does this item have children?
-        /// </summary>
-        public virtual bool CanExpand { get; set; }
+        #endregion
+
+        #region Virtual properties
 
         /// <summary>
         /// to override, that should return the list of the children for this item (if any) or null
         /// </summary>
         public virtual List<FilteredTypeTreeListItem> Children { get; set; }
-        
+
         /// <summary>
-        /// Is this item expanded? (useful only if CanExpand), should only be used in read mode
+        /// Is this item expanded? (useful only if has children), should only be used in read mode
         /// </summary>
         public bool IsExpanded { get; set; }
+
+        #endregion
+
+        #region internal mechanism
 
         /// <summary>
         /// Returns the list of the children for this item, to be used internally by the YamuiList as it
@@ -267,7 +296,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Compute the path descriptor/level for this item (not required for root items)
         /// </summary>
         private void ComputeItemProperties() {
-
             if (ParentNode != null) {
 
                 // compute path descriptor
@@ -283,6 +311,13 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
                 _pathDescriptor = _pathDescriptor + DisplayText + "(" + ItemType + ")";
             }
+        }
+
+        /// <summary>
+        /// does this item have children?
+        /// </summary>
+        public virtual bool CanExpand {
+            get { return Children != null; }
         }
 
         /// <summary>
@@ -320,12 +355,16 @@ namespace YamuiFramework.Controls.YamuiList {
         public string PathDescriptor {
             get { return _pathDescriptor ?? DisplayText + "(" + ItemType + ")"; }
         }
+
         private string _pathDescriptor;
 
         /// <summary>
         /// The level of the item defines its place in the tree, level 0 is the root, 1 is deeper and so on...
         /// </summary>
         public int Level { get; private set; }
+
+        #endregion
+
 
     }
 

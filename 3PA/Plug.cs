@@ -248,7 +248,7 @@ namespace _3PA {
             DoNppBufferActivated(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
-            WinApi.SetForegroundWindow(Npp.HandleNpp);
+            Win32Api.SetForegroundWindow(Npp.HandleNpp);
         }
 
         #endregion
@@ -296,11 +296,11 @@ namespace _3PA {
 
         #region On mouse message
 
-        private static bool MouseMessageHandler(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct) {
+        private static bool MouseMessageHandler(Win32Api.WindowsMessageMouse message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
 
             switch (message) {
                 // middle click : go to definition
-                case WinApi.WindowsMessageMouse.WM_MBUTTONDOWN:
+                case Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN:
                     //if (Npp.GetScintillaRectangle().Contains(Cursor.Position)) {
                     if (KeyboardMonitor.GetModifiers.IsCtrl) {
                         Npp.GoBackFromDefinition();
@@ -310,7 +310,7 @@ namespace _3PA {
                     return true;
                     //break;
                 // (CTRL + ) Right click : show main menu
-                case WinApi.WindowsMessageMouse.WM_RBUTTONUP:
+                case Win32Api.WindowsMessageMouse.WM_RBUTTONUP:
                     if (KeyboardMonitor.GetModifiers.IsCtrl) {
                         // we need the cursor to be in scintilla but not on the application or the auto-completion!
                         if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
@@ -326,19 +326,19 @@ namespace _3PA {
             // HACK: The following is to handle the MOVE/RESIZE event of npp's window. 
             // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
             switch (message) {
-                case WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN:
-                    if (!WinApi.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
-                        MouseMonitor.Instance.Add(WinApi.WindowsMessageMouse.WM_MOUSEMOVE);
+                case Win32Api.WindowsMessageMouse.WM_NCLBUTTONDOWN:
+                    if (!Win32Api.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
+                        MouseMonitor.Instance.Add(Win32Api.WindowsMessageMouse.WM_MOUSEMOVE);
                     }
                     break;
-                case WinApi.WindowsMessageMouse.WM_LBUTTONUP:
-                case WinApi.WindowsMessageMouse.WM_NCLBUTTONUP:
-                    if (MouseMonitor.Instance.Remove(WinApi.WindowsMessageMouse.WM_MOUSEMOVE)) {
+                case Win32Api.WindowsMessageMouse.WM_LBUTTONUP:
+                case Win32Api.WindowsMessageMouse.WM_NCLBUTTONUP:
+                    if (MouseMonitor.Instance.Remove(Win32Api.WindowsMessageMouse.WM_MOUSEMOVE)) {
                         if (OnNppWindowsMove != null)
                             OnNppWindowsMove();
                     }
                     break;
-                case WinApi.WindowsMessageMouse.WM_MOUSEMOVE:
+                case Win32Api.WindowsMessageMouse.WM_MOUSEMOVE:
                     if (OnNppWindowsMove != null)
                         OnNppWindowsMove();
                     break;
@@ -428,13 +428,13 @@ namespace _3PA {
                 // So i gave up and handle things here!
                 // Each control / form that should use a key not handled by Npp should implement a method 
                 // "HandleKeyDown" that will be triggered from here (see below)
-                var curControl = WinApi.GetFocusedControl();
+                var curControl = Win32Api.GetFocusedControl();
                 if (curControl != null) {
                     var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
-                var curWindow = Control.FromHandle(WinApi.GetForegroundWindow());
+                var curWindow = Control.FromHandle(Win32Api.GetForegroundWindow());
                 if (curWindow != null) {
                     var invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
                     if (invokeResponse != null && (bool) invokeResponse)
@@ -467,7 +467,7 @@ namespace _3PA {
                     (item.Generic || IsCurrentFileProgress)) {
                     if (!isSpamming && item.OnClic != null) {
                         try {
-                            item.OnClic();
+                            item.OnClic(item);
                         } catch (Exception e) {
                             ErrorHandler.ShowErrors(e, "Error in : " + item.DisplayText);
                         }
@@ -812,7 +812,7 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnSciDwellStart() {
-            if (WinApi.GetForegroundWindow() == Npp.HandleNpp)
+            if (Win32Api.GetForegroundWindow() == Npp.HandleNpp)
                 InfoToolTip.ShowToolTipFromDwell();
         }
 
@@ -960,7 +960,7 @@ namespace _3PA {
             Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
             // and we also block it in Npp (pull request on going for v6.9.?)
             if (Config.IsDevelopper)
-                WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
+                Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -1013,7 +1013,7 @@ namespace _3PA {
             // we wanted the default auto-completion to not show, but no more
             Npp.AutoCStops("");
             if (Config.IsDevelopper)
-                WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
+                Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
         }
 
         private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {

@@ -37,6 +37,15 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
 
+        #region constants
+
+        /// <summary>
+        /// Width allowed to draw the arrow/tree branches
+        /// </summary>
+        protected const int TreeWidth = 8;
+
+        #endregion
+
         #region private fields
 
         /// <summary>
@@ -54,7 +63,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// True when in FilterSortWithNoParent mode + filter string not empty
         /// </summary>
-        private bool _isSearching;
+        protected bool _isSearching;
 
         private bool _showTreeBranches = true;
 
@@ -238,11 +247,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Toggle expand/collapse for the an item at the given index
         /// </summary>
-        private void ExpandCollapse(int itemIndex, ForceExpansion forceExpansion) {
+        private bool ExpandCollapse(int itemIndex, ForceExpansion forceExpansion) {
 
             var selectedItem = GetItem(itemIndex);
             if (selectedItem == null)
-                return;
+                return false;
 
             // handles a node expansion
             var currentItem = selectedItem as FilteredTypeTreeListItem;
@@ -262,7 +271,11 @@ namespace YamuiFramework.Controls.YamuiList {
                     _savedState.Add(currentItemPathDescriptor, currentItem.IsExpanded);
 
                 ApplyExpansionState();
+
+                return true;
             }
+
+            return false;
         }
 
         #endregion
@@ -285,52 +298,60 @@ namespace YamuiFramework.Controls.YamuiList {
                 var shiftedDrawRect = drawRect;
 
                 // draw the tree structure
-                if (!_isSearching) {
-
-                    var treeWidth = 8;
-                    var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-                    var arrowColor = curItem.IsExpanded ? YamuiThemeManager.Current.AccentColor : foreColor;
-
-                    // draw the branches of the tree
-                    if (ShowTreeBranches) {
-                        using (var linePen = new Pen(!item.IsDisabled ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) {DashStyle = DashStyle.Solid}) {
-
-                            // Draw the vertical lines for each ancestors
-                            var pos = drawRect.X + treeWidth/2;
-                            for (int i = 1; i <= curItem.Level; i++) {
-                                if (i == curItem.Level && curItem.IsLastItem)
-                                    e.Graphics.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height/2 - 1);
-                                else
-                                    e.Graphics.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height);
-                                pos += treeWidth;
-                            }
-
-                            // Draw the horizontal line that goes to the arrow
-                            if (curItem.Level > 0) {
-                                pos -= treeWidth;
-                                linePen.Color = arrowColor;
-                                e.Graphics.DrawLine(linePen, pos, drawRect.Y + drawRect.Height/2 - 1, pos + treeWidth/2, drawRect.Y + drawRect.Height/2 - 1);
-                            }
-                        }
-                    }
-
-                    for (int i = 0; i <= curItem.Level; i++) {
-                        shiftedDrawRect.X += treeWidth;
-                        shiftedDrawRect.Width -= treeWidth;
-                    }
-
-                    // Draw the arrow icon indicating if the node is expanded or not
-                    if (curItem.CanExpand) {
-                        TextRenderer.DrawText(e.Graphics, curItem.IsExpanded ? "q" : "u", FontManager.GetOtherFont("Wingdings 3", FontStyle.Regular, (float) (shiftedDrawRect.Height*0.40)), new Rectangle(shiftedDrawRect.X - treeWidth, shiftedDrawRect.Y, treeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-                    }
-                }
+                if (!_isSearching)
+                    shiftedDrawRect = RowPaintTree(e.Graphics, curItem, drawRect, row);
 
                 // case of a separator
                 if (item.IsSeparator)
-                    RowPaintSeparator(e.Graphics, drawRect);
+                    RowPaintSeparator(e.Graphics, curItem.Level == 0 ? drawRect : shiftedDrawRect);
                 else
-                    DrawFilteredTypeRow(e.Graphics, curItem, drawRect, row);
+                    DrawFilteredTypeRow(e.Graphics, curItem, shiftedDrawRect, row);
             }
+        }
+
+        protected virtual Rectangle RowPaintTree(Graphics g, FilteredTypeTreeListItem curItem, Rectangle drawRect, YamuiListRow row) {
+            var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !curItem.IsDisabled);
+            var arrowColor = curItem.IsExpanded ? YamuiThemeManager.Current.AccentColor : foreColor;
+            var shiftedDrawRect = drawRect;
+
+            // draw the branches of the tree
+            if (ShowTreeBranches) {
+                using (var linePen = new Pen(!curItem.IsDisabled || curItem.IsSeparator ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) { DashStyle = DashStyle.Solid }) {
+
+                    var pos = drawRect.X + TreeWidth / 2;
+                    if (curItem.Level >= 1)
+                        pos += (curItem.Level - 1)*TreeWidth;
+
+                    // Draw the horizontal line that goes to the arrow
+                    if (curItem.Level > 0 && !curItem.IsSeparator) {
+                        g.DrawLine(linePen, pos, drawRect.Y + drawRect.Height / 2 - 1, pos + TreeWidth / 2, drawRect.Y + drawRect.Height / 2 - 1);
+                    }
+
+                    var familyNode = curItem;
+                    while (familyNode != null && familyNode.Level > 0) {
+                        // the current item is the last item of its parent
+                        if (familyNode.Level == curItem.Level && familyNode.IsLastItem)
+                            g.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height / 2 - 1);
+                        else if (!familyNode.IsLastItem)
+                            g.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height);
+                        familyNode = familyNode.ParentNode;
+                        pos -= TreeWidth;
+                    }
+                    
+                }
+            }
+
+            for (int i = 0; i <= curItem.Level; i++) {
+                shiftedDrawRect.X += TreeWidth;
+                shiftedDrawRect.Width -= TreeWidth;
+            }
+
+            // Draw the arrow icon indicating if the node is expanded or not
+            if (curItem.CanExpand) {
+                TextRenderer.DrawText(g, curItem.IsExpanded ? "q" : "u", FontManager.GetOtherFont("Wingdings 3", FontStyle.Regular, (float)(shiftedDrawRect.Height * 0.40)), new Rectangle(shiftedDrawRect.X - TreeWidth, shiftedDrawRect.Y, TreeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+
+            return shiftedDrawRect;
         }
 
         #endregion
@@ -420,14 +441,12 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override void OnKeyDown(KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.Left:
-                    if (_isSearching || e.Control) {
-                        LeftRight(true);
-                    } else {
+                    if (!_isSearching && !ModifierKeys.HasFlag(Keys.Alt)) {
                         var curItem = SelectedItem as FilteredTypeTreeListItem;
                         if (curItem != null) {
                             if (curItem.CanExpand && curItem.IsExpanded)
                                 // collapse the current item
-                                ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceCollapse);
+                                e.Handled = ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceCollapse);
                             else {
                                 // select its parent
                                 var lastSep = curItem.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
@@ -440,21 +459,18 @@ namespace YamuiFramework.Controls.YamuiList {
                                         itemAbove = GetItem(idx) as FilteredTypeTreeListItem;
                                     } while (itemAbove != null && !itemAbove.PathDescriptor.Equals(parentPath));
                                     SelectedItemIndex = idx;
+                                    e.Handled = true;
                                 }
                             }
                         }
                     }
-                    e.Handled = true;
                     break;
 
                 case Keys.Right:
-                    if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
-                        LeftRight(false);
-                    } else {
+                    if (!_isSearching && !ModifierKeys.HasFlag(Keys.Alt)) {
                         // expand the current item
-                        ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceExpand);
+                        e.Handled = ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceExpand);
                     }
-                    e.Handled = true;
                     break;
             }
             if (!e.Handled)

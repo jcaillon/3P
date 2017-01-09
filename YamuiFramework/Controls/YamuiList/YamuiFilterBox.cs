@@ -92,6 +92,9 @@ namespace YamuiFramework.Controls.YamuiList {
             set { _filterButtonImage = value; }
         }
 
+        /// <summary>
+        /// Accessor for the list of buttons displayed on the left of the textbox
+        /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<YamuiButtonImage> ExtraButtonsList { get; private set; }
 
@@ -109,7 +112,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
         
-        #region Constructor
+        #region Life and death
 
         public YamuiFilterBox() {
 
@@ -120,9 +123,16 @@ namespace YamuiFramework.Controls.YamuiList {
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
 
-            // this usercontrol should not be able to get the focus, only the first button can get it
+            // this usercontrol should not be able to get the focus
             SetStyle(ControlStyles.Selectable, false);
 
+        }
+
+        protected override void Dispose(bool disposing) {
+            if (AssociatedList != null)
+                _filterBox.TextChanged -= AssociatedList.OnTextChangedEvent;
+            _filterBox.KeyDown -= FilterBoxOnKeyDown;
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -150,7 +160,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // link events of the textbox to the list
             _filterBox.TextChanged += AssociatedList.OnTextChangedEvent;
-            _filterBox.KeyDown += (sender, args) => args.Handled = AssociatedList.PerformKeyDown(new KeyEventArgs(args.KeyCode));
+            _filterBox.KeyDown += FilterBoxOnKeyDown;
         }
 
         private void DrawControl() {
@@ -227,7 +237,11 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region OnButtonClick
+        #region Event handlers
+
+        private void FilterBoxOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = AssociatedList.PerformKeyDown(new KeyEventArgs(keyEventArgs.KeyCode));
+        }
 
         /// <summary>
         /// Clic on the switch mode button

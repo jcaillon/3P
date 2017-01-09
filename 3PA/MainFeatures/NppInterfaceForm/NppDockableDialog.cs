@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
@@ -44,6 +45,18 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         private Rectangle _masterRectangle;
         private EmptyForm _masterForm;
+
+        #endregion
+
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return Params;
+            }
+        }
 
         #endregion
 
@@ -77,7 +90,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;
-                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             Plug.OnNppWindowsMove += RefreshPosAndLoc;
@@ -89,7 +102,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
                 if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                     int value = 0;
-                    WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                    Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
                 }
             } catch (Exception) {
                 // ignored
@@ -105,8 +118,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (Owner == null)
                 return;
 
-            var rect = new Rectangle();
-            WinApi.GetWindowRect(_masterForm.Handle, ref rect);
+            var rect = Win32Api.GetWindowRect(_masterForm.Handle);
 
             // update location
             if (_masterRectangle.Location != rect.Location) {

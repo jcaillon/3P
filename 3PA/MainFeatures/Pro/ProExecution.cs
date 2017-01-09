@@ -552,7 +552,7 @@ namespace _3PA.MainFeatures.Pro {
         public void BringProcessToFront() {
             HasBeenKilled = true;
             try {
-                WinApi.SetForegroundWindow(Process.MainWindowHandle);
+                Win32Api.SetForegroundWindow(Process.MainWindowHandle);
             } catch (Exception) {
                 // ignored
             }

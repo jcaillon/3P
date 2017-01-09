@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
@@ -70,7 +71,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override CreateParams CreateParams {
             get {
                 var Params = base.CreateParams;
-                Params.ExStyle |= 0x80;
+                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return Params;
             }
         }
@@ -146,7 +147,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (GiveFocusBackToScintilla)
                 Npp.GrabFocus();
             else
-                WinApi.SetForegroundWindow(CurrentForegroundWindow);
+                Win32Api.SetForegroundWindow(CurrentForegroundWindow);
             IsActivated = !IsActivated;
             Opacity = UnfocusedOpacity;
         }
@@ -173,7 +174,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 if (GiveFocusBackToScintilla)
                     Npp.GrabFocus();
                 else
-                    WinApi.SetForegroundWindow(CurrentForegroundWindow);
+                    Win32Api.SetForegroundWindow(CurrentForegroundWindow);
             else {
                 IsActivated = true;
                 Opacity = FocusedOpacity;

@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli.Pages.Actions;
@@ -44,6 +45,18 @@ namespace _3PA.MainFeatures.Appli {
         public IntPtr CurrentForegroundWindow;
 
         private bool _forcingClose;
+
+        #endregion
+
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return Params;
+            }
+        }
 
         #endregion
 
@@ -115,8 +128,8 @@ namespace _3PA.MainFeatures.Appli {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            GiveFocusBack();
             Visible = false;
+            GiveFocusBack();
         }
 
         /// <summary>
@@ -142,13 +155,11 @@ namespace _3PA.MainFeatures.Appli {
         public void GiveFocusBack() {
             //WinApi.SetForegroundWindow(CurrentForegroundWindow);
             Npp.GrabFocus();
-            Opacity = Config.Instance.AppliOpacityUnfocused;
         }
 
-        protected override void OnDeactivate(EventArgs e) {
-            if (!HasModalOpened)
-                Opacity = Config.Instance.AppliOpacityUnfocused;
-            base.OnDeactivate(e);
+        protected override void OnActivated(EventArgs e) {
+            Opacity = 1;
+            base.OnActivated(e);
         }
 
         protected override void OnClosing(CancelEventArgs e) {

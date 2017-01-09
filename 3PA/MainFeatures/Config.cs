@@ -106,13 +106,6 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = true)]
             public bool GlobalUseAlternateBackColorOnGrid = false;
 
-            [Display(Name = "Application unfocused opacity",
-                Description = "Set the opacity that the main application window will have when it doenst' have the focus",
-                GroupName = "General",
-                AutoGenerateField = false)]
-            [Range(0.1, 1)]
-            public double AppliOpacityUnfocused = 1;
-
             [Display(Name = "Allow tab animation",
                 Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
                 GroupName = "General",

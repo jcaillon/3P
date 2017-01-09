@@ -35,20 +35,21 @@ namespace YamuiFramework.Forms {
     /// </summary>
     public class YamuiFormButtons : YamuiFormBaseShadowFadeIn {
 
-        #region Private
-
-        private bool _isResizable = true;
+        #region constants
 
         protected const int FormButtonWidth = 25;
-
         protected const int ResizeIconSize = 14;
+
+        #endregion
+        
+        #region Private
 
         /// <summary>
         /// Tooltip for close buttons
         /// </summary>
         private HtmlToolTip _mainFormToolTip = new HtmlToolTip();
-
         private Dictionary<WindowButtons, YamuiFormButton> _windowButtonList;
+        private int _captionBarHeight = FormButtonWidth + BorderWidth;
 
         #endregion
         
@@ -69,14 +70,17 @@ namespace YamuiFramework.Forms {
         [Browsable(false)]
         public Action OnCloseAllVisible { get; set; }
 
-        protected override Padding DefaultPadding {
-            get { return new Padding(BorderWidth, 20, BorderWidth + ResizeIconSize, BorderWidth + ResizeIconSize); }
+        /// <summary>
+        /// Height of the caption bar (what should be the title bar in a normal window)
+        /// the caption bar is sensitive to double click which maximize/reduce the window
+        /// </summary>
+        public int CaptionBarHeight {
+            get { return _captionBarHeight; }
+            set { _captionBarHeight = value; }
         }
 
-        [Category("Yamui")]
-        public bool Resizable {
-            get { return _isResizable; }
-            set { _isResizable = value; }
+        protected override Padding DefaultPadding {
+            get { return new Padding(BorderWidth, 20, BorderWidth + ResizeIconSize, BorderWidth + ResizeIconSize); }
         }
         
         #endregion
@@ -132,22 +136,6 @@ namespace YamuiFramework.Forms {
                 return;
             }
 
-            switch (m.Msg) {
-                case (int)WinApi.Messages.WM_NCHITTEST:
-                    // test in which part of the form the cursor is in (we return the caption bar if
-                    // it's on the top of the window or the resizebottomright when it's on the bottom right), 
-                    // allow to be able to maximize the window by double clicking the "title bar" for instance
-                    if (Resizable) {
-                        var ht = HitTestNca(m.LParam);
-                        if (ht != WinApi.HitTest.HTCLIENT) {
-                            m.Result = (IntPtr) ht;
-                            return;
-                        }
-                    }
-                    break;
-
-            }
-
             base.WndProc(ref m);
 
             switch (m.Msg) {
@@ -180,14 +168,18 @@ namespace YamuiFramework.Forms {
             pmmi->ptMaxPosition.y = Math.Abs(s.WorkingArea.Top - s.Bounds.Top);
         }
 
-        private WinApi.HitTest HitTestNca(IntPtr lparam) {
-            var vPoint = new Point((short)lparam, (short)((int)lparam >> 16));
-            var vPadding = Math.Max(Padding.Right, Padding.Bottom);
+        // test in which part of the form the cursor is in (we return the caption bar if
+        // it's on the top of the window or the resizebottomright when it's on the bottom right), 
+        // allow to be able to maximize the window by double clicking the "title bar" for instance
+        protected override WinApi.HitTest HitTestNca(IntPtr lparam) {
+            var output = base.HitTestNca(lparam);
+            if (output != WinApi.HitTest.HTCLIENT)
+                return output;
 
-            if (RectangleToScreen(new Rectangle(ClientRectangle.Width - vPadding, ClientRectangle.Height - vPadding, vPadding, vPadding)).Contains(vPoint))
-                return WinApi.HitTest.HTBOTTOMRIGHT;
-            if (RectangleToScreen(new Rectangle(BorderWidth, BorderWidth, ClientRectangle.Width - 2 * BorderWidth, 50)).Contains(vPoint))
+            var vPoint = new Point((short)lparam, (short)((int)lparam >> 16));
+            if (RectangleToScreen(new Rectangle(0, 0, ClientRectangle.Width, CaptionBarHeight)).Contains(vPoint))
                 return WinApi.HitTest.HTCAPTION;
+
             return WinApi.HitTest.HTCLIENT;
         }
 

@@ -317,10 +317,10 @@ namespace _3PA.Lib {
                 fsd.InitialDirectory = initialFolder;
             if (Appli.IsVisible) {
                 try {
-                    WinApi.EnableWindow(Npp.HandleNpp, false);
+                    Win32Api.EnableWindow(Npp.HandleNpp, false);
                     fsd.ShowDialog(Appli.Form.Handle);
                 } finally {
-                    WinApi.EnableWindow(Npp.HandleNpp, true);
+                    Win32Api.EnableWindow(Npp.HandleNpp, true);
                 }
             } else
                 fsd.ShowDialog(Npp.HandleNpp);

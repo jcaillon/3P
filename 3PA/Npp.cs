@@ -58,8 +58,8 @@ namespace _3PA {
         /// <returns></returns>
         public static Encoding GetCurrentEncoding {
             get {
-                var curBufferId = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
-                int nppEncoding = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
+                var curBufferId = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
+                int nppEncoding = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
                 return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
                 /*
                 // Logically, we should identify the correct encoding as follow, but in reality
@@ -106,13 +106,13 @@ namespace _3PA {
 
         public static bool IsNppWindowFocused {
             get {
-                return (WinApi.GetForegroundWindow() == HandleNpp);
+                return (Win32Api.GetForegroundWindow() == HandleNpp);
             }
         }
 
         public static bool IsScintillaFocused {
             get {
-                return (WinApi.GetForegroundWindow() == HandleScintilla);
+                return (Win32Api.GetForegroundWindow() == HandleScintilla);
             }
         }
 
@@ -122,9 +122,10 @@ namespace _3PA {
         /// <returns></returns>
         public static Screen NppScreen {
             get {
-                Rectangle output = new Rectangle();
-                WinApi.GetWindowRect(HandleScintilla, ref output);
-                return Screen.FromPoint(output.Location);
+                Rectangle nppRect =  Win32Api.GetWindowRect(HandleScintilla);
+                var nppLoc = nppRect.Location;
+                nppLoc.Offset(nppRect.Width / 2, nppRect.Height / 2);
+                return Screen.FromPoint(nppLoc);
             }
         }
 
@@ -138,11 +139,11 @@ namespace _3PA {
         }
 
         public static void SaveCurrentSession(string file) {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
         }
 
         public static void LoadCurrentSession(string file) {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_LOADSESSION, 0, file);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_LOADSESSION, 0, file);
         }
 
         /// <summary>
@@ -220,7 +221,7 @@ namespace _3PA {
             var tbIcons = new toolbarIcons { hToolbarBmp = image.GetHbitmap() };
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
 
@@ -246,9 +247,9 @@ namespace _3PA {
         /// <returns></returns>
         public static List<string> GetOpenedFilesPrimary() {
             var output = new List<string>();
-            int nbFile = (int) WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) NppMsg.PRIMARY_VIEW);
-            using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
-                if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESPRIMARY, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) NppMsg.PRIMARY_VIEW);
+            using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESPRIMARY, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
             return output;
@@ -260,9 +261,9 @@ namespace _3PA {
         /// <returns></returns>
         public static List<string> GetOpenedFilesSecondary() {
             var output = new List<string>();
-            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.SECOND_VIEW);
-            using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
-                if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESSECOND, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.SECOND_VIEW);
+            using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESSECOND, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
             return output;
@@ -274,9 +275,9 @@ namespace _3PA {
         /// <returns></returns>
         public static List<string> GetOpenedFiles() {
             var output = new List<string>();
-            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.ALL_OPEN_FILES);
-            using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
-                if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.ALL_OPEN_FILES);
+            using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
             return output;
@@ -290,10 +291,10 @@ namespace _3PA {
         /// <returns></returns>
         public static string GetSessionFiles(string sessionFilePath) {
             var output = new StringBuilder();
-            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
             if (nbFile > 0) {
-                using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
-                    if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
+                using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                    if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
                         foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
                 }
             }
@@ -306,7 +307,7 @@ namespace _3PA {
         /// <param name="sessionFilePath"></param>
         /// <returns></returns>
         public static bool SaveSession(string sessionFilePath) {
-            string sessionPath = Marshal.PtrToStringUni(WinApi.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, sessionFilePath));
+            string sessionPath = Marshal.PtrToStringUni(Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, sessionFilePath));
             return !String.IsNullOrEmpty(sessionPath);
         }
 
@@ -315,8 +316,8 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetCurrentFilePath() {
-            var path = new StringBuilder(WinApi.MaxPath);
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+            var path = new StringBuilder(Win32Api.MaxPath);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             return path.ToString();
         }
 
@@ -324,7 +325,7 @@ namespace _3PA {
         ///     Saves the current document.
         /// </summary>
         public static void SaveCurrentDocument() {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
         }
 
         /// <summary>
@@ -341,7 +342,7 @@ namespace _3PA {
                 SwitchToDocument(file);
                 return true;
             } 
-            return ((int) WinApi.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
+            return ((int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
 
         /// <summary>
@@ -376,8 +377,8 @@ namespace _3PA {
         /// <param name="extension">The extension.</param>
         /// <returns></returns>
         public static bool IsCurrentFileHasExtension(string extension) {
-            var path = new StringBuilder(WinApi.MaxPath);
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+            var path = new StringBuilder(Win32Api.MaxPath);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             var file = path.ToString();
             return !String.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase);
         }
@@ -388,7 +389,7 @@ namespace _3PA {
         /// <returns></returns>
         public static string GetCurrentFileExtension() {
             string currentFileExtension;
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETEXTPART, 0, out currentFileExtension);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETEXTPART, 0, out currentFileExtension);
             return currentFileExtension;
         }
 
@@ -398,7 +399,7 @@ namespace _3PA {
         /// <returns></returns>
         public static string GetNppDirectory() {
             string pathNotepadFolder;
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
             return pathNotepadFolder;
         }
 
@@ -407,7 +408,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="doc"></param>
         public static void SwitchToDocument(string doc) {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
         }
 
         /// <summary>
@@ -428,7 +429,7 @@ namespace _3PA {
         public static string GetNppVersion {
             get {
                 if (string.IsNullOrEmpty(_nppVersion)) {
-                int nppVersion = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
+                int nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
                 var lowWord = (nppVersion & 0x0000FFFF).ToString();
                 _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
@@ -459,8 +460,8 @@ namespace _3PA {
         /// <returns></returns>
         public static string GetConfigDir() {
             if (string.IsNullOrEmpty(_configDir)) {
-                var buffer = new StringBuilder(WinApi.MaxPath);
-                WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, WinApi.MaxPath, buffer);
+                var buffer = new StringBuilder(Win32Api.MaxPath);
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
                 _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.AssemblyProduct);
                 Utils.CreateDirectory(_configDir);
             }
@@ -474,13 +475,13 @@ namespace _3PA {
         /// </summary>
         public static void Exit() {
             const int wmCommand = 0x111;
-            WinApi.SendMessage(HandleNpp, (NppMsg)wmCommand, (int)NppMenuCmd.FileExit, 0);
+            Win32Api.SendMessage(HandleNpp, (NppMsg)wmCommand, (int)NppMenuCmd.FileExit, 0);
         }
 
         public static void ShowInactiveTopmost(Form frm) {
-            WinApi.ShowWindow(frm.Handle, WinApi.ShowWindowCommands.ShowNoActivate);
+            Win32Api.ShowWindow(frm.Handle, Win32Api.ShowWindowCommands.ShowNoActivate);
             //SetWindowPos(frm.Handle.ToInt32(), HWND_TOPMOST, frm.Left, frm.Top, frm.Width, frm.Height, SWP_NOACTIVATE);
-            WinApi.SetWindowPos(frm.Handle.ToInt32(), HandleNpp.ToInt32(), frm.Left, frm.Top, frm.Width, frm.Height,
+            Win32Api.SetWindowPos(frm.Handle.ToInt32(), HandleNpp.ToInt32(), frm.Left, frm.Top, frm.Width, frm.Height,
                 SwpNoactivate);
         }
 
@@ -494,22 +495,22 @@ namespace _3PA {
             string retval = null;
             var mainWindowHandle = HandleNpp;
             // find status bar control on the main window of the application
-            var statusBarHandle = WinApi.FindWindowEx(mainWindowHandle, IntPtr.Zero, "msctls_statusbar32", IntPtr.Zero);
+            var statusBarHandle = Win32Api.FindWindowEx(mainWindowHandle, IntPtr.Zero, "msctls_statusbar32", IntPtr.Zero);
             if (statusBarHandle != IntPtr.Zero) {
                 //cut current text
-                var size = (int)WinApi.SendMessage(statusBarHandle, SbGettextlength, 0, IntPtr.Zero);
+                var size = (int)Win32Api.SendMessage(statusBarHandle, SbGettextlength, 0, IntPtr.Zero);
                 var buffer = new StringBuilder(size);
-                WinApi.SendMessage(statusBarHandle, (NppMsg)SbGettext, 0, buffer);
+                Win32Api.SendMessage(statusBarHandle, (NppMsg)SbGettext, 0, buffer);
                 retval = buffer.ToString();
 
                 // set text for the existing part with index 0
                 var text = Marshal.StringToHGlobalAuto(labelText);
-                WinApi.SendMessage(statusBarHandle, SbSettext, 0, text);
+                Win32Api.SendMessage(statusBarHandle, SbSettext, 0, text);
                 Marshal.FreeHGlobal(text);
 
                 //the foolowing may be needed for puture features
                 // create new parts width array
-                var nParts = WinApi.SendMessage(statusBarHandle, SbGetparts, 0, IntPtr.Zero).ToInt32();
+                var nParts = Win32Api.SendMessage(statusBarHandle, SbGetparts, 0, IntPtr.Zero).ToInt32();
                 nParts++;
                 var memPtr = Marshal.AllocHGlobal(sizeof(int) * nParts);
                 var partWidth = 100; // set parts width according to the form size
@@ -517,12 +518,12 @@ namespace _3PA {
                     Marshal.WriteInt32(memPtr, i * sizeof(int), partWidth);
                     partWidth += partWidth;
                 }
-                WinApi.SendMessage(statusBarHandle, SbGetparts, nParts, memPtr);
+                Win32Api.SendMessage(statusBarHandle, SbGetparts, nParts, memPtr);
                 Marshal.FreeHGlobal(memPtr);
 
                 //// set text for the new part
                 var text0 = Marshal.StringToHGlobalAuto(labelText);
-                WinApi.SendMessage(statusBarHandle, SbGetparts, nParts - 1, text0);
+                Win32Api.SendMessage(statusBarHandle, SbGetparts, nParts - 1, text0);
                 Marshal.FreeHGlobal(text0);
             }
             return retval;
@@ -533,7 +534,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="cmd"></param>
         public static void RunCommand(NppMenuCmd cmd) {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
         }
     }
 }

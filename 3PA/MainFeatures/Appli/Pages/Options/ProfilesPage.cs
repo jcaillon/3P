@@ -88,10 +88,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
 
             // autocompletion list
-            yamuiFilteredTypeList1.GetTypeImage += type => {
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((CompletionType) type).ToString());
-                return tryImg ?? ImageResources.Error;
-            };
             yamuiFilteredTypeList1.MoreTypesImage = ImageResources.More;
 
             flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
@@ -99,9 +95,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             
 
             // tREE
-            yamuiFilteredTypeTreeList1.GetTypeImage += i => {
-                return (Image) ImageResources.ResourceManager.GetObject(i == 0 ? "Block" : "Abbreviation");
-            };
             yamuiFilteredTypeTreeList1.MoreTypesImage = ImageResources.More;
             yamuiFilteredTypeTreeList1.SetItems(new List<ListItem> {
                 new TreeItem {
@@ -186,6 +179,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             get { return Level; }
         }
 
+        public override Image ItemTypeImage {
+            get {
+                return (Image)ImageResources.ResourceManager.GetObject(ItemType == 0 ? "Block" : "Abbreviation");
+            }
+        }
+
         public override Image ItemImage {
             get { return (Image)ImageResources.ResourceManager.GetObject(Level == 0 ? "Block" : "Abbreviation"); }
         }
@@ -211,7 +210,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// to override, does this item have children?
         /// </summary>
         public override bool CanExpand {
-            get { return Level <= 3; }
+            get {
+                return Level <= 3;
+            }
         }
 
         /// <summary>
@@ -242,6 +243,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         public override int ItemType {
             get { return (int) Type; }
+        }
+
+        public override Image ItemTypeImage {
+            get {
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(((CompletionType)ItemType).ToString());
+                return tryImg ?? ImageResources.Error;
+            }
         }
 
         public override Image ItemImage {

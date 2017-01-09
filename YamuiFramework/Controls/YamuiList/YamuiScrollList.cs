@@ -152,7 +152,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 RepositionThumb();
 
                 // activate/select the correct button button
-                SelectedRowIndex = _selectedItemIndex - TopIndex;
+                SelectedRowIndex = SelectedItemIndex - TopIndex;
             }
         }
 
@@ -655,7 +655,7 @@ namespace YamuiFramework.Controls.YamuiList {
         protected virtual void RowPaintSeparator(Graphics g, Rectangle drawRect) {
             using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormAltBack)) {
                 var width = (int)(drawRect.Width * 0.45);
-                g.FillRectangle(b, new Rectangle(0, drawRect.Y + drawRect.Height / 2 - 2, width, 4));
+                g.FillRectangle(b, new Rectangle(drawRect.X, drawRect.Y + drawRect.Height / 2 - 2, width, 4));
             }
         }
 
@@ -681,9 +681,8 @@ namespace YamuiFramework.Controls.YamuiList {
         protected void HandleWindowsProc(Message message) {
             switch (message.Msg) {
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
-                    // delta negative when scrolling up
-                    var delta = -(short)(message.WParam.ToInt32() >> 16);
-                    TopIndex += Math.Sign(delta) * _nbRowFullyDisplayed / 2;
+                    var delta = (short)(message.WParam.ToInt32() >> 16);
+                    DoScroll(delta);
                     break;
 
                 case (int)WinApi.Messages.WM_LBUTTONDOWN:
@@ -744,6 +743,14 @@ namespace YamuiFramework.Controls.YamuiList {
             if (!new Rectangle(new Point(0, 0), Size).Contains(PointToClient(MousePosition)))
                 IsHovered = false;
             base.OnMouseLeave(e);
+        }
+
+        /// <summary>
+        /// Scroll the list for the given delta
+        /// The delta should be negative when scrolling up!
+        /// </summary>
+        public void DoScroll(int delta) {
+            TopIndex += -Math.Sign(delta) * _nbRowFullyDisplayed / 2;
         }
 
         /// <summary>
@@ -818,6 +825,21 @@ namespace YamuiFramework.Controls.YamuiList {
             var newIndex = SelectedItemIndex;
 
             switch (pressedKey) {
+
+                case Keys.Tab:
+                    if (TabPressed != null) {
+                        TabPressed(this);
+                        return true;
+                    }
+                    return false;
+
+                case Keys.Enter:
+                    if (EnterPressed != null) {
+                        EnterPressed(this);
+                        return true;
+                    }
+                    return false;
+
                 case Keys.End:
                     newIndex = _nbItems;
                     break;
@@ -829,19 +851,6 @@ namespace YamuiFramework.Controls.YamuiList {
                 default:
                     do {
                         switch (pressedKey) {
-                            case Keys.Tab:
-                                if (TabPressed != null) {
-                                    TabPressed(this);
-                                    return true;
-                                }
-                                return false;
-
-                            case Keys.Enter:
-                                if (EnterPressed != null) {
-                                    EnterPressed(this);
-                                    return true;
-                                }
-                                return false;
 
                             case Keys.Up:
                                 newIndex--;
@@ -904,6 +913,9 @@ namespace YamuiFramework.Controls.YamuiList {
                 // change the selected row
                 SelectedRowIndex = rowIndex;
 
+                // make sure to  trigger the onchangeindex event
+                SelectedItemIndex = SelectedItemIndex;
+
                 OnItemClick(args);
             }
         }
@@ -926,6 +938,13 @@ namespace YamuiFramework.Controls.YamuiList {
         public bool PerformKeyDown(KeyEventArgs e) {
             OnKeyDown(e);
             return e.Handled;
+        }
+
+        /// <summary>
+        /// Programatically triggers the HandleWindowsProc method
+        /// </summary>
+        public void PerformHandleWindowsProc(Message message) {
+            HandleWindowsProc(message);
         }
 
         /// <summary>

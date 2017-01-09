@@ -37,11 +37,11 @@ namespace _3PA.Interop {
     internal static class FormIntegration {
 
         public static void RegisterToNpp(IntPtr handle) {
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
+            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
         }
 
         public static void UnRegisterToNpp(IntPtr handle) {
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
+            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
         }
     }
 }

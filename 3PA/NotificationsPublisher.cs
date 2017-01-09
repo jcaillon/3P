@@ -235,11 +235,11 @@ namespace _3PA {
             if (!MouseMonitor.Instance.IsInstalled) {
                 MouseMonitor.Instance.Clear();
                 MouseMonitor.Instance.Add(
-                    WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN,
-                    WinApi.WindowsMessageMouse.WM_NCLBUTTONUP,
-                    WinApi.WindowsMessageMouse.WM_LBUTTONUP,
-                    WinApi.WindowsMessageMouse.WM_MBUTTONDOWN,
-                    WinApi.WindowsMessageMouse.WM_RBUTTONUP);
+                    Win32Api.WindowsMessageMouse.WM_NCLBUTTONDOWN,
+                    Win32Api.WindowsMessageMouse.WM_NCLBUTTONUP,
+                    Win32Api.WindowsMessageMouse.WM_LBUTTONUP,
+                    Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN,
+                    Win32Api.WindowsMessageMouse.WM_RBUTTONUP);
                 MouseMonitor.Instance.GetMouseMessage += MouseMessageHandler;
                 MouseMonitor.Instance.Install();
             }

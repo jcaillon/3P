@@ -299,7 +299,7 @@
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
     <Compile Include="Interop\ScintillaHelper.cs" />
-    <Compile Include="Interop\WinApi.cs" />
+    <Compile Include="Interop\Win32Api.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />
     <Compile Include="Lib\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />

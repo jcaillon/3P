@@ -314,7 +314,6 @@ namespace YamuiFramework.Controls {
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
                 IsPressed = true;
                 Invalidate();
-                e.Handled = true;
             }
             base.OnKeyDown(e);
         }

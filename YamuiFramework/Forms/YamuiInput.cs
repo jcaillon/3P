@@ -418,7 +418,9 @@ namespace YamuiFramework.Forms {
         private static int Show(IntPtr ownerHandle, string caption, string htmlTitle, string htmlMessage, List<string> buttonsList, ref object data, out YamuiInput msgBox, int maxFormWidth = 0, int maxFormHeight = 0, int minFormWidth = 0, bool waitResponse = true, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
 
             var ownerRect = WinApi.GetWindowRect(ownerHandle);
-            var screen = Screen.FromPoint(ownerRect.Location);
+            var ownerLocation = ownerRect.Location;
+            ownerLocation.Offset(ownerRect.Width/2, ownerRect.Height/2);
+            var screen = Screen.FromPoint(ownerLocation);
 
             // correct input if needed
             if (maxFormWidth == 0)

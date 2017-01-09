@@ -19,10 +19,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
@@ -32,20 +32,9 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public sealed class MoreTypesForm : Form {
 
-        #region Public properties
-
-        /// <summary>
-        /// Should return the image to use for the corresponding item
-        /// </summary>
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Func<int, Image> GetObjectTypeImage { get; set; }
-
-        public Size ButtonSize { get; set; }
-
-        #endregion
-
         #region private fields
 
+        private HtmlToolTip _tooltip = new HtmlToolTip();
         private const int BorderWidth = 2;
         private YamuiSimplePanel _panel;
         private const int MousePaddingInsideForm = 10;
@@ -103,28 +92,30 @@ namespace YamuiFramework.Controls.YamuiList {
 
             _parentFilteredList = parentList;
 
+            var buttonSize = new Size(YamuiFilteredTypeList.TypeButtonWidth, parentList.BottomHeight);
+
             // for each distinct type of items, create the buttons
-            int xPos = -ButtonSize.Width;
+            int xPos = -buttonSize.Width;
             int yPos = 0;
             int nBut = 0;
             int maxNbButPerRow = (int)Math.Ceiling(Math.Sqrt(typeList.Count));
             foreach (var type in typeList) {
 
-                xPos += ButtonSize.Width;
+                xPos += buttonSize.Width;
                 if (nBut >= maxNbButPerRow) {
-                    yPos += ButtonSize.Height;
+                    yPos += buttonSize.Height;
                     xPos = 0;
                     nBut = 0;
                 }
 
                 var button = new SelectorButton {
-                    Size = ButtonSize,
+                    Size = buttonSize,
                     TabStop = false,
                     Anchor = AnchorStyles.Left | AnchorStyles.Top,
                     AcceptsRightClick = true,
                     HideFocusedIndicator = true,
                     Activated = true,
-                    BackGrndImage = GetObjectTypeImage != null ? GetObjectTypeImage(type) : null,
+                    BackGrndImage = parentList.TypeImages.ContainsKey(type) ? parentList.TypeImages[type] : null,
                     Type = type,
                     Location = new Point(xPos, yPos)
                 };
@@ -135,7 +126,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 };
                 button.Activated = _parentFilteredList.IsTypeActivated(type);
-                //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                _tooltip.SetToolTip(button, (parentList.TypeText.ContainsKey(type) && parentList.TypeText[type] != null ? parentList.TypeText + "<br>" : "") + YamuiFilteredTypeList.TypeButtonTooltipText);
                 
                 if (!_panel.Controls.Contains(button))
                     _panel.Controls.Add(button);
@@ -145,7 +136,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
 
             // Size the form
-            Size = new Size(maxNbButPerRow * ButtonSize.Width + BorderWidth * 2, (int)Math.Ceiling((double) typeList.Count / maxNbButPerRow) * ButtonSize.Height + BorderWidth * 2);
+            Size = new Size(maxNbButPerRow * buttonSize.Width + BorderWidth * 2, (int)Math.Ceiling((double) typeList.Count / maxNbButPerRow) * buttonSize.Height + BorderWidth * 2);
             MinimumSize = Size;
             MaximumSize = Size;
 

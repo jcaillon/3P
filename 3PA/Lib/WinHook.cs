@@ -104,7 +104,7 @@ namespace _3PA.Lib {
 
         private static bool IsPressed(Keys key) {
             const int keyPressed = 0x8000;
-            return Convert.ToBoolean(WinApi.GetKeyState((int) key) & keyPressed);
+            return Convert.ToBoolean(Win32Api.GetKeyState((int) key) & keyPressed);
         }
 
         public static KeyModifiers GetModifiers {
@@ -134,15 +134,15 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event Func<WinApi.WindowsMessageMouse, WinApi.MOUSEHOOKSTRUCT, bool> GetMouseMessage;
+        public event Func<Win32Api.WindowsMessageMouse, Win32Api.MOUSEHOOKSTRUCT, bool> GetMouseMessage;
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public void Add(params WinApi.WindowsMessageMouse[] messages) {
-            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint) key))) {
+        public void Add(params Win32Api.WindowsMessageMouse[] messages) {
+            foreach (Win32Api.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint) key))) {
                 _messagesToIntercept.Add((uint) key);
             }
         }
@@ -150,9 +150,9 @@ namespace _3PA.Lib {
         /// <summary>
         /// Remove the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public bool Remove(params WinApi.WindowsMessageMouse[] messages) {
+        public bool Remove(params Win32Api.WindowsMessageMouse[] messages) {
             bool iDidSomething = false;
-            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => _messagesToIntercept.Contains((uint) key))) {
+            foreach (Win32Api.WindowsMessageMouse key in messages.Where(key => _messagesToIntercept.Contains((uint) key))) {
                 _messagesToIntercept.Remove((uint) key);
                 iDidSomething = true;
             }
@@ -180,8 +180,8 @@ namespace _3PA.Lib {
                 return false;
             if (!_messagesToIntercept.Contains((uint)wParam))
                 return false;
-            WinApi.MOUSEHOOKSTRUCT ms = (WinApi.MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinApi.MOUSEHOOKSTRUCT));
-            return GetMouseMessage((WinApi.WindowsMessageMouse)wParam, ms);
+            Win32Api.MOUSEHOOKSTRUCT ms = (Win32Api.MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(Win32Api.MOUSEHOOKSTRUCT));
+            return GetMouseMessage((Win32Api.WindowsMessageMouse)wParam, ms);
         }
 
         #endregion
@@ -199,15 +199,15 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetMessage;
-        public delegate void MessageHandler(WinApi.MSG message, out bool handled);
+        public delegate void MessageHandler(Win32Api.MSG message, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public void Add(params WinApi.WindowsMessage[] messages) {
-            foreach (WinApi.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+        public void Add(params Win32Api.WindowsMessage[] messages) {
+            foreach (Win32Api.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
                 _messagesToIntercept.Add((uint)key);
         }
 
@@ -228,7 +228,7 @@ namespace _3PA.Lib {
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            WinApi.MSG nc = (WinApi.MSG)Marshal.PtrToStructure(lParam, typeof(WinApi.MSG));
+            Win32Api.MSG nc = (Win32Api.MSG)Marshal.PtrToStructure(lParam, typeof(Win32Api.MSG));
             if (GetMessage == null)
                 return false;
             if (_messagesToIntercept.Contains(nc.message)) {
@@ -254,7 +254,7 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetCode;
-        public delegate void MessageHandler(WinApi.HCBT code);
+        public delegate void MessageHandler(Win32Api.HCBT code);
 
         /// <summary>
         /// Call this method to start listening to events
@@ -274,9 +274,9 @@ namespace _3PA.Lib {
         private int ThisCallBackFunction(int code, IntPtr wParam, IntPtr lParam) {
             if (code >= 0) {
                 if (GetCode != null)
-                    GetCode((WinApi.HCBT)code);
+                    GetCode((Win32Api.HCBT)code);
             }
-            return WinApi.CallNextHookEx(InternalHook, code, wParam, lParam);
+            return Win32Api.CallNextHookEx(InternalHook, code, wParam, lParam);
         }
 
         #endregion

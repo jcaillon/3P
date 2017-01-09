@@ -614,7 +614,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Returns true if the cursor is within the form window
         /// </summary>
         public static bool IsMouseIn() {
-            return WinApi.IsCursorIn(_form.Handle);
+            return Win32Api.IsCursorIn(_form.Handle);
         }
 
         #endregion

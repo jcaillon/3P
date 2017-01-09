@@ -81,13 +81,9 @@ namespace _3PA.MainFeatures.Appli {
         /// True if the form is focused 
         /// </summary>
         public static bool IsFocused() {
-            return _form != null && _form.Visible && (WinApi.GetForegroundWindow().Equals(_form.Handle));
+            return _form != null && _form.Visible && (Win32Api.GetForegroundWindow().Equals(_form.Handle));
         }
-
-        public static Control ActiveControl {
-            get { return !IsFocused() ? null : _form.FindFocusedControl(); }
-        }
-
+        
         /// <summary>
         /// Initializes the main application, since other windows uses this Form reference, 
         /// it must be called pretty soon in the plugin initialization
@@ -121,7 +117,7 @@ namespace _3PA.MainFeatures.Appli {
         /// Returns true if the cursor is within the form window
         /// </summary>
         public static bool IsMouseIn() {
-            return WinApi.IsCursorIn(_form.Handle);
+            return Win32Api.IsCursorIn(_form.Handle);
         }
 
         /// <summary>
