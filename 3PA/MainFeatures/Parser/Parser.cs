@@ -879,8 +879,8 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         private void CreateParsedOnEvent(Token onToken) {
             // info we will extract from the current statement :
-            var widgetList = new StringBuilder();
             var eventList = new StringBuilder();
+            var widgetList = new StringBuilder();
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
@@ -889,18 +889,19 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         // matching event type
-                        if (token is TokenWord || token is TokenString || (token is TokenSymbol && token.Value == "*")) {
+                        if (token is TokenWord || token is TokenString || token is TokenSymbol) {
                             eventList.Append((eventList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
                             state++;
                         }
                         break;
                     case 1:
-                        // matching "of"
+                        // matching an event list?
                         if (token is TokenSymbol && token.Value.Equals(",")) {
                             state--;
                             break;
                         }
                         if (!(token is TokenWord)) break;
+
                         if (token.Value.EqualsCi("anywhere")) {
                             // we match anywhere, need to return to match a block start
                             widgetList.Append("anywhere");
@@ -914,47 +915,58 @@ namespace _3PA.MainFeatures.Parser {
                             state++;
                             break;
                         }
-                        // otherwise, return
+
+                        // we matched a 'ON key-label key-function'
+                        widgetList.Append(token.Value);
+                        var new3 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
+                        AddParsedItem(new3);
+                        _context.Scope = new3;
                         return;
                     case 2:
                         // matching widget name
                         if (token is TokenWord || token is TokenString) {
-                            widgetList.Append((widgetList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
-
-                            // we can match several widget name separated by a comma or resume to next state
-                            if (token.Value.ToLower() == "frame") {
-                                state = 4;
-                                break;
+                            // ON * OF FRAME fMain, on ne prend pas en compte le FRAME
+                            if (!token.Value.EqualsCi("frame")) {
+                                widgetList.Append((widgetList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
+                                state++;
                             }
-
-                            var nextNonSpace = PeekAtNextNonSpace(1);
-                            if (!(nextNonSpace is TokenSymbol && nextNonSpace.Value.Equals(",")))
-                                state++;
-                        }
-                        break;
-                    case 4:
-                        if (token is TokenWord || token is TokenString) {
-                            widgetList.Append(" ").Append(token.Value);
-                            state = 2;
-
-                            var nextNonSpace = PeekAtNextNonSpace(1);
-                            if (!(nextNonSpace is TokenSymbol && nextNonSpace.Value.Equals(",")))
-                                state++;
                         }
                         break;
                     case 3:
-                        // matching "or", create another parsed item, otherwise leave to match a block start
+                        // matching a widget list?
+                        if (token is TokenSymbol && token.Value.Equals(",")) {
+                            state--;
+                            break;
+                        }
                         if (!(token is TokenWord)) break;
+
+                        // matching a widget IN FRAME
+                        if (token.Value.EqualsCi("in")) {
+                            var nextNonSpace = PeekAtNextNonSpace(1);
+                            if (!(nextNonSpace is TokenWord && nextNonSpace.Value.Equals("frame"))) {
+                                // skip the whole IN FRAME XX
+                                MoveNext();
+                                MoveNext();
+                                MoveNext();
+                                MoveNext();
+                                break;
+                            }
+                        }
+
                         var new2 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
                         AddParsedItem(new2);
                         _context.Scope = new2;
+
+                        // matching a OR
                         if (token.Value.EqualsCi("or")) {
-                            state = 0;
                             widgetList.Clear();
                             eventList.Clear();
-                        } else
-                            return;
-                        break;
+                            state = 0;
+                            break;
+                        }
+
+                        // end here
+                        return;
                 }
             } while (MoveNext());
         }
@@ -1334,7 +1346,6 @@ namespace _3PA.MainFeatures.Parser {
 
             do {
                 var token = PeekAt(1);
-                if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 // a ~ allows for a eol but we don't control if it's an eol because if it's something else we probably parsed it wrong anyway (in the lexer)
                 if (token is TokenSymbol && token.Value == "~") {
