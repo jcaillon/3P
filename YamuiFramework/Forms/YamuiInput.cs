@@ -457,6 +457,8 @@ namespace YamuiFramework.Forms {
                 if (yamuiForm != null)
                     yamuiForm.HasModalOpened = false;
 
+                msgBox.Dispose();
+
                 // get focus back to owner
                 WinApi.SetForegroundWindow(ownerHandle);
             } else {
@@ -464,7 +466,6 @@ namespace YamuiFramework.Forms {
             }
 
             var res = msgBox.DialogIntResult;
-            msgBox.Dispose();
 
             return res;
         }

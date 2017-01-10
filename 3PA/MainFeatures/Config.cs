@@ -615,6 +615,7 @@ namespace _3PA.MainFeatures {
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
         public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
+
         public const string FileGitHubAssetName = @"3P.zip"; // name of the zip file containing the release in the assets of the release
 
         #endregion
