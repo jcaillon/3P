@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AppliForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -67,9 +67,6 @@ namespace _3PA.MainFeatures.Appli {
 
             // create the tabs / content
             CreateContent(new List<YamuiMainMenu> {
-                new YamuiMainMenu("TESTS", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("Autocomp", PageNames.Welcome.ToString(), new ProfilesPage())
-                }),
                 new YamuiMainMenu("Home", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("WELCOME", PageNames.Welcome.ToString(), new HomePage())
                 }),
