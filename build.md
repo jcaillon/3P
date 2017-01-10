@@ -12,4 +12,8 @@
 - Check the default Config
 - Recompile the updater if needed!!
 - Make sure to leave at least 1 empty line above bullet lists in the GitHub release description!
-- Compile in release mode, not debug
+- Clean/Rebuild in release mode, not debug
+- Create 2 .zip in the release on github :
+  - "3P.zip" containing the 3P.dll (32 bits) and eventually the .pdb file
+  - "3P_x64.zip" containg the 3P.dll (64 bits!) and eventually the .pdf file
+- When creating a stable release, target the master branch and don't forget to do a pull request from beta > master

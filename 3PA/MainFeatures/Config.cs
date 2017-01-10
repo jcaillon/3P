@@ -614,9 +614,10 @@ namespace _3PA.MainFeatures {
         public static string FileDownloadedPdb { get { return Path.Combine(FolderUpdate, "3P.pdb"); } }
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
-        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
+        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"); } }
 
-        public const string FileGitHubAssetName = @"3P.zip"; // name of the zip file containing the release in the assets of the release
+        // name of the zip file containing the release in the assets of the release
+        public static string FileGitHubAssetName { get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; } } 
 
         #endregion
 
