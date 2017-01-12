@@ -308,7 +308,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cb_info
             // 
-            this.cb_info.ItemHeight = 15;
             this.cb_info.Location = new System.Drawing.Point(193, 114);
             this.cb_info.Name = "cb_info";
             this.cb_info.Size = new System.Drawing.Size(394, 21);

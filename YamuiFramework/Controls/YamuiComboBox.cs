@@ -19,45 +19,38 @@
 #endregion
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
+using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
     [Designer("YamuiFramework.Controls.YamuiComboBoxDesigner")]
     [ToolboxBitmap(typeof(ComboBox))]
-    public sealed class YamuiComboBox : ComboBox {
+    public sealed class YamuiComboBox : YamuiButton {
+
+        #region events
+
+        public event EventHandler<EventArgs> SelectedIndexChanged;
+
+        public event Action<YamuiComboBox> SelectedIndexChangedByUser;
+
+        #endregion
+
         #region Fields
 
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool UseCustomBackColor { get; set; }
-
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool UseCustomForeColor { get; set; }
-
-        [DefaultValue(DrawMode.OwnerDrawFixed)]
-        [Browsable(false)]
-        public new DrawMode DrawMode {
-            get { return DrawMode.OwnerDrawFixed; }
-            set { base.DrawMode = DrawMode.OwnerDrawFixed; }
+        [DefaultValue(ContentAlignment.MiddleLeft)]
+        public override ContentAlignment TextAlign {
+            get { return _textAlign; }
+            set { _textAlign = value; }
         }
 
-        [DefaultValue(ComboBoxStyle.DropDownList)]
-        [Browsable(false)]
-        public new ComboBoxStyle DropDownStyle {
-            get { return ComboBoxStyle.DropDownList; }
-            set { base.DropDownStyle = ComboBoxStyle.DropDownList; }
-        }
-
-        private string _waterMark = "";
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
         [DefaultValue("")]
@@ -70,509 +63,278 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        private bool _isHovered;
-        private bool _isPressed;
-        private bool _isFocused;
+        /// <summary>
+        /// Set the datasource for this combo box
+        /// </summary>
+        public object DataSource {
+            get {
+                return _originalDataSource;
+            }
+            set {
+                _originalDataSource = value;
+                var enumerable = _originalDataSource as IEnumerable;
+                if (enumerable == null)
+                    throw new Exception("Datasource expects an IEnumerable object");
+                _datasource = enumerable.Cast<object>().ToList();
+                _listItems.Clear();
+
+                InitList();
+            }
+        }
+
+        public String DisplayMember { get; set; }
+
+        public String ValueMember { get; set; }
+
+        public int SelectedIndex {
+            get {
+                return _selectedIndex;
+            }
+            set {
+                if (value >= 0 && value < _listItems.Count) {
+                    _selectedIndex = value;
+                    if (SelectedIndexChanged != null)
+                        SelectedIndexChanged(this, new EventArgs());
+                    RefreshText();
+                }
+            }
+        }
+
+        public object SelectedItem {
+            get {
+                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseValue : null;
+            }
+        }
+
+        public String SelectedText {
+            get {
+                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].DisplayText : null;
+            }
+            set {
+                var newIdx = _listItems.FindIndex(item => item.DisplayText.Equals(value));
+                if (newIdx >= 0 && newIdx < _listItems.Count)
+                    SelectedIndex = newIdx;
+            }
+        }
+        public object SelectedValue {
+            get {
+                var item = SelectedItem;
+                if (item == null)
+                    return null;
+                try {
+                    var field = item.GetType().GetField(ValueMember);
+                    if (field.FieldType == typeof(string)) {
+                        return field.GetValue(item);
+                    }
+                } catch (Exception) {
+                    try {
+                        var prop = item.GetType().GetProperty(ValueMember);
+                        if (prop.PropertyType == typeof(string)) {
+                            return prop.GetValue(item, null);
+                        }
+                    } catch (Exception) {
+                        if (item is string)
+                            return item;
+                        throw new Exception("Unknow property or field : " + ValueMember);
+                    }
+                }
+                return null;
+            }
+            set {
+                var newIdx = -1;
+                var i = 0;
+                foreach (var item in _listItems.Select(item => item.BaseValue)) {
+                    try {
+                        var field = item.GetType().GetField(ValueMember);
+                        if (field.FieldType == typeof(string)) {
+                            if (((string) field.GetValue(item)).Equals(value)) {
+                                newIdx = i;
+                                break;
+                            }
+                        }
+                    } catch (Exception) {
+                        try {
+                            var prop = item.GetType().GetProperty(ValueMember);
+                            if (prop.PropertyType == typeof(string)) {
+                                if (((string)prop.GetValue(item, null)).Equals(value)) {
+                                    newIdx = i;
+                                    break;
+                                }
+                            }
+                        } catch (Exception) {
+                            var s = item as string;
+                            if (s != null) {
+                                if (s.Equals(value)) {
+                                    newIdx = i;
+                                    break;
+                                }
+                            } else
+                                throw new Exception("Unknow property or field : " + ValueMember);
+                        }
+                    }
+                    i++;
+                }
+                if (newIdx >= 0 && newIdx < _listItems.Count)
+                    SelectedIndex = newIdx;
+            }
+        }
+        
+        #endregion
+
+        #region private
+
+        private string _waterMark = "";
+        private object _originalDataSource;
+        private List<object> _datasource;
+        private List<YamuiComboItem> _listItems = new List<YamuiComboItem>();
+        private int _selectedIndex;
+        private ContentAlignment _textAlign = ContentAlignment.MiddleLeft;
+        private YamuiMenu _listPopup;
 
         #endregion
 
-        #region Constructor
+        #region private methods
 
-        public YamuiComboBox() {
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint |
-                ControlStyles.Opaque, true);
+        private void RefreshText() {
+            if (SelectedIndex < _listItems.Count) {
+                Text = _listItems[SelectedIndex].DisplayText;
+                Invalidate();
+            }
+        }
+        private void InitList() {
 
-            base.DrawMode = DrawMode.OwnerDrawFixed;
-            base.DropDownStyle = ComboBoxStyle.DropDownList;
+            // simple list of strings?
+            if (_datasource != null) {
+                if (_datasource.Exists(o => o is string)) {
+                    var i = 0;
+                    _listItems = _datasource.Select(o => new YamuiComboItem {DisplayText = (string) o, BaseValue = o, Index = i++}).ToList();
+                } else {
+                    var i = 0;
+                    foreach (var obj in _datasource) {
+                        string displayText = null;
+                        try {
+                            var field = obj.GetType().GetField(DisplayMember);
+                            if (field.FieldType == typeof(string)) {
+                                displayText = (string) field.GetValue(obj);
+                            }
+                        } catch (Exception) {
+                            try {
+                                var prop = obj.GetType().GetProperty(DisplayMember);
+                                if (prop.PropertyType == typeof(string)) {
+                                    displayText = (string) prop.GetValue(obj, null);
+                                }
+                            } catch (Exception) {
+                                if (obj is string)
+                                    displayText = (string) obj;
+                                else
+                                // ReSharper disable once ConstantNullCoalescingCondition
+                                    throw new Exception("Unknow property or field : " + DisplayMember ?? "null");
+                            }
+                        }
+                        _listItems.Add(new YamuiComboItem {DisplayText = displayText, BaseValue = obj, Index = i});
+                        i++;
+                    }
+                }
+            }
 
-            // Stuff for the border color
-            _dropDownCheck.Interval = 100;
-            _dropDownCheck.Tick += dropDownCheck_Tick;
+            RefreshText();
+        }
+        
+        #endregion
 
-            Font = FontManager.GetFont(FontFunction.Small);
+        #region Override
+
+        protected override void OnButtonPressed(EventArgs eventArgs) {
+            if (_listItems != null && _listItems.Count > 0) {
+
+                // correct default selected
+                foreach (var item in _listItems) {
+                    item.IsSelectedByDefault = item.Index == SelectedIndex;
+                }
+
+                _listPopup = new YamuiMenu {
+                    SpawnLocation = Cursor.Position,
+                    MenuList = _listItems.Cast<YamuiMenuItem>().ToList(),
+                    DisplayFilterBox = true
+                };
+                _listPopup.ClicItemWrapper = item => {
+                    SelectedIndex = ((YamuiComboItem) item).Index;
+                    if (SelectedIndexChangedByUser != null)
+                        SelectedIndexChangedByUser(this);
+                    _listPopup.Close();
+                    _listPopup.Dispose();
+                };
+                var owner = FindForm();
+                if (owner != null) {
+                    _listPopup.Show(new WindowWrapper(owner.Handle));
+                } else {
+                    _listPopup.Show();
+                }
+            }
+
+            base.OnButtonPressed(eventArgs);
         }
 
         #endregion
 
         #region Paint Methods
 
-        private void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
-                clipRect.Offset(Location);
-                PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                GraphicsState state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
-                }
-            }
-        }
-
-        protected override void OnPaintBackground(PaintEventArgs e) {
-            try {
-                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
-                if (backColor != Color.Transparent)
-                    e.Graphics.Clear(backColor);
-                else
-                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
-                Invalidate();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                OnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
-            }
-        }
 
-        private void OnPaintForeground(PaintEventArgs e) {
-            ItemHeight = GetPreferredSize(Size.Empty).Height;
+            var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
+            var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
+            var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
 
-            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            // background
+            if (backColor != Color.Transparent)
+                e.Graphics.Clear(backColor);
+            else
+                PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
-            // draw border
+            // border?
             if (borderColor != Color.Transparent)
-                using (Pen p = new Pen(borderColor)) {
-                    Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
+                using (var p = new Pen(borderColor)) {
+                    var borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
                     e.Graphics.DrawRectangle(p, borderRect);
                 }
 
+            // highlight is a border with more width
+            if (Highlight && !IsHovered && !IsPressed && Enabled) {
+                using (var p = new Pen(YamuiThemeManager.Current.AccentColor, 4)) {
+                    var borderRect = new Rectangle(2, 2, Width - 4, Height - 4);
+                    e.Graphics.DrawRectangle(p, borderRect);
+                }
+            }
+            
             // draw the down arrow
             using (SolidBrush b = new SolidBrush(foreColor)) {
-                e.Graphics.FillPolygon(b, new[] { new Point(Width - 20, (Height / 2) - 2), new Point(Width - 9, (Height / 2) - 2), new Point(Width - 15, (Height / 2) + 4) });
+                e.Graphics.FillPolygon(b, new[] { new Point(ClientRectangle.Width - 20, ClientRectangle.Height / 2 - 2), new Point(ClientRectangle.Width - 9, ClientRectangle.Height / 2 - 2), new Point(ClientRectangle.Width - 15, ClientRectangle.Height / 2 + 4) });
             }
-
-            Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
-
-            DrawTextPrompt(e.Graphics);
-        }
-
-        protected override void OnDrawItem(DrawItemEventArgs e) {
-            if (e.Index >= 0) {
-                Color foreColor;
-                Color backColor = YamuiThemeManager.Current.ButtonNormalBack;
-
-                if ((e.State & DrawItemState.Selected) == DrawItemState.Selected) {
-                    backColor = YamuiThemeManager.Current.AccentColor;
-                    foreColor = YamuiThemeManager.Current.ButtonPressedFore;
-                } else {
-                    foreColor = YamuiThemeManager.Current.ButtonNormalFore;
-                }
-
-                using (SolidBrush b = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height));
-                }
-
-                Rectangle textRect = new Rectangle(0, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height);
-                TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), FontManager.GetStandardFont(), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+            
+            // text
+            if (!IsFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
+                TextRenderer.DrawText(e.Graphics, WaterMark, FontManager.GetFont(FontFunction.WaterMark), new Rectangle(0, 0, ClientRectangle.Width - 20, ClientRectangle.Height), YamuiThemeManager.Current.ButtonWatermarkFore, FontManager.GetTextFormatFlags(TextAlign));
             } else {
-                base.OnDrawItem(e);
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(0, 0, ClientRectangle.Width - 20, ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
             }
-        }
 
-        private void DrawTextPrompt(Graphics g) {
-            if (!_isFocused && SelectedIndex == -1) {
-                Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), textRect, YamuiThemeManager.Current.ButtonWatermarkFore, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
-            }
+        }
+        
+        #endregion
+
+        #region YamuiComboItem
+
+        private class YamuiComboItem : YamuiMenuItem {
+
+            public object BaseValue { get; set; }
+
+            public int Index { get; set; }
+
         }
 
         #endregion
 
-        #region Managing isHovered, isPressed, isFocused
 
-        #region Focus Methods
-
-        protected override void OnEnter(EventArgs e) {
-            _isFocused = true;
-            Invalidate();
-
-            base.OnEnter(e);
-        }
-
-        protected override void OnLeave(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLeave(e);
-        }
-
-        #endregion
-
-        #region Keyboard Methods
-
-        protected override void OnKeyDown(KeyEventArgs e) {
-            if (e.KeyCode == Keys.Space) {
-                _isPressed = true;
-                Invalidate();
-            }
-
-            base.OnKeyDown(e);
-        }
-
-        protected override void OnKeyUp(KeyEventArgs e) {
-            //Remove this code cause this prevents the focus color
-            _isPressed = false;
-            Invalidate();
-            base.OnKeyUp(e);
-        }
-
-        #endregion
-
-        #region Mouse Methods
-
-        protected override void OnMouseEnter(EventArgs e) {
-            _isHovered = true;
-            Invalidate();
-            base.OnMouseEnter(e);
-        }
-
-        protected override void OnMouseDown(MouseEventArgs e) {
-            if (e.Button == MouseButtons.Left) {
-                _isPressed = true;
-                Invalidate();
-            }
-            base.OnMouseDown(e);
-        }
-
-        protected override void OnMouseUp(MouseEventArgs e) {
-            _isPressed = false;
-            Invalidate();
-            base.OnMouseUp(e);
-        }
-
-        protected override void OnMouseLeave(EventArgs e) {
-            _isHovered = false;
-            Invalidate();
-            base.OnMouseLeave(e);
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Overridden Methods
-        protected override void OnSelectedIndexChanged(EventArgs e) {
-            base.OnSelectedIndexChanged(e);
-            Invalidate();
-        }
-
-        public override Size GetPreferredSize(Size proposedSize) {
-            Size preferredSize;
-            base.GetPreferredSize(proposedSize);
-
-            using (var g = CreateGraphics()) {
-                string measureText = Text.Length > 0 ? Text : "Random";
-                proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, measureText, FontManager.GetStandardFont(), proposedSize, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
-                //preferredSize.Height += 4;
-            }
-
-            return preferredSize;
-        }
-
-        private const int OCM_COMMAND = 0x2111;
-        private const int WM_PAINT = 15;
-        private const int WM_CTLCOLORLISTBOX = 0x0134;
-
-        protected override void WndProc(ref Message m) {
-            base.WndProc(ref m);
-
-            if (((m.Msg == WM_PAINT) || (m.Msg == OCM_COMMAND))) {
-                using (Graphics graphics = CreateGraphics()) {
-                    DrawTextPrompt(graphics);
-                }
-            }
-
-            if (m.Msg == WM_CTLCOLORLISTBOX) {
-                base.WndProc(ref m);
-                DrawNativeBorder(m.LParam);
-            }
-        }
-
-        #endregion
-
-        #region Border color
-
-        /// <summary>
-        /// Non client area border drawing
-        /// </summary>
-        /// <param name="handle">The handle to the control</param>
-        public void DrawNativeBorder(IntPtr handle) {
-            // Define the windows frame rectangle of the control
-            RECT controlRect;
-            GetWindowRect(handle, out controlRect);
-            controlRect.Right -= controlRect.Left; controlRect.Bottom -= controlRect.Top;
-            controlRect.Top = controlRect.Left = 0;
-
-            // GetFont the device context of the control
-            IntPtr dc = GetWindowDC(handle);
-
-            // Define the client area inside the control rect so it won't be filled when drawing the border
-            RECT clientRect = controlRect;
-            clientRect.Left += 1;
-            clientRect.Top += 1;
-            clientRect.Right -= 1;
-            clientRect.Bottom -= 1;
-            ExcludeClipRect(dc, clientRect.Left, clientRect.Top, clientRect.Right, clientRect.Bottom);
-
-            // Create a pen and select it
-            Color borderColor = YamuiThemeManager.Current.AccentColor;
-            IntPtr border = CreatePen(PenStyles.PS_SOLID, 1, RGB(borderColor.R,
-                borderColor.G, borderColor.B));
-
-            // Draw the border rectangle
-            IntPtr borderPen = SelectObject(dc, border);
-            Rectangle(dc, controlRect.Left, controlRect.Top, controlRect.Right, controlRect.Bottom);
-            SelectObject(dc, borderPen);
-            DeleteObject(border);
-
-            // Release the device context
-            ReleaseDC(handle, dc);
-            SetFocus(handle);
-        }
-
-        private Timer _dropDownCheck = new Timer();
-
-        /// <summary>
-        /// On drop down
-        /// </summary>
-        protected override void OnDropDown(EventArgs e) {
-            base.OnDropDown(e);
-
-            // Start checking for the dropdown visibility
-            _dropDownCheck.Start();
-        }
-
-        /// <summary>
-        /// Checks when the drop down is fully visible
-        /// </summary>
-        private void dropDownCheck_Tick(object sender, EventArgs e) {
-            _isHovered = false;
-            Invalidate();
-
-            // If the drop down has been fully dropped
-            if (DroppedDown) {
-                // Stop the time, send a listbox update
-                _dropDownCheck.Stop();
-                Message m = GetControlListBoxMessage(Handle);
-                WndProc(ref m);
-            }
-        }
-
-        /// <summary>
-        /// Creates a default WM_CTLCOLORLISTBOX message
-        /// </summary>
-        /// <param name="handle">The drop down handle</param>
-        /// <returns>A WM_CTLCOLORLISTBOX message</returns>
-        public Message GetControlListBoxMessage(IntPtr handle) {
-            // Force non-client redraw for focus border
-            Message m = new Message();
-            m.HWnd = handle;
-            m.LParam = GetListHandle(handle);
-            m.WParam = IntPtr.Zero;
-            m.Msg = WM_CTLCOLORLISTBOX;
-            m.Result = IntPtr.Zero;
-            return m;
-        }
-
-        /// <summary>
-        /// Gets the list control of a combo box
-        /// </summary>
-        /// <param name="handle">Handle of the combo box itself</param>
-        /// <returns>A handle to the list</returns>
-        public static IntPtr GetListHandle(IntPtr handle) {
-            COMBOBOXINFO info;
-            info = new COMBOBOXINFO();
-            info.cbSize = Marshal.SizeOf(info);
-            return GetComboBoxInfo(handle, ref info) ? info.hwndList : IntPtr.Zero;
-        }
-
-        public enum PenStyles {
-            PS_SOLID = 0,
-            PS_DASH = 1,
-            PS_DOT = 2,
-            PS_DASHDOT = 3,
-            PS_DASHDOTDOT = 4
-        }
-
-        public enum ComboBoxButtonState {
-            STATE_SYSTEM_NONE = 0,
-            STATE_SYSTEM_INVISIBLE = 0x00008000,
-            STATE_SYSTEM_PRESSED = 0x00000008
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct COMBOBOXINFO {
-            public Int32 cbSize;
-            public RECT rcItem;
-            public RECT rcButton;
-            public ComboBoxButtonState buttonState;
-            public IntPtr hwndCombo;
-            public IntPtr hwndEdit;
-            public IntPtr hwndList;
-        }
-
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetWindowDC(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr SetFocus(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        public static extern bool GetComboBoxInfo(IntPtr hWnd, ref COMBOBOXINFO pcbi);
-
-        [DllImport("gdi32.dll")]
-        public static extern int ExcludeClipRect(IntPtr hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
-
-        [DllImport("gdi32.dll")]
-        public static extern IntPtr CreatePen(PenStyles enPenStyle, int nWidth, int crColor);
-
-        [DllImport("gdi32.dll")]
-        public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hObject);
-
-        [DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-
-        [DllImport("gdi32.dll")]
-        public static extern void Rectangle(IntPtr hdc, int X1, int Y1, int X2, int Y2);
-
-        public static int RGB(int R, int G, int B) {
-            return (R | (G << 8) | (B << 16));
-        }
-
-        [Serializable, StructLayout(LayoutKind.Sequential)]
-        public struct RECT {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-
-            public RECT(int left_, int top_, int right_, int bottom_) {
-                Left = left_;
-                Top = top_;
-                Right = right_;
-                Bottom = bottom_;
-            }
-
-            public override bool Equals(object obj) {
-                if (obj == null || !(obj is RECT)) {
-                    return false;
-                }
-                return Equals((RECT)obj);
-            }
-
-            public bool Equals(RECT value) {
-                return Left == value.Left &&
-                Top == value.Top &&
-                Right == value.Right &&
-                Bottom == value.Bottom;
-            }
-
-            public int Height {
-                get {
-                    return Bottom - Top + 1;
-                }
-            }
-
-            public int Width {
-                get {
-                    return Right - Left + 1;
-                }
-            }
-
-            public Size Size { get { return new Size(Width, Height); } }
-            public Point Location { get { return new Point(Left, Top); } }
-            // Handy method for converting to a System.Drawing.Rectangle
-            public Rectangle ToRectangle() {
-                return System.Drawing.Rectangle.FromLTRB(Left, Top, Right, Bottom);
-            }
-
-            public static RECT FromRectangle(Rectangle rectangle) {
-                return new RECT(rectangle.Left, rectangle.Top, rectangle.Right, rectangle.Bottom);
-            }
-
-            public void Inflate(int width, int height) {
-                Left -= width;
-                Top -= height;
-                Right += width;
-                Bottom += height;
-            }
-
-            public override int GetHashCode() {
-                return Left ^ ((Top << 13) | (Top >> 0x13))
-                                  ^ ((Width << 0x1a) | (Width >> 6))
-                                  ^ ((Height << 7) | (Height >> 0x19));
-            }
-
-            public static implicit operator Rectangle(RECT rect) {
-                return System.Drawing.Rectangle.FromLTRB(rect.Left, rect.Top, rect.Right, rect.Bottom);
-            }
-
-            public static implicit operator RECT(Rectangle rect) {
-                return new RECT(rect.Left, rect.Top, rect.Right, rect.Bottom);
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Programatically triggers the OnKeyDown event
-        /// </summary>
-        public bool PerformKeyDown(KeyEventArgs e) {
-            OnKeyDown(e);
-            return e.Handled;
-        }
-
-        #endregion
     }
 
-    internal class YamuiComboBoxDesigner : ControlDesigner {
-        protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("ImeMode");
-            properties.Remove("Padding");
-            properties.Remove("FlatAppearance");
-            properties.Remove("FlatStyle");
-
-            properties.Remove("UseCompatibleTextRendering");
-            properties.Remove("Image");
-            properties.Remove("ImageAlign");
-            properties.Remove("ImageIndex");
-            properties.Remove("ImageKey");
-            properties.Remove("ImageList");
-            properties.Remove("TextImageRelation");
-
-            properties.Remove("UseVisualStyleBackColor");
-
-            properties.Remove("Font");
-            properties.Remove("RightToLeft");
-
-            base.PreFilterProperties(properties);
-        }
-    }
 }

@@ -173,7 +173,7 @@ namespace YamuiFramework.Controls {
 
         #region Methods
         
-        private void OnButtonPressed(EventArgs eventArgs) {
+        protected virtual void OnButtonPressed(EventArgs eventArgs) {
             // we could do something here, like preventing the user to click the button when the OnClick is being ran
             if (ButtonPressed != null) 
                 ButtonPressed(this, eventArgs);

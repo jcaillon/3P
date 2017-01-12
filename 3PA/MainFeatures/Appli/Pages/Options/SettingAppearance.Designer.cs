@@ -120,7 +120,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbSyntax
             // 
-            this.cbSyntax.ItemHeight = 15;
             this.cbSyntax.Location = new System.Drawing.Point(25, 273);
             this.cbSyntax.Name = "cbSyntax";
             this.cbSyntax.Size = new System.Drawing.Size(277, 21);
@@ -139,7 +138,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbApplication
             // 
-            this.cbApplication.ItemHeight = 15;
             this.cbApplication.Location = new System.Drawing.Point(25, 50);
             this.cbApplication.Name = "cbApplication";
             this.cbApplication.Size = new System.Drawing.Size(277, 21);

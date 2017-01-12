@@ -286,7 +286,6 @@ namespace YamuiFramework.Forms {
                 var cb = new YamuiComboBox {
                     Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
                     Size = new Size(inputWidth, 20),
-                    DropDownStyle = ComboBoxStyle.DropDownList,
                     Anchor = Anchor | AnchorStyles.Right
                 };
                 var dataSource = new List<string>();

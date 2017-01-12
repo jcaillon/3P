@@ -151,7 +151,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbEncoding
             // 
-            this.cbEncoding.ItemHeight = 15;
             this.cbEncoding.Location = new System.Drawing.Point(179, 335);
             this.cbEncoding.Name = "cbEncoding";
             this.cbEncoding.Size = new System.Drawing.Size(375, 21);

@@ -376,7 +376,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbDatabase
             // 
-            this.cbDatabase.ItemHeight = 15;
             this.cbDatabase.Location = new System.Drawing.Point(193, 113);
             this.cbDatabase.Name = "cbDatabase";
             this.cbDatabase.Size = new System.Drawing.Size(273, 21);
@@ -1010,7 +1009,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbSuffix
             // 
-            this.cbSuffix.ItemHeight = 15;
             this.cbSuffix.Location = new System.Drawing.Point(173, 48);
             this.cbSuffix.Name = "cbSuffix";
             this.cbSuffix.Size = new System.Drawing.Size(133, 21);
@@ -1018,7 +1016,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbName
             // 
-            this.cbName.ItemHeight = 15;
             this.cbName.Location = new System.Drawing.Point(30, 48);
             this.cbName.Name = "cbName";
             this.cbName.Size = new System.Drawing.Size(137, 21);

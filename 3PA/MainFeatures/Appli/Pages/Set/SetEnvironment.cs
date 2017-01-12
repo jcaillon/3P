@@ -290,7 +290,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                                 // empty database cb
                                 cbDatabase.DataSource = new List<string>();
-
                                 if (envLetterList.Count > 0) {
 
                                     // hide the combo if there is only one item
