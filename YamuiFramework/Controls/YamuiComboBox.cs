@@ -31,19 +31,41 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
+    /// <summary>
+    /// Implements some of the methods/fields of a combo box
+    /// </summary>
     [Designer("YamuiFramework.Controls.YamuiComboBoxDesigner")]
     [ToolboxBitmap(typeof(ComboBox))]
     public sealed class YamuiComboBox : YamuiButton {
 
-        #region events
+        #region private
 
+        private string _waterMark = "";
+        private object _originalDataSource;
+        private List<object> _datasource;
+        private List<YamuiComboItem> _listItems = new List<YamuiComboItem>();
+        private int _selectedIndex;
+        private ContentAlignment _textAlign = ContentAlignment.MiddleLeft;
+        private YamuiMenu _listPopup;
+        private bool _justFocused;
+
+        #endregion
+
+        #region Public events
+
+        /// <summary>
+        /// published when the index is changed, wether by the user or programatically
+        /// </summary>
         public event EventHandler<EventArgs> SelectedIndexChanged;
 
+        /// <summary>
+        /// published when the index is changed by the action of the user
+        /// </summary>
         public event Action<YamuiComboBox> SelectedIndexChangedByUser;
 
         #endregion
 
-        #region Fields
+        #region Public fields
 
         [DefaultValue(ContentAlignment.MiddleLeft)]
         public override ContentAlignment TextAlign {
@@ -51,6 +73,9 @@ namespace YamuiFramework.Controls {
             set { _textAlign = value; }
         }
 
+        /// <summary>
+        /// Text to show on the combobox when no value is selected
+        /// </summary>
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
         [DefaultValue("")]
@@ -82,10 +107,21 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        /// <summary>
+        /// Field of property of the object from the Datasource List of objects that should be used
+        /// as the display text
+        /// </summary>
         public String DisplayMember { get; set; }
 
+        /// <summary>
+        /// Field of property of the object from the Datasource List of objects that should be used
+        /// as the value (use SelectedValue)
+        /// </summary>
         public String ValueMember { get; set; }
 
+        /// <summary>
+        /// get/set the currently selected index
+        /// </summary>
         public int SelectedIndex {
             get {
                 return _selectedIndex;
@@ -100,12 +136,18 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        /// <summary>
+        /// get the currently selected object
+        /// </summary>
         public object SelectedItem {
             get {
-                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseValue : null;
+                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseObject : null;
             }
         }
 
+        /// <summary>
+        /// Set/get the currently selected text
+        /// </summary>
         public String SelectedText {
             get {
                 return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].DisplayText : null;
@@ -116,6 +158,10 @@ namespace YamuiFramework.Controls {
                     SelectedIndex = newIdx;
             }
         }
+
+        /// <summary>
+        /// Set/get the value of currently selected object (designated by ValueMember)
+        /// </summary>
         public object SelectedValue {
             get {
                 var item = SelectedItem;
@@ -143,7 +189,7 @@ namespace YamuiFramework.Controls {
             set {
                 var newIdx = -1;
                 var i = 0;
-                foreach (var item in _listItems.Select(item => item.BaseValue)) {
+                foreach (var item in _listItems.Select(item => item.BaseObject)) {
                     try {
                         var field = item.GetType().GetField(ValueMember);
                         if (field.FieldType == typeof(string)) {
@@ -181,33 +227,30 @@ namespace YamuiFramework.Controls {
         
         #endregion
 
-        #region private
-
-        private string _waterMark = "";
-        private object _originalDataSource;
-        private List<object> _datasource;
-        private List<YamuiComboItem> _listItems = new List<YamuiComboItem>();
-        private int _selectedIndex;
-        private ContentAlignment _textAlign = ContentAlignment.MiddleLeft;
-        private YamuiMenu _listPopup;
-
-        #endregion
-
         #region private methods
 
+        /// <summary>
+        /// Refresh the text displayed on the combo
+        /// </summary>
         private void RefreshText() {
-            if (SelectedIndex < _listItems.Count) {
+            if (SelectedIndex >= 0 && SelectedIndex < _listItems.Count) {
                 Text = _listItems[SelectedIndex].DisplayText;
-                Invalidate();
+            } else {
+                Text = null;
             }
+            Invalidate();
         }
+
+        /// <summary>
+        /// Initializes the internal list with either the Datasource only or Datasource + Display text
+        /// </summary>
         private void InitList() {
 
             // simple list of strings?
             if (_datasource != null) {
                 if (_datasource.Exists(o => o is string)) {
                     var i = 0;
-                    _listItems = _datasource.Select(o => new YamuiComboItem {DisplayText = (string) o, BaseValue = o, Index = i++}).ToList();
+                    _listItems = _datasource.Select(o => new YamuiComboItem {DisplayText = (string) o, BaseObject = o, Index = i++}).ToList();
                 } else {
                     var i = 0;
                     foreach (var obj in _datasource) {
@@ -231,7 +274,7 @@ namespace YamuiFramework.Controls {
                                     throw new Exception("Unknow property or field : " + DisplayMember ?? "null");
                             }
                         }
-                        _listItems.Add(new YamuiComboItem {DisplayText = displayText, BaseValue = obj, Index = i});
+                        _listItems.Add(new YamuiComboItem {DisplayText = displayText, BaseObject = obj, Index = i});
                         i++;
                     }
                 }
@@ -239,41 +282,143 @@ namespace YamuiFramework.Controls {
 
             RefreshText();
         }
-        
-        #endregion
 
-        #region Override
-
-        protected override void OnButtonPressed(EventArgs eventArgs) {
+        /// <summary>
+        /// displays the popup form
+        /// </summary>
+        private void DisplayPopup(string initialString) {
             if (_listItems != null && _listItems.Count > 0) {
+
+                var displayFilterBox = !string.IsNullOrEmpty(initialString) || _listItems.Count > 15;
 
                 // correct default selected
                 foreach (var item in _listItems) {
                     item.IsSelectedByDefault = item.Index == SelectedIndex;
                 }
 
+                var spawnPt = PointToScreen(new Point());
+                spawnPt.Offset(0, displayFilterBox ? 0 : Height);
                 _listPopup = new YamuiMenu {
-                    SpawnLocation = Cursor.Position,
+                    SpawnLocation = spawnPt,
                     MenuList = _listItems.Cast<YamuiMenuItem>().ToList(),
-                    DisplayFilterBox = true
+                    DisplayFilterBox = displayFilterBox,
+                    Resizable = false,
+                    Movable = false,
+                    FormMinSize = new Size(Width, 0),
+                    AutocompletionLineHeight = (displayFilterBox ? -1 : 1) * Height,
+                    InitialFilterString = initialString
                 };
+
+                // on popup clic
                 _listPopup.ClicItemWrapper = item => {
-                    SelectedIndex = ((YamuiComboItem) item).Index;
-                    if (SelectedIndexChangedByUser != null)
-                        SelectedIndexChangedByUser(this);
+                    if (item != null) {
+                        SelectedIndex = ((YamuiComboItem) item).Index;
+                        if (SelectedIndexChangedByUser != null)
+                            SelectedIndexChangedByUser(this);
+                    }
                     _listPopup.Close();
                     _listPopup.Dispose();
                 };
+
+                // show
                 var owner = FindForm();
                 if (owner != null) {
                     _listPopup.Show(new WindowWrapper(owner.Handle));
                 } else {
                     _listPopup.Show();
                 }
+
+                _listPopup.YamuiList.IndexChanged += list => {
+                    var item = list.SelectedItem;
+                    if (item != null) {
+                        SelectedIndex = ((YamuiComboItem)item).Index;
+                        if (SelectedIndexChangedByUser != null)
+                            SelectedIndexChangedByUser(this);
+                    }
+                };
+            }
+        }
+        
+        #endregion
+
+        #region Override
+
+        /// <summary>
+        /// on key down
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e) {
+
+            // pressing a letter opens the popup in filter mode
+            try {
+                KeysConverter kc = new KeysConverter();
+                string keyChar = kc.ConvertToString(e.KeyCode);
+                if (keyChar != null && keyChar.Length == 1) {
+                    DisplayPopup(keyChar);
+                    e.Handled = true;
+                }
+            } catch (Exception) {
+                //ignored
             }
 
-            base.OnButtonPressed(eventArgs);
+            // pressing down/up changes the current index
+            if (!e.Handled) {
+                switch (e.KeyCode) {
+                    case Keys.Up:
+                        SelectedIndex--;
+                        if (SelectedIndexChangedByUser != null)
+                            SelectedIndexChangedByUser(this);
+                        e.Handled = true;
+                        break;
+                    case Keys.Down:
+                        SelectedIndex++;
+                        if (SelectedIndexChangedByUser != null)
+                            SelectedIndexChangedByUser(this);
+                        e.Handled = true;
+                        break;
+                }
+            }
+
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
+
+        protected override void OnKeyUp(KeyEventArgs e) {
+            // Enter / space opens the popup
+            if (!e.Handled && IsPressed) {
+                DisplayPopup(null);
+                e.Handled = true;
+            }
+            base.OnKeyUp(e);
+        }
+
+        /// <summary>
+        /// On clic
+        /// </summary>
+        protected override void OnMouseDown(MouseEventArgs e) {
+            if (!_justFocused) {
+                DisplayPopup(null);
+            } else
+                _justFocused = false;
+            base.OnMouseDown(e);
+        }
+
+        /// <summary>
+        /// Correctly propagate a refresh for theme changes for example
+        /// </summary>
+        public override void Refresh() {
+            if (_listPopup != null)
+                _listPopup.Refresh();
+            base.Refresh();
+        }
+
+        #region Focus first, then popup
+
+        //protected override void OnEnter(EventArgs e) {
+        //    _justFocused = new Rectangle(PointToScreen(new Point()), Size).Contains(Cursor.Position);
+        //    base.OnEnter(e);
+        //}
+
+        #endregion
 
         #endregion
 
@@ -281,9 +426,10 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
 
-            var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
-            var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
-            var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
+            var hasItems = _listItems.Count > 0;
+            var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled && hasItems);
+            var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled && hasItems);
+            var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled && hasItems);
 
             // background
             if (backColor != Color.Transparent)
@@ -326,8 +472,14 @@ namespace YamuiFramework.Controls {
 
         private class YamuiComboItem : YamuiMenuItem {
 
-            public object BaseValue { get; set; }
+            /// <summary>
+            /// Stores the base object for this item
+            /// </summary>
+            public object BaseObject { get; set; }
 
+            /// <summary>
+            /// Index of this item
+            /// </summary>
             public int Index { get; set; }
 
         }

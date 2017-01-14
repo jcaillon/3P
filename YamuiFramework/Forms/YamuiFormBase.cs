@@ -209,19 +209,41 @@ namespace YamuiFramework.Forms {
         /// If the spawn point if too far on the right of the screen, the location returned will spawn the menu
         /// on the left of the spawn point
         /// </summary>
-        public Point GetBestPosition(Point spawnLocation) {
+        public Point GetBestMenuPosition(Point spawnLocation) {
             var screen = Screen.FromPoint(spawnLocation);
-            if (spawnLocation.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2) {
+            if (spawnLocation.X > screen.WorkingArea.X + screen.WorkingArea.Width/2) {
                 spawnLocation.X = spawnLocation.X - Width;
                 _reverseX = true;
-            }
+            } else
+                _reverseX = false;
             if (spawnLocation.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2) {
                 spawnLocation.Y = spawnLocation.Y - Height;
                 _reverseY = true;
-            }
+            } else
+                _reverseY = false;
             return spawnLocation;
         }
 
+        /// <summary>
+        /// Returns the best position (for the starting position of the form) given the spawn location
+        /// (spawn location being the mouse location for a menu for instance) for an autocompletion form
+        /// </summary>
+        public Point GetBestAutocompPosition(Point spawnLocation, int lineHeight) {
+            var screen = Screen.FromPoint(spawnLocation);
+            // position the window smartly
+            if (spawnLocation.X + Width > screen.WorkingArea.X + screen.WorkingArea.Width) {
+                spawnLocation.X -= (spawnLocation.X + Width) - (screen.WorkingArea.X + screen.WorkingArea.Width);
+                _reverseX = true;
+            } else
+                _reverseX = false;
+            if (spawnLocation.Y + Height > screen.WorkingArea.Y + screen.WorkingArea.Height) {
+                spawnLocation.Y = spawnLocation.Y - Height - lineHeight;
+                _reverseY = true;
+            } else
+                _reverseY = false;
+            return spawnLocation;
+        }
+        
         /// <summary>
         /// Returns the location that should be used for a window child relative to this window
         /// the location of the childRectangle should be the "default" position of the child menu

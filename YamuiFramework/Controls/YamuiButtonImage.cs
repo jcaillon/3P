@@ -54,7 +54,7 @@ namespace YamuiFramework.Controls {
             }
 
             // draw an indicator to know the image is focused
-            if (!HideFocusedIndicator && IsFocused &&!TabStop)
+            if (!HideFocusedIndicator && IsFocused)
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
                     GraphicsPath path = new GraphicsPath();
                     path.AddLines(new[] { new Point(0, 0), new Point(ClientRectangle.Width / 2, 0), new Point(0, ClientRectangle.Height / 2), new Point(0, 0), });

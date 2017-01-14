@@ -76,6 +76,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             var textTool = "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>";
             toolTip.SetToolTip(cbDatabase, textTool);
+            cbDatabase.WaterMark = "No database registered for this environment";
             toolTip.SetToolTip(lbl_listdb, textTool);
 
             toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");

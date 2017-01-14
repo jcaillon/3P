@@ -118,6 +118,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (_checkButton != null)
                 _checkButton.Checked = false;
             ThemeManager.RefreshApplicationWithTheme(theme);
+            cbApplication.Refresh();
         }
 
         /// <summary>

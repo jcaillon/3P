@@ -175,8 +175,12 @@ namespace YamuiFramework.Controls {
         
         protected virtual void OnButtonPressed(EventArgs eventArgs) {
             // we could do something here, like preventing the user to click the button when the OnClick is being ran
-            if (ButtonPressed != null) 
+            if (ButtonPressed != null) {
                 ButtonPressed(this, eventArgs);
+                var e = eventArgs as KeyEventArgs;
+                if (e != null)
+                    e.Handled = true;
+            }
         }
         
         /// <summary>
@@ -321,7 +325,6 @@ namespace YamuiFramework.Controls {
         protected override void OnKeyUp(KeyEventArgs e) {
             if (IsPressed) {
                 OnButtonPressed(e);
-                e.Handled = true;
             }
             IsPressed = false;
             Invalidate();

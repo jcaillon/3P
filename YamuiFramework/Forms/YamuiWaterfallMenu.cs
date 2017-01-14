@@ -185,7 +185,7 @@ namespace YamuiFramework.Forms {
             Resizable = false;
 
             // menu position
-            Location = GetBestPosition(location);
+            Location = GetBestMenuPosition(location);
             
             // set focused item
             ActiveControl = Controls[_selectedIndex];

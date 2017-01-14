@@ -62,6 +62,12 @@ namespace YamuiFramework.Forms {
         public Point SpawnLocation { get; set; }
 
         /// <summary>
+        /// If != 0, positions this menu not as a classic menu but as an autocompletion for a given text,
+        /// set this value to the line height of said text
+        /// </summary>
+        public int AutocompletionLineHeight { get; set; }
+
+        /// <summary>
         /// List of the item to display in the menu
         /// </summary>
         public List<YamuiMenuItem> MenuList { get; set; }
@@ -100,6 +106,11 @@ namespace YamuiFramework.Forms {
         /// Accessor to the filter box
         /// </summary>
         public YamuiFilterBox FilterBox { get; private set; }
+
+        /// <summary>
+        /// Initial filter string used (only if DisplayFilterBox is true)                                                                                                                        
+        /// </summary>
+        public string InitialFilterString { get; set; }
 
         #endregion
 
@@ -195,12 +206,13 @@ namespace YamuiFramework.Forms {
             YamuiList.MouseDown += YamuiListOnMouseDown;
             YamuiList.EnterPressed += YamuiListOnEnterPressed;
             YamuiList.RowClicked += YamuiListOnRowClicked;
+            yPos += YamuiList.Items.Count.ClampMin(1) * 20;
+
             if (YamuiList.Items.Count > 0) {
                 var selectedIdx = YamuiList.Items.Cast<YamuiMenuItem>().ToList().FindIndex(item => item.IsSelectedByDefault);
                 if (selectedIdx > 0)
                     YamuiList.SelectedItemIndex = selectedIdx;
             }
-            yPos += YamuiList.Items.Count.ClampMin(1) * 20;
             
             // add controls
             if (title != null)
@@ -220,7 +232,7 @@ namespace YamuiFramework.Forms {
             Size = new Size(maxWidth, height);
 
             // position / size
-            Location = GetBestPosition(SpawnLocation);
+            Location = AutocompletionLineHeight != 0 ? GetBestAutocompPosition(SpawnLocation, AutocompletionLineHeight) : GetBestMenuPosition(SpawnLocation);
             ResizeFormToFitScreen();
             MinimumSize = Size;
             
@@ -229,6 +241,10 @@ namespace YamuiFramework.Forms {
                 FilterBox.ClearAndFocusFilter();
             else
                 ActiveControl = YamuiList;
+
+            // Filter?
+            if (!string.IsNullOrEmpty(InitialFilterString) && DisplayFilterBox)
+                FilterBox.Text = InitialFilterString;
 
             // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
@@ -304,25 +320,9 @@ namespace YamuiFramework.Forms {
             Activate();
         }
 
-        public new int ShowDialog() {
-            DrawContent();
-            base.ShowDialog();
-            if (YamuiList != null)
-                return YamuiList.SelectedItemIndex;
-            return -1;
-        }
-
         public new void Show(IWin32Window owner) {
             DrawContent();
             base.Show(owner);
-        }
-
-        public new int ShowDialog(IWin32Window owner) {
-            DrawContent();
-            base.ShowDialog(owner);
-            if (YamuiList != null)
-                return YamuiList.SelectedItemIndex;
-            return -1;
         }
 
         #endregion

@@ -117,6 +117,18 @@ namespace YamuiFramework.Controls.YamuiList {
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<YamuiButtonImage> ExtraButtonsList { get; private set; }
 
+        /// <summary>
+        /// Set the value of the filter textbox
+        /// </summary>
+        public override string Text {
+            set {
+                this.SafeInvoke(thisBox => {
+                    _filterBox.Text = value;
+                    ActiveControl = _filterBox;
+                });
+            }
+        }
+
         #endregion
         
         #region Private
@@ -175,11 +187,13 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void Initialize(YamuiFilteredTypeList list) {
             AssociatedList = list;
-            DrawControl();
+            this.SafeInvoke(thisBox => {
+                DrawControl();
 
-            // link events of the textbox to the list
-            _filterBox.TextChanged += AssociatedList.OnTextChangedEvent;
-            _filterBox.KeyDown += FilterBoxOnKeyDown;
+                // link events of the textbox to the list
+                _filterBox.TextChanged += AssociatedList.OnTextChangedEvent;
+                _filterBox.KeyDown += FilterBoxOnKeyDown;
+            });
         }
 
         private void DrawControl() {
@@ -214,6 +228,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // draw the default buttons on the right of the filter textbox
             var xRightPos = Width - Padding.Right;
+
             // filter mode for tree list
             if (treeList != null) {
                 var img = treeList.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? SearchButtonImage : FilterButtonImage;
@@ -247,7 +262,7 @@ namespace YamuiFramework.Controls.YamuiList {
             _filterBox.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left;
             _filterBox.Location = new Point(xLeftPos, Padding.Top);
             _filterBox.Size = new Size(xRightPos - xLeftPos, thisHeight);
-            _filterBox.Text = string.Empty;
+            _filterBox.Text = AssociatedList.FilterString ?? string.Empty;
             _filterBox.WaterMark = treeList == null || treeList.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? WatermarkSearchText : WatermarkFilterText;
             Controls.Add(_filterBox);
             _tooltip.SetToolTip(_filterBox, TextBoxTooltip);
@@ -281,6 +296,8 @@ namespace YamuiFramework.Controls.YamuiList {
                 treeList.SearchMode = YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent;
                 _tooltip.SetToolTip(button, ModeButtonSearchTooltip);
             }
+
+            ActiveControl = _filterBox;
         }
 
         /// <summary>
