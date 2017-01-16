@@ -308,11 +308,12 @@ namespace YamuiFramework.Forms {
                 var tb = new YamuiTextBox {
                     Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
                     Size = new Size(inputWidth, 20),
-                    CausesValidation = true,
                     Text = strValue,
-                    Anchor = Anchor | AnchorStyles.Right
+                    Anchor = Anchor | AnchorStyles.Right,
+                    Multiline = false
                 };
-
+                tb.AcceptsTab = false;
+                tb.CausesValidation = true;
                 tb.Enter += (s, e) => tb.SelectAll();
 
                 if (itemType == typeof(char))

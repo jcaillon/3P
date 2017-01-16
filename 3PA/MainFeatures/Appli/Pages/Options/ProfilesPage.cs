@@ -104,9 +104,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 }
             });
 
-            flFilter1.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
-            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.PerformKeyDown(new KeyEventArgs(args.KeyCode));
-
+            flFilter1.Core.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
+            flFilter1.Core.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.PerformKeyDown(new KeyEventArgs(args.KeyCode));
+            flFilter1.MultiLine = false;
 
             // -------------------------------------------------------------
             // ------------ BUTTONS ----------------------------------------
@@ -163,6 +163,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     new FilteredListItem { DisplayText = "fuck10", IsDisabled = true},
                 });
             };
+
             
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);

@@ -81,7 +81,7 @@ namespace YamuiFramework.Controls {
         public void Init() {
             // draw the go back button
             _goBackButton = new YamuiButtonChar() {
-                UseWingdings = true,
+                IconFontName = YamuiButtonChar.IconFontNameEnum.Wingdings,
                 ButtonChar = "ç",
                 FakeDisabled = true,
                 Size = new Size(27, 27),

@@ -380,8 +380,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             flName.Text = ProEnvironment.Current.Name;
                             flSuffix.Text = ProEnvironment.Current.Suffix;
                             flLabel.Text = ProEnvironment.Current.Label;
-                            flExtraPf.Lines = ProEnvironment.Current.ExtraPf.Replace("\r\n", "\n").Split('\n');
-                            flExtraProPath.Lines = ProEnvironment.Current.ExtraProPath.Replace("\r\n", "\n").Split('\n');
+                            flExtraPf.Text = ProEnvironment.Current.ExtraPf;
+                            flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                             flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
                             flDatabase.Text = Config.Instance.EnvDatabase;
                             textbox1.Text = ProEnvironment.Current.GetPfPath();

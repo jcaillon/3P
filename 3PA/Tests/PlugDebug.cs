@@ -185,6 +185,7 @@ namespace _3PA.Tests {
             return outList;
         }
 
+
         public static void DebugTest1() {
 
             /*
@@ -210,6 +211,10 @@ namespace _3PA.Tests {
             };
             popup.Show(new WindowWrapper(Npp.HandleNpp));
             */
+
+            object fuck = (int)0;
+            UserCommunication.Input(ref fuck, "yo", MessageImg.MsgInfo, "title", "sub", null);
+            UserCommunication.Notify(fuck.ToString());
 
             var popup2 = new YamuiMenu {
                 SpawnLocation = Cursor.Position,

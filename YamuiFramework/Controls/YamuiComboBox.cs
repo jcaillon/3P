@@ -68,6 +68,7 @@ namespace YamuiFramework.Controls {
         #region Public fields
 
         [DefaultValue(ContentAlignment.MiddleLeft)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override ContentAlignment TextAlign {
             get { return _textAlign; }
             set { _textAlign = value; }
@@ -84,25 +85,29 @@ namespace YamuiFramework.Controls {
             get { return _waterMark; }
             set {
                 _waterMark = value.Trim();
-                Invalidate();
+                RefreshText();
             }
         }
 
         /// <summary>
         /// Set the datasource for this combo box
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object DataSource {
             get {
                 return _originalDataSource;
             }
             set {
                 _originalDataSource = value;
+                if (value == null) {
+                    _listItems.Clear();
+                    return;
+                }
                 var enumerable = _originalDataSource as IEnumerable;
                 if (enumerable == null)
                     throw new Exception("Datasource expects an IEnumerable object");
                 _datasource = enumerable.Cast<object>().ToList();
                 _listItems.Clear();
-
                 InitList();
             }
         }
@@ -111,17 +116,20 @@ namespace YamuiFramework.Controls {
         /// Field of property of the object from the Datasource List of objects that should be used
         /// as the display text
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public String DisplayMember { get; set; }
 
         /// <summary>
         /// Field of property of the object from the Datasource List of objects that should be used
         /// as the value (use SelectedValue)
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public String ValueMember { get; set; }
 
         /// <summary>
         /// get/set the currently selected index
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex {
             get {
                 return _selectedIndex;
@@ -139,6 +147,7 @@ namespace YamuiFramework.Controls {
         /// <summary>
         /// get the currently selected object
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object SelectedItem {
             get {
                 return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseObject : null;
@@ -148,11 +157,14 @@ namespace YamuiFramework.Controls {
         /// <summary>
         /// Set/get the currently selected text
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public String SelectedText {
             get {
                 return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].DisplayText : null;
             }
             set {
+                if (value == null)
+                    return;
                 var newIdx = _listItems.FindIndex(item => item.DisplayText.Equals(value));
                 if (newIdx >= 0 && newIdx < _listItems.Count)
                     SelectedIndex = newIdx;
@@ -162,6 +174,7 @@ namespace YamuiFramework.Controls {
         /// <summary>
         /// Set/get the value of currently selected object (designated by ValueMember)
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object SelectedValue {
             get {
                 var item = SelectedItem;
@@ -187,6 +200,8 @@ namespace YamuiFramework.Controls {
                 return null;
             }
             set {
+                if (value == null)
+                    return;
                 var newIdx = -1;
                 var i = 0;
                 foreach (var item in _listItems.Select(item => item.BaseObject)) {
@@ -233,12 +248,14 @@ namespace YamuiFramework.Controls {
         /// Refresh the text displayed on the combo
         /// </summary>
         private void RefreshText() {
-            if (SelectedIndex >= 0 && SelectedIndex < _listItems.Count) {
-                Text = _listItems[SelectedIndex].DisplayText;
-            } else {
-                Text = null;
-            }
-            Invalidate();
+            this.SafeInvoke(box => {
+                if (SelectedIndex >= 0 && SelectedIndex < _listItems.Count) {
+                    Text = _listItems[SelectedIndex].DisplayText;
+                } else {
+                    Text = null;
+                }
+                Invalidate();
+            });
         }
 
         /// <summary>

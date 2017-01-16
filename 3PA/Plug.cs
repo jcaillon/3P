@@ -356,17 +356,17 @@ namespace _3PA {
         /// Called when the user presses a key
         /// </summary>
         // ReSharper disable once RedundantAssignment
-        private static bool KeyDownHandler(Keys key, KeyModifiers keyModifiers) {
+        private static bool KeyDownHandler(KeyEventArgs e) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             bool handled = false;
 
             MenuItem menuItem = null;
             try {
                 // Since it's a keydown message, we can receive this a lot if the user let a button pressed
-                var isSpamming = Utils.IsSpamming(key.ToString(), 100, true);
+                var isSpamming = Utils.IsSpamming(e.KeyCode.ToString(), 100, true);
 
                 // check if the user triggered a 3P function defined in the AppliMenu
-                menuItem = TriggeredMenuItem(AppliMenu.Instance.ShortcutableItemList, isSpamming, key, keyModifiers, ref handled);
+                menuItem = TriggeredMenuItem(AppliMenu.Instance.ShortcutableItemList, isSpamming, e, ref handled);
                 if (handled)
                     return true;
 
@@ -375,32 +375,32 @@ namespace _3PA {
 
                     // Autocompletion 
                     if (AutoComplete.IsVisible) {
-                        if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
-                            handled = AutoComplete.OnKeyDown(key);
+                        if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Tab || e.KeyCode == Keys.Return || e.KeyCode == Keys.Escape)
+                            handled = AutoComplete.OnKeyDown(e.KeyCode);
                         else {
 
-                            if ((key == Keys.Right || key == Keys.Left) && keyModifiers.IsAlt)
-                                handled = AutoComplete.OnKeyDown(key);
+                            if ((e.KeyCode == Keys.Right || e.KeyCode == Keys.Left) && e.Alt)
+                                handled = AutoComplete.OnKeyDown(e.KeyCode);
                         }
                     } else {
                         // snippet ?
-                        if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
-                            if (!keyModifiers.IsCtrl && !keyModifiers.IsAlt && !keyModifiers.IsShift) {
+                        if (e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
+                            if (!e.Control && !e.Alt && !e.Shift) {
                                 if (!Snippets.InsertionActive) {
                                     //no snippet insertion in progress
-                                    if (key == Keys.Tab) {
+                                    if (e.KeyCode == Keys.Tab) {
                                         if (Snippets.TriggerCodeSnippetInsertion()) {
                                             handled = true;
                                         }
                                     }
                                 } else {
                                     //there is a snippet insertion in progress
-                                    if (key == Keys.Tab) {
+                                    if (e.KeyCode == Keys.Tab) {
                                         if (Snippets.NavigateToNextParam())
                                             handled = true;
-                                    } else if (key == Keys.Escape || key == Keys.Return) {
+                                    } else if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
                                         Snippets.FinalizeCurrent();
-                                        if (key == Keys.Return)
+                                        if (e.KeyCode == Keys.Return)
                                             handled = true;
                                     }
                                 }
@@ -409,8 +409,8 @@ namespace _3PA {
                     }
 
                     // next tooltip
-                    if (!handled && InfoToolTip.IsVisible && keyModifiers.IsCtrl && (key == Keys.Up || key == Keys.Down)) {
-                        if (key == Keys.Up)
+                    if (!handled && InfoToolTip.IsVisible && e.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)) {
+                        if (e.KeyCode == Keys.Up)
                             InfoToolTip.IndexToShow--;
                         else
                             InfoToolTip.IndexToShow++;
@@ -430,23 +430,23 @@ namespace _3PA {
                 // "HandleKeyDown" that will be triggered from here (see below)
                 var curControl = Win32Api.GetFocusedControl();
                 if (curControl != null) {
-                    var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
+                    var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] {(object) e});
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
                 var curWindow = Control.FromHandle(Win32Api.GetForegroundWindow());
                 if (curWindow != null) {
-                    var invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
+                    var invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] {(object) e});
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
 
                 // Close interfacePopups
-                if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior)
+                if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp || e.KeyCode == Keys.Next || e.KeyCode == Keys.Prior)
                     ClosePopups();
 
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Occured in : " + (menuItem == null ? (new ShortcutKey(keyModifiers.IsCtrl, keyModifiers.IsAlt, keyModifiers.IsShift, key)).ToString() : menuItem.ItemId));
+            } catch (Exception ex) {
+                ErrorHandler.ShowErrors(ex, "Occured in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
             }
 
             return handled;
@@ -455,21 +455,21 @@ namespace _3PA {
         /// <summary>
         /// Check if the key/keymodifiers correspond to a item in the menu, if yes, returns this item and execute .Do()
         /// </summary>
-        private static MenuItem TriggeredMenuItem(List<MenuItem> list, bool isSpamming, Keys key, KeyModifiers keyModifiers, ref bool handled) {
+        private static MenuItem TriggeredMenuItem(List<MenuItem> list, bool isSpamming, KeyEventArgs e, ref bool handled) {
 
             // check if the user triggered a 3P function defined in the AppliMenu
             foreach (var item in list) {
                 // shortcut corresponds to the item?
-                if ((byte) key == item.Shortcut._key &&
-                    keyModifiers.IsCtrl == item.Shortcut.IsCtrl &&
-                    keyModifiers.IsShift == item.Shortcut.IsShift &&
-                    keyModifiers.IsAlt == item.Shortcut.IsAlt &&
+                if ((byte)e.KeyCode == item.Shortcut._key &&
+                    e.Control == item.Shortcut.IsCtrl &&
+                    e.Shift == item.Shortcut.IsShift &&
+                    e.Alt == item.Shortcut.IsAlt &&
                     (item.Generic || IsCurrentFileProgress)) {
                     if (!isSpamming && item.OnClic != null) {
                         try {
                             item.OnClic(item);
-                        } catch (Exception e) {
-                            ErrorHandler.ShowErrors(e, "Error in : " + item.DisplayText);
+                        } catch (Exception ex) {
+                            ErrorHandler.ShowErrors(ex, "Error in : " + item.DisplayText);
                         }
                     }
                     handled = true;

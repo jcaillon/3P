@@ -262,8 +262,8 @@ namespace YamuiFramework.Controls.YamuiList {
             _filterBox.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left;
             _filterBox.Location = new Point(xLeftPos, Padding.Top);
             _filterBox.Size = new Size(xRightPos - xLeftPos, thisHeight);
-            _filterBox.Text = AssociatedList.FilterString ?? string.Empty;
             _filterBox.WaterMark = treeList == null || treeList.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? WatermarkSearchText : WatermarkFilterText;
+            _filterBox.Text = AssociatedList.FilterString ?? string.Empty;
             Controls.Add(_filterBox);
             _tooltip.SetToolTip(_filterBox, TextBoxTooltip);
 

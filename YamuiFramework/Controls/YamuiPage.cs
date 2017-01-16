@@ -33,6 +33,9 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
+
+            // this usercontrol should not be able to get the focus
+            SetStyle(ControlStyles.Selectable, false);
         }
 
         #endregion

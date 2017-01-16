@@ -212,7 +212,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_workPackage.Text = _locFileTagObject.WorkPackage;
             fl_bugId.Text = _locFileTagObject.BugId;
             fl_correctionNb.Text = _locFileTagObject.CorrectionNumber;
-            fl_correctionDesc.Lines = (_locFileTagObject.CorrectionDecription ?? "").Split('\n');
+            fl_correctionDesc.Text = (_locFileTagObject.CorrectionDecription ?? "");
             fl_correctionDate.Text = _locFileTagObject.CorrectionDate;
 
             lb_FileName.Text = @"<b>" + Npp.GetCurrentFileName() + @"</b>";

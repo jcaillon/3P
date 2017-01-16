@@ -69,9 +69,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void UpdateView() {
             fl_tagopen.Text = Config.Instance.TagModifOpener;
             fl_tagclose.Text = Config.Instance.TagModifCloser;
-            fl_tagtitle1.Lines = Config.Instance.TagTitleBlock1.Split('\n');
-            fl_tagtitle2.Lines = Config.Instance.TagTitleBlock2.Split('\n');
-            fl_tagtitle3.Lines = Config.Instance.TagTitleBlock3.Split('\n');
+            fl_tagtitle1.Text = Config.Instance.TagTitleBlock1;
+            fl_tagtitle2.Text = Config.Instance.TagTitleBlock2;
+            fl_tagtitle3.Text = Config.Instance.TagTitleBlock3;
             fl_encodingfilter.Text = Config.Instance.AutoSwitchEncodingForFilePatterns;
             cbEncoding.SelectedIndex = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).IndexOf(Config.Instance.AutoSwitchEncodingTo.ToString());
         }

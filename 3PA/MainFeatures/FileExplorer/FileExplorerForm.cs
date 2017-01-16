@@ -774,8 +774,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         private void BtEraseOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             textFilter.Text = "";
             FilterByText = "";
-            textFilter.Invalidate();
-
             GiveFocustoTextBox();
         }
 

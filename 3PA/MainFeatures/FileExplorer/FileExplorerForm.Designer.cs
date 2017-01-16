@@ -251,12 +251,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.textFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textFilter.CustomBackColor = System.Drawing.Color.Empty;
-            this.textFilter.CustomForeColor = System.Drawing.Color.Empty;
-            this.textFilter.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textFilter.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textFilter.Location = new System.Drawing.Point(30, 135);
             this.textFilter.Name = "textFilter";
             this.textFilter.Size = new System.Drawing.Size(510, 20);

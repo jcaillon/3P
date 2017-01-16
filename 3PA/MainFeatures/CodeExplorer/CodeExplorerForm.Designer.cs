@@ -84,16 +84,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // 
             this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxFilter.Lines = new string[0];
             this.textBoxFilter.Location = new System.Drawing.Point(90, 4);
             this.textBoxFilter.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.textBoxFilter.MaxLength = 32767;
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.PasswordChar = '\0';
-            this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textBoxFilter.SelectedText = "";
             this.textBoxFilter.Size = new System.Drawing.Size(201, 20);
-            this.textBoxFilter.TabIndex = 14;
             this.textBoxFilter.TabStop = false;
             this.textBoxFilter.WaterMark = "Filter here!";
             // 

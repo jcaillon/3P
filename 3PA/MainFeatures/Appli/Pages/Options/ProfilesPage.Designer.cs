@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.Controls.FastColoredTextBox.Core;
 using YamuiFramework.Controls.YamuiList;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
@@ -28,6 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.yamuiFilteredTypeTreeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
             this.yamuiScrollList1 = new YamuiFramework.Controls.YamuiList.YamuiScrollList();
             this.yamuiFilteredTypeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeList();
             this.btMinus = new YamuiFramework.Controls.YamuiButton();
@@ -35,14 +37,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiButton4 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton3 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
-            this.flFilter1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.flFilter1 = new YamuiTextBox2();
             this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
             this.YamuiFilteredList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredList();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlToolTip1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.yamuiFilteredTypeTreeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -77,9 +78,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
+            // yamuiFilteredTypeTreeList1
+            // 
+            this.yamuiFilteredTypeTreeList1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.yamuiFilteredTypeTreeList1.EmptyListString = "Too bad!";
+            this.yamuiFilteredTypeTreeList1.KeyPressed = null;
+            this.yamuiFilteredTypeTreeList1.Location = new System.Drawing.Point(385, 20);
+            this.yamuiFilteredTypeTreeList1.Name = "yamuiFilteredTypeTreeList1";
+            this.yamuiFilteredTypeTreeList1.ScrollWidth = 10;
+            this.yamuiFilteredTypeTreeList1.Size = new System.Drawing.Size(198, 221);
+            this.yamuiFilteredTypeTreeList1.TabIndex = 19;
+            this.yamuiFilteredTypeTreeList1.UseCustomBackColor = false;
+            // 
             // yamuiScrollList1
             // 
             this.yamuiScrollList1.EmptyListString = "Empty list!";
+            this.yamuiScrollList1.KeyPressed = null;
             this.yamuiScrollList1.Location = new System.Drawing.Point(29, 257);
             this.yamuiScrollList1.Name = "yamuiScrollList1";
             this.yamuiScrollList1.RowHeight = 18;
@@ -94,6 +109,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiFilteredTypeList1.EmptyListString = "Empty list!";
+            this.yamuiFilteredTypeList1.KeyPressed = null;
             this.yamuiFilteredTypeList1.Location = new System.Drawing.Point(385, 257);
             this.yamuiFilteredTypeList1.Name = "yamuiFilteredTypeList1";
             this.yamuiFilteredTypeList1.ScrollWidth = 10;
@@ -104,6 +120,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // btMinus
             // 
             this.btMinus.BackGrndImage = null;
+            this.btMinus.GreyScaleBackGrndImage = null;
             this.btMinus.IsFocused = false;
             this.btMinus.IsHovered = false;
             this.btMinus.IsPressed = false;
@@ -117,6 +134,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // btPlus
             // 
             this.btPlus.BackGrndImage = null;
+            this.btPlus.GreyScaleBackGrndImage = null;
             this.btPlus.IsFocused = false;
             this.btPlus.IsHovered = false;
             this.btPlus.IsPressed = false;
@@ -130,6 +148,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiButton4
             // 
             this.yamuiButton4.BackGrndImage = null;
+            this.yamuiButton4.GreyScaleBackGrndImage = null;
             this.yamuiButton4.IsFocused = false;
             this.yamuiButton4.IsHovered = false;
             this.yamuiButton4.IsPressed = false;
@@ -143,6 +162,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiButton3
             // 
             this.yamuiButton3.BackGrndImage = null;
+            this.yamuiButton3.GreyScaleBackGrndImage = null;
             this.yamuiButton3.IsFocused = false;
             this.yamuiButton3.IsHovered = false;
             this.yamuiButton3.IsPressed = false;
@@ -156,6 +176,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiButton2
             // 
             this.yamuiButton2.BackGrndImage = null;
+            this.yamuiButton2.GreyScaleBackGrndImage = null;
             this.yamuiButton2.IsFocused = false;
             this.yamuiButton2.IsHovered = false;
             this.yamuiButton2.IsPressed = false;
@@ -169,20 +190,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // flFilter1
             // 
             this.flFilter1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flFilter1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flFilter1.CustomBackColor = System.Drawing.Color.Empty;
-            this.flFilter1.CustomForeColor = System.Drawing.Color.Empty;
             this.flFilter1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flFilter1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flFilter1.Location = new System.Drawing.Point(213, 231);
             this.flFilter1.Name = "flFilter1";
             this.flFilter1.Size = new System.Drawing.Size(166, 20);
             this.flFilter1.TabIndex = 10;
-            this.flFilter1.WaterMark = null;
+            this.flFilter1.WaterMark = "fuckkk";
             // 
             // yamuiButton1
             // 
             this.yamuiButton1.BackGrndImage = null;
+            this.yamuiButton1.GreyScaleBackGrndImage = null;
             this.yamuiButton1.IsFocused = false;
             this.yamuiButton1.IsHovered = false;
             this.yamuiButton1.IsPressed = false;
@@ -196,6 +215,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // YamuiFilteredList1
             // 
             this.YamuiFilteredList1.EmptyListString = "Empty list!";
+            this.YamuiFilteredList1.KeyPressed = null;
             this.YamuiFilteredList1.Location = new System.Drawing.Point(213, 257);
             this.YamuiFilteredList1.Name = "YamuiFilteredList1";
             this.YamuiFilteredList1.ScrollWidth = 10;
@@ -246,18 +266,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlToolTip1.OwnerDraw = true;
             this.htmlToolTip1.ReshowDelay = 100;
             // 
-            // yamuiFilteredTypeTreeList1
-            // 
-            this.yamuiFilteredTypeTreeList1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.yamuiFilteredTypeTreeList1.EmptyListString = "Too bad!";
-            this.yamuiFilteredTypeTreeList1.Location = new System.Drawing.Point(385, 20);
-            this.yamuiFilteredTypeTreeList1.Name = "yamuiFilteredTypeTreeList1";
-            this.yamuiFilteredTypeTreeList1.ScrollWidth = 10;
-            this.yamuiFilteredTypeTreeList1.Size = new System.Drawing.Size(198, 221);
-            this.yamuiFilteredTypeTreeList1.TabIndex = 19;
-            this.yamuiFilteredTypeTreeList1.UseCustomBackColor = false;
-            // 
             // ProfilesPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -279,7 +287,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel1;
         private YamuiFilteredList YamuiFilteredList1;
-        private YamuiTextBox flFilter1;
+        private YamuiTextBox2 flFilter1;
         private YamuiButton yamuiButton1;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip1;
         private YamuiButton yamuiButton2;

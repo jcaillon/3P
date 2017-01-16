@@ -22,6 +22,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
+using System.Windows.Input;
 
 namespace YamuiFramework.Helper {
 
@@ -30,6 +32,13 @@ namespace YamuiFramework.Helper {
     public static class WinApi {
 
         #region Structs
+
+        public enum MapType : uint {
+            MAPVK_VK_TO_VSC = 0x0,
+            MAPVK_VSC_TO_VK = 0x1,
+            MAPVK_VK_TO_CHAR = 0x2,
+            MAPVK_VSC_TO_VK_EX = 0x3,
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT {
@@ -79,13 +88,6 @@ namespace YamuiFramework.Helper {
 
         #region Enums
 
-        public enum ScrollBar {
-            SB_HORZ = 0,
-            SB_VERT = 1,
-            SB_CTL = 2,
-            SB_BOTH = 3
-        }
-
         public enum HitTest {
             HTNOWHERE = 0,
             HTCLIENT = 1,
@@ -107,10 +109,6 @@ namespace YamuiFramework.Helper {
             HTSIZEFIRST = HTLEFT,
             HTSIZELAST = HTBOTTOMRIGHT,
             HTTRANSPARENT = -1
-        }
-
-        public enum TabControlHitTest {
-            TCHT_NOWHERE = 1
         }
 
         public enum Messages : uint {
@@ -608,7 +606,66 @@ namespace YamuiFramework.Helper {
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wp, IntPtr lp);
 
+
+        #region Get char pressed on key down
+
+        [DllImport("user32.dll")]
+        public static extern int ToUnicode(
+            uint wVirtKey,
+            uint wScanCode,
+            byte[] lpKeyState,
+            [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)] StringBuilder pwszBuff,
+            int cchBuff,
+            uint wFlags);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetKeyboardState(byte[] lpKeyState);
+
+        [DllImport("user32.dll")]
+        public static extern uint MapVirtualKey(uint uCode, MapType uMapType);
+
+        /// <summary>
+        /// Returns null or the char associated to the keyValue pressed
+        /// </summary>
+        public static char? GetCharFromKey(int keyValue) {
+            return GetCharFromKey(KeyInterop.KeyFromVirtualKey(keyValue));
+        }
+
+        /// <summary>
+        /// Returns null or the char associated to the key pressed
+        /// </summary>
+        public static char? GetCharFromKey(Key key) {
+            char? ch = null;
+
+            int virtualKey = KeyInterop.VirtualKeyFromKey(key);
+            byte[] keyboardState = new byte[256];
+            GetKeyboardState(keyboardState);
+
+            uint scanCode = MapVirtualKey((uint) virtualKey, MapType.MAPVK_VK_TO_VSC);
+            StringBuilder stringBuilder = new StringBuilder(2);
+
+            int result = ToUnicode((uint) virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
+            switch (result) {
+                case -1:
+                    break;
+                case 0:
+                    break;
+                case 1: {
+                    ch = stringBuilder[0];
+                    break;
+                }
+                default: {
+                    ch = stringBuilder[0];
+                    break;
+                }
+            }
+            return ch;
+        }
+
+        #endregion
+
         #endregion
 
     }
+
 }

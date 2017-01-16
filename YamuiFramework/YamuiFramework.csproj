@@ -61,6 +61,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animations\Transitions\IManagedType.cs" />
@@ -85,6 +86,74 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Bookmarks.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Char.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\CommandManager.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Commands.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\DocumentMap.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\EncodingDetector.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\ExportToHTML.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\ExportToRTF.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\FastColoredTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\FileTextSource.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\FindForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\FindForm.designer.cs">
+      <DependentUpon>FindForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\GoToForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\GoToForm.designer.cs">
+      <DependentUpon>GoToForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\Hints.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Hotkeys.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.designer.cs">
+      <DependentUpon>HotkeysEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\LimitedStack.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Line.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\LinesAccessor.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\MacrosManager.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Place.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\PlatformType.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\Range.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\ReplaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\ReplaceForm.designer.cs">
+      <DependentUpon>ReplaceForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\Ruler.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\Ruler.designer.cs">
+      <DependentUpon>Ruler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\Style.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\SyntaxDescriptor.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\SyntaxHighlighter.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\TextSource.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\TypeDescriptor.cs" />
+    <Compile Include="Controls\FastColoredTextBox\Core\UnfocusablePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\VisualMarker.cs" />
+    <Compile Include="Controls\YamuiTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\FastColoredTextBox\Core\YamuiTextBox2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiArea.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -128,9 +197,6 @@
     <Compile Include="Controls\YamuiComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiDateTimePicker.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\YamuiLabel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -144,10 +210,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiProgressBar.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiProgressIndicator.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiColorRadioButton.cs">
       <SubType>Component</SubType>
@@ -161,14 +227,11 @@
     <Compile Include="Controls\YamuiTabButtons.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\YamuiButtonToggle.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiSlider.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiPage.cs">
       <SubType>UserControl</SubType>
@@ -225,103 +288,104 @@
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />
     <Compile Include="Helper\YamuiExtensions.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RColor.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RDashStyle.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RFontStyle.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RKeyEvent.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RMouseEvent.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RPoint.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RRect.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\Entities\RSize.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RAdapter.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RBrush.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RContextMenu.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RControl.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RFont.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RFontFamily.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RGraphics.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RGraphicsPath.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RImage.cs" />
-    <Compile Include="HtmlRenderer.Core\Adapters\RPen.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\CssData.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\CssDefaults.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\Border.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssBox.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssBoxFrame.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssBoxHr.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssBoxImage.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssBoxProperties.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssLayoutEngine.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssLayoutEngineTable.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssLength.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssLineBox.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssRect.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssRectImage.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssRectWord.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssSpacingBox.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\CssUnit.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\HoverBoxBlock.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Dom\HtmlTag.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\BoxClickedEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\CssBlock.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\CssBlockSelectorItem.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlGenerationStyle.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlImageLoadEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlLinkClickedEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlLinkClickedException.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlRefreshEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlRenderErrorEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlRenderErrorType.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlScrollEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\HtmlStylesheetLoadEventArgs.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Entities\LinkElementData.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\BackgroundImageDrawHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\BordersDrawHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\ContextMenuHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\FontsHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\ImageLoadHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\SelectionHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Handlers\StylesheetLoadHandler.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\HtmlContainerInt.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\HtmlRendererUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Parse\CssParser.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Parse\CssValueParser.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Parse\DomParser.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Parse\HtmlParser.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Parse\RegexParserUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\ArgChecker.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\CommonUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\CssConstants.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\CssUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\DomUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\HtmlConstants.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\HtmlUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\RenderUtils.cs" />
-    <Compile Include="HtmlRenderer.Core\Core\Utils\SubString.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\BrushAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\ContextMenuAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\ControlAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\FontAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\FontFamilyAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\GraphicsAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\GraphicsPathAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\ImageAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\PenAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Adapters\WinFormsAdapter.cs" />
-    <Compile Include="HtmlRenderer.WinForms\HtmlContainer.cs" />
-    <Compile Include="HtmlRenderer.WinForms\HtmlLabel.cs">
+    <Compile Include="Helper\YamuiScrollBar.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RColor.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RDashStyle.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RFontStyle.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RKeyEvent.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RMouseEvent.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RPoint.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RRect.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\Entities\RSize.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RAdapter.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RBrush.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RContextMenu.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RControl.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RFont.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RFontFamily.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RGraphics.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RGraphicsPath.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RImage.cs" />
+    <Compile Include="HtmlRenderer\Core\Adapters\RPen.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\CssData.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\CssDefaults.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\Border.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssBox.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssBoxFrame.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssBoxHr.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssBoxImage.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssBoxProperties.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssLayoutEngine.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssLayoutEngineTable.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssLength.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssLineBox.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssRect.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssRectImage.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssRectWord.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssSpacingBox.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\CssUnit.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\HoverBoxBlock.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Dom\HtmlTag.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\BoxClickedEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\CssBlock.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\CssBlockSelectorItem.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlGenerationStyle.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlImageLoadEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlLinkClickedEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlLinkClickedException.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlRefreshEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlRenderErrorEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlRenderErrorType.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlScrollEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\HtmlStylesheetLoadEventArgs.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Entities\LinkElementData.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\BackgroundImageDrawHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\BordersDrawHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\ContextMenuHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\FontsHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\ImageLoadHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\SelectionHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Handlers\StylesheetLoadHandler.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\HtmlContainerInt.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\HtmlRendererUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Parse\CssParser.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Parse\CssValueParser.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Parse\DomParser.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Parse\HtmlParser.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Parse\RegexParserUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\ArgChecker.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\CommonUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\CssConstants.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\CssUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\DomUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\HtmlConstants.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\HtmlUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\RenderUtils.cs" />
+    <Compile Include="HtmlRenderer\Core\Core\Utils\SubString.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\BrushAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\ContextMenuAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\ControlAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\FontAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\FontFamilyAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\GraphicsAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\GraphicsPathAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\ImageAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\PenAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Adapters\WinFormsAdapter.cs" />
+    <Compile Include="HtmlRenderer\WinForms\HtmlContainer.cs" />
+    <Compile Include="HtmlRenderer\WinForms\HtmlLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="HtmlRenderer.WinForms\HtmlPanel.cs">
+    <Compile Include="HtmlRenderer\WinForms\HtmlPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="HtmlRenderer.WinForms\HtmlRender.cs" />
-    <Compile Include="HtmlRenderer.WinForms\HtmlToolTip.cs">
+    <Compile Include="HtmlRenderer\WinForms\HtmlRender.cs" />
+    <Compile Include="HtmlRenderer\WinForms\HtmlToolTip.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="HtmlRenderer.WinForms\Utilities\ClipboardHelper.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Utilities\Utils.cs" />
-    <Compile Include="HtmlRenderer.WinForms\Utilities\Win32Utils.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Utilities\ClipboardHelper.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Utilities\Utils.cs" />
+    <Compile Include="HtmlRenderer\WinForms\Utilities\Win32Utils.cs" />
     <Compile Include="Helper\DwmApi.cs" />
     <Compile Include="Helper\WinApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -335,6 +399,21 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\FastColoredTextBox.resx">
+      <DependentUpon>FastColoredTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\FindForm.resx">
+      <DependentUpon>FindForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\GoToForm.resx">
+      <DependentUpon>GoToForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.resx">
+      <DependentUpon>HotkeysEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\ReplaceForm.resx">
+      <DependentUpon>ReplaceForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Fonts\ResourceFont.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceFont.Designer.cs</LastGenOutput>
@@ -371,8 +450,9 @@
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgWarning.png" />
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
-    <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageLoad.png" />
-    <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageError.png" />
+    <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageLoad.png" />
+    <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageError.png" />
+    <None Include="Controls\FastColoredTextBox\Core\FCTB_key.snk" />
     <None Include="Fonts\REDCIRCL.ttf" />
     <None Include="Resources\ApplicationThemes" />
   </ItemGroup>

@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("DEPLOY YOUR APPLICATION", PageNames.MassCompiler.ToString(), new DoDeployPage()),
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
-                    //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
+                    new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
                     new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General", "Compilation" })),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),

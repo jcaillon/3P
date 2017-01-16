@@ -30,10 +30,15 @@ namespace YamuiFramework.Controls {
         #region constructor
 
         public YamuiArea() {
-            SetStyle(ControlStyles.UserPaint |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
+
+            // this usercontrol should not be able to get the focus
+            SetStyle(ControlStyles.Selectable, false);
 
             // this control is only visible in design mode
             Visible = DesignMode;

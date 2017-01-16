@@ -19,6 +19,7 @@
 #endregion
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -34,9 +35,8 @@ namespace YamuiFramework.Controls {
     public class YamuiButtonChar : YamuiButton {
        
         #region Fields
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool UseWingdings { get; set; }
+
+        public IconFontNameEnum IconFontName { get; set; }
 
         [DefaultValue("ç")]
         [Category("Yamui")]
@@ -54,6 +54,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Paint Methods
+
         protected override void OnPaint(PaintEventArgs e) {
             try {
                 Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
@@ -83,12 +84,22 @@ namespace YamuiFramework.Controls {
 
                 designRect.Width += 2;
                 designRect.Height += 2;
-                TextRenderer.DrawText(e.Graphics, ButtonChar, FontManager.GetOtherFont(UseWingdings ? "Wingdings" : "Webdings", FontStyle.Regular, (float)(Height * 0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(e.Graphics, ButtonChar, FontManager.GetOtherFont(IconFontName.ToString().Replace("_", " "), FontStyle.Regular, (float)(Height * 0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             } catch {
                 // ignored
             }
         }
+
         #endregion
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public enum IconFontNameEnum {
+            Webdings,
+            Wingdings,
+            Wingdings_2,
+            Wingdings_3,
+        }
+
     }
     internal class YamuiGoBackButtonDesigner : ControlDesigner {
 

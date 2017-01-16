@@ -46,9 +46,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region constructor
         public ShortCutsPage() {
             InitializeComponent();
-
-            // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -134,6 +131,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // Activate scrollbars
             scrollPanel.ContentPanel.Height = yPos + 20;
             Height = yPos;
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -182,15 +182,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
         }
 
-        private bool OnNewShortcutPressed(Keys key, KeyModifiers modifiers) {
+        private bool OnNewShortcutPressed(KeyEventArgs e) {
             bool stopListening = true;
             var button = (YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
 
             // the user presses escape to cancel the current shortcut modification
-            if (key == Keys.Escape) {
+            if (e.KeyCode == Keys.Escape) {
                 button.Text = Config.Instance.ShortCuts[_currentItemId];
-            } else if (key != Keys.ControlKey && key != Keys.ShiftKey && key != Keys.Menu) {
-                var newSpec = (new ShortcutKey(modifiers.IsCtrl, modifiers.IsAlt, modifiers.IsShift, key)).ToString();
+            } else if (e.KeyCode != Keys.ControlKey && e.KeyCode != Keys.ShiftKey && e.KeyCode != Keys.Menu) {
+                var newSpec = (new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode)).ToString();
 
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {

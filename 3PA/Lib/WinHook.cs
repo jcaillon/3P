@@ -47,9 +47,9 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event Func<Keys, KeyModifiers, bool> KeyDown;
+        public event Func<KeyEventArgs, bool> KeyDown;
 
-        public event Func<Keys, KeyModifiers, bool> KeyDownByPass;
+        public event Func<KeyEventArgs, bool> KeyDownByPass;
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
@@ -82,14 +82,14 @@ namespace _3PA.Lib {
             if (KeyDownByPass != null) {
                 // on key down
                 if (!context.IsBitSet(31)) {
-                    bool handled = KeyDownByPass(key, GetModifiers);
+                    bool handled = KeyDownByPass(new KeyEventArgs(ToFullKey(key, GetModifiers)));
                     return handled;
                 }
             } else {
                 if (KeyDown != null && _keysToIntercept.Contains(key)) {
                     // on key down
                     if (!context.IsBitSet(31)) {
-                        bool handled = KeyDown(key, GetModifiers);
+                        bool handled = KeyDown(new KeyEventArgs(ToFullKey(key, GetModifiers)));
                         return handled;
                     }
                 }
@@ -115,6 +115,16 @@ namespace _3PA.Lib {
                     IsAlt = IsPressed(Keys.Menu)
                 };
             }
+        }
+
+        private static Keys ToFullKey(Keys rawKey, KeyModifiers modifiers) {
+            if (modifiers.IsAlt)
+                rawKey |= Keys.Alt;
+            if (modifiers.IsCtrl)
+                rawKey |= Keys.Control;
+            if (modifiers.IsShift)
+                rawKey |= Keys.Shift;
+            return rawKey;
         }
 
         #endregion

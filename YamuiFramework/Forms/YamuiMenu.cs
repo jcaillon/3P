@@ -323,6 +323,7 @@ namespace YamuiFramework.Forms {
         public new void Show(IWin32Window owner) {
             DrawContent();
             base.Show(owner);
+            Activate();
         }
 
         #endregion

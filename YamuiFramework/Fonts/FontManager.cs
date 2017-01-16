@@ -38,7 +38,8 @@ namespace YamuiFramework.Fonts {
         AutoCompletion,
         MenuMain,
         MenuSecondary,
-        WaterMark
+        WaterMark,
+        TextBox
     }
 
     public static class FontManager {
@@ -71,6 +72,8 @@ namespace YamuiFramework.Fonts {
                     return GetFont(FontStyle.Bold, 11f);
                 case FontFunction.WaterMark:
                     return GetFont(FontStyle.Italic, 12f);
+                case FontFunction.TextBox:
+                    return GetOtherFont("Consolas", FontStyle.Regular, 11f);
                 default:
                     return GetFont(FontStyle.Regular, 12f);
             }

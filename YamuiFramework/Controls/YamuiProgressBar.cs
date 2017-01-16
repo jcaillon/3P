@@ -31,7 +31,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiProgressBarDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
-    public class YamuiProgressBar : Control {
+    public class YamuiProgressBar : UserControl {
 
         #region fields
 
@@ -147,6 +147,9 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
+
+            // this usercontrol should not be able to get the focus
+            SetStyle(ControlStyles.Selectable, false);
 
             _tmrMarquee.Tick += _tmrMarquee_Tick;
 

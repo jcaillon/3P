@@ -29,7 +29,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
-    [Designer("YamuiFramework.Controls.YamuiTextBox2Designer")]
+    [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
     public sealed class YamuiTextBox : TextBox {
 
         #region Fields
@@ -84,14 +84,14 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool MultiLines {
-            get { return _multiLines; }
+        public new bool Multiline {
+            get { return _multiline; }
             set {
-                _multiLines = value;
-                WordWrap = MultiLines;
+                _multiline = value;
+                WordWrap = Multiline;
             }
         }
-        private bool _multiLines;
+        private bool _multiline;
 
         #endregion
 
@@ -102,8 +102,8 @@ namespace YamuiFramework.Controls {
             Font = FontManager.GetStandardFont();
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
-            Multiline = true;
             WordWrap = false;
+            base.Multiline = true;
             MinimumSize = new Size(20, 20);
         }
 
@@ -112,7 +112,7 @@ namespace YamuiFramework.Controls {
         #region Handle MultiLines
 
         protected override void OnTextChanged(EventArgs e) {
-            if (!MultiLines && Text.Contains("\n")) {
+            if (!Multiline && Text.Contains("\n")) {
                 Text = Text.Replace("\n", "").Replace("\r", "");
                 SelectionStart = TextLength;
             }
@@ -130,7 +130,7 @@ namespace YamuiFramework.Controls {
         protected override void WndProc(ref Message m) {
 
             // Send WM_MOUSEWHEEL messages to the parent
-            if (!MultiLines && m.Msg == (int)WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint)m.Msg, m.WParam, m.LParam);
+            if (!Multiline && m.Msg == (int)WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint)m.Msg, m.WParam, m.LParam);
             else base.WndProc(ref m);
 
 
@@ -239,7 +239,7 @@ namespace YamuiFramework.Controls {
         public bool PerformKeyDown(KeyEventArgs e) {
             OnKeyDown(e);
             if (!e.Handled && e.KeyCode == Keys.Return) {
-                if (MultiLines) {
+                if (Multiline) {
                     var initialPos = SelectionStart;
                     Text = Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < TextLength ? Text.Substring(initialPos, TextLength - initialPos) : "");
                     SelectionStart = initialPos + 2;
@@ -255,7 +255,7 @@ namespace YamuiFramework.Controls {
 
     }
 
-    internal class YamuiTextBox2Designer : ControlDesigner {
+    internal class YamuiRegularTextBox2Designer : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("Multiline");
             properties.Remove("WordWrap");

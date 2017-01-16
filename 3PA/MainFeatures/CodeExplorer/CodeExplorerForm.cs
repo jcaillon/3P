@@ -664,7 +664,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private void ClearFilter() {
             textBoxFilter.Text = "";
             FilterByText = "";
-            textBoxFilter.Invalidate();
         }
 
         public void RefreshParserAndCodeExplorer() {

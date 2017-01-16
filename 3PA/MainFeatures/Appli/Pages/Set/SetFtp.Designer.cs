@@ -138,12 +138,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_timeout
             // 
-            this.fl_timeout.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_timeout.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_timeout.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_timeout.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_timeout.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_timeout.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_timeout.Location = new System.Drawing.Point(193, 312);
             this.fl_timeout.Name = "fl_timeout";
             this.fl_timeout.Size = new System.Drawing.Size(93, 20);
@@ -206,12 +200,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.fl_remoteDir.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_remoteDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_remoteDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_remoteDir.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_remoteDir.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_remoteDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_remoteDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_remoteDir.Location = new System.Drawing.Point(193, 223);
             this.fl_remoteDir.Name = "fl_remoteDir";
             this.fl_remoteDir.Size = new System.Drawing.Size(704, 20);
@@ -233,12 +221,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_password
             // 
-            this.fl_password.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_password.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_password.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_password.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_password.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_password.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_password.Location = new System.Drawing.Point(193, 197);
             this.fl_password.Name = "fl_password";
             this.fl_password.Size = new System.Drawing.Size(266, 20);
@@ -305,12 +287,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_host
             // 
-            this.fl_host.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_host.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_host.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_host.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_host.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_host.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_host.Location = new System.Drawing.Point(193, 145);
             this.fl_host.Name = "fl_host";
             this.fl_host.Size = new System.Drawing.Size(266, 20);
@@ -319,12 +295,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_port
             // 
-            this.fl_port.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_port.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_port.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_port.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_port.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_port.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_port.Location = new System.Drawing.Point(193, 259);
             this.fl_port.Name = "fl_port";
             this.fl_port.Size = new System.Drawing.Size(57, 20);
@@ -333,12 +303,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_user
             // 
-            this.fl_user.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_user.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_user.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_user.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_user.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_user.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_user.Location = new System.Drawing.Point(193, 171);
             this.fl_user.Name = "fl_user";
             this.fl_user.Size = new System.Drawing.Size(266, 20);

@@ -83,7 +83,7 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
-
+            
             _contentPanel = new YamuiInternalPanel {
                 Location = new Point(0, 0),
                 Width = Width,

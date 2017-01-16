@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using YamuiFramework.Controls.FastColoredTextBox.Core;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
@@ -256,6 +257,11 @@ namespace YamuiFramework.Controls.YamuiList {
             var textBox = sender as TextBox;
             if (textBox != null)
                 FilterString = textBox.Text;
+            else {
+                var fctb = sender as FastColoredTextBox.Core.FastColoredTextBox;
+                if (fctb != null)
+                    FilterString = fctb.Text;
+            }
         }
 
         #endregion
