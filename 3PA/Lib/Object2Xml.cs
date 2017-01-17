@@ -201,7 +201,11 @@ namespace _3PA.Lib {
                 } else {
                     XElement elm = itemElement.Element(property.Name);
                     if (elm != null) {
-                        property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFromInvariantString(valueInAttribute ? elm.Attribute(ValueString).Value : elm.Value));
+                        var val = TypeDescriptor.GetConverter(property.FieldType).ConvertFromInvariantString(valueInAttribute ? elm.Attribute(ValueString).Value : elm.Value);
+                        if (val is string)
+                            property.SetValue(item, ((string)val).Replace("\r", "").Replace("\n", "\r\n"));
+                        else
+                            property.SetValue(item, val);
                     }
                 }
             }

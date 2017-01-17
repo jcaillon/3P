@@ -89,6 +89,7 @@ namespace YamuiFramework.Controls {
             set {
                 _multiline = value;
                 WordWrap = Multiline;
+                AcceptsReturn = Multiline;
             }
         }
         private bool _multiline;
@@ -112,10 +113,10 @@ namespace YamuiFramework.Controls {
         #region Handle MultiLines
 
         protected override void OnTextChanged(EventArgs e) {
-            if (!Multiline && Text.Contains("\n")) {
-                Text = Text.Replace("\n", "").Replace("\r", "");
-                SelectionStart = TextLength;
-            }
+            //if (!Multiline && Text.Contains("\n")) {
+            //    Text = Text.Replace("\n", "").Replace("\r", "");
+            //    SelectionStart = TextLength;
+            //}
             base.OnTextChanged(e);
         }
 

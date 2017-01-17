@@ -381,6 +381,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             flSuffix.Text = ProEnvironment.Current.Suffix;
                             flLabel.Text = ProEnvironment.Current.Label;
                             flExtraPf.Text = ProEnvironment.Current.ExtraPf;
+                            var t = ProEnvironment.Current.ExtraProPath;
                             flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                             flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
                             flDatabase.Text = Config.Instance.EnvDatabase;
