@@ -50,12 +50,18 @@ namespace _3PA.MainFeatures.Parser {
         private int _startCol;
         private int _startLine;
         private int _startPos;
-        private bool _previousTokenIsString;
 
         private int _tokenPos = -1;
 
         // we could use a List here, but this GapBuffer class is more appropriate to do insertions
         private GapBuffer<Token> _tokenList = new GapBuffer<Token>();
+
+        // specific to progress, preprocess defined var can contain a ' or " but in that case,
+        // the string ends at the end of the line no matter what. So we keep track on which line 
+        // the the last preprocessed var was
+        private int _definePreProcLastLine = -2;
+        // line of the last ~ symbol
+        private int _tildeLastLine = -2;
 
         #endregion
 
@@ -155,8 +161,6 @@ namespace _3PA.MainFeatures.Parser {
             do {
                 token = GetNextToken();
                 _tokenList.Add(token);
-
-                _previousTokenIsString = token is TokenString;
             } while (!(token is TokenEof));
         }
 
@@ -191,6 +195,13 @@ namespace _3PA.MainFeatures.Parser {
             ReadChr();
             if (eol == '\r' && PeekAtChr(0) == '\n')
                 ReadChr();
+            
+            // small exception for progress, to be able to interprete line like :
+            // &scope-define varname l'appel~\r\nest bon " 
+            // make the scope define line virtually continue on the next line
+            if (_startLine == _tildeLastLine)
+                _definePreProcLastLine++;
+
             _line++;
             _column = ColumnStartAt;
         }
@@ -223,6 +234,10 @@ namespace _3PA.MainFeatures.Parser {
                 return CreateCommentToken();
 
             switch (ch) {
+                case '~':
+                    _tildeLastLine = _startLine;
+                    return CreateSymbolToken();
+
                 case '/':
                     var nextChar = PeekAtChr(1);
                     // comment
@@ -240,6 +255,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 case '&':
                     // pre-processed directive (i.e. &define, &analyse-suspend, &message)
+                    _definePreProcLastLine = _startLine;
                     return new TokenPreProcDirective(
                         ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), 
                         _startLine, _startCol, _startPos, _pos);
@@ -283,8 +299,9 @@ namespace _3PA.MainFeatures.Parser {
                     // EOS (if followed by any space/new line char)
                     if (char.IsWhiteSpace(PeekAtChr(1)))
                         return CreateEosToken();
-                    // String descriptor
-                    if (_previousTokenIsString)
+                    // String descriptor?
+                    var count = _tokenList.Count;
+                    if (count > 0 && _tokenList[count - 1] is TokenString)
                         return CreateStringDescriptorToken();
                     // or a badly placed symbol
                     return CreateSymbolToken();
@@ -502,8 +519,24 @@ namespace _3PA.MainFeatures.Parser {
                 if (ch == Eof)
                     break;
 
+                // escape char (read anything as part of the string after that)
+                if (ch == '~') {
+                    ReadChr(); // read tilde
+                    var nextCh = PeekAtChr(0);
+                    if (nextCh == '\r' || nextCh == '\n') {
+                        ReadEol(ch);
+                    } else
+                        ReadChr();
+                    continue;
+                }
+
                 // new line
                 if (ch == '\r' || ch == '\n') {
+
+                    // a string continues at the next line... Except when it's on a &define line
+                    if (_definePreProcLastLine == _startLine)
+                        break;
+
                     ReadEol(ch);
                     continue;
                 }
@@ -513,9 +546,7 @@ namespace _3PA.MainFeatures.Parser {
                     break; // done reading
                     // keep on reading
                 }
-                // escape char (read anything as part of the string after that)
-                if (ch == '~')
-                    ReadChr();
+
                 ReadChr();
             }
             return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);

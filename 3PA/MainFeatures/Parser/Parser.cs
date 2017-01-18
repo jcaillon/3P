@@ -753,7 +753,11 @@ namespace _3PA.MainFeatures.Parser {
         /// Returns token value or token value minus starting/ending quote of the token is a string
         /// </summary>
         private string GetTokenStrippedValue(Token token) {
-            return (token is TokenString) ? token.Value.Substring(1, token.Value.Length - 2) : token.Value;
+            if (token is TokenString) {
+                var endsWithQuote = token.Value.EndsWith("\"") || token.Value.EndsWith("'");
+                return token.Value.Substring(1, token.Value.Length - (endsWithQuote ? 2 : 1));
+            }
+            return token.Value;
         }
 
         /// <summary>
