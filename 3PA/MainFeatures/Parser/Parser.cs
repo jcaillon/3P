@@ -573,6 +573,8 @@ namespace _3PA.MainFeatures.Parser {
 
             // we check if the token + posAhead will be a proprocessed variable { & x} that needs to be replaced
             var toReplaceToken = PeekAt(posAhead);
+
+            HashSet<string> replacedVar = null; // keep track of each var replaced here
             
             while (toReplaceToken is TokenPreProcVariable) {
 
@@ -588,6 +590,14 @@ namespace _3PA.MainFeatures.Parser {
                 var nameToken = PeekAt(posAhead + 1);
                 var varName = (toReplaceToken.Value == "{" ? "" : "&") + nameToken.Value;
                 List<Token> valueTokens;
+
+                // make sure to not replace the same var name in the same replacement loop, if we do that
+                // this means we will go into an infinite loop
+                if (replacedVar == null)
+                    replacedVar = new HashSet<string>();
+                if (replacedVar.Contains(varName))
+                    break;
+                replacedVar.Add(varName);
 
                 // count nb of tokens composing this |{&|name|  |}| (will 3 or more depending if there are spaces after the name)
                 count = 1;
