@@ -426,14 +426,14 @@ namespace _3PA.MainFeatures.Pro {
             var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
             // case of step 0 (compilation) we list only compilable files
-            var fileExtensionFilter = step == 0 ? Config.Instance.CompileKnownExtension : "";
+            var fileExtensionFilter = step == 0 ? Config.Instance.CompilableFilesPattern : "*";
 
             // construct the filters list
             var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
             var excludeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
 
             foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
-                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions))) {
+                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(searchPattern => Directory.EnumerateFiles(folderPath, searchPattern, searchOptions))) {
                     if (!filesToCompile.Contains(filePath) && IsFilePassingFilters(filePath, includeFiltersList, excludeFiltersList))
                         filesToCompile.Add(filePath);
                 }

@@ -45,10 +45,14 @@ namespace _3PA {
         /// Is the current file compilable in progress
         /// </summary>
         public static bool IsCurrentFileCompilable {
-            get {
-                var ext = Npp.GetCurrentFileExtension();
-                return !string.IsNullOrEmpty(ext) && Config.Instance.CompileKnownExtension.Contains(ext);
-            }
+            get { return IsFileCompilable(Npp.GetCurrentFilePath()); }
+        }
+
+        /// <summary>
+        /// Returns true if the file is compilable in progress
+        /// </summary>
+        public static bool IsFileCompilable(string fileName) {
+            return Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern);
         }
 
         /// <summary>

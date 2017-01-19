@@ -41,7 +41,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // add event handlers
-            cb_info.SelectedIndexChanged += SelectedIndexChanged;
+            cb_info.SelectedIndexChangedByUser += SelectedIndexChanged;
             bt_ok.ButtonPressed += BtOkOnButtonPressed;
             bt_ok.BackGrndImage = ImageResources.Save;
             bt_cancel.ButtonPressed += BtCancelOnButtonPressed;
@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <summary>
         /// called when the user changes the value of the combo box
         /// </summary>
-        private void SelectedIndexChanged(object sender, EventArgs e) {
+        private void SelectedIndexChanged(YamuiComboBox sender) {
             var val = cb_info.SelectedValue.ToString();
             if (val.Equals(FileTag.LastTag) || val.Equals(FileTag.DefaultTag))
                 _locFileTagObject = FileTag.GetFileTags(val, "");

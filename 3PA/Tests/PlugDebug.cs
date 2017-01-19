@@ -50,6 +50,64 @@ namespace _3PA.Tests {
     /// </summary>
     internal class PlugDebug {
 
+        #region debug
+
+        public static void ParseReferenceFile() {
+            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "Parser_in.p")));
+        }
+
+        public static void ParseCurrentFile() {
+            RunParserTests(Npp.Text);
+        }
+
+        public static void ParseAllFiles() {
+
+            // create unique temporary folder
+            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "ParseAllFiles_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+            string outNotif = "";
+            var outFile = Path.Combine(testDir, "out.txt");
+            if (!Utils.CreateDirectory(testDir))
+                return;
+
+            var watch2 = Stopwatch.StartNew();
+
+            foreach (var file in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
+                if (file.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) {
+
+                    string outStr = file + " >>> ";
+                    
+                    var watch = Stopwatch.StartNew();
+
+                    Lexer lexer = new Lexer(Utils.ReadAllText(file));
+                    outStr += "Lexer (" + watch.ElapsedMilliseconds + " ms), ";
+
+                    Parser parser = new Parser(lexer, "", null, null, true);
+                    outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
+
+                    if (parser.ParserErrors != null && parser.ParserErrors.Count > 0)
+                        outNotif += file.ToHtmlLink() + "<br>";
+
+                    var parserVisitor = new ParserVisitor(true);
+                    parser.Accept(parserVisitor);
+                    outStr += "Visitor (" + watch.ElapsedMilliseconds + " ms)\r\n";
+
+                    watch.Stop();
+
+                    Utils.FileAppendAllText(outFile, outStr);
+                }
+            }
+
+            watch2.Stop();
+            
+            Utils.FileAppendAllText(outFile, "\r\n\r\nTotal time : " + watch2.ElapsedMilliseconds);
+
+            UserCommunication.Notify(outNotif + "<br>Done :<br>" + outFile.ToHtmlLink(), 0);
+
+        }
+
+        #endregion
+
+
         #region tests and dev
 
         public const int MAX_PATH = 260;
@@ -243,8 +301,6 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest2() {
-            RunParserTests(Npp.Text);
-
             Task.Factory.StartNew(() => {
                 MeasureIt(() => {
                     var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
@@ -300,7 +356,7 @@ namespace _3PA.Tests {
         public static void RunParserTests(string content) {
 
             // create unique temporary folder
-            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "RunParserTests_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
 
             var perfFile = Path.Combine(testDir, "perfs.txt");
             if (!Utils.CreateDirectory(testDir))

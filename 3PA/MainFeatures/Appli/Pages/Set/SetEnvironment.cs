@@ -39,8 +39,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private bool _unsafeDelete;
 
-        private bool _switchingMode;
-
         #endregion
 
         #region constructor
@@ -164,9 +162,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             tgCompLocally.ButtonPressed += TgCompLocallyOnCheckedChanged;
             tgCompWithLst.ButtonPressed += TgCompWithLstOnButtonPressed;
 
-            cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
-            cbSuffix.SelectedIndexChanged += cbSuffix_SelectedIndexChanged;
-            cbDatabase.SelectedIndexChanged += cbDatabase_SelectedIndexChanged;
+            cbName.SelectedIndexChangedByUser += cbName_SelectedIndexChanged;
+            cbSuffix.SelectedIndexChangedByUser += cbSuffix_SelectedIndexChanged;
+            cbDatabase.SelectedIndexChangedByUser += cbDatabase_SelectedIndexChanged;
 
             _currentMode = ViewMode.Edit;
             ToggleMode(ViewMode.Select);
@@ -262,160 +260,152 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void ToggleMode(ViewMode mode) {
             if (IsHandleCreated) {
                 BeginInvoke((Action) delegate {
-                    _switchingMode = true;
-                    try {
+                    // mode
+                    var isAddOrEdit = (mode == ViewMode.Add || mode == ViewMode.Copy || mode == ViewMode.Edit);
+                    var isDbAddOrEdit = (mode == ViewMode.DbAdd || mode == ViewMode.DbEdit);
+                    var isSelect = (mode == ViewMode.Select);
 
-                        // mode
-                        var isAddOrEdit = (mode == ViewMode.Add || mode == ViewMode.Copy || mode == ViewMode.Edit);
-                        var isDbAddOrEdit = (mode == ViewMode.DbAdd || mode == ViewMode.DbEdit);
-                        var isSelect = (mode == ViewMode.Select);
+                    // selection
+                    flName.Visible = flSuffix.Visible = flLabel.Visible = isAddOrEdit;
+                    cbName.Visible = cbSuffix.Visible = !isAddOrEdit;
+                    cbName.Enabled = cbSuffix.Enabled = !isAddOrEdit && !isDbAddOrEdit;
+                    txLabel.Text = ProEnvironment.Current.Label;
 
-                        // selection
-                        flName.Visible = flSuffix.Visible = flLabel.Visible = isAddOrEdit;
-                        cbName.Visible = cbSuffix.Visible = !isAddOrEdit;
-                        cbName.Enabled = cbSuffix.Enabled = !isAddOrEdit && !isDbAddOrEdit;
-                        txLabel.Text = ProEnvironment.Current.Label;
+                    // Fill combo boxes
+                    if (isSelect) {
+                        var envList = ProEnvironment.GetList;
+                        // Fill combo box appli
+                        var appliList = envList.Select(environnement => environnement.Name).Distinct().ToList();
+                        if (appliList.Count > 0) {
+                            cbName.DataSource = appliList;
+                            var selectedIdx = appliList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Name));
+                            cbName.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
 
-                        // Fill combo boxes
-                        if (isSelect) {
-                            var envList = ProEnvironment.GetList;
-                            // Fill combo box appli
-                            var appliList = envList.Select(environnement => environnement.Name).Distinct().ToList();
-                            if (appliList.Count > 0) {
-                                cbName.DataSource = appliList;
-                                var selectedIdx = appliList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Name));
-                                cbName.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                            // Combo box env letter
+                            var envLetterList = envList.Where(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name)).Select(environnement => environnement.Suffix).ToList();
 
-                                // Combo box env letter
-                                var envLetterList = envList.Where(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name)).Select(environnement => environnement.Suffix).ToList();
+                            // empty database cb
+                            cbDatabase.DataSource = new List<string>();
+                            if (envLetterList.Count > 0) {
 
-                                // empty database cb
-                                cbDatabase.DataSource = new List<string>();
-                                if (envLetterList.Count > 0) {
-
-                                    // hide the combo if there is only one item
-                                    if (envLetterList.Count == 1) {
-                                        cbSuffix.Hide();
-                                    } else {
-                                        cbSuffix.Show();
-                                        cbSuffix.DataSource = envLetterList;
-                                        selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Suffix));
-                                        cbSuffix.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
-                                    }
-
-                                    // Combo box database
-                                    var dic = envList.FirstOrDefault(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name) && environnement.Suffix.EqualsCi(ProEnvironment.Current.Suffix));
-                                    if (dic != null) {
-                                        var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
-                                        if (databaseList.Count > 0) {
-                                            cbDatabase.DataSource = databaseList;
-                                            selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvDatabase));
-                                            cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
-                                        }
-                                    }
-                                } else {
+                                // hide the combo if there is only one item
+                                if (envLetterList.Count == 1) {
                                     cbSuffix.Hide();
+                                } else {
+                                    cbSuffix.Show();
+                                    cbSuffix.DataSource = envLetterList;
+                                    selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Suffix));
+                                    cbSuffix.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                                }
+
+                                // Combo box database
+                                var dic = envList.FirstOrDefault(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name) && environnement.Suffix.EqualsCi(ProEnvironment.Current.Suffix));
+                                if (dic != null) {
+                                    var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
+                                    if (databaseList.Count > 0) {
+                                        cbDatabase.DataSource = databaseList;
+                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvDatabase));
+                                        cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                                    }
                                 }
                             } else {
-                                // the user needs to add a new one
-                                btAdd.UseCustomBackColor = true;
-                                btAdd.BackColor = ThemeManager.Current.AccentColor;
+                                cbSuffix.Hide();
                             }
-                        }
-
-                        // handle pf dictionnary
-                        flDatabase.Visible = isDbAddOrEdit;
-                        cbDatabase.Visible = !flDatabase.Visible;
-
-                        // entering or leaving DB add/edit mode
-                        if (isDbAddOrEdit || _currentMode == ViewMode.DbAdd || _currentMode == ViewMode.DbEdit) {
-                            flDatabase.Enabled = textbox1.Enabled = isDbAddOrEdit;
-                            areaEnv.SetPropertyOnArea("Visible", !isDbAddOrEdit);
-                            areaDb.SetPropertyOnArea("Visible", !isDbAddOrEdit);
-                            areaLeftButtons.SetPropertyOnArea("Enabled", isDbAddOrEdit);
-                        }
-
-                        // entering or leaving add/edit mode
-                        else if (isAddOrEdit || _currentMode == ViewMode.Add || _currentMode == ViewMode.Copy || _currentMode == ViewMode.Edit) {
-                            EnableAllTextBoxes(isAddOrEdit);
-                            areaPf.SetPropertyOnArea("Visible", !isAddOrEdit);
-                            areaDb.SetPropertyOnArea("Visible", !isAddOrEdit);
-                            areaLeftButtons.SetPropertyOnArea("Enabled", isAddOrEdit);
-                        }
-
-                        // update the download database button
-                        UpdateDownloadButton();
-
-                        // buttons to handle pf files
-                        btDbAdd.Visible = btDbEdit.Visible = btDbDelete.Visible = isSelect;
-                        btDbSave.Visible = btDbCancel.Visible = isDbAddOrEdit;
-                        btDbDelete.Enabled = ProEnvironment.Current.DbConnectionInfo.Count >= 1;
-
-                        // buttons modify/new/duplicate/delete
-                        btEdit.Visible = btAdd.Visible = btDelete.Visible = btCopy.Visible = isSelect;
-                        btSave.Visible = btCancel.Visible = isAddOrEdit;
-                        btDelete.Enabled = ProEnvironment.GetList.Count > 1;
-
-                        // Compilation toggle
-                        tgCompWithLst.Enabled = tgCompLocally.Enabled = isSelect;
-
-                        if (mode == ViewMode.Add) {
-                            // reset fields when adding a new env
-                            foreach (var control in scrollPanel.ContentPanel.Controls) {
-                                if (control is YamuiTextBox)
-                                    ((YamuiTextBox) control).Text = string.Empty;
-                            }
-                            cbDatabase.DataSource = new List<string>();
-                            var defaultEnv = new ProEnvironment.ProEnvironmentObject();
-                            tgCompLocally.Checked = defaultEnv.CompileLocally;
-                            tgCompWithLst.Checked = defaultEnv.CompileWithListing;
-
-                        } else if (mode == ViewMode.DbAdd) {
-                            // reset fields when adding a new pf
-                            flDatabase.Text = string.Empty;
-                            textbox1.Text = string.Empty;
-
                         } else {
-                            // fill details
-                            flName.Text = ProEnvironment.Current.Name;
-                            flSuffix.Text = ProEnvironment.Current.Suffix;
-                            flLabel.Text = ProEnvironment.Current.Label;
-                            flExtraPf.Text = ProEnvironment.Current.ExtraPf;
-                            var t = ProEnvironment.Current.ExtraProPath;
-                            flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
-                            flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
-                            flDatabase.Text = Config.Instance.EnvDatabase;
-                            textbox1.Text = ProEnvironment.Current.GetPfPath();
-                            textbox2.Text = ProEnvironment.Current.IniPath;
-                            textbox3.Text = ProEnvironment.Current.BaseLocalPath;
-                            textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
-                            textbox5.Text = ProEnvironment.Current.ProwinPath;
-                            textbox6.Text = ProEnvironment.Current.LogFilePath;
-
-                            tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
-                            tgCompWithLst.Checked = ProEnvironment.Current.CompileWithListing;
+                            // the user needs to add a new one
+                            btAdd.UseCustomBackColor = true;
+                            btAdd.BackColor = ThemeManager.Current.AccentColor;
                         }
-
-                        // blink when changing mode
-                        if (mode != _currentMode && mode != ViewMode.Select) {
-                            if (isAddOrEdit) {
-                                BlinkButton(btSave, ThemeManager.Current.AccentColor);
-                                BlinkButton(btCancel, ThemeManager.Current.AccentColor);
-                                ActiveControl = btSave;
-                            } else {
-                                BlinkButton(btDbSave, ThemeManager.Current.AccentColor);
-                                BlinkButton(btDbCancel, ThemeManager.Current.AccentColor);
-                                ActiveControl = btDbSave;
-                            }
-                        } else if (mode != _currentMode && mode == ViewMode.Select)
-                            ActiveControl = _currentMode == ViewMode.Edit ? btEdit : btDbEdit;
-
-                        // save current mode
-                        _currentMode = mode;
-
-                    } finally {
-                        _switchingMode = false;
                     }
+
+                    // handle pf dictionnary
+                    flDatabase.Visible = isDbAddOrEdit;
+                    cbDatabase.Visible = !flDatabase.Visible;
+
+                    // entering or leaving DB add/edit mode
+                    if (isDbAddOrEdit || _currentMode == ViewMode.DbAdd || _currentMode == ViewMode.DbEdit) {
+                        flDatabase.Enabled = textbox1.Enabled = isDbAddOrEdit;
+                        areaEnv.SetPropertyOnArea("Visible", !isDbAddOrEdit);
+                        areaDb.SetPropertyOnArea("Visible", !isDbAddOrEdit);
+                        areaLeftButtons.SetPropertyOnArea("Enabled", isDbAddOrEdit);
+                    }
+
+                    // entering or leaving add/edit mode
+                    else if (isAddOrEdit || _currentMode == ViewMode.Add || _currentMode == ViewMode.Copy || _currentMode == ViewMode.Edit) {
+                        EnableAllTextBoxes(isAddOrEdit);
+                        areaPf.SetPropertyOnArea("Visible", !isAddOrEdit);
+                        areaDb.SetPropertyOnArea("Visible", !isAddOrEdit);
+                        areaLeftButtons.SetPropertyOnArea("Enabled", isAddOrEdit);
+                    }
+
+                    // update the download database button
+                    UpdateDownloadButton();
+
+                    // buttons to handle pf files
+                    btDbAdd.Visible = btDbEdit.Visible = btDbDelete.Visible = isSelect;
+                    btDbSave.Visible = btDbCancel.Visible = isDbAddOrEdit;
+                    btDbDelete.Enabled = ProEnvironment.Current.DbConnectionInfo.Count >= 1;
+
+                    // buttons modify/new/duplicate/delete
+                    btEdit.Visible = btAdd.Visible = btDelete.Visible = btCopy.Visible = isSelect;
+                    btSave.Visible = btCancel.Visible = isAddOrEdit;
+                    btDelete.Enabled = ProEnvironment.GetList.Count > 1;
+
+                    // Compilation toggle
+                    tgCompWithLst.Enabled = tgCompLocally.Enabled = isSelect;
+
+                    if (mode == ViewMode.Add) {
+                        // reset fields when adding a new env
+                        foreach (var control in scrollPanel.ContentPanel.Controls) {
+                            if (control is YamuiTextBox)
+                                ((YamuiTextBox) control).Text = string.Empty;
+                        }
+                        cbDatabase.DataSource = new List<string>();
+                        var defaultEnv = new ProEnvironment.ProEnvironmentObject();
+                        tgCompLocally.Checked = defaultEnv.CompileLocally;
+                        tgCompWithLst.Checked = defaultEnv.CompileWithListing;
+
+                    } else if (mode == ViewMode.DbAdd) {
+                        // reset fields when adding a new pf
+                        flDatabase.Text = string.Empty;
+                        textbox1.Text = string.Empty;
+
+                    } else {
+                        // fill details
+                        flName.Text = ProEnvironment.Current.Name;
+                        flSuffix.Text = ProEnvironment.Current.Suffix;
+                        flLabel.Text = ProEnvironment.Current.Label;
+                        flExtraPf.Text = ProEnvironment.Current.ExtraPf;
+                        flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
+                        flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
+                        flDatabase.Text = Config.Instance.EnvDatabase;
+                        textbox1.Text = ProEnvironment.Current.GetPfPath();
+                        textbox2.Text = ProEnvironment.Current.IniPath;
+                        textbox3.Text = ProEnvironment.Current.BaseLocalPath;
+                        textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
+                        textbox5.Text = ProEnvironment.Current.ProwinPath;
+                        textbox6.Text = ProEnvironment.Current.LogFilePath;
+
+                        tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
+                        tgCompWithLst.Checked = ProEnvironment.Current.CompileWithListing;
+                    }
+
+                    // blink when changing mode
+                    if (mode != _currentMode && mode != ViewMode.Select) {
+                        if (isAddOrEdit) {
+                            BlinkButton(btSave, ThemeManager.Current.AccentColor);
+                            BlinkButton(btCancel, ThemeManager.Current.AccentColor);
+                            ActiveControl = btSave;
+                        } else {
+                            BlinkButton(btDbSave, ThemeManager.Current.AccentColor);
+                            BlinkButton(btDbCancel, ThemeManager.Current.AccentColor);
+                            ActiveControl = btDbSave;
+                        }
+                    } else if (mode != _currentMode && mode == ViewMode.Select)
+                        ActiveControl = _currentMode == ViewMode.Edit ? btEdit : btDbEdit;
+
+                    // save current mode
+                    _currentMode = mode;
                 });
             }
         }
@@ -541,9 +531,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// when changing appli
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbName_SelectedIndexChanged(object sender, EventArgs e) {
-            if (_switchingMode || Config.Instance.EnvName.Equals(cbName.SelectedItem.ToString()))
+        private void cbName_SelectedIndexChanged(YamuiComboBox sender) {
+            if (Config.Instance.EnvName.Equals(cbName.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(cbName.SelectedItem.ToString(), null, null);
             ToggleMode(ViewMode.Select);
@@ -553,9 +542,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// when changing env letter
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbSuffix_SelectedIndexChanged(object sender, EventArgs e) {
-            if (_switchingMode || Config.Instance.EnvSuffix.Equals(cbSuffix.SelectedItem.ToString()))
+        private void cbSuffix_SelectedIndexChanged(YamuiComboBox sender) {
+            if (Config.Instance.EnvSuffix.Equals(cbSuffix.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, cbSuffix.SelectedItem.ToString(), null);
             ToggleMode(ViewMode.Select);
@@ -565,9 +553,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// when changing database
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbDatabase_SelectedIndexChanged(object sender, EventArgs e) {
-            if (_switchingMode || Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
+        private void cbDatabase_SelectedIndexChanged(YamuiComboBox sender) {
+            if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
             textbox1.Text = ProEnvironment.Current.GetPfPath();

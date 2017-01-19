@@ -63,7 +63,7 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string UserName = GetTrigramFromPa();
 
-            [Display(Name = "Progress 4GL files patterns",
+            [Display(Name = "Progress 4GL file patterns",
                 Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
@@ -119,11 +119,11 @@ namespace _3PA.MainFeatures {
 
             #region COMPILATION
 
-            [Display(Name = "Compilable files extension list",
-                Description = "A comma separated list of progress file extensions that can be compiled : <br>It is used to check if you can compile / check syntax / execute the current file",
+            [Display(Name = "Compilable file patterns",
+                Description = "A comma separated list of patterns that identify a compilable Progress file<br>It is used to check if you can compile / check syntax / execute the current file<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-            public string CompileKnownExtension = ".p,.w,.t,.cls";
+            public string CompilableFilesPattern = "*.p,*.w,*.t,*.cls";
 
             [Display(Name = "Always use a temp directory to compile",
                 Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",

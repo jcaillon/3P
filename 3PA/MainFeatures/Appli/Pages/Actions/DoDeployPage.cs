@@ -195,7 +195,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // cb
             tooltip.SetToolTip(cbName, "Browse and select the available profiles, each profile hold deployment settings");
-            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
+            cbName.SelectedIndexChangedByUser += CbNameOnSelectedIndexChanged;
 
             // modify rules
             tooltip.SetToolTip(btRules, "Click to modify the rules");
@@ -498,7 +498,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 } else {
                     if (filesToCompile.Count == 0) {
-                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompileKnownExtension, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
+                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompilableFilesPattern, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
                     }
 
                     // nothing started
@@ -660,7 +660,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         }
 
-        private void CbNameOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
+        private void CbNameOnSelectedIndexChanged(YamuiComboBox sender) {
             DeployProfile.Current = DeployProfile.List[cbName.SelectedIndex];
             Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
             SetFieldsFromData();
@@ -846,13 +846,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void UpdateCombo() {
-            cbName.SelectedIndexChanged -= CbNameOnSelectedIndexChanged;
             cbName.DataSource = DeployProfile.List.Select(profile => profile.Name).ToList();
             if (DeployProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
                 cbName.SelectedText = Config.Instance.CurrentDeployProfile;
             else
                 cbName.SelectedIndex = 0;
-            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
         }
 
         private void ResetFields() {
