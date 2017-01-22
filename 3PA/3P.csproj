@@ -182,6 +182,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.Designer.cs">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionFilterClass.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionSortingClass.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -261,8 +266,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionItem.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
@@ -314,19 +319,13 @@
     <Compile Include="Lib\LibLoader.cs" />
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\AutoComplete.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.Designer.cs">
-      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletion.cs" />
     <Compile Include="MainFeatures\FilteredLists\FilteredItemTextRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\Keywords.cs" />
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
@@ -399,10 +398,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetEnvironment.resx">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
-      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>

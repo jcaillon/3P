@@ -37,7 +37,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiButton4 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton3 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
-            this.flFilter1 = new YamuiTextBox2();
+            this.flFilter1 = new YamuiTextBox();
             this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
             this.YamuiFilteredList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredList();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
@@ -83,7 +83,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiFilteredTypeTreeList1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiFilteredTypeTreeList1.EmptyListString = "Too bad!";
-            this.yamuiFilteredTypeTreeList1.KeyPressed = null;
             this.yamuiFilteredTypeTreeList1.Location = new System.Drawing.Point(385, 20);
             this.yamuiFilteredTypeTreeList1.Name = "yamuiFilteredTypeTreeList1";
             this.yamuiFilteredTypeTreeList1.ScrollWidth = 10;
@@ -94,7 +93,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiScrollList1
             // 
             this.yamuiScrollList1.EmptyListString = "Empty list!";
-            this.yamuiScrollList1.KeyPressed = null;
             this.yamuiScrollList1.Location = new System.Drawing.Point(29, 257);
             this.yamuiScrollList1.Name = "yamuiScrollList1";
             this.yamuiScrollList1.RowHeight = 18;
@@ -109,7 +107,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiFilteredTypeList1.EmptyListString = "Empty list!";
-            this.yamuiFilteredTypeList1.KeyPressed = null;
             this.yamuiFilteredTypeList1.Location = new System.Drawing.Point(385, 257);
             this.yamuiFilteredTypeList1.Name = "yamuiFilteredTypeList1";
             this.yamuiFilteredTypeList1.ScrollWidth = 10;
@@ -215,7 +212,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // YamuiFilteredList1
             // 
             this.YamuiFilteredList1.EmptyListString = "Empty list!";
-            this.YamuiFilteredList1.KeyPressed = null;
             this.YamuiFilteredList1.Location = new System.Drawing.Point(213, 257);
             this.YamuiFilteredList1.Name = "YamuiFilteredList1";
             this.YamuiFilteredList1.ScrollWidth = 10;
@@ -287,7 +283,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel1;
         private YamuiFilteredList YamuiFilteredList1;
-        private YamuiTextBox2 flFilter1;
+        private YamuiTextBox flFilter1;
         private YamuiButton yamuiButton1;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip1;
         private YamuiButton yamuiButton2;

@@ -21,8 +21,8 @@ namespace YamuiFramework.Controls {
 
         #region private
 
-        private YamuiScrollBar _verticScrollBar;
-        private YamuiScrollBar _horizScrollBar;
+        private YamuiVirtualScrollBar _verticScrollBar;
+        private YamuiVirtualScrollBar _horizScrollBar;
         private FastColoredTextBox.Core.FastColoredTextBox _fctb;
         private int _scrollBarWidth = 10;
         private bool _multiLine;
@@ -206,14 +206,14 @@ namespace YamuiFramework.Controls {
             Controls.Add(_fctb);
 
             // vertical scroll
-            _verticScrollBar = new YamuiScrollBar {
+            _verticScrollBar = new YamuiVirtualScrollBar {
                 Orientation = ScrollOrientation.VerticalScroll
             };
             _verticScrollBar.Scroll += OnScrollBarUpdate;
             _verticScrollBar.OnInvalidate += OnScrollBarInvalidate;
 
             // horizontal scroll
-            _horizScrollBar = new YamuiScrollBar {
+            _horizScrollBar = new YamuiVirtualScrollBar {
                 Orientation = ScrollOrientation.HorizontalScroll
             };
             _horizScrollBar.Scroll += OnScrollBarUpdate;

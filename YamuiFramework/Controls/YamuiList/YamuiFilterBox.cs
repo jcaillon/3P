@@ -124,6 +124,10 @@ namespace YamuiFramework.Controls.YamuiList {
             set {
                 this.SafeInvoke(thisBox => {
                     _filterBox.Text = value;
+                    if (!string.IsNullOrEmpty(value)) {
+                        _filterBox.SelectionStart = value.Length;
+                        _filterBox.SelectionLength = 0;
+                    }
                     ActiveControl = _filterBox;
                 });
             }
@@ -259,6 +263,7 @@ namespace YamuiFramework.Controls.YamuiList {
             xRightPos -= 5;
 
             // textbox
+            _filterBox.SelectAllTextOnActivate = false;
             _filterBox.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left;
             _filterBox.Location = new Point(xLeftPos, Padding.Top);
             _filterBox.Size = new Size(xRightPos - xLeftPos, thisHeight);

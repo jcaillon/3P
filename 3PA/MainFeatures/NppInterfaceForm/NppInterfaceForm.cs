@@ -57,7 +57,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public double FocusedOpacity;
 
         private bool _allowInitialdisplay;
-        private bool _focusAllowed;
 
         /// <summary>
         /// Use this to know if the form is currently activated
@@ -66,13 +65,22 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #endregion
 
-        #region Don't show in ATL+TAB
+        #region ShowWithoutActivation & Don't show in ATL+TAB
+
+        /// <summary>
+        /// This indicates that the form should not take focus when shown
+        /// However, if you specify TopMost = true, then this doesn't work anymore, hence why we
+        /// specify it through the CreateParams
+        /// </summary>
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
 
         protected override CreateParams CreateParams {
             get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
-                return Params;
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return createParams;
             }
         }
 
@@ -96,7 +104,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             Opacity = 0;
             Visible = false;
             Tag = false;
-            Closing += OnClosing;
 
             Plug.OnNppWindowsMove += PlugOnOnNppWindowsMove;
         }
@@ -159,36 +166,23 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <summary>
         /// instead of closing, cloak this form (invisible)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="cancelEventArgs"></param>
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            if ((bool) Tag) return;
-            cancelEventArgs.Cancel = true;
+        protected override void OnClosing(CancelEventArgs e) {
+            if ((bool)Tag) return;
+            e.Cancel = true;
             Cloack();
+            base.OnClosing(e);
         }
-
-
+        
         protected override void OnActivated(EventArgs e) {
-            // Activate the window that previously had focus
-            if (!_focusAllowed)
-                if (GiveFocusBackToScintilla)
-                    Npp.GrabFocus();
-                else
-                    Win32Api.SetForegroundWindow(CurrentForegroundWindow);
-            else {
+
                 IsActivated = true;
                 Opacity = FocusedOpacity;
-            }
+            
             base.OnActivated(e);
         }
 
         private void PlugOnOnNppWindowsMove() {
             Close();
-        }
-
-        protected override void OnShown(EventArgs e) {
-            _focusAllowed = true;
-            base.OnShown(e);
         }
 
         /// <summary>

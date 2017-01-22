@@ -30,7 +30,7 @@ using _3PA.Data;
 using _3PA.Images;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 
@@ -123,7 +123,7 @@ namespace _3PA {
             Config.Instance.AccentColor = theme.AccentColor;
             
             // force the autocomplete to redraw
-            AutoComplete.ForceClose();
+            AutoCompletion.ForceClose();
             CodeExplorer.ApplyColorSettings();
             FileExplorer.ApplyColorSettings();
             Application.DoEvents();

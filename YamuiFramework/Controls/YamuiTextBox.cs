@@ -32,6 +32,13 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
     public sealed class YamuiTextBox : TextBox {
 
+        #region private
+
+        private bool _selectAllTextOnActivate = true;
+        private bool _appliedPadding;
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -94,6 +101,15 @@ namespace YamuiFramework.Controls {
         }
         private bool _multiline;
 
+        /// <summary>
+        /// If true, when the textbox is activated, the whole text is selected
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SelectAllTextOnActivate {
+            get { return _selectAllTextOnActivate; }
+            set { _selectAllTextOnActivate = value; }
+        }
+
         #endregion
 
         #region Constructor
@@ -109,25 +125,11 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
-        #region Handle MultiLines
-
-        protected override void OnTextChanged(EventArgs e) {
-            //if (!Multiline && Text.Contains("\n")) {
-            //    Text = Text.Replace("\n", "").Replace("\r", "");
-            //    SelectionStart = TextLength;
-            //}
-            base.OnTextChanged(e);
-        }
-
-        #endregion
-
+        
         #region Custom paint
 
         private const int OcmCommand = 0x2111;
-        private const int WmPaint = 15;
-        private bool _appliedPadding;
-
+ 
         protected override void WndProc(ref Message m) {
 
             // Send WM_MOUSEWHEEL messages to the parent
@@ -135,7 +137,7 @@ namespace YamuiFramework.Controls {
             else base.WndProc(ref m);
 
 
-            if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {
+            if ((m.Msg == (int)WinApi.Messages.WM_PAINT) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
                     ApplyInternalPadding();
@@ -192,7 +194,8 @@ namespace YamuiFramework.Controls {
 
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
-            SelectAll();
+            if (SelectAllTextOnActivate)
+                SelectAll();
             Invalidate();
 
             base.OnEnter(e);
@@ -219,13 +222,6 @@ namespace YamuiFramework.Controls {
             _isHovered = false;
             Invalidate();
             base.OnMouseLeave(e);
-        }
-
-        protected override void OnClick(EventArgs e) {
-            if (!_isFocused) {
-                SelectAll();
-            }
-            base.OnClick(e);
         }
 
         #endregion

@@ -24,7 +24,7 @@ using System.Linq;
 using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProMisc {
@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Pro {
 
 
             // match a word in the autocompletion? go to definition
-            var data = AutoComplete.FindInCompletionData(curWord, position, true);
+            var data = AutoCompletion.FindInCompletionData(curWord, position, true);
             if (data != null && data.Count > 0) {
 
                 var nbFound = data.Count(data2 => data2.FromParser);

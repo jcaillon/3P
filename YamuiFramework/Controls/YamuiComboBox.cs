@@ -367,10 +367,9 @@ namespace YamuiFramework.Controls {
 
             // pressing a letter opens the popup in filter mode
             try {
-                KeysConverter kc = new KeysConverter();
-                string keyChar = kc.ConvertToString(e.KeyCode);
-                if (keyChar != null && keyChar.Length == 1) {
-                    DisplayPopup(keyChar);
+                var c = WinApi.GetCharFromKey(e.KeyValue);
+                if (c != null && char.IsLetterOrDigit((char)c)) {
+                    DisplayPopup(c.ToString());
                     e.Handled = true;
                 }
             } catch (Exception) {

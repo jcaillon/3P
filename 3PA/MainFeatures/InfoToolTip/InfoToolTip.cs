@@ -26,7 +26,7 @@ using System.Threading;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // sets the tooltip content
-            var data = AutoComplete.FindInCompletionData(Npp.GetAblWordAtPosition(position), position);
+            var data = AutoCompletion.FindInCompletionData(Npp.GetAblWordAtPosition(position), position);
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
@@ -392,7 +392,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         string keyword = data.DisplayText;
                         if (data.KeywordType == KeywordType.Abbreviation) {
                             keyword = Keywords.GetFullKeyword(keyword);
-                            var associatedKeyword = AutoComplete.FindInCompletionData(keyword, 0);
+                            var associatedKeyword = AutoCompletion.FindInCompletionData(keyword, 0);
                             if (associatedKeyword != null && associatedKeyword.Count > 0)
                                 data = associatedKeyword.First();
                         }

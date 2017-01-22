@@ -126,7 +126,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 };
                 button.Activated = _parentFilteredList.IsTypeActivated(type);
-                _tooltip.SetToolTip(button, (parentList.TypeText.ContainsKey(type) && parentList.TypeText[type] != null ? parentList.TypeText + "<br>" : "") + YamuiFilteredTypeList.TypeButtonTooltipText);
+                _tooltip.SetToolTip(button, (parentList.TypeText.ContainsKey(type) && parentList.TypeText[type] != null ? parentList.TypeText[type] + "<br>" : "") + YamuiFilteredTypeList.TypeButtonTooltipText);
                 
                 if (!_panel.Controls.Contains(button))
                     _panel.Controls.Add(button);

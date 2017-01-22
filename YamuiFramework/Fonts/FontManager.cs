@@ -186,6 +186,7 @@ namespace YamuiFramework.Fonts {
                     byte[] fontdata;
                     switch (familyName) {
                         case @"REDCIRCL":
+                            // .ttf file in embedded resource
                             fontdata = ResourceFont.REDCIRCL;
                             break;
                         default:

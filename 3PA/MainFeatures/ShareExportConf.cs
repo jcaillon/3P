@@ -25,7 +25,7 @@ using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
@@ -336,7 +336,7 @@ namespace _3PA.MainFeatures {
         private static void ImportKeywords(ConfLine conf) {
             Keywords.Import();
             // Update autocompletion
-            AutoComplete.RefreshStaticItems();
+            AutoCompletion.RefreshStaticItems();
             ParserHandler.ParseCurrentDocument();
         }
 

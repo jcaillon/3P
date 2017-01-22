@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Pro;
 
@@ -429,7 +429,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
                 Flag = AddExternalFlag((pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0)),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -458,7 +458,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
                 Flag = AddExternalFlag((pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0)),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -492,7 +492,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
                 Flag = AddExternalFlag((pars.IsExternal ? ParseFlag.ExternalProc : 0) | (pars.IsPrivate ? ParseFlag.Private : 0)),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -509,7 +509,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
                 Flag = AddExternalFlag(pars.Type == ParsedPreProcVariableType.Global ? ParseFlag.FileScope : ParseFlag.LocalScope),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -542,7 +542,7 @@ namespace _3PA.MainFeatures.Parser {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
                 Flag = 0,
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -655,7 +655,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = type,
                 SubString = subString,
                 Flag = AddExternalFlag(SetFlags(flag, pars.LcFlagString)),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -725,7 +725,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.TempTable,
                 SubString = subStr,
                 Flag = AddExternalFlag(SetFlags(0, pars.LcFlagString)),
-                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });

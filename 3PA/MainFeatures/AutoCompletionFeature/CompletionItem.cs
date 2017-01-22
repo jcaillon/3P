@@ -17,16 +17,20 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
-using _3PA.MainFeatures.FilteredLists;
+using System.Collections.Generic;
+using System.Drawing;
+using YamuiFramework.Controls.YamuiList;
+using _3PA.Images;
 using _3PA.MainFeatures.Parser;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.AutoCompletionFeature {
 
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
-    internal class CompletionItem : FilteredItem {
+    internal class CompletionItem : FilteredTypeListItem {
 
         /// <summary>
         /// Type of completion
@@ -79,6 +83,72 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
                 if (flag == 0 || !Flag.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
+            }
+        }
+
+
+        /// <summary>
+        /// The piece of text displayed in the list
+        /// </summary>
+        public override string DisplayText { get; set; }
+
+        /// <summary>
+        /// return the image to display for this item
+        /// If null, the image corresponding to ItemTypeImage will be used instead
+        /// </summary>
+        public override Image ItemImage { get { return null; } }
+
+        /// <summary>
+        /// return this item type (a unique int for each item type)
+        /// if the value is strictly inferior to 0, the button for this type will not appear
+        /// on the bottom of list
+        /// </summary>
+        public override int ItemType { get { return (int) Type; } }
+
+        /// <summary>
+        /// return the image that will be used to identify this item
+        /// type, it will be used for the bottom buttons of the list
+        /// All items of a given type should return the same image! The image used for the 
+        /// bottom buttons will be that of the first item found for the given type
+        /// </summary>
+        public override Image ItemTypeImage {
+            get {
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(((CompletionType)ItemType).ToString());
+                return tryImg ?? ImageResources.Error;
+            }
+        }
+
+        /// <summary>
+        /// The text that describes this item type
+        /// </summary>
+        public override string ItemTypeText { get { return ((CompletionType) ItemType).ToString(); }}
+
+        /// <summary>
+        /// return true if the item is to be highlighted
+        /// </summary>
+        public override bool IsRowHighlighted { get { return false; } }
+
+        /// <summary>
+        /// return a string containing the subtext to display
+        /// </summary>
+        public override string SubText { get { return SubString; } }
+
+        /// <summary>
+        /// return a list of images to be displayed (in reverse order) for the item
+        /// </summary>
+        public override List<Image> TagImages {
+            get {
+                var outList = new List<Image>();
+                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
+
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    if (tryImg != null) {
+                        outList.Add(tryImg);
+                    }
+                }
+                return outList;
             }
         }
 
@@ -135,4 +205,5 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Label = 14,
         Sequence = 15
     }
+
 }

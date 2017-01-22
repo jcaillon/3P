@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Helper {
-        public class YamuiScrollBar {
+        public class YamuiVirtualScrollBar {
 
             #region Private
 

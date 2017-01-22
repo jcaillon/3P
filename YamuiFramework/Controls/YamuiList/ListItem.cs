@@ -80,41 +80,41 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Constructor
 
         public FilteredListItem() {
-            FilterFullyMatch = true;
+            InternalFilterFullyMatch = true;
         }
 
         #endregion
 
-        #region internal mechanism
+        #region internal filter mechanism
 
         /// <summary>
         /// The dispertion level with which the lowerCaseFilterString matches the DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
-        public int FilterDispertionLevel { get; private set; }
+        public int InternalFilterDispertionLevel { get; private set; }
 
         /// <summary>
         /// True of the lowerCaseFilterString fully matches DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
-        public bool FilterFullyMatch { get; private set; }
+        public bool InternalFilterFullyMatch { get; private set; }
 
         /// <summary>
         /// The way lowerCaseFilterString matches DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
-        public List<CharacterRange> FilterMatchedRanges { get; private set; }
+        public List<CharacterRange> InternalFilterMatchedRanges { get; private set; }
 
         /// <summary>
         /// Call this method to compute the value of
         /// FilterDispertionLevel, FilterFullyMatch, FilterMatchedRanges
         /// </summary>
         /// <remarks>Internal use only!</remarks>
-        public void FilterApply(string lowerCaseFilterString) {
+        public void InternalFilterApply(string lowerCaseFilterString) {
 
-            FilterMatchedRanges = new List<CharacterRange>();
-            FilterFullyMatch = true;
-            FilterDispertionLevel = 0;
+            InternalFilterMatchedRanges = new List<CharacterRange>();
+            InternalFilterFullyMatch = true;
+            InternalFilterDispertionLevel = 0;
 
             // not filtering, everything should be included
             if (string.IsNullOrEmpty(lowerCaseFilterString))
@@ -122,7 +122,7 @@ namespace YamuiFramework.Controls.YamuiList {
             
             // exclude the separator items and empty text from a match when searching
             if (IsSeparator || string.IsNullOrEmpty(DisplayText)) {
-                FilterFullyMatch = false;
+                InternalFilterFullyMatch = false;
                 return;
             }
             
@@ -147,7 +147,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     posFilter++;
                     // we matched the entire filter
                     if (posFilter >= filterLenght) {
-                        FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch + 1));
+                        InternalFilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch + 1));
                         break;
                     }
                 } else {
@@ -155,28 +155,28 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     // gap between match mean more penalty than finding the match later in the string
                     if (posFilter > 0) {
-                        FilterDispertionLevel += 900;
+                        InternalFilterDispertionLevel += 900;
                     } else {
-                        FilterDispertionLevel += 30;
+                        InternalFilterDispertionLevel += 30;
                     }
                 }
                 // we stopped matching, remember matching range
                 if (!matching && wasMatching)
-                    FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch));
+                    InternalFilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch));
                 pos++;
             }
 
             // put the exact matches first
             if (filterLenght != textLenght)
-                FilterDispertionLevel += 1;
+                InternalFilterDispertionLevel += 1;
 
             // we reached the end of the input, if we were matching stuff, remember matching range
             if (pos >= textLenght && matching)
-                FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - 1 - startMatch));
+                InternalFilterMatchedRanges.Add(new CharacterRange(startMatch, pos - 1 - startMatch));
 
             // we didn't match the entire filter
             if (posFilter < filterLenght)
-                FilterFullyMatch = false;
+                InternalFilterFullyMatch = false;
         }
 
         #endregion

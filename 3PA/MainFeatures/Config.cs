@@ -209,6 +209,8 @@ namespace _3PA.MainFeatures {
             [Range(3, 20)]
             public int AutoCompleteShowListOfXSuggestions = 12;
 
+            public int AutoCompleteWidth = 310;
+
             [Display(Name = "Insert current suggestion on word end",
                 Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
                 GroupName = "Auto-completion",

@@ -245,7 +245,7 @@
     <Compile Include="Forms\YamuiFormBaseShadow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\YamuiFormBaseShadowFadeIn.cs">
+    <Compile Include="Forms\YamuiFormBaseFadeIn.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiFormBase.cs">
@@ -288,7 +288,7 @@
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />
     <Compile Include="Helper\YamuiExtensions.cs" />
-    <Compile Include="Helper\YamuiScrollBar.cs" />
+    <Compile Include="Helper\YamuiVirtualScrollBar.cs" />
     <Compile Include="HtmlRenderer\Core\Adapters\Entities\RColor.cs" />
     <Compile Include="HtmlRenderer\Core\Adapters\Entities\RDashStyle.cs" />
     <Compile Include="HtmlRenderer\Core\Adapters\Entities\RFontStyle.cs" />

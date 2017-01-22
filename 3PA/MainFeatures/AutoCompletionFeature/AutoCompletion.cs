@@ -17,21 +17,23 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using YamuiFramework.Controls.YamuiList;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.AutoCompletionFeature {
 
     /// <summary>
     /// This class handles the AutoCompletionForm
     /// </summary>
-    internal static class AutoComplete {
+    internal static class AutoCompletion {
 
         #region events
 
@@ -74,7 +76,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             get { return _currentTypeOfList; }
             set {
                 _needToSetActiveTypes = _currentTypeOfList != TypeOfList.Reset;
-                _needToSetItems = true;
                 _currentTypeOfList = value;
             }
         }
@@ -112,7 +113,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-        #region public accessors (thread safe)
+        #region public accessors (locked)
 
         /// <summary>
         /// List of the current items in the autocompletion (thread safe)
@@ -127,6 +128,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     }
                 }
                 return new List<CompletionItem>();
+            }
+            private set {
+                if (_itemsListLock.TryEnterWriteLock(-1)) {
+                    try {
+                        _currentItems = value;
+                        _needToSetItems = true;
+                    } finally {
+                        _itemsListLock.ExitWriteLock();
+                    }
+                }
             }
         }
 
@@ -222,7 +233,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         public static CompletionItem FindInSavedItems(string keyword, int line) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(SavedAllItems.ToList(), line);
+            var filteredList = GetSortedFilteredSavedList(line, false);
             if (filteredList == null || filteredList.Count <= 0) return null;
             CompletionItem found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
             return found;
@@ -234,7 +245,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         public static List<CompletionItem> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(SavedAllItems.ToList(), Npp.LineFromPosition(position), dontCheckLine);
+            var filteredList = GetSortedFilteredSavedList(Npp.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)
@@ -248,12 +259,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return listOfFields.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
         }
 
+        public static List<CompletionItem> GetSortedFilteredSavedList(int lineNumber, bool dontCheckLine) {
+            var filterClass = new CompletionFilterClass();
+            filterClass.UpdateConditions(lineNumber, dontCheckLine);
+            var outList = SavedAllItems.Where(filterClass.FilterPredicate).ToList();
+            outList.Sort(CompletionDataSortingClass<CompletionItem>.Instance);
+            return outList;
+        }
+
         /// <summary>
         /// returns the keyword currently selected in the completion list
         /// </summary>
         /// <returns></returns>
         public static CompletionItem GetCurrentSuggestion() {
-            return _form.GetCurrentSuggestion();
+            return _form.YamuiList.SelectedItem as CompletionItem;
         }
 
         #endregion
@@ -282,7 +301,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _staticItems.AddRange(DataBase.GetTablesList());
 
                     // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
-                    _staticItems.Sort(new CompletionDataSortingClass());
+                    _staticItems.Sort(CompletionDataSortingClass<CompletionItem>.Instance);
 
                 } finally {
                     _itemsListLock.ExitWriteLock();
@@ -327,19 +346,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             CurrentTypeOfList = TypeOfList.Reset;
             if (IsVisible)
                 UpdateAutocompletion();
-        }
-
-        /// <summary>
-        /// Set the list of current items, handles the lock
-        /// </summary>
-        private static void SetCurrentItems(List<CompletionItem> currentItems) {
-            if (_itemsListLock.TryEnterWriteLock(-1)) {
-                try {
-                    _currentItems = currentItems;
-                } finally {
-                    _itemsListLock.ExitWriteLock();
-                }
-            }
         }
 
         /// <summary>
@@ -388,7 +394,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (foundTable != null) {
                     if (CurrentTypeOfList != TypeOfList.Fields) {
                         CurrentTypeOfList = TypeOfList.Fields;
-                        SetCurrentItems(DataBase.GetFieldsList(foundTable).ToList());
+                        CurrentItems = DataBase.GetFieldsList(foundTable).ToList();
                     }
                     ShowSuggestionList(keyword);
                     return;
@@ -399,7 +405,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (foundDatabase != null) {
                     if (CurrentTypeOfList != TypeOfList.Tables) {
                         CurrentTypeOfList = TypeOfList.Tables;
-                        SetCurrentItems(DataBase.GetTablesList(foundDatabase).ToList());
+                        CurrentItems = DataBase.GetTablesList(foundDatabase).ToList();
                     }
                     ShowSuggestionList(keyword);
                     return;
@@ -416,7 +422,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (lastCharBeforeWord.Equals(":")) {
                 if (CurrentTypeOfList != TypeOfList.KeywordObject) {
                     CurrentTypeOfList = TypeOfList.KeywordObject;
-                    SetCurrentItems(SavedAllItems);
+                    CurrentItems = SavedAllItems;
                 }
                 ShowSuggestionList(keyword);
                 return;
@@ -425,7 +431,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // show normal complete list
             if (CurrentTypeOfList != TypeOfList.Complete) {
                 CurrentTypeOfList = TypeOfList.Complete;
-                SetCurrentItems(SavedAllItems);
+                CurrentItems = SavedAllItems;
             }
             ShowSuggestionList(keyword);
             
@@ -443,19 +449,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // instanciate the form if needed
             if (_form == null) {
-                _form = new AutoCompletionForm(keyword) {
+                _form = new AutoCompletionForm {
                     UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity,
                     FocusedOpacity = Config.Instance.AutoCompleteFocusedOpacity
                 };
+                _form.YamuiList.SortingClass = CompletionDataSortingClass<ListItem>.Instance;
+                _form.YamuiList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
                 _form.InsertSuggestion += OnInsertSuggestion;
+                _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _form.Show(Npp.Win32WindowNpp);
-                _form.SetItems(CurrentItems);
+
             } else if (_needToSetItems) {
                 // we changed the mode, we need to Set the items of the autocompletion
-                _form.SetItems(CurrentItems, _needToSetActiveTypes || !_form.Visible);
+                _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
-            } else {
-                _form.SortItems();
             }
 
             // only activate certain types
@@ -463,26 +470,30 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // only activate certain types
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
-                        _form.SetUnActiveType(new List<CompletionType> {
-                            CompletionType.KeywordObject
+                        _form.YamuiList.SetUnactiveType(new List<int> {
+                            (int)CompletionType.KeywordObject
                         });
                         break;
                     case TypeOfList.KeywordObject:
-                        _form.SetActiveType(new List<CompletionType> {
-                            CompletionType.KeywordObject
+                        _form.YamuiList.SetActiveType(new List<int> {
+                            (int)CompletionType.KeywordObject
                         });
                         break;
                     default:
-                        _form.SetUnActiveType(null);
+                        _form.YamuiList.SetUnactiveType(null);
                         break;
                 }
             }
 
+            // the filter uses the current caret line to know which item should be filtered, set it here
+            var nppCurrentLine = Npp.Line.CurrentLine;
+            CompletionFilterClass.Instance.UpdateConditions(nppCurrentLine, false);
+
             // filter with keyword (keyword can be empty)
-            _form.FilterByText = keyword;
+            _form.YamuiList.FilterString = keyword;
 
             // close?
-            if (!_openedFromShortCut && Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) {
+            if (!_openedFromShortCut && Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.YamuiList.NbItems == 0) {
                 Close();
                 return;
             }
@@ -490,14 +501,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // if the form was already visible, don't go further
             if (_form.Visible) return;
 
-            _form.SelectFirstItem();
+            _form.YamuiList.SelectedItemIndex = 0;
 
-            // update position (and alternate color config)
+            // update position
             var point = Npp.GetCaretScreenLocation();
-            var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
+            var lineHeight = Npp.TextHeight(nppCurrentLine);
             point.Y += lineHeight;
             _form.SetPosition(point, lineHeight + 2);
             _form.UnCloack();
+
         }
 
         /// <summary>
@@ -538,11 +550,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _lastRememberedKeyword = item.DisplayText;
 
             item.Ranking++;
+            _form.YamuiList.SortInitialList();
+
             if (item.FromParser)
                 RememberUseOfParsedItem(item.DisplayText);
             else if (item.Type != CompletionType.Keyword && item.Type != CompletionType.Snippet)
                 RememberUseOfDatabaseItem(item.DisplayText);                
         }
+
 
         #endregion
 
@@ -587,10 +602,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public static bool OnKeyDown(Keys key) {
-            return IsVisible && _form.OnKeyDown(key);
+        public static bool PerformKeyDown(KeyEventArgs e) {
+            return IsVisible && _form.YamuiList.PerformKeyDown(e);
         }
 
         /// <summary>

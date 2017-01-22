@@ -25,7 +25,7 @@ using System.Linq;
 using System.Text;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures {
 
@@ -127,7 +127,7 @@ namespace _3PA.MainFeatures {
                         LocSnippetContext.CurrentParameterValue = Npp.GetTextBetween(LocSnippetContext.CurrentParameter.Value);
                     }
 
-                    AutoComplete.Close();
+                    AutoCompletion.Close();
 
                     if (LocSnippetContext.Parameters.Count <= 1)
                         FinalizeCurrent();

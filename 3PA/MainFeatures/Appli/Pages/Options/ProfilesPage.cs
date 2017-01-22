@@ -30,7 +30,7 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class ProfilesPage : YamuiPage {
@@ -71,10 +71,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 new FilteredListItem { DisplayText = "FUCK0"},
             });
 
-            YamuiFilteredList1.EnterPressed += list => {
+            YamuiFilteredList1.EnterPressed += (list, e) => {
                 UserCommunication.Notify(list.SelectedItemIndex + " = " + (list.SelectedItem ?? new FilteredListItem { DisplayText = "null" }).DisplayText);
             };
-            YamuiFilteredList1.TabPressed += list => {
+            YamuiFilteredList1.TabPressed += (list, e) => {
                 YamuiFilteredList1.ListPadding = new Padding(5, 10, 15, 25);
                 list.SelectedItemIndex = 1115;
             };
@@ -104,9 +104,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 }
             });
 
-            flFilter1.Core.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
-            flFilter1.Core.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.PerformKeyDown(new KeyEventArgs(args.KeyCode));
-            flFilter1.MultiLine = false;
+            flFilter1.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.PerformKeyDown(new KeyEventArgs(args.KeyCode));
+            flFilter1.Multiline = false;
 
             // -------------------------------------------------------------
             // ------------ BUTTONS ----------------------------------------
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
 
             yamuiButton1.ButtonPressed += (sender, args) => {
-                yamuiFilteredTypeList1.SetItems(AutoComplete.CurrentItems.Select(item => new FuckItem {
+                yamuiFilteredTypeList1.SetItems(AutoCompletion.CurrentItems.Select(item => new FuckItem {
                     DisplayText = item.DisplayText,
                     Type = item.Type,
                     SubString = item.SubString,

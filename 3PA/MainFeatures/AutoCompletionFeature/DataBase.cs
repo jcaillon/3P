@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +26,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal static class DataBase {
 
         #region events
@@ -314,7 +315,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Database,
                 FromParser = false,
-                Ranking = AutoComplete.FindRankingOfDatabaseItem(@base.LogicalName),
+                Ranking = AutoCompletion.FindRankingOfDatabaseItem(@base.LogicalName),
                 Flag = 0
             }).ToList();
         }
@@ -350,7 +351,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 SubString = dataBase.LogicalName,
                 Type = CompletionType.Table,
                 FromParser = false,
-                Ranking = AutoComplete.FindRankingOfDatabaseItem(table.Name),
+                Ranking = AutoCompletion.FindRankingOfDatabaseItem(table.Name),
                 Flag = 0
             }).ToList());
             return output;
@@ -370,7 +371,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Type = field.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
-                Ranking = AutoComplete.FindRankingOfDatabaseItem(field.Name),
+                Ranking = AutoCompletion.FindRankingOfDatabaseItem(field.Name),
                 Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0),

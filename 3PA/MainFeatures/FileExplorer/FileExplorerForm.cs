@@ -28,12 +28,12 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
+using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Pro;
@@ -909,6 +909,28 @@ namespace _3PA.MainFeatures.FileExplorer {
         #endregion
 
     }
+
+    #region SelectorButtons
+
+    public class SelectorButton<T> : YamuiButtonImage {
+        private bool _activated;
+
+        #region Fields
+
+        public bool Activated {
+            get { return _activated; }
+            set {
+                _activated = value;
+                UseGreyScale = !_activated;
+            }
+        }
+
+        public T Type { get; set; }
+        #endregion
+
+    }
+
+    #endregion
 
     #region sorting
     /// <summary>

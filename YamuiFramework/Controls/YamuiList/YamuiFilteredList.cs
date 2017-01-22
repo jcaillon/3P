@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using YamuiFramework.Controls.FastColoredTextBox.Core;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
@@ -81,9 +80,9 @@ namespace YamuiFramework.Controls.YamuiList {
                 _filterString = value.ToLower().Trim();
                 if (_initialItems != null && _nbInitialItems > 0) {
                     // apply the filter on each item to compute internal properties
-                    _initialItems.ForEach(data => data.FilterApply(_filterString));
-                    ApplyFilterPredicate();
+                    _initialItems.ForEach(data => data.InternalFilterApply(_filterString));
                 }
+                ApplyFilterPredicate();
             }
         }
 
@@ -97,11 +96,16 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public IComparer<ListItem> SortingClass { get; set; }
+
+        /// <summary>
         /// Returns the list of items passed to the SetItems method, before filters
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public virtual List<ListItem> InitialItems {
-            get { return _items; }
+        public virtual List<FilteredListItem> InitialItems {
+            get { return _initialItems; }
         }
 
         #endregion
@@ -124,6 +128,7 @@ namespace YamuiFramework.Controls.YamuiList {
             _nbInitialItems = _initialItems.Count;
 
             // we reapply the current filter to this new list
+            SortInitialList();
             FilterString = FilterString;
         }
 
@@ -147,15 +152,29 @@ namespace YamuiFramework.Controls.YamuiList {
         /// it also sorts the list of items
         /// </summary>
         protected virtual List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
-            List<ListItem> items;
 
-            if (FilterPredicate != null)
-                items = listItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
-            else
-                items = listItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+            IEnumerable<FilteredListItem> items;
 
-            // sort
-            return items;
+            if (!string.IsNullOrEmpty(_filterString)) {
+                if (FilterPredicate != null)
+                    items = listItems.Where(item => item.InternalFilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.InternalFilterDispertionLevel);
+                else
+                    items = listItems.Where(item => item.InternalFilterFullyMatch).OrderBy(data => data.InternalFilterDispertionLevel);
+            } else {
+                if (FilterPredicate != null)
+                    items = listItems.Where(item => FilterPredicate(item));
+                else
+                    items = listItems;
+            }
+            return items.Cast<ListItem>().ToList();
+
+            //List<ListItem> items;
+            //if (FilterPredicate != null)
+            //    items = listItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>//().ToList();
+            //else
+            //    items = listItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+            //
+            //return items;
         }
 
         #endregion
@@ -192,7 +211,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // letter highlight
             if (!item.IsDisabled)
-                DrawTextHighlighting(e.Graphics, ((FilteredListItem) item).FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
+                DrawTextHighlighting(e.Graphics, ((FilteredListItem) item).InternalFilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text
             TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
@@ -257,11 +276,12 @@ namespace YamuiFramework.Controls.YamuiList {
             var textBox = sender as TextBox;
             if (textBox != null)
                 FilterString = textBox.Text;
-            else {
-                var fctb = sender as FastColoredTextBox.Core.FastColoredTextBox;
-                if (fctb != null)
-                    FilterString = fctb.Text;
-            }
+        }
+
+        public void SortInitialList() {
+            // sort
+            if (SortingClass != null && _initialItems != null && _nbInitialItems > 0)
+                _initialItems.Sort(SortingClass);
         }
 
         #endregion

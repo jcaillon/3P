@@ -121,7 +121,7 @@ namespace YamuiFramework.Forms {
         /// </summary>
         protected override CreateParams CreateParams {
             get {
-                CreateParams createParams = base.CreateParams;
+                var createParams = base.CreateParams;
                 createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
                 return createParams;
@@ -206,7 +206,7 @@ namespace YamuiFramework.Forms {
             YamuiList.MouseDown += YamuiListOnMouseDown;
             YamuiList.EnterPressed += YamuiListOnEnterPressed;
             YamuiList.RowClicked += YamuiListOnRowClicked;
-            yPos += YamuiList.Items.Count.ClampMin(1) * 20;
+            yPos += YamuiList.Items.Count.ClampMin(1) * YamuiList.RowHeight;
 
             if (YamuiList.Items.Count > 0) {
                 var selectedIdx = YamuiList.Items.Cast<YamuiMenuItem>().ToList().FindIndex(item => item.IsSelectedByDefault);
@@ -254,7 +254,7 @@ namespace YamuiFramework.Forms {
             ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
         }
 
-        private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList) {
+        private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
             ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
         }
 

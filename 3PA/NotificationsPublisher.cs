@@ -89,7 +89,7 @@ namespace _3PA {
                         PluginIsReady = false;
                         return;
                 }
-
+                
                 #endregion
 
                 // Only do stuff when the dll is fully loaded

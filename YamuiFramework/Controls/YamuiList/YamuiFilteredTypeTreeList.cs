@@ -378,7 +378,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 if (item == null) continue;
                 
                 // the item must be included
-                if (parentsToInclude.Contains(item.PathDescriptor) || (item.FilterFullyMatch && (FilterPredicate == null || FilterPredicate(item)))) {
+                if (parentsToInclude.Contains(item.PathDescriptor) || (item.InternalFilterFullyMatch && (FilterPredicate == null || FilterPredicate(item)))) {
                     outList.Add(item);
 
                     // we register its parent to be included as well

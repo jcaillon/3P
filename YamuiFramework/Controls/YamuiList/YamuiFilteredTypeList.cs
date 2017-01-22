@@ -170,6 +170,14 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
+        #region Life
+
+        public YamuiFilteredTypeList() {
+            _tooltip.ShowAlways = true;
+        }
+
+        #endregion
+        
         #region Paint
 
         protected override void OnPaintBackground(PaintEventArgs e) {
@@ -262,7 +270,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         BackGrndImage = TypeImages.ContainsKey(type) ? TypeImages[type] : null
                     });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
-                    _tooltip.SetToolTip(_typeButtons[type], (TypeText.ContainsKey(type) && TypeText[type] != null ? TypeText + "<br>" : "") + TypeButtonTooltipText);
+                    _tooltip.SetToolTip(_typeButtons[type], (TypeText.ContainsKey(type) && TypeText[type] != null ? TypeText[type] + "<br>" : "") + TypeButtonTooltipText);
                 }
 
                 _typeButtons[type].Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
@@ -414,7 +422,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // letter highlight
             if (!item.IsDisabled)
-                DrawTextHighlighting(g, item.FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
+                DrawTextHighlighting(g, item.InternalFilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text
             TextRenderer.DrawText(g, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
@@ -524,7 +532,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
                 // everything is unactive but this one
                 if (_typeButtons.Count(b => b.Value.Activated) == 1 && _typeButtons.First(b => b.Value.Activated).Key == clickedType) {
-                    SetUnActiveType(null);
+                    SetUnactiveType(null);
                 } else {
                     SetActiveType(new List<int> {clickedType});
                 }
@@ -552,12 +560,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// use this to programmatically check any type that is not in the given list
         /// </summary>
-        public void SetUnActiveType(List<int> allowedType) {
+        public void SetUnactiveType(List<int> notAllowedType) {
             this.SafeInvoke(form => {
-                if (allowedType == null)
-                    allowedType = new List<int>();
+                if (notAllowedType == null)
+                    notAllowedType = new List<int>();
                 foreach (var selectorButton in _typeButtons) {
-                    selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
+                    selectorButton.Value.Activated = notAllowedType.IndexOf(selectorButton.Value.Type) < 0;
                 }
                 ApplyFilterPredicate();
             });

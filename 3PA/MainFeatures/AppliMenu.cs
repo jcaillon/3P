@@ -27,7 +27,7 @@ using YamuiFramework.Forms;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.Tests;
@@ -258,7 +258,7 @@ namespace _3PA.MainFeatures {
 
             _mainMenuList = new List<MenuItem> {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, item => Appli.Appli.ToggleView(), "Open_main_window", "Alt+Space") { Generic = true },
-                new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, item => AutoComplete.OnShowCompleteSuggestionList(), "Show_Suggestion_List", "Ctrl+Space"),
+                new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, item => AutoCompletion.OnShowCompleteSuggestionList(), "Show_Suggestion_List", "Ctrl+Space"),
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") { Generic = true },
                 new MenuItem(this, "Check syntax", ImageResources.CheckCode, item => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),

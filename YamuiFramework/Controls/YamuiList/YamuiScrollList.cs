@@ -333,23 +333,28 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// handle the keys pressed in the control, returns true if you actually handled the key
+        /// Get the number of items displayed in the list (after all filtering)
         /// </summary>
-        public Func<YamuiScrollList, bool> KeyPressed { get; set; }
+        public int NbItems { get { return _nbItems; } }
 
         #endregion
 
         #region public Events
 
         /// <summary>
+        /// handle the keys pressed in the control
+        /// </summary>
+        public event Action<YamuiScrollList, KeyEventArgs> KeyPressed;
+
+        /// <summary>
         /// Triggered when the TAB key is pressed
         /// </summary>
-        public event Action<YamuiScrollList> TabPressed;
+        public event Action<YamuiScrollList, KeyEventArgs> TabPressed;
 
         /// <summary>
         /// Triggered when the ENTER key is pressed
         /// </summary>
-        public event Action<YamuiScrollList> EnterPressed;
+        public event Action<YamuiScrollList, KeyEventArgs> EnterPressed;
 
         /// <summary>
         /// Triggered when the selected index changes
@@ -813,7 +818,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Events pushed from the button rows
 
         protected override void OnKeyDown(KeyEventArgs e) {
-            e.Handled = HandleKeyDown(e.KeyCode);
+            e.Handled = HandleKeyDown(e);
             if (!e.Handled)
                 base.OnKeyDown(e);
         }
@@ -821,22 +826,23 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Handles the key pressed for the control
         /// </summary>
-        private bool HandleKeyDown(Keys pressedKey) {
+        private bool HandleKeyDown(KeyEventArgs e) {
             var newIndex = SelectedItemIndex;
 
+            var pressedKey = e.KeyCode;
             switch (pressedKey) {
 
                 case Keys.Tab:
                     if (TabPressed != null) {
-                        TabPressed(this);
-                        return true;
+                        TabPressed(this, e);
+                        return e.Handled;
                     }
                     return false;
 
                 case Keys.Enter:
                     if (EnterPressed != null) {
-                        EnterPressed(this);
-                        return true;
+                        EnterPressed(this, e);
+                        return e.Handled;
                     }
                     return false;
 
@@ -878,8 +884,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
                             default:
                                 if (KeyPressed != null)
-                                    return KeyPressed(this);
-                                return false;
+                                    KeyPressed(this, e);
+                                return e.Handled;
                         }
                         if (newIndex > _nbItems - 1)
                             newIndex = 0;

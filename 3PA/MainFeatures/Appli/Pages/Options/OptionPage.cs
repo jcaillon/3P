@@ -32,7 +32,7 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
 
@@ -340,7 +340,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             CodeExplorer.CodeExplorer.ApplyColorSettings();
             FileExplorer.FileExplorer.ApplyColorSettings();
-            AutoComplete.ForceClose();
+            AutoCompletion.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyOptionsForScintilla();
 

@@ -33,7 +33,7 @@ namespace YamuiFramework.Forms {
     /// <summary>
     /// Form class that adds the top right buttons + resize
     /// </summary>
-    public class YamuiFormButtons : YamuiFormBaseShadowFadeIn {
+    public class YamuiFormButtons : YamuiFormBaseFadeIn {
 
         #region constants
 

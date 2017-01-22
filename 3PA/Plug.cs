@@ -34,7 +34,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
@@ -228,20 +228,20 @@ namespace _3PA {
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
-            DataBase.OnDatabaseInfoUpdated += AutoComplete.RefreshStaticItems;
+            DataBase.OnDatabaseInfoUpdated += AutoCompletion.RefreshStaticItems;
 
             ParserHandler.OnParseStarted += () => { CodeExplorer.Refreshing = true; };
-            ParserHandler.OnParseEnded += AutoComplete.RefreshDynamicItems;
+            ParserHandler.OnParseEnded += AutoCompletion.RefreshDynamicItems;
             ParserHandler.OnParseEnded += CodeExplorer.UpdateCodeExplorer;
 
-            AutoComplete.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
+            AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
 
             Keywords.Import();
             Snippets.Init();
             FileTag.Import();
 
             // initialize the list of objects of the autocompletion form
-            AutoComplete.RefreshStaticItems();
+            AutoCompletion.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
             IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
@@ -279,7 +279,7 @@ namespace _3PA {
                 Keywords.SaveRanking();
 
                 // close every form
-                AutoComplete.ForceClose();
+                AutoCompletion.ForceClose();
                 InfoToolTip.ForceClose();
                 Appli.ForceClose();
                 FileExplorer.ForceClose();
@@ -315,7 +315,7 @@ namespace _3PA {
                         // we need the cursor to be in scintilla but not on the application or the auto-completion!
                         if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
                             (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
-                            (!AutoComplete.IsVisible || !AutoComplete.IsMouseIn())) {
+                            (!AutoCompletion.IsVisible || !AutoCompletion.IsMouseIn())) {
                             AppliMenu.ShowMainMenuAtCursor();
                             return true;
                         }
@@ -374,13 +374,12 @@ namespace _3PA {
                 if (IsCurrentFileProgress) {
 
                     // Autocompletion 
-                    if (AutoComplete.IsVisible) {
+                    if (AutoCompletion.IsVisible) {
                         if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Tab || e.KeyCode == Keys.Return || e.KeyCode == Keys.Escape)
-                            handled = AutoComplete.OnKeyDown(e.KeyCode);
+                            handled = AutoCompletion.PerformKeyDown(e);
                         else {
-
                             if ((e.KeyCode == Keys.Right || e.KeyCode == Keys.Left) && e.Alt)
-                                handled = AutoComplete.OnKeyDown(e.KeyCode);
+                                handled = AutoCompletion.PerformKeyDown(e);
                         }
                     } else {
                         // snippet ?
@@ -645,7 +644,6 @@ namespace _3PA {
         /// <summary>
         /// Called when the user enters any character in npp
         /// </summary>
-        /// <param name="c"></param>
         public static void OnSciCharTyped(char c) {
 
             // CTRL + S : char code 19
@@ -672,11 +670,10 @@ namespace _3PA {
         /// Called after the UI has updated, allows to correctly read the text style, to correct 
         /// the indentation w/o it being erased and so on...
         /// </summary>
-        /// <param name="c"></param>
         public static void OnCharAddedWordContinue(char c) {
             try {
                 // handles the autocompletion
-                AutoComplete.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordContinue");
             }
@@ -687,7 +684,6 @@ namespace _3PA {
         /// Called after the UI has updated, allows to correctly read the text style, to correct 
         /// the indentation w/o it being erased and so on...
         /// </summary>
-        /// <param name="c"></param>
         public static void OnCharAddedWordEnd(char c) {
             try {
                 // we finished entering a keyword
@@ -703,13 +699,13 @@ namespace _3PA {
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
-                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoComplete.IsVisible) {
+                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoCompletion.IsVisible) {
                     string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
-                        if (AutoComplete.IsVisible) {
-                            var lastSugg = AutoComplete.GetCurrentSuggestion();
+                        if (AutoCompletion.IsVisible) {
+                            var lastSugg = AutoCompletion.GetCurrentSuggestion();
                             if (lastSugg != null)
                                 replacementWord = lastSugg.DisplayText;
                         }
@@ -724,7 +720,7 @@ namespace _3PA {
 
                     // replace the last keyword by the correct case
                     if (replacementWord == null) {
-                        var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
+                        var casedKeyword = AutoCompletion.CorrectKeywordCase(keyword, searchWordAt);
                         if (casedKeyword != null)
                             replacementWord = casedKeyword;
                     }
@@ -739,7 +735,7 @@ namespace _3PA {
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
-                AutoComplete.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion();
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
@@ -785,7 +781,7 @@ namespace _3PA {
 
             // did the user supress 1 char?
             if (deletedText && nc.length == 1) {
-                AutoComplete.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion();
             }
         }
 
@@ -1032,7 +1028,7 @@ namespace _3PA {
         /// Call this method to close all popup/autocompletion form and alike
         /// </summary>
         public static void ClosePopups() {
-            AutoComplete.Close();
+            AutoCompletion.Close();
             InfoToolTip.Close();
         }
 
