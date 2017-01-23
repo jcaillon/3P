@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             point.Offset(Npp.GetScintillaRectangle().Location);
             var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight + 5;
-            _form.SetPosition(point, lineHeight + 5);
+            _form.GetBestAutocompPosition(point, lineHeight + 5);
 
             _openedFromDwell = openTemporary;
             if (!_form.Visible) {
@@ -142,7 +142,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // refresh tooltip with the correct index
             _form.Cloack();
             SetToolTip();
-            _form.SetPosition();
             if (!_form.Visible)
                 _form.UnCloack();
         }
@@ -150,8 +149,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <summary>
         /// Method called when the tooltip is opened to help the user during autocompletion
         /// </summary>
-        public static void ShowToolTipFromAutocomplete(CompletionItem item, Rectangle completionRectangle, bool reversedForm) {
-            if (Config.Instance.ToolTipDeactivate) return;
+        public static void ShowToolTipFromAutocomplete(CompletionItem item, AutoCompletionForm parentForm) {
+            if (Config.Instance.ToolTipDeactivate) 
+                return;
             
             bool lockTaken = false;
             try {
@@ -165,7 +165,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 SetToolTip();
 
                 // update position
-                _form.SetPosition(completionRectangle, reversedForm);
+                _form.Location = parentForm.GetToolTipBestPosition(_form.Size);
 
                 _openedFromDwell = false;
                 _openedForCompletion = true;

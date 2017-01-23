@@ -259,8 +259,9 @@ namespace YamuiFramework.Forms {
         /// Returns the location that should be used for a tooltip window relative to this window
         /// </summary>
         public Point GetToolTipBestPosition(Size childSize) {
+            var screen = Screen.FromPoint(Location);
             return new Point(
-                _reverseX ? Location.X - childSize.Width : Location.X + Width,
+                (Location.X + Width + childSize.Width > screen.WorkingArea.X + screen.WorkingArea.Width) ? Location.X - childSize.Width : Location.X + Width,
                 _reverseY ? Location.Y + Height - childSize.Height : Location.Y);
         }
 

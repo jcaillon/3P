@@ -1582,6 +1582,23 @@ namespace _3PA.Interop {
     }
 
     [Flags]
+    public enum SciModificationMod : uint {
+        // Modified notification types
+        SC_MOD_INSERTTEXT = 0x1,
+        SC_MOD_DELETETEXT = 0x2,
+        SC_MOD_BEFOREINSERT = 0x400,
+        SC_MOD_BEFOREDELETE = 0x800,
+        SC_MOD_CHANGEANNOTATION = 0x20000,
+        SC_MOD_INSERTCHECK = 0x100000,
+
+        // Modified flags
+        SC_PERFORMED_USER = 0x10,
+        SC_PERFORMED_UNDO = 0x20,
+        SC_PERFORMED_REDO = 0x40,
+        SC_LASTSTEPINUNDOREDO = 0x100,
+    }
+
+    [Flags]
     public enum SciMsg : uint {
         // Autocompletions
         SC_AC_FILLUP = 1,
@@ -1788,19 +1805,6 @@ namespace _3PA.Interop {
         SC_UPDATE_SELECTION = 0x02,
         SC_UPDATE_V_SCROLL = 0x04,
         SC_UPDATE_H_SCROLL = 0x08,
-
-        // Modified notification types
-        SC_MOD_INSERTTEXT = 0x1,
-        SC_MOD_DELETETEXT = 0x2,
-        SC_MOD_BEFOREINSERT = 0x400,
-        SC_MOD_BEFOREDELETE = 0x800,
-        SC_MOD_CHANGEANNOTATION = 0x20000,
-        SC_MOD_INSERTCHECK = 0x100000,
-
-        // Modified flags
-        SC_PERFORMED_USER = 0x10,
-        SC_PERFORMED_UNDO = 0x20,
-        SC_PERFORMED_REDO = 0x40,
 
         // Status codes
         SC_STATUS_OK = 0,

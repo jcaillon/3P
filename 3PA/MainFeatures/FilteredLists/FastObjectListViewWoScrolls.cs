@@ -35,11 +35,6 @@ namespace _3PA.MainFeatures.FilteredLists {
             if (m.Msg == WmNccalcsize) // WM_NCCALCSIZE
             {
                 int style = GetWindowLong(Handle, GwlStyle);
-                if (Config.Instance.AutoCompleteHideScrollBar) {
-                    // deactivate vertical scroll bar
-                    if ((style & WsVscroll) == WsVscroll)
-                        SetWindowLong(Handle, GwlStyle, style & ~WsVscroll);
-                }
                 // deactivate horizontal scroll bar
                 if ((style & WsHscroll) == WsHscroll)
                     SetWindowLong(Handle, GwlStyle, style & ~WsHscroll);

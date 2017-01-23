@@ -121,7 +121,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// The text that describes this item type
         /// </summary>
-        public override string ItemTypeText { get { return ((CompletionType) ItemType).ToString(); }}
+        public override string ItemTypeText { 
+            get {
+                return "Category : <span class='SubTextColor'><b>" + ((CompletionType)ItemType) + "</b></span><br><br>"; 
+            }
+        }
 
         /// <summary>
         /// return true if the item is to be highlighted

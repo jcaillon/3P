@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Security;
+using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
@@ -72,6 +73,7 @@ namespace YamuiFramework.Controls.YamuiList {
         private int _rowHeight = DefaultRowHeight;
 
         protected List<ListItem> _items;
+        protected ReaderWriterLockSlim _itemsLock = new ReaderWriterLockSlim();
 
         protected int _nbItems;
 
@@ -103,6 +105,8 @@ namespace YamuiFramework.Controls.YamuiList {
         private bool _isScrollHovered;
         private bool _isHovered;
         private bool _isFocused;
+
+        private bool _isSettingItems;
 
         #endregion
 
@@ -163,6 +167,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public int SelectedItemIndex {
             get { return _selectedItemIndex; }
             set {
+                var oldIndex = _selectedItemIndex;
                 _selectedItemIndex = value;
                 _selectedItemIndex = _selectedItemIndex.ClampMax(_nbItems - 1);
                 _selectedItemIndex = _selectedItemIndex.ClampMin(0);
@@ -177,7 +182,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 // activate/select the correct button button
                 SelectedRowIndex = _selectedItemIndex - TopIndex;
 
-                if (IndexChanged != null)
+                if (IndexChanged != null && !_isSettingItems && oldIndex != _selectedItemIndex)
                     IndexChanged(this);
             }
         }
@@ -329,7 +334,26 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual List<ListItem> Items {
-            get { return _items; }
+            get {
+                if (_itemsLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _items;
+                    } finally {
+                        _itemsLock.ExitReadLock();
+                    }
+                }
+                return null;
+            }
+            private set {
+                if (_itemsLock.TryEnterWriteLock(-1)) {
+                    try {
+                        _items = value;
+                        _nbItems = _items == null ? 0 :_items.Count;
+                    } finally {
+                        _itemsLock.ExitWriteLock();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -496,8 +520,9 @@ namespace YamuiFramework.Controls.YamuiList {
             if (listItems == null)
                 throw new ArgumentNullException();
 
-            _items = listItems;
-            _nbItems = _items.Count;
+            _isSettingItems = true;
+
+            Items = listItems;
 
             ComputeScrollBar();
             DrawButtons();
@@ -507,7 +532,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // and an enabled item!
             if (_nbItems > SelectedItemIndex) {
-                if (_items[SelectedItemIndex].IsDisabled) {
+                if (Items[SelectedItemIndex].IsDisabled) {
                     var newIndex = SelectedItemIndex;
                     do {
                         newIndex++;
@@ -515,13 +540,15 @@ namespace YamuiFramework.Controls.YamuiList {
                             newIndex = 0;
 
                     } // do this while the current button is disabled and we didn't already try every button
-                    while (_items[newIndex].IsDisabled && SelectedItemIndex != newIndex);
+                    while (GetItem(newIndex).IsDisabled && SelectedItemIndex != newIndex);
                     SelectedItemIndex = newIndex;
                 }
             }
 
             // Correct the top index if needed, in any case this will Refresh the buttons + reposition the thumb
             TopIndex = TopIndex;
+
+            _isSettingItems = false;
         }
         
         #endregion
@@ -598,8 +625,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Refresh all the buttons to display the right items
         /// </summary>
         private void RefreshButtons() {
-
-            if (_items != null) {
+            if (_nbItems > 0) {
 
                 // for each displayed item of the list
                 for (int i = 0; i < _nbRowDisplayed; i++) {
@@ -608,7 +634,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         _rows[i].Visible = false;
                     } else {
                         // associate with the item
-                        var itemBeingDisplayed = _items[TopIndex + i];
+                        var itemBeingDisplayed = GetItem(TopIndex + i);
                         _rows[i].Tag = itemBeingDisplayed;
 
                         if (!_rows[i].Visible)
@@ -895,7 +921,7 @@ namespace YamuiFramework.Controls.YamuiList {
                             return false;
 
                     } // do this while the current button is disabled and we didn't already try every button
-                    while (_items[newIndex].IsDisabled && SelectedItemIndex != newIndex);
+                    while (GetItem(newIndex).IsDisabled && SelectedItemIndex != newIndex);
                     break;
             }
 
@@ -965,7 +991,15 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Return the item at the given index (or null)
         /// </summary>
         protected ListItem GetItem(int index) {
-            return 0 <= index && index < _nbItems ? _items[index] : null;
+            if (_itemsLock.TryEnterReadLock(-1)) {
+                try {
+                    if (0 <= index && index < _nbItems)
+                        return _items[index];
+                } finally {
+                    _itemsLock.ExitReadLock();
+                }
+            }
+            return null;
         }
 
         /// <summary>

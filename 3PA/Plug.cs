@@ -375,12 +375,7 @@ namespace _3PA {
 
                     // Autocompletion 
                     if (AutoCompletion.IsVisible) {
-                        if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Tab || e.KeyCode == Keys.Return || e.KeyCode == Keys.Escape)
-                            handled = AutoCompletion.PerformKeyDown(e);
-                        else {
-                            if ((e.KeyCode == Keys.Right || e.KeyCode == Keys.Left) && e.Alt)
-                                handled = AutoCompletion.PerformKeyDown(e);
-                        }
+                        handled = AutoCompletion.PerformKeyDown(e);
                     } else {
                         // snippet ?
                         if (e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
@@ -700,36 +695,13 @@ namespace _3PA {
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoCompletion.IsVisible) {
-                    string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
-                        if (AutoCompletion.IsVisible) {
-                            var lastSugg = AutoCompletion.GetCurrentSuggestion();
-                            if (lastSugg != null)
-                                replacementWord = lastSugg.DisplayText;
-                        }
+                        AutoCompletion.UseCurrentSuggestion(-offset);
                     }
-
-                    // replace abbreviation by completekeyword
-                    if (Config.Instance.CodeReplaceAbbreviations) {
-                        var fullKeyword = Keywords.GetFullKeyword(replacementWord ?? keyword);
-                        if (fullKeyword != null)
-                            replacementWord = fullKeyword;
-                    }
-
-                    // replace the last keyword by the correct case
-                    if (replacementWord == null) {
-                        var casedKeyword = AutoCompletion.CorrectKeywordCase(keyword, searchWordAt);
-                        if (casedKeyword != null)
-                            replacementWord = casedKeyword;
-                    }
-
-                    if (replacementWord != null)
-                        Npp.ReplaceKeywordWrapped(replacementWord, -offset);
                 }
-
-
+                
                 // replace semicolon by a point
                 if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext)
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
@@ -747,6 +719,7 @@ namespace _3PA {
         #region OnSciUpdateUi
 
         public static void OnSciUpdateUi(SCNotification nc) {
+
             // we need to set the indentation when we received this notification, not before or it's overwritten
             while (ActionsAfterUpdateUi.Any()) {
                 ActionsAfterUpdateUi.Dequeue()();
@@ -767,10 +740,10 @@ namespace _3PA {
         #region OnSciModified
 
         public static void OnSciModified(SCNotification nc) {
-            bool deletedText = (nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0;
+            bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
 
             // if the text has changed
-            if (deletedText || (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
+            if (deletedText || (nc.modificationType & (int)SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
 
                 // observe modifications to lines (MANDATORY)
                 Npp.UpdateLinesInfo(nc, !deletedText);
@@ -779,8 +752,12 @@ namespace _3PA {
                 ParserHandler.ParseCurrentDocument();
             }
 
-            // did the user supress 1 char?
-            if (deletedText && nc.length == 1) {
+            if ((nc.modificationType & (int) SciModificationMod.SC_LASTSTEPINUNDOREDO) != 0) {
+                ClosePopups();
+            }
+
+            // did the user supress 1 char? (or one line)
+            if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
                 AutoCompletion.UpdateAutocompletion();
             }
         }
@@ -931,7 +908,7 @@ namespace _3PA {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
-                Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
+                Npp.EventMask = (int)(SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);
                 _initiatedScintilla[curScintilla] = 1;
             }
 
@@ -978,7 +955,6 @@ namespace _3PA {
                 var guiConfig = XDocument.Load(Config.FileNppConfigXml).Descendants("GUIConfig");
                 string themeXmlPath;
                 try {
-                    // ReSharper disable once PossibleNullReferenceException
                    themeXmlPath = (string) (guiConfig as XElement[] ?? guiConfig.ToArray()).FirstOrDefault(x => x.Attribute("name").Value.Equals("stylerTheme")).Attribute("path");
                 } catch (Exception) {
                     themeXmlPath = null;

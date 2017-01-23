@@ -9,7 +9,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    internal class CompletionDataSortingClass<T> : IComparer<T> where T : ListItem {
+    internal class CompletionSortingClass<T> : IComparer<T> where T : ListItem {
         
         #region private
 
@@ -20,10 +20,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         
         #region Singleton
 
-        private static CompletionDataSortingClass<T> _instance;
+        private static CompletionSortingClass<T> _instance;
 
-        public static CompletionDataSortingClass<T> Instance {
-            get { return _instance ?? (_instance = new CompletionDataSortingClass<T>()); }
+        public static CompletionSortingClass<T> Instance {
+            get { return _instance ?? (_instance = new CompletionSortingClass<T>()); }
             set { _instance = value; }
         }
 
@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #region Life
 
-        private CompletionDataSortingClass() {
+        private CompletionSortingClass() {
             _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
         }
 

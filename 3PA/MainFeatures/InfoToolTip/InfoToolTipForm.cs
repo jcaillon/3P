@@ -29,16 +29,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
     internal sealed class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
-        // prevents the form from stealing the focus
-        //protected override bool ShowWithoutActivation {
-        //    get { return true; }
-        //}
-
-        private static int _positionMode;
-        private static Point _position;
-        private static int _lineHeight;
-        private static Rectangle _rect;
-        private static bool _reversed;
 
         private YamuiScrollPanel _panel;
         private HtmlLabel _labelContent;
@@ -96,69 +86,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         /// <summary>
-        /// Position the tooltip relatively to a point
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="lineHeight"></param>
-        public void SetPosition(Point position, int lineHeight) {
-            _positionMode = 0;
-            _position = position;
-            _lineHeight = lineHeight;
-
-            var screen = Screen.FromPoint(position);
-
-            // position the window smartly
-            if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
-                position.X = position.X - Width;
-            if (position.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2)
-                position.Y = position.Y - Height - lineHeight;
-            Location = position;
-        }
-
-        /// <summary>
-        /// Position the tooltip relatively to the autocompletion form (represented by a rectangle)
-        /// reversed = true if the autocompletion is ABOVE the text it completes
-        /// </summary>
-        /// <param name="rect"></param>
-        /// <param name="reversed"></param>
-        public void SetPosition(Rectangle rect, bool reversed) {
-            _positionMode = 1;
-            _rect = rect;
-            _reversed = reversed;
-
-            var screen = Screen.FromPoint(rect.Location);
-
-            var position = new Point(0, 0);
-            // position the window smartly
-            if (reversed)
-                position.Y = (rect.Y + rect.Height) - Height;
-            else
-                position.Y = rect.Y;
-
-            if (rect.X > (screen.WorkingArea.Width - (rect.X + rect.Width)))
-                position.X = rect.X - Width;
-            else
-                position.X = rect.X + rect.Width;
-            Location = position;
-        }
-
-        /// <summary>
-        /// Reposition the tooltip with the last SetPosition method called
-        /// </summary>
-        public void SetPosition() {
-            if (_positionMode == 1)
-                SetPosition(_rect, _reversed);
-            else
-                SetPosition(_position, _lineHeight);
-        }
-
-        /// <summary>
         /// Sets the link clicked event for the label
         /// </summary>
         /// <param name="clickHandler"></param>
         public void SetLinkClickedEvent(Action<HtmlLinkClickedEventArgs> clickHandler) {
             _labelContent.LinkClicked += (sender, args) => clickHandler(args);
         }
+
         #endregion
 
     }

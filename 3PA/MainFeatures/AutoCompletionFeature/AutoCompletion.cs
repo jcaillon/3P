@@ -54,7 +54,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// position of the carret when the autocompletion was opened (from shortcut)
         /// </summary>
-        private static int _openedFromShortCutPosition;
+        private static int _shownPosition;
+
+        private static int _shownLine;
 
         private static AutoCompletionForm _form;
 
@@ -80,6 +82,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
         }
         private static TypeOfList _currentTypeOfList;
+        
         private static bool _needToSetItems;
         private static bool _needToSetActiveTypes;
 
@@ -133,6 +136,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (_itemsListLock.TryEnterWriteLock(-1)) {
                     try {
                         _currentItems = value;
+                        _currentItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
                         _needToSetItems = true;
                     } finally {
                         _itemsListLock.ExitWriteLock();
@@ -183,51 +187,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void OnShowCompleteSuggestionList() {
             ParserHandler.ParseCurrentDocument();
             _openedFromShortCut = true;
-            _openedFromShortCutPosition = Npp.CurrentPosition;
+            _shownLine = Npp.Line.CurrentLine;
+            _shownPosition = Npp.CurrentPosition;
             UpdateAutocompletion();
         }
-
-        /// <summary>
-        /// Returns a keyword from the autocompletion list with the correct case
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="lastWordPos"></param>
-        /// <returns></returns>
-        public static string CorrectKeywordCase(string keyword, int lastWordPos) {
-            string output = null;
-            if (!Config.Instance.DisableAutoCaseCompletly) {
-                var found = FindInSavedItems(keyword, Npp.Line.CurrentLine);
-                if (found != null) {
-                    RememberUseOf(found);
-                    int caseMode;
-                    if (found.FromParser)
-                        caseMode = 4; // use displayText case
-                    else if (found.Type == CompletionType.Database || found.Type == CompletionType.Field || found.Type == CompletionType.FieldPk || found.Type == CompletionType.Sequence || found.Type == CompletionType.Table)
-                        caseMode = Config.Instance.DatabaseChangeCaseMode;
-                    else
-                        caseMode = Config.Instance.KeywordChangeCaseMode;
-                    output = keyword.ConvertCase(caseMode, found.DisplayText);
-                } else {
-                    // search in tables fields
-                    var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(lastWordPos));
-                    if (tableFound != null) {
-                        var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
-                        if (fieldFound != null) {
-                            RememberUseOf(new CompletionItem {
-                                FromParser = false,
-                                DisplayText = fieldFound.Name,
-                                Type = CompletionType.Field,
-                                Ranking = 0
-                            });
-                            RememberUseOfDatabaseItem(fieldFound.Name);
-                            output = keyword.ConvertCase(tableFound.IsTempTable ? 4 : Config.Instance.DatabaseChangeCaseMode, fieldFound.Name);
-                        }
-                    }
-                }
-            }
-            return output;
-        }
-
+        
         /// <summary>
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
@@ -263,16 +227,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var filterClass = new CompletionFilterClass();
             filterClass.UpdateConditions(lineNumber, dontCheckLine);
             var outList = SavedAllItems.Where(filterClass.FilterPredicate).ToList();
-            outList.Sort(CompletionDataSortingClass<CompletionItem>.Instance);
+            outList.Sort(CompletionSortingClass<CompletionItem>.Instance);
             return outList;
         }
 
         /// <summary>
-        /// returns the keyword currently selected in the completion list
+        /// Replace the keywork at given offset with the current suggestion
         /// </summary>
-        /// <returns></returns>
-        public static CompletionItem GetCurrentSuggestion() {
-            return _form.YamuiList.SelectedItem as CompletionItem;
+        public static void UseCurrentSuggestion(int offset) {
+            InsertSuggestion(_form.YamuiList.SelectedItem as CompletionItem, offset);
         }
 
         #endregion
@@ -300,8 +263,28 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     _staticItems.AddRange(DataBase.GetSequencesList());
                     _staticItems.AddRange(DataBase.GetTablesList());
 
+                    // modify the case of each item
+                    foreach (var item in _staticItems) {
+                        int caseMode = -1;
+                        switch (item.Type) {
+                            case CompletionType.Keyword:
+                            case CompletionType.KeywordObject:
+                                caseMode = Config.Instance.KeywordChangeCaseMode;
+                                break;
+                            case CompletionType.Database:
+                            case CompletionType.Field:
+                            case CompletionType.FieldPk:
+                            case CompletionType.Table:
+                            case CompletionType.Sequence:
+                                caseMode = Config.Instance.DatabaseChangeCaseMode;
+                                break;
+                        }
+                        if (caseMode > -1)
+                            item.DisplayText = item.DisplayText.ConvertCase(caseMode);
+                    }
+
                     // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
-                    _staticItems.Sort(CompletionDataSortingClass<CompletionItem>.Instance);
+                    _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
 
                 } finally {
                     _itemsListLock.ExitWriteLock();
@@ -354,17 +337,27 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// it is only called when the user adds or delete a char
         /// </summary>
         public static void UpdateAutocompletion() {
+
             if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                 return;
 
+            var nppCurrentPosition = Npp.CurrentPosition;
+            var nppCurrentLine = Npp.Line.CurrentLine;
+
             // dont show in string/comments..?
-            if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+            if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(nppCurrentPosition))
                 return;
+
+            // the caret changed line
+            if (IsVisible && nppCurrentLine != _shownLine) {
+                Close();
+                return;
+            }
 
             // get current word, current previous word (table or database name)
             int nbPoints;
             string previousWord = "";
-            var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
+            var strOnLeft = Npp.GetTextOnLeftOfPos(nppCurrentPosition);
             var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
             var splitted = keyword.Split('.');
             string lastCharBeforeWord = "";
@@ -413,7 +406,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // close if there is nothing to suggest
-            if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && (keyword == null || keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                 Close();
                 return;
             }
@@ -433,6 +426,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 CurrentTypeOfList = TypeOfList.Complete;
                 CurrentItems = SavedAllItems;
             }
+
             ShowSuggestionList(keyword);
             
         }
@@ -453,21 +447,24 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity,
                     FocusedOpacity = Config.Instance.AutoCompleteFocusedOpacity
                 };
-                _form.YamuiList.SortingClass = CompletionDataSortingClass<ListItem>.Instance;
+                // Set the filter and the sorting class
+                _form.YamuiList.SortingClass = CompletionSortingClass<ListItem>.Instance;
                 _form.YamuiList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
+
+                _form.YamuiList.EmptyListString = @"No suggestions!";
+
                 _form.InsertSuggestion += OnInsertSuggestion;
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _form.Show(Npp.Win32WindowNpp);
-
-            } else if (_needToSetItems) {
-                // we changed the mode, we need to Set the items of the autocompletion
+            } 
+            // we changed the mode, we need to Set the items of the autocompletion
+            else if (_needToSetItems) {
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
             }
 
             // only activate certain types
             if (_needToSetActiveTypes || !_form.Visible) {
-                // only activate certain types
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
                         _form.YamuiList.SetUnactiveType(new List<int> {
@@ -499,9 +496,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // if the form was already visible, don't go further
-            if (_form.Visible) return;
+            if (_form.Visible) 
+                return;
 
-            _form.YamuiList.SelectedItemIndex = 0;
+            _shownLine = nppCurrentLine;
+            _shownPosition = Npp.CurrentPosition;
 
             // update position
             var point = Npp.GetCaretScreenLocation();
@@ -510,22 +509,26 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _form.SetPosition(point, lineHeight + 2);
             _form.UnCloack();
 
+            _form.YamuiList.SelectedItemIndex = 0;
         }
 
         /// <summary>
         /// Method called by the form when the user accepts a suggestion (tab or enter or doubleclick)
         /// </summary>
         private static void OnInsertSuggestion(CompletionItem data) {
-            try {
+            InsertSuggestion(data);
+        }
 
+        public static void InsertSuggestion(CompletionItem data, int offset = 0) {
+            try {
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
-                if (Config.Instance.CodeReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
+                if (Config.Instance.CodeReplaceAbbreviations && (data.Flag & ParseFlag.Abbreviation) != 0) {
                     var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
                     replacementText = fullKeyword ?? data.DisplayText;
                 }
-
-                Npp.ReplaceKeywordWrapped(replacementText, 0);
+                
+                Npp.ReplaceKeywordWrapped(replacementText, offset);
 
                 // Remember this item to show it higher in the list later
                 RememberUseOf(data);
@@ -535,7 +538,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 Close();
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error during AutoCompletionAccepted");
+                ErrorHandler.ShowErrors(e, "Error during InsertSuggestion");
             }
         }
 
@@ -550,68 +553,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _lastRememberedKeyword = item.DisplayText;
 
             item.Ranking++;
-            _form.YamuiList.SortInitialList();
+            _form.YamuiList.SortInitialList(); // sort the list of items since the ranking has changed
 
             if (item.FromParser)
                 RememberUseOfParsedItem(item.DisplayText);
-            else if (item.Type != CompletionType.Keyword && item.Type != CompletionType.Snippet)
+            else if (item.Type == CompletionType.Database || item.Type == CompletionType.Field || item.Type == CompletionType.FieldPk || item.Type == CompletionType.Table)
                 RememberUseOfDatabaseItem(item.DisplayText);                
         }
 
-
-        #endregion
-
-        #region _form handler
-
-        /// <summary>
-        /// Is the form currently visible?
-        /// </summary>
-        public static bool IsVisible {
-            get { return _form != null && _form.Visible; }
-        }
-
-        /// <summary>
-        /// Closes the form
-        /// </summary>
-        public static void Close() {
-            try {
-                if (_form != null)
-                    _form.Cloack();
-                _openedFromShortCut = false;
-
-                // closing the autocompletion form also closes the tooltip
-                InfoToolTip.InfoToolTip.CloseIfOpenedForCompletion();
-            } catch (Exception e) {
-                ErrorHandler.LogError(e);
-            }
-        }
-
-        /// <summary>
-        /// Forces the form to close, only when leaving npp
-        /// </summary>
-        public static void ForceClose() {
-            try {
-                if (_form != null)
-                    _form.ForceClose();
-                _form = null;
-            } catch (Exception e) {
-                ErrorHandler.LogError(e);
-            }
-        }
-
-        /// <summary>
-        /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
-        /// </summary>
-        public static bool PerformKeyDown(KeyEventArgs e) {
-            return IsVisible && _form.YamuiList.PerformKeyDown(e);
-        }
-
-        /// <summary>
-        /// Returns true if the cursor is within the form window
-        /// </summary>
-        public static bool IsMouseIn() {
-            return Win32Api.IsCursorIn(_form.Handle);
-        }
 
         #endregion
 
@@ -660,5 +609,62 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
+        
+        #region _form handler
+
+        /// <summary>
+        /// Is the form currently visible?
+        /// </summary>
+        public static bool IsVisible {
+            get { return _form != null && _form.Visible; }
+        }
+
+        /// <summary>
+        /// Closes the form
+        /// </summary>
+        public static void Close() {
+            try {
+                if (_form != null)
+                    _form.Cloack();
+                _openedFromShortCut = false;
+
+                // closing the autocompletion form also closes the tooltip
+                InfoToolTip.InfoToolTip.CloseIfOpenedForCompletion();
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
+            }
+        }
+
+        /// <summary>
+        /// Forces the form to close, only when leaving npp
+        /// </summary>
+        public static void ForceClose() {
+            try {
+                if (_form != null) {
+                    _form.InsertSuggestion -= OnInsertSuggestion;
+                    _form.ForceClose();
+                }
+                _form = null;
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
+            }
+        }
+
+        /// <summary>
+        /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
+        /// </summary>
+        public static bool PerformKeyDown(KeyEventArgs e) {
+            return IsVisible && _form.YamuiList.PerformKeyDown(e);
+        }
+
+        /// <summary>
+        /// Returns true if the cursor is within the form window
+        /// </summary>
+        public static bool IsMouseIn() {
+            return Win32Api.IsCursorIn(_form.Handle);
+        }
+
+        #endregion
+
     }
 }

@@ -220,7 +220,10 @@ namespace _3PA {
                 Keys.PageDown,
                 Keys.PageUp,
                 Keys.Next,
-                Keys.Prior);
+                Keys.Prior,
+                Keys.Home,
+                Keys.End
+                );
             // we also add the key that are used as shortcut for 3P functions
             AppliMenu.Instance = null; // make sure to recompute the menu
             if (AppliMenu.Instance != null) {

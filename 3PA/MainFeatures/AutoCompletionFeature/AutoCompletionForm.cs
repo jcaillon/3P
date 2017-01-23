@@ -65,6 +65,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             YamuiList.RowClicked += YamuiListOnRowClicked;
             YamuiList.KeyPressed += YamuiListOnKeyPressed;
             YamuiList.MouseLeft += YamuiListOnMouseLeft;
+            YamuiList.IndexChanged += YamuiListOnIndexChanged;
             
             // add control
             Controls.Add(YamuiList);
@@ -78,6 +79,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
+        }
+
+        private void YamuiListOnIndexChanged(YamuiScrollList yamuiScrollList) {
+            InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(YamuiList.SelectedItem as CompletionItem, this);
         }
 
         #endregion
@@ -112,13 +117,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         private void YamuiListOnKeyPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
-            // down and up activate the display of tooltip
-            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) {
-                //InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
-            }
-
             if (e.KeyCode == Keys.Escape) {
-                Close();
+                Cloack();
                 InfoToolTip.InfoToolTip.Close();
                 e.Handled = true;
             }

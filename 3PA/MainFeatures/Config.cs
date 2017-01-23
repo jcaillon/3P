@@ -200,16 +200,7 @@ namespace _3PA.MainFeatures {
                 Description = "Whether or not to allow the ENTER key to accept the suggestion",
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
-            public bool AutoCompleteUseEnterToAccept = false;
-
-            [Display(Name = "Number of suggestions",
-                Description = "The number of suggestions shown in the list",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            [Range(3, 20)]
-            public int AutoCompleteShowListOfXSuggestions = 12;
-
-            public int AutoCompleteWidth = 310;
+            public bool AutoCompleteUseEnterToAccept = true;
 
             [Display(Name = "Insert current suggestion on word end",
                 Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
@@ -222,12 +213,6 @@ namespace _3PA.MainFeatures {
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnlyShowDefinedVar = true;
-
-            [Display(Name = "Hide list scroll bar",
-                Description = "Check to remove the scrollbar, you can still move up/down with arrow keys<br>and next/previous pages, this is only to have a prettier list in dark themes",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteHideScrollBar = false;
 
             [Display(Name = "Unfocused opacity",
                 Description = "The opacity of the list when unfocused",
@@ -245,6 +230,38 @@ namespace _3PA.MainFeatures {
 
             public string AutoCompletePriorityList = "2,4,5,12,7,8,11,3,6,15,9,14,10,13,0,1";
 
+            // Height of the autocompletion form
+            public int AutoCompleteShowListOfXSuggestions = 12;
+
+            // Width of the autocompletion form
+            public int AutoCompleteWidth = 310;
+            
+            [Display(Name = "Keywords auto-case mode",
+                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 4)]
+            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
+
+            [Display(Name = "Database info auto-case mode",
+                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 4)]
+            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
+
+            [Display(Name = "Auto replace abbreviations",
+                Description = "Automatically replaces abbreviations by their full lenght counterparts",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool CodeReplaceAbbreviations = true;
+
+            [Display(Name = "Auto replace semicolon",
+                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool CodeReplaceSemicolon = true;
+
             #endregion
 
             #region CODE EDITION
@@ -252,38 +269,6 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// CODE EDITION
             /// </summary>
-
-            [Display(Name = "Disable all auto-case mode",
-                Description = "Toggle on if you wish to completly disable the auto-case ability of 3P<br><br>By default, 3P will at least correct the case for variables (using their definition)<br>it also can convert the case of keywords / database info (tables, fields...) : see the options below",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool DisableAutoCaseCompletly = false;
-
-            [Display(Name = "Keywords auto-case mode",
-                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            [Range(0, 4)]
-            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Database info auto-case mode",
-                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            [Range(0, 4)]
-            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Auto replace abbreviations",
-                Description = "Automatically replaces abbreviations by their full lenght counterparts",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool CodeReplaceAbbreviations = true;
-
-            [Display(Name = "Auto replace semicolon",
-                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool CodeReplaceSemicolon = true;
 
             [Display(Name = "Max number of characters in a block",
                 Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This value allows to show a warning when you overpass the limit in notepad++",

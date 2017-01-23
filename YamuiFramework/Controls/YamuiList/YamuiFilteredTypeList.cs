@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
@@ -65,8 +66,10 @@ namespace YamuiFramework.Controls.YamuiList {
         protected HtmlToolTip _tooltip = new HtmlToolTip();
 
         protected Dictionary<int, SelectorButton> _typeButtons = new Dictionary<int, SelectorButton>();
-
         protected List<int> _typeList = new List<int>();
+        private Dictionary<int, Image> _typeImages;
+        private Dictionary<int, string> _typeText;
+        private ReaderWriterLockSlim _typeListLock = new ReaderWriterLockSlim();
 
         protected const TextFormatFlags TextRightFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPadding;
 
@@ -160,13 +163,19 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Stores a correspondance between type number and image to use for the button
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Dictionary<int, Image> TypeImages { get; private set; }
+        public Dictionary<int, Image> TypeImages {
+            get { return _typeImages; }
+            private set { _typeImages = value; }
+        }
 
         /// <summary>
         /// Stores a correspondance between type number and text to use for the tooltip of the button
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Dictionary<int, string> TypeText { get; private set; }
+        public Dictionary<int, string> TypeText {
+            get { return _typeText; }
+            private set { _typeText = value; }
+        }
 
         #endregion
 
@@ -211,7 +220,13 @@ namespace YamuiFramework.Controls.YamuiList {
             }
 
             // set the type buttons needed
-            ComputeTypeButtonsNeeded(listItems);
+            if (_typeListLock.TryEnterWriteLock(-1)) {
+                try {
+                    ComputeTypeButtonsNeeded(listItems);
+                } finally {
+                    _typeListLock.ExitWriteLock();
+                }
+            }
 
             base.SetItems(listItems);
         }
@@ -546,40 +561,43 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// use this to programmatically uncheck any type that is not in the given list
         /// </summary>
-        public void SetActiveType(List<int> allowedType) {
+        public void SetActiveType(List<int> allowedType, bool forceGraphicalUpdate = true) {
             this.SafeInvoke(form => {
                 if (allowedType == null)
                     allowedType = new List<int>();
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
                 }
-                ApplyFilterPredicate();
+                if (forceGraphicalUpdate)
+                    ApplyFilterPredicate();
             });
         }
 
         /// <summary>
         /// use this to programmatically check any type that is not in the given list
         /// </summary>
-        public void SetUnactiveType(List<int> notAllowedType) {
+        public void SetUnactiveType(List<int> notAllowedType, bool forceGraphicalUpdate = true) {
             this.SafeInvoke(form => {
                 if (notAllowedType == null)
                     notAllowedType = new List<int>();
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = notAllowedType.IndexOf(selectorButton.Value.Type) < 0;
                 }
-                ApplyFilterPredicate();
+                if (forceGraphicalUpdate)
+                    ApplyFilterPredicate();
             });
         }
 
         /// <summary>
         /// reset all the button Types to activated
         /// </summary>
-        public void ResetActiveType() {
+        public void ResetActiveType(bool forceGraphicalUpdate = true) {
             this.SafeInvoke(form => {
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = true;
                 }
-                ApplyFilterPredicate();
+                if (forceGraphicalUpdate)
+                    ApplyFilterPredicate();
             });
         }
 

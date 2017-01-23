@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
@@ -46,6 +47,7 @@ namespace YamuiFramework.Controls.YamuiList {
         protected Predicate<FilteredListItem> _filterPredicate;
         
         protected List<FilteredListItem> _initialItems;
+        protected ReaderWriterLockSlim _initItemsLock = new ReaderWriterLockSlim();
 
         protected int _nbInitialItems;
 
@@ -78,9 +80,15 @@ namespace YamuiFramework.Controls.YamuiList {
             get { return _filterString; }
             set {
                 _filterString = value.ToLower().Trim();
-                if (_initialItems != null && _nbInitialItems > 0) {
+                if (_nbInitialItems > 0) {
                     // apply the filter on each item to compute internal properties
-                    _initialItems.ForEach(data => data.InternalFilterApply(_filterString));
+                    if (_initItemsLock.TryEnterReadLock(-1)) {
+                        try {
+                            _initialItems.ForEach(data => data.InternalFilterApply(_filterString));
+                        } finally {
+                            _initItemsLock.ExitReadLock();
+                        }
+                    }
                 }
                 ApplyFilterPredicate();
             }
@@ -96,7 +104,9 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// 
+        /// Set a class implemmenting a comparer to sort the initial list of items,
+        /// When you use SetItems() you should already have sorted the list, the later sorts
+        /// are manual, call SortInitialList()
         /// </summary>
         public IComparer<ListItem> SortingClass { get; set; }
 
@@ -105,7 +115,26 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual List<FilteredListItem> InitialItems {
-            get { return _initialItems; }
+            get {
+                if (_initItemsLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _initialItems;
+                    } finally {
+                        _initItemsLock.ExitReadLock();
+                    }
+                }
+                return null;
+            }
+            private set {
+                if (_initItemsLock.TryEnterWriteLock(-1)) {
+                    try {
+                        _initialItems = value;
+                        _nbInitialItems = _initialItems == null ? 0 : _initialItems.Count;
+                    } finally {
+                        _initItemsLock.ExitWriteLock();
+                    }
+                }
+            }
         }
 
         #endregion
@@ -124,11 +153,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Set the items that will be displayed in the list
         /// </summary>
         public override void SetItems(List<ListItem> listItems) {
-            _initialItems = listItems.Cast<FilteredListItem>().ToList();
-            _nbInitialItems = _initialItems.Count;
+            InitialItems = listItems.Cast<FilteredListItem>().ToList();
 
             // we reapply the current filter to this new list
-            SortInitialList();
             FilterString = FilterString;
         }
 
@@ -140,11 +167,17 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Filter the list of initial items with the filter predicate and the FilterFullyMatch
         /// </summary>
         protected void ApplyFilterPredicate() {
-            if (_initialItems == null || _nbInitialItems == 0)
+            if (_nbInitialItems == 0)
                 return;
 
             // base setItems
-            base.SetItems(GetFilteredAndSortedList(_initialItems));
+            if (_initItemsLock.TryEnterReadLock(-1)) {
+                try {
+                    base.SetItems(GetFilteredAndSortedList(_initialItems));
+                } finally {
+                    _initItemsLock.ExitReadLock();
+                }
+            }
         }
 
         /// <summary>
@@ -166,15 +199,8 @@ namespace YamuiFramework.Controls.YamuiList {
                 else
                     items = listItems;
             }
-            return items.Cast<ListItem>().ToList();
 
-            //List<ListItem> items;
-            //if (FilterPredicate != null)
-            //    items = listItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>//().ToList();
-            //else
-            //    items = listItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
-            //
-            //return items;
+            return items.Cast<ListItem>().ToList();
         }
 
         #endregion
@@ -280,8 +306,15 @@ namespace YamuiFramework.Controls.YamuiList {
 
         public void SortInitialList() {
             // sort
-            if (SortingClass != null && _initialItems != null && _nbInitialItems > 0)
-                _initialItems.Sort(SortingClass);
+            if (SortingClass != null && _nbInitialItems > 0) {
+                if (_initItemsLock.TryEnterReadLock(-1)) {
+                    try {
+                        _initialItems.Sort(SortingClass);
+                    } finally {
+                        _initItemsLock.ExitReadLock();
+                    }
+                }
+            }
         }
 
         #endregion
