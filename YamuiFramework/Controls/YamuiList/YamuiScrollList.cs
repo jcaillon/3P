@@ -151,9 +151,9 @@ namespace YamuiFramework.Controls.YamuiList {
                 _topIndex = value;
                 _topIndex = _topIndex.ClampMax(_nbItems - _nbRowFullyDisplayed);
                 _topIndex = _topIndex.ClampMin(0);
-                
-                RefreshButtons();
-                RepositionThumb();
+
+                this.SafeSyncInvoke(RefreshButtons);
+                this.SafeSyncInvoke(RepositionThumb);
 
                 // activate/select the correct button button
                 SelectedRowIndex = SelectedItemIndex - TopIndex;
@@ -310,13 +310,15 @@ namespace YamuiFramework.Controls.YamuiList {
                 _listPadding = value;
 
                 ComputeBaseRectangle();
-                ResizeControl();
-                Invalidate();
+                this.SafeSyncInvoke(ResizeControl);
+                Invalidate(); // invalidate doesn't need an invoke
 
                 // reposition buttons
-                for (int i = 0; i < _nbRowDisplayed; i++) {
-                    _rows[i].Location = new Point(_listRectangle.Left, _listRectangle.Top + i * RowHeight);
-                }
+                this.SafeSyncInvoke(() => {
+                    for (int i = 0; i < _nbRowDisplayed; i++) {
+                        _rows[i].Location = new Point(_listRectangle.Left, _listRectangle.Top + i*RowHeight);
+                    }
+                });
             }
         }
 
@@ -449,7 +451,7 @@ namespace YamuiFramework.Controls.YamuiList {
             SetStyle(ControlStyles.Selectable, false);
 
             ComputeBaseRectangle();
-            ComputeScrollBar();
+            this.SafeSyncInvoke(ComputeScrollBar);
         }
 
         #endregion
@@ -524,15 +526,15 @@ namespace YamuiFramework.Controls.YamuiList {
 
             Items = listItems;
 
-            ComputeScrollBar();
-            DrawButtons();
+            this.SafeSyncInvoke(ComputeScrollBar);
+            this.SafeSyncInvoke(DrawButtons);
 
             // make sure to select an index that exists
             SelectedItemIndex = SelectedItemIndex;
 
             // and an enabled item!
             if (_nbItems > SelectedItemIndex) {
-                if (Items[SelectedItemIndex].IsDisabled) {
+                if (GetItem(SelectedItemIndex).IsDisabled) {
                     var newIndex = SelectedItemIndex;
                     do {
                         newIndex++;
@@ -645,6 +647,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     // repaint
                     _rows[i].Invalidate();
+                    _rows[i].Update(); // force to redraw the control immediatly
                 }
             }
         }
@@ -968,7 +971,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Programatically triggers the OnKeyDown event
         /// </summary>
         public bool PerformKeyDown(KeyEventArgs e) {
-            OnKeyDown(e);
+            this.SafeSyncInvoke(() => OnKeyDown(e));
             return e.Handled;
         }
 
@@ -976,7 +979,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Programatically triggers the HandleWindowsProc method
         /// </summary>
         public void PerformHandleWindowsProc(Message message) {
-            HandleWindowsProc(message);
+            this.SafeSyncInvoke(() => HandleWindowsProc(message));
         }
 
         /// <summary>
@@ -984,7 +987,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void GrabFocus() {
             if (_nbRowDisplayed > 0)
-                ActiveControl = _rows[0];
+                this.SafeSyncInvoke(() => ActiveControl = _rows[0]);
         }
 
         /// <summary>
@@ -1016,8 +1019,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// to be called when the padding/size of the control changes
         /// </summary>
         private void ResizeControl() {
-            ComputeScrollBar();
-            DrawButtons();
+            this.SafeSyncInvoke(ComputeScrollBar);
+            this.SafeSyncInvoke(DrawButtons);
 
             // reposition top index if needed (also refresh buttons and thumb)
             TopIndex = TopIndex; 

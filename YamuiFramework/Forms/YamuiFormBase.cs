@@ -268,7 +268,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Resizes the form so that it doesn't go out of screen
         /// </summary>
-        public void ResizeFormToFitScreen() {
+        protected void ResizeFormToFitScreen() {
             var loc = Location;
             loc.Offset(Width / 2, Height / 2);
             var screen = Screen.FromPoint(loc);
@@ -299,7 +299,7 @@ namespace YamuiFramework.Forms {
         /// Programatically triggers the OnKeyDown event
         /// </summary>
         public bool PerformKeyDown(KeyEventArgs e) {
-            OnKeyDown(e);
+            this.SafeSyncInvoke(form => form.OnKeyDown(e));
             return e.Handled;
         }
 

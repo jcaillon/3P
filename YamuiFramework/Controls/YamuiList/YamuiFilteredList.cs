@@ -139,7 +139,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region Set
+        #region Life and death
 
         /// <summary>
         /// Constructor to initialize stuff
@@ -149,6 +149,18 @@ namespace YamuiFramework.Controls.YamuiList {
             _framePen = new Pen(YamuiThemeManager.Current.AutoCompletionHighlightBorder);
         }
 
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                _fillBrush.Dispose();
+                _framePen.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
+        #region Set
+        
         /// <summary>
         /// Set the items that will be displayed in the list
         /// </summary>

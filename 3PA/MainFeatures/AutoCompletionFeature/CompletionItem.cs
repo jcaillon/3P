@@ -85,8 +85,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toApplyOnFlag(name, flag);
             }
         }
-
-
+        
         /// <summary>
         /// The piece of text displayed in the list
         /// </summary>

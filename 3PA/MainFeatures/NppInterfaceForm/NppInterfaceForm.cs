@@ -133,39 +133,45 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            _lastPosition = Location;
-            GiveFocusBack();
-            Visible = false;
-            // move this to an invisible part of the screen, otherwise we can see this window
-            // if another window with Opacity <1 is in front Oo
-            Location = new Point(-10000, -10000);
+            this.SafeSyncInvoke(() => {
+                _lastPosition = Location;
+                GiveFocusBack();
+                Visible = false;
+                // move this to an invisible part of the screen, otherwise we can see this window
+                // if another window with Opacity <1 is in front Oo
+                Location = new Point(-10000, -10000);
+            });
         }
 
         /// <summary>
         /// show the form
         /// </summary>
         public void UnCloack() {
-            if (Location == CloakedPosition)
-                Location = _lastPosition;
-            _allowInitialdisplay = true;
-            Opacity = UnfocusedOpacity;
-            Visible = true;
-            GiveFocusBack();
+            this.SafeSyncInvoke(() => {
+                if (Location == CloakedPosition)
+                    Location = _lastPosition;
+                _allowInitialdisplay = true;
+                Opacity = UnfocusedOpacity;
+                Visible = true;
+                GiveFocusBack();
+            });
         }
 
         /// <summary>
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
-            FormIntegration.UnRegisterToNpp(Handle);
-            Tag = true;
-            Close();
+            this.SafeSyncInvoke(() => {
+                FormIntegration.UnRegisterToNpp(Handle);
+                Tag = true;
+                Close();
+            });
         }
 
         /// <summary>
         /// Gives focus back to the owner window
         /// </summary>
-        public void GiveFocusBack() {
+        protected void GiveFocusBack() {
             if (GiveFocusBackToScintilla)
                 Npp.GrabFocus();
             else

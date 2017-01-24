@@ -37,9 +37,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #region fields
 
-        private static Dictionary<string, CompletionItem> _keywordList = new Dictionary<string, CompletionItem>(); 
-        private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
-        private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.CurrentCultureIgnoreCase);
+        // Dictionnay of id -> keyword
+        private static Dictionary<string, KeywordDefinition> _keywordList = new Dictionary<string, KeywordDefinition>(); 
+        private static Dictionary<string, KeywordHelp> _help = new Dictionary<string, KeywordHelp>(StringComparer.CurrentCultureIgnoreCase);
+        private static List<KeywordAbbreviation> _abbreviations = new List<KeywordAbbreviation>();
 
         #endregion
         
@@ -64,11 +65,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
                     if (!_keywordList.ContainsKey(items[0])) {
-                        _keywordList.Add(items[0], new CompletionItem {
+                        _keywordList.Add(items[0], new KeywordDefinition {
                             DisplayText = items[1],
                             Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                             Ranking = int.Parse(items[4]),
-                            SubString = keywordType.ToString(),
                             Flag = flag,
                             KeywordType = keywordType
                         });
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, (i, line) => {
                 var items = line.Split('\t');
                 if (items.Count() == 2) {
-                    _abbreviations.Add(new KeywordsAbbreviations {
+                    _abbreviations.Add(new KeywordAbbreviation {
                         CompleteText = items[1],
                         ShortText = items[0]
                     });
@@ -111,7 +111,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     for (int i = 2; i < items.Length; i++) {
                         listSynthax.Add(items[i]);
                     }
-                    _help.Add(items[0], new KeywordsHelp {
+                    _help.Add(items[0], new KeywordHelp {
                         Description = items[1],
                         Synthax = listSynthax
                     });
@@ -140,7 +140,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// returns the list of keywords
         /// </summary>
         public static List<CompletionItem> GetList() {
-            return _keywordList.Values.ToList();
+            return _keywordList.Values.Select(keyword => new CompletionItem {
+                DisplayText = keyword.DisplayText,
+                Type = keyword.Type,
+                Ranking = keyword.Ranking,
+                SubString = keyword.KeywordType.ToString(),
+                Flag = keyword.Flag,
+                KeywordType = keyword.KeywordType
+            }).ToList();
         }
 
         /// <summary>
@@ -161,12 +168,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static KeywordsHelp GetKeywordHelp(string key) {
+        public static KeywordHelp GetKeywordHelp(string key) {
             return _help.ContainsKey(key) ? _help[key] : null;
         }
 
         #endregion
 
+    }
+
+    internal class KeywordDefinition {
+        public string DisplayText { get; set; }
+        public CompletionType Type { get; set; }
+        public int Ranking{ get; set; }
+        public KeywordType KeywordType { get; set; }
+        public ParseFlag Flag { get; set; }
     }
 
     /// <summary>
@@ -194,13 +209,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Method
     }
 
-    public class KeywordsAbbreviations {
+    internal class KeywordAbbreviation {
         public string CompleteText;
         public string ShortText;
     }
 
-    public class KeywordsHelp {
+    internal class KeywordHelp {
         public string Description;
         public List<string> Synthax;
     }
+
 }

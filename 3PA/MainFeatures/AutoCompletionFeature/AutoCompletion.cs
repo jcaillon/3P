@@ -475,7 +475,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // the thread used to create the form
             _form.Keyword = keyword;
             if (_form.InvokeRequired)
-                _form.SafeSyncInvoke(ShowSuggestionList);
+                ShowSuggestionList(_form);
+                //_form.SafeSyncInvoke(ShowSuggestionList); TODO: TESING W/O HANDLING INVOKE HERE BUT DIRECTLY IN THE YAMUILIST, TO DELETE
             else
                 ShowSuggestionList(_form);
         }
@@ -661,7 +662,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void Cloak() {
             try {
                 if (_form != null)
-                    _form.Cloack();
+                    _form.SafeSyncInvoke(form => form.Cloack());
                 _openedFromShortCut = false;
 
                 // closing the autocompletion form also closes the tooltip

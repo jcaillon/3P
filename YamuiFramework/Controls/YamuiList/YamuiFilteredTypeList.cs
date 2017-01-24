@@ -215,9 +215,9 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // measure the space taken by the label "showing x items"
             using (var gImg = new Bitmap(1, 1))
-            using (var g = Graphics.FromImage(gImg)) {
-                _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
-            }
+                using (var g = Graphics.FromImage(gImg)) {
+                    _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
+                }
 
             // set the type buttons needed
             if (_typeListLock.TryEnterWriteLock(-1)) {
