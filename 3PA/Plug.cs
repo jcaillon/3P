@@ -668,7 +668,7 @@ namespace _3PA {
         public static void OnCharAddedWordContinue(char c) {
             try {
                 // handles the autocompletion
-                AutoCompletion.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion(false);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordContinue");
             }
@@ -707,7 +707,7 @@ namespace _3PA {
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
-                AutoCompletion.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion(true);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
@@ -758,7 +758,7 @@ namespace _3PA {
 
             // did the user supress 1 char? (or one line)
             if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
-                AutoCompletion.UpdateAutocompletion();
+                AutoCompletion.UpdateAutocompletion(true);
             }
         }
 
@@ -1004,7 +1004,7 @@ namespace _3PA {
         /// Call this method to close all popup/autocompletion form and alike
         /// </summary>
         public static void ClosePopups() {
-            AutoCompletion.Close();
+            AutoCompletion.Cloak();
             InfoToolTip.Close();
         }
 

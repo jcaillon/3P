@@ -1,6 +1,12 @@
 ﻿using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
+
+
+    /// <summary>
+    /// This class is not a singleton (the constructor is public) but we use a static instance
+    /// performances and handiness
+    /// </summary>
     internal class CompletionFilterClass {
 
         #region private

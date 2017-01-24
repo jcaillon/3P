@@ -15,6 +15,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public YamuiFilteredTypeList YamuiList { get; private set; }
 
+        /// <summary>
+        /// Stores the current word to use a filter in the autocompletion
+        /// </summary>
+        public string Keyword { get; set; }
+
         #endregion
 
         #region events

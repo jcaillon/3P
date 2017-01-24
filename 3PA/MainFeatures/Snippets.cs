@@ -127,7 +127,7 @@ namespace _3PA.MainFeatures {
                         LocSnippetContext.CurrentParameterValue = Npp.GetTextBetween(LocSnippetContext.CurrentParameter.Value);
                     }
 
-                    AutoCompletion.Close();
+                    AutoCompletion.Cloak();
 
                     if (LocSnippetContext.Parameters.Count <= 1)
                         FinalizeCurrent();

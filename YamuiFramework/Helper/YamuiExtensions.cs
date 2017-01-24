@@ -52,6 +52,25 @@ namespace YamuiFramework.Helper {
                 call(isi);
         }
 
+        /// <summary>
+        /// Executes a function on the thread of the given object
+        /// </summary>
+        public static object SafeSyncInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) {
+                return isi.Invoke(call, new object[] { isi });
+            }
+            return call(isi);
+        }
+
+        /// <summary>
+        /// Executes an action on the thread of the given object
+        /// </summary>
+        public static void SafeSyncInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) isi.Invoke(call, new object[] { isi });
+            else
+                call(isi);
+        }
+
         #endregion
 
         #region Simple math
