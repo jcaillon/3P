@@ -267,26 +267,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     _staticItems.AddRange(DataBase.GetSequencesList());
                     _staticItems.AddRange(DataBase.GetTablesList());
 
-                    // modify the case of each item
-                    foreach (var item in _staticItems) {
-                        int caseMode = -1;
-                        switch (item.Type) {
-                            case CompletionType.Keyword:
-                            case CompletionType.KeywordObject:
-                                caseMode = Config.Instance.KeywordChangeCaseMode;
-                                break;
-                            case CompletionType.Database:
-                            case CompletionType.Field:
-                            case CompletionType.FieldPk:
-                            case CompletionType.Table:
-                            case CompletionType.Sequence:
-                                caseMode = Config.Instance.DatabaseChangeCaseMode;
-                                break;
-                        }
-                        if (caseMode > -1)
-                            item.DisplayText = item.DisplayText.ConvertCase(caseMode);
-                    }
-
                     // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
                     _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
 

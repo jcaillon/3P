@@ -36,10 +36,14 @@ namespace YamuiFramework.Forms {
         /// Opacity, scaled on the owner's opacity
         /// </summary>
         public new double Opacity {
-            get { return base.Opacity; }
+            get {
+                return this.SafeSyncInvoke(() => base.Opacity);
+            }
             set {
-                if (Owner != null)
-                    base.Opacity = value * Owner.Opacity;
+                this.SafeSyncInvoke(() => {
+                    if (Owner != null)
+                        base.Opacity = value*Owner.Opacity;
+                });
             }
         }
 
@@ -48,14 +52,16 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public bool GoHide {
             set {
-                if (value) {
-                    Opacity = 0;
-                    Location = new Point(-100000, -100000);
-                } else {
-                    Opacity = 1d;
-                    if (Owner != null)
-                        Location = Owner.PointToScreen(_pageRectangle.Location);
-                }
+                this.SafeSyncInvoke(() => {
+                    if (value) {
+                        Opacity = 0;
+                        Location = new Point(-100000, -100000);
+                    } else {
+                        Opacity = 1d;
+                        if (Owner != null)
+                            Location = Owner.PointToScreen(_pageRectangle.Location);
+                    }
+                });
             }
         }
 

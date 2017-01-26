@@ -141,7 +141,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public static List<CompletionItem> GetList() {
             return _keywordList.Values.Select(keyword => new CompletionItem {
-                DisplayText = keyword.DisplayText,
+                DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode),
                 Type = keyword.Type,
                 Ranking = keyword.Ranking,
                 SubString = keyword.KeywordType.ToString(),

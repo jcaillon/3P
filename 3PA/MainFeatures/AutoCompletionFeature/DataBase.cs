@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// List of sequences of the database
         /// </summary>
-        private static List<CompletionItem> _sequences = new List<CompletionItem>();
+        private static List<SequenceItem> _sequences = new List<SequenceItem>();
 
         private static bool _isExtracting;
 
@@ -195,10 +195,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     case 'S':
                         if (splitted.Length != 3 || currentDb == null) 
                             return;
-                        _sequences.Add(new CompletionItem {
-                            DisplayText = splitted[1],
-                            Type = CompletionType.Sequence,
-                            SubString = currentDb.LogicalName
+                        _sequences.Add(new SequenceItem {
+                            SeqName = splitted[1],
+                            DbName = currentDb.LogicalName
                         });
                         break;
                     case 'T':
@@ -311,7 +310,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (_dataBases.Count <= 0)
                 return new List<CompletionItem>();
             return _dataBases.Select(@base => new CompletionItem {
-                DisplayText = @base.LogicalName,
+                DisplayText = @base.LogicalName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                 Type = CompletionType.Database,
                 FromParser = false,
                 Ranking = AutoCompletion.FindRankingOfDatabaseItem(@base.LogicalName),
@@ -323,7 +322,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// returns the list of keywords
         /// </summary>
         public static List<CompletionItem> GetSequencesList() {
-            return _sequences;
+            return _sequences.Select(item => new CompletionItem {
+                DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                Type = CompletionType.Sequence,
+                SubString = item.DbName
+            }).ToList();
         }
 
         /// <summary>
@@ -346,7 +349,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var output = new List<CompletionItem>();
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
             output.AddRange(dataBase.Tables.Select(table => new CompletionItem {
-                DisplayText = table.Name,
+                DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                 SubString = dataBase.LogicalName,
                 Type = CompletionType.Table,
                 FromParser = false,
@@ -366,7 +369,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (table == null)
                 return output;
             output.AddRange(table.Fields.Select(field => new CompletionItem {
-                DisplayText = field.Name,
+                DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                 Type = field.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
@@ -404,6 +407,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
+
+        internal class SequenceItem {
+            public string SeqName { get; set; }
+            public string DbName { get; set; }
+        }
 
     }
 }
