@@ -122,14 +122,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public override string Text {
             set {
-                this.SafeInvoke(thisBox => {
-                    _filterBox.Text = value;
-                    if (!string.IsNullOrEmpty(value)) {
-                        _filterBox.SelectionStart = value.Length;
-                        _filterBox.SelectionLength = 0;
-                    }
-                    ActiveControl = _filterBox;
-                });
+                _filterBox.Text = value;
+                if (!string.IsNullOrEmpty(value)) {
+                    _filterBox.SelectionStart = value.Length;
+                    _filterBox.SelectionLength = 0;
+                }
+                ActiveControl = _filterBox;
             }
         }
 
@@ -191,13 +189,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void Initialize(YamuiFilteredTypeList list) {
             AssociatedList = list;
-            this.SafeInvoke(thisBox => {
-                DrawControl();
+            DrawControl();
 
-                // link events of the textbox to the list
-                _filterBox.TextChanged += AssociatedList.OnTextChangedEvent;
-                _filterBox.KeyDown += FilterBoxOnKeyDown;
-            });
+            // link events of the textbox to the list
+            _filterBox.TextChanged += AssociatedList.OnTextChangedEvent;
+            _filterBox.KeyDown += FilterBoxOnKeyDown;
         }
 
         private void DrawControl() {
@@ -317,10 +313,8 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Public methods
 
         public void ClearAndFocusFilter() {
-            this.SafeInvoke(thisBox => {
-                _filterBox.Text = "";
-                ActiveControl = _filterBox;
-            });
+            _filterBox.Text = "";
+            ActiveControl = _filterBox;
         }
 
         #endregion

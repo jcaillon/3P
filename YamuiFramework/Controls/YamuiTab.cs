@@ -302,7 +302,7 @@ namespace YamuiFramework.Controls {
             if (!YamuiThemeManager.TabAnimationAllowed) return;
             var t = new Transition(new TransitionType_Acceleration(500));
             t.add(_animSmokeScreen, "Opacity", 0d);
-            t.TransitionCompletedEvent += (sender, args) => _animSmokeScreen.GoHide = true;
+            t.TransitionCompletedEvent += (sender, args) => _animSmokeScreen.SafeSyncInvoke(form => form.GoHide = true);
             t.run();
         }
 

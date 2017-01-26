@@ -90,6 +90,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #endregion
 
         #region Tooltip
+
         /// <summary>
         /// Method called when the tooltip is opened from the mouse being inactive on scintilla
         /// </summary>
@@ -124,7 +125,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             point.Offset(Npp.GetScintillaRectangle().Location);
             var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight + 5;
-            _form.GetBestAutocompPosition(point, lineHeight + 5);
+            _form.Location = _form.GetBestAutocompPosition(point, lineHeight + 5);
 
             _openedFromDwell = openTemporary;
             if (!_form.Visible) {

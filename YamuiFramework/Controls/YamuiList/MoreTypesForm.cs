@@ -20,22 +20,21 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
-using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
 
     /// <summary>
     /// A class to display a cool custom context menu
     /// </summary>
-    public sealed class MoreTypesForm : Form {
+    public sealed class MoreTypesForm : YamuiFormBaseShadow {
 
         #region private fields
 
         private HtmlToolTip _tooltip = new HtmlToolTip();
-        private const int BorderWidth = 2;
         private YamuiSimplePanel _panel;
         private const int MousePaddingInsideForm = 10;
         private YamuiFilteredTypeList _parentFilteredList;
@@ -46,9 +45,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected override CreateParams CreateParams {
             get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= 0x80;
-                return Params;
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return createParams;
             }
         }
 
@@ -64,18 +64,16 @@ namespace YamuiFramework.Controls.YamuiList {
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
+
             ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
             MaximizeBox = false;
             MinimizeBox = false;
             ShowIcon = false;
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Hide;
             StartPosition = FormStartPosition.Manual;
-
-            // keydown
-            //KeyPreview = true;
-            //PreviewKeyDown += OnPreviewKeyDown;
+            Movable = false;
+            Resizable = false;
 
             SuspendLayout();
             _panel = new YamuiSimplePanel {
@@ -125,6 +123,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         control.Activated = _parentFilteredList.IsTypeActivated(control.Type);
                     }
                 };
+                button.LostFocus += (sender, args) => CloseIfMouseOut();
                 button.Activated = _parentFilteredList.IsTypeActivated(type);
                 _tooltip.SetToolTip(button, (parentList.TypeText.ContainsKey(type) && parentList.TypeText[type] != null ? parentList.TypeText[type] + "<br>" : "") + YamuiFilteredTypeList.TypeButtonTooltipText);
                 
@@ -150,35 +149,13 @@ namespace YamuiFramework.Controls.YamuiList {
                 location.Y = location.Y - Height + MousePaddingInsideForm;
             } else
                 location.Y -= MousePaddingInsideForm;
+
             Location = location;
         }
 
         #endregion
 
-        #region Paint Methods
-
-        protected override void OnPaint(PaintEventArgs e) {
-
-            var backColor = YamuiThemeManager.Current.FormBack;
-            var borderColor = YamuiThemeManager.Current.FormBorder;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, BorderWidth) {
-                Alignment = PenAlignment.Inset
-            };
-            e.Graphics.DrawRectangle(pen, rect);
-        }
-
-        #endregion
-
         #region Events
-
-        //private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
-        //    previewKeyDownEventArgs.IsInputKey = true;
-        //}
         
         protected override void OnMouseLeave(EventArgs e) {
             base.OnMouseLeave(e);
@@ -194,8 +171,16 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected override void OnLostFocus(EventArgs e) {
             base.OnLostFocus(e);
-            Close();
-            Dispose();
+            CloseIfMouseOut();
+        }
+
+        private void CloseIfMouseOut() {
+            var rect = ClientRectangle;
+            rect.Offset(Location);
+            if (!rect.Contains(MousePosition)) {
+                Close();
+                Dispose();
+            }
         }
 
         #endregion

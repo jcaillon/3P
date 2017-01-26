@@ -455,8 +455,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // the thread used to create the form
             _form.Keyword = keyword;
             if (_form.InvokeRequired)
-                ShowSuggestionList(_form);
-                //_form.SafeSyncInvoke(ShowSuggestionList); TODO: TESING W/O HANDLING INVOKE HERE BUT DIRECTLY IN THE YAMUILIST, TO DELETE
+                _form.SafeSyncInvoke(ShowSuggestionList);
             else
                 ShowSuggestionList(_form);
         }
@@ -671,7 +670,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
         /// </summary>
         public static bool PerformKeyDown(KeyEventArgs e) {
-            return IsVisible && _form.YamuiList.PerformKeyDown(e);
+            return IsVisible && (bool)_form.YamuiList.SafeSyncInvoke(list => list.PerformKeyDown(e));
         }
 
         /// <summary>

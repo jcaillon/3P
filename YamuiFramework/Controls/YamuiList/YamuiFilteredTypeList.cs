@@ -562,43 +562,37 @@ namespace YamuiFramework.Controls.YamuiList {
         /// use this to programmatically uncheck any type that is not in the given list
         /// </summary>
         public void SetActiveType(List<int> allowedType, bool forceGraphicalUpdate = true) {
-            this.SafeInvoke(form => {
-                if (allowedType == null)
-                    allowedType = new List<int>();
-                foreach (var selectorButton in _typeButtons) {
-                    selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
-                }
-                if (forceGraphicalUpdate)
-                    ApplyFilterPredicate();
-            });
+            if (allowedType == null)
+                allowedType = new List<int>();
+            foreach (var selectorButton in _typeButtons) {
+                selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
+            }
+            if (forceGraphicalUpdate)
+                ApplyFilterPredicate();
         }
 
         /// <summary>
         /// use this to programmatically check any type that is not in the given list
         /// </summary>
         public void SetUnactiveType(List<int> notAllowedType, bool forceGraphicalUpdate = true) {
-            this.SafeInvoke(form => {
-                if (notAllowedType == null)
-                    notAllowedType = new List<int>();
-                foreach (var selectorButton in _typeButtons) {
-                    selectorButton.Value.Activated = notAllowedType.IndexOf(selectorButton.Value.Type) < 0;
-                }
-                if (forceGraphicalUpdate)
-                    ApplyFilterPredicate();
-            });
+            if (notAllowedType == null)
+                notAllowedType = new List<int>();
+            foreach (var selectorButton in _typeButtons) {
+                selectorButton.Value.Activated = notAllowedType.IndexOf(selectorButton.Value.Type) < 0;
+            }
+            if (forceGraphicalUpdate)
+                ApplyFilterPredicate();
         }
 
         /// <summary>
         /// reset all the button Types to activated
         /// </summary>
         public void ResetActiveType(bool forceGraphicalUpdate = true) {
-            this.SafeInvoke(form => {
-                foreach (var selectorButton in _typeButtons) {
-                    selectorButton.Value.Activated = true;
-                }
-                if (forceGraphicalUpdate)
-                    ApplyFilterPredicate();
-            });
+            foreach (var selectorButton in _typeButtons) {
+                selectorButton.Value.Activated = true;
+            }
+            if (forceGraphicalUpdate)
+                ApplyFilterPredicate();
         }
 
         #endregion
