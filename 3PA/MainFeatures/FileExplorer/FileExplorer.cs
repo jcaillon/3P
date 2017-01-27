@@ -19,31 +19,42 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using YamuiFramework.Controls.YamuiList;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.FilteredLists;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
-    internal static class FileExplorer {
 
-        #region fields
+    internal class FileExplorer : NppDockableDialog<FileExplorerForm> {
 
-        /// <summary>
-        /// Form accessor
-        /// </summary>
-        public static FileExplorerForm Form { get; private set; }
+        #region Singleton
 
-        /// <summary>
-        /// Does the form exists and is visible?
-        /// </summary>
-        public static bool IsVisible {
-            get { return Form != null && Form.Visible; }
+        private static FileExplorer _instance;
+
+        public static FileExplorer Instance {
+            get { return _instance ?? (_instance = new FileExplorer()); }
+            set { _instance = value; }
+        }
+
+        private FileExplorer() {
+            _dialogDescription = "File explorer";
+            _formDefaultPos = NppTbMsg.CONT_LEFT;
+        }
+
+        #endregion
+
+        #region Init
+
+        protected override void Init() {
+            Form = new FileExplorerForm(_fakeForm);
         }
 
         #endregion
@@ -53,9 +64,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Use this to redraw the docked form
         /// </summary>
-        public static void ApplyColorSettings() {
-            if (Form == null) return;
-            Form.StyleOvlTree();
+        public void ApplyColorSettings() {
+            if (Form == null)
+                return;
             Form.Refresh();
         }
 
@@ -63,9 +74,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Just redraw the file explorer ovl list, it is used to update the "selected" scope when
         /// the user changes the current document
         /// </summary>
-        public static void RedrawFileExplorerList() {
-            if (Form == null) return;
-            Form.Redraw();
+        public void RedrawFileExplorerList() {
+            if (Form == null)
+                return;
+            Form.YamuiList.Refresh();
         }
 
         #endregion
@@ -75,32 +87,35 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Refresh the files list
         /// </summary>
-        public static void RebuildFileList() {
-            if (!IsVisible) return;
+        public void RebuildFileList() {
+            if (!IsVisible)
+                return;
             Form.RefreshFileList();
         }
 
         /// <summary>
         /// Start a new search for files
         /// </summary>
-        public static void StartSearch() {
+        public void StartSearch() {
             try {
-                if (Form == null) return;
-                Form.ClearFilter();
-                Form.GiveFocustoTextBox();
+                if (Form == null)
+                    return;
+                Form.SafeSyncInvoke(form => {
+                    Form.FilterBox.ClearAndFocusFilter();
+                });
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in StartSearch");
             }
         }
 
-        private static DateTime _startTime;
+        private DateTime _startTime;
 
         /// <summary>
         /// Add each files/folders of a given path to the output List of FileObject,
         /// can be set to be recursive,
         /// can be set to not add the subfolders in the results
         /// </summary>
-        public static List<FileListItem> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
+        public List<FileListItem> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
 
             if (firstCall)
                 _startTime = DateTime.Now;
@@ -122,7 +137,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                         DisplayText = fileInfo.Name,
                         BasePath = fileInfo.DirectoryName,
                         FullPath = fileInfo.FullName,
-                        Flags = FileFlag.ReadOnly,
+                        Flag = FileFlag.ReadOnly,
                         Size = fileInfo.Length,
                         CreateDateTime = fileInfo.CreationTime,
                         ModifieDateTime = fileInfo.LastWriteTime,
@@ -171,76 +186,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        #region Dockable dialog
-        public static EmptyForm FakeForm { get; private set; }
-        public static int DockableCommandIndex;
-
-        public static void Toggle(bool doShow) {
-            if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
-                Toggle();
-            }
-        }
-
-        /// <summary>
-        /// Toggle the docked form on and off, can be called first and will initialize the form
-        /// </summary>
-        public static void Toggle() {
-            try {
-                // initialize if not done
-                if (FakeForm == null) {
-                    Init();
-                    // if just shown, refresh the list
-                    if (Plug.PluginIsReady)
-                        RebuildFileList();
-                } else {
-                    Win32Api.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
-                }
-                Form.RefreshPosAndLoc();
-                if (FakeForm == null) return;
-                UpdateMenuItemChecked();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
-            }
-        }
-
-        /// <summary>
-        /// Either check or uncheck the menu, depending on the visibility of the form
-        /// (does it both on the menu and toolbar)
-        /// </summary>
-        public static void UpdateMenuItemChecked() {
-            if (FakeForm == null) return;
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
-            Config.Instance.FileExplorerVisible = FakeForm.Visible;
-        }
-
-        /// <summary>
-        /// Initialize the form
-        /// </summary>
-        private static void Init() {
-            // register fake form to Npp
-            FakeForm = new EmptyForm();
-            NppTbData nppTbData = new NppTbData {
-                hClient = FakeForm.Handle,
-                pszName = AssemblyInfo.AssemblyProduct + " - File explorer",
-                dlgID = DockableCommandIndex,
-                uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
-                pszModuleName = AssemblyInfo.AssemblyProduct
-            };
-
-            IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
-            Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
-
-            Form = new FileExplorerForm(FakeForm);
-        }
-
-        public static void ForceClose() {
-            if (Form != null)
-                Form.Close();
-        }
-
-        #endregion
     }
 
     #region FileListItem
@@ -248,15 +193,89 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// <summary>
     /// Object describing a file
     /// </summary>
-    internal class FileListItem : FilteredItem {
+    internal class FileListItem : FilteredTypeTreeListItem {
+
         public string BasePath { get; set; }
         public string FullPath { get; set; }
         public DateTime ModifieDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }
         public long Size { get; set; }
         public FileType Type { get; set; }
-        public FileFlag Flags { get; set; }
+        public FileFlag Flag { get; set; }
         public string SubString { get; set; }
+
+        /// <summary>
+        /// The piece of text displayed in the list
+        /// </summary>
+        public override string DisplayText { get; set; }
+
+        /// <summary>
+        /// return the image to display for this item
+        /// If null, the image corresponding to ItemTypeImage will be used instead
+        /// </summary>
+        public override Image ItemImage { get { return null; } }
+
+        /// <summary>
+        /// return this item type (a unique int for each item type)
+        /// if the value is strictly inferior to 0, the button for this type will not appear
+        /// on the bottom of list
+        /// </summary>
+        public override int ItemType { get { return (int)Type; } }
+
+        /// <summary>
+        /// return the image that will be used to identify this item
+        /// type, it will be used for the bottom buttons of the list
+        /// All items of a given type should return the same image! The image used for the 
+        /// bottom buttons will be that of the first item found for the given type
+        /// </summary>
+        public override Image ItemTypeImage {
+            get {
+                return Utils.GetImageFromStr(Utils.GetExtensionImage(Type.ToString(), true));
+            }
+        }
+
+        /// <summary>
+        /// The text that describes this item type
+        /// </summary>
+        public override string ItemTypeText { 
+            get {
+                return "Category : <span class='SubTextColor'><b>" + ((CompletionType)ItemType) + "</b></span><br><br>";
+            }
+        }
+
+        /// <summary>
+        /// return true if the item is to be highlighted
+        /// </summary>
+        public override bool IsRowHighlighted { get { return FullPath.Equals(Plug.CurrentFilePath); } }
+
+        /// <summary>
+        /// return a string containing the subtext to display
+        /// </summary>
+        public override string SubText { get { return SubString; } }
+
+        /// <summary>
+        /// return a list of images to be displayed (in reverse order) for the item
+        /// </summary>
+        public override List<Image> TagImages {
+            get {
+                var outList = new List<Image>();
+                foreach (var name in Enum.GetNames(typeof(FileFlag))) {
+                    FileFlag flag = (FileFlag)Enum.Parse(typeof(FileFlag), name);
+                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
+
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    if (tryImg != null)
+                        outList.Add(tryImg);
+                }
+                return outList;
+            }
+        }
+
+        /// <summary>
+        /// to override, that should return the list of the children for this item (if any) or null
+        /// </summary>
+        public override List<FilteredTypeTreeListItem> Children { get; set; }
+
     }
 
     /// <summary>

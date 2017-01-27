@@ -263,14 +263,14 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public virtual List<FilteredTypeTreeListItem> Children { get; set; }
 
+        #endregion
+
+        #region internal mechanism
+
         /// <summary>
         /// Is this item expanded? (useful only if has children), should only be used in read mode
         /// </summary>
         public bool IsExpanded { get; set; }
-
-        #endregion
-
-        #region internal mechanism
 
         /// <summary>
         /// Returns the list of the children for this item, to be used internally by the YamuiList as it

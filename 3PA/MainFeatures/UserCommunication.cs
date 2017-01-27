@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures {
 
         #region private fields
 
-        private static EmptyForm _anchorForm;
+        private static NppDockableDialogEmptyForm _anchorForm;
 
         private static List<YamuiInput> _openedMessage = new List<YamuiInput>();
 
@@ -53,7 +53,7 @@ namespace _3PA.MainFeatures {
         /// from a back groundthread, use : BeginInvoke()
         /// </summary>
         public static void Init() {
-            _anchorForm = new EmptyForm {
+            _anchorForm = new NppDockableDialogEmptyForm {
                 Location = new Point(-10000, -10000),
                 Visible = false
             };

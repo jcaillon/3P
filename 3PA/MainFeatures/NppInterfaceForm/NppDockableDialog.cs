@@ -1,175 +1,102 @@
-﻿#region header
-// ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (NppDockableDialog.cs) is part of 3P.
-// 
-// 3P is a free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// 3P is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with 3P. If not, see <http://www.gnu.org/licenses/>.
-// ========================================================================
-#endregion
-using System;
-using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
+﻿using System;
+using System.Runtime.InteropServices;
 using YamuiFramework.Helper;
+using _3PA.Images;
 using _3PA.Interop;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
-    /// <summary>
-    /// Okay so... what is the point of this class?
-    /// Basically, if you directly feed a form (that you want to display as a dockable panel) to Npp, you will get screwed
-    /// It handles form so poorly, it can cause npp to freeze when you play with it (docking it/undocking it, moving it...)
-    /// 
-    /// So, what we do is we tell Npp to use a dummy form with nothing on it and we let it manipulate this meanless form.
-    /// Meanwhile, we hook to this empty form and we track its position/size to cover it with our own borderless window
-    /// 
-    /// Unfortunatly, we can't just subscribe to ClientSizeChanged and LocationChanged events of the master form
-    /// because when we move the Npp window, the LocationChange event of the master form isn't triggered... Idk why...
-    /// So instead, use a hook onto npp and we update the position/size each time we receive a message that npp has 
-    /// moved
-    /// </summary>
-    internal class NppDockableDialog : Form {
+    internal class NppDockableDialog<T> where T : NppDockableDialogForm {
 
-        #region fields
+        #region private
 
-        private Rectangle _masterRectangle;
-        private EmptyForm _masterForm;
+        protected string _dialogDescription = "?";
+
+        protected NppTbMsg _formDefaultPos = NppTbMsg.CONT_LEFT;
+
+        protected T Form { get; set; }
+
+        protected NppDockableDialogEmptyForm _fakeForm;
 
         #endregion
 
-        #region Don't show in ATL+TAB
+        #region Fields
 
-        protected override CreateParams CreateParams {
-            get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
-                return Params;
-            }
+        /// <summary>
+        /// Does the form exists and is visible?
+        /// </summary>
+        public bool IsVisible {
+            get { return !(Form == null || !(bool)Form.SafeSyncInvoke(form => form.Visible)); }
         }
-
+        
+        public int DockableCommandIndex { get; set; }
+        
         #endregion
 
-        #region constructor
+        #region Methods
 
-        public NppDockableDialog() { }
+        /// <summary>
+        /// Initialize the form, should set RealForm = new T()
+        /// </summary>
+        protected virtual void Init() {
 
-        public NppDockableDialog(EmptyForm formToCover) {
-
-            // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
-
-            FormBorderStyle = FormBorderStyle.None;
-            ControlBox = false;
-            ShowInTaskbar = false;
-            StartPosition = FormStartPosition.Manual;
-            AutoScaleMode = AutoScaleMode.None;
-            _masterForm = formToCover;
-            Location = _masterForm.PointToScreen(Point.Empty);
-            ClientSize = _masterForm.ClientSize;
-
-            _masterForm.VisibleChanged += Cover_OnVisibleChanged;
-            _masterForm.Closed += MasterFormOnClosed;
-
-            _masterForm.ClientSizeChanged += RefreshPosAndLoc;
-            _masterForm.LocationChanged += RefreshPosAndLoc;
-            _masterForm.LostFocus += RefreshPosAndLoc;
-            _masterForm.GotFocus += RefreshPosAndLoc;
-
-            Show(_masterForm);
-            // Disable Aero transitions, the plexiglass gets too visible
-            if (Environment.OSVersion.Version.Major >= 6) {
-                int value = 1;
-                Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
-            }
-
-            Plug.OnNppWindowsMove += RefreshPosAndLoc;
         }
 
-        protected override void Dispose(bool disposing) {
+        public void Toggle(bool doShow) {
+            if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
+                Toggle();
+            }
+        }
+
+        /// <summary>
+        /// Toggle the docked form on and off, can be called first and will initialize the form
+        /// </summary>
+        public void Toggle() {
             try {
-                Plug.OnNppWindowsMove -= RefreshPosAndLoc;
+                // initialize if not done
+                if (_fakeForm == null) {
 
-                if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
-                    int value = 0;
-                    Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
+                    // register fake form to Npp
+                    _fakeForm = new NppDockableDialogEmptyForm();
+                    NppTbData nppTbData = new NppTbData {
+                        hClient = _fakeForm.Handle,
+                        pszName = AssemblyInfo.AssemblyProduct + " - " + _dialogDescription,
+                        dlgID = DockableCommandIndex,
+                        uMask = _formDefaultPos | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
+                        hIconTab = (uint)Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
+                        pszModuleName = AssemblyInfo.AssemblyProduct
+                    };
+                    IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
+                    Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
+                    Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+                    Init();
+                } else {
+                    Win32Api.SendMessage(Npp.HandleNpp, !_fakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, _fakeForm.Handle);
                 }
-            } catch (Exception) {
-                // ignored
+                Form.RefreshPosAndLoc();
+                if (_fakeForm == null) return;
+                UpdateMenuItemChecked();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error loading " + _dialogDescription);
             }
-            base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Either check or uncheck the menu, depending on the visibility of the form
+        /// (does it both on the menu and toolbar)
+        /// </summary>
+        public void UpdateMenuItemChecked() {
+            if (_fakeForm == null) return;
+            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
+            Config.Instance.FileExplorerVisible = _fakeForm.Visible;
+        }
+
+        public void ForceClose() {
+            if (Form != null)
+                Form.Close();
         }
 
         #endregion
-
-        #region Its name says it all
-
-        public void RefreshPosAndLoc() {
-            if (Owner == null)
-                return;
-
-            var rect = Win32Api.GetWindowRect(_masterForm.Handle);
-
-            // update location
-            if (_masterRectangle.Location != rect.Location) {
-                Location = Owner.PointToScreen(Point.Empty);
-            }
-
-            // update size
-            if (ClientSize != Owner.ClientSize) {
-                ClientSize = Owner.ClientSize;
-            }
-            _masterRectangle = rect;
-        }
-
-        #endregion
-
-        #region On event handlers
-
-        private void RefreshPosLocContent(object sender, EventArgs e) {
-            RefreshPosAndLoc();
-            Refresh();
-        }
-
-        private void RefreshPosAndLoc(object sender, EventArgs e) {
-            RefreshPosAndLoc();
-        }
-
-        private void Cover_OnVisibleChanged(object sender, EventArgs eventArgs) {
-            if (Owner == null)
-                return;
-
-            Visible = Owner.Visible;
-            if (!Visible) {
-                // get it out of the screen or it might be visible through low opacity... trust me
-                Location = new Point(-10000, -10000);
-            } else {
-                Location = Owner.PointToScreen(Point.Empty);
-                Refresh();
-            }
-        }
-
-        private void MasterFormOnClosed(object sender, EventArgs eventArgs) {
-            Close();
-        }
-
-        protected override void OnClosing(CancelEventArgs e) {
-            // register to Npp
-            FormIntegration.UnRegisterToNpp(Handle);
-            base.OnClosing(e);
-        }
-
-        #endregion
-
     }
 }

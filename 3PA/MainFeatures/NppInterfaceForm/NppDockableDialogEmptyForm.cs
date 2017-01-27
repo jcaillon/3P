@@ -26,13 +26,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
     /// An empty form that does absolutely nothing
     /// </summary>
-    internal partial class EmptyForm : Form {
+    internal partial class NppDockableDialogEmptyForm : Form {
 
         protected override bool ShowWithoutActivation {
             get { return true; }
         }
 
-        public EmptyForm() {
+        public NppDockableDialogEmptyForm() {
             InitializeComponent();
 
             // register to Npp

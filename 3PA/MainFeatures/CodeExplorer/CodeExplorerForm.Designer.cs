@@ -124,13 +124,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             this.Controls.Add(this.buttonExpandRetract);
             this.Controls.Add(this.textBoxFilter);
             this.Controls.Add(this.buttonIncludeExternal);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "CodeExplorerForm";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.Text = "DockableExplorerForm";
+            this.Text = "CodeExplorerForm";
             this.ResumeLayout(false);
-
+            this.PerformLayout();
         }
 
         #endregion

@@ -124,8 +124,8 @@ namespace _3PA {
             
             // force the autocomplete to redraw
             AutoCompletion.ForceClose();
-            CodeExplorer.ApplyColorSettings();
-            FileExplorer.ApplyColorSettings();
+            CodeExplorer.Instance.ApplyColorSettings();
+            FileExplorer.Instance.ApplyColorSettings();
             Application.DoEvents();
             Appli.Refresh();
         }

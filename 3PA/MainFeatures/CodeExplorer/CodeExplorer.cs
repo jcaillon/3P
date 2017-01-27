@@ -17,131 +17,82 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.Runtime.InteropServices;
-using _3PA.Images;
 using _3PA.Interop;
-using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-    internal static class CodeExplorer {
 
-        #region Fields
+    internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {
 
-        public static CodeExplorerForm Form { get; private set; }
 
-        public static bool IsVisible {
-            get { return Form != null && Form.Visible; }
+        #region Singleton
+
+        private static CodeExplorer _instance;
+
+        public static CodeExplorer Instance
+        {
+            get { return _instance ?? (_instance = new CodeExplorer()); }
+            set { _instance = value; }
+        }
+
+        private CodeExplorer() {
+            _dialogDescription = "Code explorer";
+            _formDefaultPos = NppTbMsg.CONT_RIGHT;
         }
 
         #endregion
 
-        #region public methods
+        #region Init
+
+        protected override void Init() {
+            Form = new CodeExplorerForm(_fakeForm);
+        }
+
+        #endregion
+
+        #region handling form
 
         /// <summary>
-        /// Call this method to update the code explorer tree with the data from the Parser Handler
+        /// Use this to redraw the docked form
         /// </summary>
-        public static void UpdateCodeExplorer() {
-            if (Form == null) return;
-            Form.UpdateTreeData();
+        public void ApplyColorSettings() {
+            if (Form == null)
+                return;
+            Form.Refresh();
         }
 
         /// <summary>
         /// Just redraw the code explorer, it is used to update the "selected" scope when
         /// the user click in scintilla
         /// </summary>
-        public static void RedrawCodeExplorerList() {
-            if (Form == null) return;
+        public void RedrawCodeExplorerList() {
+            if (Form == null)
+                return;
+            //Form.YamuiList.Refresh();
             Form.Redraw();
         }
 
+        #endregion
+
+
+        #region public methods
+
         /// <summary>
-        /// Use this to redraw the docked form
+        /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
-        public static void ApplyColorSettings() {
+        public void UpdateCodeExplorer() {
             if (Form == null) return;
-            Form.StyleOvlTree();
-            Form.Refresh();
+            Form.UpdateTreeData();
         }
 
         /// <summary>
         /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
         /// </summary>
-        public static bool Refreshing {
+        public bool Refreshing {
             set {
                 if (Form == null) return;
                 Form.Refreshing = value;
             }
-        }
-
-        #endregion
-
-        #region DockableDialog
-
-        public static EmptyForm FakeForm { get; private set; }
-        public static int DockableCommandIndex;
-
-        public static void Toggle(bool doShow) {
-            if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
-                Toggle();
-            }
-        }
-
-        /// <summary>
-        /// Toggle the docked form on and off, can be called first and will initialize the form
-        /// </summary>
-        public static void Toggle() {
-            try {
-                // initialize if not done
-                if (FakeForm == null) {
-                    Init();
-                    // first time we show it, refresh the list
-                    if (Plug.PluginIsReady)
-                        Form.RefreshParserAndCodeExplorer();
-                } else {
-                    Win32Api.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
-                }
-                Form.RefreshPosAndLoc();
-                if (FakeForm == null) return;
-                UpdateMenuItemChecked();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
-            }
-        }
-
-        /// <summary>
-        /// Either check or uncheck the menu, depending on the visibility of the form
-        /// (does it both on the menu and toolbar)
-        /// </summary>
-        public static void UpdateMenuItemChecked() {
-            if (FakeForm == null) return;
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
-            Config.Instance.CodeExplorerVisible = FakeForm.Visible;
-        }
-
-        /// <summary>
-        /// Initialize the form
-        /// </summary>
-        public static void Init() {
-            FakeForm = new EmptyForm();
-            NppTbData nppTbData = new NppTbData {
-                hClient = FakeForm.Handle,
-                pszName = AssemblyInfo.AssemblyProduct + " - Code explorer",
-                dlgID = DockableCommandIndex,
-                uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.CodeExplorerLogo).Handle,
-                pszModuleName = AssemblyInfo.AssemblyProduct
-            };
-            IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
-            Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
-            Form = new CodeExplorerForm(FakeForm);
-        }
-
-        public static void ForceClose() {
-            if (Form != null)
-                Form.Close();
         }
 
         #endregion

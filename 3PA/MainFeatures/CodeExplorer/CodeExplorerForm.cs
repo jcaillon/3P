@@ -36,7 +36,7 @@ using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
 
-    internal partial class CodeExplorerForm : NppDockableDialog {
+    internal partial class CodeExplorerForm : NppDockableDialogForm {
 
         #region fields
 
@@ -108,14 +108,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region constructor
 
-        public CodeExplorerForm(EmptyForm formToCover) : base(formToCover) {
+        public CodeExplorerForm(NppDockableDialogEmptyForm formToCover) : base(formToCover) {
             InitializeComponent();
-
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
 
             #region Object list
 
@@ -232,7 +226,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         /// <param name="e"></param>
         protected override void OnVisibleChanged(EventArgs e) {
-            CodeExplorer.UpdateMenuItemChecked();
+            CodeExplorer.Instance.UpdateMenuItemChecked();
             base.OnVisibleChanged(e);
         }
 

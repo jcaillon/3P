@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-    partial class EmptyForm {
+    partial class NppDockableDialogEmptyForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             this.ControlBox = false;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "EmptyForm";
+            this.Name = "NppDockableDialogEmptyForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "FakeCodeExplorerForm";

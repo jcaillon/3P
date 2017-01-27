@@ -37,6 +37,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #region constructor
         public InfoToolTipForm() {
+            
+            Resizable = false;
 
             Padding = new Padding(5);
 
@@ -57,6 +59,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _panel.ContentPanel.Controls.Add(_labelContent);
 
             Size = new Size(50, 50);
+
         }
         #endregion
 

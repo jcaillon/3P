@@ -193,6 +193,8 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerSortingClass.cs" />
+    <Compile Include="MainFeatures\FileExplorer\FileSortingClass.cs" />
     <Compile Include="MainFeatures\FilteredLists\FilteredItem.cs" />
     <Compile Include="MainFeatures\FilteredLists\FilteredItemTreeRenderer.cs">
       <SubType>Component</SubType>
@@ -203,9 +205,10 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\AppliMenu.cs" />
-    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -245,11 +248,11 @@
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Pro\ProCodeFormat.cs" />
-    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
-      <DependentUpon>EmptyForm.cs</DependentUpon>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.Designer.cs">
+      <DependentUpon>NppDockableDialogEmptyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Pro\FilesInfo.cs" />
     <Compile Include="MainFeatures\Pro\ProExecution.cs" />
@@ -403,8 +406,8 @@
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
-      <DependentUpon>EmptyForm.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.resx">
+      <DependentUpon>NppDockableDialogEmptyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>

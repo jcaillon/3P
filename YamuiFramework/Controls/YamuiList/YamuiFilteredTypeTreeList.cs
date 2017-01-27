@@ -140,7 +140,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeTreeListItem))
-                throw new Exception("listItems shoud contain objects of type FilteredTypeItem");
+                throw new Exception("listItems shoud contain objects of type FilteredTypeTreeListItem");
 
             _treeRootItems = listItems.Cast<FilteredTypeTreeListItem>().ToList();
 

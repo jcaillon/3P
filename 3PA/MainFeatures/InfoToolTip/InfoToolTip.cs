@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -190,20 +191,20 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 case "gotoownerfile":
                     if (split.Length > 1) {
                         Npp.Goto(split[1]);
-                        Close();
+                        Cloak();
                     }
                     break;
                 case "trigger":
                     if (split.Length > 1) {
                         var fullPath = ProEnvironment.Current.FindFirstFileInEnv(split[1]);
                         Npp.Goto(string.IsNullOrEmpty(fullPath) ? split[1] : fullPath);
-                        Close();
+                        Cloak();
                     }
                     break;
                 case "proto":
                     if (split.Length > 3) {
                         Npp.Goto(split[1], int.Parse(split[2]), int.Parse(split[3]));
-                        Close();
+                        Cloak();
                     }
                 break;
                 case "gotodefinition":
@@ -566,13 +567,21 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         /// <summary>
+        /// Is a tooltip visible?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsVisible {
+            get { return !(_form == null || !(bool)_form.SafeSyncInvoke(form => form.Visible)); }
+        }
+
+        /// <summary>
         /// Closes the form
         /// </summary>
-        public static void Close(bool calledFromDwellEnd = false) {
+        public static void Cloak(bool calledFromDwellEnd = false) {
             try {
                 if (calledFromDwellEnd && !_openedFromDwell) return;
                 if (_form != null)
-                    _form.Cloack();
+                    _form.SafeSyncInvoke(form => form.Cloack());
                 _openedFromDwell = false;
                 _openedForCompletion = false;
                 _currentCompletionList = null;
@@ -587,7 +596,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         public static void CloseIfOpenedForCompletion() {
             if (_openedForCompletion)
-                Close();
+                Cloak();
         }
 
         /// <summary>
@@ -597,18 +606,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
             try {
                 if (_form != null)
                     _form.ForceClose();
-                _form = null;
             } catch (Exception e) {
                 ErrorHandler.LogError(e);
             }
-        }
-
-        /// <summary>
-        /// Is a tooltip visible?
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsVisible {
-            get { return _form != null && _form.Visible; }
         }
 
         /// <summary>

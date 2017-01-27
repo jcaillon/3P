@@ -446,6 +446,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _form.YamuiList.EmptyListString = @"No suggestions!";
 
                 _form.InsertSuggestion += OnInsertSuggestion;
+                _form.ResizeBegin += OnResizeBegin;
+
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
                 _form.Show(Npp.Win32WindowNpp);
@@ -577,6 +579,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 RememberUseOfDatabaseItem(item.DisplayText);                
         }
 
+        /// <summary>
+        /// When the user resizes the form, we need to hide the autocompletion
+        /// </summary>
+        private static void OnResizeBegin(object sender, EventArgs eventArgs) {
+            if (InfoToolTip.InfoToolTip.IsVisible)
+                InfoToolTip.InfoToolTip.Cloak();
+        }
 
         #endregion
 
@@ -632,7 +641,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return _form != null && _form.Visible; }
+            get { return !(_form == null || !(bool) _form.SafeSyncInvoke(form => form.Visible)); }
         }
 
         /// <summary>
@@ -658,9 +667,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             try {
                 if (_form != null) {
                     _form.InsertSuggestion -= OnInsertSuggestion;
+                    _form.ResizeBegin -= OnResizeBegin;
                     _form.ForceClose();
                 }
-                _form = null;
             } catch (Exception e) {
                 ErrorHandler.LogError(e);
             }

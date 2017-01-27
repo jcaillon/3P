@@ -26,8 +26,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using YamuiFramework.Controls;
-using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
@@ -137,10 +135,10 @@ namespace _3PA {
             var cmdIndex = 0;
             AppliMenu.MainMenuCommandIndex = cmdIndex;
             Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
-            CodeExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
+            CodeExplorer.Instance.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Instance.Toggle);
+            FileExplorer.Instance.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Instance.Toggle);
         }
 
         /// <summary>
@@ -148,8 +146,8 @@ namespace _3PA {
         /// </summary>
         internal static void DoNppNeedToolbarImages() {
             Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.MainMenuCommandIndex);
-            Npp.SetToolbarImage(ImageResources.FileExplorer16x16, FileExplorer.DockableCommandIndex);
-            Npp.SetToolbarImage(ImageResources.CodeExplorer16x16, CodeExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.FileExplorer16x16, FileExplorer.Instance.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.CodeExplorer16x16, CodeExplorer.Instance.DockableCommandIndex);
         }
 
         /// <summary>
@@ -200,16 +198,16 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Toggle(Abl.IsCurrentProgressFile);
+                    CodeExplorer.Instance.Toggle(Abl.IsCurrentProgressFile);
                 } else if (Config.Instance.CodeExplorerVisible) {
-                    CodeExplorer.Toggle();
+                    CodeExplorer.Instance.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Toggle(Abl.IsCurrentProgressFile);
+                    FileExplorer.Instance.Toggle(Abl.IsCurrentProgressFile);
                 } else if (Config.Instance.FileExplorerVisible) {
-                    FileExplorer.Toggle();
+                    FileExplorer.Instance.Toggle();
                 }
 
                 return true;
@@ -226,13 +224,13 @@ namespace _3PA {
                 OnPlugReady();
 
             // subscribe to static events
-            ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
+            ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
             DataBase.OnDatabaseInfoUpdated += AutoCompletion.RefreshStaticItems;
 
-            ParserHandler.OnParseStarted += () => { CodeExplorer.Refreshing = true; };
+            ParserHandler.OnParseStarted += () => { CodeExplorer.Instance.Refreshing = true; };
             ParserHandler.OnParseEnded += AutoCompletion.RefreshDynamicItems;
-            ParserHandler.OnParseEnded += CodeExplorer.UpdateCodeExplorer;
+            ParserHandler.OnParseEnded += CodeExplorer.Instance.UpdateCodeExplorer;
 
             AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
 
@@ -271,8 +269,8 @@ namespace _3PA {
                 FileTag.Export();
 
                 // save config (should be done but just in case)
-                CodeExplorer.UpdateMenuItemChecked();
-                FileExplorer.UpdateMenuItemChecked();
+                CodeExplorer.Instance.UpdateMenuItemChecked();
+                FileExplorer.Instance.UpdateMenuItemChecked();
                 Config.Save();
 
                 // remember the most used keywords
@@ -282,8 +280,8 @@ namespace _3PA {
                 AutoCompletion.ForceClose();
                 InfoToolTip.ForceClose();
                 Appli.ForceClose();
-                FileExplorer.ForceClose();
-                CodeExplorer.ForceClose();
+                FileExplorer.Instance.ForceClose();
+                CodeExplorer.Instance.ForceClose();
                 UserCommunication.ForceClose();
                 AppliMenu.ForceCloseMenu();
 
@@ -563,14 +561,14 @@ namespace _3PA {
             FilesInfo.UpdateErrorsInScintilla();
 
             // refresh file explorer currently opened file
-            FileExplorer.RedrawFileExplorerList();
+            FileExplorer.Instance.RedrawFileExplorerList();
 
             if (!initiating) {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Toggle(IsCurrentFileProgress);
+                    CodeExplorer.Instance.Toggle(IsCurrentFileProgress);
                 }
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Toggle(IsCurrentFileProgress);
+                    FileExplorer.Instance.Toggle(IsCurrentFileProgress);
                 }
             } else {
                 // make sure to use the ProEnvironment and colorize the error counter
@@ -794,7 +792,7 @@ namespace _3PA {
         /// </summary>
         public static void OnSciDwellEnd() {
             if (!KeyboardMonitor.GetModifiers.IsCtrl)
-                InfoToolTip.Close(true);
+                InfoToolTip.Cloak(true);
         }
 
         /// <summary>
@@ -808,7 +806,7 @@ namespace _3PA {
             Snippets.FinalizeCurrent();
 
             // update scope of code explorer (the selection img)
-            CodeExplorer.RedrawCodeExplorerList();
+            CodeExplorer.Instance.RedrawCodeExplorerList();
         }
 
         /// <summary>
@@ -1005,7 +1003,7 @@ namespace _3PA {
         /// </summary>
         public static void ClosePopups() {
             AutoCompletion.Cloak();
-            InfoToolTip.Close();
+            InfoToolTip.Cloak();
         }
 
         #endregion

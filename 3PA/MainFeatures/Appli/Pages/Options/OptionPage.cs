@@ -338,8 +338,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void ApplySettings() {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            CodeExplorer.CodeExplorer.ApplyColorSettings();
-            FileExplorer.FileExplorer.ApplyColorSettings();
+            CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
+            FileExplorer.FileExplorer.Instance.ApplyColorSettings();
             AutoCompletion.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyOptionsForScintilla();

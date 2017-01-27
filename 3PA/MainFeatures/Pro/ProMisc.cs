@@ -42,10 +42,10 @@ namespace _3PA.MainFeatures.Pro {
             if (InfoToolTip.InfoToolTip.IsVisible) {
                 if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
                     Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
-                    InfoToolTip.InfoToolTip.Close();
+                    InfoToolTip.InfoToolTip.Cloak();
                     return;
                 }
-                InfoToolTip.InfoToolTip.Close();
+                InfoToolTip.InfoToolTip.Cloak();
             }
 
             // try to go to the definition of the selected word

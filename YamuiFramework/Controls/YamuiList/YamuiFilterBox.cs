@@ -317,6 +317,10 @@ namespace YamuiFramework.Controls.YamuiList {
             ActiveControl = _filterBox;
         }
 
+        public void FocusFilter() {
+            ActiveControl = _filterBox;
+        }
+
         #endregion
 
         #region YamuiFilterBoxButton

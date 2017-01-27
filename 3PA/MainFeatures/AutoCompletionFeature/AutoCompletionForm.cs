@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
@@ -124,7 +123,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private void YamuiListOnKeyPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
             if (e.KeyCode == Keys.Escape) {
                 Cloack();
-                InfoToolTip.InfoToolTip.Close();
+                InfoToolTip.InfoToolTip.Cloak();
                 e.Handled = true;
             }
         }

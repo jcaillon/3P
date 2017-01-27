@@ -270,7 +270,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") { Generic = true },
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, item => ProMisc.OpenCurrentInAppbuilder(), "Send_appbuilder", "Alt+O"),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.StartSearch(), "Search_file", "Alt+Q") { Generic = true },
+                new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.Instance.StartSearch(), "Search_file", "Alt+Q") { Generic = true },
                 goToDefItem,
                 goToPreviousJump,
                 //new MenuItem(this, "New 4GL file", ImageResources.GenerateCode, ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N") {
