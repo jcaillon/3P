@@ -194,13 +194,8 @@
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerSortingClass.cs" />
+    <Compile Include="MainFeatures\FileExplorer\FileListItem.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileSortingClass.cs" />
-    <Compile Include="MainFeatures\FilteredLists\FilteredItem.cs" />
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTreeRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTree.cs" />
-    <Compile Include="MainFeatures\FilteredLists\OlvStyler.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -265,9 +260,6 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FastObjectListViewWoScrolls.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\DataBase.cs" />
@@ -323,9 +315,6 @@
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletion.cs" />
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTextRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\Keywords.cs" />
@@ -645,7 +634,6 @@
     <Content Include="Images\tooltips\Input.png" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
     <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
-    <Content Include="Lib\ObjectListView\ObjectListView.dll" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -661,11 +649,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
-      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
-      <Name>ObjectListView2012</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>YamuiFramework</Name>

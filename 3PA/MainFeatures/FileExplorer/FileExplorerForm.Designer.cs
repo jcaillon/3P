@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 

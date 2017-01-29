@@ -83,16 +83,6 @@ namespace _3PA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ObjectListView {
-            get {
-                object obj = ResourceManager.GetObject("ObjectListView", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] YamuiFramework {
             get {
                 object obj = ResourceManager.GetObject("YamuiFramework", resourceCulture);

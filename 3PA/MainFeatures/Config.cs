@@ -342,7 +342,7 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CodeExplorerAutoHideOnNonProgressFile = false;
 
-            public CodeExplorerForm.SortingType CodeExplorerSortingType;
+            public SortingType CodeExplorerSortingType;
 
             #endregion
 

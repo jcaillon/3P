@@ -25,8 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
@@ -317,12 +315,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
         }
 
-        private void FastOlvOnCellRightClick(object sender, CellRightClickEventArgs cellRightClickEventArgs) {
-            var fileObj = (FileListItem)cellRightClickEventArgs.Model;
-            if (fileObj != null) {
-                Utils.OpenFileInFolder(fileObj.FullPath);
-                cellRightClickEventArgs.Handled = true;
-            }
+        private void FastOlvOnCellRightClick(object sender) {
+            //Utils.OpenFileInFolder(fileObj.FullPath);
         }
 
         #endregion

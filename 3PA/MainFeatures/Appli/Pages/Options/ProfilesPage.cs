@@ -20,14 +20,10 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
-using YamuiFramework.Fonts;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;

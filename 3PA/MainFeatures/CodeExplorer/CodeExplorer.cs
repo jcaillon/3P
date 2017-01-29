@@ -68,13 +68,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void RedrawCodeExplorerList() {
             if (Form == null)
                 return;
-            //Form.YamuiList.Refresh();
-            Form.Redraw();
+            Form.YamuiList.Refresh();
         }
 
         #endregion
-
-
+        
         #region public methods
 
         /// <summary>
