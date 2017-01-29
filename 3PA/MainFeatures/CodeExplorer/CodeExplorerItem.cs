@@ -77,6 +77,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public bool IsNotBlock { get; set; }
 
         /// <summary>
+        /// This item should be on the root of the tree?
+        /// </summary>
+        public bool IsRoot { get { return Branch == CodeExplorerBranch.Root || Branch == CodeExplorerBranch.MainBlock; } }
+
+        /// <summary>
         /// Apply an action for each flag of the item
         /// </summary>
         /// <param name="toApplyOnFlag"></param>

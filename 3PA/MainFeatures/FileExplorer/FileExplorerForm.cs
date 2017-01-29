@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
@@ -174,6 +175,9 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             Refreshing = false;
 
+            yamuiList.RowClicked += YamuiListOnRowClicked;
+            yamuiList.EnterPressed += YamuiListOnEnterPressed;
+
             #endregion
 
         }
@@ -282,24 +286,22 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region events
 
-        /// <summary>
-        /// Executed when the user double click an item or press enter
-        /// </summary>
-        private void OnActivateItem() {
+        private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs keyEventArgs) {
+            var curItem = (FileListItem)yamuiList.SelectedItem;
+            if (curItem == null)
+                return;
+            Utils.OpenAnyLink(curItem.FullPath);
+        }
+
+        private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs e) {
             var curItem = (FileListItem)yamuiList.SelectedItem;
             if (curItem == null)
                 return;
 
-            Utils.OpenAnyLink(curItem.FullPath);
-        }
-        
-        /// <summary>
-        /// handles double click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
-        private void FastOlvOnDoubleClick(object sender, EventArgs eventArgs) {
-            OnActivateItem();
+            if (e.Button == MouseButtons.Middle)
+                Utils.OpenFileInFolder(curItem.FullPath);
+            else if (e.Clicks >= 2)
+                Utils.OpenAnyLink(curItem.FullPath);
         }
 
         private void FastOlvOnClick(object sender, EventArgs eventArgs) {
@@ -315,15 +317,11 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
         }
 
-        private void FastOlvOnCellRightClick(object sender) {
-            //Utils.OpenFileInFolder(fileObj.FullPath);
-        }
-
         #endregion
 
         #endregion
 
-        #region File list buttons events
+        #region File list events
 
         private void RefreshGotoDirButton() {
             // refresh a button depending on the mode...
@@ -354,7 +352,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             filterbox.FocusFilter();
         }
 
-        private void OnRefreshClic(YamuiButtonImage yamuiButtonImage) {
+        private void OnRefreshClic(YamuiButtonImage yamuiButtonImage, EventArgs e) {
             RefreshFileList();
             filterbox.FocusFilter();
         }

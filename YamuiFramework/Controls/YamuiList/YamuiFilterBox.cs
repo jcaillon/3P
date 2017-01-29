@@ -23,7 +23,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
@@ -216,7 +215,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         TabStop = false
                     };
                     var button1 = button;
-                    extraButton.ButtonPressed += (sender, args) => button1.OnClic((YamuiButtonImage) sender);
+                    extraButton.ButtonPressed += (sender, args) => button1.OnClic((YamuiButtonImage) sender, args);
                     Controls.Add(extraButton);
                     ExtraButtonsList.Add(extraButton);
                     if (button.ToolTip != null)
@@ -335,7 +334,7 @@ namespace YamuiFramework.Controls.YamuiList {
             /// <summary>
             /// Action associated to the clic on the button
             /// </summary>
-            public Action<YamuiButtonImage> OnClic { get; set; }
+            public Action<YamuiButtonImage, EventArgs> OnClic { get; set; }
 
             /// <summary>
             /// Tooltip to display for the button (can be null)

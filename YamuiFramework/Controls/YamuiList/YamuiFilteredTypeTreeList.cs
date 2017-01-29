@@ -33,7 +33,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This class is the most complicated, obviously
     /// The difficulty being handling the filter string correctly;
     /// basically, we have two separate modes (see SearchMode)
-    /// This is not the conventionnal tree searching but this makes more sense to me
+    /// This is not the conventional tree searching but this makes more sense to me
     /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
 
@@ -109,6 +109,15 @@ namespace YamuiFramework.Controls.YamuiList {
             set { _showTreeBranches = value; }
         }
 
+        /// <summary>
+        /// Root items passed to the SetItems method
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        protected List<FilteredTypeTreeListItem> TreeRootItems {
+            get { return _treeRootItems; }
+            set { _treeRootItems = value; }
+        }
+
         #endregion
 
         #region Enum
@@ -140,14 +149,18 @@ namespace YamuiFramework.Controls.YamuiList {
 
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeTreeListItem))
-                throw new Exception("listItems shoud contain objects of type FilteredTypeTreeListItem");
+                throw new Exception("listItems should contain objects of type FilteredTypeTreeListItem");
 
-            _treeRootItems = listItems.Cast<FilteredTypeTreeListItem>().ToList();
+            TreeRootItems = listItems.Cast<FilteredTypeTreeListItem>().ToList();
+
+            foreach (var item in TreeRootItems) {
+                item.ResetItemProperties();
+            }
 
             if (_isSearching)
-                base.SetItems(GetFullItemsList(_treeRootItems));
+                base.SetItems(GetFullItemsList(TreeRootItems));
             else
-                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+                base.SetItems(GetExpandedItemsList(TreeRootItems, ForceExpansion.Idle));
         }
 
         /// <summary>
@@ -163,7 +176,6 @@ namespace YamuiFramework.Controls.YamuiList {
             foreach (var item in list) {
                 outList.Add(item);
                 var descriptor = item.PathDescriptor;
-
                 if (item.CanExpand) {
 
                     // force expand/collapse?
@@ -202,7 +214,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     var children = GetFullItemsList(item.GetItemChildren());
                     if (children != null)
                         outList.AddRange(children);
-                }
+                } 
             }
             return outList;
         }
@@ -216,7 +228,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void ForceAllToExpand() {
             if (!_isSearching)
-                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceExpand));
+                base.SetItems(GetExpandedItemsList(TreeRootItems, ForceExpansion.ForceExpand));
         }
 
         /// <summary>
@@ -224,7 +236,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void ForceAllToCollapse() {
             if (!_isSearching)
-                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceCollapse));
+                base.SetItems(GetExpandedItemsList(TreeRootItems, ForceExpansion.ForceCollapse));
         }
 
         /// <summary>
@@ -233,11 +245,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void ApplyExpansionState() {
             if (!_isSearching)
-                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+                base.SetItems(GetExpandedItemsList(TreeRootItems, ForceExpansion.Idle));
         }
 
         /// <summary>
-        /// The list automatocally saves the expansion state of a node when it is changed,
+        /// The list automatically saves the expansion state of a node when it is changed,
         /// if you want the states to be forgotten, call this method
         /// </summary>
         public void ClearSavedExpansionState() {
@@ -408,9 +420,9 @@ namespace YamuiFramework.Controls.YamuiList {
 
                 // we went from searching to not searching or the contrary
                 if (_isSearching)
-                    base.SetItems(GetFullItemsList(_treeRootItems));
+                    base.SetItems(GetFullItemsList(TreeRootItems));
                 else
-                    base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+                    base.SetItems(GetExpandedItemsList(TreeRootItems, ForceExpansion.Idle));
                 return true;
             }
             return false;

@@ -21,10 +21,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Images;
+using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
@@ -40,7 +42,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         // remember the original list of items
         private List<CodeExplorerItem> _initialObjectsList;
-        
+        private bool _isExpanded;
+
         #endregion
 
         #region Fields public
@@ -104,14 +107,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
             };
             filterbox.Initialize(yamuiList);
 
-            //treeList.SortingClass = CompletionSortingClass<ListItem>.Instance;
-            //treeList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
             yamuiList.EmptyListString = @"Nothing to display";
 
             Refreshing = false;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             RefreshSortButton();
+
+            // list events
+            yamuiList.RowClicked += YamuiListOnRowClicked;
+            yamuiList.EnterPressed += YamuiListOnEnterPressed;
         }
 
         #endregion
@@ -164,9 +169,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
 
                 // apply custom sorting
-                //_initialObjectsList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
-                _initialObjectsList = tempList;
-                /*
+                tempList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
+
                 HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
 
                 // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
@@ -176,22 +180,21 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     var item = tempList[iItem];
 
                     // add an extra item that will be a new branch
-                    if (!item.Branch && !foundBranches.Contains(item.Branch)) {
+                    if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
                         var branchDisplayText = item.Branch.GetDescription();
 
                         currentLvl1Parent = new CodeExplorerItem {
                             DisplayText = branchDisplayText,
                             Branch = item.Branch,
-                            CanExpand = true,
-                            // by default, the lvl 1 branches are expanded
-                            IsExpanded = (!_expandedBranches.ContainsKey(branchDisplayText) ? _isExpanded : _expandedBranches[branchDisplayText])
+                            IsExpanded = true, // by default, expand lvl 1 branch
+                            Children = new List<FilteredTypeTreeListItem>()
                         };
                         foundBranches.Add(item.Branch);
                         _initialObjectsList.Add(currentLvl1Parent);
                     }
 
                     // Add a child item to the current branch
-                    if (foundBranches.Contains(item.Branch)) {
+                    if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
 
                         // For each duplicated item (same Icon and same displayText), we create a new branch
                         var iIdentical = iItem + 1;
@@ -206,49 +209,32 @@ namespace _3PA.MainFeatures.CodeExplorer {
                         }
                         // if we found identical item
                         if (iIdentical > iItem + 1) {
+
                             // we create a branch for them
                             var currentLvl2Parent = new CodeExplorerItem {
                                 DisplayText = tempList[iItem].DisplayText,
                                 Branch = tempList[iItem].Branch,
                                 IconType = tempList[iItem].IconType,
-                                CanExpand = true,
-                                // by default, the lvl 2 branches are NOT expanded
-                                IsExpanded = _expandedBranches.ContainsKey(tempList[iItem].DisplayText) && _expandedBranches[tempList[iItem].DisplayText],
-                                Ancestors = new List<FilteredItemTree> { currentLvl1Parent },
+                                IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
                                 SubString = "x" + (iIdentical - iItem),
                                 IsNotBlock = tempList[iItem].IsNotBlock,
-                                Flag = flags
+                                Flag = flags,
+                                Children = new List<FilteredTypeTreeListItem>()
                             };
-                            _initialObjectsList.Add(currentLvl2Parent);
+                            currentLvl1Parent.Children.Add(currentLvl2Parent);
 
                             // add child items to the newly created lvl 2 branch
                             for (int i = iItem; i < iIdentical; i++) {
-                                tempList[i].Ancestors = new List<FilteredItemTree> { currentLvl1Parent, currentLvl2Parent };
-                                tempList[i].IsNotBlock = true;
-                                _initialObjectsList.Add(tempList[i]);
+                                currentLvl2Parent.Children.Add(tempList[i]);
                             }
-
-                            // last child
-                            (_initialObjectsList.LastOrDefault() ?? new CodeExplorerItem()).IsLastItem = true;
-
+                            
                             iItem += (iIdentical - iItem);
-
-                            // last child of the branch
-                            if (iItem >= tempList.Count - 1 || item.Branch != tempList[iItem].Branch)
-                                currentLvl2Parent.IsLastItem = true;
-
                             continue;
-
                         }
 
                         // single item, add it normally
-                        item.Ancestors = new List<FilteredItemTree> { currentLvl1Parent };
-                        _initialObjectsList.Add(item);
-
-                        // last child of the branch
-                        if (iItem == tempList.Count - 1 || item.Branch != tempList[iItem + 1].Branch)
-                            item.IsLastItem = true;
-
+                        currentLvl1Parent.Children.Add(item);
+                        
                     } else {
                         // add existing item as a root item
                         _initialObjectsList.Add(item);
@@ -256,8 +242,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                     iItem++;
                 }
-                */
-
+                
             } else {
                 _initialObjectsList = tempList;
             }
@@ -273,43 +258,42 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Executed when the user double click an item or press enter
         /// </summary>
-        private void OnActivateItem() {
+        private bool OnActivateItem() {
             var curItem = yamuiList.SelectedItem as CodeExplorerItem;
             if (curItem == null)
-                return;
+                return false;
 
-            // Branch clicked : expand/retract
             if (!curItem.CanExpand) {
                 // Item clicked : go to line
                 Npp.Goto(curItem.DocumentOwner, curItem.GoToLine, curItem.GoToColumn);
+                return true;
             }
-        }
 
-        #endregion
-        
-        #region Misc
-
-        public void RefreshParserAndCodeExplorer() {
-            this.SafeInvoke(form => {
-                ParserHandler.ParserVisitor.ClearSavedParserVisitors();
-                Plug.DoNppDocumentSwitched();
-            });
+            return false;
         }
 
         #endregion
 
         #region Button events
 
-        private void buttonRefresh_Click(YamuiButtonImage sender) {
-            if (Refreshing) {
+        private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs keyEventArgs) {
+            OnActivateItem();
+        }
+
+        private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
+            if(OnActivateItem())
+                Npp.GrabFocus();
+        }
+
+        private void buttonRefresh_Click(YamuiButtonImage sender, EventArgs e) {
+            if (Refreshing)
                 return;
-            }
-            Refresh();
-            RefreshParserAndCodeExplorer();
+            ParserHandler.ParserVisitor.ClearSavedParserVisitors();
+            Plug.DoNppDocumentSwitched();
             Npp.GrabFocus();
         }
 
-        private void buttonSort_Click(YamuiButtonImage sender) {
+        private void buttonSort_Click(YamuiButtonImage sender, EventArgs e) {
             Config.Instance.CodeExplorerSortingType++;
             if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
@@ -322,25 +306,19 @@ namespace _3PA.MainFeatures.CodeExplorer {
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
         }
 
-        private void buttonExpandRetract_Click(YamuiButtonImage sender) {
-            //_isExpanded = !_isExpanded;
-            //_expandedBranches.Clear();
-            //UpdateTreeData();
-            //// update button
-            //buttonExpandRetract.BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
-            //buttonExpandRetract.Invalidate();
+        private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
+            _isExpanded = !_isExpanded;
 
+            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
             Npp.GrabFocus();
         }
 
-        private void ButtonIncludeExternalOnButtonPressed(YamuiButtonImage sender) {
+        private void ButtonIncludeExternalOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
             // change option and image
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
-            //buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-
+            filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             // parse document
             Plug.DoNppDocumentSwitched();
-
             Npp.GrabFocus();
         }
 

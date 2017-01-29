@@ -296,21 +296,28 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Compute the path descriptor/level for this item (not required for root items)
         /// </summary>
         private void ComputeItemProperties() {
-            if (ParentNode != null) {
+            // compute path descriptor
+            _pathDescriptor = string.Empty;
+            // compute node level
+            Level = 0;
 
-                // compute path descriptor
-                _pathDescriptor = string.Empty;
-                // compute node level
-                Level = 0;
-
-                var loopParent = ParentNode;
-                while (loopParent != null) {
-                    _pathDescriptor = loopParent.DisplayText + "(" + loopParent.ItemType + ")" + TreePathSeparator + _pathDescriptor;
-                    Level++;
-                    loopParent = loopParent.ParentNode;
-                }
-                _pathDescriptor = _pathDescriptor + DisplayText + "(" + ItemType + ")";
+            var loopParent = ParentNode;
+            while (loopParent != null) {
+                _pathDescriptor = loopParent.DisplayText + "(" + loopParent.ItemType + ")" + TreePathSeparator + _pathDescriptor;
+                Level++;
+                loopParent = loopParent.ParentNode;
             }
+            _pathDescriptor = _pathDescriptor + DisplayText + "(" + ItemType + ")";
+        }
+
+        /// <summary>
+        /// Reset the properties of this item, to correctly draw the tree
+        /// This method needs to be called on each root item when setting items
+        /// </summary>
+        public void ResetItemProperties() {
+            ParentNode = null;
+            _pathDescriptor = null;
+            Level = 0;
         }
 
         /// <summary>
