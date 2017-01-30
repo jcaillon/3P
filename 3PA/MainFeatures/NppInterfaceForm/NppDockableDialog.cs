@@ -95,6 +95,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public void ForceClose() {
             if (Form != null)
                 Form.Close();
+            Form = null;
         }
 
         #endregion

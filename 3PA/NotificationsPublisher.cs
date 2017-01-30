@@ -83,10 +83,8 @@ namespace _3PA {
                     case (uint) NppNotif.NPPN_SHUTDOWN:
                         // uninstall hooks on mouse/keyboard
                         UninstallHooks();
-
-                        DoNppShutDown();
-
                         PluginIsReady = false;
+                        DoNppShutDown();
                         return;
                 }
                 

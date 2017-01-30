@@ -228,9 +228,9 @@ namespace _3PA {
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
             DataBase.OnDatabaseInfoUpdated += AutoCompletion.RefreshStaticItems;
 
-            ParserHandler.OnParseStarted += () => { CodeExplorer.Instance.Refreshing = true; };
+            ParserHandler.OnParseStarted += CodeExplorer.Instance.OnParseStarted;
             ParserHandler.OnParseEnded += AutoCompletion.RefreshDynamicItems;
-            ParserHandler.OnParseEnded += CodeExplorer.Instance.UpdateCodeExplorer;
+            ParserHandler.OnParseEnded += CodeExplorer.Instance.OnParseEnded;
 
             AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
 
@@ -261,6 +261,17 @@ namespace _3PA {
                 if (OnShutDown != null)
                     OnShutDown();
 
+                // unsubscribe to static events
+                ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
+                ProEnvironment.OnEnvironmentChange -= DataBase.UpdateDatabaseInfo;
+                DataBase.OnDatabaseInfoUpdated -= AutoCompletion.RefreshStaticItems;
+
+                ParserHandler.OnParseStarted -= CodeExplorer.Instance.OnParseStarted;
+                ParserHandler.OnParseEnded -= AutoCompletion.RefreshDynamicItems;
+                ParserHandler.OnParseEnded -= CodeExplorer.Instance.OnParseEnded;
+
+                AutoCompletion.OnUpdatedStaticItems -= Parser.UpdateKnownStaticItems;
+
                 // clean up timers
                 ReccurentAction.CleanAll();
                 DelayedAction.CleanAll();
@@ -277,11 +288,11 @@ namespace _3PA {
                 Keywords.SaveRanking();
 
                 // close every form
+                FileExplorer.Instance.ForceClose();
+                CodeExplorer.Instance.ForceClose();
                 AutoCompletion.ForceClose();
                 InfoToolTip.ForceClose();
                 Appli.ForceClose();
-                FileExplorer.Instance.ForceClose();
-                CodeExplorer.Instance.ForceClose();
                 UserCommunication.ForceClose();
                 AppliMenu.ForceCloseMenu();
 

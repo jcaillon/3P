@@ -78,19 +78,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
-        public void UpdateCodeExplorer() {
-            if (Form == null || Form.Disposing) return;
+        public void OnParseEnded() {
+            if (Form == null) return;
             Form.UpdateTreeData();
         }
-
-        /// <summary>
-        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
-        /// </summary>
-        public bool Refreshing {
-            set {
-                if (Form == null || Form.Disposing) return;
-                Form.Refreshing = value;
-            }
+        public void OnParseStarted() {
+            if (Form == null) return;
+            Form.Refreshing = true;
         }
 
         #endregion

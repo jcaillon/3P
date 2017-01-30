@@ -138,6 +138,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public override bool IsRowHighlighted {
             get {
+                return false;
                 var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
                 return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
             } 

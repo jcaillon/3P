@@ -55,7 +55,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             get { return _refreshing; }
             set {
                 _refreshing = value;
-                this.SafeSyncInvoke(() => {
+                this.SafeInvoke(form => {
                     var refreshButton = filterbox.ExtraButtonsList != null && filterbox.ExtraButtonsList.Count > 0 ? filterbox.ExtraButtonsList[0] : null;
                     if (refreshButton == null)
                         return;
