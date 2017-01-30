@@ -513,7 +513,7 @@
     <Content Include="Images\FileExplorer\XmlType.png" />
     <Content Include="Images\FileExplorer\XrefType.png" />
     <Content Include="Images\FileExplorer\ZipType.png" />
-    <Content Include="Images\logo\logo256x256.png" />
+    <Content Include="Images\logo\logo150x150.png" />
     <Content Include="Images\Menu\EditCode.png" />
     <Content Include="Images\Menu\DataAdmin.png" />
     <Content Include="Images\Menu\DatabaseTools.png" />
@@ -589,7 +589,6 @@
     <Content Include="Images\Html\getting-started-2.png" />
     <Content Include="Images\Html\getting-started-3.png" />
     <Content Include="Images\logo\icon\3p_icon.ico" />
-    <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo20x20.png" />
     <Content Include="Images\logo\logo30x30.png" />
     <Content Include="Html\Pages\getting_started.txt" />

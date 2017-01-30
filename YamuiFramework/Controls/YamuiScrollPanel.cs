@@ -158,8 +158,12 @@ namespace YamuiFramework.Controls {
                     // mouse in scrollbar
                     if (_barRectangle.Contains(mousePosRelativeToThis)) {
 
+                        var thumbRect = _thumbRectangle;
+                        thumbRect.X -= _thumbPadding;
+                        thumbRect.Width += _thumbPadding * 2;
+
                         // mouse in thumb
-                        if (_thumbRectangle.Contains(mousePosRelativeToThis)) {
+                        if (thumbRect.Contains(mousePosRelativeToThis)) {
                             _isPressed = true;
                             _lastMouseMove = PointToScreen(MousePosition);
                             Invalidate();

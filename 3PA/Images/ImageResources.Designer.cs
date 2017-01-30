@@ -1093,6 +1093,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap logo150x150 {
+            get {
+                object obj = ResourceManager.GetObject("logo150x150", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap logo16x16 {
             get {
                 object obj = ResourceManager.GetObject("logo16x16", resourceCulture);
@@ -1106,16 +1116,6 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap logo20x20 {
             get {
                 object obj = ResourceManager.GetObject("logo20x20", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap logo256x256 {
-            get {
-                object obj = ResourceManager.GetObject("logo256x256", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

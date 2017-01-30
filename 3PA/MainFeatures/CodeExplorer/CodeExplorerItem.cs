@@ -136,13 +136,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// return true if the item is to be highlighted
         /// </summary>
-        public override bool IsRowHighlighted {
-            get {
-                return false;
-                var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
-                return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
-            } 
-        }
+        public override bool IsRowHighlighted { get { return false; } }
 
         /// <summary>
         /// return a string containing the subtext to display

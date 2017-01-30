@@ -284,7 +284,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         
         #endregion
 
-        #region events
+        #endregion
+
+        #region File list events
 
         private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs keyEventArgs) {
             var curItem = (FileListItem)yamuiList.SelectedItem;
@@ -298,30 +300,14 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (curItem == null)
                 return;
 
-            if (e.Button == MouseButtons.Middle)
-                Utils.OpenFileInFolder(curItem.FullPath);
-            else if (e.Clicks >= 2)
+            if (e.Button == MouseButtons.Right) {
+                if (File.Exists(curItem.FullPath))
+                    Utils.OpenFileInFolder(curItem.FullPath);
+                else
+                    Utils.OpenAnyLink(curItem.FullPath);
+            } else if (e.Clicks >= 2)
                 Utils.OpenAnyLink(curItem.FullPath);
         }
-
-        private void FastOlvOnClick(object sender, EventArgs eventArgs) {
-            if (!KeyboardMonitor.GetModifiers.IsAlt)
-                return;
-            var curItem = (FileListItem)yamuiList.SelectedItem;
-            if (curItem != null) {
-                // remove or add favourite flag
-                if (curItem.Flag.HasFlag(FileFlag.Favourite))
-                    curItem.Flag &= ~FileFlag.Favourite;
-                else
-                    curItem.Flag |= FileFlag.Favourite;
-            }
-        }
-
-        #endregion
-
-        #endregion
-
-        #region File list events
 
         /// <summary>
         /// Redirect mouse wheel to yamuilist?

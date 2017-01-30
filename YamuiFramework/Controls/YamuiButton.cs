@@ -59,11 +59,11 @@ namespace YamuiFramework.Controls {
         public bool Highlight { get; set; }
 
         /// <summary>
-        /// Allows the ButtonPressed event to also be activated by a right click on the button
+        /// Allows the ButtonPressed event to also be activated by a right/middle click on the button
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool AcceptsRightClick { get; set; }
+        public virtual bool AcceptsAnyClick { get; set; }
 
         /// <summary>
         /// Set the image to use for this button
@@ -342,7 +342,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
+            if (e.Button == MouseButtons.Left || AcceptsAnyClick) {
                 IsPressed = true;
                 Invalidate();
             }

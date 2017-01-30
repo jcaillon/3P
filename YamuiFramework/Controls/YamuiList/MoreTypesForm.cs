@@ -110,7 +110,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     Size = buttonSize,
                     TabStop = false,
                     Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                    AcceptsRightClick = true,
+                    AcceptsAnyClick = true,
                     HideFocusedIndicator = true,
                     Activated = true,
                     BackGrndImage = parentList.TypeImages.ContainsKey(type) ? parentList.TypeImages[type] : null,

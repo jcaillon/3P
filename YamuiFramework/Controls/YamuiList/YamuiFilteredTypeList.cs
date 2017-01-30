@@ -279,7 +279,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     _typeButtons.Add(type, new SelectorButton {
                         Size = new Size(TypeButtonWidth, DefaultBottomHeight),
                         TabStop = false,
-                        AcceptsRightClick = true,
+                        AcceptsAnyClick = true,
                         HideFocusedIndicator = true,
                         Activated = true,
                         BackGrndImage = TypeImages.ContainsKey(type) ? TypeImages[type] : null

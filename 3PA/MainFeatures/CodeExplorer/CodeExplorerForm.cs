@@ -42,7 +42,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         // remember the original list of items
         private List<CodeExplorerItem> _initialObjectsList;
-        private bool _isExpanded;
+        private bool _isExpanded = true;
 
         #endregion
 
@@ -110,13 +110,17 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.EmptyListString = @"Nothing to display";
 
             Refreshing = false;
+            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-
-            RefreshSortButton();
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
 
             // list events
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
+
+            //var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
+            //return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
+
         }
 
         #endregion
@@ -307,17 +311,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             UpdateTreeData();
-            RefreshSortButton();
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
             Npp.GrabFocus();
         }
 
-        private void RefreshSortButton() {
-            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
-        }
-
         private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
+            if (_isExpanded)
+                yamuiList.ForceAllToCollapse();
+            else
+                yamuiList.ForceAllToExpand();
             _isExpanded = !_isExpanded;
-
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
             Npp.GrabFocus();
         }

@@ -100,9 +100,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             try {
                 if (Form == null)
                     return;
-                Form.SafeSyncInvoke(form => {
-                    Form.FilterBox.ClearAndFocusFilter();
-                });
+                Form.Focus();
+                Form.FilterBox.ClearAndFocusFilter();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in StartSearch");
             }

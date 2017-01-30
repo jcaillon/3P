@@ -701,70 +701,62 @@ namespace YamuiFramework.Controls.YamuiList {
             base.OnResize(e);
         }
 
-        [SecuritySafeCritical]
-        protected override void WndProc(ref Message message) {
-            if (HasScrolls)
-                HandleWindowsProc(message);
-            base.WndProc(ref message);
-        }
-
-        /// <summary>
-        /// when the scroll bar is visible we listen to messages to handle the scroll
-        /// </summary>
-        protected void HandleWindowsProc(Message message) {
-            switch (message.Msg) {
-                case (int)WinApi.Messages.WM_LBUTTONDOWN:
-                    var mousePosRelativeToThis = PointToClient(MousePosition);
-
-                    // mouse in scrollbar
-                    if (_scrollRectangle.Contains(mousePosRelativeToThis)) {
-
-                        // mouse in thumb
-                        if (_thumbRectangle.Contains(mousePosRelativeToThis)) {
-                            _isScrollPressed = true;
-                            Invalidate();
-                            _yPosOnThumb = mousePosRelativeToThis.Y - _thumbRectangle.Y;
-                        } else {
-                            ThumbPosToTopIndex(mousePosRelativeToThis.Y);
-                        }
-
-                        // give focus back to the control
-                        GrabFocus();
-                    }
-                    break;
-
-                case (int)WinApi.Messages.WM_LBUTTONUP:
-                    if (_isScrollPressed) {
-                        _isScrollPressed = false;
-                        Invalidate();
-                    }
-                    break;
-
-                case (int)WinApi.Messages.WM_MOUSEMOVE:
-                    // hover thumb
-                    var mousePosRelativeToThis2 = PointToClient(MousePosition);
-                    if (_thumbRectangle.Contains(mousePosRelativeToThis2)) {
-                        _isScrollHovered = true;
-                        Invalidate();
-                    } else {
-                        if (_isScrollHovered) {
-                            _isScrollHovered = false;
-                            Invalidate();
-                        }
-                    }
-
-                    // moving thumb
-                    if (_isScrollPressed) {
-                        ThumbPosToTopIndex(mousePosRelativeToThis2.Y - _yPosOnThumb);
-                    }
-
-                    break;
-            }
-        }
-
         protected override void OnMouseWheel(MouseEventArgs e) {
             DoScroll(e.Delta);
             base.OnMouseWheel(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e) {
+            var mousePosRelativeToThis = PointToClient(MousePosition);
+
+            // mouse in scrollbar
+            if (_scrollRectangle.Contains(mousePosRelativeToThis)) {
+
+                var thumbRect = _thumbRectangle;
+                thumbRect.X -= ThumbPadding;
+                thumbRect.Width += ThumbPadding*2;
+
+                // mouse in thumb
+                if (thumbRect.Contains(mousePosRelativeToThis)) {
+                    _isScrollPressed = true;
+                    Invalidate();
+                    _yPosOnThumb = mousePosRelativeToThis.Y - _thumbRectangle.Y;
+                } else {
+                    ThumbPosToTopIndex(mousePosRelativeToThis.Y);
+                }
+
+                // give focus back to the control
+                GrabFocus();
+            }
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e) {
+            if (_isScrollPressed) {
+                _isScrollPressed = false;
+                Invalidate();
+            }
+            base.OnMouseUp(e);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e) {
+            // hover thumb
+            var mousePosRelativeToThis2 = PointToClient(MousePosition);
+            if (_thumbRectangle.Contains(mousePosRelativeToThis2)) {
+                _isScrollHovered = true;
+                Invalidate();
+            } else {
+                if (_isScrollHovered) {
+                    _isScrollHovered = false;
+                    Invalidate();
+                }
+            }
+
+            // moving thumb
+            if (_isScrollPressed) {
+                ThumbPosToTopIndex(mousePosRelativeToThis2.Y - _yPosOnThumb);
+            }
+            base.OnMouseMove(e);
         }
 
         protected override void OnMouseEnter(EventArgs e) {
@@ -859,6 +851,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         private bool HandleKeyDown(KeyEventArgs e) {
             var newIndex = SelectedItemIndex;
+            var nbRowDisplayed = _nbRowFullyDisplayed.ClampMax(_nbRowDisplayed);
 
             var pressedKey = e.KeyCode;
             switch (pressedKey) {
@@ -898,19 +891,21 @@ namespace YamuiFramework.Controls.YamuiList {
                                 break;
 
                             case Keys.PageDown:
-                                if (SelectedRowIndex == _nbRowFullyDisplayed - 1)
-                                    newIndex += _nbRowFullyDisplayed;
+                                if (SelectedRowIndex >= nbRowDisplayed - 1)
+                                    newIndex += nbRowDisplayed;
                                 else
-                                    newIndex = TopIndex + _nbRowFullyDisplayed - 1;
-                                pressedKey = Keys.Down;
+                                    newIndex = TopIndex + nbRowDisplayed - 1;
+                                if (newIndex > _nbItems - 1)
+                                    newIndex = _nbItems - 1;
                                 break;
 
                             case Keys.PageUp:
                                 if (SelectedRowIndex == 0)
-                                    newIndex -= _nbRowFullyDisplayed;
+                                    newIndex -= nbRowDisplayed;
                                 else
                                     newIndex = TopIndex;
-                                pressedKey = Keys.Up;
+                                if (newIndex < 0)
+                                    newIndex = 0;
                                 break;
 
                             default:
@@ -978,13 +973,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Programatically triggers the HandleWindowsProc method
-        /// </summary>
-        public void PerformHandleWindowsProc(Message message) {
-            HandleWindowsProc(message);
-        }
-
-        /// <summary>
         /// Call this method to make the list focused
         /// </summary>
         public void GrabFocus() {
@@ -1033,6 +1021,14 @@ namespace YamuiFramework.Controls.YamuiList {
 
         public class YamuiListRow : YamuiButton {
 
+            #region private
+
+            private bool _acceptsAnyClick = true;
+
+            #endregion
+
+            #region public
+
             /// <summary>
             /// true if the row is selected
             /// </summary>
@@ -1040,14 +1036,27 @@ namespace YamuiFramework.Controls.YamuiList {
 
             public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint;
 
+            public override bool AcceptsAnyClick {
+                get { return _acceptsAnyClick; }
+                set { _acceptsAnyClick = value; }
+            }
+
+            #endregion
+
+            #region Life
+
             public YamuiListRow() {
                 // by default, buttons don't handle double click since a button in windows can only be simply clicked
                 // here we activate the double click
                 SetStyle(
-                    ControlStyles.StandardClick | 
-                    ControlStyles.StandardDoubleClick, 
+                    ControlStyles.StandardClick |
+                    ControlStyles.StandardDoubleClick,
                     true);
             }
+
+            #endregion
+
+            #region override
 
             /// <summary>
             /// redirect all input key to keydown
@@ -1064,6 +1073,9 @@ namespace YamuiFramework.Controls.YamuiList {
                     e.Graphics.Clear(YamuiThemeManager.Current.MenuNormalBack);
                 }
             }
+
+            #endregion
+
         }
 
         #endregion
