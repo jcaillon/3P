@@ -513,6 +513,7 @@
     <Content Include="Images\FileExplorer\XmlType.png" />
     <Content Include="Images\FileExplorer\XrefType.png" />
     <Content Include="Images\FileExplorer\ZipType.png" />
+    <Content Include="Images\logo\logo256x256.png" />
     <Content Include="Images\Menu\EditCode.png" />
     <Content Include="Images\Menu\DataAdmin.png" />
     <Content Include="Images\Menu\DatabaseTools.png" />

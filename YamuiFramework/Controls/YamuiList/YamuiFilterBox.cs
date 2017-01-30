@@ -266,7 +266,6 @@ namespace YamuiFramework.Controls.YamuiList {
             _filterBox.Text = AssociatedList.FilterString ?? string.Empty;
             Controls.Add(_filterBox);
             _tooltip.SetToolTip(_filterBox, TextBoxTooltip);
-
         }
 
         #endregion

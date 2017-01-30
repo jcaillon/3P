@@ -713,11 +713,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected void HandleWindowsProc(Message message) {
             switch (message.Msg) {
-                case (int) WinApi.Messages.WM_MOUSEWHEEL:
-                    var delta = (short)(message.WParam.ToInt32() >> 16);
-                    DoScroll(delta);
-                    break;
-
                 case (int)WinApi.Messages.WM_LBUTTONDOWN:
                     var mousePosRelativeToThis = PointToClient(MousePosition);
 
@@ -767,6 +762,11 @@ namespace YamuiFramework.Controls.YamuiList {
             }
         }
 
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            DoScroll(e.Delta);
+            base.OnMouseWheel(e);
+        }
+
         protected override void OnMouseEnter(EventArgs e) {
             IsHovered = true;
             base.OnMouseEnter(e);
@@ -783,7 +783,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// The delta should be negative when scrolling up!
         /// </summary>
         public void DoScroll(int delta) {
-            TopIndex += -Math.Sign(delta) * _nbRowFullyDisplayed / 2;
+            //TopIndex += -Math.Sign(delta) * _nbRowFullyDisplayed / 2;
+            TopIndex += -Math.Sign(delta) * 3;
         }
 
         /// <summary>

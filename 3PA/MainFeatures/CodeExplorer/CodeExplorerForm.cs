@@ -256,6 +256,15 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region events
 
         /// <summary>
+        /// Redirect mouse wheel to yamuilist?
+        /// </summary>
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            if (ActiveControl is YamuiFilterBox)
+                yamuiList.DoScroll(e.Delta);
+            base.OnMouseWheel(e);
+        }
+
+        /// <summary>
         /// Executed when the user double click an item or press enter
         /// </summary>
         private bool OnActivateItem() {

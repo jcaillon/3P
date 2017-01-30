@@ -318,16 +318,17 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedFile pars) {
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Root,
-                IconType = CodeExplorerIconType.BranchIcon,
-                Flag = 0,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            if (_isBaseFile)
+                _parsedExplorerItemsList.Add(new CodeExplorerItem {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.Root,
+                    IconType = CodeExplorerIconType.BranchIcon,
+                    Flag = 0,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                    SubString = null
+                });
         }
 
         /// <summary>
@@ -898,9 +899,9 @@ namespace _3PA.MainFeatures.Parser {
         private static ParserVisitor ParseFile(string filePath, ParsedScopeItem scopeItem, Dictionary<string, List<Token>> includeParameters) {
             ParserVisitor parserVisitor;
 
-            // did we already parsed this file in a previous parse session?
+            // did we already parsed this file in a previous parse session? (if we are in CodeExplorerDisplayExternalItems mode we need to parse it again anyway)
             var pathWithParam = filePath + "|" + GetParserIncludeParams(includeParameters);
-            if (_savedParserVisitors.ContainsKey(pathWithParam)) {
+            if (!Config.Instance.CodeExplorerDisplayExternalItems && _savedParserVisitors.ContainsKey(pathWithParam)) {
                 parserVisitor = _savedParserVisitors[pathWithParam];
             } else {
                 // Parse it
@@ -949,7 +950,6 @@ namespace _3PA.MainFeatures.Parser {
                     codeExplorerItem.Flag = codeExplorerItem.Flag | CodeExplorerFlag.Persistent;
                 }
                 _parsedExplorerItemsList.AddRange(listExpToAdd);
-
             }
         }
 

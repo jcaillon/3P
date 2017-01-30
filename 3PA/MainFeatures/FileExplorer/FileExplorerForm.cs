@@ -323,6 +323,15 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region File list events
 
+        /// <summary>
+        /// Redirect mouse wheel to yamuilist?
+        /// </summary>
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            if (ActiveControl is YamuiFilterBox)
+                yamuiList.DoScroll(e.Delta);
+            base.OnMouseWheel(e);
+        }
+
         private void RefreshGotoDirButton() {
             // refresh a button depending on the mode...
             if (IsHandleCreated) {

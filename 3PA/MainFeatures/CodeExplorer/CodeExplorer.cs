@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
         public void UpdateCodeExplorer() {
-            if (Form == null) return;
+            if (Form == null || Form.Disposing) return;
             Form.UpdateTreeData();
         }
 
@@ -88,7 +88,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public bool Refreshing {
             set {
-                if (Form == null) return;
+                if (Form == null || Form.Disposing) return;
                 Form.Refreshing = value;
             }
         }
