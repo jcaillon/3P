@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// return true if the item is to be highlighted
         /// </summary>
-        public override bool IsRowHighlighted { get { return FullPath.Equals(Plug.CurrentFilePath); } }
+        public override bool IsRowHighlighted { get { return false; } }
 
         /// <summary>
         /// return a string containing the subtext to display

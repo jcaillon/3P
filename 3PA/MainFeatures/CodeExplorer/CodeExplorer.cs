@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures.NppInterfaceForm;
 
@@ -38,6 +40,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private CodeExplorer() {
             _dialogDescription = "Code explorer";
             _formDefaultPos = NppTbMsg.CONT_RIGHT;
+            _iconImage = ImageResources.CodeExplorerLogo;
         }
 
         #endregion
@@ -65,10 +68,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Just redraw the code explorer, it is used to update the "selected" scope when
         /// the user click in scintilla
         /// </summary>
-        public void RedrawCodeExplorerList() {
+        public void UpdateCurrentScope() {
             if (Form == null)
                 return;
-            Form.YamuiList.Refresh();
+            Form.UpdateCurrentScope();
         }
 
         #endregion

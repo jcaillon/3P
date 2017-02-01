@@ -118,6 +118,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
 
+
             //var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
             //return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
 
@@ -253,6 +254,31 @@ namespace _3PA.MainFeatures.CodeExplorer {
             
             yamuiList.SetItems(_initialObjectsList.Cast<ListItem>().ToList());
 
+            // also update current scope 
+            UpdateCurrentScope();
+
+        }
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Updates the current scope to inform the user in which scope the caret is currently in
+        /// </summary>
+        public void UpdateCurrentScope() {
+            if (Plug.IsCurrentFileProgress) {
+                var currentScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
+                if (currentScope != null) {
+                    pbCurrentScope.BackGrndImage = Utils.GetImageFromStr(currentScope.ScopeType.ToString());
+                    pbCurrentScope.Invalidate();
+                    lbCurrentScope.Text = currentScope.Name;
+                    return;
+                }
+            }
+            pbCurrentScope.BackGrndImage = ImageResources.NotApplicable;
+            pbCurrentScope.Invalidate();
+            lbCurrentScope.Text = @"Not applicable";
         }
 
         #endregion

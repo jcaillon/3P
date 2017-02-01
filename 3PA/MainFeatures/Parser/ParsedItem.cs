@@ -117,14 +117,14 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// Allows faster comparison against ParsedScopeItems
+    /// Allows faster comparison against ParsedScopeItems (should have the same name as the CodeExplorerBranch Enum)
     /// </summary>
     internal enum ParsedScopeType {
-        File,
+        Root,
         Block,
         Procedure,
         Function,
-        OnStatement
+        OnEvent
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.File) { }
+        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) { }
 
     }
 
@@ -284,7 +284,7 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         public ParsedOnStatement(string name, Token token, string eventList, string widgetList)
-            : base(name, token, ParsedScopeType.OnStatement) {
+            : base(name, token, ParsedScopeType.OnEvent) {
             EventList = eventList;
             WidgetList = widgetList;
         }

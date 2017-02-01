@@ -99,13 +99,6 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileAlwaysShowNotification = true;
 
-
-            [Display(Name = "Use alternate back color for lists",
-                Description = "Use alternate back color for the autocompletion, the code explorer, the file explorer and so on...",
-                GroupName = "General",
-                AutoGenerateField = true)]
-            public bool GlobalUseAlternateBackColorOnGrid = false;
-
             [Display(Name = "Allow tab animation",
                 Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
                 GroupName = "General",

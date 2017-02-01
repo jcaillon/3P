@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using YamuiFramework.Helper;
 using _3PA.Images;
@@ -14,6 +15,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected string _dialogDescription = "?";
 
         protected NppTbMsg _formDefaultPos = NppTbMsg.CONT_LEFT;
+
+        protected Image _iconImage = ImageResources.FileExplorerLogo;
 
         protected T Form { get; set; }
 
@@ -64,7 +67,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                         pszName = AssemblyInfo.AssemblyProduct + " - " + _dialogDescription,
                         dlgID = DockableCommandIndex,
                         uMask = _formDefaultPos | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                        hIconTab = (uint)Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
+                        hIconTab = (uint)Utils.GetIconFromImage(_iconImage).Handle,
                         pszModuleName = AssemblyInfo.AssemblyProduct
                     };
                     IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));

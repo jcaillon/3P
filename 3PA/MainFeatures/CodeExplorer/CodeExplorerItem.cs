@@ -174,8 +174,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     internal enum CodeExplorerBranch {
-        [Description("Everything in code order")]
-        EverythingInCodeOrder,
         [Description("Root")]
         Root,
         [Description("Appbuilder blocks")]

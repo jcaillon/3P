@@ -817,7 +817,7 @@ namespace _3PA {
             Snippets.FinalizeCurrent();
 
             // update scope of code explorer (the selection img)
-            CodeExplorer.Instance.RedrawCodeExplorerList();
+            CodeExplorer.Instance.UpdateCurrentScope();
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
+using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
     partial class FileExplorerForm {
@@ -170,7 +171,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.yamuiLabel3.AutoSize = true;
             this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel3.Location = new System.Drawing.Point(4, 93);
+            this.yamuiLabel3.Location = new System.Drawing.Point(2, 93);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel3.Name = "yamuiLabel3";
             this.yamuiLabel3.Size = new System.Drawing.Size(114, 19);
@@ -224,7 +225,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.yamuiLabel2.AutoSize = true;
             this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel2.Location = new System.Drawing.Point(4, 47);
+            this.yamuiLabel2.Location = new System.Drawing.Point(2, 47);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
             this.yamuiLabel2.Size = new System.Drawing.Size(177, 19);

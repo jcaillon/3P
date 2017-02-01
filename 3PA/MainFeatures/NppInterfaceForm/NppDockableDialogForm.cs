@@ -62,10 +62,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #region constructor
 
-        public NppDockableDialogForm() { }
-
-        public NppDockableDialogForm(NppDockableDialogEmptyForm formToCover) {
-
+        public NppDockableDialogForm() {
             // why those styles? check here: 
             // https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
             SetStyle(
@@ -75,24 +72,28 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
 
+
             FormBorderStyle = FormBorderStyle.None;
             ControlBox = false;
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.Manual;
             AutoScaleMode = AutoScaleMode.None;
-            _masterForm = formToCover;
-            Location = _masterForm.PointToScreen(Point.Empty);
-            ClientSize = _masterForm.ClientSize;
+        }
 
+        public NppDockableDialogForm(NppDockableDialogEmptyForm formToCover) : this() {
+            _masterForm = formToCover;
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
             _masterForm.Closed += MasterFormOnClosed;
-
             _masterForm.ClientSizeChanged += RefreshPosAndLoc;
             _masterForm.LocationChanged += RefreshPosAndLoc;
             _masterForm.LostFocus += RefreshPosAndLoc;
             _masterForm.GotFocus += RefreshPosAndLoc;
 
+            Location = _masterForm.PointToScreen(Point.Empty);
+            ClientSize = _masterForm.ClientSize;
+
             Show(_masterForm);
+
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;

@@ -47,6 +47,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private FileExplorer() {
             _dialogDescription = "File explorer";
             _formDefaultPos = NppTbMsg.CONT_LEFT;
+            _iconImage = ImageResources.FileExplorerLogo;
         }
 
         #endregion

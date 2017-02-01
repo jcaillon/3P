@@ -252,7 +252,7 @@ namespace YamuiFramework.Forms {
         public Point GetChildBestPosition(Rectangle childRectangle, int parentLineHeight) {
             return new Point(
                 _reverseX ? (childRectangle.X - childRectangle.Width - Width) : childRectangle.X,
-                _reverseY ? (childRectangle.Y - (Height - 2) + parentLineHeight) : childRectangle.Y);
+                childRectangle.Y);
         }
 
         /// <summary>

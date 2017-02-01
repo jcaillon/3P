@@ -188,6 +188,7 @@ namespace _3PA {
 
             }
             GrabFocus();
+            Plug.OnUpdateSelection();
         }
 
         /// <summary>
