@@ -245,7 +245,6 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-
             /*
             var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
             webServiceJson.AddToReq("UUID", "allo");

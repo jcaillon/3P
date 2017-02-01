@@ -43,9 +43,11 @@ namespace _3PA.MainFeatures {
         /// Holds the info about the latest release found on the distant update server
         /// </summary>
         private static ReleaseInfo _latestReleaseInfo;
-        private static bool _warnedUserAboutUpdateAvail;
-        private static volatile bool _checking;
         private static ReccurentAction _checkEveryHourAction;
+
+        private static volatile bool _isChecking;
+        private static volatile bool _displayResultNotif;
+        private static bool _updateAvailableOnRestart;
 
         #endregion
 
@@ -93,17 +95,18 @@ namespace _3PA.MainFeatures {
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
                     Style.InstallUdl();
             }
+
         }
 
         /// <summary>
-        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediatly
+        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately
         /// </summary>
         public static void StartCheckingForUpdate() {
             // check for updates every now and then (2h)
             _checkEveryHourAction = new ReccurentAction(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
-                    CheckForUpdate(false);
+                    CheckForUpdate(true);
             }, 1000 * 60 * 120);
         }
 
@@ -114,7 +117,7 @@ namespace _3PA.MainFeatures {
             if (!Utils.IsSpamming("updates", 1000)) {
                 UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
                 Task.Factory.StartNew(() => {
-                    CheckForUpdate(true);
+                    CheckForUpdate(false);
                 });
             }
         }
@@ -122,34 +125,38 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Gets an object with the latest release info
         /// </summary>
-        public static void CheckForUpdate(bool alwaysGetFeedBack) {
+        public static void CheckForUpdate(bool periodicCheck) {
 
-            if (_latestReleaseInfo != null) {
+            _displayResultNotif = !periodicCheck;
+
+            if (_isChecking)
+                return;
+
+            if (_updateAvailableOnRestart && _latestReleaseInfo != null && _displayResultNotif) {
                 // we already checked and there is a new version
-                if (!_warnedUserAboutUpdateAvail || alwaysGetFeedBack)
-                    NotifyUpdateAvailable();
+                NotifyUpdateAvailable();
                 return;
             }
-
-            if (_checking)
-                return;
-
+            _isChecking = true;
             try {
-                var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi);
-                wb.TimeOut = 3000;
-                wb.OnInitHttpWebRequest += request => { request.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"); };
-                wb.OnRequestEnded += json => WbOnOnRequestEnded(json, alwaysGetFeedBack);
+                var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi) {
+                    TimeOut = 3000
+                };
+                wb.OnInitHttpWebRequest += request => {
+                    request.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
+                };
+                wb.OnRequestEnded += WbOnOnRequestEnded;
                 wb.Execute();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when checking for updates");
+                _isChecking = false;
             }
         }
 
         /// <summary>
         /// Called when the gitub api for releases responses
         /// </summary>
-        private static void WbOnOnRequestEnded(WebServiceJson webServiceJson, bool alwaysGetFeedBack) {
-
+        private static void WbOnOnRequestEnded(WebServiceJson webServiceJson) {
             try {
                 if (webServiceJson.StatusCodeResponse == HttpStatusCode.OK && webServiceJson.ResponseException == null) {
                     Config.Instance.LastCheckUpdateOk = true;
@@ -158,19 +165,20 @@ namespace _3PA.MainFeatures {
                     var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
                     if (releases != null && releases.Count > 0) {
 
-                        // sort by descring order
+                        // sort
                         releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
                     
                         var localVersion = AssemblyInfo.Version;
                         var outputBody = new StringBuilder();
                         foreach (var release in releases) {
 
-                            if (string.IsNullOrEmpty(release.tag_name)) continue;
+                            if (string.IsNullOrEmpty(release.tag_name)) 
+                                continue;
 
                             // For each version higher than the local one, append to the release body
                             // Will be used to display the version log to the user
-                            if (release.tag_name.IsHigherVersionThan(localVersion) && 
-                                (Config.Instance.UserGetsPreReleases || !release.prerelease) &&
+                            if (release.tag_name.IsHigherVersionThan(localVersion) &&
+                                (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || !release.prerelease) &&
                                 release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(Config.FileGitHubAssetName))) {
 
                                 // in case something is undefined (but shouldn't happen)
@@ -200,17 +208,20 @@ namespace _3PA.MainFeatures {
                             Utils.DeleteDirectory(Config.FolderUpdate, true);
 
                             Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(Config.FileGitHubAssetName)).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
-
-                        } else if (alwaysGetFeedBack) {
-                            UserCommunication.NotifyUnique("UpdateChecked", "Congratulations! You already possess the latest <b>" + (!Config.Instance.UserGetsPreReleases && !AssemblyInfo.IsPreRelease ? "stable" : "beta") + "</b> version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version, null);
+                            return;
+                        } 
+                        
+                        if (_displayResultNotif) {
+                            UserCommunication.NotifyUnique("UpdateChecked", "Congratulations! You already possess the latest <b>" + (!AssemblyInfo.IsPreRelease ? "stable" : "beta") + "</b> version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version, null);
                         }
                     }
 
                 } else {
 
                     // failed to retrieve the list
-                    if (alwaysGetFeedBack || Config.Instance.LastCheckUpdateOk)
-                        UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed", null);
+                    if (_displayResultNotif || Config.Instance.LastCheckUpdateOk)
+                        UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on GITHUB.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessful, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach GITHUB", "Connection failed", null);
+
                     Config.Instance.LastCheckUpdateOk = false;
 
                     // check if there is an update available in the Shared config folder
@@ -221,7 +232,7 @@ namespace _3PA.MainFeatures {
                         // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
                         if (File.Exists(potentialUpdate) &&
                             Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
-                            (Config.Instance.UserGetsPreReleases || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
+                            (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
 
                             // copy to local update folder and warn the user 
                             if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
@@ -246,10 +257,9 @@ namespace _3PA.MainFeatures {
                     }
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when checking the latest release ");
+                ErrorHandler.ShowErrors(e, "Error when checking the latest release");
             }
-
-            _checking = false;
+            _isChecking = false;
         }
 
         #endregion
@@ -279,7 +289,7 @@ namespace _3PA.MainFeatures {
 
                         // write the version log
                         Utils.FileWriteAllText(Config.FileVersionLog, _latestReleaseInfo.body, Encoding.Default);
-                        
+
                         NotifyUpdateAvailable();
                     
                     } else {
@@ -289,14 +299,16 @@ namespace _3PA.MainFeatures {
                 } else {
                     UserCommunication.Notify("I failed to unzip the following file : <br>" + Config.FileLatestReleaseZip + "<br>It contains the update for 3P, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
                 }
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "On Download File Completed");
             }
+            _isChecking = false;
         }
 
         private static void NotifyUpdateAvailable() {
             if (_latestReleaseInfo != null) {
+
+                _updateAvailableOnRestart = true;
 
                 UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
                     <br>
@@ -311,11 +323,11 @@ namespace _3PA.MainFeatures {
                     (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
                     (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
-                _warnedUserAboutUpdateAvail = true;
-
                 // stop checking for more updates :)
                 _checkEveryHourAction.Dispose();
+
             }
+            _isChecking = false;
         }
 
         #endregion
