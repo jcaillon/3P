@@ -75,13 +75,14 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public bool IsActivated;
 
+        public bool IsShown { get; set; }
+
         #endregion
 
         #region ShowWithoutActivation & Don't show in ATL+TAB
 
         /// <summary>
         /// This indicates that the form should not take focus when shown
-        /// However, if you specify TopMost = true, then this doesn't work anymore, hence why we
         /// specify it through the CreateParams
         /// </summary>
         protected override bool ShowWithoutActivation {
@@ -133,39 +134,34 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            this.SafeSyncInvoke(() => {
-                _lastPosition = Location;
-                GiveFocusBack();
-                Visible = false;
-                // move this to an invisible part of the screen, otherwise we can see this window
-                // if another window with Opacity <1 is in front Oo
-                Location = new Point(-10000, -10000);
-            });
+            _lastPosition = Location;
+            Visible = false;
+            // move this to an invisible part of the screen, otherwise we can see this window
+            // if another window with Opacity <1 is in front Oo
+            Location = new Point(-10000, -10000);
+            GiveFocusBack();
+            IsShown = false;
         }
 
         /// <summary>
         /// show the form
         /// </summary>
         public void UnCloack() {
-            this.SafeSyncInvoke(() => {
-                if (Location == CloakedPosition)
-                    Location = _lastPosition;
-                _allowInitialdisplay = true;
-                Opacity = UnfocusedOpacity;
-                Visible = true;
-                GiveFocusBack();
-            });
+            if (Location == CloakedPosition)
+                Location = _lastPosition;
+            _allowInitialdisplay = true;
+            Opacity = UnfocusedOpacity;
+            Visible = true;
+            IsShown = true;
         }
 
         /// <summary>
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
-            this.SafeSyncInvoke(() => {
-                FormIntegration.UnRegisterToNpp(Handle);
-                Tag = true;
-                Close();
-            });
+            FormIntegration.UnRegisterToNpp(Handle);
+            Tag = true;
+            Close();
         }
 
         /// <summary>
@@ -188,7 +184,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// instead of closing, cloak this form (invisible)
         /// </summary>
         protected override void OnClosing(CancelEventArgs e) {
-            if ((bool)Tag) return;
+            if ((bool)Tag) 
+                return;
             e.Cancel = true;
             Cloack();
             base.OnClosing(e);

@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures {
                         <b>MOVE (delete the source and replace the target)</b> this file : <div>" + Path.GetDirectoryName(Config.FileDownloadedPlugin).ToHtmlLink(Config.FileDownloadedPlugin) + @"</div><br>
                         <b>In this folder</b> (replacing the old file) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        <i>(n.b. : this message will be shown at startup as long as the above-mentionned file exists!)</i><br>
+                        <i>(n.b. : this message will be shown at startup as long as the above-mentioned file exists!)</i><br>
                         Thank you for your patience!</div>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                     return;
                 }
@@ -321,7 +321,7 @@ namespace _3PA.MainFeatures {
                     Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
                     "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink()+ @"</b><br>" +
                     (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
+                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
                 // stop checking for more updates :)
                 _checkEveryHourAction.Dispose();

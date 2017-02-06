@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.Appli {
@@ -43,7 +44,6 @@ namespace _3PA.MainFeatures.Appli {
                 if (_form == null) {
                     Init();
                 }
-
                 if (_form != null) {
                     // create the form
                     if (!_hasBeenShownOnce) {
@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Appli {
         /// True if the form is focused 
         /// </summary>
         public static bool IsFocused() {
-            return _form != null && _form.Visible && (Win32Api.GetForegroundWindow().Equals(_form.Handle));
+            return IsVisible && Win32Api.GetForegroundWindow().Equals(_form.Handle);
         }
         
         /// <summary>
@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.Appli {
         /// it must be called pretty soon in the plugin initialization
         /// </summary>
         public static void Init() {
-            if (_form != null) ForceClose();
+            ForceClose();
             _form = new AppliForm {
                 CurrentForegroundWindow = Npp.HandleNpp
             };
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.Appli {
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return _form != null && _form.Visible; }
+            get { return !(_form == null || !(bool)_form.SafeSyncInvoke(form => form.Visible)); }
         }
 
     }

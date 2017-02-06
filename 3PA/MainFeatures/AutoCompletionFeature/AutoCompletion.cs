@@ -641,7 +641,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return !(_form == null || !(bool) _form.SafeSyncInvoke(form => form.Visible)); }
+            get { return !(_form == null || !_form.IsShown); }
         }
 
         /// <summary>
@@ -670,6 +670,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     _form.ResizeBegin -= OnResizeBegin;
                     _form.ForceClose();
                 }
+                _form = null;
             } catch (Exception e) {
                 ErrorHandler.LogError(e);
             }

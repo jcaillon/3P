@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures {
             public string UserName = GetTrigramFromPa();
 
             [Display(Name = "Progress 4GL file patterns",
-                Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
+                Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
             public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.d,*.lst,*.df,*.cls";

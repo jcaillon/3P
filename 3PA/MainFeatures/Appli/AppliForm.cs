@@ -124,15 +124,14 @@ namespace _3PA.MainFeatures.Appli {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            Visible = false;
             GiveFocusBack();
+            Visible = false;
         }
 
         /// <summary>
         /// show the form
         /// </summary>
         public void UnCloack() {
-            Opacity = 1;
             Visible = true;
         }
 
@@ -151,11 +150,6 @@ namespace _3PA.MainFeatures.Appli {
         public void GiveFocusBack() {
             //WinApi.SetForegroundWindow(CurrentForegroundWindow);
             Npp.GrabFocus();
-        }
-
-        protected override void OnActivated(EventArgs e) {
-            Opacity = 1;
-            base.OnActivated(e);
         }
 
         protected override void OnClosing(CancelEventArgs e) {

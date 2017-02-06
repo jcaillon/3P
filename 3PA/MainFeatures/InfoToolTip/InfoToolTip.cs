@@ -571,7 +571,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <returns></returns>
         public static bool IsVisible {
-            get { return !(_form == null || !(bool)_form.SafeSyncInvoke(form => form.Visible)); }
+            get { return !(_form == null || !_form.IsShown); }
         }
 
         /// <summary>
@@ -606,6 +606,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             try {
                 if (_form != null)
                     _form.ForceClose();
+                _form = null;
             } catch (Exception e) {
                 ErrorHandler.LogError(e);
             }
