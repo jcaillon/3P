@@ -524,7 +524,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
-        /// Method called by the form when the user accepts a suggestion (tab or enter or doubleclick)
+        /// Method called by the form when the user accepts a suggestion (tab or enter or double-click)
         /// </summary>
         private static void OnInsertSuggestion(CompletionItem data) {
             InsertSuggestion(data);

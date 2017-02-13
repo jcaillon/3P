@@ -104,7 +104,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Set a class implemmenting a comparer to sort the initial list of items,
+        /// Set a class implementing a comparer to sort the initial list of items,
         /// When you use SetItems() you should already have sorted the list, the later sorts
         /// are manual, call SortInitialList()
         /// </summary>
@@ -179,8 +179,10 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Filter the list of initial items with the filter predicate and the FilterFullyMatch
         /// </summary>
         protected void ApplyFilterPredicate() {
-            if (_nbInitialItems == 0)
+            if (_nbInitialItems == 0) {
+                base.SetItems(new List<ListItem>());
                 return;
+            }
 
             // base setItems
             if (_initItemsLock.TryEnterReadLock(-1)) {

@@ -211,7 +211,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeListItem))
-                throw new Exception("listItems shoud contain objects of type FilteredTypeItem");
+                throw new Exception("listItems should contain objects of type FilteredTypeItem");
 
             // measure the space taken by the label "showing x items"
             using (var gImg = new Bitmap(1, 1))

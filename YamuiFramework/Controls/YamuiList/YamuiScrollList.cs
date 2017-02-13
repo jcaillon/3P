@@ -644,11 +644,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     // repaint
                     _rows[i].Invalidate();
-                    //_rows[i].Update(); // force to redraw the control immediatly
                 }
             }
 
-            Update();
+            Update(); // force to redraw the control immediately
         }
 
         #endregion

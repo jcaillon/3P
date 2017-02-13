@@ -74,6 +74,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Form.UpdateCurrentScope();
         }
 
+        public override void UpdateMenuItemChecked() {
+            base.UpdateMenuItemChecked();
+            Config.Instance.CodeExplorerVisible = _fakeForm.Visible;
+        }
+
         #endregion
         
         #region public methods

@@ -81,6 +81,11 @@ namespace _3PA.MainFeatures.FileExplorer {
             Form.YamuiList.Refresh();
         }
 
+        public override void UpdateMenuItemChecked() {
+            base.UpdateMenuItemChecked();
+            Config.Instance.FileExplorerVisible = _fakeForm.Visible;
+        }
+
         #endregion
 
         #region public methods

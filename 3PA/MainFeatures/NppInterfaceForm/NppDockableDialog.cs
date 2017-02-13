@@ -89,10 +89,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Either check or uncheck the menu, depending on the visibility of the form
         /// (does it both on the menu and toolbar)
         /// </summary>
-        public void UpdateMenuItemChecked() {
+        public virtual void UpdateMenuItemChecked() {
             if (_fakeForm == null) return;
             Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
-            Config.Instance.FileExplorerVisible = _fakeForm.Visible;
         }
 
         public void ForceClose() {
