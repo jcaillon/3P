@@ -221,7 +221,7 @@ namespace _3PA.MainFeatures {
             [Range(0.1, 1)]
             public double AutoCompleteFocusedOpacity = 0.92;
 
-            public string AutoCompletePriorityList = "2,4,5,12,7,8,11,3,6,15,9,14,10,13,0,1";
+            public string AutoCompletionItemPriorityList = "";
 
             // Height of the autocompletion form
             public int AutoCompleteShowListOfXSuggestions = 12;
@@ -326,7 +326,7 @@ namespace _3PA.MainFeatures {
             /// </summary>
 
             public bool CodeExplorerVisible = true;
-            public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11,13";
+            public string CodeExplorerItemPriorityList = "";
             public bool CodeExplorerDisplayExternalItems = false;
 
             [Display(Name = "Auto-hide/show for progress documents",
@@ -612,8 +612,11 @@ namespace _3PA.MainFeatures {
         public static List<int> GetPriorityList(Type enumerationType, string configPropertyName) {
             var value = (string)Instance.GetValueOf(configPropertyName);
             if (Enum.GetNames(enumerationType).Length != value.Split(',').Length) {
-                var defaultConf = new ConfigObject();
-                value = (string)defaultConf.GetValueOf(configPropertyName);
+                value = "";
+                for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++) {
+                    value += i + ",";
+                }
+                value = value.TrimEnd(',');
                 Instance.SetValueOf(configPropertyName, value);
             }
             var output = new List<int>();

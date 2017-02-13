@@ -270,6 +270,20 @@ namespace _3PA.MainFeatures.Parser {
             });
         }
 
+        public void Visit(ParsedEvent pars) {
+            // to code explorer
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
+                DisplayText = pars.Name,
+                Branch = pars.Type == ParsedEventType.Subscribe ? CodeExplorerBranch.Subscribe : (pars.Type == ParsedEventType.Publish ? CodeExplorerBranch.Publish : CodeExplorerBranch.Unsubscribe),
+                Flag = AddExternalFlag((CodeExplorerFlag)0),
+                IsNotBlock = true,
+                DocumentOwner = pars.FilePath,
+                GoToLine = pars.Line,
+                GoToColumn = pars.Column,
+                SubString = SetExternalInclude(null)
+            });
+        }
+
         /// <summary>
         /// Include files
         /// </summary>

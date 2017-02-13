@@ -251,11 +251,17 @@ namespace YamuiFramework.Forms {
         }
 
         private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
+            Visible = false;
             ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
+            Close();
+            Dispose();
         }
 
         private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
+            Visible = false;
             ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
+            Close();
+            Dispose();
         }
 
         /// <summary>
@@ -346,7 +352,7 @@ namespace YamuiFramework.Forms {
             protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
 
                 // background
-                var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+                var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled || item.IsSeparator);
                 e.Graphics.Clear(backColor);
 
                 // foreground

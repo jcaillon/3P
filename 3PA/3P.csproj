@@ -507,6 +507,9 @@
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\Type\NotApplicable.png" />
+    <Content Include="Images\DockableExplorer\Type\Publish.png" />
+    <Content Include="Images\DockableExplorer\Type\Subscribe.png" />
+    <Content Include="Images\DockableExplorer\Type\Unsubscribe.png" />
     <Content Include="Images\FileExplorer\BringToFront.png" />
     <Content Include="Images\FileExplorer\FtpType.png" />
     <Content Include="Images\FileExplorer\PlType.png" />

@@ -362,6 +362,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (ch == '~') {
                     ReadTildeAndEol();
                     readTilde = true;
+                    continue;
                 }
 
                 break;
@@ -524,7 +525,7 @@ namespace _3PA.MainFeatures.Parser {
                     ReadChr(); // read tilde
                     var nextCh = PeekAtChr(0);
                     if (nextCh == '\r' || nextCh == '\n') {
-                        ReadEol(ch);
+                        ReadEol(nextCh);
                     } else
                         ReadChr();
                     continue;

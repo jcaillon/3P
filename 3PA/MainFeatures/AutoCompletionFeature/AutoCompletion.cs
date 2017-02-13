@@ -451,6 +451,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
                 _form.Show(Npp.Win32WindowNpp);
+                Npp.GrabFocus();
             } 
 
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than

@@ -1573,6 +1573,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Publish {
+            get {
+                object obj = ResourceManager.GetObject("Publish", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Push {
             get {
                 object obj = ResourceManager.GetObject("Push", resourceCulture);
@@ -1823,6 +1833,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Subscribe {
+            get {
+                object obj = ResourceManager.GetObject("Subscribe", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Synchronize {
             get {
                 object obj = ResourceManager.GetObject("Synchronize", resourceCulture);
@@ -1956,6 +1976,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap UnknowType {
             get {
                 object obj = ResourceManager.GetObject("UnknowType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Unsubscribe {
+            get {
+                object obj = ResourceManager.GetObject("Unsubscribe", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

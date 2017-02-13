@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using YamuiFramework.Controls.YamuiList;
-using _3PA.MainFeatures.AutoCompletionFeature;
 
 #pragma warning disable 1570
 
@@ -43,7 +42,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region Life
 
         private CodeExplorerSortingClass() {
-            _explorerBranchTypePriority = Config.GetPriorityList(typeof(CompletionType), "CodeExplorerPriorityList");
+            _explorerBranchTypePriority = Config.GetPriorityList(typeof(CodeExplorerBranch), "CodeExplorerItemPriorityList");
         }
 
         #endregion

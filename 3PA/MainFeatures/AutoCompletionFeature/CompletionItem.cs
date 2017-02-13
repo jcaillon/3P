@@ -191,22 +191,22 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
     internal enum CompletionType {
-        FieldPk = 0,
-        Field = 1,
-        Snippet = 2,
-        TempTable = 3,
-        VariablePrimitive = 4,
-        VariableComplex = 5,
-        Table = 6,
-        Function = 7,
-        Procedure = 8,
-        Preprocessed = 9,
-        Keyword = 10,
-        Database = 11,
-        Widget = 12,
-        KeywordObject = 13,
-        Label = 14,
-        Sequence = 15
+        Snippet,
+        VariablePrimitive,
+        VariableComplex,
+        Widget,
+        Function,
+        Procedure,
+        Database,
+        TempTable,
+        Table,
+        Sequence,
+        Preprocessed,
+        Label,
+        Keyword,
+        KeywordObject,
+        FieldPk,
+        Field,
     }
 
 }

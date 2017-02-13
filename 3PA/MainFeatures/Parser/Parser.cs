@@ -443,6 +443,15 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "dynamic-function":
                             CreateParsedDynamicFunction(token);
+                            break;                        
+                        case "subscribe":
+                            CreateParsedSubscribe(token);
+                            break;                              
+                        case "unsubscribe":
+                            CreateParsedSubscribe(token);
+                            break;                       
+                        case "publish":
+                            CreateParsedPublish(token);
                             break;
                         default:
                             // it's a potential label
@@ -790,6 +799,141 @@ namespace _3PA.MainFeatures.Parser {
         #region Read a statement, create Parsed values
 
         /// <summary>
+        /// Creates a subscribe parsed item
+        /// </summary>
+        private void CreateParsedSubscribe(Token tokenSub) {
+            /*
+            SUBSCRIBE [ PROCEDURE subscriber-handle] [ TO ] event-name 
+                { IN publisher-handle | ANYWHERE }
+                [ RUN-PROCEDURE local-internal-procedure ] [ NO-ERROR ].
+             * 
+            UNSUBSCRIBE [ PROCEDURE subscriber-handle ] [ TO ] { event-name | ALL } 
+                [ IN publisher-handle ].
+            */
+
+            // info we will extract from the current statement :
+            string subscriberHandle = null;
+            string eventName = null;
+            string publisherHandler = null;
+            string runProcedure = null;
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (state == 3) break; // stop when the run procedure has been found
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                switch (state) {
+                    case 0:
+                        if (token is TokenWord) {
+                            if (token.Value.EqualsCi("procedure"))
+                                state = 20;
+                            else if (token.Value.EqualsCi("all")) {
+                                // event name
+                                eventName = GetTokenStrippedValue(token);
+                                state++;
+                            }
+                        } else if (token is TokenString) {
+                            // event name
+                            eventName = GetTokenStrippedValue(token);
+                            state++;
+                        }
+                        break;
+                    case 1:
+                        if (!(token is TokenWord))
+                            break;
+                        switch (token.Value.ToLower()) {
+                            case "in":
+                                state = 30;
+                                break;                            
+                            case "anywhere":
+                                publisherHandler = token.Value;
+                                break;
+                            case "run-procedure":
+                                state++;
+                                break;
+                        }
+                        break;
+                    case 2:
+                        // matching the local procedure 
+                        if (token is TokenString) {
+                            runProcedure = GetTokenStrippedValue(token);
+                            state++;
+                        }
+                        break;
+                    case 20:
+                        // matching PROCEDURE xx
+                        if (!(token is TokenWord))
+                            continue;
+                        subscriberHandle = token.Value;
+                        state = 0;
+                        break;                    
+                    case 30:
+                        // matching IN publisher-handle
+                        if (!(token is TokenWord))
+                            continue;
+                        publisherHandler = token.Value;
+                        state = 1;
+                        break;
+                }
+            } while (MoveNext());
+            if (!string.IsNullOrEmpty(eventName))
+                AddParsedItem(new ParsedEvent(tokenSub.Value.EqualsCi("subscribe") ?  ParsedEventType.Subscribe : ParsedEventType.Unsubscribe, eventName, tokenSub, subscriberHandle, publisherHandler, runProcedure, null));
+        }
+
+
+        /// <summary>
+        /// Creates a publish parsed item
+        /// </summary>
+        private void CreateParsedPublish(Token tokenPub) {
+            /*
+            PUBLISH event-name
+              [ FROM publisher-handle ]
+              [ ( parameter[ , parameter ]... ) ].
+            */
+
+            // info we will extract from the current statement :
+            string eventName = null;
+            string publisherHandler = null;
+            StringBuilder left = new StringBuilder();
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                switch (state) {
+                    case 0:
+                        if (token is TokenString) {
+                            // event name
+                            eventName = GetTokenStrippedValue(token);
+                            state++;
+                        }
+                        break;
+                    case 1:
+                        if (token is TokenWord) {
+                            if (token.Value.EqualsCi("from"))
+                                state = 10;
+                        } else if (token is TokenSymbol && token.Value.Equals("(")) {
+                            AddTokenToStringBuilder(left, token);
+                            state ++;
+                        }
+                        break;
+                    case 2:
+                        AddTokenToStringBuilder(left, token);
+                        break;
+                    case 10:
+                        // match publisher handler
+                        if (!(token is TokenWord))
+                            break;
+                        publisherHandler = token.Value;
+                        state = 1;
+                        break;
+                }
+            } while (MoveNext());
+            if (!string.IsNullOrEmpty(eventName))
+                AddParsedItem(new ParsedEvent(ParsedEventType.Publish, eventName, tokenPub, null, publisherHandler, null, left.ToString()));
+        }
+
+        /// <summary>
         /// Creates a dynamic function parsed item
         /// </summary>
         private void CreateParsedDynamicFunction(Token tokenFun) {
@@ -838,7 +982,6 @@ namespace _3PA.MainFeatures.Parser {
             bool isValue = false;
             bool hasPersistent = false;
             _lastTokenWasSpace = true;
-            StringBuilder leftStr = new StringBuilder();
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
@@ -882,7 +1025,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             if (state == 0) return;
-            AddParsedItem(new ParsedRun(name, runToken, leftStr.ToString(), isValue, hasPersistent));
+            AddParsedItem(new ParsedRun(name, runToken, null, isValue, hasPersistent));
         }
 
         /// <summary>
@@ -1363,7 +1506,8 @@ namespace _3PA.MainFeatures.Parser {
                 if (token is TokenComment) continue;
                 // a ~ allows for a eol but we don't control if it's an eol because if it's something else we probably parsed it wrong anyway (in the lexer)
                 if (token is TokenSymbol && token.Value == "~") {
-                    MoveNext();
+                    if (PeekAt(2) is TokenEol)
+                        MoveNext();
                     continue;
                 }
                 if (token is TokenEol) break;

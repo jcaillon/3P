@@ -255,19 +255,19 @@ namespace _3PA.Tests {
             };
             webServiceJson.Execute();
             */
-            /*
-            var list = AppliMenu.Instance._mainMenuList.ToList();
+            
+            var list = AppliMenu.Instance.MainMenuList.ToList();
             foreach (var menuItem in list) {
                 menuItem.ItemType = -1;
             }
-            var popup = new YamuiMenuPopup {
+            var popup = new YamuiMenu() {
                 HtmlTitle = "<div align='center'>Yop</div>",
                 SpawnLocation = Cursor.Position,
                 MenuList = list.Cast<YamuiMenuItem>().ToList(),
                 DisplayNbItems = true
             };
             popup.Show(new WindowWrapper(Npp.HandleNpp));
-            */
+            /*
 
             object fuck = (int)0;
             UserCommunication.Input(ref fuck, "yo", MessageImg.MsgInfo, "title", "sub", null);
@@ -287,7 +287,7 @@ namespace _3PA.Tests {
                 popup2.Dispose();
             };
             popup2.Show(new WindowWrapper(Npp.HandleNpp));
-
+            */
             //UserCommunication.Notify("test");
             //UserCommunication.Notify("test");
             /*
@@ -623,6 +623,10 @@ namespace _3PA.Tests {
         }
 
         public void Visit(ParsedFoundTableUse pars) {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedEvent pars) {
             AppendEverything(pars);
         }
 

@@ -178,16 +178,24 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Root,
         [Description("Appbuilder blocks")]
         Block,
+        [Description("Program parameters")]
+        ProgramParameter,
+        [Description("ON events")]
+        OnEvent,
         [Description("Main block")]
         MainBlock,
+        [Description("Includes")]
+        Include,
         [Description("Procedures")]
         Procedure,
         [Description("Functions")]
         Function,
-        [Description("ON events")]
-        OnEvent,
-        [Description("Includes")]
-        Include,
+        [Description("Subscribe")]
+        Subscribe,
+        [Description("Publish")]
+        Publish,
+        [Description("Unsubscribe")]
+        Unsubscribe,
         [Description("Run statements")]
         Run,
         [Description("Dynamic function calls")]
@@ -196,8 +204,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Browse,
         [Description("Tables used")]
         TableUsed,
-        [Description("Program parameters")]
-        ProgramParameter,
         [Description("Temp-tables used")]
         TempTableUsed
     }

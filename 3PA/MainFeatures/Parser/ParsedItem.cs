@@ -360,6 +360,37 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
+    /// Subscribe parsed item (name is the event name)
+    /// </summary>
+    internal class ParsedEvent : ParsedItem {
+        public ParsedEventType Type { get; private set; }
+        public string SubscriberHandle { get; private set; }
+
+        /// <summary>
+        /// can be anywhere or the handle of a proc
+        /// </summary>
+        public string PublisherHandler { get; private set; }
+        public string RunProcedure { get; private set; }
+        public string Left { get; private set; }
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+        public ParsedEvent(ParsedEventType type, string name, Token token, string subscriberHandle, string publisherHandler, string runProcedure, string left) : base(name, token) {
+            SubscriberHandle = subscriberHandle;
+            PublisherHandler = publisherHandler;
+            RunProcedure = runProcedure;
+            Left = left;
+            Type = type;
+        }
+    }
+
+    internal enum ParsedEventType {
+        Subscribe,
+        Unsubscribe,
+        Publish
+    }
+
+    /// <summary>
     /// include file parsed item
     /// </summary>
     internal class ParsedIncludeFile : ParsedItem {

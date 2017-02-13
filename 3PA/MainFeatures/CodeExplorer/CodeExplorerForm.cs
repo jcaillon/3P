@@ -208,6 +208,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                         // while we match identical items
                         while (iIdentical < tempList.Count &&
                             tempList[iItem].IconType == tempList[iIdentical].IconType &&
+                            tempList[iItem].Branch == tempList[iIdentical].Branch &&
                             tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
                             flags = flags | tempList[iIdentical].Flag;
                             iIdentical++;

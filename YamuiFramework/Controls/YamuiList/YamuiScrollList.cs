@@ -896,6 +896,7 @@ namespace YamuiFramework.Controls.YamuiList {
                                     newIndex = TopIndex + nbRowDisplayed - 1;
                                 if (newIndex > _nbItems - 1)
                                     newIndex = _nbItems - 1;
+                                pressedKey = Keys.Down;
                                 break;
 
                             case Keys.PageUp:
@@ -905,6 +906,7 @@ namespace YamuiFramework.Controls.YamuiList {
                                     newIndex = TopIndex;
                                 if (newIndex < 0)
                                     newIndex = 0;
+                                pressedKey = Keys.Up;
                                 break;
 
                             default:

@@ -35,6 +35,7 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(ParsedLabel pars);
         void Visit(ParsedFunctionCall pars);
         void Visit(ParsedFoundTableUse pars);
+        void Visit(ParsedEvent pars);
         void PostVisit();
     }
 }
