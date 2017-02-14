@@ -1666,10 +1666,21 @@ namespace _3PA.MainFeatures.Parser {
         /// Matches a procedure definition
         /// </summary>
         private bool CreateParsedProcedure(Token procToken) {
+            /*
+            PROCEDURE proc-name[ PRIVATE ] :
+                [procedure-body]
+
+            PROCEDURE proc-name 
+                {   EXTERNAL "dllname" [ CDECL | PASCAL | STDCALL ]
+                        [ ORDINAL n ][ PERSISTENT ][ THREAD-SAFE ] | IN SUPER } :
+                [ procedure-body ]
+            */
+
             // info we will extract from the current statement :
             string name = "";
             bool isExternal = false;
             bool isPrivate = false;
+            string externalDllName = null;
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
 
@@ -1690,15 +1701,29 @@ namespace _3PA.MainFeatures.Parser {
                     case 1:
                         // matching external
                         if (!(token is TokenWord)) continue;
-                        if (token.Value.EqualsCi("external")) isExternal = true;
-                        if (token.Value.EqualsCi("private")) isPrivate = true;
+                        switch (token.Value.ToLower()) {
+                            case "external":
+                                isExternal = true;
+                                state++;
+                                break;
+                            case "private":
+                                isPrivate = true;
+                                break;
+                        }
                         break;
+                    case 2:
+                        // matching the name of the external dll
+                        if (!(token is TokenString)) continue;
+                        externalDllName = GetTokenStrippedValue(token);
+                        state--;
+                        break;
+
                 }
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
 
             if (state < 1) return false;
-            var newProc = new ParsedProcedure(name, procToken, leftStr.ToString(), isExternal, isPrivate) {
+            var newProc = new ParsedProcedure(name, procToken, leftStr.ToString(), isExternal, isPrivate, externalDllName) {
                 // = end position of the EOS of the statement
                 EndPosition = token.EndPosition
             };

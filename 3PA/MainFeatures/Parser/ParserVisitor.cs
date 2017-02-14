@@ -207,7 +207,6 @@ namespace _3PA.MainFeatures.Parser {
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.RunExternal,
-                IconType = CodeExplorerIconType.BranchIcon,
                 IsNotBlock = true,
                 Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.LoadPersistent : 0) | ((pars.HasPersistent && string.IsNullOrEmpty(fullFilePath)) ? CodeExplorerFlag.NotFound : 0)),
                 DocumentOwner = pars.FilePath,
@@ -237,7 +236,6 @@ namespace _3PA.MainFeatures.Parser {
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = pars.ExternalCall ? CodeExplorerBranch.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerBranch.StaticFunctionCall : CodeExplorerBranch.DynamicFunctionCall),
-                IconType = CodeExplorerIconType.BranchIcon,
                 IsNotBlock = true,
                 Flag = AddExternalFlag((CodeExplorerFlag)0),
                 DocumentOwner = pars.FilePath,
@@ -490,12 +488,12 @@ namespace _3PA.MainFeatures.Parser {
             // to code explorer
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Procedure,
+                Branch = pars.IsExternal ? CodeExplorerBranch.ExternalProcedure : CodeExplorerBranch.Procedure,
                 Flag = AddExternalFlag((pars.IsPrivate ? CodeExplorerFlag.Private : 0) | (pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0)),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null)
+                SubString = pars.IsExternal ? pars.ExternalDllName : SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null)
             });
 
             // to completion data

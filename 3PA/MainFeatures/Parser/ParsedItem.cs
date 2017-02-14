@@ -182,22 +182,26 @@ namespace _3PA.MainFeatures.Parser {
         public string Left { get; private set; }
 
         /// <summary>
-        /// Has the external flag in its definition
+        /// Is the procedure external?
         /// </summary>
         public bool IsExternal { get; private set; }
         /// <summary>
         /// Has the private flag
         /// </summary>
         public bool IsPrivate { get; private set; }
+
+        public string ExternalDllName { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, Token token, string left, bool isExternal, bool isPrivate)
+        public ParsedProcedure(string name, Token token, string left, bool isExternal, bool isPrivate, string externalDllName)
             : base(name, token, ParsedScopeType.Procedure) {
             Left = left;
             IsExternal = isExternal;
             IsPrivate = isPrivate;
+            ExternalDllName = externalDllName;
         }
     }
 

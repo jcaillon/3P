@@ -186,6 +186,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         MainBlock,
         [Description("Includes")]
         Include,
+        [Description("External procedures")]
+        ExternalProcedure,
         [Description("Procedures")]
         Procedure,
         [Description("Functions")]
