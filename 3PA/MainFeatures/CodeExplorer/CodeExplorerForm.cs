@@ -27,6 +27,7 @@ using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
@@ -203,7 +204,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                         // For each duplicated item (same Icon and same displayText), we create a new branch
                         var iIdentical = iItem + 1;
-                        CodeExplorerFlag flags = 0;
+                        ParseFlag flags = 0;
 
                         // while we match identical items
                         while (iIdentical < tempList.Count &&

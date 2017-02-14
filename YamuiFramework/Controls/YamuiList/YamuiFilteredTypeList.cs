@@ -51,7 +51,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected const int MinItemLabelWidth = 45;
 
-        protected const float DefaultSubTextOpacity = 0.3f;
+        protected const float DefaultSubTextOpacity = 0.5f;
 
         protected const float DefaultFlagImagesOpacity = 0.5f;
 

@@ -187,7 +187,19 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         // the procedure is EXTERNAL
         ExternalProc = 32768,
         // a proc or func was loaded in persistent
-        Persistent = 65536
+        Persistent = 65536,
+
+        // the block has too much characters and the program will not be open-able in the appbuilder
+        IsTooLong = 131072,
+        // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
+        Uncertain = 262144,
+        // if a table found w/o the database name before it
+        MissingDbName = 524288,
+        // if the .i file is not found in the propath
+        NotFound = 1048576,
+        // a run file has the keyword PERSISTENT
+        LoadPersistent = 2097152,
+
     }
 
     internal enum CompletionType {

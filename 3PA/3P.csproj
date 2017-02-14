@@ -506,6 +506,7 @@
     <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\DockableExplorer\Type\DefinedTempTable.png" />
     <Content Include="Images\DockableExplorer\Type\DynamicFunctionCall.png" />
     <Content Include="Images\DockableExplorer\Type\DynamicFunctionCallExternal.png" />
     <Content Include="Images\DockableExplorer\Type\ExternalProcedure.png" />

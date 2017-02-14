@@ -24,7 +24,7 @@ using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.CodeExplorer {
 
@@ -63,7 +63,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Flags for the item, is directly related to the images displayed on the right of the item
         /// </summary>
-        public CodeExplorerFlag Flag { get; set; }
+        public ParseFlag Flag { get; set; }
 
         /// <summary>
         /// The string to display right next to the Flags
@@ -85,9 +85,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Apply an action for each flag of the item
         /// </summary>
         /// <param name="toApplyOnFlag"></param>
-        public void DoForEachFlag(Action<string, CodeExplorerFlag> toApplyOnFlag) {
-            foreach (var name in Enum.GetNames(typeof(CodeExplorerFlag))) {
-                CodeExplorerFlag flag = (CodeExplorerFlag)Enum.Parse(typeof(CodeExplorerFlag), name);
+        public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
+            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
                 if (flag == 0 || !Flag.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
             }
@@ -149,8 +149,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public override List<Image> TagImages {
             get {
                 var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(CodeExplorerFlag))) {
-                    CodeExplorerFlag flag = (CodeExplorerFlag)Enum.Parse(typeof(CodeExplorerFlag), name);
+                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
                     if (flag == 0 || !Flag.HasFlag(flag)) continue;
 
                     Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
@@ -198,6 +198,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Publish,
         [Description("Unsubscribe")]
         Unsubscribe,
+        [Description("Defined temp-tables")]
+        DefinedTempTable,
         [Description("Run internal routine")]
         Run,
         [Description("Run external procedure")]
@@ -237,25 +239,4 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Parameter
     }
 
-    [Flags]
-    internal enum CodeExplorerFlag {
-        // the block has too much characters and the program will not be open-able in the appbuilder
-        IsTooLong = 1,
-        // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
-        Uncertain = 2,
-        // if a table found w/o the database name before it
-        MissingDbName = 4,
-        // if the .i file is not found in the propath
-        NotFound = 8,
-        // if the extracted info is from an external file (.i)
-        External = 16,
-        // a run file has the keyword PERSISTENT
-        LoadPersistent = 32,
-        // a proc or func was loaded in persistent
-        Persistent = 64,
-        // private proc
-        Private = 128,
-        // is a buffer
-        Buffer = 256
-    }
 }
