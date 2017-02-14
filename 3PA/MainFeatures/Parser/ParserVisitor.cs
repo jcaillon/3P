@@ -167,9 +167,8 @@ namespace _3PA.MainFeatures.Parser {
         public void PostVisit() {
             if (_isBaseFile) {
                 // correct the internal/external type of run statements :
-                foreach (var item in _parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                    if (_definedProcedures.Contains(item.DisplayText))
-                        item.IconType = CodeExplorerIconType.RunInternal;
+                foreach (var item in _parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.RunExternal && _definedProcedures.Contains(item.DisplayText))) {
+                    item.Branch = CodeExplorerBranch.Run;
                 }
             }
 
@@ -207,8 +206,8 @@ namespace _3PA.MainFeatures.Parser {
             // to code explorer
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Run,
-                IconType = CodeExplorerIconType.RunExternal,
+                Branch = CodeExplorerBranch.RunExternal,
+                IconType = CodeExplorerIconType.BranchIcon,
                 IsNotBlock = true,
                 Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.LoadPersistent : 0) | ((pars.HasPersistent && string.IsNullOrEmpty(fullFilePath)) ? CodeExplorerFlag.NotFound : 0)),
                 DocumentOwner = pars.FilePath,
@@ -237,8 +236,8 @@ namespace _3PA.MainFeatures.Parser {
             // To code explorer
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.DynamicFunctionCall,
-                IconType = pars.ExternalCall ? CodeExplorerIconType.FunctionCallExternal : CodeExplorerIconType.FunctionCallInternal,
+                Branch = pars.ExternalCall ? CodeExplorerBranch.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerBranch.StaticFunctionCall : CodeExplorerBranch.DynamicFunctionCall),
+                IconType = CodeExplorerIconType.BranchIcon,
                 IsNotBlock = true,
                 Flag = AddExternalFlag((CodeExplorerFlag)0),
                 DocumentOwner = pars.FilePath,

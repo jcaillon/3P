@@ -274,17 +274,8 @@
   <data name="DynamicFunctionCall" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\type\dynamicfunctioncall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FunctionCallExternal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\type\functioncallexternal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="FunctionCallInternal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\type\functioncallinternal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="RunExternal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\type\runexternal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RunInternal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\type\runinternal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="MissingDbName" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\flag\missingdbname.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -732,5 +723,14 @@
   </data>
   <data name="Unsubscribe" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\type\unsubscribe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DynamicFunctionCall1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\type\dynamicfunctioncall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DynamicFunctionCallExternal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\type\dynamicfunctioncallexternal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StaticFunctionCall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\type\staticfunctioncall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

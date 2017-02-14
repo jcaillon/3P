@@ -196,10 +196,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Publish,
         [Description("Unsubscribe")]
         Unsubscribe,
-        [Description("Run statements")]
+        [Description("Run internal routine")]
         Run,
-        [Description("Dynamic function calls")]
+        [Description("Run external procedure")]
+        RunExternal,
+        [Description("Static function calls")]
+        StaticFunctionCall,
+        [Description("Internal dynamic function calls")]
         DynamicFunctionCall,
+        [Description("External dynamic function calls")]
+        DynamicFunctionCallExternal,
         [Description("Browse definitions")]
         Browse,
         [Description("Tables used")]
@@ -220,8 +226,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         SettingsBlock,
         CreateWindowBlock,
         RuntimeBlock,
-        FunctionCallInternal,
-        FunctionCallExternal,
+        DynamicFunctionCall,
+        DynamicFunctionCallExternal,
         RunInternal,
         RunExternal,
         Table,

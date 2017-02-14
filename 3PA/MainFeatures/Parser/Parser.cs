@@ -559,7 +559,7 @@ namespace _3PA.MainFeatures.Parser {
             else if (token is TokenSymbol && token.Value.Equals("(")) {
                 var prevToken = PeekAtNextNonSpace(0, true);
                 if (prevToken is TokenWord && _functionPrototype.ContainsKey(prevToken.Value))
-                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false));
+                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false, true));
             }
 
             // end of statement
@@ -825,12 +825,17 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         if (token is TokenWord) {
-                            if (token.Value.EqualsCi("procedure"))
-                                state = 20;
-                            else if (token.Value.EqualsCi("all")) {
-                                // event name
-                                eventName = GetTokenStrippedValue(token);
-                                state++;
+                            switch (token.Value.ToLower()) {
+                                case "procedure":
+                                    state = 20;
+                                    break;
+                                case "to":
+                                    break;
+                                default:
+                                    // event name
+                                    eventName = GetTokenStrippedValue(token);
+                                    state++;
+                                    break;
                             }
                         } else if (token is TokenString) {
                             // event name
@@ -855,7 +860,7 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 2:
                         // matching the local procedure 
-                        if (token is TokenString) {
+                        if (token is TokenString || token is TokenWord) {
                             runProcedure = GetTokenStrippedValue(token);
                             state++;
                         }
@@ -902,7 +907,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (token is TokenComment) continue;
                 switch (state) {
                     case 0:
-                        if (token is TokenString) {
+                        if (token is TokenString || token is TokenWord) {
                             // event name
                             eventName = GetTokenStrippedValue(token);
                             state++;
@@ -962,7 +967,7 @@ namespace _3PA.MainFeatures.Parser {
 
             if (state == 0) return;
 
-            AddParsedItem(new ParsedFunctionCall(name, tokenFun, !_functionPrototype.ContainsKey(name)));
+            AddParsedItem(new ParsedFunctionCall(name, tokenFun, !_functionPrototype.ContainsKey(name), false));
         }
 
         /// <summary>

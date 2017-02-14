@@ -106,7 +106,9 @@ namespace _3PA.MainFeatures {
             public bool AppliAllowTabAnimation = true;
 
             public bool GlobalShowDetailedHelpForErrors = true;
+
             public bool UserFirstUse = true;
+            public bool NppOutdatedVersion = false;
 
             #endregion
 

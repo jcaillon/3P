@@ -523,6 +523,26 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap DynamicFunctionCall1 {
+            get {
+                object obj = ResourceManager.GetObject("DynamicFunctionCall1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DynamicFunctionCallExternal {
+            get {
+                object obj = ResourceManager.GetObject("DynamicFunctionCallExternal", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Edit {
             get {
                 object obj = ResourceManager.GetObject("Edit", resourceCulture);
@@ -806,26 +826,6 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Function {
             get {
                 object obj = ResourceManager.GetObject("Function", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FunctionCallExternal {
-            get {
-                object obj = ResourceManager.GetObject("FunctionCallExternal", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FunctionCallInternal {
-            get {
-                object obj = ResourceManager.GetObject("FunctionCallInternal", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1713,16 +1713,6 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RunInternal {
-            get {
-                object obj = ResourceManager.GetObject("RunInternal", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap RuntimeBlock {
             get {
                 object obj = ResourceManager.GetObject("RuntimeBlock", resourceCulture);
@@ -1816,6 +1806,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Snippet {
             get {
                 object obj = ResourceManager.GetObject("Snippet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StaticFunctionCall {
+            get {
+                object obj = ResourceManager.GetObject("StaticFunctionCall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

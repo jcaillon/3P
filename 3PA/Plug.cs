@@ -183,8 +183,12 @@ namespace _3PA {
 
                 // check Npp version, 3P requires version 6.8 or higher
                 if (!String.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("7.2")) {
-                    UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
-                }
+                    if (!Config.Instance.NppOutdatedVersion) {
+                        UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+                        Config.Instance.NppOutdatedVersion = true;
+                    }
+                } else
+                    Config.Instance.NppOutdatedVersion = false;
 
                 // Check if an update has been done and start checking for new updates
                 UpdateHandler.CheckForUpdateDone();

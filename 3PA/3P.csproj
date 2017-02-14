@@ -506,8 +506,11 @@
     <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\DockableExplorer\Type\DynamicFunctionCall.png" />
+    <Content Include="Images\DockableExplorer\Type\DynamicFunctionCallExternal.png" />
     <Content Include="Images\DockableExplorer\Type\NotApplicable.png" />
     <Content Include="Images\DockableExplorer\Type\Publish.png" />
+    <Content Include="Images\DockableExplorer\Type\StaticFunctionCall.png" />
     <Content Include="Images\DockableExplorer\Type\Subscribe.png" />
     <Content Include="Images\DockableExplorer\Type\Unsubscribe.png" />
     <Content Include="Images\FileExplorer\BringToFront.png" />
@@ -537,15 +540,12 @@
     <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
     <Content Include="Images\DockableExplorer\Type\Block.png" />
     <Content Include="Images\DockableExplorer\Type\DefinitionBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\DynamicFunctionCall.png" />
     <Content Include="Images\DockableExplorer\Type\FunctionCallExternal.png" />
-    <Content Include="Images\DockableExplorer\Type\FunctionCallInternal.png" />
     <Content Include="Images\DockableExplorer\Type\Include.png" />
     <Content Include="Images\DockableExplorer\Type\PreprocessorBlock.png" />
     <Content Include="Images\DockableExplorer\Type\ProgramParameter.png" />
     <Content Include="Images\DockableExplorer\Type\Prototype.png" />
     <Content Include="Images\DockableExplorer\Type\RunExternal.png" />
-    <Content Include="Images\DockableExplorer\Type\RunInternal.png" />
     <Content Include="Images\DockableExplorer\Type\RuntimeBlock.png" />
     <Content Include="Images\DockableExplorer\Type\SettingsBlock.png" />
     <Content Include="Images\DockableExplorer\Type\CreateWindowBlock.png" />
@@ -554,7 +554,6 @@
     <Content Include="Images\DockableExplorer\Type\XtfrBlock.png" />
     <Content Include="Images\DockableExplorer\Type\Browse.png" />
     <Content Include="Images\DockableExplorer\buttons\clear_filters.png" />
-    <Content Include="Images\DockableExplorer\Type\EverythingInCodeOrder.png" />
     <Content Include="Images\DockableExplorer\buttons\collapse.png" />
     <Content Include="Images\DockableExplorer\Type\OnEvent.png" />
     <Content Include="Images\DockableExplorer\buttons\eraser.png" />

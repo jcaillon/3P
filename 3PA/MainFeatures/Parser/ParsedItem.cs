@@ -327,14 +327,16 @@ namespace _3PA.MainFeatures.Parser {
         /// true if the called function is not defined in the program
         /// </summary>
         public bool ExternalCall { get; private set; }
+        public bool StaticCall { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFunctionCall(string name, Token token, bool externalCall)
+        public ParsedFunctionCall(string name, Token token, bool externalCall, bool staticCall)
             : base(name, token) {
             ExternalCall = externalCall;
+            StaticCall = staticCall;
         }
     }
 
