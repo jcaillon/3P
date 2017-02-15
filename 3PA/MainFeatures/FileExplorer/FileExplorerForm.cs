@@ -197,8 +197,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        #region File list
-
         #region Refresh file list and selector mechanic
 
         /// <summary>
@@ -228,7 +226,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // get the list of FileObjects
             _initialObjectsList = new List<FileListItem>();
-            switch (Config.Instance.FileExplorerViewMode) {
+            switch (Config.Instance.FileExplorerDirectoriesToExplore) {
                 case 0:
                     _initialObjectsList = FileExplorer.Instance.ListFileOjectsInDirectory(ProEnvironment.Current.BaseLocalPath);
                     break;
@@ -284,8 +282,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         
         #endregion
 
-        #endregion
-
         #region File list events
 
         private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs keyEventArgs) {
@@ -322,25 +318,25 @@ namespace _3PA.MainFeatures.FileExplorer {
             // refresh a button depending on the mode...
             if (IsHandleCreated) {
                 BeginInvoke((Action) delegate {
-                    btGotoDir.Visible = Config.Instance.FileExplorerViewMode <= 1;
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerViewMode);
+                    btGotoDir.Visible = Config.Instance.FileExplorerDirectoriesToExplore <= 1;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerDirectoriesToExplore);
                     btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
                     btDirectory.Invalidate();
-                    lbDirectory.Text = _explorerDirStr[Config.Instance.FileExplorerViewMode];
+                    lbDirectory.Text = _explorerDirStr[Config.Instance.FileExplorerDirectoriesToExplore];
                 });
             }
         }
 
         private void BtGotoDirOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (Config.Instance.FileExplorerViewMode == 0)
+            if (Config.Instance.FileExplorerDirectoriesToExplore == 0)
                 Utils.OpenFolder(ProEnvironment.Current.BaseLocalPath);
-            else if (Config.Instance.FileExplorerViewMode == 1)
+            else if (Config.Instance.FileExplorerDirectoriesToExplore == 1)
                 Utils.OpenFolder(ProEnvironment.Current.BaseCompilationPath);
         }
 
         private void BtDirectoryOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            Config.Instance.FileExplorerViewMode++;
-            if (Config.Instance.FileExplorerViewMode > 3) Config.Instance.FileExplorerViewMode = 0;
+            Config.Instance.FileExplorerDirectoriesToExplore++;
+            if (Config.Instance.FileExplorerDirectoriesToExplore > 3) Config.Instance.FileExplorerDirectoriesToExplore = 0;
             RefreshGotoDirButton();
 
             RefreshFileList();

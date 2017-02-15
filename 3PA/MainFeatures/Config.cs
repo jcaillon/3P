@@ -319,6 +319,9 @@ namespace _3PA.MainFeatures {
             [Range(1000, 30000)]
             public int FileExplorerListFilesTimeOutInMs = 3000;
 
+            // Current folder mode for the file explorer : local/compilation/propath/everywhere
+            public int FileExplorerDirectoriesToExplore = 0;
+
             #endregion
 
             #region CODE EXPLORER
@@ -376,11 +379,7 @@ namespace _3PA.MainFeatures {
             public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
 
             #endregion
-
-
-            // Current folder mode for the file explorer : local/compilation/propath/everywhere
-            public int FileExplorerViewMode = 3;
-
+            
             // Shared configuration last folder selected
             public string SharedConfFolder = "";
             // a list of Label corresponding to confLine(s) that are auto-updated

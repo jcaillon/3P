@@ -357,9 +357,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-            
+
             // background
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+            var backColor = item.IsSeparator ?
+                YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             e.Graphics.Clear(backColor);
 
             var curItem = item as FilteredTypeListItem;
@@ -436,7 +438,7 @@ namespace YamuiFramework.Controls.YamuiList {
             var textRectangle = new Rectangle(drawRect.X + 3 + (img != null ? img.Width : 0), 0, drawRect.Width - 3 - (img != null ? img.Width : 0), drawRect.Height);
 
             // letter highlight
-            if (!item.IsDisabled)
+            if (!(item.IsDisabled || item.IsSeparator))
                 DrawTextHighlighting(g, item.InternalFilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text

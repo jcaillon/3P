@@ -31,9 +31,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region private
 
-        private bool _isSeparator;
-        private bool _isDisabled;
-
         #endregion
 
         #region Virtual properties
@@ -46,22 +43,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// The item is disabled or not (a separator is necesseraly disabled)
         /// </summary>
-        public virtual bool IsDisabled {
-            get { return _isDisabled; }
-            set { _isDisabled = _isSeparator || value; }
-        }
+        public virtual bool IsDisabled { get; set; }
 
         /// <summary>
         /// true if the item is a separator
         /// </summary>
-        public virtual bool IsSeparator {
-            get { return _isSeparator; }
-            set {
-                _isSeparator = value;
-                if (_isSeparator)
-                    IsDisabled = true;
-            }
-        }
+        public virtual bool IsSeparator { get; set; }
 
         #endregion
 

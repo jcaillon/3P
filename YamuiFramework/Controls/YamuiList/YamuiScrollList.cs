@@ -193,7 +193,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public ListItem SelectedItem {
             get {
                 var item = GetItem(SelectedItemIndex);
-                return item != null ? (item.IsDisabled ? null : item) : null;
+                return item != null ? (item.IsDisabled || item.IsSeparator ? null : item) : null;
             }
         }
 
@@ -252,7 +252,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public ListItem HotItem {
             get {
                 var item = GetItem(TopIndex + HotRow);
-                return item != null ? (item.IsDisabled ? null : item) : null;
+                return item != null ? (item.IsDisabled || item.IsSeparator ? null : item) : null;
             }
         }
 
@@ -531,15 +531,16 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // and an enabled item!
             if (_nbItems > SelectedItemIndex) {
-                if (GetItem(SelectedItemIndex).IsDisabled) {
+                var item = GetItem(SelectedItemIndex);
+                if (item.IsDisabled || item.IsSeparator) {
                     var newIndex = SelectedItemIndex;
                     do {
                         newIndex++;
                         if (newIndex > _nbItems - 1)
                             newIndex = 0;
-
+                        item = GetItem(newIndex);
                     } // do this while the current button is disabled and we didn't already try every button
-                    while (GetItem(newIndex).IsDisabled && SelectedItemIndex != newIndex);
+                    while ((item.IsDisabled || item.IsSeparator) && SelectedItemIndex != newIndex);
                     SelectedItemIndex = newIndex;
                 }
             }
@@ -658,7 +659,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected virtual void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+            var backColor = item.IsSeparator ?
+                YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
 
             // background
@@ -674,7 +677,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // foreground
             // left line
-            if (row.IsSelected && !item.IsDisabled) {
+            if (row.IsSelected) {
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
                     e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, row.ClientRectangle.Height));
                 }
@@ -685,7 +688,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         protected virtual void RowPaintSeparator(Graphics g, Rectangle drawRect) {
-            using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormAltBack)) {
+            using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.MenuNormalAltBack)) {
                 var width = (int)(drawRect.Width * 0.45);
                 g.FillRectangle(b, new Rectangle(drawRect.X, drawRect.Y + drawRect.Height / 2 - 2, width, 4));
             }
@@ -878,6 +881,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     break;
 
                 default:
+                    ListItem newItem = null;
                     do {
                         switch (pressedKey) {
 
@@ -921,8 +925,9 @@ namespace YamuiFramework.Controls.YamuiList {
                         if (_nbItems == 0)
                             return false;
 
+                        newItem = GetItem(newIndex);
                     } // do this while the current button is disabled and we didn't already try every button
-                    while (GetItem(newIndex).IsDisabled && SelectedItemIndex != newIndex);
+                    while ((newItem.IsDisabled || newItem.IsSeparator) && SelectedItemIndex != newIndex);
                     break;
             }
 
@@ -940,7 +945,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 // can't select a disabled item
                 var rowIndex = int.Parse(((YamuiListRow) sender).Name);
                 var newItem = GetItem(rowIndex + TopIndex);
-                if (newItem != null && newItem.IsDisabled)
+                if (newItem != null && (newItem.IsDisabled || newItem.IsSeparator))
                     return;
 
                 // change the selected row

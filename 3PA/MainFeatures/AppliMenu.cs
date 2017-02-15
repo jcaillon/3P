@@ -140,7 +140,13 @@ namespace _3PA.MainFeatures {
         /// <returns></returns>
         private static List<MenuItem> DisableItemIfNeeded(List<MenuItem> list) {
             var isCurrentFileProgressFile = Abl.IsCurrentProgressFile;
-            list.ForEach(item => item.IsDisabled = !isCurrentFileProgressFile && (!item.Generic));
+            foreach (var menu in list) {
+                menu.IsDisabled = !isCurrentFileProgressFile && !menu.Generic;
+                if (menu.Children != null)
+                    foreach (var subMenu in menu.Children.Cast<MenuItem>()) {
+                        subMenu.IsDisabled = !isCurrentFileProgressFile && (!menu.Generic || !subMenu.Generic);
+                    }
+            }
             return list;
         }
 
@@ -227,7 +233,7 @@ namespace _3PA.MainFeatures {
             _databaseTools = new List<MenuItem> {
                 new MenuItem(this, "Open data administration", ImageResources.DataAdmin, item => ProMisc.OpenDbAdmin(), "Data_admin", "") { Generic = true },
                 new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, item => ProMisc.OpenDictionary(), "Data_dictionary", "") { Generic = true },
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, item => ProMisc.OpenDataDigger(), "Data_digger", "") { Generic = true },
                 new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, item => ProMisc.OpenDataReader(), "Data_reader", "") { Generic = true },
 
@@ -248,24 +254,24 @@ namespace _3PA.MainFeatures {
             MainMenuList = new List<MenuItem> {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, item => Appli.Appli.ToggleView(), "Open_main_window", "Alt+Space") { Generic = true },
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, item => AutoCompletion.OnShowCompleteSuggestionList(), "Show_Suggestion_List", "Ctrl+Space"),
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") { Generic = true },
                 new MenuItem(this, "Check syntax", ImageResources.CheckCode, item => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
                 new MenuItem(this, "Compile", ImageResources.CompileCode, item => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
                 new MenuItem(this, "Run program", ImageResources.RunCode, item => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
                 new MenuItem(this, "Prolint code", ImageResources.ProlintCode, item => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
                 new MenuItem(this, "Deploy current file", ImageResources.Deploy, item => ProMisc.DeployCurrentFile(), "Deploy", "Ctrl+Alt+Prior") { Generic = true },
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") { Generic = true },
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, item => ProMisc.OpenCurrentInAppbuilder(), "Send_appbuilder", "Alt+O"),
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.Instance.StartSearch(), "Search_file", "Alt+Q") { Generic = true },
                 goToDefItem,
                 goToPreviousJump,
                 //new MenuItem(this, "New 4GL file", ImageResources.GenerateCode, ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N") {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Switch environment", ImageResources.Env, item => ShowEnvMenuAtCursor(), "Switch_env", "Ctrl+E") {
                     Generic = true
                 },
@@ -282,7 +288,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, item => ShowMiscMenuAtCursor(), "Miscellaneous", "Alt+M") {
                     Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
                 new MenuItem(this, "Options", ImageResources.ShowOptions, item => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
             };
 

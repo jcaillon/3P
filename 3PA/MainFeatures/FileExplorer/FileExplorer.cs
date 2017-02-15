@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
@@ -159,18 +160,19 @@ namespace _3PA.MainFeatures.FileExplorer {
                 try {
                     foreach (var directoryInfo in dirInfo.GetDirectories()) {
                         if (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directoryInfo.FullName)) {
-                            // recursive
-                            if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
-                                output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false));
-                            }
-                            output.Add(new FileListItem {
+                            var folderItem = new FileListItem {
                                 DisplayText = directoryInfo.Name,
                                 BasePath = Path.GetDirectoryName(directoryInfo.FullName),
                                 FullPath = directoryInfo.FullName,
                                 CreateDateTime = directoryInfo.CreationTime,
                                 ModifieDateTime = directoryInfo.LastWriteTime,
                                 Type = FileType.Folder
-                            });
+                            };
+                            output.Add(folderItem);
+                            // recursive
+                            if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
+                                folderItem.Children = ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false).Cast<FilteredTypeTreeListItem>().ToList();
+                            }
                         }
                     }
                 } catch (Exception e) {

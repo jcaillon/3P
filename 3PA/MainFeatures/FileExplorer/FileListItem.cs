@@ -94,6 +94,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public override List<FilteredTypeTreeListItem> Children { get; set; }
 
+        // make all items expanded by default
+        public FileListItem() {
+            IsExpanded = true;
+        }
     }
 
     /// <summary>

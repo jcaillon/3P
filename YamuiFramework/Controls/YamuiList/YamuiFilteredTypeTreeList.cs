@@ -300,7 +300,9 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
 
             // background
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+            var backColor = item.IsSeparator ? 
+                YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             e.Graphics.Clear(backColor);
 
             var curItem = item as FilteredTypeTreeListItem;
@@ -328,7 +330,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // draw the branches of the tree
             if (ShowTreeBranches) {
-                using (var linePen = new Pen(!curItem.IsDisabled || curItem.IsSeparator ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) { DashStyle = DashStyle.Solid }) {
+                using (var linePen = new Pen(!(curItem.IsDisabled || curItem.IsSeparator) ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) { DashStyle = DashStyle.Solid }) {
 
                     var pos = drawRect.X + TreeWidth / 2;
                     if (curItem.Level >= 1)

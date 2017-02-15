@@ -65,15 +65,17 @@ namespace YamuiFramework.Controls {
                 }
 
                 // draw main image, in greyscale if not activated
-                var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
-                e.Graphics.DrawImage(BackGrndImage, recImg);
+                if (BackGrndImage != null) {
+                    var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width)/2, (ClientRectangle.Height - BackGrndImage.Height)/2), new Size(BackGrndImage.Width, BackGrndImage.Height));
+                    e.Graphics.DrawImage(BackGrndImage, recImg);
 
-                // border
-                if (DrawBorder) {
-                    recImg = ClientRectangle;
-                    recImg.Inflate(-2, -2);
-                    using (Pen b = new Pen(YamuiThemeManager.Current.ButtonNormalBorder, 2f)) {
-                        e.Graphics.DrawRectangle(b, recImg);
+                    // border
+                    if (DrawBorder) {
+                        recImg = ClientRectangle;
+                        recImg.Inflate(-2, -2);
+                        using (Pen b = new Pen(YamuiThemeManager.Current.ButtonNormalBorder, 2f)) {
+                            e.Graphics.DrawRectangle(b, recImg);
+                        }
                     }
                 }
             } catch {

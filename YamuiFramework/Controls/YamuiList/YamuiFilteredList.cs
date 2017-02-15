@@ -225,7 +225,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+            var backColor = item.IsSeparator ?
+                YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
 
             // background
@@ -241,7 +243,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // foreground
             // left line
-            if (row.IsSelected && !item.IsDisabled) {
+            if (row.IsSelected) {
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
                     e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, row.ClientRectangle.Height));
                 }
@@ -250,7 +252,7 @@ namespace YamuiFramework.Controls.YamuiList {
             var textRectangle = new Rectangle(5, 0, row.ClientRectangle.Width - 5, RowHeight);
 
             // letter highlight
-            if (!item.IsDisabled)
+            if (!(item.IsDisabled || item.IsSeparator))
                 DrawTextHighlighting(e.Graphics, ((FilteredListItem) item).InternalFilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text

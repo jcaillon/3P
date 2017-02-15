@@ -159,7 +159,7 @@ namespace YamuiFramework.Forms {
             Controls.Clear();
 
             // evaluates the width needed to draw the control
-            var maxWidth = MenuList.Select(item => TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
+            var maxWidth = MenuList.Select(item => item.Level * 8 + TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
             maxWidth += MenuList.Exists(item => item.SubText != null) ? 10 : 0;
             maxWidth += (MenuList.Exists(item => item.ItemImage != null) ? 35 : 8) + 22;
             if (FormMaxSize.Width > 0)
@@ -251,17 +251,31 @@ namespace YamuiFramework.Forms {
         }
 
         private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
-            Visible = false;
-            ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
-            Close();
-            Dispose();
+            var item = yamuiScrollList.SelectedItem as YamuiMenuItem;
+            if (item != null) {
+                if (item.CanExpand) {
+                    ClicItemWrapper(item);
+                } else {
+                    Visible = false;
+                    ClicItemWrapper(item);
+                    Close();
+                    Dispose();
+                }
+            }
         }
 
         private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
-            Visible = false;
-            ClicItemWrapper((YamuiMenuItem) yamuiScrollList.SelectedItem);
-            Close();
-            Dispose();
+            var item = yamuiScrollList.SelectedItem as YamuiMenuItem;
+            if (item != null) {
+                if (item.CanExpand) {
+                    ClicItemWrapper(item);
+                } else {
+                    Visible = false;
+                    ClicItemWrapper(item);
+                    Close();
+                    Dispose();
+                }
+            }
         }
 
         /// <summary>
@@ -352,7 +366,9 @@ namespace YamuiFramework.Forms {
             protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
 
                 // background
-                var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled || item.IsSeparator);
+                var backColor = item.IsSeparator ?
+                    YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                    YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
                 e.Graphics.Clear(backColor);
 
                 // foreground
@@ -376,9 +392,9 @@ namespace YamuiFramework.Forms {
                         shiftedDrawRect = RowPaintTree(e.Graphics, curItem, drawRect, row);
 
                     // case of a separator
-                    if (item.IsSeparator)
+                    if (item.IsSeparator) {
                         RowPaintSeparator(e.Graphics, curItem.Level == 0 ? drawRect : shiftedDrawRect);
-                    else
+                    } else
                         DrawFilteredTypeRow(e.Graphics, curItem, NoCanExpandItem ? drawRect : shiftedDrawRect, row);
                 }
             }
