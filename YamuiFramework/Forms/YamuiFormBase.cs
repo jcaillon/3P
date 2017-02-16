@@ -78,6 +78,10 @@ namespace YamuiFramework.Forms {
                 ControlStyles.Opaque, true);
 
             FormBorderStyle = FormBorderStyle.None;
+
+            // icon
+            if (YamuiThemeManager.GlobalIcon != null)
+                Icon = YamuiThemeManager.GlobalIcon;
         }
 
         #endregion

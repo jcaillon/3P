@@ -47,28 +47,35 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static void CorrectCodeIndentation() {
 
+            // handle spam (2s min between 2 indent)
+            if (Utils.IsSpamming("CorrectCodeIndentation", 20000))
+                return;
+
+            // make sure to parse the current document before doing anything
+            ParserHandler.ParseCurrentDocument(true, true);
+
+            var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
             var canIndent = ParserHandler.AblParser.ParserErrors.Count == 0;
-            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(Config.FolderTemp, "lines.log") + "'>" + Path.Combine(Config.FolderTemp, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
-            if (!canIndent) {
-                StringBuilder x = new StringBuilder();
-                var i = 0;
-                var dic = ParserHandler.AblParser.LineInfo;
-                while (dic.ContainsKey(i)) {
-                    x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].Scope.Name);
-                    //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
-                    i++;
-                }
-                Utils.FileWriteAllText(Path.Combine(Config.FolderTemp, "lines.log"), x.ToString());
+
+            StringBuilder x = new StringBuilder();
+            var i = 0;
+            var dic = ParserHandler.AblParser.LineInfo;
+            while (dic.ContainsKey(i)) {
+                x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
+                i++;
             }
+            Utils.FileWriteAllText(linesLogFile, x.ToString());
 
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
             if (canIndent) {
-                
+                var indentWidth = Npp.TabWidth;
+                i = 0;
+                while (dic.ContainsKey(i)) {
+                    Npp.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
+                    i++;
+                }
             } else {
-                UserCommunication.NotifyUnique("FormatDocumentFail", "This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br><a href='#about'>Open the about window to get the github url</a>", MessageImg.MsgRip, "Format document", "Incorrect grammar", args => {
-                    Appli.Appli.GoToPage(PageNames.Welcome); 
-                    UserCommunication.CloseUniqueNotif("FormatDocumentFail");
-                }, 20);
+                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + GetParserErrorDescription() : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
             }
         }
 

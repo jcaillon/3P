@@ -161,7 +161,7 @@ namespace YamuiFramework.Forms {
             // evaluates the width needed to draw the control
             var maxWidth = MenuList.Select(item => item.Level * 8 + TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
             maxWidth += MenuList.Exists(item => item.SubText != null) ? 10 : 0;
-            maxWidth += (MenuList.Exists(item => item.ItemImage != null) ? 35 : 8) + 22;
+            maxWidth += (MenuList.Exists(item => item.ItemImage != null) ? 35 : 8) + 30;
             if (FormMaxSize.Width > 0)
                 maxWidth = maxWidth.ClampMax(FormMaxSize.Width);
             if (FormMinSize.Width > 0)
@@ -311,10 +311,14 @@ namespace YamuiFramework.Forms {
         protected override void OnDeactivate(EventArgs e) {
             // ReSharper disable once ObjectCreationAsStatement
             new DelayedAction(30, () => {
-                this.SafeInvoke(popup => {
-                    popup.Close();
-                    popup.Dispose();
-                });
+                try {
+                    this.SafeInvoke(popup => {
+                        popup.Close();
+                        popup.Dispose();
+                    });
+                } catch (Exception) {
+                    //ok
+                }
             });
             base.OnDeactivate(e);
         }

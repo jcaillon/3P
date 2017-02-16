@@ -63,14 +63,16 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Closes the visible menu (if any)
         /// </summary>
-        public static void ForceCloseMenu() {
+        public static bool ForceCloseMenu() {
             if (YamuiWaterfallMenu.ListOfOpenededMenuHandle != null && YamuiWaterfallMenu.ListOfOpenededMenuHandle.Count > 0) {
                 var curCtrl = (Control.FromHandle(YamuiWaterfallMenu.ListOfOpenededMenuHandle[0]));
                 var curMenu = curCtrl as YamuiWaterfallMenu;
                 if (curMenu != null) {
                     curMenu.CloseAll();
+                    return true;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -189,7 +191,7 @@ namespace _3PA.MainFeatures {
             // List of item that can be assigned to a shortcut
             ShortcutableItemList = new List<MenuItem> {
                 // add the main menu here, so it can appear in the list of shortcut to set
-                new MenuItem(null, "Open main menu", ImageResources.logo20x20, item => ShowMainMenuAtCursor(), "Show_main_menu", "F6") {
+                new MenuItem(null, "Open main menu", ImageResources.logo20x20, item => ShowMainMenuAtCursor(), "Show_main_menu_", "Alt+C") {
                     Generic = true
                 }
             };
@@ -212,6 +214,7 @@ namespace _3PA.MainFeatures {
 
             _editCodeList = new List<MenuItem> {
                 new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProGenerateCode.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
+                new MenuItem(this, "Correct document indentation", ImageResources.FormatCode,item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I"),
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
             };
 
@@ -280,12 +283,15 @@ namespace _3PA.MainFeatures {
                     Children = _databaseTools.Cast<FilteredTypeTreeListItem>().ToList()
                 },
                 new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, item => ShowGenerateCodeMenuAtCursor(), "Generate_code", "Alt+Insert") {
+                    Generic = true,
                     Children = _generateCodeMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
                 new MenuItem(this, "Edit code", ImageResources.EditCode, item => ShowEditCodeMenuAtCursor(), "Edit_code", "Alt+E") {
+                    Generic = true,
                     Children = _editCodeList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
                 new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, item => ShowMiscMenuAtCursor(), "Miscellaneous", "Alt+M") {
+                    Generic = true,
                     Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
                 new MenuItem(true) { Generic = true }, // --------------------------

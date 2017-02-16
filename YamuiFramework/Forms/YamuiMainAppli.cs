@@ -63,10 +63,6 @@ namespace YamuiFramework.Forms {
         public YamuiMainAppli() {
             StartPosition = FormStartPosition.CenterScreen;
             TransparencyKey = Color.Fuchsia;
-
-            // icon
-            if (YamuiThemeManager.GlobalIcon != null)
-                Icon = YamuiThemeManager.GlobalIcon;
         }
 
         #endregion

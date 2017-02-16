@@ -106,8 +106,7 @@ namespace _3PA.Tests {
         }
 
         #endregion
-
-
+        
         #region tests and dev
 
         public const int MAX_PATH = 260;
@@ -134,8 +133,7 @@ namespace _3PA.Tests {
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_ALTERNATE)]
             public string cAlternate;
         }
-
-
+        
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern SafeFindHandle FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
 
@@ -242,8 +240,7 @@ namespace _3PA.Tests {
             }
             return outList;
         }
-
-
+        
         public static void DebugTest1() {
             /*
             var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
@@ -318,7 +315,12 @@ namespace _3PA.Tests {
 
         public static void DebugTest3() {
 
-            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "Parser_in.p")));
+            UserCommunication.Message("# What's new in this version? #\n\n",
+                MessageImg.MsgUpdate,
+                "A new version has been installed!",
+                "Updated to version " + AssemblyInfo.Version,
+                new List<string> { "ok" },
+                false);
 
             //RunParserTests(Npp.Text);
 
