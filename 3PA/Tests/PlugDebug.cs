@@ -69,6 +69,7 @@ namespace _3PA.Tests {
             if (!Utils.CreateDirectory(testDir))
                 return;
 
+            var parserErrors = "";
             var watch2 = Stopwatch.StartNew();
 
             foreach (var file in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
@@ -91,11 +92,17 @@ namespace _3PA.Tests {
                     parser.Accept(parserVisitor);
                     outStr += "Visitor (" + watch.ElapsedMilliseconds + " ms)\r\n";
 
+                    if (parser.ParserErrors.Count > 0) {
+                        parserErrors = file + "<br>" + ProCodeFormat.GetParserErrorDescription(parser.ParserErrors) + "<br>";
+                    }
+
                     watch.Stop();
 
                     Utils.FileAppendAllText(outFile, outStr);
                 }
             }
+
+            Utils.FileAppendAllText(outFile, parserErrors);
 
             watch2.Stop();
             

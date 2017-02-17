@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using _3PA.Lib;
@@ -30,11 +32,11 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Returns a string that describes the errors found by the parser (relative to block start/end)
         /// </summary>
-        public static string GetParserErrorDescription() {
-            if (ParserHandler.AblParser.ParserErrors.Count == 0)
+        public static string GetParserErrorDescription(List<ParserError> listErrors) {
+            if (listErrors == null || listErrors.Count == 0)
                 return string.Empty;
             var error = new StringBuilder();
-            foreach (var parserError in ParserHandler.AblParser.ParserErrors) {
+            foreach (var parserError in listErrors) {
                 error.AppendLine("<div>");
                 error.AppendLine("- Line " + (parserError.TriggerLine + 1) + ", " + parserError.Type.GetDescription());
                 error.AppendLine("</div>");
@@ -57,25 +59,27 @@ namespace _3PA.MainFeatures.Pro {
             var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
             var canIndent = ParserHandler.AblParser.ParserErrors.Count == 0;
 
+            // start indenting
+            Npp.BeginUndoAction();
+
             StringBuilder x = new StringBuilder();
+            var indentWidth = Npp.TabWidth;
             var i = 0;
             var dic = ParserHandler.AblParser.LineInfo;
             while (dic.ContainsKey(i)) {
-                x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
+                if (canIndent)
+                    Npp.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
+                else
+                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;
             }
             Utils.FileWriteAllText(linesLogFile, x.ToString());
 
+            Npp.EndUndoAction();
+
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
-            if (canIndent) {
-                var indentWidth = Npp.TabWidth;
-                i = 0;
-                while (dic.ContainsKey(i)) {
-                    Npp.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
-                    i++;
-                }
-            } else {
-                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + GetParserErrorDescription() : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
+            if (!canIndent) {
+                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + GetParserErrorDescription(ParserHandler.AblParser.ParserErrors) : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
             }
         }
 

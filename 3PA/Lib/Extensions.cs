@@ -263,7 +263,7 @@ namespace _3PA.Lib {
         /// Ex : "file.xml".TestAgainstListOfPatterns("*.xls,*.com,*.xml") return true
         /// </summary>
         public static bool TestAgainstListOfPatterns(this string source, string listOfPattern) {
-            return listOfPattern.Split(',').ToList().Exists(s => source.RegexMatch(s.WildCardToRegex()));
+            return listOfPattern.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList().Exists(s => source.RegexMatch(s.WildCardToRegex()));
         }
 
         /// <summary>

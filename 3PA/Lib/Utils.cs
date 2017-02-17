@@ -367,13 +367,7 @@ namespace _3PA.Lib {
             try {
 
                 // open the file if it has a progress extension or Known extension
-                string ext;
-                try {
-                    ext = Path.GetExtension(link);
-                } catch (Exception) {
-                    ext = null;
-                }
-                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.ProgressFilesPattern.Contains(ext)) && File.Exists(link)) {
+                if ((link.TestAgainstListOfPatterns(Config.Instance.NppFilesPattern) || link.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) && File.Exists(link)) {
                     Npp.Goto(link);
                     return true;
                 }
@@ -391,8 +385,7 @@ namespace _3PA.Lib {
                     if (OpenFolder(link))
                         return true;
                 }
-
-
+                
                 var process = new ProcessStartInfo(link) {
                     UseShellExecute = true
                 };

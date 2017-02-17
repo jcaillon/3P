@@ -69,11 +69,11 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.d,*.lst,*.df,*.cls";
 
-            [Display(Name = "Npp openable extension",
-                Description = "A comma separated list of file extensions, describes the type of files that should be opened with notepad++ from the file explorer<br>If a file is associated to npp in the shell, it will also be opened with npp, no worries!",
+            [Display(Name = "Npp files patterns",
+                Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string GlobalNppOpenableExtension = ".txt,.boi,.sh,.cmd";
+            public string NppFilesPattern = "*.txt,*.boi,*.sh,*.cmd";
 
             [Display(Name = "Path to the help file",
                 Description = "Should point to the progress documentation file (lgrfeng.chm)",

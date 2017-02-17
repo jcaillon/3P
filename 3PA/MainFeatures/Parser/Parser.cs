@@ -510,48 +510,42 @@ namespace _3PA.MainFeatures.Parser {
             else if (token is TokenPreProcDirective) {
 
                 var directiveLower = token.Value.ToLower();
+                
+                switch (directiveLower) {
+                    case "&else":
+                        NewStatement(token);
+                        break;
 
-                // should be the first word of a statement (otherwise this probably doesn't compile anyway!)
-                if (_context.StatementWordCount == 0) {
+                    case "&if":
+                        _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
+                        break;
 
-                    switch (directiveLower) {
-                        case "&else":
-                            NewStatement(token);
-                            break;
-
-                        case "&if":
-                            _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
-                            break;
-
-                        case "&elseif":
-                        case "&endif":
-                            if (_context.PreProcIfStack.Count > 0) {
-                                var prevIf = _context.PreProcIfStack.Pop();
-                                prevIf.EndBlockLine = token.Line;
-                                prevIf.EndBlockPosition = token.EndPosition;
-                            } else
-                                _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedIfEndIfBlockEnd, token, 0));
+                    case "&elseif":
+                    case "&endif":
+                        if (_context.PreProcIfStack.Count > 0) {
+                            var prevIf = _context.PreProcIfStack.Pop();
+                            prevIf.EndBlockLine = token.Line;
+                            prevIf.EndBlockPosition = token.EndPosition;
+                        } else
+                            _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedIfEndIfBlockEnd, token, 0));
                             
-                            if (directiveLower == "&elseif") {
-                                _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
-                            } else {
-                                NewStatement(token);
-                            }
-                            break;
-
-                        default:
-                            if (CreateParsedPreProcDirective(token))
-                                NewStatement(PeekAt(0));
-                            break;
-                    }
-
-                } else {
-                    switch (directiveLower) {
-                        case "&then":
+                        if (directiveLower == "&elseif") {
+                            _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
+                        } else {
                             NewStatement(token);
-                            break;
-                    }
-                    
+                        }
+                        break;
+
+                    case "&then":
+                        NewStatement(token);
+                        break;
+
+                    default:
+                        // should be the first word of a statement (otherwise this probably doesn't compile anyway!)
+                        // if(_context.StatementWordCount == 0)
+                        if (CreateParsedPreProcDirective(token))
+                            NewStatement(PeekAt(0));
+                        break;
                 }
             }
 
