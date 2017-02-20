@@ -355,7 +355,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         if (paramList.Count > 0)
                             foreach (var parameter in paramList) {
                                 var defItem = (ParsedDefine) parameter.ParsedItem;
-                                toDisplay.Append(FormatRowParam(defItem.LcFlagString, parameter.DisplayText + " as <span class='ToolTipSubString'>" + defItem.PrimitiveType + "</span>"));
+                                toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as <span class='ToolTipSubString'>" + defItem.PrimitiveType + "</span>"));
                             }
                         else
                             toDisplay.Append("None");
@@ -363,14 +363,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Function:
                         var funcItem = (ParsedFunction) data.ParsedItem;
                         toDisplay.Append(FormatSubtitle("RETURN TYPE"));
-                        toDisplay.Append(FormatRowParam("output", "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
+                        toDisplay.Append(FormatRowParam(ParseFlag.Output, "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
 
                         toDisplay.Append(FormatSubtitle("PARAMETERS"));
                         var param2List = ParserHandler.FindProcedureParameters(data);
                         if (param2List.Count > 0)
                             foreach (var parameter in param2List) {
                                 var defItem = (ParsedDefine) parameter.ParsedItem;
-                                toDisplay.Append(FormatRowParam(defItem.LcFlagString, parameter.DisplayText + " as " + FormatSubString(defItem.PrimitiveType.ToString())));
+                                toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as " + FormatSubString(defItem.PrimitiveType.ToString())));
                             }
                         else
                             toDisplay.Append("None");
@@ -466,8 +466,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append(FormatRow("Is LIKE", varItem.TempPrimitiveType));
                         if (!string.IsNullOrEmpty(varItem.ViewAs))
                             toDisplay.Append(FormatRow("Screen representation", varItem.ViewAs));
-                        if (!string.IsNullOrEmpty(varItem.LcFlagString))
-                            toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
                         if (!string.IsNullOrEmpty(varItem.Left)) {
                             toDisplay.Append(FormatSubtitle("END OF DECLARATION"));
                             toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
@@ -528,12 +526,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
             return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 
-        private static string FormatRowParam(string paramType, string text) {
-            var image = "Input";
-            if (paramType.ContainsFast("input-output"))
-                image = "InputOutput";
-            else if (paramType.ContainsFast("output"))
-                image = "Output";
+        private static string FormatRowParam(ParseFlag flags, string text) {
+            var image = ParseFlag.Input.ToString();
+            if (flags.HasFlag(ParseFlag.InputOutput))
+                image = ParseFlag.InputOutput.ToString();
+            else if (flags.HasFlag(ParseFlag.Output))
+                image = ParseFlag.Output.ToString();
+            else if (flags.HasFlag(ParseFlag.Return))
+                image = ParseFlag.Return.ToString();
             return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 

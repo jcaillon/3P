@@ -24,7 +24,6 @@ using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
@@ -64,7 +63,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Flags for the item, is directly related to the images displayed on the right of the item
         /// </summary>
-        public ParseFlag Flag { get; set; }
+        public ParseFlag Flags { get; set; }
 
         /// <summary>
         /// The string to display right next to the Flags
@@ -89,7 +88,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                 ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                if (flag == 0 || !Flags.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
             }
         }
@@ -111,7 +110,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// if the value is strictly inferior to 0, the button for this type will not appear
         /// on the bottom of list
         /// </summary>
-        public override int ItemType { get { return (int) IconType; } }
+        public override int ItemType { get { return IconType > 0 ? (int)IconType : (int) Branch + 666; } }
 
         /// <summary>
         /// return the image that will be used to identify this item
@@ -152,7 +151,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 var outList = new List<Image>();
                 foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                     ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                    if (flag == 0 || !Flags.HasFlag(flag)) continue;
 
                     Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
                     if (tryImg != null)

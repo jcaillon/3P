@@ -23,8 +23,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Parser {
 
@@ -37,27 +39,31 @@ namespace _3PA.MainFeatures.Parser {
         #region static
 
         /// <summary>
-        /// A dictionnary of known keywords and database info
+        /// A dictionary of known keywords and database info
         /// </summary>
         private static Dictionary<string, CompletionType> _knownStaticItems = new Dictionary<string, CompletionType>();
 
         public static void UpdateKnownStaticItems() {
-
             // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
-            _knownStaticItems = DataBase.GetDbDictionnary();
+            _knownStaticItems = DataBase.GetDbDictionary();
             foreach (var keyword in Keywords.GetList().Where(keyword => !_knownStaticItems.ContainsKey(keyword.DisplayText))) {
                 _knownStaticItems[keyword.DisplayText] = keyword.Type;
             }
         }
 
+        /// <summary>
+        /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
+        /// </summary>
+        public static Func<string, string> FindIncludeFullPath = s => ProEnvironment.Current.FindFirstFileInPropath(s);
+
+        /// <summary>
+        /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
+        /// </summary>
+        private static Dictionary<string, Lexer> _savedLexerInclude = new Dictionary<string, Lexer>();
+
         #endregion
 
         #region private fields
-
-        /// <summary>
-        /// Represent the FILE LEVEL scope
-        /// </summary>
-        private ParsedScopeItem _rootScope;
 
         /// <summary>
         /// List of the parsed items (output)
@@ -65,9 +71,16 @@ namespace _3PA.MainFeatures.Parser {
         private List<ParsedItem> _parsedItemList = new List<ParsedItem>();
 
         /// <summary>
+        /// Represent the FILE LEVEL scope
+        /// </summary>
+        private ParsedScopeItem _rootScope;
+
+        /// <summary>
         /// Result of the lexer, list of tokens
         /// </summary>
         private GapBuffer<Token> _tokenList;
+
+        private int _tokenCount;
         private int _tokenPos = -1;
 
         /// <summary>
@@ -105,24 +118,26 @@ namespace _3PA.MainFeatures.Parser {
         private List<ParserError> _parserErrors = new List<ParserError>();
 
         /// <summary>
-        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
-        /// It's the parameters from an include, ex: {1}->SHARED, {& name}->_extension
+        /// In the file being parsed we can have includes, the files included are read, tokenized, and the tokens
+        /// are inserted for the current file
+        /// But we need to know from which file each token is extracted, this is the purpose of this list :
+        /// the [0] will designate the current procedure file, [1] the first include and so on...
         /// </summary>
-        private Dictionary<string, List<Token>> _includeParameters;
+        private List<ParsedIncludeFile> _parsedIncludes = new List<ParsedIncludeFile>();
 
         /// <summary>
         /// Contains a dictionary in which each variable name known corresponds to its value tokenized
         /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// or & DEFINE variables from the current file
         /// </summary>
-        private Dictionary<string, List<Token>> _preProcVariables;
+        private Dictionary<string, List<Token>> _globalPreProcVariables = new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
         #region public accessors
 
         /// <summary>
-        /// dictionnay of *line, line info*
+        /// dictionary of *line, line info*
         /// </summary>
         public Dictionary<int, LineInfo> LineInfo {
             get { return _lineInfo; }
@@ -148,15 +163,6 @@ namespace _3PA.MainFeatures.Parser {
         public Dictionary<string, ParsedFunction> ParsedPrototypes {
             get { return _functionPrototype; }
         }
-        
-        /// <summary>
-        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
-        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
-        /// or & DEFINE variables from the current file
-        /// </summary>
-        public Dictionary<string, List<Token>> IncludeParameters {
-            get { return _includeParameters; }
-        }
 
         /// <summary>
         /// Path to the file being parsed (is added to the parseItem info)
@@ -174,23 +180,28 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor with a string instead of a lexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, Dictionary<string, List<Token>> includeParameters, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, includeParameters, matchKnownWords) { }
+        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) { }
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
-        public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, Dictionary<string, List<Token>> includeParameters, bool matchKnownWords) {
+        public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) {
 
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
-            _includeParameters = includeParameters;
-            _preProcVariables = _includeParameters == null ?
-                new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase):
-                new Dictionary<string, List<Token>>(_includeParameters, StringComparer.CurrentCultureIgnoreCase);
-            
-            // the preprocessed variable {0} equals to the filename...
-            _preProcVariables.Add("0", new List<Token> { new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0) });
+            // the first of this list represents the file currently being parsed
+            _parsedIncludes.Add(
+                new ParsedIncludeFile(
+                    "root", 
+                    new TokenEos(null, 0, 0, 0, 0),
+                    // the preprocessed variable {0} equals to the filename...
+                    new Dictionary<string, List<Token>> {
+                        {"0", new List<Token> { new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0) }}
+                    }, 
+                    _filePathBeingParsed,
+                    null)
+            );            
 
             // init context
             _context = new ParseContext {
@@ -202,20 +213,21 @@ namespace _3PA.MainFeatures.Parser {
             // create root item
             if (defaultScope == null) {
                 _rootScope = new ParsedFile("Root", new TokenEos(null, 0, 0, 0, 0));
-                AddParsedItem(_rootScope);
+                AddParsedItem(_rootScope, 0);
             } else
                 _rootScope = defaultScope;
             _context.Scope = _rootScope;
 
             // Analyze
             _tokenList = lexer.GetTokensList;
+            _tokenCount = _tokenList.Count;
             ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
             ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
             while (MoveNext()) {
                 Analyze();
             }
 
-            // add missing values to the line dictionnary
+            // add missing values to the line dictionary
             var current = new LineInfo(GetCurrentDepth(), _rootScope);
             for (int i = lexer.MaxLine - 1; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
@@ -234,6 +246,10 @@ namespace _3PA.MainFeatures.Parser {
             _context.UibBlockStack.Clear();
             _context = null;
             _tokenList = null;
+
+            // if we are parsing an include file that was saved for later use, update it
+            if (_savedLexerInclude.ContainsKey(filePathBeingParsed))
+                _savedLexerInclude.Remove(filePathBeingParsed);
         }
 
         private static Lexer NewLexerFromData(string data) {
@@ -264,7 +280,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Peek forward x tokens, returns an TokenEof if out of limits
         /// </summary>
         private Token PeekAt(int x) {
-            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", -1, -1, -1, -1) : _tokenList[_tokenPos + x];
+            return (_tokenPos + x >= _tokenCount || _tokenPos + x < 0) ? new TokenEof("", -1, -1, -1, -1) : _tokenList[_tokenPos + x];
         }
 
         /// <summary>
@@ -284,14 +300,14 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private bool MoveNext() {
 
-            // before moving to the next token, we analyse the current token
+            // before moving to the next token, we analyze the current token
             if (!_context.IsTokenIsEos && PeekAt(0) is TokenWord) {
                 _context.StatementWordCount++;
             }
             _context.IsTokenIsEos = false;
 
             // move to the next token
-            if (++_tokenPos >= _tokenList.Count)
+            if (++_tokenPos >= _tokenCount)
                 return false;
 
             // replace a pre proc var {&x} at current pos + 2
@@ -304,7 +320,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Replace the token at the current pos + x by the token given
         /// </summary>
         public void ReplaceToken(int x, Token token) {
-            if (_tokenPos + x < _tokenList.Count)
+            if (_tokenPos + x < _tokenCount)
                 _tokenList[_tokenPos + x] = token;
         }
 
@@ -312,13 +328,17 @@ namespace _3PA.MainFeatures.Parser {
         /// Inserts tokens at the current pos + x
         /// </summary>
         public void InsertTokens(int x, List<Token> tokens) {
-            if (_tokenPos + x < _tokenList.Count)
+            if (_tokenPos + x < _tokenCount) {
                 _tokenList.InsertRange(_tokenPos + x, tokens);
+                _tokenCount = _tokenList.Count;
+            }
         }
 
         public void RemoveTokens(int x, int count) {
-            if (_tokenPos + x + count <= _tokenList.Count)
+            if (_tokenPos + x + count <= _tokenCount) {
                 _tokenList.RemoveRange(_tokenPos + x, count);
+                _tokenCount = _tokenList.Count;
+            }
         }
 
         /// <summary>
@@ -370,7 +390,7 @@ namespace _3PA.MainFeatures.Parser {
                 // first word of a statement
                 if (_context.StatementWordCount == 0) {
 
-                    // matches a definition statement at the beggining of a statement
+                    // matches a definition statement at the beginning of a statement
                     switch (lowerTok) {
                         case "function":
                             // parse a function definition
@@ -480,18 +500,18 @@ namespace _3PA.MainFeatures.Parser {
                             NewStatement(token);
                             break;
                         default:
-                            // try to match a known keyword
+                            // try to match a known word
                             if (_matchKnownWords) {
                                 if (_knownStaticItems.ContainsKey(lowerTok)) {
                                     // we known the word
                                     if (_knownStaticItems[lowerTok] == CompletionType.Table) {
                                         // it's a table from the database
-                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, false));
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, false), token.OwnerNumber);
                                     }
                                 } else if (_knownWords.ContainsKey(lowerTok)) {
                                     if (_knownWords[lowerTok] == CompletionType.Table) {
                                         // it's a temp table
-                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, true));
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, true), token.OwnerNumber);
                                     }
                                 }
                             }
@@ -502,8 +522,8 @@ namespace _3PA.MainFeatures.Parser {
 
             // include
             else if (token is TokenInclude) {
-                if (CreateParsedIncludeFile(token))
-                    NewStatement(PeekAt(0));
+                CreateParsedIncludeFile(token);
+                NewStatement(PeekAt(1));
             }
 
             // pre processed statement
@@ -553,16 +573,17 @@ namespace _3PA.MainFeatures.Parser {
             else if (token is TokenSymbol && token.Value.Equals("(")) {
                 var prevToken = PeekAtNextNonSpace(0, true);
                 if (prevToken is TokenWord && _functionPrototype.ContainsKey(prevToken.Value))
-                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false, true));
+                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false, true), token.OwnerNumber);
             }
 
             // end of statement
             else if (token is TokenEos) {
                 // match a label if there was only one word followed by : in the statement
                 if (_context.StatementUnknownFirstWord && _context.StatementWordCount == 1 && token.Value.Equals(":"))
-                    CreateParsedLabel();
+                    CreateParsedLabel(token);
                 NewStatement(token);
             }
+
         }
 
         #endregion
@@ -574,7 +595,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private void ReplacePreProcVariablesAhead(int posAhead) {
 
-            // we check if the token + posAhead will be a proprocessed variable { & x} that needs to be replaced
+            // we check if the token + posAhead will be a preprocessed variable { & x} that needs to be replaced
             var toReplaceToken = PeekAt(posAhead);
 
             HashSet<string> replacedVar = null; // keep track of each var replaced here
@@ -592,7 +613,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 var nameToken = PeekAt(posAhead + 1);
                 var varName = (toReplaceToken.Value == "{" ? "" : "&") + nameToken.Value;
-                List<Token> valueTokens;
+                List<Token> valueTokens = null;
 
                 // make sure to not replace the same var name in the same replacement loop, if we do that
                 // this means we will go into an infinite loop
@@ -613,17 +634,20 @@ namespace _3PA.MainFeatures.Parser {
 
                 // remove the tokens composing |{&|name|  |}|
                 RemoveTokens(posAhead, count);
+                
+                // do we have a definition for the var?
+                if (_parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables.ContainsKey(varName))
+                    valueTokens = _parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables[varName].ToList();
+                else if (_globalPreProcVariables.ContainsKey(varName))
+                    valueTokens = _globalPreProcVariables[varName].ToList();
 
-
-                if (!_preProcVariables.ContainsKey(varName)) {
+                if (valueTokens == null) {
                     // if we don't have the definition for the variable, it must be replaced by an empty string
                     valueTokens = new List<Token> {
                         new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
                     };
                 } else {
-                    valueTokens = _preProcVariables[varName].ToList();
-
-                    // we have to "merge" the TokenWord at the beggining and end of what we are inserting, this allows to take care of
+                    // we have to "merge" the TokenWord at the beginning and end of what we are inserting, this allows to take care of
                     // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
                     var prevToken = PeekAt(posAhead - 1);
                     if (valueTokens.FirstOrDefault() is TokenWord && prevToken is TokenWord) {
@@ -666,7 +690,7 @@ namespace _3PA.MainFeatures.Parser {
             if (!_lineInfo.ContainsKey(statementStartLine))
                 _lineInfo.Add(statementStartLine, new LineInfo(depth, _context.Scope));
 
-            // add missing values to the line dictionnary
+            // add missing values to the line dictionary
             if (statementStartLine > -1 && token.Line > statementStartLine) {
                 for (int i = statementStartLine + 1; i <= token.Line; i++)
                     if (!_lineInfo.ContainsKey(i))
@@ -734,15 +758,22 @@ namespace _3PA.MainFeatures.Parser {
         /// Call this method instead of adding the items directly in the list,
         /// updates the scope and file name
         /// </summary>
-        private void AddParsedItem(ParsedItem item) {
+        private void AddParsedItem(ParsedItem item, ushort ownerNumber) {
+            
+            // add external flag + include line if needed
+            if (ownerNumber > 0) {
+                item.FilePath = _parsedIncludes[ownerNumber].FullFilePath;
+                item.IncludeLine = _parsedIncludes[ownerNumber].Line;
+                item.Flags |= ParseFlag.FromInclude;
+            } else {
+                item.FilePath = _filePathBeingParsed;
+            }
 
-            item.FilePath = FilePathBeingParsed;
             item.Scope = _context.Scope;
 
-            // add the item name's to the known words
-            if (!_knownWords.ContainsKey(item.Name)) {
-                _knownWords.Add(item.Name, (item is ParsedTable) ? CompletionType.Table : CompletionType.Keyword);
-            }
+            // add the item name's to the known temp tables?
+            if (!_knownWords.ContainsKey(item.Name) && item is ParsedTable)
+                _knownWords.Add(item.Name, CompletionType.Table);
 
             _parsedItemList.Add(item);
         }
@@ -774,7 +805,7 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Trim whitespaces tokens at the beggining and end of the list
+        /// Trim whitespaces tokens at the beginning and end of the list
         /// </summary>
         private List<Token> TrimTokensList(List<Token> tokensList) {
 
@@ -786,7 +817,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             return tokensList;
-        } 
+        }
 
         #endregion
 
@@ -876,7 +907,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
             if (!string.IsNullOrEmpty(eventName))
-                AddParsedItem(new ParsedEvent(tokenSub.Value.EqualsCi("subscribe") ?  ParsedEventType.Subscribe : ParsedEventType.Unsubscribe, eventName, tokenSub, subscriberHandle, publisherHandler, runProcedure, null));
+                AddParsedItem(new ParsedEvent(tokenSub.Value.EqualsCi("subscribe") ? ParsedEventType.Subscribe : ParsedEventType.Unsubscribe, eventName, tokenSub, subscriberHandle, publisherHandler, runProcedure, null), tokenSub.OwnerNumber);
         }
 
 
@@ -929,7 +960,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
             if (!string.IsNullOrEmpty(eventName))
-                AddParsedItem(new ParsedEvent(ParsedEventType.Publish, eventName, tokenPub, null, publisherHandler, null, left.ToString()));
+                AddParsedItem(new ParsedEvent(ParsedEventType.Publish, eventName, tokenPub, null, publisherHandler, null, left.ToString()), tokenPub.OwnerNumber);
         }
 
         /// <summary>
@@ -961,14 +992,14 @@ namespace _3PA.MainFeatures.Parser {
 
             if (state == 0) return;
 
-            AddParsedItem(new ParsedFunctionCall(name, tokenFun, !_functionPrototype.ContainsKey(name), false));
+            AddParsedItem(new ParsedFunctionCall(name, tokenFun, !_functionPrototype.ContainsKey(name), false), tokenFun.OwnerNumber);
         }
 
         /// <summary>
         /// Creates a label parsed item
         /// </summary>
-        private void CreateParsedLabel() {
-            AddParsedItem(new ParsedLabel(_context.StatementFirstToken.Value, _context.StatementFirstToken));
+        private void CreateParsedLabel(Token labelToken) {
+            AddParsedItem(new ParsedLabel(_context.StatementFirstToken.Value, _context.StatementFirstToken), labelToken.OwnerNumber);
         }
 
         /// <summary>
@@ -978,8 +1009,7 @@ namespace _3PA.MainFeatures.Parser {
         private void CreateParsedRun(Token runToken) {
             // info we will extract from the current statement :
             string name = "";
-            bool isValue = false;
-            bool hasPersistent = false;
+            ParseFlag flag = 0;
             _lastTokenWasSpace = true;
             int state = 0;
             do {
@@ -992,11 +1022,11 @@ namespace _3PA.MainFeatures.Parser {
                         // matching proc name (or VALUE)
                         if (token is TokenSymbol && token.Value.Equals(")")) {
                             state++;
-                        } else if (isValue && !(token is TokenWhiteSpace || token is TokenSymbol)) {
+                        } else if (flag.HasFlag(ParseFlag.Uncertain) && !(token is TokenWhiteSpace || token is TokenSymbol)) {
                             name += GetTokenStrippedValue(token);
                         } else if (token is TokenWord) {
                             if (token.Value.ToLower().Equals("value"))
-                                isValue = true;
+                                flag |= ParseFlag.Uncertain;
                             else {
                                 name += token.Value;
                                 state++;
@@ -1017,14 +1047,14 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord))
                             break;
                         if (token.Value.EqualsCi("persistent"))
-                            hasPersistent = true;
+                            flag |= ParseFlag.Persistent;
                         state++;
                         break;
                 }
             } while (MoveNext());
 
             if (state == 0) return;
-            AddParsedItem(new ParsedRun(name, runToken, null, isValue, hasPersistent));
+            AddParsedItem(new ParsedRun(name, runToken, null) { Flags = flag }, runToken.OwnerNumber);
         }
 
         /// <summary>
@@ -1062,7 +1092,7 @@ namespace _3PA.MainFeatures.Parser {
                             // we match anywhere, need to return to match a block start
                             widgetList.Append("anywhere");
                             var new1 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                            AddParsedItem(new1);
+                            AddParsedItem(new1, onToken.OwnerNumber);
                             _context.Scope = new1;
                             return;
                         }
@@ -1075,7 +1105,7 @@ namespace _3PA.MainFeatures.Parser {
                         // we matched a 'ON key-label key-function'
                         widgetList.Append(token.Value);
                         var new3 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                        AddParsedItem(new3);
+                        AddParsedItem(new3, onToken.OwnerNumber);
                         _context.Scope = new3;
                         return;
                     case 2:
@@ -1110,7 +1140,7 @@ namespace _3PA.MainFeatures.Parser {
                         }
 
                         var new2 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                        AddParsedItem(new2);
+                        AddParsedItem(new2, onToken.OwnerNumber);
                         _context.Scope = new2;
 
                         // matching a OR
@@ -1130,19 +1160,18 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Matches a new definition
         /// </summary>
-        private void CreateParsedDefine(Token functionToken, bool isDynamic) {
+        private void CreateParsedDefine(Token defineToken, bool isDynamic) {
 
             // info we will extract from the current statement :
             string name = "";
+            ParseFlag flags = isDynamic ? ParseFlag.Dynamic : 0;
             ParsedAsLike asLike = ParsedAsLike.None;
             ParseDefineType type = ParseDefineType.None;
             string tempPrimitiveType = "";
             string viewAs = "";
             string bufferFor = "";
-            bool isExtended = false;
             _lastTokenWasSpace = true;
             StringBuilder left = new StringBuilder();
-            StringBuilder strFlags = new StringBuilder();
 
             // for temp tables:
             string likeTable = "";
@@ -1210,25 +1239,46 @@ namespace _3PA.MainFeatures.Parser {
                                 state++;
                                 break;
                             case "new":
+                                flags |= ParseFlag.New;
+                                break;
                             case "global":
+                                flags |= ParseFlag.Global;
+                                break;
                             case "shared":
+                                flags |= ParseFlag.Shared;
+                                break;
                             case "private":
+                                flags |= ParseFlag.Private;
+                                break;
                             case "protected":
+                                flags |= ParseFlag.Protected;
+                                break;
                             case "public":
+                                flags |= ParseFlag.Public;
+                                break;
                             case "static":
+                                flags |= ParseFlag.Static;
+                                break;
                             case "abstract":
+                                flags |= ParseFlag.Abstract;
+                                break;
                             case "override":
-                                // flags found before the type
-                                if (strFlags.Length > 0)
-                                    strFlags.Append(" ");
-                                strFlags.Append(lowerToken);
+                                flags |= ParseFlag.Override;
+                                break;
+                            case "serializable":
+                                flags |= ParseFlag.Serializable;
                                 break;
                             case "input":
-                            case "output":
-                            case "input-output":
+                                flags |= ParseFlag.Input;
+                                break;
                             case "return":
-                                // flags found before the type in case of a define parameter
-                                strFlags.Append(lowerToken);
+                                flags |= ParseFlag.Return;
+                                break;
+                            case "output":
+                                flags |= ParseFlag.Output;
+                                break;
+                            case "input-output":
+                                flags |= ParseFlag.InputOutput;
                                 break;
                         }
                         break;
@@ -1284,7 +1334,8 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
                         if (lowerToken.Equals("view-as")) state = 13;
-                        if (lowerToken.Equals("extent")) isExtended = true;
+                        if (lowerToken.Equals("extent"))
+                            flags |= ParseFlag.Extent;
                         break;
                     case 13:
                         // define variable : match a view-as
@@ -1478,15 +1529,17 @@ namespace _3PA.MainFeatures.Parser {
                 if (!string.IsNullOrEmpty(indexName)) 
                     indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields));
 
-                AddParsedItem(new ParsedTable(name, functionToken, "", "", name, "", likeTable, true, fields, indexList, new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()) {
+                AddParsedItem(new ParsedTable(name, defineToken, "", "", name, "", likeTable, true, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString()) {
                     // = end position of the EOS of the statement
-                    EndPosition = token.EndPosition
-                });
+                    EndPosition = token.EndPosition,
+                    Flags = flags
+                }, defineToken.OwnerNumber);
             } else
-                AddParsedItem(new ParsedDefine(name, functionToken, strFlags.ToString(), asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, isExtended, isDynamic) {
+                AddParsedItem(new ParsedDefine(name, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor) {
                     // = end position of the EOS of the statement
-                    EndPosition = token.EndPosition
-                });
+                    EndPosition = token.EndPosition,
+                    Flags = flags
+                }, defineToken.OwnerNumber);
         }
 
         /// <summary>
@@ -1520,22 +1573,26 @@ namespace _3PA.MainFeatures.Parser {
                 AddTokenToStringBuilder(definition, token);
             } while (MoveNext());
 
-            ParsedPreProcVariableType newPreProcVarType = 0;
+            ParseFlag flags = 0;
 
             // match first word of the statement
             switch (directiveToken.Value.ToUpper()) {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    newPreProcVarType = ParsedPreProcVariableType.Global;
+                    flags |= ParseFlag.Global;
                     break;
 
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    newPreProcVarType = ParsedPreProcVariableType.Scope;
+                    flags |= ParseFlag.FileScope;
                     break;
 
                 case "&ANALYZE-SUSPEND":
+                    // we don't care about the blocks of include files
+                    if (directiveToken.OwnerNumber > 0)
+                        return false;
+
                     // it marks the beggining of an appbuilder block, it can only be at a root/File level, otherwise flag error
                     if (!(_context.Scope is ParsedFile)) {
                         _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockStart, directiveToken, 0));
@@ -1583,10 +1640,14 @@ namespace _3PA.MainFeatures.Parser {
                     });
 
                     // save the block description
-                    AddParsedItem(_context.UibBlockStack.Peek());
+                    AddParsedItem(_context.UibBlockStack.Peek(), directiveToken.OwnerNumber);
                     break;
 
                 case "&ANALYZE-RESUME":
+                    // we don't care about the blocks of include files
+                    if (directiveToken.OwnerNumber > 0)
+                        return false;
+
                     // it marks the end of an appbuilder block, it can only be at a root/File level
                     if (!(_context.Scope is ParsedFile)) {
                         _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, directiveToken, 0));
@@ -1618,14 +1679,23 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // We matched a new preprocessed variable?
-            if (newPreProcVarType > 0 && !string.IsNullOrEmpty(variableName)) {
-                AddParsedItem(new ParsedPreProcVariable(variableName, directiveToken, 0, ParsedPreProcVariableType.Global, definition.ToString().Trim()));
+            if (flags > 0 && !string.IsNullOrEmpty(variableName)) {
+                AddParsedItem(new ParsedPreProcVariable(variableName, directiveToken, 0, definition.ToString().Trim()) {
+                    Flags = flags
+                }, directiveToken.OwnerNumber);
 
-                // add it to the know variables
-                if (_preProcVariables.ContainsKey("&" + variableName))
-                    _preProcVariables["&" + variableName] = TrimTokensList(tokensList);
-                else
-                    _preProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
+                // add it to the know variables (either to the global scope or to the local scope)
+                if (flags.HasFlag(ParseFlag.Global)) {
+                    if (_globalPreProcVariables.ContainsKey("&" + variableName))
+                        _globalPreProcVariables["&" + variableName] = TrimTokensList(tokensList);
+                    else
+                        _globalPreProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
+                } else {
+                    if (_parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.ContainsKey("&" + variableName))
+                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables["&" + variableName] = TrimTokensList(tokensList);
+                    else
+                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
+                }
             }
 
             return true;
@@ -1650,7 +1720,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = ParsedPreProcBlockType.IfEndIf,
                 BlockDescription = expression.ToString(),
             };
-            AddParsedItem(newIf);
+            AddParsedItem(newIf, ifToken.OwnerNumber);
 
             return newIf;
 
@@ -1672,8 +1742,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // info we will extract from the current statement :
             string name = "";
-            bool isExternal = false;
-            bool isPrivate = false;
+            ParseFlag flags = 0;
             string externalDllName = null;
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
@@ -1697,11 +1766,11 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) continue;
                         switch (token.Value.ToLower()) {
                             case "external":
-                                isExternal = true;
+                                flags |= ParseFlag.External;
                                 state++;
                                 break;
                             case "private":
-                                isPrivate = true;
+                                flags |= ParseFlag.Private;
                                 break;
                         }
                         break;
@@ -1717,11 +1786,12 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             if (state < 1) return false;
-            var newProc = new ParsedProcedure(name, procToken, leftStr.ToString(), isExternal, isPrivate, externalDllName) {
+            var newProc = new ParsedProcedure(name, procToken, leftStr.ToString(), externalDllName) {
                 // = end position of the EOS of the statement
-                EndPosition = token.EndPosition
+                EndPosition = token.EndPosition,
+                Flags = flags
             };
-            AddParsedItem(newProc);
+            AddParsedItem(newProc, procToken.OwnerNumber);
             _context.Scope = newProc;
             return true;
         }
@@ -1735,11 +1805,11 @@ namespace _3PA.MainFeatures.Parser {
             string name = null;
             string returnType = null;
             string extend = null;
-            bool isExtent = false;
-            _lastTokenWasSpace = true;
+            ParseFlag flags = 0;
             StringBuilder parameters = new StringBuilder();
-            bool isPrivate = false;
             var parametersList = new List<ParsedItem>();
+
+            _lastTokenWasSpace = true;
 
             Token token;
             int state = 0;
@@ -1768,9 +1838,9 @@ namespace _3PA.MainFeatures.Parser {
                         // matching parameters (start)
                         if (token is TokenWord) {
                             if (token.Value.EqualsCi("private")) 
-                                isPrivate = true;
+                                flags |= ParseFlag.Private;
                             if (token.Value.EqualsCi("extent"))
-                                isExtent = true;
+                                flags |= ParseFlag.Extent;
 
                             // we didn't match any opening (, but we found a forward
                             if (token.Value.EqualsCi("forward"))
@@ -1780,7 +1850,7 @@ namespace _3PA.MainFeatures.Parser {
 
                         } else if (token is TokenSymbol && token.Value.Equals("("))
                             state = 3;
-                        else if (isExtent && token is TokenNumber)
+                        else if (flags.HasFlag(ParseFlag.Extent) && token is TokenNumber)
                             extend = token.Value;
                         break;
                     case 3:
@@ -1816,8 +1886,7 @@ namespace _3PA.MainFeatures.Parser {
                     EndPosition = token.EndPosition,
                     EndBlockLine = token.Line,
                     EndBlockPosition = token.EndPosition,
-                    IsPrivate = isPrivate,
-                    IsExtended = isExtent,
+                    Flags = flags,
                     Extend = extend ?? string.Empty,
                     Parameters = parameters.ToString()
                 };
@@ -1826,8 +1895,8 @@ namespace _3PA.MainFeatures.Parser {
 
                 // case of a IN, we add it to the list of item
                 if (!createdProto.SimpleForward) {
-                    
-                    AddParsedItem(createdProto);
+
+                    AddParsedItem(createdProto, functionToken.OwnerNumber);
 
                     // modify context
                     _context.Scope = createdProto;
@@ -1835,7 +1904,7 @@ namespace _3PA.MainFeatures.Parser {
                     // add the parameters to the list
                     if (parametersList.Count > 0) {
                         foreach (var parsedItem in parametersList) {
-                            AddParsedItem(parsedItem);
+                            AddParsedItem(parsedItem, functionToken.OwnerNumber);
                         }
                     }
 
@@ -1850,8 +1919,7 @@ namespace _3PA.MainFeatures.Parser {
             // New function
             ParsedImplementation createdImp = new ParsedImplementation(name, functionToken, returnType) {
                 EndPosition = token.EndPosition,
-                IsPrivate = isPrivate,
-                IsExtended = isExtent,
+                Flags = flags,
                 Extend = extend ?? string.Empty,
                 Parameters = parameters.ToString()
             };
@@ -1870,8 +1938,7 @@ namespace _3PA.MainFeatures.Parser {
 
                     // boolean to know if the implementation matches the prototype
                     createdImp.PrototypeUpdated = (
-                        createdImp.IsExtended == proto.IsExtended &&
-                        createdImp.IsPrivate == proto.IsPrivate &&
+                        createdImp.Flags == proto.Flags &&
                         createdImp.Extend.Equals(proto.Extend) &&
                         createdImp.ParsedReturnType.Equals(proto.ParsedReturnType) &&
                         createdImp.Parameters.Equals(proto.Parameters));
@@ -1880,7 +1947,7 @@ namespace _3PA.MainFeatures.Parser {
                 _functionPrototype.Add(name, createdImp);
             }
 
-            AddParsedItem(createdImp);
+            AddParsedItem(createdImp, functionToken.OwnerNumber);
 
             // modify context
             _context.Scope = createdImp;
@@ -1888,7 +1955,7 @@ namespace _3PA.MainFeatures.Parser {
             // add the parameters to the list
             if (parametersList.Count > 0) {
                 foreach (var parsedItem in parametersList) {
-                    AddParsedItem(parsedItem);
+                    AddParsedItem(parsedItem, functionToken.OwnerNumber);
                 }
             }
 
@@ -1901,18 +1968,17 @@ namespace _3PA.MainFeatures.Parser {
         private List<ParsedItem> GetParsedParameters(Token functionToken, StringBuilder parameters) {
             // info the parameters
             string paramName = "";
+            ParseFlag flags = 0;
             ParsedAsLike paramAsLike = ParsedAsLike.None;
             string paramPrimitiveType = "";
-            string strFlags = "";
             string parameterFor = "";
-            bool isExtended = false;
             var parametersList = new List<ParsedItem>();
 
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
                 if (token is TokenEos) break;
-                if (token is TokenSymbol && (token.Value.Equals(")"))) state = 99;
+                if (token is TokenSymbol && token.Value.Equals(")")) state = 99;
                 if (token is TokenComment) continue;
                 switch (state) {
                     case 0:
@@ -1931,12 +1997,17 @@ namespace _3PA.MainFeatures.Parser {
                                 paramPrimitiveType = lwToken;
                                 state = 20;
                                 break;
-                            case "return":
                             case "input":
+                                flags |= ParseFlag.Input;
+                                break;
+                            case "return":
+                                flags |= ParseFlag.Return;
+                                break;
                             case "output":
+                                flags |= ParseFlag.Output;
+                                break;
                             case "input-output":
-                                // flags found before the type in case of a define parameter
-                                strFlags = lwToken;
+                                flags |= ParseFlag.InputOutput;
                                 break;
                             default:
                                 paramName = token.Value;
@@ -1983,17 +2054,19 @@ namespace _3PA.MainFeatures.Parser {
 
                     case 99:
                         // matching parameters "," that indicates a next param
-                        if (token is TokenWord && token.Value.EqualsCi("extent")) isExtended = true;
+                        if (token is TokenWord && token.Value.EqualsCi("extent"))
+                            flags |= ParseFlag.Extent;
                         else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
                             // create a variable for this function scope
                             if (!String.IsNullOrEmpty(paramName))
-                                parametersList.Add(new ParsedDefine(paramName, functionToken, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false));
+                                parametersList.Add(new ParsedDefine(paramName, functionToken, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor) {
+                                    Flags = flags
+                                });
                             paramName = "";
                             paramAsLike = ParsedAsLike.None;
                             paramPrimitiveType = "";
-                            strFlags = "";
                             parameterFor = "";
-                            isExtended = false;
+                            flags = 0;
 
                             if (token.Value.Equals(","))
                                 state = 0;
@@ -2007,15 +2080,18 @@ namespace _3PA.MainFeatures.Parser {
             return parametersList;
         }
 
+        #region Handle include files
 
         /// <summary>
         /// matches an include file
         /// </summary>
-        private bool CreateParsedIncludeFile(Token bracketToken) {
+        private void CreateParsedIncludeFile(Token bracketToken) {
 
             // This method should handle those cases :
             // {  file.i &name=val &2="value"} -> {&name} and {&2}
             // {file.i val "value"} -> {1} {2}
+
+            var startingPos = _tokenPos;
 
             // info we will extract from the current statement :
             string fileName = "";
@@ -2035,7 +2111,10 @@ namespace _3PA.MainFeatures.Parser {
                     CreateParsedIncludeFile(token);
                     continue;
                 }*/
-                if (token is TokenSymbol && token.Value == "}") break;
+                if (token is TokenSymbol && token.Value == "}") {
+                    MoveNext();
+                    break;
+                }
                 switch (state) {
                     case 0:
                         // read the file name
@@ -2089,12 +2168,54 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             // we matched the include file name
-            if (!string.IsNullOrEmpty(fileName))
-                AddParsedItem(new ParsedIncludeFile(fileName, bracketToken, parameters));
+            if (!string.IsNullOrEmpty(fileName)) {
+                // try to find the file in the propath
+                var fullFilePath = FindIncludeFullPath(fileName);
 
-            return true;
+                // always add the parameter "0" which it the filename
+                parameters.Add("0", new List<Token> { new TokenWord(Path.GetFileName(fullFilePath), 0, 0, 0, 0) });
+
+                var newInclude = new ParsedIncludeFile(fileName, bracketToken, parameters, fullFilePath, _parsedIncludes[bracketToken.OwnerNumber]);
+
+                AddParsedItem(newInclude, bracketToken.OwnerNumber);
+
+                // Parse the include file ?
+                if (!string.IsNullOrEmpty(fullFilePath)) {
+
+                    Lexer lexer;
+
+                    // did we already parsed this file in a previous parse session?
+                    if (_savedLexerInclude.ContainsKey(fullFilePath)) {
+                        lexer = _savedLexerInclude[fullFilePath];
+                    } else {
+                        // Parse it
+                        lexer = new Lexer(Utils.ReadAllText(fullFilePath));
+                        _savedLexerInclude.Add(fullFilePath, lexer);
+                    }
+
+                    // add this include to the references and modify each token
+                    _parsedIncludes.Add(newInclude);
+                    var includeNumber = (ushort) (_parsedIncludes.Count - 1);
+                    var tokens = lexer.GetTokensList.ToList();
+                    tokens.ForEach(token => token.OwnerNumber = includeNumber);
+
+                    // replace the tokens
+                    var nbTokens = _tokenPos - startingPos + 1;
+                    _tokenPos = startingPos - 1; // reposition the current token before the start of the {include.i}
+                    RemoveTokens(1, nbTokens.ClampMax(_tokenCount - (_tokenPos + 1)));
+                    InsertTokens(1, tokens);
+
+                    // replaces a preproc var {&x} at the beggining of the include file
+                    ReplacePreProcVariablesAhead(1);
+                    ReplacePreProcVariablesAhead(2);
+                } else {
+                    newInclude.Flags |= ParseFlag.NotFound;
+                }
+            }
         }
 
+        #endregion
+        
         #endregion
 
         #endregion

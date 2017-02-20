@@ -103,9 +103,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap alphabetical_sorting {
+        internal static System.Drawing.Bitmap Alphabetical_sorting {
             get {
-                object obj = ResourceManager.GetObject("alphabetical_sorting", resourceCulture);
+                object obj = ResourceManager.GetObject("Alphabetical_sorting", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -243,9 +243,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap clear_filters {
+        internal static System.Drawing.Bitmap Clear_filters {
             get {
-                object obj = ResourceManager.GetObject("clear_filters", resourceCulture);
+                object obj = ResourceManager.GetObject("Clear_filters", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -293,9 +293,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap collapse {
+        internal static System.Drawing.Bitmap Collapse {
             get {
-                object obj = ResourceManager.GetObject("collapse", resourceCulture);
+                object obj = ResourceManager.GetObject("Collapse", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -623,9 +623,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap eraser {
+        internal static System.Drawing.Bitmap Eraser {
             get {
-                object obj = ResourceManager.GetObject("eraser", resourceCulture);
+                object obj = ResourceManager.GetObject("Eraser", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -653,9 +653,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap expand {
+        internal static System.Drawing.Bitmap Expand {
             get {
-                object obj = ResourceManager.GetObject("expand", resourceCulture);
+                object obj = ResourceManager.GetObject("Expand", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -853,6 +853,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FromInclude {
+            get {
+                object obj = ResourceManager.GetObject("FromInclude", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FtpType {
             get {
                 object obj = ResourceManager.GetObject("FtpType", resourceCulture);
@@ -933,9 +943,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap global {
+        internal static System.Drawing.Bitmap Global {
             get {
-                object obj = ResourceManager.GetObject("global", resourceCulture);
+                object obj = ResourceManager.GetObject("Global", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1086,16 +1096,6 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Label {
             get {
                 object obj = ResourceManager.GetObject("Label", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap LoadPersistent {
-            get {
-                object obj = ResourceManager.GetObject("LoadPersistent", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1403,9 +1403,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap numerical_sorting {
+        internal static System.Drawing.Bitmap Numerical_sorting {
             get {
-                object obj = ResourceManager.GetObject("numerical_sorting", resourceCulture);
+                object obj = ResourceManager.GetObject("Numerical_sorting", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1543,6 +1543,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Primary {
+            get {
+                object obj = ResourceManager.GetObject("Primary", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Private {
             get {
                 object obj = ResourceManager.GetObject("Private", resourceCulture);
@@ -1663,9 +1673,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap refresh {
+        internal static System.Drawing.Bitmap Refresh {
             get {
-                object obj = ResourceManager.GetObject("refresh", resourceCulture);
+                object obj = ResourceManager.GetObject("Refresh", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1673,9 +1683,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap refreshing {
+        internal static System.Drawing.Bitmap Refreshing {
             get {
-                object obj = ResourceManager.GetObject("refreshing", resourceCulture);
+                object obj = ResourceManager.GetObject("Refreshing", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1706,6 +1716,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Reserved {
             get {
                 object obj = ResourceManager.GetObject("Reserved", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Return {
+            get {
+                object obj = ResourceManager.GetObject("Return", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

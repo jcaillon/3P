@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public ParsedScopeItem Scope { get; set; }
 
-        public ParseFlag Flag { get; set; }
+        public ParseFlag Flags { get; set; }
 
         public abstract void Accept(IParserVisitor visitor);
 
@@ -143,9 +143,9 @@ namespace _3PA.MainFeatures.Parser {
     /// Flags applicable for every ParsedItems
     /// </summary>
     [Flags]
-    internal enum ParseFlag {
+    internal enum ParseFlag : ulong {
         // indicates that the parsed item is not coming from the originally parsed source (= from .i)
-        External = 1,
+        FromInclude = 1,
         // Local/File define the scope of a defined variable...
         LocalScope = 2,
         FileScope = 4,
@@ -179,8 +179,8 @@ namespace _3PA.MainFeatures.Parser {
         MissingDbName = 524288,
         // if the .i file is not found in the propath
         NotFound = 1048576,
-        // a run file has the keyword PERSISTENT
-        LoadPersistent = 2097152,
+        // a procedure is an EXTERNAL procedure
+        External = 2097152,
 
         // Method
         Protected = 4194304,
@@ -188,7 +188,13 @@ namespace _3PA.MainFeatures.Parser {
         Static = 16777216,
         Abstract = 33554432,
         Override = 67108864,
-        Final = 134217728
+        Final = 134217728,
+
+        // parameters
+        Input = 268435456,
+        InputOutput = 536870912,
+        Output = 1073741824,
+        Return = 2147483648
     }
 
     #endregion
@@ -250,28 +256,15 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParsedProcedure : ParsedScopeItem {
         public string Left { get; private set; }
-
-        /// <summary>
-        /// Is the procedure external?
-        /// </summary>
-        public bool IsExternal { get; private set; }
-
-        /// <summary>
-        /// Has the private flag
-        /// </summary>
-        public bool IsPrivate { get; private set; }
-
         public string ExternalDllName { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, Token token, string left, bool isExternal, bool isPrivate, string externalDllName)
+        public ParsedProcedure(string name, Token token, string left, string externalDllName)
             : base(name, token, ParsedScopeType.Procedure) {
             Left = left;
-            IsExternal = isExternal;
-            IsPrivate = isPrivate;
             ExternalDllName = externalDllName;
         }
     }
@@ -292,10 +285,7 @@ namespace _3PA.MainFeatures.Parser {
         /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
         /// </summary>
         public string Extend { get; set; }
-
-        public bool IsExtended { get; set; }
         public string Parameters { get; set; }
-        public bool IsPrivate { get; set; }
 
         protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
             ParsedReturnType = parsedReturnType;
@@ -426,22 +416,13 @@ namespace _3PA.MainFeatures.Parser {
     /// Run parsed item
     /// </summary>
     internal class ParsedRun : ParsedItem {
-        /// <summary>
-        /// true if the Run statement is based on a evaluating a VALUE()
-        /// </summary>
-        public bool IsEvaluateValue { get; private set; }
-
-        public bool HasPersistent { get; private set; }
         public string Left { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-
-        public ParsedRun(string name, Token token, string left, bool isEvaluateValue, bool hasPersistent) : base(name, token) {
+        public ParsedRun(string name, Token token, string left) : base(name, token) {
             Left = left;
-            IsEvaluateValue = isEvaluateValue;
-            HasPersistent = hasPersistent;
         }
     }
 
@@ -484,21 +465,39 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParsedIncludeFile : ParsedItem {
         /// <summary>
-        /// The dictionnary contains the association between parameter name -> value
+        /// The dictionary contains the association between parameter name -> value
         /// passed with the include file; either 1->value or & name->value 
         /// depending on the way parameters were passed to the include
         /// The value is tokenized and we store the list of tokens here. During parsing, 
         /// we will inject those tokens in place of the {& varname}
+        /// 
+        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
+        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
+        /// or & DEFINE variables from the current file
         /// </summary>
-        public Dictionary<string, List<Token>> Parameters { get; set; }
+        public Dictionary<string, List<Token>> ScopedPreProcVariables { get; set; }
+
+        /// <summary>
+        /// if null, that means this ParsedIncludeFile is actually the procedure being parsed,
+        /// otherwise it can be found in an include itself found on the procedure being parsed
+        /// </summary>
+        public ParsedIncludeFile Parent { get; private set; }
+
+        /// <summary>
+        /// Full path of the include file (when actually found in the propath
+        /// null otherwise)
+        /// </summary>
+        public string FullFilePath { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, Token token, Dictionary<string, List<Token>> parameters)
+        public ParsedIncludeFile(string name, Token token, Dictionary<string, List<Token>> scopedPreProcVariables, string fullFilePath, ParsedIncludeFile parent)
             : base(name, token) {
-            Parameters = parameters;
+            ScopedPreProcVariables = scopedPreProcVariables;
+            FullFilePath = fullFilePath;
+            Parent = parent;
         }
     }
 
@@ -508,37 +507,24 @@ namespace _3PA.MainFeatures.Parser {
     internal class ParsedPreProcVariable : ParsedItem {
         public string Value { get; private set; }
         public int UndefinedLine { get; set; }
-        public ParsedPreProcVariableType Type { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedPreProcVariable(string name, Token token, int undefinedLine, ParsedPreProcVariableType type, string value) : base(name, token) {
+        public ParsedPreProcVariable(string name, Token token, int undefinedLine, string value) : base(name, token) {
             UndefinedLine = undefinedLine;
-            Type = type;
             Value = value;
         }
-    }
-
-    internal enum ParsedPreProcVariableType {
-        Scope = 2,
-        Global = 4
     }
 
     /// <summary>
     /// Define parsed item
     /// </summary>
     internal class ParsedDefine : ParsedItem {
-        /// <summary>
-        /// can contains (separated by 1 space) :
-        /// global, shared, private, new
-        /// </summary>
-        public string LcFlagString { get; private set; }
 
         /// <summary>
-        /// contains as or like in lowercase
-        /// (for buffers, it contains the table it buffs)
+        /// contains as or like
         /// </summary>
         public ParsedAsLike AsLike { get; private set; }
 
@@ -546,16 +532,6 @@ namespace _3PA.MainFeatures.Parser {
         /// In case of a buffer, contains the references table (BUFFER name FOR xxx)
         /// </summary>
         public string BufferFor { get; private set; }
-
-        /// <summary>
-        /// if the variable is "EXTENT [x]"
-        /// </summary>
-        public bool IsExtended { get; private set; }
-
-        /// <summary>
-        /// if the variable was CREATE'd instead of DEFINE'd
-        /// </summary>
-        public bool IsDynamic { get; private set; }
 
         public string Left { get; private set; }
 
@@ -584,17 +560,14 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, Token token, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
+        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor)
             : base(name, token) {
-            LcFlagString = lcFlagString;
             AsLike = asLike;
             Left = left;
             Type = type;
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
             BufferFor = bufferFor;
-            IsExtended = isExtended;
-            IsDynamic = isDynamic;
         }
     }
 
@@ -711,12 +684,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string UseIndex { get; private set; }
 
-        /// <summary>
-        /// In case of a temp table, can contains the eventuals :
-        /// NEW [ GLOBAL ] ] SHARED ] | [ PRIVATE | PROTECTED ] [ STATIC ] flags
-        /// </summary>
-        public string LcFlagString { get; private set; }
-
         public List<ParsedField> Fields { get; set; }
         public List<ParsedIndex> Indexes { get; set; }
         public List<ParsedTrigger> Triggers { get; set; }
@@ -725,7 +692,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, token) {
+        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex) : base(name, token) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
@@ -735,7 +702,6 @@ namespace _3PA.MainFeatures.Parser {
             Fields = fields;
             Indexes = indexes;
             Triggers = triggers;
-            LcFlagString = lcFlagString;
             UseIndex = useIndex;
         }
     }

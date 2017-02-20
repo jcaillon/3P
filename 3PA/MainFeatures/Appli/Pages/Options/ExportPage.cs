@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (string.IsNullOrEmpty(Config.Instance.SharedConfHistoric))
                 btHistoric.Visible = false;
 
-            btRefresh.BackGrndImage = ImageResources.refresh;
+            btRefresh.BackGrndImage = ImageResources.Refresh;
             btRefresh.ButtonPressed += BtRefreshOnButtonPressed;
             tooltip.SetToolTip(btRefresh, "Click to <b>refresh</b> the local and distant file status");
 

@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Type = keyword.Type,
                 Ranking = keyword.Ranking,
                 SubString = keyword.KeywordType.ToString(),
-                Flag = keyword.Flag,
+                Flags = keyword.Flag,
                 KeywordType = keyword.KeywordType
             }).ToList();
         }

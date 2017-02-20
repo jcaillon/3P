@@ -261,7 +261,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         Type = CompletionType.Snippet,
                         Ranking = 0,
                         FromParser = false,
-                        Flag = 0
+                        Flags = 0
                     }).ToList());
                     _staticItems.AddRange(DataBase.GetDbList());
                     _staticItems.AddRange(DataBase.GetSequencesList());
@@ -542,7 +542,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
-                if (Config.Instance.CodeReplaceAbbreviations && (data.Flag & ParseFlag.Abbreviation) != 0) {
+                if (Config.Instance.CodeReplaceAbbreviations && (data.Flags & ParseFlag.Abbreviation) != 0) {
                     var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
                     replacementText = fullKeyword ?? data.DisplayText;
                 }

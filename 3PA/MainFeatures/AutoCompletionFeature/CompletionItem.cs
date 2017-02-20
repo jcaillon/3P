@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// It works as a Flag, call HasFlag() method to if a certain flag is set and use
         /// Flag = Flag | ParseFlag.Reserved to set a flag!
         /// </summary>
-        public ParseFlag Flag { get; set; }
+        public ParseFlag Flags { get; set; }
 
         /// <summary>
         /// Used for sorting the autocompletion list, the higher the ranking, the higher in the list
@@ -82,7 +82,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                 ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                if (flag == 0 || !Flags.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
             }
         }
@@ -144,7 +144,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 var outList = new List<Image>();
                 foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                     ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                    if (flag == 0 || !Flags.HasFlag(flag)) continue;
 
                     Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
                     if (tryImg != null) {

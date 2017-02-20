@@ -60,12 +60,12 @@ namespace _3PA.MainFeatures.FileExplorer {
                     if (refreshButton == null)
                         return;
                     if (_refreshing) {
-                        refreshButton.BackGrndImage = ImageResources.refreshing;
+                        refreshButton.BackGrndImage = ImageResources.Refreshing;
                         refreshButton.Invalidate();
                         btDirectory.Enabled = false;
                         toolTipHtml.SetToolTip(refreshButton, "The list is being refreshed, please wait");
                     } else {
-                        refreshButton.BackGrndImage = ImageResources.refresh;
+                        refreshButton.BackGrndImage = ImageResources.Refresh;
                         refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic //refreshing is done so you have to use this button when you add/delete a file in said directory");
                         btDirectory.Enabled = true;
@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // add the refresh button to the filter box
             filterbox.ExtraButtons = new List<YamuiFilterBox.YamuiFilterBoxButton> {
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.refresh,
+                    Image = ImageResources.Refresh,
                     OnClic = OnRefreshClic
                 }
             };

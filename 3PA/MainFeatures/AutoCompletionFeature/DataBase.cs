@@ -212,11 +212,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[3],
                             splitted[4],
                             splitted[5],
-                            "", false,
+                            "", 
+                            false,
                             new List<ParsedField>(),
                             new List<ParsedIndex>(),
-                            new List<ParsedTrigger>()
-                            , "", "");
+                            new List<ParsedTrigger>(), 
+                            "");
                         currentDb.Tables.Add(currentTable);
                         break;
                     case 'X':
@@ -292,7 +293,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, CompletionType> GetDbDictionnary() {
+        public static Dictionary<string, CompletionType> GetDbDictionary() {
             var output = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
             _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
                 if (!output.ContainsKey(table.Name))
@@ -314,7 +315,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Type = CompletionType.Database,
                 FromParser = false,
                 Ranking = AutoCompletion.FindRankingOfDatabaseItem(@base.LogicalName),
-                Flag = 0
+                Flags = 0
             }).ToList();
         }
 
@@ -354,7 +355,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Type = CompletionType.Table,
                 FromParser = false,
                 Ranking = AutoCompletion.FindRankingOfDatabaseItem(table.Name),
-                Flag = 0
+                Flags = 0
             }).ToList());
             return output;
         }
@@ -374,7 +375,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 FromParser = false,
                 SubString = field.Type.ToString(),
                 Ranking = AutoCompletion.FindRankingOfDatabaseItem(field.Name),
-                Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
+                Flags = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0),
                 ParsedItem = table

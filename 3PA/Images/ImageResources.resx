@@ -124,10 +124,13 @@
   <data name="Abbreviation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\abbreviation.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Abstract" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\abstract.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="alphabetical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Alphabetical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\alphabetical_sorting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Autocompletion" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -172,7 +175,7 @@
   <data name="ClearAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\clearall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="clear_filters" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Clear_filters" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\clear_filters.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ClsType" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -184,7 +187,7 @@
   <data name="CodeExplorerLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>toolbar\codeexplorerlogo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="collapse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Collapse" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\collapse.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="CompileCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -283,7 +286,7 @@
   <data name="EnvSuffix" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\envsuffix.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="eraser" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Eraser" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\eraser.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -292,7 +295,7 @@
   <data name="Error30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\error30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="expand" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Expand" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\expand.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ExplorerDir0" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -343,11 +346,17 @@
   <data name="FileScope" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\filescope.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Final" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\final.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="FolderType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>filetypes\foldertype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="FormatCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\formatcode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FromInclude" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\frominclude.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="FtpType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>filetypes\ftptype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -373,7 +382,7 @@
   <data name="getting_started_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>html\getting-started-3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="global" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Global" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\global.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="GoBackward" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -398,16 +407,19 @@
     <value>parseritem\flags\index.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Input" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>tooltips\input.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>parseritem\flags\input.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="InputOutput" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>tooltips\inputoutput.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>parseritem\flags\inputoutput.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="InsertMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\insertmark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="IsTooLong" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\istoolong.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>filetypes\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Keyword" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\keyword.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -417,9 +429,6 @@
   </data>
   <data name="Label" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\label.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="LoadPersistent" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\loadpersistent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="LocalScope" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\localscope.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -511,7 +520,7 @@
   <data name="NotSaved" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\notsaved.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="numerical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Numerical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\numerical_sorting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -530,7 +539,10 @@
     <value>appli\outdated.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Output" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>tooltips\output.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>parseritem\flags\output.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Override" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\override.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Parameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\parameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -550,6 +562,9 @@
   <data name="Previous" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\previous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Primary" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\primary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Private" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\private.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -568,6 +583,9 @@
   <data name="ProlintCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\prolintcode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Protected" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\protected.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Prototype" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\prototype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -583,10 +601,10 @@
   <data name="ReadOnly" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\readonly.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="refreshing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Refreshing" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\refreshing.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Report" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -597,6 +615,9 @@
   </data>
   <data name="Reserved" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\reserved.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Return" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\return.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Root" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\root.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -634,6 +655,9 @@
   <data name="Sequence" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\sequence.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Serializable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\serializable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="SettingsBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\settingsblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -645,6 +669,9 @@
   </data>
   <data name="Snippet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\snippet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Static" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>parseritem\flags\static.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StaticFunctionCall" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\type\staticfunctioncall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -684,6 +711,9 @@
   </data>
   <data name="ToggleComment" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\togglecomment.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>filetypes\ttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Uncertain" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>parseritem\flags\uncertain.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -732,29 +762,5 @@
   </data>
   <data name="ZoomIn" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\zoomin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Abstract" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\abstract.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Final" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\final.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>filetypes\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Override" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\override.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Protected" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\protected.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Serializable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\serializable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Static" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>parseritem\flags\static.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="TType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>filetypes\ttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

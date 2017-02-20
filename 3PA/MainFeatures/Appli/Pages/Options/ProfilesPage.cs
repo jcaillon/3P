@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     DisplayText = item.DisplayText,
                     Type = item.Type,
                     SubString = item.SubString,
-                    Flag = item.Flag
+                    Flag = item.Flags
                 }).Cast<ListItem>().ToList());
             };
 

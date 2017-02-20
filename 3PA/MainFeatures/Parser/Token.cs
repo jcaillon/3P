@@ -28,6 +28,12 @@ namespace _3PA.MainFeatures.Parser {
         public int Column { get; private set; }
         public int StartPosition { get; private set; }
         public int EndPosition { get; private set; }
+
+        /// <summary>
+        /// Used to differentiate the source of the tokens in a procedure containing include files
+        /// 0 will correspond to the procedure itself, 1 to the first include and so on...
+        /// </summary>
+        public ushort OwnerNumber { get; set; }
         protected Token(string value, int line, int column, int startPosition, int endPosition) {
             Value = value;
             Line = line;

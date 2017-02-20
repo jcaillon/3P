@@ -82,7 +82,7 @@ namespace _3PA.Tests {
                     Lexer lexer = new Lexer(Utils.ReadAllText(file));
                     outStr += "Lexer (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    Parser parser = new Parser(lexer, "", null, null, true);
+                    Parser parser = new Parser(lexer, "", null, true);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
                     if (parser.ParserErrors != null && parser.ParserErrors.Count > 0)
@@ -399,7 +399,7 @@ namespace _3PA.Tests {
             watch = Stopwatch.StartNew();
             //------------
 
-            Parser parser = new Parser(lexer, "", null, null, true);
+            Parser parser = new Parser(lexer, "", null, true);
 
             //--------------
             watch.Stop();

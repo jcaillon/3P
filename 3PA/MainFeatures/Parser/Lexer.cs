@@ -42,6 +42,7 @@ namespace _3PA.MainFeatures.Parser {
         private char[] _symbolChars = {'=', '+', '-', '/', ',', '.', '*', '~', '!', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', '|', '\\', '`', '’'};
 
         private string _data;
+        private int _dataLength;
         private int _pos;
         private int _line = LineStartAt;
         private int _column = ColumnStartAt;
@@ -94,6 +95,7 @@ namespace _3PA.MainFeatures.Parser {
             if (data == null)
                 throw new ArgumentNullException("data");
             _data = data;
+            _dataLength = _data.Length;
 
             // create the list of tokens
             Tokenize();
@@ -168,7 +170,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Peek forward x chars
         /// </summary>
         private char PeekAtChr(int x) {
-            return _pos + x >= _data.Length ? Eof : _data[_pos + x];
+            return _pos + x >= _dataLength ? Eof : _data[_pos + x];
         }
 
         /// <summary>

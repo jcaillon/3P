@@ -61,11 +61,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     if (refreshButton == null)
                         return;
                     if (_refreshing) {
-                        refreshButton.BackGrndImage = ImageResources.refreshing;
+                        refreshButton.BackGrndImage = ImageResources.Refreshing;
                         refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "The tree is being refreshed, please wait");
                     } else {
-                        refreshButton.BackGrndImage = ImageResources.refresh;
+                        refreshButton.BackGrndImage = ImageResources.Refresh;
                         refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "Click to <b>Refresh</b> the tree");
                     }
@@ -87,22 +87,22 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // add the refresh button to the filter box
             filterbox.ExtraButtons = new List<YamuiFilterBox.YamuiFilterBoxButton> {
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.refresh,
+                    Image = ImageResources.Refresh,
                     OnClic = buttonRefresh_Click
                 },
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.collapse,
+                    Image = ImageResources.Collapse,
                     OnClic = buttonExpandRetract_Click,
                     ToolTip = "Toggle <b>Expand/Collapse</b>"
                 },
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.numerical_sorting,
+                    Image = ImageResources.Numerical_sorting,
                     OnClic = buttonSort_Click,
                     ToolTip = "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order<br>-Uncategorized, unsorted"
                 },
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.External,
-                    OnClic = ButtonIncludeExternalOnButtonPressed,
+                    Image = ImageResources.FromInclude,
+                    OnClic = ButtonFromIncludeOnButtonPressed,
                     ToolTip = "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)"
                 }
             };
@@ -111,9 +111,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.EmptyListString = @"Nothing to display";
 
             Refreshing = false;
-            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
+            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
 
             // list events
             yamuiList.RowClicked += YamuiListOnRowClicked;
@@ -211,7 +211,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                             tempList[iItem].IconType == tempList[iIdentical].IconType &&
                             tempList[iItem].Branch == tempList[iIdentical].Branch &&
                             tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
-                            flags = flags | tempList[iIdentical].Flag;
+                            flags = flags | tempList[iIdentical].Flags;
                             iIdentical++;
                         }
                         // if we found identical item
@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                                 IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
                                 SubString = "x" + (iIdentical - iItem),
                                 IsNotBlock = tempList[iItem].IsNotBlock,
-                                Flag = flags,
+                                Flags = flags,
                                 Children = new List<FilteredTypeTreeListItem>()
                             };
                             currentLvl1Parent.Children.Add(currentLvl2Parent);
@@ -339,7 +339,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             UpdateTreeData();
-            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
             Npp.GrabFocus();
         }
 
@@ -349,11 +349,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             else
                 yamuiList.ForceAllToExpand();
             _isExpanded = !_isExpanded;
-            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
+            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             Npp.GrabFocus();
         }
 
-        private void ButtonIncludeExternalOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
+        private void ButtonFromIncludeOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
             // change option and image
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
