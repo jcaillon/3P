@@ -25,6 +25,7 @@ using YamuiFramework.Controls.YamuiList;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
 

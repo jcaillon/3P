@@ -25,6 +25,7 @@ using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProMisc {

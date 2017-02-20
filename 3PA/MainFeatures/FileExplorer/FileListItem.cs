@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public override string ItemTypeText {
             get {
-                return "Category : <span class='SubTextColor'><b>" + ((CompletionType)ItemType) + "</b></span><br><br>";
+                return "Category : <span class='SubTextColor'><b>." + ((FileType)ItemType).ToString().ToLower() + " file</b></span><br><br>";
             }
         }
 

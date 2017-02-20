@@ -478,10 +478,10 @@ namespace _3PA.MainFeatures.Parser {
         /// Procedures
         /// </summary>
         public void Visit(ParsedProcedure pars) {
-            // check lenght of block
+            // check length of block
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
-            // fill dictionnary containing the name of all procedures defined
+            // fill dictionary containing the name of all procedures defined
             if (!_definedProcedures.Contains(pars.Name))
                 _definedProcedures.Add(pars.Name);
 
@@ -500,8 +500,9 @@ namespace _3PA.MainFeatures.Parser {
             _parsedCompletionItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
-                SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
-                Flag = AddExternalFlag((pars.IsExternal ? ParseFlag.ExternalProc : 0) | (pars.IsPrivate ? ParseFlag.Private : 0)),
+                ItemImage = pars.IsExternal ? Utils.GetImageFromStr(CodeExplorerBranch.ExternalProcedure.ToString()) : null,
+                SubString = pars.IsExternal ? pars.ExternalDllName : (!_isBaseFile ? _currentParsedFileName : string.Empty),
+                Flag = AddExternalFlag(pars.IsPrivate ? ParseFlag.Private : 0),
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true

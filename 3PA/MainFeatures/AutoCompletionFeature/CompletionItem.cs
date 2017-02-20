@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Images;
+using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
@@ -95,7 +96,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// return the image to display for this item
         /// If null, the image corresponding to ItemTypeImage will be used instead
         /// </summary>
-        public override Image ItemImage { get { return null; } }
+        public override Image ItemImage { get; set; }
 
         /// <summary>
         /// return this item type (a unique int for each item type)
@@ -112,8 +113,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public override Image ItemTypeImage {
             get {
-                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(((CompletionType)ItemType).ToString());
-                return tryImg ?? ImageResources.Error;
+                return Utils.GetImageFromStr(((CompletionType)ItemType).ToString());
             }
         }
 
@@ -154,51 +154,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return outList;
             }
         }
-
-    }
-    
-    /// <summary>
-    /// Flags applicable for every ParsedItems
-    /// </summary>
-    [Flags]
-    internal enum ParseFlag {
-        // indicates that the parsed item is not coming from the originally parsed source (= from .i)
-        External = 1,
-        // Local/File define the scope of a defined variable...
-        LocalScope = 2,
-        FileScope = 4,
-        Parameter = 8,
-        // is used for keywords
-        Reserved = 16,
-        Abbreviation = 32,
-        New = 64,
-        // Special flag for DEFINE
-        Global = 128,
-        Shared = 256,
-        Private = 512,
-        // flags for fields
-        Mandatory = 1024,
-        Extent = 2048,
-        Index = 4096,
-        // is a buffer
-        Buffer = 8192,
-        // the variable was defined with a CREATE and not a DEFINE
-        Dynamic = 16384,
-        // the procedure is EXTERNAL
-        ExternalProc = 32768,
-        // a proc or func was loaded in persistent
-        Persistent = 65536,
-
-        // the block has too much characters and the program will not be open-able in the appbuilder
-        IsTooLong = 131072,
-        // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
-        Uncertain = 262144,
-        // if a table found w/o the database name before it
-        MissingDbName = 524288,
-        // if the .i file is not found in the propath
-        NotFound = 1048576,
-        // a run file has the keyword PERSISTENT
-        LoadPersistent = 2097152,
 
     }
 

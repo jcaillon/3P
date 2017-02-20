@@ -200,10 +200,6 @@ namespace _3PA.MainFeatures.Pro {
                     throw new Exception("Couln't decrease the opened counter...");
                 }
 
-                // restore splashscreen
-                if (!string.IsNullOrEmpty(ProgressWin32))
-                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp"));
-
             } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
@@ -489,14 +485,12 @@ namespace _3PA.MainFeatures.Pro {
                 Params.Append(" -ini " + baseIniPath.ProQuoter());
             if (batchMode)
                 Params.Append(" -b");
+            else
+                Params.Append(" -nosplash");
             Params.Append(" -p " + runnerPath.ProQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
                 Params.Append(" " + ProEnv.CmdLineParameters.Trim());
             ExeParameters = Params.ToString();
-
-            // we supress the splashscreen
-            if (!batchMode)
-                MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp"));
 
             // Start a process
             var pInfo = new ProcessStartInfo {
@@ -645,19 +639,6 @@ namespace _3PA.MainFeatures.Pro {
 
                 // display a custom post execution notification if needed
                 DisplayPostExecutionNotification();
-            }
-        }
-
-        /// <summary>
-        /// move a file, catch the errors
-        /// </summary>
-        private void MoveSplashScreenNoError(string from, string to) {
-            if (File.Exists(from)) {
-                try {
-                    File.Move(from, to);
-                } catch (Exception) {
-                    // if it fails it is not really a problem
-                }
             }
         }
 

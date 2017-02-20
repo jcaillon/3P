@@ -22,6 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace _3PA.MainFeatures.Parser {
+
+    #region base classes
+
     /// <summary>
     /// base abstract class for ParsedItem
     /// </summary>
@@ -71,6 +74,8 @@ namespace _3PA.MainFeatures.Parser {
         /// Scope in which this item has been parsed
         /// </summary>
         public ParsedScopeItem Scope { get; set; }
+
+        public ParseFlag Flag { get; set; }
 
         public abstract void Accept(IParserVisitor visitor);
 
@@ -124,8 +129,71 @@ namespace _3PA.MainFeatures.Parser {
         Block,
         Procedure,
         Function,
-        OnEvent
+        OnEvent,
+        Class,
+        Method,
+        Constructor
     }
+
+    #endregion
+
+    #region ParseFlag
+
+    /// <summary>
+    /// Flags applicable for every ParsedItems
+    /// </summary>
+    [Flags]
+    internal enum ParseFlag {
+        // indicates that the parsed item is not coming from the originally parsed source (= from .i)
+        External = 1,
+        // Local/File define the scope of a defined variable...
+        LocalScope = 2,
+        FileScope = 4,
+        Parameter = 8,
+        // is used for keywords
+        Reserved = 16,
+        Abbreviation = 32,
+        New = 64,
+        // Special flag for DEFINE
+        Global = 128,
+        Shared = 256,
+        Private = 512,
+        // flags for fields
+        Mandatory = 1024,
+        Extent = 2048,
+        Index = 4096,
+        // is a buffer
+        Buffer = 8192,
+        // the variable was defined with a CREATE and not a DEFINE
+        Dynamic = 16384,
+        // class serializable
+        Serializable = 32768,
+        // a proc or func was loaded in persistent
+        Persistent = 65536,
+
+        // the block has too much characters and the program will not be open-able in the appbuilder
+        IsTooLong = 131072,
+        // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
+        Uncertain = 262144,
+        // if a table found w/o the database name before it
+        MissingDbName = 524288,
+        // if the .i file is not found in the propath
+        NotFound = 1048576,
+        // a run file has the keyword PERSISTENT
+        LoadPersistent = 2097152,
+
+        // Method
+        Protected = 4194304,
+        Public = 8388608,
+        Static = 16777216,
+        Abstract = 33554432,
+        Override = 67108864,
+        Final = 134217728
+    }
+
+    #endregion
+
+    #region procedural classes
 
     /// <summary>
     /// The "root" scope of a file
@@ -135,7 +203,8 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) { }
+
+        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) {}
 
     }
 
@@ -153,11 +222,12 @@ namespace _3PA.MainFeatures.Parser {
         /// Everything after ANALYZE-SUSPEND
         /// </summary>
         public string BlockDescription { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedPreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {
-        }
+
+        public ParsedPreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {}
     }
 
     internal enum ParsedPreProcBlockType {
@@ -185,6 +255,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Is the procedure external?
         /// </summary>
         public bool IsExternal { get; private set; }
+
         /// <summary>
         /// Has the private flag
         /// </summary>
@@ -211,14 +282,17 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal abstract class ParsedFunction : ParsedScopeItem {
         public ParsedPrimitiveType ReturnType { get; set; }
+
         /// <summary>
         /// Parsed string for the return type, use ReturnType instead!
         /// </summary>
         public string ParsedReturnType { get; private set; }
+
         /// <summary>
         /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
         /// </summary>
         public string Extend { get; set; }
+
         public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
@@ -258,10 +332,12 @@ namespace _3PA.MainFeatures.Parser {
         /// true if this function is an implementation AND has a prototype
         /// </summary>
         public bool HasPrototype { get; set; }
+
         public int PrototypeLine { get; set; }
         public int PrototypeColumn { get; set; }
         public int PrototypePosition { get; set; }
         public int PrototypeEndPosition { get; set; }
+
         /// <summary>
         /// Boolean to know if the prototype is correct compared to the implementation
         /// </summary>
@@ -283,6 +359,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class ParsedOnStatement : ParsedScopeItem {
         public string EventList { get; private set; }
         public string WidgetList { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -299,6 +376,7 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParsedFoundTableUse : ParsedItem {
         public bool IsTempTable { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -319,8 +397,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedLabel(string name, Token token) : base(name, token) {
-        }
+        public ParsedLabel(string name, Token token) : base(name, token) {}
     }
 
     /// <summary>
@@ -331,6 +408,7 @@ namespace _3PA.MainFeatures.Parser {
         /// true if the called function is not defined in the program
         /// </summary>
         public bool ExternalCall { get; private set; }
+
         public bool StaticCall { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
@@ -352,8 +430,10 @@ namespace _3PA.MainFeatures.Parser {
         /// true if the Run statement is based on a evaluating a VALUE()
         /// </summary>
         public bool IsEvaluateValue { get; private set; }
+
         public bool HasPersistent { get; private set; }
         public string Left { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -376,11 +456,14 @@ namespace _3PA.MainFeatures.Parser {
         /// can be anywhere or the handle of a proc
         /// </summary>
         public string PublisherHandler { get; private set; }
+
         public string RunProcedure { get; private set; }
         public string Left { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
+
         public ParsedEvent(ParsedEventType type, string name, Token token, string subscriberHandle, string publisherHandler, string runProcedure, string left) : base(name, token) {
             SubscriberHandle = subscriberHandle;
             PublisherHandler = publisherHandler;
@@ -408,6 +491,7 @@ namespace _3PA.MainFeatures.Parser {
         /// we will inject those tokens in place of the {& varname}
         /// </summary>
         public Dictionary<string, List<Token>> Parameters { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -425,6 +509,7 @@ namespace _3PA.MainFeatures.Parser {
         public string Value { get; private set; }
         public int UndefinedLine { get; set; }
         public ParsedPreProcVariableType Type { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -450,41 +535,51 @@ namespace _3PA.MainFeatures.Parser {
         /// global, shared, private, new
         /// </summary>
         public string LcFlagString { get; private set; }
+
         /// <summary>
         /// contains as or like in lowercase
         /// (for buffers, it contains the table it buffs)
         /// </summary>
         public ParsedAsLike AsLike { get; private set; }
+
         /// <summary>
         /// In case of a buffer, contains the references table (BUFFER name FOR xxx)
         /// </summary>
         public string BufferFor { get; private set; }
+
         /// <summary>
         /// if the variable is "EXTENT [x]"
         /// </summary>
         public bool IsExtended { get; private set; }
+
         /// <summary>
         /// if the variable was CREATE'd instead of DEFINE'd
         /// </summary>
         public bool IsDynamic { get; private set; }
+
         public string Left { get; private set; }
+
         /// <summary>
         /// The "Type" is what succeeds the DEFINE word of the statement (VARIABLE, BUFFER....)
         /// </summary>
         public ParseDefineType Type { get; private set; }
+
         /// <summary>
         /// When parsing, we store the value of the "primitive-type" in there, 
         /// with the visitor, we convert this to a ParsedPrimitiveType later
         /// </summary>
-        public string TempPrimitiveType { get; private set; } 
+        public string TempPrimitiveType { get; private set; }
+
         /// <summary>
         /// (Used for variables) contains the primitive type of the variable
         /// </summary>
         public ParsedPrimitiveType PrimitiveType { get; set; }
+
         /// <summary>
         /// first word after "view-as"
         /// </summary>
         public string ViewAs { get; private set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -513,40 +608,23 @@ namespace _3PA.MainFeatures.Parser {
     /// Enumeration of DEFINE types
     /// </summary>
     internal enum ParseDefineType {
-        [Description("PARAMETER")]
-        Parameter,
-        [Description("DATA-SOURCE")]
-        DataSource,
-        [Description("EVENT")]
-        Event,
-        [Description("BUFFER")]
-        Buffer,
-        [Description("VARIABLE")]
-        Variable,
-        [Description("BROWSE")]
-        Browse,
-        [Description("STREAM")]
-        Stream,
-        [Description("BUTTON")]
-        Button,
-        [Description("DATASET")]
-        Dataset,
-        [Description("IMAGE")]
-        Image,
-        [Description("MENU")]
-        Menu,
-        [Description("FRAME")]
-        Frame,
-        [Description("QUERY")]
-        Query,
-        [Description("RECTANGLE")]
-        Rectangle,
-        [Description("PROPERTY")]
-        Property,
-        [Description("SUB-MENU")]
-        SubMenu,
-        [Description("NONE")]
-        None
+        [Description("PARAMETER")] Parameter,
+        [Description("DATA-SOURCE")] DataSource,
+        [Description("EVENT")] Event,
+        [Description("BUFFER")] Buffer,
+        [Description("VARIABLE")] Variable,
+        [Description("BROWSE")] Browse,
+        [Description("STREAM")] Stream,
+        [Description("BUTTON")] Button,
+        [Description("DATASET")] Dataset,
+        [Description("IMAGE")] Image,
+        [Description("MENU")] Menu,
+        [Description("FRAME")] Frame,
+        [Description("QUERY")] Query,
+        [Description("RECTANGLE")] Rectangle,
+        [Description("PROPERTY")] Property,
+        [Description("SUB-MENU")] SubMenu,
+        [Description("NONE")] None
     }
 
     internal enum ParsedPrimitiveType {
@@ -612,30 +690,37 @@ namespace _3PA.MainFeatures.Parser {
         public string Id { get; private set; }
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
+
         /// <summary>
         /// To know if the table is a temptable
         /// </summary>
         public bool IsTempTable { get; private set; }
+
         /// <summary>
         /// From database, represents the description of the table
         /// </summary>
         public string Description { get; private set; }
+
         /// <summary>
         /// contains the table "LIKE TABLE" name in lowercase
         /// </summary>
         public string LcLikeTable { get; private set; }
+
         /// <summary>
         /// if temptable and temptable is "like" another table, contains the USE-INDEX 
         /// </summary>
         public string UseIndex { get; private set; }
+
         /// <summary>
         /// In case of a temp table, can contains the eventuals :
         /// NEW [ GLOBAL ] ] SHARED ] | [ PRIVATE | PROTECTED ] [ STATIC ] flags
         /// </summary>
         public string LcFlagString { get; private set; }
+
         public List<ParsedField> Fields { get; set; }
         public List<ParsedIndex> Indexes { get; set; }
         public List<ParsedTrigger> Triggers { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
@@ -660,21 +745,25 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParsedField {
         public string Name { get; private set; }
+
         /// <summary>
         /// When parsing, we store the value of the "primitive-type" in there, 
         /// with the visitor, we convert this to a ParsedPrimitiveType later
         /// </summary>
-        public string TempType { get; set; } 
-        public ParsedPrimitiveType Type { get; set; } 
-        public string Format { get;  set; }
-        public int Order { get;  set; }
-        public ParsedFieldFlag Flag { get;  set; }
-        public string InitialValue { get;  set; }
-        public string Description { get;  set; }
+        public string TempType { get; set; }
+
+        public ParsedPrimitiveType Type { get; set; }
+        public string Format { get; set; }
+        public int Order { get; set; }
+        public ParsedFieldFlag Flag { get; set; }
+        public string InitialValue { get; set; }
+        public string Description { get; set; }
+
         /// <summary>
         /// contains as or like in lowercase
         /// </summary>
         public ParsedAsLike AsLike { get; set; }
+
         public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, ParsedAsLike asLike) {
             Name = name;
             TempType = lcTempType;
@@ -703,6 +792,7 @@ namespace _3PA.MainFeatures.Parser {
         public string Name { get; private set; }
         public ParsedIndexFlag Flag { get; set; }
         public List<string> FieldsList { get; private set; }
+
         public ParsedIndex(string name, ParsedIndexFlag flag, List<string> fieldsList) {
             Name = name;
             Flag = flag;
@@ -724,9 +814,145 @@ namespace _3PA.MainFeatures.Parser {
     internal class ParsedTrigger {
         public string Event { get; private set; }
         public string ProcName { get; private set; }
+
         public ParsedTrigger(string @event, string procName) {
             Event = @event;
             ProcName = procName;
         }
     }
+
+    #endregion
+
+    #region OOP classes
+    /*
+    /// <summary>
+    /// Class
+    /// </summary>
+    internal class ParsedClass : ParsedScopeItem {
+        /// <summary>
+        /// Super type name
+        /// </summary>
+        public string Inherits { get; private set; }
+        /// <summary>
+        /// List of interfaces name
+        /// </summary>
+        public List<string> Implements { get; private set; }
+
+        public ParseFlag Flags { get; private set; }
+
+        public List<ParsedMethod> Methods { get; set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedClass(string name, Token token)
+            : base(name, token, ParsedScopeType.Class) {
+        }
+    }
+
+    /// <summary>
+    /// Method/Constructor
+    /// Constructor are very identical to method so they use the same parse object,
+    /// but we differentiate them with ParsedScopeType
+    /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
+    /// </summary>
+    internal class ParsedMethod : ParsedScopeItem {
+
+        /// <summary>
+        /// Return type or VOID
+        /// </summary>
+        public string ReturnType { get; private set; }
+
+        /// <summary>
+        /// </summary>
+        
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedMethod(string name, Token token, ParsedScopeType type)
+            : base(name, token, type) {
+        }
+    }
+
+    /// <summary>
+    /// Constructor
+    /// Constructor are very identical to method so they use the same parse object,
+    /// but we differentiate them with ParsedScopeType
+    /// </summary>
+    internal class ParsedConstructor : ParsedScopeItem {
+
+        /// <summary>
+        /// Return type or VOID
+        /// </summary>
+        public string ReturnType { get; private set; }
+
+        /// <summary>
+        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
+        /// </summary>
+        public ParseFlag Flags { get; private set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedConstructor(string name, Token token)
+            : base(name, token, ParsedScopeType.Constructor) {
+        }
+    }
+
+    /// <summary>
+    /// Method
+    /// </summary>
+    internal class ParsedMethod : ParsedScopeItem {
+
+        /// <summary>
+        /// Return type or VOID
+        /// </summary>
+        public string ReturnType { get; private set; }
+
+        /// <summary>
+        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
+        /// </summary>
+        public ParseFlag Flags { get; private set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedMethod(string name, Token token)
+            : base(name, token, ParsedScopeType.Method) {
+        }
+    }
+
+    /// <summary>
+    /// Method/Constructor
+    /// Constructor are very identical to method so they use the same parse object,
+    /// but we differentiate them with ParsedScopeType
+    /// </summary>
+    internal class ParsedMethod : ParsedScopeItem {
+
+        /// <summary>
+        /// Return type or VOID
+        /// </summary>
+        public string ReturnType { get; private set; }
+
+        /// <summary>
+        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
+        /// </summary>
+        public ParseFlag Flags { get; private set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedMethod(string name, Token token, ParsedScopeType type)
+            : base(name, token, type) {
+        }
+    }
+    */
+    #endregion
+    
 }

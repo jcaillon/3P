@@ -105,13 +105,13 @@ namespace _3PA.MainFeatures.Parser {
         private List<ParserError> _parserErrors = new List<ParserError>();
 
         /// <summary>
-        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
+        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
         /// It's the parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// </summary>
         private Dictionary<string, List<Token>> _includeParameters;
 
         /// <summary>
-        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
+        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
         /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// or & DEFINE variables from the current file
         /// </summary>
@@ -189,7 +189,7 @@ namespace _3PA.MainFeatures.Parser {
                 new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase):
                 new Dictionary<string, List<Token>>(_includeParameters, StringComparer.CurrentCultureIgnoreCase);
             
-            // the proprocessed variable {0} equals to the filename...
+            // the preprocessed variable {0} equals to the filename...
             _preProcVariables.Add("0", new List<Token> { new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0) });
 
             // init context
@@ -207,7 +207,7 @@ namespace _3PA.MainFeatures.Parser {
                 _rootScope = defaultScope;
             _context.Scope = _rootScope;
 
-            // Analyse
+            // Analyze
             _tokenList = lexer.GetTokensList;
             ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
             ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
@@ -335,7 +335,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Do the job 
 
-        #region Analyse
+        #region Analyze
 
         private void Analyze() {
             var token = PeekAt(0);
@@ -356,7 +356,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 var lowerTok = token.Value.ToLower();
 
-                // Match splitted keywords...
+                // Match split keywords...
                 var nextToken = PeekAt(1);
                 while (nextToken is TokenSymbol && nextToken.Value.Equals("~")) {
                     MoveNext(); // ~
@@ -395,8 +395,8 @@ namespace _3PA.MainFeatures.Parser {
                             // parse a ON statement
                             CreateParsedOnEvent(token);
                             break;
-                        case "def":
                         case "define":
+                        case "def":
                             // Parse a define statement
                             CreateParsedDefine(token, false);
                             break;
