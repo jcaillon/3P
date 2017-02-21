@@ -246,16 +246,16 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
                         if (splitted.Length != 12 || currentTable == null) 
                             return;
-                        var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
-                        if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
-                        if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
-                        if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
+                        var flags = splitted[6].Equals("1") ? ParseFlag.Mandatory : 0;
+                        if (splitted[7].Equals("1")) flags = flags | ParseFlag.Extent;
+                        if (splitted[8].Equals("1")) flags = flags | ParseFlag.Index;
+                        if (splitted[9].Equals("1")) flags = flags | ParseFlag.Primary;
                         var curField = new ParsedField(
                             splitted[2],
                             splitted[3],
                             splitted[4],
                             int.Parse(splitted[5]),
-                            flag2,
+                            flags,
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
@@ -371,13 +371,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return output;
             output.AddRange(table.Fields.Select(field => new CompletionItem {
                 DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                Type = field.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
+                Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
                 Ranking = AutoCompletion.FindRankingOfDatabaseItem(field.Name),
-                Flags = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
-                       (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
-                       (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0),
+                Flags = (field.Flags.HasFlag(ParseFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
+                       (field.Flags.HasFlag(ParseFlag.Index) ? ParseFlag.Index : 0) |
+                       (field.Flags.HasFlag(ParseFlag.Extent) ? ParseFlag.Extent : 0),
                 ParsedItem = table
             }));
             return output;

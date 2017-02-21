@@ -662,7 +662,7 @@ namespace _3PA.MainFeatures.Parser {
                     subStr = @"Like " + foundTable.Name;
                     foreach (var field in foundTable.Fields) {
                         pars.Fields.Add(
-                            new ParsedField(field.Name, "", field.Format, field.Order, ParsedFieldFlag.None, field.InitialValue, field.Description, field.AsLike) {
+                            new ParsedField(field.Name, "", field.Format, field.Order, 0, field.InitialValue, field.Description, field.AsLike) {
                                 Type = field.Type
                             });
                     }
@@ -696,8 +696,8 @@ namespace _3PA.MainFeatures.Parser {
                     var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
                     if (foundfield != null) {
                         if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
-                            foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
-                        foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Index;
+                            foundfield.Flags |= ParseFlag.Primary;
+                        foundfield.Flags |= ParseFlag.Index;
                     }
                 }
             }

@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.Pro {
             var error = new StringBuilder();
             foreach (var parserError in listErrors) {
                 error.AppendLine("<div>");
-                error.AppendLine("- Line " + (parserError.TriggerLine + 1) + ", " + parserError.Type.GetDescription());
+                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
                 error.AppendLine("</div>");
             }
             return error.ToString();

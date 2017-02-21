@@ -207,6 +207,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\Parser\Parser2.cs" />
     <Compile Include="MainFeatures\Pro\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />

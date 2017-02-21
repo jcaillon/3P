@@ -194,7 +194,9 @@ namespace _3PA.MainFeatures.Parser {
         Input = 268435456,
         InputOutput = 536870912,
         Output = 1073741824,
-        Return = 2147483648
+        Return = 2147483648,
+
+        Primary = 4294967296,
     }
 
     #endregion
@@ -721,7 +723,7 @@ namespace _3PA.MainFeatures.Parser {
         public ParsedPrimitiveType Type { get; set; }
         public string Format { get; set; }
         public int Order { get; set; }
-        public ParsedFieldFlag Flag { get; set; }
+        public ParseFlag Flags { get; set; }
         public string InitialValue { get; set; }
         public string Description { get; set; }
 
@@ -730,25 +732,16 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public ParsedAsLike AsLike { get; set; }
 
-        public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, ParsedAsLike asLike) {
+        public ParsedField(string name, string lcTempType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) {
             Name = name;
             TempType = lcTempType;
             Format = format;
             Order = order;
-            Flag = flag;
+            Flags = flags;
             InitialValue = initialValue;
             Description = description;
             AsLike = asLike;
         }
-    }
-
-    [Flags]
-    internal enum ParsedFieldFlag {
-        None = 1,
-        Extent = 2,
-        Index = 4,
-        Primary = 8,
-        Mandatory = 16
     }
 
     /// <summary>
