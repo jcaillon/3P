@@ -221,8 +221,8 @@ namespace _3PA.MainFeatures.Parser {
                     default:
                         // should be the first word of a statement (otherwise this probably doesn't compile anyway!)
                         // if(_context.StatementWordCount == 0)
-                        if (CreateParsedPreProcDirective(token))
-                            NewStatement(PeekAt(0));
+                        CreateParsedPreProcDirective(token);
+                        NewStatement(PeekAt(0));
                         break;
                 }
             }
@@ -1862,6 +1862,7 @@ namespace _3PA.MainFeatures.Parser {
                     // add this include to the references and modify each token
                     _parsedIncludes.Add(newInclude);
                     var includeNumber = (ushort) (_parsedIncludes.Count - 1);
+                    lexer.GetTokensList.RemoveAt(lexer.GetTokensList.Count - 1);
                     var tokens = lexer.GetTokensList.ToList();
                     tokens.ForEach(token => token.OwnerNumber = includeNumber);
 

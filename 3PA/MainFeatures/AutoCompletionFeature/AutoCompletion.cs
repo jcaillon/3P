@@ -452,7 +452,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _needToSetItems = false;
                 _form.Show(Npp.Win32WindowNpp);
                 Npp.GrabFocus();
-            } 
+            }
+
+            // unfortunately, there is no other way at the moment...
+            Npp.AutoCCancel();
 
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than
             // the thread used to create the form

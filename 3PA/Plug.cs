@@ -653,14 +653,14 @@ namespace _3PA {
         /// Called when the user enters any character in npp
         /// </summary>
         public static void OnSciCharTyped(char c) {
-
+            /*
             // CTRL + S : char code 19
             if (c == (char) 19) {
                 Npp.Undo();
                 Npp.SaveCurrentDocument();
                 return;
             }
-
+            */
             // we are still entering a keyword
             if (Abl.IsCharAllowedInVariables(c)) {
                 ActionsAfterUpdateUi.Enqueue(() => {
@@ -849,7 +849,7 @@ namespace _3PA {
                         warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                         var curPath = CurrentFilePath;
                         UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
-                            Npp.Goto(curPath, Int32.Parse(args.Link));
+                            Npp.Goto(curPath, int.Parse(args.Link));
                             UserCommunication.CloseUniqueNotif("AppBuilderLimit");
                         }, 20);
                         CurrentFileObject.WarnedTooLong = true;
@@ -942,8 +942,6 @@ namespace _3PA {
             Npp.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
 
             // we want the default auto-completion to not show
-            // we block on a scintilla level (pretty bad solution because it slows down npp on big documents)
-            Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
             // and we also block it in Npp (pull request on going for v6.9.?)
             if (Config.IsDevelopper)
                 Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
@@ -996,7 +994,6 @@ namespace _3PA {
             }
             
             // we wanted the default auto-completion to not show, but no more
-            Npp.AutoCStops("");
             if (Config.IsDevelopper)
                 Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
         }
