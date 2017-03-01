@@ -59,9 +59,9 @@ namespace _3PA {
         /// </summary>
         public static int CurrentScintilla {
             get {
-                int curScintilla;
+                long curScintilla;
                 Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                return curScintilla;
+                return (int) curScintilla;
             }
         }
 
@@ -260,6 +260,14 @@ namespace _3PA {
         /// </summary>
         public static void AutoCCancel() {
             Sci.Send(SciMsg.SCI_AUTOCCANCEL);
+        }
+
+        /// <summary>
+        /// to be tested!!!!
+        /// </summary>
+        /// <returns></returns>
+        public static bool AutoCActive() {
+            return Sci.Send(SciMsg.SCI_AUTOCACTIVE).IsTrue();
         }
 
         /// <summary>

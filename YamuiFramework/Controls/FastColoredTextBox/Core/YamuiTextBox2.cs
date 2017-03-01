@@ -433,7 +433,7 @@ namespace YamuiFramework.Controls {
         protected void HandleWindowsProc(Message message) {
             switch (message.Msg) {
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
-                    var delta = (short) (message.WParam.ToInt32() >> 16);
+                    var delta = (short) (message.WParam.ToInt64() >> 16);
                     var pt = PointToClient(MousePosition);
 
                     if (!_verticScrollBar.OnMouseWheel(pt, delta))

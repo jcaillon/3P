@@ -408,9 +408,9 @@ namespace _3PA.Lib {
             if (htmlLinkClickedEventArgs.Link.Contains("|")) {
                 var splitted = htmlLinkClickedEventArgs.Link.Split('|');
                 if (splitted.Length == 2)
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                    Npp.Goto(splitted[0], int.Parse(splitted[1]));
                 else
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]), Int32.Parse(splitted[2]));
+                    Npp.Goto(splitted[0], int.Parse(splitted[1]), int.Parse(splitted[2]));
                 htmlLinkClickedEventArgs.Handled = true;
             } else {
                 htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);

@@ -47,65 +47,65 @@ namespace _3PA.Interop {
         public delegate IntPtr Scintilla_DirectFunction(IntPtr ptr, uint iMessage, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, out IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, out IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
 
         public static IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam) {
-            return SendMessage(hWnd, (UInt32)msg, wParam, lParam);
+            return SendMessage(hWnd, (uint)msg, wParam, lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr((uint) lParam));
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr((uint) lParam));
         }        
         
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr(lParam));
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam.ToPointer());
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam.ToPointer());
         }
 
-        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam) {
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out long lParam) {
             IntPtr outVal;
-            IntPtr retval = SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), out outVal);
-            lParam = outVal.ToInt32();
+            IntPtr retval = SendMessage(hWnd, (uint)msg, new IntPtr(wParam), out outVal);
+            lParam = outVal.ToInt64();
             return retval;
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam) {
-            return SendMessage(hWnd, (UInt32)msg, wParam, new IntPtr(lParam));
+            return SendMessage(hWnd, (uint)msg, wParam, new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, StringBuilder lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
         }
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, string lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, string lParam) {
-            return SendMessage(hWnd, (UInt32)msg, wParam, lParam);
+            return SendMessage(hWnd, (uint)msg, wParam, lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, string lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, int lParam) {
-            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr(lParam));
+            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam) {
@@ -303,19 +303,19 @@ namespace _3PA.Interop {
         [StructLayout(LayoutKind.Sequential)]
         public struct MSG {
             public IntPtr hwnd;
-            public UInt32 message;
+            public uint message;
             public IntPtr wParam;
             public IntPtr lParam;
-            public UInt32 time;
+            public uint time;
             public POINT pt;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT {
-            public Int32 x;
-            public Int32 y;
+            public int x;
+            public int y;
 
-            public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
+            public POINT(int x, int y) { this.x = x; this.y = y; }
         }
 
         #endregion

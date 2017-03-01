@@ -165,7 +165,7 @@ namespace _3PA.Lib {
             };
 
             Marshal.StructureToPtr(dropFiles, hGlobal, true);
-            Marshal.Copy(names, 0, new IntPtr(hGlobal.ToInt32() + dropFiles.pFiles), names.Length);
+            Marshal.Copy(names, 0, new IntPtr(hGlobal.ToInt64() + dropFiles.pFiles), names.Length);
 
             PostMessage(hWnd, WM_DROPFILES, hGlobal, IntPtr.Zero);
 

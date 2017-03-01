@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
-using YamuiFramework.Controls.FastColoredTextBox.Core;
 using YamuiFramework.Controls.YamuiList;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {

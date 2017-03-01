@@ -130,7 +130,7 @@ namespace _3PA.MainFeatures.Pro {
                 UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
                     var split = args.Link.Split('#');
                     if (split.Length == 2) {
-                        Npp.GotoPos(split[0], Int32.Parse(split[1]));
+                        Npp.GotoPos(split[0], int.Parse(split[1]));
                         args.Handled = true;
                     } else {
                         if (!_ignoredFiles.Contains(args.Link)) {

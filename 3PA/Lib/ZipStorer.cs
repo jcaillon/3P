@@ -107,7 +107,7 @@ namespace _3PA.Lib {
         // File access for Open method
         private FileAccess _access;
         // Static CRC32 Table
-        private static UInt32[] _crcTable;
+        private static uint[] _crcTable;
         // Default filename encoder
         private static Encoding _defaultEncoding = Encoding.GetEncoding(437);
         #endregion
@@ -116,9 +116,9 @@ namespace _3PA.Lib {
         // Static constructor. Just invoked once in order to create the CRC32 lookup table.
         static ZipStorer() {
             // Generate CRC32 table
-            _crcTable = new UInt32[256];
+            _crcTable = new uint[256];
             for (int i = 0; i < _crcTable.Length; i++) {
-                UInt32 c = (UInt32)i;
+                uint c = (uint)i;
                 for (int j = 0; j < 8; j++) {
                     if ((c & 1) != 0)
                         c = 3988292384 ^ (c >> 1);
@@ -675,14 +675,14 @@ namespace _3PA.Lib {
                 BinaryReader br = new BinaryReader(_zipFileStream);
                 do {
                     _zipFileStream.Seek(-5, SeekOrigin.Current);
-                    UInt32 sig = br.ReadUInt32();
+                    uint sig = br.ReadUInt32();
                     if (sig == 0x06054b50) {
                         _zipFileStream.Seek(6, SeekOrigin.Current);
 
-                        UInt16 entries = br.ReadUInt16();
-                        Int32 centralSize = br.ReadInt32();
-                        UInt32 centralDirOffset = br.ReadUInt32();
-                        UInt16 commentSize = br.ReadUInt16();
+                        ushort entries = br.ReadUInt16();
+                        int centralSize = br.ReadInt32();
+                        uint centralDirOffset = br.ReadUInt32();
+                        ushort commentSize = br.ReadUInt16();
 
                         // check if comment field is the very last data in file
                         if (_zipFileStream.Position + commentSize != _zipFileStream.Length)

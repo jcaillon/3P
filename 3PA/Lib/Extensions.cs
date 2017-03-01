@@ -384,9 +384,9 @@ namespace _3PA.Lib {
             try {
                 var i = 0;
                 while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
-                    if (Int32.Parse(splitLocal[i]) > Int32.Parse(splitDistant[i]))
+                    if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
                         return true;
-                    if (Int32.Parse(splitLocal[i]) < Int32.Parse(splitDistant[i]))
+                    if (int.Parse(splitLocal[i]) < int.Parse(splitDistant[i]))
                         return false;
                     i++;
                 }

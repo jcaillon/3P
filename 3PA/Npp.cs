@@ -430,7 +430,7 @@ namespace _3PA {
         public static string GetNppVersion {
             get {
                 if (string.IsNullOrEmpty(_nppVersion)) {
-                int nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
+                var nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
                 var lowWord = (nppVersion & 0x0000FFFF).ToString();
                 _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
@@ -477,13 +477,6 @@ namespace _3PA {
         public static void Exit() {
             const int wmCommand = 0x111;
             Win32Api.SendMessage(HandleNpp, (NppMsg)wmCommand, (int)NppMenuCmd.FileExit, 0);
-        }
-
-        public static void ShowInactiveTopmost(Form frm) {
-            Win32Api.ShowWindow(frm.Handle, Win32Api.ShowWindowCommands.ShowNoActivate);
-            //SetWindowPos(frm.Handle.ToInt32(), HWND_TOPMOST, frm.Left, frm.Top, frm.Width, frm.Height, SWP_NOACTIVATE);
-            Win32Api.SetWindowPos(frm.Handle.ToInt32(), HandleNpp.ToInt32(), frm.Left, frm.Top, frm.Width, frm.Height,
-                SwpNoactivate);
         }
 
         /// <summary>

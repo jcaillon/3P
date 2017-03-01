@@ -116,7 +116,7 @@ namespace YamuiFramework.Forms {
 
             switch (m.Msg) {
                 case (int)WinApi.Messages.WM_SYSCOMMAND:
-                    var sc = m.WParam.ToInt32() & 0xFFF0;
+                    var sc = m.WParam.ToInt64() & 0xFFF0;
                     switch (sc) {
                         // prevent the window from moving
                         case (int)WinApi.Messages.SC_MOVE:

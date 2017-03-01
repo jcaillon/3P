@@ -148,7 +148,7 @@ namespace YamuiFramework.Controls {
 
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
                     // delta negative when scrolling up
-                    var delta = -((short)(message.WParam.ToInt32() >> 16));
+                    var delta = -((short)(message.WParam.ToInt64() >> 16));
                     DoScroll(Math.Sign(delta) * _thumbRectangle.Height / 2);
                     break;
 
@@ -241,7 +241,7 @@ namespace YamuiFramework.Controls {
                 // maximum free space to scroll in the panel
                 float scrollSpace = _contentPanel.Height - Height;
                 // % in the scroll bar to % in the panel
-                _contentPanel.Top = Convert.ToInt32((scrollSpace/100)*percentScrolled)*-1;
+                _contentPanel.Top = (int)(scrollSpace/100*percentScrolled)*-1;
             }
         }
 

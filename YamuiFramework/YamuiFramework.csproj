@@ -86,73 +86,8 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Bookmarks.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Char.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\CommandManager.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Commands.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\DocumentMap.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\EncodingDetector.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\ExportToHTML.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\ExportToRTF.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\FastColoredTextBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\FileTextSource.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\FindForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\FindForm.designer.cs">
-      <DependentUpon>FindForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\GoToForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\GoToForm.designer.cs">
-      <DependentUpon>GoToForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\Hints.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Hotkeys.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.designer.cs">
-      <DependentUpon>HotkeysEditorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\LimitedStack.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Line.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\LinesAccessor.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\MacrosManager.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Place.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\PlatformType.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\Range.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\ReplaceForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\ReplaceForm.designer.cs">
-      <DependentUpon>ReplaceForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\Ruler.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\Ruler.designer.cs">
-      <DependentUpon>Ruler.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\Style.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\SyntaxDescriptor.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\SyntaxHighlighter.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\TextSource.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\TypeDescriptor.cs" />
-    <Compile Include="Controls\FastColoredTextBox\Core\UnfocusablePanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\VisualMarker.cs" />
     <Compile Include="Controls\YamuiTextBox.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\FastColoredTextBox\Core\YamuiTextBox2.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiArea.cs">
       <SubType>UserControl</SubType>
@@ -399,21 +334,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\FastColoredTextBox.resx">
-      <DependentUpon>FastColoredTextBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\FindForm.resx">
-      <DependentUpon>FindForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\GoToForm.resx">
-      <DependentUpon>GoToForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\HotkeysEditorForm.resx">
-      <DependentUpon>HotkeysEditorForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FastColoredTextBox\Core\ReplaceForm.resx">
-      <DependentUpon>ReplaceForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Fonts\ResourceFont.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceFont.Designer.cs</LastGenOutput>
@@ -452,7 +372,6 @@
     <Content Include="Resources\BaseStyleSheet.css" />
     <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageError.png" />
-    <None Include="Controls\FastColoredTextBox\Core\FCTB_key.snk" />
     <None Include="Fonts\REDCIRCL.ttf" />
     <None Include="Resources\ApplicationThemes" />
   </ItemGroup>
