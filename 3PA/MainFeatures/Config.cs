@@ -67,7 +67,7 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.d,*.lst,*.df,*.cls";
+            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.cls,*.lst,*.df";
 
             [Display(Name = "Npp files patterns",
                 Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
@@ -621,7 +621,7 @@ namespace _3PA.MainFeatures {
                 Instance.SetValueOf(configPropertyName, value);
             }
             var output = new List<int>();
-            var temp = value.Split(',').Select(Int32.Parse).ToList();
+            var temp = value.Split(',').Select(int.Parse).ToList();
             for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++)
                 output.Add(temp.IndexOf(i));
             return output;
