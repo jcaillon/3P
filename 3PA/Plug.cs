@@ -38,6 +38,7 @@ using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.Tests;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
@@ -314,11 +315,12 @@ namespace _3PA {
             switch (message) {
                 // middle click : go to definition
                 case Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN:
-                    //if (Npp.GetScintillaRectangle().Contains(Cursor.Position)) {
-                    if (KeyboardMonitor.GetModifiers.IsCtrl) {
-                        Npp.GoBackFromDefinition();
-                    } else {
-                        ProMisc.GoToDefinition(true);
+                    if (IsCurrentFileProgress) {
+                        if (KeyboardMonitor.GetModifiers.IsCtrl) {
+                            Npp.GoBackFromDefinition();
+                        } else {
+                            ProMisc.GoToDefinition(true);
+                        }
                     }
                     return true;
                     //break;
@@ -383,51 +385,49 @@ namespace _3PA {
                 if (handled)
                     return true;
 
-                // The following is specific to 3P files
-                if (IsCurrentFileProgress) {
-
-                    // Autocompletion 
-                    if (AutoCompletion.IsVisible) {
-                        handled = AutoCompletion.PerformKeyDown(e);
-                    } else {
-                        // snippet ?
-                        if (e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
-                            if (!e.Control && !e.Alt && !e.Shift) {
-                                if (!Snippets.InsertionActive) {
-                                    //no snippet insertion in progress
-                                    if (e.KeyCode == Keys.Tab) {
-                                        if (Snippets.TriggerCodeSnippetInsertion()) {
-                                            handled = true;
-                                        }
+                // Autocompletion 
+                if (AutoCompletion.IsVisible) {
+                    handled = AutoCompletion.PerformKeyDown(e);
+                } else {
+                    /*
+                    // snippet ?
+                    if (e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
+                        if (!e.Control && !e.Alt && !e.Shift) {
+                            if (!Snippets.InsertionActive) {
+                                //no snippet insertion in progress
+                                if (e.KeyCode == Keys.Tab) {
+                                    if (Snippets.TriggerCodeSnippetInsertion()) {
+                                        handled = true;
                                     }
-                                } else {
-                                    //there is a snippet insertion in progress
-                                    if (e.KeyCode == Keys.Tab) {
-                                        if (Snippets.NavigateToNextParam())
-                                            handled = true;
-                                    } else if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
-                                        Snippets.FinalizeCurrent();
-                                        if (e.KeyCode == Keys.Return)
-                                            handled = true;
-                                    }
+                                }
+                            } else {
+                                //there is a snippet insertion in progress
+                                if (e.KeyCode == Keys.Tab) {
+                                    if (Snippets.NavigateToNextParam())
+                                        handled = true;
+                                } else if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
+                                    Snippets.FinalizeCurrent();
+                                    if (e.KeyCode == Keys.Return)
+                                        handled = true;
                                 }
                             }
                         }
                     }
-
-                    // next tooltip
-                    if (!handled && InfoToolTip.IsVisible && e.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)) {
-                        if (e.KeyCode == Keys.Up)
-                            InfoToolTip.IndexToShow--;
-                        else
-                            InfoToolTip.IndexToShow++;
-                        InfoToolTip.TryToShowIndex();
-                        handled = true;
-                    }
-                                        
-                    if (handled)
-                        return true;
+                    */
                 }
+
+                // next tooltip
+                if (!handled && InfoToolTip.IsVisible && e.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)) {
+                    if (e.KeyCode == Keys.Up)
+                        InfoToolTip.IndexToShow--;
+                    else
+                        InfoToolTip.IndexToShow++;
+                    InfoToolTip.TryToShowIndex();
+                    handled = true;
+                }
+                                        
+                if (handled)
+                    return true;
                 
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
@@ -560,9 +560,6 @@ namespace _3PA {
             CurrentFilePath = Npp.GetCurrentFilePath();
             CurrentFileObject = FilesInfo.GetFileInfo(CurrentFilePath);
 
-            // accept advanced notifications only if the current file is a progress file
-            CurrentFileAllowed = IsCurrentFileProgress;
-
             // update current scintilla
             Npp.UpdateScintilla();
 
@@ -588,17 +585,14 @@ namespace _3PA {
             } else {
                 // make sure to use the ProEnvironment and colorize the error counter
                 FilesInfo.UpdateFileStatus();
-                ProEnvironment.Current.ReComputeProPath();
-            }
 
-            if (IsCurrentFileProgress) {
-               
                 // Need to compute the propath again, because we take into account relative path
-                ProEnvironment.Current.ReComputeProPath();
-
-                // rebuild lines info (MANDATORY)
-                Npp.RebuildLinesInfo();
+                if (IsCurrentFileProgress)
+                    ProEnvironment.Current.ReComputeProPath();
             }
+
+            // rebuild lines info (MANDATORY)
+            Npp.RebuildLinesInfo();
 
             // Parse the document
             ParserHandler.ParseCurrentDocument(true);
@@ -633,9 +627,6 @@ namespace _3PA {
         /// Called when a new file is being opened in notepad++
         /// </summary>
         private static void DoNppFileBeforeLoad() {
-            // assume the file is not a progress file
-            CurrentFileAllowed = false;
-
             // Reset the scintilla option for the indentation mode, as crazy as this is, it DESTROYS the performances
             // when opening big files in scintilla...
             Npp.AnnotationVisible = AnnotationMode;
@@ -644,8 +635,6 @@ namespace _3PA {
         #endregion
 
         #endregion
-
-        #region Called when CurrentFileAllowed
 
         #region On char typed
 
@@ -704,19 +693,19 @@ namespace _3PA {
                     offset = 1;
 
                 var searchWordAt = curPos - offset;
-                var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
-                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoCompletion.IsVisible) {
+                if (AutoCompletion.IsVisible && isNormalContext) {
+                    var keyword = Npp.GetKeyword(searchWordAt);
 
-                    // automatically insert selected keyword of the completion list
+                    // automatically insert selected keyword of the completion list?
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
                         AutoCompletion.UseCurrentSuggestion(-offset);
                     }
                 }
                 
                 // replace semicolon by a point
-                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext)
+                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && IsCurrentFileProgress)
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
@@ -784,6 +773,9 @@ namespace _3PA {
         /// </summary>
         public static void OnSciMarginClick(SCNotification nc) {
 
+            if (!IsCurrentFileProgress)
+                return;
+
             // click on the error margin
             if (nc.margin == FilesInfo.ErrorMarginNumber) {
                 // if it's an error symbol that has been clicked, the error on the line will be cleared
@@ -798,6 +790,10 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnSciDwellStart() {
+            // only do extra stuff if we are in a progress file
+            if (!IsCurrentFileProgress)
+                return;
+
             if (Win32Api.GetForegroundWindow() == Npp.HandleNpp)
                 InfoToolTip.ShowToolTipFromDwell();
         }
@@ -836,6 +832,9 @@ namespace _3PA {
         /// </summary>
         public static void OnNppFileBeforeSaved() {
 
+            if (!IsCurrentFileProgress)
+                return;
+
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
@@ -859,15 +858,13 @@ namespace _3PA {
 
             // for debug purposes, check if the document can be parsed
             if (Config.IsDevelopper && ParserHandler.AblParser.ParserErrors.Count > 0) {
-                UserCommunication.Notify("The parser found erros on this file:<br>" + ProCodeFormat.GetParserErrorDescription(ParserHandler.AblParser.ParserErrors), MessageImg.MsgInfo, "Parser message", "Errors found", 3);
+                UserCommunication.Notify("The parser found errors on this file:<br>" + ProCodeFormat.GetParserErrorDescription(ParserHandler.AblParser.ParserErrors), MessageImg.MsgInfo, "Parser message", "Errors found", 3);
             }
 
             // update function prototypes
             if (IsCurrentFileProgress)
                 ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
         }
-
-        #endregion
 
         #endregion
 

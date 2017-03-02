@@ -790,6 +790,11 @@ namespace _3PA.MainFeatures.Parser {
             // LIKE
             if (analyseLike)
                 return FindPrimitiveTypeOfLike(str);
+            return ConvertStringToParsedPrimitiveType(str);
+        }
+
+        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str) {
+            str = str.ToLower();
 
             // AS
             switch (str) {
@@ -821,6 +826,7 @@ namespace _3PA.MainFeatures.Parser {
                 foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
                     return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
                 }
+
             return ParsedPrimitiveType.Unknow;
         }
 

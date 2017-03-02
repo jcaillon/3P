@@ -65,8 +65,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
-        /// Just redraw the code explorer, it is used to update the "selected" scope when
-        /// the user click in scintilla
+        /// update the "selected" scope when the user click in scintilla
         /// </summary>
         public void UpdateCurrentScope() {
             if (Form == null)
@@ -76,7 +75,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         public override void UpdateMenuItemChecked() {
             base.UpdateMenuItemChecked();
-            Config.Instance.CodeExplorerVisible = _fakeForm.Visible;
+            Config.Instance.CodeExplorerVisible = _fakeForm != null && _fakeForm.Visible;
         }
 
         #endregion

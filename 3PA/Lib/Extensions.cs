@@ -402,6 +402,8 @@ namespace _3PA.Lib {
         /// <param name="word"></param>
         /// <returns></returns>
         public static bool ContainsAtLeastOneLetter(this string word) {
+            if (string.IsNullOrEmpty(word))
+                return false;
             var max = word.Length - 1;
             int count = 0;
             while (count <= max) {

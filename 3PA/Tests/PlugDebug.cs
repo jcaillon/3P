@@ -322,6 +322,8 @@ namespace _3PA.Tests {
 
         public static void DebugTest3() {
 
+            UserCommunication.Notify(Path.GetExtension("ezfzef\\zefzeff.ext"));
+
             UserCommunication.Message("# What's new in this version? #\n\n",
                 MessageImg.MsgUpdate,
                 "A new version has been installed!",

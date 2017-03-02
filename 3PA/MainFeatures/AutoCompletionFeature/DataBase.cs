@@ -259,7 +259,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
-                        curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
+                        curField.Type = ParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempType);
                         currentTable.Fields.Add(curField);
                         break;
                 }

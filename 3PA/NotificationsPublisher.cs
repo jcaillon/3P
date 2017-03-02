@@ -39,12 +39,6 @@ namespace _3PA {
         /// </summary>
         public static bool PluginIsFullyLoaded { get; private set; }
 
-        /// <summary>
-        /// Set to false to only get notifications of file switched/saved/loaded, allowing to 
-        /// filter notifications on certain files that doesn't concern the plugin
-        /// </summary>
-        public static bool CurrentFileAllowed { get; set; }
-
         #endregion
 
         #region Npp notifications
@@ -96,7 +90,7 @@ namespace _3PA {
 
                 switch (code) {
                     // the user changed the current document
-                    case (uint) NppNotif.NPPN_BUFFERACTIVATED:
+                    case (uint)NppNotif.NPPN_BUFFERACTIVATED:
                         DoNppBufferActivated();
                         return;
 
@@ -119,15 +113,6 @@ namespace _3PA {
                         // on file closed
                         OnNppFileBeforeClose();
                         return;
-                }
-
-                // only do extra stuff if we are in a progress file
-                if (!CurrentFileAllowed) 
-                    return;
-
-                #region extra
-
-                switch (code) {
 
                     case (uint)NppNotif.NPPN_FILEBEFORESAVE:
                         // on file saved
@@ -165,11 +150,9 @@ namespace _3PA {
                         // called each time the user click on a margin
                         OnSciMarginClick(nc);
                         return;
-
-
+                        
                     case (uint) SciNotif.SCN_MODIFYATTEMPTRO:
                         // Code a checkout when trying to modify a read-only file
-
                         return;
 
                     case (uint) SciNotif.SCN_DWELLSTART:
@@ -183,9 +166,7 @@ namespace _3PA {
                         return;
 
                 }
-
-                #endregion
-
+                
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
             }
@@ -222,6 +203,7 @@ namespace _3PA {
                 Keys.Home,
                 Keys.End
                 );
+
             // we also add the key that are used as shortcut for 3P functions
             AppliMenu.Instance = null; // make sure to recompute the menu
             if (AppliMenu.Instance != null) {
@@ -252,5 +234,6 @@ namespace _3PA {
         }
 
         #endregion
+
     }
 }

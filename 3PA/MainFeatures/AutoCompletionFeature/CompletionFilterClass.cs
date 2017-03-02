@@ -54,11 +54,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (compData == null)
                 return false;
 
-            var output = true;
-
             // if the item isn't a parsed item, it is available no matter where we are in the code
             if (!compData.FromParser)
                 return true;
+
+            var output = true;
 
             // case of Parsed define or temp table define
             if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable || compData.ParsedItem is ParsedLabel) {

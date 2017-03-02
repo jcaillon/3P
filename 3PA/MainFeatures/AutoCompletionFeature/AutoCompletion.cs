@@ -56,7 +56,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// position of the carret when the autocompletion was opened (from shortcut)
         /// </summary>
         private static int _shownPosition;
-
         private static int _shownLine;
 
         private static AutoCompletionForm _form;
@@ -243,7 +242,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
+        
         #region core mechanism
 
         /// <summary>
@@ -454,9 +453,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Npp.GrabFocus();
             }
 
-            // unfortunately, there is no other way at the moment...
-            Npp.AutoCCancel();
-
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than
             // the thread used to create the form
             _form.Keyword = keyword;
@@ -571,7 +567,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static void RememberUseOf(CompletionItem item) {
 
             // handles unwanted rank progression (when the user enter several times the same keyword)
-            if (item.DisplayText.Equals(_lastRememberedKeyword)) return;
+            if (item.DisplayText.Equals(_lastRememberedKeyword))
+                return;
             _lastRememberedKeyword = item.DisplayText;
 
             item.Ranking++;

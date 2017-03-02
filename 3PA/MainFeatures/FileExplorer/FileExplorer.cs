@@ -84,7 +84,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         public override void UpdateMenuItemChecked() {
             base.UpdateMenuItemChecked();
-            Config.Instance.FileExplorerVisible = _fakeForm.Visible;
+            Config.Instance.FileExplorerVisible = _fakeForm != null && _fakeForm.Visible;
         }
 
         #endregion

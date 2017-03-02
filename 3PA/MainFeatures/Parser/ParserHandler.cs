@@ -140,13 +140,6 @@ namespace _3PA.MainFeatures.Parser {
             return ParserVisitor.FindAnyTableOrBufferByName(name);
         }
 
-        /// <summary>
-        /// convertion
-        /// </summary>
-        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            return ParserVisitor.ConvertStringToParsedPrimitiveType(str, analyseLike);
-        }
-
         #endregion
 
         #region do the parsing and get the results
@@ -233,6 +226,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 if (OnParseEnded != null)
                     OnParseEnded();
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
             } finally {

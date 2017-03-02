@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
@@ -91,7 +92,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// Call this method to update the content of the form according to the current document
         /// </summary>
         public void UpdateInfo() {
-            _filename = Npp.GetCurrentFileName();
+            _filename = Path.GetFileName(Plug.CurrentFilePath);
 
             // populate combobox
             var list = new List<ItemCombo> {
@@ -215,7 +216,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_correctionDesc.Text = (_locFileTagObject.CorrectionDecription ?? "");
             fl_correctionDate.Text = _locFileTagObject.CorrectionDate;
 
-            lb_FileName.Text = @"<b>" + Npp.GetCurrentFileName() + @"</b>";
+            lb_FileName.Text = @"<b>" + Path.GetFileName(Plug.CurrentFilePath) + @"</b>";
             var val = cb_info.SelectedValue.ToString();
             if (!val.Equals(FileTag.LastTag) && !val.Equals(FileTag.DefaultTag)) {
                 lb_SaveState.Text = @"<b>Info saved</b>";
