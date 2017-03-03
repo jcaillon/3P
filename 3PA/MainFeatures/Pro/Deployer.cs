@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using _3PA.Data;
@@ -82,6 +83,7 @@ namespace _3PA.MainFeatures.Pro {
 
             var outputMessage = new StringBuilder();
 
+            // get all the rules
             _fullDeployRulesList = new List<DeployRule>();
             Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], (lineNb, lineString) => {
                 var items = lineString.Split('\t');
@@ -101,54 +103,73 @@ namespace _3PA.MainFeatures.Pro {
                         Step = step, 
                         NameFilter = items[1].Trim(), 
                         SuffixFilter = items[2].Trim(), 
-                        Type = type, 
-                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), 
+                        Type = type,
+                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true"), 
+                        Line = lineNb + 1,
                         SourcePattern = items[5].Trim(),
-                        DeployTarget = items[6].Trim(), 
-                        Line = (lineNb + 1)
+                        DeployTarget = items[6].Trim().Replace('/', '\\')
                     };
                     
-                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
-
                     obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
-                    obj.DeployTarget = obj.ShouldDeployTargetReplaceDollar ? obj.DeployTarget.Remove(0, 1) : obj.DeployTarget.Replace('/', '\\');
+                    if (obj.ShouldDeployTargetReplaceDollar)
+                        obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
 
                     if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
-                        outputMessage.Append("- The FTP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
+                        outputMessage.Append("- The FTP rule line n°" + obj.Line + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
-                        outputMessage.Append("- The ZIP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .zip should be found<br>");
+                        outputMessage.Append("- The ZIP rule line n°" + obj.Line + " has an incorrect deployment target, a .zip should be found<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
-                        outputMessage.Append("- The Prolib rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .pl should be found<br>");
+                        outputMessage.Append("- The Prolib rule line n°" + obj.Line + " has an incorrect deployment target, a .pl should be found<br>");
                         return;
                     }
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _fullDeployRulesList.Add(obj);
 
-                    // new filter rule
                 } else if (items.Length == 5) {
+                    // new filter rule
 
                     var obj = new DeployFilterRule {
                         Step = step, 
                         NameFilter = items[1].Trim(), 
                         SuffixFilter = items[2].Trim(), 
-                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"), 
-                        SourcePattern = items[4].Trim().Replace('/', '\\'),
+                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
+                        SourcePattern = items[4].Trim()
                     };
+                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern))
+                        _fullDeployRulesList.Add(obj);
+
+
+                } else if (items.Length == 4) {
+                    // new variable
+
+                    var obj = new DeployVariableRule {
+                        NameFilter = items[0].Trim(),
+                        SuffixFilter = items[1].Trim(),
+                        VariableName = items[2].Trim(),
+                        Path = items[3].Trim()
+                    };
+
+                    if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
+                        outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(obj.Path))
                         _fullDeployRulesList.Add(obj);
                 }
             }, Encoding.Default);
 
             if (outputMessage.Length > 0)
-                UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect:<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Errors reading rules file", "Rules incorrect", args => {
+                UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect :<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Error(s) reading rules file", "Rules incorrect", args => {
                     EditRules();
                     args.Handled = true;
                 });
@@ -171,6 +192,21 @@ namespace _3PA.MainFeatures.Pro {
 
             if (rules.Any()) {
 
+                if (rules.Exists(rule => rule is DeployVariableRule)) {
+
+                    strBuilder.Append("<h2 style='padding-top: 0px; margin-top: 0px;'>Path variables</h2>");
+                    strBuilder.Append("<table width='100%;'>");
+                    strBuilder.Append("<tr class='CompPathHead'><td align='center' width='9%'>Application<br>Name</td><td align='center' width='9%'>Application<br>Suffix</td><td align='center' width='13%'>Var<br>Name</td><td width='69%' align='right'>Path</td></tr>");
+
+                    var alt = false;
+                    foreach (var rule in rules.OfType<DeployVariableRule>()) {
+                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + WebUtility.HtmlEncode(rule.VariableName) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.Path.Length > 45 ? "..." + rule.Path.Substring(rule.Path.Length - 45) : rule.Path) + "</td></tr>");
+                        alt = !alt;
+                    }
+                    
+                    strBuilder.Append("</table>");
+                }
+
                 if (rules.Exists(rule => rule is DeployFilterRule)) {
 
                     strBuilder.Append("<h2 style='padding-top: 0px; margin-top: 0px;'>Filter rules</h2>");
@@ -179,7 +215,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var alt = false;
                     foreach (var rule in rules.OfType<DeployFilterRule>()) {
-                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td" + (alt ? " class='AlternatBackColor'" : "") + "><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.Include ? "Include" : "Exclude") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.SourcePattern.Length > 45 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 45) : rule.SourcePattern) + "</td></tr>");
+                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.Include ? "Include" : "Exclude") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.SourcePattern.Length > 45 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 45) : rule.SourcePattern) + "</td></tr>");
                         alt = !alt;
                     }
 
@@ -194,7 +230,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var alt = false;
                     foreach (var rule in rules.OfType<DeployTransferRule>()) {
-                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + (rule.SourcePattern.Length > 50 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 50) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.DeployTarget.Length > 50 ? "..." + rule.DeployTarget.Substring(rule.DeployTarget.Length - 50) : rule.DeployTarget) + "</td></tr>");
+                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + WebUtility.HtmlEncode(rule.SourcePattern.Length > 50 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 50) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + WebUtility.HtmlEncode(rule.DeployTarget.Length > 50 ? "..." + rule.DeployTarget.Substring(rule.DeployTarget.Length - 50) : rule.DeployTarget) + "</td></tr>");
                         alt = !alt;
                     }
 
@@ -221,6 +257,8 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         
         private List<DeployRule> _deployRulesList;
+
+        private List<DeployVariableRule> _deployVarList;
 
 
         /// <summary>
@@ -250,9 +288,9 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Hard copy
         /// </summary>
-        public Deployer(ProEnvironment.ProEnvironmentObject proEnv, Deployer deployer) {
-            ProEnv = proEnv;
+        public Deployer(ProEnvironment.ProEnvironmentObject proEnv, Deployer deployer) : this(proEnv) {
             _deployRulesList = deployer.DeployRules;
+            _deployVarList = deployer._deployVarList;
         }
 
         #endregion
@@ -325,6 +363,7 @@ namespace _3PA.MainFeatures.Pro {
                         return itemTransfer1 == null ? 1 : -1;
                     });
 
+                    _deployVarList = _deployRulesList.OfType<DeployVariableRule>().ToList();
                 }
                 return _deployRulesList;
             }
@@ -363,17 +402,19 @@ namespace _3PA.MainFeatures.Pro {
             var outList = new List<FileToDeploy>();
 
             // for each transfer rule that match the source pattern
-            foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(rule.RegexSourcePattern) && rule.Step == step)) {
+            foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step)) {
 
                 string outPath;
 
+                var deployTarget = ReplaceVariablesIn(rule.DeployTarget);
+
                 if (rule.ShouldDeployTargetReplaceDollar) {
-                    outPath = sourcePath.RegexReplace(rule.RegexSourcePattern, rule.DeployTarget);
+                    outPath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
                 } else {
-                    outPath = rule.DeployTarget;
+                    outPath = deployTarget;
                 }
 
-                if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(rule.DeployTarget)) {
+                if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(deployTarget)) {
                     outPath = Path.Combine(ProEnv.BaseCompilationPath, outPath);
                 }
 
@@ -451,13 +492,13 @@ namespace _3PA.MainFeatures.Pro {
 
             // test include filters
             if (includeFiltersList.Count > 0) {
-                var hasMatch = includeFiltersList.Any(rule => filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                var hasMatch = includeFiltersList.Any(rule => filePath.RegexMatch(rule.RegexSourcePattern));
                 passing = hasMatch;
             }
 
             // test exclude filters
             if (excludeFiltersList.Count > 0) {
-                var hasNoMatch = excludeFiltersList.All(rule => !filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                var hasNoMatch = excludeFiltersList.All(rule => !filePath.RegexMatch(rule.RegexSourcePattern));
                 passing = passing && hasNoMatch;
             }
 
@@ -747,6 +788,24 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
+        #region private /utils
+
+        private string ReplaceVariablesIn(string input) {
+            if (input.ContainsFast("<")) {
+                foreach (var variableRule in _deployVarList) {
+                    input = input.Replace(variableRule.VariableName, variableRule.Path);
+                }
+            }
+            return input;
+        }
+
+        private string GetRegexAndReplaceVariablesIn(string input) {
+            input = ReplaceVariablesIn(input);
+            return input.StartsWith(":") ? input.Remove(0, 1) : input.Replace('/', '\\').WildCardToRegex();
+        }
+
+        #endregion
+        
         #endregion
 
     }
@@ -790,11 +849,6 @@ namespace _3PA.MainFeatures.Pro {
         public string SourcePattern { get; set; }
 
         /// <summary>
-        /// Pattern to match in the source (as a regular expression)
-        /// </summary>
-        public string RegexSourcePattern { get; set; }
-
-        /// <summary>
         /// deploy target depending on the deploytype of this rule
         /// </summary>
         public string DeployTarget { get; set; }
@@ -822,6 +876,24 @@ namespace _3PA.MainFeatures.Pro {
         /// Pattern to match in the source path
         /// </summary>
         public string SourcePattern { get; set; }
+
+        /// <summary>
+        /// Pattern to match in the source (as a regular expression)
+        /// </summary>
+        public string RegexSourcePattern { get; set; }
+    }
+
+    public class DeployVariableRule : DeployRule {
+
+        /// <summary>
+        /// the name of the variable, format &lt;XXX&gt;
+        /// </summary>
+        public string VariableName { get; set; }
+
+        /// <summary>
+        /// The path that should replace the variable &lt;XXX&gt;
+        /// </summary>
+        public string Path { get; set; }
     }
 
     #endregion

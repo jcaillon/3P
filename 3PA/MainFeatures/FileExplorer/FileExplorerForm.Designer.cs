@@ -242,7 +242,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lblEnv.Name = "lblEnv";
             this.lblEnv.Size = new System.Drawing.Size(309, 20);
             this.lblEnv.TabIndex = 38;
-            this.lblEnv.Text = "BOI - A";
+            this.lblEnv.Text = "";
             this.lblEnv.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btEnvList

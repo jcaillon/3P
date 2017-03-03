@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using _3PA.Lib;
-using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA.MainFeatures.Pro {
 

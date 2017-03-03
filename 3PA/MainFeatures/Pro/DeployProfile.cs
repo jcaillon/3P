@@ -69,8 +69,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-
+        
         #region private static fields
 
         private static List<DeployProfile> _list;

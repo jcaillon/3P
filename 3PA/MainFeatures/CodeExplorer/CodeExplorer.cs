@@ -45,9 +45,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        #region Init
+        #region InitForm
 
-        protected override void Init() {
+        protected override void InitForm() {
             Form = new CodeExplorerForm(_fakeForm);
         }
 

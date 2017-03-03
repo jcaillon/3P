@@ -98,6 +98,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             // register to env change event
             ProEnvironment.OnEnvironmentChange += UpdateCurrentEnvName;
 
+            UpdateCurrentEnvName();
+
             btEnvList.BackGrndImage = ImageResources.Env;
             btEnvList.ButtonPressed += BtEnvListOnButtonPressed;
             toolTipHtml.SetToolTip(btEnvList, "Click to <b>open a menu</b> that allows you to quickly select another environment");

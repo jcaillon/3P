@@ -76,10 +76,27 @@
 # - For step 0, if the environment is set to `compile next to source` then the *.r will be moved next to the source and no transfer rules will apply
 ## ======================
 # EXTRA :
-# If you wish, you can also directly use regular expression in the "source pattern". If you do so, you can then use capturing groups and
+#
+# **Using regular expressions :**
+#
+# If you wish, you can also directly use regular expression in the "source pattern" for the transfer. If you do so, you can then use capturing groups and
 # use $1, $2... in the "deploy target" to dynamically rename the "deploy target" in function of the source
+# You can also use regular expression for filter rules in the "source_pattern"
 # To activate this feature, the "source pattern" and "deploy target" should start with the character ":"
+#
+# **Using "variables" :**
+#
+# You can define variables on a line with info separated by tabulations; the format is :
+# name	suffix	<var_name>	path
+# The <var_name> is then replaced in the transfer rules by the value of the "path"
+# See the example below for a better understanding
 # ========================================================================
+
+# Example of variables (commented with #)
+##############################################
+#name	suffix  	<var_name>    	path
+##############################################
+*   	*       	<myvar>     	C:\temp
 
 # Example of filter rules (commented with #)
 ##############################################
@@ -89,6 +106,7 @@
 #1  	*APP*	*   	+       	*\folder\*
 #1  	APP??	start* 	Exclude 	*specific_numbered_file_???.txt
 #1  	APP??	start* 	-       	*\file_starting_with*
+#0  	*   	*   	-       	:\\(tmp|temp|trash)\\
 
 # Examples of transfer rules (commented with #) :
 #####################################################################
@@ -96,6 +114,7 @@
 #####################################################################
 #0  	*   	*   	Ftp 	yes 	*myfilter\*  	ftp://progress@127.0.0.1/myfolder/deploy/
 #0  	*APP*	deploy*	Prolib	No  	*myfilter\*  	file.pl
-#0  	*   	*   	Zip 	no  	*.myfilter  	file.zip
-#0  	APP??	*   	Copy	yes 	*.thing     	C:\temp\
-#0  	*   	*   	Move	no  	*.thing     	temp\2\
+#1  	*   	*   	Zip 	no  	*.myfilter  	file.zip
+#1  	APP??	*   	Copy	yes 	*.thing     	C:\temp\
+#1  	*   	*   	Move	no  	*.thing     	<myvar>\2\
+#0  	*   	*   	Prolib	no  	:^.*\\(module1|module2|module3)\\serveur\\.*$	:serveur\$1.pl

@@ -19,17 +19,13 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YamuiFramework.Controls.YamuiList;
-using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
-using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
@@ -53,10 +49,11 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        #region Init
+        #region InitForm
 
-        protected override void Init() {
+        protected override void InitForm() {
             Form = new FileExplorerForm(_fakeForm);
+            Form.RefreshFileList();
         }
 
         #endregion
@@ -70,16 +67,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (Form == null)
                 return;
             Form.Refresh();
-        }
-
-        /// <summary>
-        /// Just redraw the file explorer ovl list, it is used to update the "selected" scope when
-        /// the user changes the current document
-        /// </summary>
-        public void RedrawFileExplorerList() {
-            if (Form == null)
-                return;
-            Form.YamuiList.Refresh();
         }
 
         public override void UpdateMenuItemChecked() {

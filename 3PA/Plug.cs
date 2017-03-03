@@ -572,9 +572,6 @@ namespace _3PA {
             // Update info on the current file
             FilesInfo.UpdateErrorsInScintilla();
 
-            // refresh file explorer currently opened file
-            FileExplorer.Instance.RedrawFileExplorerList();
-
             if (!initiating) {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Instance.Toggle(IsCurrentFileProgress);

@@ -48,8 +48,7 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
-
+        
         #region Html utilities
 
         /// <summary>

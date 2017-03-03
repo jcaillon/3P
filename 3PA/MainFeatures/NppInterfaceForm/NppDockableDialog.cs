@@ -42,7 +42,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <summary>
         /// Initialize the form, should set RealForm = new T()
         /// </summary>
-        protected virtual void Init() {
+        protected virtual void InitForm() {
 
         }
 
@@ -73,7 +73,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                     IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
                     Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
                     Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
-                    Init();
+                    InitForm();
                 } else {
                     Win32Api.SendMessage(Npp.HandleNpp, !_fakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, _fakeForm.Handle);
                 }
