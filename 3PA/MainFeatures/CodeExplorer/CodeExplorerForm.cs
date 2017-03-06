@@ -108,6 +108,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             };
             filterbox.Initialize(yamuiList);
 
+            yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
 
             Refreshing = false;
@@ -269,7 +270,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Updates the current scope to inform the user in which scope the caret is currently in
         /// </summary>
         public void UpdateCurrentScope() {
-            if (Plug.IsCurrentFileProgress) {
+            if (Npp.CurrentFile.IsProgress) {
                 var currentScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
                 if (currentScope != null) {
                     pbCurrentScope.BackGrndImage = Utils.GetImageFromStr(currentScope.ScopeType.ToString());

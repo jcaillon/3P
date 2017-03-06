@@ -205,10 +205,10 @@ namespace _3PA.MainFeatures.Parser {
                         do {
                             //var watch = Stopwatch.StartNew();
 
-                            _lastParsedFilePath = Plug.CurrentFilePath;
+                            _lastParsedFilePath = Npp.CurrentFile.Path;
 
                             // Parse the document
-                            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
+                            _ablParser = new Parser(Npp.CurrentFile.IsProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
 
                             // visitor
                             _parserVisitor = new ParserVisitor(true);
@@ -217,7 +217,7 @@ namespace _3PA.MainFeatures.Parser {
                             //watch.Stop();
                             //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
 
-                        } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath));
+                        } while (!_lastParsedFilePath.Equals(Npp.CurrentFile.Path));
 
                     } finally {
                         _parserLock.ExitWriteLock();

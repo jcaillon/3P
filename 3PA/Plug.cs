@@ -20,12 +20,10 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
@@ -38,7 +36,6 @@ using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
-using _3PA.Tests;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
@@ -81,33 +78,23 @@ namespace _3PA {
 
         #region Fields
 
-        // We don't want to recompute those values all the time so we store them when the buffer (document) changes
+        private static Npp.NppFile _previousFile;
 
         /// <summary>
-        /// true if the current file is a progress file, false otherwise
+        /// PreviousFile
         /// </summary>
-        public static bool IsCurrentFileProgress { get; private set; }
-
-        /// <summary>
-        /// true if the previous file was a progress file, false otherwise
-        /// </summary>
-        public static bool IsPreviousFileProgress { get; private set; }
-
-        /// <summary>
-        /// Stores the current file path when switching document
-        /// </summary>
-        public static string CurrentFilePath { get; private set; }
-
-        /// <summary>
-        /// Information on the current file
-        /// </summary>
-        public static FileInfoObject CurrentFileObject { get; private set; }
-
+        public static Npp.NppFile PreviousFile {
+            get { return _previousFile ?? (_previousFile = new Npp.NppFile()); }
+        }
+        
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
 
+        /// <summary>
+        /// Allows us to know when a file is opened for the first time (to change encoding for instance)
+        /// </summary>
         private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase); 
 
         #endregion
@@ -167,6 +154,9 @@ namespace _3PA {
                 // Clear the %temp% directory if we didn't do it properly last time
                 Utils.DeleteDirectory(Config.FolderTemp, true);
 
+                // ask to disable the default autocompletion
+                NppConfig.Instance.AskToDisableAutocompletion();
+
                 // if the UDL is not installed
                 if (!Style.InstallUdl(true)) {
                     Style.InstallUdl();
@@ -203,14 +193,14 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(Abl.IsCurrentProgressFile);
+                    CodeExplorer.Instance.Toggle(Npp.NppFile.PathFromApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.CodeExplorerVisible) {
                     CodeExplorer.Instance.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(Abl.IsCurrentProgressFile);
+                    FileExplorer.Instance.Toggle(Npp.NppFile.PathFromApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.FileExplorerVisible) {
                     FileExplorer.Instance.Toggle();
                 }
@@ -247,7 +237,7 @@ namespace _3PA {
             AutoCompletion.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
-            IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
+            Npp.CurrentFile.Update(); // to correctly init isPreviousProgress
             DoNppBufferActivated(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
@@ -315,7 +305,7 @@ namespace _3PA {
             switch (message) {
                 // middle click : go to definition
                 case Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN:
-                    if (IsCurrentFileProgress) {
+                    if (Npp.CurrentFile.IsProgress) {
                         if (KeyboardMonitor.GetModifiers.IsCtrl) {
                             Npp.GoBackFromDefinition();
                         } else {
@@ -471,7 +461,7 @@ namespace _3PA {
                     e.Control == item.Shortcut.IsCtrl &&
                     e.Shift == item.Shortcut.IsShift &&
                     e.Alt == item.Shortcut.IsAlt &&
-                    (item.Generic || IsCurrentFileProgress)) {
+                    (item.Generic || Npp.CurrentFile.IsProgress)) {
                     if (!isSpamming && item.OnClic != null) {
                         try {
                             item.OnClic(item);
@@ -500,8 +490,8 @@ namespace _3PA {
         private static void OnNppFileBeforeClose() {
 
             // remove the file from the opened files list
-            if (_openedFileList.Contains(CurrentFilePath)) {
-                _openedFileList.Remove(CurrentFilePath);
+            if (_openedFileList.Contains(Npp.CurrentFile.Path)) {
+                _openedFileList.Remove(Npp.CurrentFile.Path);
             }
         }
 
@@ -524,15 +514,23 @@ namespace _3PA {
         /// no matter if the document is a Progress file or not
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
+
+            // update current scintilla
+            Npp.UpdateScintilla();
+
+            // update current file
+            PreviousFile.Path = Npp.CurrentFile.Path;
+            PreviousFile.IsProgress = Npp.CurrentFile.IsProgress;
+            Npp.CurrentFile.Update();
+            Npp.CurrentFile.FileInfoObject = FilesInfo.GetFileInfo(Npp.CurrentFile.Path);
             
             // if the file has just been opened
-            var currentFile = Npp.GetCurrentFilePath();
-            if (!_openedFileList.Contains(currentFile)) {
-                _openedFileList.Add(currentFile);
+            if (!_openedFileList.Contains(Npp.CurrentFile.Path)) {
+                _openedFileList.Add(Npp.CurrentFile.Path);
 
                 // need to auto change encoding?
                 if (Config.Instance.AutoSwitchEncodingTo != NppEncodingFormat._Automatic_default && !string.IsNullOrEmpty(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
-                    if (Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
+                    if (Npp.CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
                         NppMenuCmd cmd;
                         if (Enum.TryParse(((int)Config.Instance.AutoSwitchEncodingTo).ToString(), true, out cmd))
                             Npp.RunCommand(cmd);
@@ -541,27 +539,18 @@ namespace _3PA {
             }
 
             // deactivate show space for conf files
-            if (ShareExportConf.IsFileExportedConf(CurrentFilePath))
+            if (ShareExportConf.IsFileExportedConf(PreviousFile.Path))
                 if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                     Npp.ViewWhitespace = _whitespaceMode;
 
             DoNppDocumentSwitched(initiating);
 
             // activate show space for conf files
-            if (ShareExportConf.IsFileExportedConf(CurrentFilePath))
+            if (ShareExportConf.IsFileExportedConf(Npp.CurrentFile.Path))
                 Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
         }
 
         public static void DoNppDocumentSwitched(bool initiating = false) {
-
-            // update current file info
-            IsPreviousFileProgress = IsCurrentFileProgress;
-            IsCurrentFileProgress = Abl.IsCurrentProgressFile;
-            CurrentFilePath = Npp.GetCurrentFilePath();
-            CurrentFileObject = FilesInfo.GetFileInfo(CurrentFilePath);
-
-            // update current scintilla
-            Npp.UpdateScintilla();
 
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyOptionsForScintilla();
@@ -574,19 +563,17 @@ namespace _3PA {
 
             if (!initiating) {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(IsCurrentFileProgress);
+                    CodeExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
                 }
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(IsCurrentFileProgress);
+                    FileExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
                 }
             } else {
                 // make sure to use the ProEnvironment and colorize the error counter
                 FilesInfo.UpdateFileStatus();
-
-                // Need to compute the propath again, because we take into account relative path
-                if (IsCurrentFileProgress)
-                    ProEnvironment.Current.ReComputeProPath();
             }
+
+            ProEnvironment.Current.ReComputeProPath();
 
             // rebuild lines info (MANDATORY)
             Npp.RebuildLinesInfo();
@@ -610,10 +597,10 @@ namespace _3PA {
         public static void DoNppDocumentSaved() {
 
             // the user can open a .txt and save it as a .p
-            DoNppDocumentSwitched();
+            DoNppBufferActivated();
 
             // if it's a conf file, import it
-            ShareExportConf.TryToImportFile(CurrentFilePath);
+            ShareExportConf.TryToImportFile(Npp.CurrentFile.Path);
         }
 
         #endregion
@@ -702,7 +689,7 @@ namespace _3PA {
                 }
                 
                 // replace semicolon by a point
-                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && IsCurrentFileProgress)
+                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && Npp.CurrentFile.IsProgress)
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
@@ -770,7 +757,7 @@ namespace _3PA {
         /// </summary>
         public static void OnSciMarginClick(SCNotification nc) {
 
-            if (!IsCurrentFileProgress)
+            if (!Npp.CurrentFile.IsProgress)
                 return;
 
             // click on the error margin
@@ -788,7 +775,7 @@ namespace _3PA {
         /// </summary>
         public static void OnSciDwellStart() {
             // only do extra stuff if we are in a progress file
-            if (!IsCurrentFileProgress)
+            if (!Npp.CurrentFile.IsProgress)
                 return;
 
             if (Win32Api.GetForegroundWindow() == Npp.HandleNpp)
@@ -829,11 +816,11 @@ namespace _3PA {
         /// </summary>
         public static void OnNppFileBeforeSaved() {
 
-            if (!IsCurrentFileProgress)
+            if (!Npp.CurrentFile.IsProgress)
                 return;
 
             // check for block that are too long and display a warning
-            if (Abl.IsCurrentFileFromAppBuilder && !CurrentFileObject.WarnedTooLong) {
+            if (Abl.IsCurrentFileFromAppBuilder && !Npp.CurrentFile.FileInfoObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
                 var explorerItemsList = ParserHandler.ParserVisitor.ParsedExplorerItemsList;
 
@@ -843,12 +830,12 @@ namespace _3PA {
                     if (warningMessage.Length > 0) {
                         warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                         warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
-                        var curPath = CurrentFilePath;
+                        var curPath = Npp.CurrentFile.Path;
                         UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                             Npp.Goto(curPath, int.Parse(args.Link));
                             UserCommunication.CloseUniqueNotif("AppBuilderLimit");
                         }, 20);
-                        CurrentFileObject.WarnedTooLong = true;
+                        Npp.CurrentFile.FileInfoObject.WarnedTooLong = true;
                     }
                 }
             }
@@ -859,7 +846,7 @@ namespace _3PA {
             }
 
             // update function prototypes
-            if (IsCurrentFileProgress)
+            if (Npp.CurrentFile.IsProgress)
                 ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
         }
 
@@ -878,6 +865,7 @@ namespace _3PA {
                 }
             }
         }
+
         private static Annotation _annotationMode = Annotation.Hidden;
 
         private static bool _indentWithTabs;
@@ -886,28 +874,12 @@ namespace _3PA {
 
         private static int[] _initiatedScintilla = {0,0};
         private static bool _hasBeenInit;
-        private static bool _warnedAboutFailStylers;
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         internal static void ApplyOptionsForScintilla() {
-            if (IsCurrentFileProgress)
-                ApplyPluginOptionsForScintilla();
-            else
-                ApplyDefaultOptionsForScintilla();
-        }
-
-        internal static void ApplyPluginOptionsForScintilla() {
-            if (!_hasBeenInit || !IsPreviousFileProgress) {
-                // read default options
-                _tabWidth = Npp.TabWidth;
-                _indentWithTabs = Npp.UseTabs;
-                _whitespaceMode = Npp.ViewWhitespace;
-                AnnotationMode = Npp.AnnotationVisible;
-            }
-            _hasBeenInit = true;
 
             // need to do this stuff uniquely for both scintilla
             var curScintilla = Npp.CurrentScintilla; // 0 or 1
@@ -918,6 +890,22 @@ namespace _3PA {
                 Npp.EventMask = (int)(SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);
                 _initiatedScintilla[curScintilla] = 1;
             }
+
+            if (Npp.CurrentFile.IsProgress)
+                ApplyPluginOptionsForScintilla();
+            else
+                ApplyDefaultOptionsForScintilla();
+        }
+
+        internal static void ApplyPluginOptionsForScintilla() {
+            if (!_hasBeenInit || !PreviousFile.IsProgress) {
+                // read default options
+                _tabWidth = Npp.TabWidth;
+                _indentWithTabs = Npp.UseTabs;
+                _whitespaceMode = Npp.ViewWhitespace;
+                AnnotationMode = Npp.AnnotationVisible;
+            }
+            _hasBeenInit = true;
 
             Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
             Npp.UseTabs = false;
@@ -935,15 +923,11 @@ namespace _3PA {
             Npp.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
             Npp.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
 
-            // we want the default auto-completion to not show
-            // and we also block it in Npp (pull request on going for v6.9.?)
-            if (Config.IsDevelopper)
-                Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
             // nothing has been done yet, no need to reset anything! same if we already were on a non progress file
-            if (!_hasBeenInit || !IsPreviousFileProgress)
+            if (!_hasBeenInit || !PreviousFile.IsProgress)
                 return;
 
             // apply default options
@@ -954,50 +938,15 @@ namespace _3PA {
             if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                 Npp.ViewWhitespace = _whitespaceMode;
 
-            // apply default style...
-            try {
-                // read the config.xml to know which theme is in use
-                var guiConfig = XDocument.Load(Config.FileNppConfigXml).Descendants("GUIConfig");
-                string themeXmlPath;
-                try {
-                   themeXmlPath = (string) (guiConfig as XElement[] ?? guiConfig.ToArray()).FirstOrDefault(x => x.Attribute("name").Value.Equals("stylerTheme")).Attribute("path");
-                } catch (Exception) {
-                    themeXmlPath = null;
-                }
-                if (string.IsNullOrEmpty(themeXmlPath) || !File.Exists(themeXmlPath))
-                    themeXmlPath = Config.FileNppStylersXml;
-                
-                // read npp's stylers.xml file
-                var widgetStyle = XDocument.Load(themeXmlPath).Descendants("WidgetStyle");
-                var xElements = widgetStyle as XElement[] ?? widgetStyle.ToArray();
-                var wsFore = GetColorInStylers(xElements, "White space symbol", "fgColor");
-                Npp.SetIndentGuideColor(GetColorInStylers(xElements, "Indent guideline style", "bgColor"), GetColorInStylers(xElements, "Indent guideline style", "fgColor"));
-                Npp.SetWhiteSpaceColor(true, Color.Transparent, wsFore);
-                Npp.SetSelectionColor(true, GetColorInStylers(xElements, "Selected text colour", "bgColor"), Color.Transparent);
-                Npp.CaretLineBackColor = GetColorInStylers(xElements, "Current line background colour", "bgColor");
-                Npp.CaretColor = GetColorInStylers(xElements, "Caret colour", "fgColor");
-                Npp.SetFoldMarginColors(true, GetColorInStylers(xElements, "Fold margin", "bgColor"), GetColorInStylers(xElements, "Fold margin", "fgColor"));
-                Npp.SetFoldMarginMarkersColor(GetColorInStylers(xElements, "Fold", "fgColor"), GetColorInStylers(xElements, "Fold", "bgColor"), GetColorInStylers(xElements, "Fold active", "fgColor"));
-
-            } catch (Exception e) {
-                ErrorHandler.LogError(e);
-                if (!_warnedAboutFailStylers) {
-                    _warnedAboutFailStylers = true;
-                    UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + Config.FileNppStylersXml.ToHtmlLink() + "</div>", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");
-                }
-            }
-            
-            // we wanted the default auto-completion to not show, but no more
-            if (Config.IsDevelopper)
-                Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
-        }
-
-        private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {
-            try {
-                return ColorTranslator.FromHtml("#" + (string)widgetStyle.First(x => x.Attribute("name").Value.Equals(attributeName)).Attribute(attributeToGet));
-            } catch (Exception) {
-                return Color.Transparent;
-            }
+            // read npp's stylers.xml file
+            Npp.SetIndentGuideColor(NppConfig.Instance.Stylers.IndentGuideLineBg, NppConfig.Instance.Stylers.IndentGuideLineFg);
+            Npp.SetWhiteSpaceColor(true, Color.Transparent, NppConfig.Instance.Stylers.WhiteSpaceFg);
+            Npp.SetSelectionColor(true, NppConfig.Instance.Stylers.SelectionBg, Color.Transparent);
+            Npp.CaretLineBackColor = NppConfig.Instance.Stylers.CaretLineBg;
+            Npp.CaretColor = NppConfig.Instance.Stylers.CaretFg;
+            Npp.SetFoldMarginColors(true, NppConfig.Instance.Stylers.FoldMarginBg, NppConfig.Instance.Stylers.FoldMarginFg);
+            Npp.SetFoldMarginMarkersColor(NppConfig.Instance.Stylers.FoldMarginMarkerFg, NppConfig.Instance.Stylers.FoldMarginMarkerBg, NppConfig.Instance.Stylers.FoldMarginMarkerActiveFg);
+           
         }
 
         #endregion

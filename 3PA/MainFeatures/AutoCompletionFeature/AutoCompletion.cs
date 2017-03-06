@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// </summary>
     internal static class AutoCompletion {
 
-        #region events
+        #region Events
 
         /// <summary>
         /// published when the list of static items (keywords, database info, snippets) is updated
@@ -53,7 +53,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static bool _openedFromShortCut;
 
         /// <summary>
-        /// position of the carret when the autocompletion was opened (from shortcut)
+        /// position of the caret when the autocompletion was opened (from shortcut)
         /// </summary>
         private static int _shownPosition;
         private static int _shownLine;
@@ -73,7 +73,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static List<CompletionItem> _staticItems = new List<CompletionItem>();
 
         /// <summary>
-        /// This dictionnary is what is used to remember the ranking of each word for the current session
+        /// This dictionary is what is used to remember the ranking of each word for the current session
         /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
         /// </summary>
         private static Dictionary<string, int> _displayTextRankingParsedItems = new Dictionary<string, int>();

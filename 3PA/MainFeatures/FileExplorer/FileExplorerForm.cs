@@ -163,7 +163,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             //treeList.SortingClass = CompletionSortingClass<ListItem>.Instance;
             //treeList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
             yamuiList.EmptyListString = @"No files!";
-            
+            yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
+
             toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
             toolTipHtml.SetToolTip(lbDirectory, "Current directory being explored");
@@ -303,7 +304,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Utils.OpenFileInFolder(curItem.FullPath);
                 else
                     Utils.OpenAnyLink(curItem.FullPath);
-            } else if (e.Clicks >= 2)
+            } else if (e.Clicks >= 2 && !curItem.CanExpand)
                 Utils.OpenAnyLink(curItem.FullPath);
         }
 
@@ -425,7 +426,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            FilesInfo.ClearAllErrors(Plug.CurrentFilePath);
+            FilesInfo.ClearAllErrors(Npp.CurrentFile.Path);
             Npp.GrabFocus();
         }
 
@@ -450,8 +451,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (Plug.CurrentFileObject.ProgressExecution != null)
-                Plug.CurrentFileObject.ProgressExecution.BringProcessToFront();
+            if (Npp.CurrentFile.FileInfoObject.ProgressExecution != null)
+                Npp.CurrentFile.FileInfoObject.ProgressExecution.BringProcessToFront();
         }
 
         #endregion

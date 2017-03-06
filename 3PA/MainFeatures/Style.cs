@@ -108,8 +108,8 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUdlXml);
-            var fileContent = File.Exists(Config.FileNppUdlXml) ? Utils.ReadAllText(Config.FileNppUdlXml, encoding) : @"<NotepadPlus />";
+            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUserDefinedLang);
+            var fileContent = File.Exists(Config.FileNppUserDefinedLang) ? Utils.ReadAllText(Config.FileNppUserDefinedLang, encoding) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -128,15 +128,8 @@ namespace _3PA.MainFeatures {
             else
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
-            try {
-                Utils.FileWriteAllText(Config.FileNppUdlXml, fileContent, encoding);
-            } catch (Exception e) {
-                if (e is UnauthorizedAccessException)
-                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
-                else
-                    ErrorHandler.ShowErrors(e, "Error while accessing userDefineLang.xml");
-                return false;
-            }
+            if (!Utils.FileWriteAllText(Config.FileNppUserDefinedLang, fileContent, encoding))
+                UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUserDefinedLang + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
             return true;
         }
 

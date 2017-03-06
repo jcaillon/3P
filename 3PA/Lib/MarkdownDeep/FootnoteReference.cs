@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (Abbreviation.cs) is part of 3P.
+// This file (FootnoteReference.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,16 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace MarkdownDeep
+namespace _3PA.Lib.MarkdownDeep
 {
-	class Abbreviation
+	class FootnoteReference
 	{
-		public Abbreviation(string abbr, string title)
+		public FootnoteReference(int index, string id)
 		{
-			Abbr = abbr;
-			Title = title;
+			this.index = index;
+			this.id = id;
 		}
-		public string Abbr;
-		public string Title;
+		public int index;
+		public string id;
 	}
 }

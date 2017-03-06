@@ -17,12 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace MarkdownDeep {
+namespace _3PA.Lib.MarkdownDeep {
 
     public class ImageInfo {
         public string url;

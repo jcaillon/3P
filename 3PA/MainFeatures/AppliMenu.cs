@@ -141,7 +141,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <returns></returns>
         private static List<MenuItem> DisableItemIfNeeded(List<MenuItem> list) {
-            var isCurrentFileProgressFile = Abl.IsCurrentProgressFile;
+            var isCurrentFileProgressFile = Npp.CurrentFile.IsProgress;
             foreach (var menu in list) {
                 menu.IsDisabled = !isCurrentFileProgressFile && !menu.Generic;
                 if (menu.Children != null)

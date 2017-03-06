@@ -25,8 +25,7 @@ using _3PA.MainFeatures.NppInterfaceForm;
 namespace _3PA.MainFeatures.CodeExplorer {
 
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {
-
-
+        
         #region Singleton
 
         private static CodeExplorer _instance;
@@ -61,6 +60,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void ApplyColorSettings() {
             if (Form == null)
                 return;
+            Form.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             Form.Refresh();
         }
 

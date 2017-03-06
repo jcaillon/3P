@@ -51,9 +51,8 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// The user clicked on the button to close all visible notifications
         /// </summary>
-        private static void OnCloseAllVisibleNotif() {
-            var toClose = _openNotifications.Where(openForm => openForm.Top > 0).ToList();
-            toClose.ForEach(notifications => {
+        private static void CloseAllNotif() {
+            _openNotifications.ToList().ForEach(notifications => {
                 notifications.Close();
                 notifications.Dispose();
             });
@@ -78,8 +77,8 @@ namespace YamuiFramework.Forms {
         public YamuiNotification(string htmlTitle, string htmlMessage, int duration, Screen screenToUse = null, int formMinWidth = 0, int formMaxWidth = 0, int formMaxHeight = 0, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
 
             // close all notif button
-            CloseAllVisibleBox = true;
-            OnCloseAllVisible = OnCloseAllVisibleNotif;
+            CloseAllBox = true;
+            OnCloseAllNotif = CloseAllNotif;
             Movable = false;
             Resizable = false;
 

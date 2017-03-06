@@ -178,7 +178,7 @@ namespace _3PA.MainFeatures.Pro {
         public static void OpenCurrentInAppbuilder() {
             new ProExecution {
                 ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Plug.CurrentFilePath)
+                    new FileToCompile(Npp.CurrentFile.Path)
                 },
                 OnExecutionOk = execution => {
                     try {
@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures.Pro {
                 currentOperation = CurrentOperation.Run;
 
             // process already running?
-            if (Plug.CurrentFileObject.CurrentOperation >= CurrentOperation.Prolint) {
+            if (Npp.CurrentFile.FileInfoObject.CurrentOperation >= CurrentOperation.Prolint) {
                 UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
                     KillCurrentProcess();
                     StartProgressExec(executionType);
@@ -233,16 +233,16 @@ namespace _3PA.MainFeatures.Pro {
                 }, 5);
                 return;
             }
-            if (!Abl.IsCurrentProgressFile) {
+            if (!Npp.CurrentFile.IsProgress) {
                 UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
                 return;
             }
-            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
-                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
+            if (string.IsNullOrEmpty(Npp.CurrentFile.Path) || !File.Exists(Npp.CurrentFile.Path)) {
+                UserCommunication.Notify("Couldn't find the following file :<br>" + Npp.CurrentFile.Path, MessageImg.MsgError, "Execution error", "File not found", 10);
                 return;
             }
-            if (!Abl.IsCurrentFileCompilable) {
-                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+            if (!Npp.CurrentFile.IsCompilable) {
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Npp.CurrentFile.Path).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
             }
 
@@ -257,22 +257,22 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // launch the compile process for the current file
-            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
+            Npp.CurrentFile.FileInfoObject.ProgressExecution = new ProExecution {
                 ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Plug.CurrentFilePath)
+                    new FileToCompile(Npp.CurrentFile.Path)
                 },
                 OnExecutionEnd = OnSingleExecutionEnd,
                 OnExecutionOk = OnSingleExecutionOk
             };
-            if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
+            if (!Npp.CurrentFile.FileInfoObject.ProgressExecution.Do(executionType))
                 return;
 
             // change file object current operation, set flag
-            Plug.CurrentFileObject.CurrentOperation |= currentOperation;
+            Npp.CurrentFile.FileInfoObject.CurrentOperation |= currentOperation;
             FilesInfo.UpdateFileStatus();
 
             // clear current errors (updates the current file info)
-            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
+            FilesInfo.ClearAllErrors(Npp.CurrentFile.Path, true);
 
         }
 
@@ -280,10 +280,10 @@ namespace _3PA.MainFeatures.Pro {
         /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
         /// </summary>
         public static void KillCurrentProcess() {
-            if (Plug.CurrentFileObject.ProgressExecution != null) {
-                Plug.CurrentFileObject.ProgressExecution.KillProcess();
+            if (Npp.CurrentFile.FileInfoObject.ProgressExecution != null) {
+                Npp.CurrentFile.FileInfoObject.ProgressExecution.KillProcess();
                 UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+                OnSingleExecutionEnd(Npp.CurrentFile.FileInfoObject.ProgressExecution);
             }
         }
 
@@ -299,7 +299,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // Clear flag or we can't do any other actions on this file
                 FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
 
@@ -318,7 +318,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
 
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
                 var otherFilesInError = false;
                 int nbWarnings = 0;
                 int nbErrors = 0;
@@ -387,19 +387,19 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy the current file, if it's a progress file then compile it, otherwise follow the transer rules of step 1
         /// </summary>
         public static void DeployCurrentFile() {
-            if (Abl.IsCurrentFileCompilable) {
+            if (Npp.CurrentFile.IsCompilable) {
                 // then that's just a link to compilation
                 StartProgressExec(ExecutionType.Compile);
 
                 UserCommunication.Notify("Deploying a compilable file is strictly equal as compiling it<br>The deployment rules for step 0 are applied in both case!", MessageImg.MsgInfo, "Deploy a file", "Bypass to compilation", 2);
             } else {
                 if (ProEnvironment.Current.Deployer.IsFilePassingFilters(
-                    Plug.CurrentFilePath,
+                    Npp.CurrentFile.Path,
                     ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
                     ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
 
                     // deploy the file for STEP 1
-                    var deployedFiles = ProEnvironment.Current.Deployer.DeployFiles(ProEnvironment.Current.Deployer.GetTransfersNeededForFile(Plug.CurrentFilePath, 1));
+                    var deployedFiles = ProEnvironment.Current.Deployer.DeployFiles(ProEnvironment.Current.Deployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1));
                     if (deployedFiles == null || deployedFiles.Count == 0) {
                         UserCommunication.Notify("The current file doesn't match any transfer rules for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "No transfer rules", args => {
                             Deployer.EditRules();
@@ -407,7 +407,7 @@ namespace _3PA.MainFeatures.Pro {
                         }, 5);
                     } else {
                         var hasError = deployedFiles.Exists(deploy => !deploy.IsOk);
-                        UserCommunication.NotifyUnique(Plug.CurrentFilePath, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProCompilation.FormatCompilationResult(Plug.CurrentFilePath, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
+                        UserCommunication.NotifyUnique(Npp.CurrentFile.Path, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProCompilation.FormatCompilationResult(Npp.CurrentFile.Path, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
                     }
                 } else { 
                     UserCommunication.Notify("The current file didn't pass the deployment filters for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "Filtered by deployment rules", args => {

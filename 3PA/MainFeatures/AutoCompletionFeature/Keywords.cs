@@ -29,7 +29,7 @@ using _3PA.MainFeatures.Parser;
 namespace _3PA.MainFeatures.AutoCompletionFeature {
 
     //TODO: pour gérer les HANDLE attribute, ajouter une colonne aux keywords qui peut soit être vide soit contenir une liste de nombres qui correspondent à un id de handle:
-    // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont se flag 1 dans la 5eme colonne
+    // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont 1 dans la 5eme colonne
 
     /// <summary>
     /// this class handles the static keywords of progress

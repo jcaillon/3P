@@ -28,7 +28,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using MarkdownDeep;
+using _3PA.Lib.MarkdownDeep;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 

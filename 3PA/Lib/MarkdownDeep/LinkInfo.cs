@@ -17,7 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace MarkdownDeep
+namespace _3PA.Lib.MarkdownDeep
 {
 	internal class LinkInfo
 	{

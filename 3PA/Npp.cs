@@ -29,58 +29,151 @@ using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA {
+
     /// <summary>
-    ///     This class contains very generic wrappers for basic Notepad++ functionality.
+    /// This class contains very generic wrappers for basic Notepad++ functionality
     /// </summary>
     internal static partial class Npp {
 
+        #region CurrentFile Info
+
+        #region private
+
+        private static NppFile _currentFile;
+
+        #endregion
+
+        #region Accessors
+
         /// <summary>
-        /// Returns the encoding used by Npp for the current document, it should be used to 
-        /// encode the string coming from and to Scintilla
+        /// CurrentFile
         /// </summary>
-        /// <remarks>This is very weird but we only need to encode/decode strings from/to scintilla
-        /// when the current Encoding is UTF-8, in all other case, we can read/write the strings
-        /// as they are (</remarks>
-        /// <returns></returns>
-        public static Encoding GetCurrentEncoding {
-            get {
-                var curBufferId = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
-                int nppEncoding = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
-                return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
-                /*
-                // Logically, we should identify the correct encoding as follow, but in reality
-                // we only need to convert To/From UTF8/ANSI
-                Encoding encoding = Encoding.Default;
-                switch(nppEncoding) {
-                    case 1:
-                    case 4:
-                        // UTF-8
-                        encoding = Encoding.UTF8;
-                        break;
-                    case 2:
-                    case 6:
-                        // UTF-16 Big Endian
-                        encoding = Encoding.BigEndianUnicode;
-                        break;
-                    case 3:
-                    case 7:
-                        // UTF-16 Little Endian
-                        encoding = Encoding.Unicode;
-                        break;
-                    case 5:
-                        // not sure about that (uni7Bit?)
-                        encoding = Encoding.UTF7;
-                        break;
-                    default:
-                        // ANSI (chars in the range 0-255 range)
-                        encoding = Encoding.GetEncoding(1252);
-                        break;
+        public static NppFile CurrentFile {
+            get { return _currentFile ?? (_currentFile = new NppFile()); }
+        }
+
+        #endregion
+
+        #region NppFileInfo
+
+        /// <summary>
+        /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
+        /// </summary>
+        internal class NppFile {
+            /// <summary>
+            /// true if the current file is a progress file, false otherwise
+            /// </summary>
+            public bool IsProgress { get; set; }
+
+            /// <summary>
+            /// Stores the current file path when switching document
+            /// </summary>
+            public string Path { get; set; }
+
+            /// <summary>
+            /// Information on the current file
+            /// </summary>
+            public FileInfoObject FileInfoObject { get; set; }
+
+            public void Update() {
+                CurrentFile.Path = PathFromApi;
+                CurrentFile.IsProgress = CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern);
+            }
+
+            /// <summary>
+            /// Is the file a progress + compilable file?
+            /// </summary>
+            public bool IsCompilable {
+                get { return Path.TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern); }
+            }
+
+            /// <summary>
+            /// file name
+            /// </summary>
+            public string FileName { get { return System.IO.Path.GetFileName(Path); } }
+
+            /// <summary>
+            /// Directory of file
+            /// </summary>
+            public string DirectoryName { get { return System.IO.Path.GetDirectoryName(Path); } }
+
+            /// <summary>
+            /// Extension of file
+            /// </summary>
+            public string Extension { get { return System.IO.Path.GetExtension(Path); } }
+
+            /// <summary>
+            /// Gets the path of the current document
+            /// </summary>
+            /// <returns></returns>
+            public static string PathFromApi {
+                get {
+                    var path = new StringBuilder(Win32Api.MaxPath);
+                    Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+                    return path.ToString();
                 }
-                */
+            }
+
+            /// <summary>
+            /// Saves the current document
+            /// </summary>
+            public static void Save() {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
+            }
+
+            /// <summary>
+            /// Returns the encoding used by Npp for the current document, it should be used to 
+            /// encode the string coming from and to Scintilla
+            /// </summary>
+            /// <remarks>This is very weird but we only need to encode/decode strings from/to scintilla
+            /// when the current Encoding is UTF-8, in all other case, we can read/write the strings
+            /// as they are (</remarks>
+            /// <returns></returns>
+            public Encoding BufferEncoding {
+                get {
+                    var curBufferId = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
+                    int nppEncoding = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
+                    return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
+                    /*
+                    // Logically, we should identify the correct encoding as follow, but in reality
+                    // we only need to convert To/From UTF8/ANSI
+                    Encoding encoding = Encoding.Default;
+                    switch(nppEncoding) {
+                        case 1:
+                        case 4:
+                            // UTF-8
+                            encoding = Encoding.UTF8;
+                            break;
+                        case 2:
+                        case 6:
+                            // UTF-16 Big Endian
+                            encoding = Encoding.BigEndianUnicode;
+                            break;
+                        case 3:
+                        case 7:
+                            // UTF-16 Little Endian
+                            encoding = Encoding.Unicode;
+                            break;
+                        case 5:
+                            // not sure about that (uni7Bit?)
+                            encoding = Encoding.UTF7;
+                            break;
+                        default:
+                            // ANSI (chars in the range 0-255 range)
+                            encoding = Encoding.GetEncoding(1252);
+                            break;
+                    }
+                    */
+                }
             }
         }
+
+        #endregion
+        
+        #endregion
 
         /// <summary>
         ///     Gets the Notepad++ main window handle.
@@ -118,9 +211,9 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     Get the IWin32Window of the Npp window
-        ///     Must be used as an input for forms.Show() in order to link the create form to the Npp window
-        ///     if the user switches applications, the dialog hides with Notepad++
+        /// Get the IWin32Window of the Npp window
+        /// Must be used as an input for forms.Show() in order to link the create form to the Npp window
+        /// if the user switches applications, the dialog hides with Notepad++
         /// </summary>
         public static IWin32Window Win32WindowNpp {
             get { return new WindowWrapper(HandleNpp); }
@@ -156,9 +249,9 @@ namespace _3PA {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
             }
-            if (saveHistoric && Plug.IsCurrentFileProgress)
-                _goToHistory.Push(new Tuple<string, int, Point>(GetCurrentFilePath(), FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
-            if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
+            if (saveHistoric && CurrentFile.IsProgress)
+                _goToHistory.Push(new Tuple<string, int, Point>(CurrentFile.Path, FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
+            if (!string.IsNullOrEmpty(document) && !document.Equals(CurrentFile.Path)) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
                 else
@@ -287,13 +380,6 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     Saves the current document.
-        /// </summary>
-        public static void SaveCurrentDocument() {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
-        }
-
-        /// <summary>
         /// Opens given file in notepad++
         /// </summary>
         /// <param name="file"></param>
@@ -309,17 +395,8 @@ namespace _3PA {
             } 
             return ((int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
+        
 
-
-        /// <summary>
-        /// Gets the path of the current document.
-        /// </summary>
-        /// <returns></returns>
-        public static string GetCurrentFilePath() {
-            var path = new StringBuilder(Win32Api.MaxPath);
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
-            return path.ToString();
-        }
 
         /// <summary>
         /// returns npp's folder path

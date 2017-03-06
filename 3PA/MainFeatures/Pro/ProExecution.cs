@@ -274,7 +274,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
-                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) &&
+                if (fileToCompile.InputPath.Equals(Npp.CurrentFile.Path) &&
                     (Npp.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) &&
                     !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
                     fileToCompile.CompInputPath = Path.Combine(LocalTempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff_") + count + Path.GetExtension(fileToCompile.InputPath));
@@ -404,7 +404,7 @@ namespace _3PA.MainFeatures.Pro {
                 prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + ListToCompile.First().InputPath.ProQuoter());
-                var filename = Path.GetFileName(Plug.CurrentFilePath);
+                var filename = Npp.CurrentFile.FileName;
                 if (FileTag.Contains(filename)) {
                     var fileInfo = FileTag.GetLastFileTag(filename);
                     prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.ProQuoter());

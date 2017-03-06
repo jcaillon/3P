@@ -249,7 +249,7 @@ namespace _3PA.Lib {
                         return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
-                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Abl.IsCurrentProgressFile);
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress);
                 }
                 return SciPositionFromLine(index);
             }

@@ -17,9 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 
-namespace MarkdownDeep
+namespace _3PA.Lib.MarkdownDeep
 {
 	/*
 	 * StringScanner is a simple class to help scan through an input string.

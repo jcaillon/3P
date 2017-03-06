@@ -45,10 +45,10 @@ namespace _3PA.MainFeatures.Pro {
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
 
-            if (_ignoredFiles.Contains(Plug.CurrentFilePath) || Config.Instance.DisablePrototypeAutoUpdate) {
+            if (_ignoredFiles.Contains(Npp.CurrentFile.Path) || Config.Instance.DisablePrototypeAutoUpdate) {
                 if (silent)
                     return;
-                _ignoredFiles.Remove(Plug.CurrentFilePath);
+                _ignoredFiles.Remove(Npp.CurrentFile.Path);
             }
 
             List<ParsedImplementation> listOfOutDatedProto;
@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 outputMessage.Append("<i>");
                 outputMessage.Append("CTRL + Z will cancel the above-mentionned modifications<br>");
-                outputMessage.Append(Plug.CurrentFilePath.ToHtmlLink("Click here to stop auto-updating the prototypes for this file"));
+                outputMessage.Append(Npp.CurrentFile.Path.ToHtmlLink("Click here to stop auto-updating the prototypes for this file"));
                 outputMessage.Append("</i>");
                 UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
                     var split = args.Link.Split('#');
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.Pro {
                     } else {
                         if (!_ignoredFiles.Contains(args.Link)) {
                             _ignoredFiles.Add(args.Link);
-                            UserCommunication.NotifyUnique("Prototype_synchro", "Automatic prototype updates stopped for the file :<br>" + Plug.CurrentFilePath + "<br><br><i>This is effective until you restart Notepad++<br>You can also trigger an update manually to restart the auto-update</i>", MessageImg.MsgInfo, "Function prototypes", "Synchronization stopped", null, 5);
+                            UserCommunication.NotifyUnique("Prototype_synchro", "Automatic prototype updates stopped for the file :<br>" + Npp.CurrentFile.Path + "<br><br><i>This is effective until you restart Notepad++<br>You can also trigger an update manually to restart the auto-update</i>", MessageImg.MsgInfo, "Function prototypes", "Synchronization stopped", null, 5);
                         }
                     }
                 }, 5);
@@ -716,7 +716,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         private static void CommonTagAction(Action<FileTagObject> performAction) {
-            var filename = Path.GetFileName(Plug.CurrentFilePath);
+            var filename = Npp.CurrentFile.FileName;
             if (FileTag.Contains(filename)) {
                 var fileInfo = FileTag.GetLastFileTag(filename);
                 Npp.BeginUndoAction();

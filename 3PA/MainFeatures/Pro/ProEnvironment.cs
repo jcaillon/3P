@@ -185,7 +185,7 @@ namespace _3PA.MainFeatures.Pro {
             public List<string> GetProPathDirList {
                 get {
                     if (_currentProPathDirList == null) {
-                        var curFilePath = Path.GetDirectoryName(Plug.CurrentFilePath);
+                        var curFilePath = Npp.CurrentFile.DirectoryName;
                         var basePath = (!string.IsNullOrEmpty(BaseLocalPath) && Directory.Exists(BaseLocalPath)) ? BaseLocalPath : curFilePath;
 
                         // get full propath (from .ini + from user custom field + current file folder)

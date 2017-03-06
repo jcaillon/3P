@@ -61,14 +61,14 @@ namespace YamuiFramework.Forms {
         /// </summary>
         [Browsable(false)]
         [DefaultValue(false)]
-        public bool CloseAllVisibleBox { get; set; }
+        public bool CloseAllBox { get; set; }
 
         /// <summary>
         /// To use with ShowCloseAllVisibleButton,
         /// Action to do when the user click the button
         /// </summary>
         [Browsable(false)]
-        public Action OnCloseAllVisible { get; set; }
+        public Action OnCloseAllNotif { get; set; }
 
         /// <summary>
         /// Height of the caption bar (what should be the title bar in a normal window)
@@ -216,7 +216,7 @@ namespace YamuiFramework.Forms {
                     AddWindowButton(WindowButtons.Maximize);
                 if (MinimizeBox)
                     AddWindowButton(WindowButtons.Minimize);
-                if (CloseAllVisibleBox)
+                if (CloseAllBox)
                     AddWindowButton(WindowButtons.CloseAllVisible);
                 UpdateWindowButtonPosition();
             }
@@ -277,7 +277,7 @@ namespace YamuiFramework.Forms {
                     break;
                 case WindowButtons.CloseAllVisible:
                     newButton.Text = ((char)(126)).ToString();
-                    _mainFormToolTip.SetToolTip(newButton, "<b>Close all visible</b> notification windows");
+                    _mainFormToolTip.SetToolTip(newButton, "<b>Close all</b> notification windows");
                     break;
             }
 
@@ -312,8 +312,8 @@ namespace YamuiFramework.Forms {
                     _mainFormToolTip.SetToolTip(btn, "<b>" + (WindowState == FormWindowState.Normal ? "Maximize" : "Restore") + "</b> this window");
                     break;
                 case WindowButtons.CloseAllVisible:
-                    if (OnCloseAllVisible != null)
-                        OnCloseAllVisible();
+                    if (OnCloseAllNotif != null)
+                        OnCloseAllNotif();
                     break;
             }
         }

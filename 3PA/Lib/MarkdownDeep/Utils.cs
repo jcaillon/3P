@@ -17,16 +17,17 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MarkdownDeep
+namespace _3PA.Lib.MarkdownDeep
 {
 	/*
 	 * Various utility and extension methods
 	 */
-	static class Utils
+	internal static class Utils
 	{
 		// Extension method. Get the last item in a list (or null if empty)
 		public static T Last<T>(this List<T> list) where T:class {

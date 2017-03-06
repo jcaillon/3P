@@ -18,8 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using _3PA.Lib;
-using _3PA.MainFeatures;
 
 namespace _3PA {
 
@@ -32,27 +30,6 @@ namespace _3PA {
         /// <returns></returns>
         public static bool IsCharAllowedInVariables(char c) {
             return char.IsLetterOrDigit(c) || c == '-' || c == '_' || c == '&';
-        }
-
-        /// <summary>
-        /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
-        /// </summary>
-        public static bool IsCurrentProgressFile {
-            get { return Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern); }
-        }
-
-        /// <summary>
-        /// Is the current file compilable in progress
-        /// </summary>
-        public static bool IsCurrentFileCompilable {
-            get { return IsFileCompilable(Npp.GetCurrentFilePath()); }
-        }
-
-        /// <summary>
-        /// Returns true if the file is compilable in progress
-        /// </summary>
-        public static bool IsFileCompilable(string fileName) {
-            return Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern);
         }
 
         /// <summary>

@@ -338,9 +338,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     // Draw the horizontal line that goes to the arrow
                     if (curItem.Level > 0 && !curItem.IsSeparator) {
-                        g.DrawLine(linePen, pos, drawRect.Y + drawRect.Height / 2 - 1, pos + TreeWidth / 2, drawRect.Y + drawRect.Height / 2 - 1);
+                        g.DrawLine(linePen, pos, drawRect.Y + drawRect.Height / 2 - 1, pos + (curItem.CanExpand ? TreeWidth / 2 : TreeWidth), drawRect.Y + drawRect.Height / 2 - 1);
                     }
 
+                    // draw the vertical lines
                     var familyNode = curItem;
                     while (familyNode != null && familyNode.Level > 0) {
                         // the current item is the last item of its parent

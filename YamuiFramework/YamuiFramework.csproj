@@ -368,7 +368,6 @@
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgQuestion.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgToolTip.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgWarning.png" />
-    <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
     <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer\Core\Core\Utils\ImageError.png" />

@@ -559,6 +559,31 @@ namespace _3PA.Lib {
             return false;
         }
 
+        private static Dictionary<string, DateTime> _watchedFiles = new Dictionary<string, DateTime>();
+
+        /// <summary>
+        /// Allows to quickly check if a file has been modified since the last we called this method
+        /// It returns false the first time we call it, then it compares the LastWriteTime for the following
+        /// calls
+        /// </summary>
+        public static bool HasFileChanged(string filePath) {
+            // first watch, no problem
+            if (!_watchedFiles.ContainsKey(filePath)) {
+                if (File.Exists(filePath))
+                    _watchedFiles.Add(filePath, File.GetLastWriteTime(filePath));
+                return false;
+            }
+            // then check the last write date didn't change
+            if (File.Exists(filePath)) {
+                if (_watchedFiles[filePath].Equals(File.GetLastWriteTime(filePath)))
+                    return false;
+                _watchedFiles[filePath] = File.GetLastWriteTime(filePath);
+            } else {
+                _watchedFiles.Remove(filePath);
+            }
+            return true;
+        }
+
         /// <summary>
         /// Returns the list of control of given typ
         /// </summary>

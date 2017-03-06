@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MarkdownDeep
+namespace _3PA.Lib.MarkdownDeep
 {
 	// Some block types are only used during block parsing, some
 	// are only used during rendering and some are used during both

@@ -30,6 +30,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Microsoft.Win32.SafeHandles;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
@@ -39,6 +40,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli.Pages.Options;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
@@ -322,14 +324,11 @@ namespace _3PA.Tests {
 
         public static void DebugTest3() {
 
-            UserCommunication.Notify(Path.GetExtension("ezfzef\\zefzeff.ext"));
+            // File.GetLastWriteTime
 
-            UserCommunication.Message("# What's new in this version? #\n\n",
-                MessageImg.MsgUpdate,
-                "A new version has been installed!",
-                "Updated to version " + AssemblyInfo.Version,
-                new List<string> { "ok" },
-                false);
+            
+            UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
+
 
             //RunParserTests(Npp.Text);
 

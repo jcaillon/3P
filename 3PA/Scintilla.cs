@@ -31,7 +31,7 @@ namespace _3PA {
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
-    /// - For every scintilla message that involves a position, the exepect position (expected by scintilla) is the<br />
+    /// - For every scintilla message that involves a position, the expect position (expected by scintilla) is the<br />
     /// f***** BYTE position, not the character position (as anyone would assume at first!). This messes up with all your<br />
     /// function<br />
     /// calls when the document is encoded in UTF8 (for example), as character can be encoded on 2 bytes... Every methods<br />
@@ -45,6 +45,7 @@ namespace _3PA {
         #region fields
 
         public const int KeywordMaxLength = 60;
+        private static int _curScintillaNb;
         private static IntPtr _curScintilla;
         private static DocumentLines _lines;
         private static Scintilla _scintilla;
@@ -52,12 +53,20 @@ namespace _3PA {
         #endregion
 
         #region Critical Core
-
+        
         /// <summary>
         /// Returns the current instance of scintilla used
         /// 0/1 corresponding to the main/seconday scintilla currently used
         /// </summary>
         public static int CurrentScintilla {
+            get { return _curScintillaNb; }
+        }
+
+        /// <summary>
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
+        /// </summary>
+        public static int CurrentScintillaApi {
             get {
                 long curScintilla;
                 Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
@@ -69,7 +78,12 @@ namespace _3PA {
         /// Gets the window handle to current Scintilla.
         /// </summary>
         public static IntPtr HandleScintilla {
-            get { return (_curScintilla != IntPtr.Zero) ? _curScintilla : (_curScintilla = (CurrentScintilla == 0) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle); }
+            get {
+                if (_curScintilla != IntPtr.Zero)
+                    return _curScintilla;
+                UpdateScintilla();
+                return _curScintilla;
+            }
         }
 
         /// <summary>
@@ -108,8 +122,9 @@ namespace _3PA {
         /// Updates the current scintilla handle for Npp's functions
         /// Called when the user changes the current document
         /// </summary>
-        public static void UpdateScintilla(bool reverse = false) {
-            _curScintilla = ((!reverse && CurrentScintilla == 0) || (reverse && CurrentScintilla == 1)) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
+        public static void UpdateScintilla() {
+            _curScintillaNb = CurrentScintillaApi;
+            _curScintilla = _curScintillaNb == 0 ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
             Sci.UpdateScintillaDirectMessage(_curScintilla);
         }
 

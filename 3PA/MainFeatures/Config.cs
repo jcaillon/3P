@@ -103,7 +103,13 @@ namespace _3PA.MainFeatures {
                 Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
                 GroupName = "General",
                 AutoGenerateField = true)]
-            public bool AppliAllowTabAnimation = true;
+            public bool AppliAllowTabAnimation = true;            
+            
+            [Display(Name = "Show tree branches",
+                Description = "Whether or not you want to draw the branches of the trees displayed in 3P (for the file and code explorer)",
+                GroupName = "General",
+                AutoGenerateField = true)]
+            public bool ShowTreeBranches = true;
 
             public bool GlobalShowDetailedHelpForErrors = true;
 
@@ -256,6 +262,8 @@ namespace _3PA.MainFeatures {
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool CodeReplaceSemicolon = true;
+
+            public bool NeverAskToDisableDefaultAutoComp = false;
 
             #endregion
 
@@ -584,10 +592,11 @@ namespace _3PA.MainFeatures {
         public static string FileDeployProfiles { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentProfiles.conf"); } }
 
         // Npp files
-        public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
+        public static string FileNppUserDefinedLang { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
         public static string FileNppConfigXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\config.xml")); } }
         public static string FileNppStylersXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\stylers.xml")); } }
-        public static string FolderNppThemes { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\themes")); } }
+        public static string FolderNppAutocompApis { get { return Path.GetFullPath(Path.Combine(Npp.GetNppDirectory(), @"plugins\APIs")); } }
+        public static string FileNppLangsXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\langs.xml")); } }
 
         // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }

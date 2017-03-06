@@ -66,6 +66,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public void ApplyColorSettings() {
             if (Form == null)
                 return;
+            Form.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             Form.Refresh();
         }
 
@@ -159,6 +160,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                             // recursive
                             if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
                                 folderItem.Children = ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false).Cast<FilteredTypeTreeListItem>().ToList();
+                                if (folderItem.Children.Count == 0)
+                                    folderItem.Children = null;
                             }
                         }
                     }

@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
             Style.Current = Style.GetThemesList[cbSyntax.SelectedIndex];
             Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-            if (Plug.IsCurrentFileProgress) {
+            if (Npp.CurrentFile.IsProgress) {
                 Style.SetSyntaxStyles();
                 Plug.ApplyOptionsForScintilla();
                 FilesInfo.UpdateFileStatus();

@@ -20,6 +20,7 @@
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.Themes;
+using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
