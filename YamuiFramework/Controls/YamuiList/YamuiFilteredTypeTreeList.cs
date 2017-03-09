@@ -363,7 +363,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // Draw the arrow icon indicating if the node is expanded or not
             if (curItem.CanExpand) {
-                TextRenderer.DrawText(g, curItem.IsExpanded ? "q" : "u", FontManager.GetOtherFont("Wingdings 3", FontStyle.Regular, (float)(shiftedDrawRect.Height * 0.40)), new Rectangle(shiftedDrawRect.X - TreeWidth, shiftedDrawRect.Y, TreeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, curItem.IsExpanded ? "6" : "4", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(shiftedDrawRect.Height * 0.70)), new Rectangle(shiftedDrawRect.X - TreeWidth, shiftedDrawRect.Y, TreeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             }
 
             return shiftedDrawRect;

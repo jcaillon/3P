@@ -91,6 +91,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
+        [Browsable(true)]
         public new bool Multiline {
             get { return _multiline; }
             set {
@@ -254,7 +255,6 @@ namespace YamuiFramework.Controls {
 
     internal class YamuiRegularTextBox2Designer : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("Multiline");
             properties.Remove("WordWrap");
             properties.Remove("MinimumSize");
             base.PreFilterProperties(properties);
