@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures {
                 Description = "Whether or not you want to draw the branches of the trees displayed in 3P (for the file and code explorer)",
                 GroupName = "General",
                 AutoGenerateField = true)]
-            public bool ShowTreeBranches = true;
+            public bool ShowTreeBranches = false;
 
             public bool GlobalShowDetailedHelpForErrors = true;
 

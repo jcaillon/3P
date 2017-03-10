@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -47,6 +46,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         // remember the list that was passed to the autocomplete form when we set the items, we need this
         // because we reorder the list each time the user filters stuff, but we need the original order
         private List<FileListItem> _initialObjectsList;
+        private bool _isExpanded = true;
 
         /// <summary>
         /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
@@ -156,7 +156,12 @@ namespace _3PA.MainFeatures.FileExplorer {
                 new YamuiFilterBox.YamuiFilterBoxButton {
                     Image = ImageResources.Refresh,
                     OnClic = OnRefreshClic
-                }
+                },
+                new YamuiFilterBox.YamuiFilterBoxButton {
+                    Image = ImageResources.Collapse,
+                    OnClic = buttonExpandRetract_Click,
+                    ToolTip = "Toggle <b>Expand/Collapse</b>"
+                },
             };
             filterbox.Initialize(yamuiList);
 
@@ -164,6 +169,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             //treeList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
             yamuiList.EmptyListString = @"No files!";
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
+
+            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
+            yamuiList.SortingClass = FileSortingClass<ListItem>.Instance;
 
             toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
@@ -349,6 +357,16 @@ namespace _3PA.MainFeatures.FileExplorer {
         private void OnRefreshClic(YamuiButtonImage yamuiButtonImage, EventArgs e) {
             RefreshFileList();
             filterbox.FocusFilter();
+        }
+
+        private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
+            if (_isExpanded)
+                yamuiList.ForceAllToCollapse();
+            else
+                yamuiList.ForceAllToExpand();
+            _isExpanded = !_isExpanded;
+            filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
+            Npp.GrabFocus();
         }
 
         #endregion

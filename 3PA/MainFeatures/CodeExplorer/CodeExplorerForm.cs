@@ -111,6 +111,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
 
+            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
+            yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
+
             Refreshing = false;
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;

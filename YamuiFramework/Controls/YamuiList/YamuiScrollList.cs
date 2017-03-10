@@ -585,24 +585,11 @@ namespace YamuiFramework.Controls.YamuiList {
                     };
                     _rows[i].ButtonPressed += OnRowClick;
                     _rows[i].DoubleClick += OnRowClick;
-                    _rows[i].MouseEnter += (sender, args) => {
-                        IsHovered = true;
-                        HotRow = int.Parse(((YamuiListRow) sender).Name);
-                        if (MouseEnteredRow != null)
-                            MouseEnteredRow(this);
-                    };
-                    _rows[i].MouseLeave += (sender, args) => {
-                        if (!new Rectangle(new Point(0, 0), Size).Contains(PointToClient(MousePosition)))
-                            IsHovered = false;
-                        if (MouseLeftRow != null)
-                            MouseLeftRow(this);
-                    };
-                    _rows[i].Enter += (sender, args) => IsFocused = true;
-                    _rows[i].Leave += (sender, args) => IsFocused = false;
-                    _rows[i].MouseMove += (sender, args) => {
-                        if (RowMouseMove != null)
-                                RowMouseMove(this, args);
-                    };
+                    _rows[i].MouseEnter += OnRowMouseEnter;
+                    _rows[i].MouseLeave += OnRowMouseLeave;
+                    _rows[i].Enter += OnRowEnter;
+                    _rows[i].Leave += OnRowLeave;
+                    _rows[i].MouseMove += OnRowMouseMove;
                 }
 
                 _rows[i].Location = new Point(_listRectangle.Left, _listRectangle.Top + i*RowHeight);
@@ -837,10 +824,52 @@ namespace YamuiFramework.Controls.YamuiList {
             }
 
         }
-        
+
         #endregion
 
         #region Events pushed from the button rows
+
+        /// <summary>
+        /// The mouse leave a row
+        /// </summary>
+        protected virtual void OnRowMouseLeave(object sender, EventArgs eventArgs) {
+            if (!new Rectangle(new Point(0, 0), Size).Contains(PointToClient(MousePosition)))
+                IsHovered = false;
+            if (MouseLeftRow != null)
+                MouseLeftRow(this);
+        }
+
+        /// <summary>
+        /// The mouse enter a row
+        /// </summary>
+        protected virtual void OnRowMouseEnter(object sender, EventArgs eventArgs) {
+            IsHovered = true;
+            HotRow = int.Parse(((YamuiListRow)sender).Name);
+            if (MouseEnteredRow != null)
+                MouseEnteredRow(this);
+        }
+
+        /// <summary>
+        /// Focus lost by the row
+        /// </summary>
+        protected virtual void OnRowLeave(object sender, EventArgs eventArgs) {
+            IsFocused = false;
+        }
+
+        /// <summary>
+        /// Focus gained by a row
+        /// </summary>
+        protected virtual void OnRowEnter(object sender, EventArgs eventArgs) {
+            IsFocused = true;
+        }
+
+        /// <summary>
+        /// The mouse moves on a row
+        /// </summary>
+        protected virtual void OnRowMouseMove(object sender, MouseEventArgs args) {
+            if (RowMouseMove != null)
+                RowMouseMove(this, args);
+        }
 
         protected override void OnKeyDown(KeyEventArgs e) {
             e.Handled = HandleKeyDown(e);
@@ -954,14 +983,14 @@ namespace YamuiFramework.Controls.YamuiList {
                 // make sure to  trigger the onchangeindex event
                 SelectedItemIndex = SelectedItemIndex;
 
-                OnItemClick(args);
+                OnItemClick(sender, args);
             }
         }
 
         /// <summary>
         /// Click on an item, SelectedItem is usable at this time
         /// </summary>
-        protected virtual void OnItemClick(MouseEventArgs eventArgs) {
+        protected virtual void OnItemClick(object sender, MouseEventArgs eventArgs) {
             if (RowClicked != null)
                 RowClicked(this, eventArgs);
         }

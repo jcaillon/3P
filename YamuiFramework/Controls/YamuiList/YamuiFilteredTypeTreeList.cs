@@ -66,6 +66,7 @@ namespace YamuiFramework.Controls.YamuiList {
         protected bool _isSearching;
 
         private bool _showTreeBranches = true;
+        private int _nodeExpandClickMargin = 20;
 
         #endregion
 
@@ -116,6 +117,16 @@ namespace YamuiFramework.Controls.YamuiList {
         protected List<FilteredTypeTreeListItem> TreeRootItems {
             get { return _treeRootItems; }
             set { _treeRootItems = value; }
+        }
+
+        /// <summary>
+        /// When the user click on the arrow of a row, it either collapse or expand the node
+        /// Here, you can increase the margin taken to know if the click is on the arrow or not
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int NodeExpandClickMargin {
+            get { return _nodeExpandClickMargin; }
+            set { _nodeExpandClickMargin = value; }
         }
 
         #endregion
@@ -194,6 +205,9 @@ namespace YamuiFramework.Controls.YamuiList {
                         var children = GetExpandedItemsList(item.GetItemChildren(), forceExpansion);
                         if (children != null)
                             outList.AddRange(children);
+                    } else if (forceExpansion != ForceExpansion.Idle) {
+                        // to also force the savedState of the children node
+                        GetExpandedItemsList(item.GetItemChildren(), forceExpansion);
                     }
                 }
             }
@@ -325,7 +339,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected virtual Rectangle RowPaintTree(Graphics g, FilteredTypeTreeListItem curItem, Rectangle drawRect, YamuiListRow row) {
             var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !curItem.IsDisabled);
-            var arrowColor = curItem.IsExpanded ? YamuiThemeManager.Current.AccentColor : foreColor;
             var shiftedDrawRect = drawRect;
 
             // draw the branches of the tree
@@ -363,7 +376,23 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // Draw the arrow icon indicating if the node is expanded or not
             if (curItem.CanExpand) {
-                TextRenderer.DrawText(g, curItem.IsExpanded ? "6" : "4", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(shiftedDrawRect.Height * 0.70)), new Rectangle(shiftedDrawRect.X - TreeWidth, shiftedDrawRect.Y, TreeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                Color arrowColor;
+                if (row.IsHovered && new Rectangle(new Point(0, 0), new Size(shiftedDrawRect.X + NodeExpandClickMargin, drawRect.Height)).Contains(row.PointToClient(MousePosition)))
+                    arrowColor = YamuiThemeManager.Current.AccentColor;
+                else
+                    arrowColor = curItem.IsExpanded ? YamuiThemeManager.Current.MenuNormalFore : YamuiThemeManager.Current.MenuDisabledFore;
+
+                var rect = new Rectangle(shiftedDrawRect.X - TreeWidth + 1, shiftedDrawRect.Y, TreeWidth - 2, shiftedDrawRect.Height);
+                rect.Y = rect.Y + (rect.Height - rect.Width)/2;
+                rect.Height = rect.Width;
+
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                using (SolidBrush brush = new SolidBrush(arrowColor)) {
+                    if (!curItem.IsExpanded)
+                        g.FillPolygon(brush, new[] { new Point(rect.X, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height / 2), new Point(rect.X, rect.Y + rect.Height) });
+                    else
+                        g.FillPolygon(brush, new[] { new Point(rect.X, rect.Y + rect.Height), new Point(rect.X + rect.Width, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height) });
+                }
             }
 
             return shiftedDrawRect;
@@ -381,8 +410,14 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
 
             // when searching, the tree must actually behave like a FilteredTypeList
-            if (_isSearching)
+            if (_isSearching) {
+                if (SortingClass != null) {
+                    var list = listItems.ToList();
+                    list.Sort(SortingClass); // make sure to sort the "initial" list here
+                    return base.GetFilteredAndSortedList(list);
+                }
                 return base.GetFilteredAndSortedList(listItems);
+            }
 
             var outList = new List<FilteredTypeTreeListItem>();
             var parentsToInclude = new HashSet<string>();
@@ -435,15 +470,29 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region Events pushed from the button rows
 
+        protected override void OnRowMouseMove(object sender, MouseEventArgs args) {
+            ((YamuiListRow)sender).Invalidate(); // force to redraw on mouse move
+            base.OnRowMouseMove(sender, args);
+        }
+
         /// <summary>
         /// Click on an item, SelectedItem is usable at this time
         /// </summary>
-        protected override void OnItemClick(MouseEventArgs eventArgs) {
+        protected override void OnItemClick(object sender, MouseEventArgs eventArgs) {
             // handles node expansion
-            if (!_isSearching)
-                ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+            if (!_isSearching) {
+                var curItem = SelectedItem as FilteredTypeTreeListItem;
+                if (curItem != null) {
+                    var widthOfArrow = NodeExpandClickMargin;
+                    for (int i = 0; i <= curItem.Level; i++) {
+                        widthOfArrow += TreeWidth;
+                    }
+                    if (eventArgs.X <= widthOfArrow)
+                        ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+                }
+            }
 
-            base.OnItemClick(eventArgs);
+            base.OnItemClick(sender, eventArgs);
         }
 
         #endregion
