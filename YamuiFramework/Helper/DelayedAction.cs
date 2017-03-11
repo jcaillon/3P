@@ -24,19 +24,17 @@ using System.Threading.Tasks;
 using System.Timers;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>
     /// Simple class to delay an action
     /// </summary>
     public class DelayedAction : IDisposable {
-
         #region private fields
 
         private Timer _timer;
 
         private Action _toDo;
 
-        private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>(); 
+        private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>();
 
         #endregion
 
@@ -96,6 +94,5 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
     }
 }

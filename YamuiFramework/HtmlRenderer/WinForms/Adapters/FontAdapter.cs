@@ -21,13 +21,11 @@ using System;
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms Font object for core.
     /// </summary>
-    internal sealed class FontAdapter : RFont
-    {
+    internal sealed class FontAdapter : RFont {
         #region Fields and Consts
 
         /// <summary>
@@ -57,60 +55,49 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public FontAdapter(Font font)
-        {
+        public FontAdapter(Font font) {
             _font = font;
         }
 
         /// <summary>
         /// the underline win-forms font.
         /// </summary>
-        public Font Font
-        {
+        public Font Font {
             get { return _font; }
         }
 
         /// <summary>
         /// Get the handle to this Font.
         /// </summary>
-        public IntPtr HFont
-        {
-            get
-            {
+        public IntPtr HFont {
+            get {
                 if (_hFont == IntPtr.Zero)
                     _hFont = _font.ToHfont();
                 return _hFont;
             }
         }
 
-        public override double Size
-        {
+        public override double Size {
             get { return _font.Size; }
         }
 
-        public override double UnderlineOffset
-        {
+        public override double UnderlineOffset {
             get { return _underlineOffset; }
         }
 
-        public override double Height
-        {
+        public override double Height {
             get { return _height; }
         }
 
-        public override double LeftPadding
-        {
-            get { return _height / 6f; }
+        public override double LeftPadding {
+            get { return _height/6f; }
         }
 
-        public override double GetWhitespaceWidth(RGraphics graphics)
-        {
-            if (_whitespaceWidth < 0)
-            {
+        public override double GetWhitespaceWidth(RGraphics graphics) {
+            if (_whitespaceWidth < 0) {
                 _whitespaceWidth = graphics.MeasureString(" ", this).Width;
             }
             return _whitespaceWidth;
@@ -121,8 +108,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// </summary>
         /// <param name="height">the full height of the font</param>
         /// <param name="underlineOffset">the vertical offset of the font underline location from the top of the font.</param>
-        internal void SetMetrics(int height, int underlineOffset)
-        {
+        internal void SetMetrics(int height, int underlineOffset) {
             _height = height;
             _underlineOffset = underlineOffset;
         }

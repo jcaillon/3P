@@ -19,13 +19,11 @@
 #endregion
 using System;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Stores an ordered pair of floating-point numbers, typically the width and height of a rectangle.
     /// </summary>
-    public struct RSize
-    {
+    public struct RSize {
         #region Fields and Consts
 
         /// <summary>
@@ -54,7 +52,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
 
         #endregion
 
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="RSize" /> structure from the specified existing
         ///     <see
@@ -67,8 +64,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         cref="RSize" />
         ///     structure.
         /// </param>
-        public RSize(RSize size)
-        {
+        public RSize(RSize size) {
             _width = size._width;
             _height = size._height;
         }
@@ -77,8 +73,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// Initializes a new instance of the <see cref="RSize" /> structure from the specified <see cref="RPoint" /> structure.
         /// </summary>
         /// <param name="pt">The <see cref="RPoint" /> structure from which to initialize this <see cref="RSize" /> structure.</param>
-        public RSize(RPoint pt)
-        {
+        public RSize(RPoint pt) {
             _width = pt.X;
             _height = pt.Y;
         }
@@ -92,8 +87,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="height">
         ///     The height component of the new <see cref="RSize" /> structure.
         /// </param>
-        public RSize(double width, double height)
-        {
+        public RSize(double width, double height) {
             _width = width;
             _height = height;
         }
@@ -105,8 +99,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     This property returns true when this <see cref="RSize" /> structure has both a width and height of zero; otherwise, false.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public bool IsEmpty
-        {
+        public bool IsEmpty {
             get {
                 if (Math.Abs(_width) < 0.0001)
                     return Math.Abs(_height) < 0.0001;
@@ -121,8 +114,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The horizontal component of this <see cref="RSize" /> structure, typically measured in pixels.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public double Width
-        {
+        public double Width {
             get { return _width; }
             set { _width = value; }
         }
@@ -134,8 +126,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The vertical component of this <see cref="RSize" /> structure, typically measured in pixels.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public double Height
-        {
+        public double Height {
             get { return _height; }
             set { _height = value; }
         }
@@ -147,8 +138,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>The <see cref="RPoint" /> structure to which this operator converts.</returns>
         /// <param name="size">The <see cref="RSize" /> structure to be converted
         /// </param>
-        public static explicit operator RPoint(RSize size)
-        {
+        public static explicit operator RPoint(RSize size) {
             return new RPoint(size.Width, size.Height);
         }
 
@@ -168,8 +158,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The second <see cref="RSize" /> structure to add.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static RSize operator +(RSize sz1, RSize sz2)
-        {
+        public static RSize operator +(RSize sz1, RSize sz2) {
             return Add(sz1, sz2);
         }
 
@@ -189,8 +178,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="RSize" /> structure on the right side of the subtraction operator.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static RSize operator -(RSize sz1, RSize sz2)
-        {
+        public static RSize operator -(RSize sz1, RSize sz2) {
             return Subtract(sz1, sz2);
         }
 
@@ -229,8 +217,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="RSize" /> structure on the right of the inequality operator.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static bool operator !=(RSize sz1, RSize sz2)
-        {
+        public static bool operator !=(RSize sz1, RSize sz2) {
             return !(sz1 == sz2);
         }
 
@@ -249,8 +236,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="sz2">
         ///     The second <see cref="RSize" /> structure to add.
         /// </param>
-        public static RSize Add(RSize sz1, RSize sz2)
-        {
+        public static RSize Add(RSize sz1, RSize sz2) {
             return new RSize(sz1.Width + sz2.Width, sz1.Height + sz2.Height);
         }
 
@@ -269,8 +255,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="sz2">
         ///     The <see cref="RSize" /> structure on the right side of the subtraction operator.
         /// </param>
-        public static RSize Subtract(RSize sz1, RSize sz2)
-        {
+        public static RSize Subtract(RSize sz1, RSize sz2) {
             return new RSize(sz1.Width - sz2.Width, sz1.Height - sz2.Height);
         }
 
@@ -290,11 +275,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="T:System.Object" /> to test.
         /// </param>
         /// <filterpriority>1</filterpriority>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             if (!(obj is RSize))
                 return false;
-            var sizeF = (RSize)obj;
+            var sizeF = (RSize) obj;
             if (Math.Abs(sizeF.Width - Width) < 0.001 && Math.Abs(sizeF.Height - Height) < 0.001)
                 return sizeF.GetType() == GetType();
             return false;
@@ -307,8 +291,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     An integer value that specifies a hash value for this <see cref="RSize" /> structure.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return base.GetHashCode();
         }
 
@@ -318,9 +301,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     Returns a <see cref="RPoint" /> structure.
         /// </returns>
-        public RPoint ToPointF()
-        {
-            return (RPoint)this;
+        public RPoint ToPointF() {
+            return (RPoint) this;
         }
 
         /// <summary>
@@ -335,8 +317,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
         ///         version="1" Flags="UnmanagedCode" />
         /// </PermissionSet>
-        public override string ToString()
-        {
+        public override string ToString() {
             return "{Width=" + _width + ", Height=" + _height + "}";
         }
     }

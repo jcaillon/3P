@@ -27,14 +27,11 @@ using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-
     internal partial class CodeExplorerForm : NppDockableDialogForm {
-
         #region private
 
         private volatile bool _refreshing;
@@ -73,9 +70,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
             }
         }
 
-        public YamuiFilteredTypeTreeList YamuiList { get { return yamuiList; } }
+        public YamuiFilteredTypeTreeList YamuiList {
+            get { return yamuiList; }
+        }
 
-        public YamuiFilterBox FilterBox { get { return filterbox; } }
+        public YamuiFilterBox FilterBox {
+            get { return filterbox; }
+        }
 
         #endregion
 
@@ -123,10 +124,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
 
-
             //var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
             //return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
-
         }
 
         #endregion
@@ -168,7 +167,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         private void UpdateTreeDataAction() {
-
             // get the list of items
             var tempList = ParserHandler.ParserVisitor.ParsedExplorerItemsList.ToList();
             if (tempList.Count == 0)
@@ -177,7 +175,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
             _initialObjectsList = new List<CodeExplorerItem>();
 
             if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
-
                 // apply custom sorting
                 tempList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
 
@@ -205,22 +202,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                     // Add a child item to the current branch
                     if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
-
                         // For each duplicated item (same Icon and same displayText), we create a new branch
                         var iIdentical = iItem + 1;
                         ParseFlag flags = 0;
 
                         // while we match identical items
                         while (iIdentical < tempList.Count &&
-                            tempList[iItem].IconType == tempList[iIdentical].IconType &&
-                            tempList[iItem].Branch == tempList[iIdentical].Branch &&
-                            tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
+                               tempList[iItem].IconType == tempList[iIdentical].IconType &&
+                               tempList[iItem].Branch == tempList[iIdentical].Branch &&
+                               tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
                             flags = flags | tempList[iIdentical].Flags;
                             iIdentical++;
                         }
                         // if we found identical item
                         if (iIdentical > iItem + 1) {
-
                             // we create a branch for them
                             var currentLvl2Parent = new CodeExplorerItem {
                                 DisplayText = tempList[iItem].DisplayText,
@@ -238,14 +233,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
                             for (int i = iItem; i < iIdentical; i++) {
                                 currentLvl2Parent.Children.Add(tempList[i]);
                             }
-                            
+
                             iItem += (iIdentical - iItem);
                             continue;
                         }
 
                         // single item, add it normally
                         currentLvl1Parent.Children.Add(item);
-                        
                     } else {
                         // add existing item as a root item
                         _initialObjectsList.Add(item);
@@ -253,16 +247,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                     iItem++;
                 }
-                
             } else {
                 _initialObjectsList = tempList;
             }
-            
+
             yamuiList.SetItems(_initialObjectsList.Cast<ListItem>().ToList());
 
             // also update current scope 
             UpdateCurrentScope();
-
         }
 
         #endregion
@@ -326,7 +318,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
-            if(OnActivateItem())
+            if (OnActivateItem())
                 Npp.GrabFocus();
         }
 
@@ -367,7 +359,5 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         #endregion
-
     }
-
 }

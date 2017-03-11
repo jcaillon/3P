@@ -19,36 +19,31 @@
 #endregion
 using System;
 
-namespace YamuiFramework.Animations.Transitions
-{
-    internal class ManagedType_Float : IManagedType
-    {
+namespace YamuiFramework.Animations.Transitions {
+    internal class ManagedType_Float : IManagedType {
         #region IManagedType Members
 
         /// <summary>
         /// Returns the type we're managing.
         /// </summary>
-        public Type getManagedType()
-        {
+        public Type getManagedType() {
             return typeof(float);
         }
 
         /// <summary>
         /// Returns a copy of the float passed in.
         /// </summary>
-        public object copy(object o)
-        {
-            float f = (float)o;
+        public object copy(object o) {
+            float f = (float) o;
             return f;
         }
 
         /// <summary>
         /// Returns the interpolated value for the percentage passed in.
         /// </summary>
-        public object getIntermediateValue(object start, object end, double dPercentage)
-        {
-            float fStart = (float)start;
-            float fEnd = (float)end;
+        public object getIntermediateValue(object start, object end, double dPercentage) {
+            float fStart = (float) start;
+            float fEnd = (float) end;
             return Utility.interpolate(fStart, fEnd, dPercentage);
         }
 

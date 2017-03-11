@@ -20,13 +20,11 @@
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms Image object for core.
     /// </summary>
-    internal sealed class ImageAdapter : RImage
-    {
+    internal sealed class ImageAdapter : RImage {
         /// <summary>
         /// the underline win-forms image.
         /// </summary>
@@ -35,31 +33,26 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// Initializes a new instance of the <see cref="T:System.Object"/> class.
         /// </summary>
-        public ImageAdapter(Image image)
-        {
+        public ImageAdapter(Image image) {
             _image = image;
         }
 
         /// <summary>
         /// the underline win-forms image.
         /// </summary>
-        public Image Image
-        {
+        public Image Image {
             get { return _image; }
         }
 
-        public override double Width
-        {
+        public override double Width {
             get { return _image.Width; }
         }
 
-        public override double Height
-        {
+        public override double Height {
             get { return _image.Height; }
         }
 
-        public override void Dispose()
-        {
+        public override void Dispose() {
             _image.Dispose();
         }
     }

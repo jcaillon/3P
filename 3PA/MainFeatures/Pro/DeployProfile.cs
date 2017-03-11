@@ -24,9 +24,7 @@ using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal class DeployProfile {
-
         #region public static event
 
         /// <summary>
@@ -37,11 +35,12 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Fields
+
         /// <summary>
         /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
         /// </summary>
-
         public string Name = "";
+
         public string SourceDirectory = "";
         public bool ExploreRecursively = true;
         public bool AutoUpdateSourceDir = true;
@@ -69,7 +68,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-        
+
         #region private static fields
 
         private static List<DeployProfile> _list;
@@ -77,7 +76,7 @@ namespace _3PA.MainFeatures.Pro {
         private static DeployProfile _current;
 
         #endregion
-        
+
         #region Public static methods
 
         /// <summary>
@@ -129,8 +128,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-
     }
-
 }

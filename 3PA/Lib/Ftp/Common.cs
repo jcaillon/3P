@@ -39,9 +39,15 @@ namespace _3PA.Lib.Ftp {
      *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
      */
 
-    public enum ETransferMode { Ascii, Binary }
+    public enum ETransferMode {
+        Ascii,
+        Binary
+    }
 
-    public enum ETextEncoding { Ascii, Utf8 }
+    public enum ETextEncoding {
+        Ascii,
+        Utf8
+    }
 
     public class FtpReply {
         private int _code;

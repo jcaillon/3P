@@ -24,9 +24,7 @@ using System.Reflection;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Controls {
-
     public class YamuiArea : UserControl {
-
         #region constructor
 
         public YamuiArea() {
@@ -67,10 +65,9 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
-
             // background
             PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
@@ -105,7 +102,5 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
-
     }
 }

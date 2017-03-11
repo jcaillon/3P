@@ -28,6 +28,7 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     #region Enums
 
     public enum LabelMode {
@@ -40,8 +41,8 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiLabelDesigner")]
     [ToolboxBitmap(typeof(Label))]
     public class YamuiLabel : Label {
-
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
@@ -51,6 +52,7 @@ namespace YamuiFramework.Controls {
         public bool UseCustomForeColor { get; set; }
 
         private FontFunction _function = FontFunction.Normal;
+
         [DefaultValue(FontFunction.Normal)]
         [Category("Yamui")]
         public FontFunction Function {
@@ -67,15 +69,22 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool FakeDisabled {
             get { return _fakeDisabled; }
-            set { _fakeDisabled = value; Invalidate(); }
+            set {
+                _fakeDisabled = value;
+                Invalidate();
+            }
         }
 
         private bool _wrapToLine;
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool WrapToLine {
             get { return _wrapToLine; }
-            set { _wrapToLine = value; Refresh(); }
+            set {
+                _wrapToLine = value;
+                Refresh();
+            }
         }
 
         protected override Padding DefaultPadding {
@@ -119,7 +128,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
@@ -140,6 +149,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Overridden Methods
+
         public override Size GetPreferredSize(Size proposedSize) {
             Size preferredSize;
             base.GetPreferredSize(proposedSize);
@@ -156,13 +166,13 @@ namespace YamuiFramework.Controls {
             base.OnEnabledChanged(e);
             Invalidate();
         }
+
         #endregion
     }
 
     #region designer
 
     internal class YamuiLabelDesigner : ControlDesigner {
-
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
             properties.Remove("FlatAppearance");
@@ -188,5 +198,4 @@ namespace YamuiFramework.Controls {
     }
 
     #endregion
-
 }

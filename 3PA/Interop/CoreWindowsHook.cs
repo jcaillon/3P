@@ -32,7 +32,6 @@ namespace _3PA.Interop {
     /// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644959(v=vs.85).aspx
     /// </summary>
     internal abstract class WindowsHook<T> : CoreWindowsHook, IDisposable where T : new() {
-
         #region Singleton
 
         /// <summary>
@@ -49,7 +48,6 @@ namespace _3PA.Interop {
         private static T _instance;
 
         #endregion
-
 
         #region Constructor / destructor
 
@@ -114,21 +112,21 @@ namespace _3PA.Interop {
 
     // Hook Types
     internal enum HookType {
-		WH_JOURNALRECORD = 0,
-		WH_JOURNALPLAYBACK = 1,
-		WH_KEYBOARD = 2,
-		WH_GETMESSAGE = 3,
-		WH_CALLWNDPROC = 4,
-		WH_CBT = 5,
-		WH_SYSMSGFILTER = 6,
-		WH_MOUSE = 7,
-		WH_HARDWARE = 8,
-		WH_DEBUG = 9,
-		WH_SHELL = 10,
-		WH_FOREGROUNDIDLE = 11,
-		WH_CALLWNDPROCRET = 12,		
-		WH_KEYBOARD_LL = 13,
-		WH_MOUSE_LL = 14
+        WH_JOURNALRECORD = 0,
+        WH_JOURNALPLAYBACK = 1,
+        WH_KEYBOARD = 2,
+        WH_GETMESSAGE = 3,
+        WH_CALLWNDPROC = 4,
+        WH_CBT = 5,
+        WH_SYSMSGFILTER = 6,
+        WH_MOUSE = 7,
+        WH_HARDWARE = 8,
+        WH_DEBUG = 9,
+        WH_SHELL = 10,
+        WH_FOREGROUNDIDLE = 11,
+        WH_CALLWNDPROCRET = 12,
+        WH_KEYBOARD_LL = 13,
+        WH_MOUSE_LL = 14
     }
 
     #endregion
@@ -136,9 +134,6 @@ namespace _3PA.Interop {
     #region CoreWindowsHook
 
     internal class CoreWindowsHook {
-
-
-
         // Internal properties
         protected IntPtr InternalHook = IntPtr.Zero;
         protected Win32Api.HookProc CallBackFunction;
@@ -207,7 +202,6 @@ namespace _3PA.Interop {
         public bool IsInstalled {
             get { return InternalHook != IntPtr.Zero; }
         }
-
     }
 
     #endregion
@@ -215,9 +209,9 @@ namespace _3PA.Interop {
     #region Class HookEventArgs
 
     internal class HookEventArgs : EventArgs {
-        public int HookCode;	// Hook code
-        public IntPtr WParam;	// WPARAM argument
-        public IntPtr LParam;	// LPARAM argument
+        public int HookCode; // Hook code
+        public IntPtr WParam; // WPARAM argument
+        public IntPtr LParam; // LPARAM argument
     }
 
     #endregion

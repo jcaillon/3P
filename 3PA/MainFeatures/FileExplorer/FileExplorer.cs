@@ -29,9 +29,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
-
     internal class FileExplorer : NppDockableDialog<FileExplorerForm> {
-
         #region Singleton
 
         private static FileExplorer _instance;
@@ -110,7 +108,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// can be set to not add the subfolders in the results
         /// </summary>
         public List<FileListItem> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
-
             if (firstCall)
                 _startTime = DateTime.Now;
 
@@ -182,7 +179,5 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         #endregion
-
     }
-
 }

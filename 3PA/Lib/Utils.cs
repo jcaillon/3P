@@ -41,7 +41,6 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA.Lib {
-
     /*        
        #region Events
 
@@ -60,7 +59,6 @@ namespace _3PA.Lib {
     /// Class that exposes utility methods
     /// </summary>
     internal static class Utils {
-
         #region File manipulation wrappers
 
         /// <summary>
@@ -137,7 +135,6 @@ namespace _3PA.Lib {
         /// <param name="path"></param>
         /// <returns></returns>
         public static bool HideDirectory(string path) {
-
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                 return false;
 
@@ -293,10 +290,10 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string ShowFileSelection(string initialFile, string filter) {
             using (OpenFileDialog dialog = new OpenFileDialog {
-                    Multiselect = false,
-                    Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
-                    Title = @"Select a file"
-                }) {
+                Multiselect = false,
+                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
+                Title = @"Select a file"
+            }) {
                 var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
                 if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                     dialog.InitialDirectory = initialFolder;
@@ -365,7 +362,6 @@ namespace _3PA.Lib {
         public static bool OpenAnyLink(string link) {
             if (string.IsNullOrEmpty(link)) return false;
             try {
-
                 // open the file if it has a progress extension or Known extension
                 if ((link.TestAgainstListOfPatterns(Config.Instance.NppFilesPattern) || link.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) && File.Exists(link)) {
                     Npp.Goto(link);
@@ -385,12 +381,11 @@ namespace _3PA.Lib {
                     if (OpenFolder(link))
                         return true;
                 }
-                
+
                 var process = new ProcessStartInfo(link) {
                     UseShellExecute = true
                 };
                 Process.Start(process);
-
             } catch (Exception e) {
                 if (!(e is Win32Exception))
                     ErrorHandler.LogError(e);
@@ -449,7 +444,6 @@ namespace _3PA.Lib {
         /// <param name="size"></param>
         /// <returns></returns>
         public static Image ResizeImage(Image imgToResize, Size size) {
-
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
 
@@ -479,7 +473,6 @@ namespace _3PA.Lib {
         /// Allows to know how many files of each file type there is
         /// </summary>
         public static Dictionary<FileType, int> GetNbFilesPerType(List<string> files) {
-
             Dictionary<FileType, int> output = new Dictionary<FileType, int>();
 
             foreach (var file in files) {
@@ -624,7 +617,7 @@ namespace _3PA.Lib {
             try {
                 FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(path);
                 return myFileVersionInfo.FileVersion;
-            } catch(Exception) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -659,7 +652,6 @@ namespace _3PA.Lib {
         /// <param name="filePath"></param>
         /// <param name="targetDir"></param>
         public static bool ExtractAll(string filePath, string targetDir) {
-
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                 return false;
             if (!CreateDirectory(targetDir))
@@ -670,7 +662,6 @@ namespace _3PA.Lib {
             try {
                 // Opens existing zip file
                 using (ZipStorer zip = ZipStorer.Open(filePath, FileAccess.Read)) {
-
                     // Extract all files in target directory
                     foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
                         var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
@@ -685,13 +676,12 @@ namespace _3PA.Lib {
             }
 
             return result;
-        } 
+        }
 
         /// <summary>
         /// This methods pushes a file into a new/existing zip file
         /// </summary>
         public static bool ZipFile(string zipPath, string filePath, string filePathInZip, ZipStorer.Compression compressionMethod) {
-
             if (string.IsNullOrEmpty(zipPath))
                 return false;
 
@@ -722,7 +712,6 @@ namespace _3PA.Lib {
         /// Zip the given folder
         /// </summary>
         public static bool ZipFolder(string zipPath, string folderPath, ZipStorer.Compression compressionMethod) {
-
             if (string.IsNullOrEmpty(zipPath) || string.IsNullOrEmpty(folderPath))
                 return false;
 
@@ -764,7 +753,6 @@ namespace _3PA.Lib {
         /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
         /// </summary>
         public static bool SendFileToFtp(string localFilePath, string ftpUri) {
-
             if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
                 return false;
 
@@ -797,7 +785,7 @@ namespace _3PA.Lib {
                 if (!_ftpClients.ContainsKey(serverUri))
                     _ftpClients.Add(serverUri, new FtpsClient());
                 ftp = _ftpClients[serverUri];
-                
+
                 // try to connect!
                 if (!ftp.Connected) {
                     if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
@@ -826,7 +814,6 @@ namespace _3PA.Lib {
                             ErrorHandler.ShowErrors(e, "Error sending a file! " + e.Message);
                     }
                 }
-            
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error sending a file to FTP");
             }
@@ -870,9 +857,7 @@ namespace _3PA.Lib {
             }
             _ftpClients.Clear();
         }
-        
+
         #endregion
-
-
     }
 }

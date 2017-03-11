@@ -21,13 +21,11 @@ using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms pens objects for core.
     /// </summary>
-    internal sealed class PenAdapter : RPen
-    {
+    internal sealed class PenAdapter : RPen {
         /// <summary>
         /// The actual WinForms brush instance.
         /// </summary>
@@ -36,38 +34,32 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// Init.
         /// </summary>
-        public PenAdapter(Pen pen)
-        {
+        public PenAdapter(Pen pen) {
             _pen = pen;
         }
 
         /// <summary>
         /// The actual WinForms brush instance.
         /// </summary>
-        public Pen Pen
-        {
+        public Pen Pen {
             get { return _pen; }
         }
 
-        public override double Width
-        {
+        public override double Width {
             get { return _pen.Width; }
-            set { _pen.Width = (float)value; }
+            set { _pen.Width = (float) value; }
         }
 
-        public override RDashStyle DashStyle
-        {
-            set
-            {
-                switch (value)
-                {
+        public override RDashStyle DashStyle {
+            set {
+                switch (value) {
                     case RDashStyle.Solid:
                         _pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
                         break;
                     case RDashStyle.Dash:
                         _pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                         if (Width < 2)
-                            _pen.DashPattern = new[] { 4, 4f }; // better looking
+                            _pen.DashPattern = new[] {4, 4f}; // better looking
                         break;
                     case RDashStyle.Dot:
                         _pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;

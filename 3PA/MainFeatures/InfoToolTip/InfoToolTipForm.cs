@@ -25,9 +25,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.InfoToolTip {
-
     internal sealed class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
-
         #region fields
 
         private YamuiScrollPanel _panel;
@@ -36,8 +34,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #endregion
 
         #region constructor
+
         public InfoToolTipForm() {
-            
             Resizable = false;
 
             Padding = new Padding(5);
@@ -59,8 +57,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _panel.ContentPanel.Controls.Add(_labelContent);
 
             Size = new Size(50, 50);
-
         }
+
         #endregion
 
         #region public
@@ -71,19 +69,18 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <param name="content"></param>
         /// <param name="minimumWidth"></param>
         public void SetText(string content, int minimumWidth = 200) {
-
             if (Visible)
                 Cloack();
 
             var screen = Npp.NppScreen;
 
-            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width / 2 - 20);
+            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width/2 - 20);
 
             _panel.ContentPanel.Size = _labelContent.Size;
-            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
+            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height/2 - 10) + 10);
 
             // Too tall?
-            if (_labelContent.Height > (screen.WorkingArea.Height / 2 - 10)) {
+            if (_labelContent.Height > (screen.WorkingArea.Height/2 - 10)) {
                 Width = Width + 10; // add scrollbar width
             }
         }
@@ -97,6 +94,5 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         #endregion
-
     }
 }

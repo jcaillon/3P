@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     /// <summary>
     /// Defines HTML strings
     /// </summary>
-    internal static class HtmlConstants
-    {
+    internal static class HtmlConstants {
         public const string A = "a";
         //        public const string ABBR = "ABBR";
         //        public const string ACRONYM = "ACRONYM";

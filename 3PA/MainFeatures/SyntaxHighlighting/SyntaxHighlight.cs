@@ -19,8 +19,8 @@
 #endregion
 namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlight {
-
         #region real colorization todo
+
         /*
         /// <summary>
         /// Called on STYLENEEDED notification
@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             derp++;
         }
         */
-        #endregion
 
+        #endregion
     }
 }

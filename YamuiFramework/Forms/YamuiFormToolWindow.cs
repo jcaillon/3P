@@ -21,12 +21,10 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 
 namespace YamuiFramework.Forms {
-
     /// <summary>
     /// Form class that does not take focus on show
     /// </summary>
     public class YamuiFormToolWindow : YamuiFormButtons {
-
         #region ShowWithoutActivation & Don't show in ATL+TAB
 
         /// <summary>
@@ -41,13 +39,12 @@ namespace YamuiFramework.Forms {
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return createParams;
             }
         }
 
         #endregion
-
     }
 }

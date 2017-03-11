@@ -28,10 +28,8 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
     public sealed class YamuiTextBox : TextBox {
-
         #region private
 
         private bool _selectAllTextOnActivate = true;
@@ -55,8 +53,12 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public Color CustomBackColor {
             get { return _customBackColor; }
-            set { _customBackColor = value; Invalidate(); }
+            set {
+                _customBackColor = value;
+                Invalidate();
+            }
         }
+
         private Color _customBackColor;
 
         /// <summary>
@@ -73,8 +75,12 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public Color CustomForeColor {
             get { return _customForeColor; }
-            set { _customForeColor = value; Invalidate(); }
+            set {
+                _customForeColor = value;
+                Invalidate();
+            }
         }
+
         private Color _customForeColor;
 
         [Browsable(true)]
@@ -100,6 +106,7 @@ namespace YamuiFramework.Controls {
                 AcceptsReturn = Multiline;
             }
         }
+
         private bool _multiline;
 
         /// <summary>
@@ -126,19 +133,17 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-        
+
         #region Custom paint
 
         private const int OcmCommand = 0x2111;
- 
-        protected override void WndProc(ref Message m) {
 
+        protected override void WndProc(ref Message m) {
             // Send WM_MOUSEWHEEL messages to the parent
-            if (!Multiline && m.Msg == (int)WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint)m.Msg, m.WParam, m.LParam);
+            if (!Multiline && m.Msg == (int) WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
             else base.WndProc(ref m);
 
-
-            if ((m.Msg == (int)WinApi.Messages.WM_PAINT) || (m.Msg == OcmCommand)) {
+            if ((m.Msg == (int) WinApi.Messages.WM_PAINT) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
                     ApplyInternalPadding();
@@ -157,7 +162,6 @@ namespace YamuiFramework.Controls {
         }
 
         private void CustomPaint(Graphics g) {
-
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
@@ -250,7 +254,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     internal class YamuiRegularTextBox2Designer : ControlDesigner {

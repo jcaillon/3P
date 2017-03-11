@@ -26,19 +26,17 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-    
     /// <summary>
     /// Form class that implements interesting utilities + shadow + onpaint + movable/resizable borderless
     /// </summary>
     public class YamuiFormBase : Form {
-
         #region Constants
 
         public const int BorderWidth = 2;
         public const int ResizeHitDetectionSize = 8;
-        
+
         #endregion
-        
+
         #region private fields
 
         private bool _reverseX;
@@ -47,7 +45,7 @@ namespace YamuiFramework.Forms {
         private bool _isMovable = true;
 
         #endregion
-        
+
         #region Properties
 
         [Category("Yamui")]
@@ -55,7 +53,7 @@ namespace YamuiFramework.Forms {
             get { return _isMovable; }
             set { _isMovable = value; }
         }
-        
+
         [Category("Yamui")]
         public bool Resizable {
             get { return _isResizable; }
@@ -63,11 +61,10 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-        
+
         #region constructor
 
         public YamuiFormBase() {
-
             // why those styles? check here: 
             // https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
             SetStyle(
@@ -89,7 +86,6 @@ namespace YamuiFramework.Forms {
         #region OnPaint
 
         protected override void OnPaint(PaintEventArgs e) {
-
             var backColor = YamuiThemeManager.Current.FormBack;
             var borderColor = YamuiThemeManager.Current.FormBorder;
 
@@ -97,17 +93,16 @@ namespace YamuiFramework.Forms {
 
             // draw the border with Style color
             var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, BorderWidth) { Alignment = PenAlignment.Inset };
+            var pen = new Pen(borderColor, BorderWidth) {Alignment = PenAlignment.Inset};
             e.Graphics.DrawRectangle(pen, rect);
-
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         #endregion
 
         #region WndProc
-        
+
         protected override void WndProc(ref Message m) {
             if (DesignMode) {
                 base.WndProc(ref m);
@@ -115,23 +110,23 @@ namespace YamuiFramework.Forms {
             }
 
             switch (m.Msg) {
-                case (int)WinApi.Messages.WM_SYSCOMMAND:
+                case (int) WinApi.Messages.WM_SYSCOMMAND:
                     var sc = m.WParam.ToInt64() & 0xFFF0;
                     switch (sc) {
                         // prevent the window from moving
-                        case (int)WinApi.Messages.SC_MOVE:
-                            if (!Movable) 
+                        case (int) WinApi.Messages.SC_MOVE:
+                            if (!Movable)
                                 return;
                             break;
                     }
                     break;
 
-                case (int)WinApi.Messages.WM_NCHITTEST:
+                case (int) WinApi.Messages.WM_NCHITTEST:
                     // Allows to resize the form
                     if (Resizable) {
                         var ht = HitTestNca(m.LParam);
                         if (ht != WinApi.HitTest.HTCLIENT) {
-                            m.Result = (IntPtr)ht;
+                            m.Result = (IntPtr) ht;
                             return;
                         }
                     }
@@ -139,29 +134,28 @@ namespace YamuiFramework.Forms {
             }
 
             base.WndProc(ref m);
-
         }
 
         /// <summary>
         /// test in which part of the form the cursor is in, it allows to resize a borderless window
         /// </summary>
         protected virtual WinApi.HitTest HitTestNca(IntPtr lparam) {
-            var cursorLocation = new Point((short)lparam, (short)((int)lparam >> 16));
+            var cursorLocation = new Point((short) lparam, (short) ((int) lparam >> 16));
 
             // top left
             if (RectangleToScreen(new Rectangle(0, 0, ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
-                return WinApi.HitTest.HTTOPLEFT;            
-            
+                return WinApi.HitTest.HTTOPLEFT;
+
             // top
-            if (RectangleToScreen(new Rectangle(ResizeHitDetectionSize, 0, ClientRectangle.Width - 2 * ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
+            if (RectangleToScreen(new Rectangle(ResizeHitDetectionSize, 0, ClientRectangle.Width - 2*ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTTOP;
-            
+
             // top right
             if (RectangleToScreen(new Rectangle(ClientRectangle.Width - ResizeHitDetectionSize, 0, ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTTOPRIGHT;
-            
+
             // right
-            if (RectangleToScreen(new Rectangle(ClientRectangle.Width - ResizeHitDetectionSize, ResizeHitDetectionSize, ResizeHitDetectionSize, ClientRectangle.Height - 2 * ResizeHitDetectionSize)).Contains(cursorLocation))
+            if (RectangleToScreen(new Rectangle(ClientRectangle.Width - ResizeHitDetectionSize, ResizeHitDetectionSize, ResizeHitDetectionSize, ClientRectangle.Height - 2*ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTRIGHT;
 
             // bottom right
@@ -169,17 +163,17 @@ namespace YamuiFramework.Forms {
                 return WinApi.HitTest.HTBOTTOMRIGHT;
 
             // bottom
-            if (RectangleToScreen(new Rectangle(ResizeHitDetectionSize, ClientRectangle.Height - ResizeHitDetectionSize, ClientRectangle.Width - 2 * ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
+            if (RectangleToScreen(new Rectangle(ResizeHitDetectionSize, ClientRectangle.Height - ResizeHitDetectionSize, ClientRectangle.Width - 2*ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTBOTTOM;
-            
+
             // bottom left
             if (RectangleToScreen(new Rectangle(0, ClientRectangle.Height - ResizeHitDetectionSize, ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTBOTTOMLEFT;
 
             // left
-            if (RectangleToScreen(new Rectangle(0, ResizeHitDetectionSize, ResizeHitDetectionSize, ClientRectangle.Height - 2 * ResizeHitDetectionSize)).Contains(cursorLocation))
+            if (RectangleToScreen(new Rectangle(0, ResizeHitDetectionSize, ResizeHitDetectionSize, ClientRectangle.Height - 2*ResizeHitDetectionSize)).Contains(cursorLocation))
                 return WinApi.HitTest.HTLEFT;
-            
+
             return WinApi.HitTest.HTCLIENT;
         }
 
@@ -192,12 +186,12 @@ namespace YamuiFramework.Forms {
         /// </summary>
         protected override void OnMouseDown(MouseEventArgs e) {
             if (Movable && e.Button == MouseButtons.Left) {
-                if (WindowState == FormWindowState.Maximized) 
+                if (WindowState == FormWindowState.Maximized)
                     return;
-                
+
                 // do as if the cursor was on the title bar
                 WinApi.ReleaseCapture();
-                WinApi.SendMessage(Handle, (uint)WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int)WinApi.HitTest.HTCAPTION), new IntPtr(0));
+                WinApi.SendMessage(Handle, (uint) WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int) WinApi.HitTest.HTCAPTION), new IntPtr(0));
             }
             base.OnMouseDown(e);
         }
@@ -220,7 +214,7 @@ namespace YamuiFramework.Forms {
                 _reverseX = true;
             } else
                 _reverseX = false;
-            if (spawnLocation.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2) {
+            if (spawnLocation.Y > screen.WorkingArea.Y + screen.WorkingArea.Height/2) {
                 spawnLocation.Y = spawnLocation.Y - Height;
                 _reverseY = true;
             } else
@@ -247,7 +241,7 @@ namespace YamuiFramework.Forms {
                 _reverseY = false;
             return spawnLocation;
         }
-        
+
         /// <summary>
         /// Returns the location that should be used for a window child relative to this window
         /// the location of the childRectangle should be the "default" position of the child menu
@@ -274,7 +268,7 @@ namespace YamuiFramework.Forms {
         /// </summary>
         protected void ResizeFormToFitScreen() {
             var loc = Location;
-            loc.Offset(Width / 2, Height / 2);
+            loc.Offset(Width/2, Height/2);
             var screen = Screen.FromPoint(loc);
             if (Location.X < screen.WorkingArea.X) {
                 var rightPos = Location.X + Width;
@@ -308,6 +302,5 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-        
     }
 }

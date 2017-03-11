@@ -20,13 +20,11 @@
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms brushes objects for core.
     /// </summary>
-    internal sealed class BrushAdapter : RBrush
-    {
+    internal sealed class BrushAdapter : RBrush {
         /// <summary>
         /// The actual WinForms brush instance.
         /// </summary>
@@ -41,8 +39,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// Init.
         /// </summary>
-        public BrushAdapter(Brush brush, bool dispose)
-        {
+        public BrushAdapter(Brush brush, bool dispose) {
             _brush = brush;
             _dispose = dispose;
         }
@@ -50,15 +47,12 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// The actual WinForms brush instance.
         /// </summary>
-        public Brush Brush
-        {
+        public Brush Brush {
             get { return _brush; }
         }
 
-        public override void Dispose()
-        {
-            if (_dispose)
-            {
+        public override void Dispose() {
+            if (_dispose) {
                 _brush.Dispose();
             }
         }

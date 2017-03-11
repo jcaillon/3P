@@ -29,13 +29,12 @@ using YamuiFramework.Themes;
 
 // Credits to : http://sourceforge.net/projects/bsfccontrollibr/
 
-namespace YamuiFramework.Controls
-{
+namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiRadioButtonDesigner")]
     [ToolboxBitmap(typeof(RadioButton))]
-    public class YamuiRadioButton : RadioButton
-    {
+    public class YamuiRadioButton : RadioButton {
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
@@ -47,6 +46,7 @@ namespace YamuiFramework.Controls
         private bool _isHovered;
         private bool _isPressed;
         private bool _isFocused;
+
         #endregion
 
         #region Constructor
@@ -64,6 +64,7 @@ namespace YamuiFramework.Controls
         #endregion
 
         #region Paint Methods
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -82,7 +83,7 @@ namespace YamuiFramework.Controls
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
@@ -108,20 +109,20 @@ namespace YamuiFramework.Controls
 
             // Paint the back + border of the checkbox
             using (SolidBrush b = new SolidBrush(backColor)) {
-                Rectangle boxRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+                Rectangle boxRect = new Rectangle(0, Height/2 - 6, 12, 12);
                 e.Graphics.FillRectangle(b, boxRect);
             }
 
             if (borderColor != Color.Transparent)
                 using (Pen p = new Pen(borderColor)) {
-                    Rectangle boxRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+                    Rectangle boxRect = new Rectangle(0, Height/2 - 6, 12, 12);
                     e.Graphics.DrawRectangle(p, boxRect);
                 }
 
             // paint the form inside
             if (Checked) {
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
-                    Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
+                    Rectangle boxRect = new Rectangle(4, Height/2 - 2, 5, 5);
                     e.Graphics.FillRectangle(b, boxRect);
                 }
             }
@@ -129,7 +130,6 @@ namespace YamuiFramework.Controls
             Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, FontManager.GetTextFormatFlags(TextAlign));
         }
-
 
         #endregion
 
@@ -207,25 +207,21 @@ namespace YamuiFramework.Controls
 
         #region Overridden Methods
 
-        protected override void OnEnabledChanged(EventArgs e)
-        {
+        protected override void OnEnabledChanged(EventArgs e) {
             base.OnEnabledChanged(e);
             Invalidate();
         }
 
-        protected override void OnCheckedChanged(EventArgs e)
-        {
+        protected override void OnCheckedChanged(EventArgs e) {
             base.OnCheckedChanged(e);
             Invalidate();
         }
 
-        public override Size GetPreferredSize(Size proposedSize)
-        {
+        public override Size GetPreferredSize(Size proposedSize) {
             Size preferredSize;
             base.GetPreferredSize(proposedSize);
 
-            using (var g = CreateGraphics())
-            {
+            using (var g = CreateGraphics()) {
                 proposedSize = new Size(int.MaxValue, int.MaxValue);
                 preferredSize = TextRenderer.MeasureText(g, Text, FontManager.GetStandardFont(), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
                 preferredSize.Width += 16;
@@ -247,7 +243,6 @@ namespace YamuiFramework.Controls
         }
 
         #endregion
-
     }
 
     internal class YamuiRadioButtonDesigner : ControlDesigner {

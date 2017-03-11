@@ -20,9 +20,7 @@
 using System.Collections.Generic;
 
 namespace _3PA.Lib.Ftp {
-
     internal class FileTransfert {
-
         public int NbSimultaneousFiles { get; set; }
 
         public List<FileToTransfert> ListOfFileToTransfert { get; set; }
@@ -31,12 +29,9 @@ namespace _3PA.Lib.Ftp {
             get { return 0; }
         }
 
-        public void StartTransfert() { }
+        public void StartTransfert() {}
 
-        public void StopTransfert() {
-
-        }
-
+        public void StopTransfert() {}
     }
 
     internal class FileToTransfert {

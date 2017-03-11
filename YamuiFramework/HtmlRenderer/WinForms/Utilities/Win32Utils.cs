@@ -22,13 +22,11 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Utilities {
     /// <summary>
     /// Utility for Win32 API.
     /// </summary>
-    internal static class Win32Utils
-    {
+    internal static class Win32Utils {
         public const int WsBorder = 0x00800000;
 
         public const int WsExClientEdge = 0x200;
@@ -71,8 +69,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
         /// <param name="height">the height of the memory HDC to create</param>
         /// <param name="dib">returns used bitmap memory section that must be released when done with memory HDC</param>
         /// <returns>memory HDC</returns>
-        public static IntPtr CreateMemoryHdc(IntPtr hdc, int width, int height, out IntPtr dib)
-        {
+        public static IntPtr CreateMemoryHdc(IntPtr hdc, int width, int height, out IntPtr dib) {
             // Create a memory DC so we can work off-screen
             IntPtr memoryHdc = CreateCompatibleDC(hdc);
             SetBkMode(memoryHdc, 1);
@@ -97,8 +94,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
         /// </summary>
         /// <param name="memoryHdc">Memory HDC to release</param>
         /// <param name="dib">bitmap section to release</param>
-        public static void ReleaseMemoryHdc(IntPtr memoryHdc, IntPtr dib)
-        {
+        public static void ReleaseMemoryHdc(IntPtr memoryHdc, IntPtr dib) {
             DeleteObject(dib);
             DeleteDC(memoryHdc);
         }
@@ -131,8 +127,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
         /// </remarks>
         /// <param name="handle">A handle to the window.</param>
         /// <returns>RECT structure that receives the screen coordinates of the upper-left and lower-right corners of the window.</returns>
-        public static Rectangle GetWindowRectangle(IntPtr handle)
-        {
+        public static Rectangle GetWindowRectangle(IntPtr handle) {
             Rectangle rect;
             GetWindowRect(handle, out rect);
             return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
@@ -195,15 +190,13 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct BlendFunction
-    {
+    internal struct BlendFunction {
         public byte BlendOp;
         public byte BlendFlags;
         public byte SourceConstantAlpha;
         public byte AlphaFormat;
 
-        public BlendFunction(byte alpha)
-        {
+        public BlendFunction(byte alpha) {
             BlendOp = 0;
             BlendFlags = 0;
             AlphaFormat = 0;
@@ -212,8 +205,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct BitMapInfo
-    {
+    internal struct BitMapInfo {
         public int biSize;
         public int biWidth;
         public int biHeight;
@@ -232,8 +224,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct TextMetric
-    {
+    internal struct TextMetric {
         public int tmHeight;
         public int tmAscent;
         public int tmDescent;
@@ -256,4 +247,5 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
         public byte tmCharSet;
     }
 }
+
 #endif

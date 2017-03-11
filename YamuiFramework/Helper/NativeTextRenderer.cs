@@ -23,13 +23,11 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>      
     /// Wrapper for GDI text rendering functions<br/>      
     /// This class is not thread-safe as GDI function should be called from the UI thread.      
     ///  </summary>      
     public sealed class NativeTextRenderer : IDisposable {
-
         #region Fields and Consts
 
         /// <summary>
@@ -58,7 +56,7 @@ namespace YamuiFramework.Helper {
         private IntPtr _hdc;
 
         #endregion
-        
+
         /// <summary>
         /// Init.
         /// </summary>
@@ -106,7 +104,7 @@ namespace YamuiFramework.Helper {
             SetFont(font);
 
             var size = new Size();
-            GetTextExtentExPoint(_hdc, str, str.Length, (int)Math.Round(maxWidth), _charFit, _charFitWidth, ref size);
+            GetTextExtentExPoint(_hdc, str, str.Length, (int) Math.Round(maxWidth), _charFit, _charFitWidth, ref size);
             charFit = _charFit[0];
             charFitWidth = charFit > 0 ? _charFitWidth[charFit - 1] : 0;
             return size;
@@ -139,7 +137,7 @@ namespace YamuiFramework.Helper {
             SetTextColor(color);
 
             var rect2 = new Rect(rect);
-            DrawText(_hdc, str, str.Length, ref rect2, (uint)flags);
+            DrawText(_hdc, str, str.Length, ref rect2, (uint) flags);
         }
 
         /// <summary>
@@ -195,7 +193,6 @@ namespace YamuiFramework.Helper {
                 _hdc = IntPtr.Zero;
             }
         }
-
 
         #region Private methods
 
@@ -254,7 +251,7 @@ namespace YamuiFramework.Helper {
         private static extern int GetTextExtentPoint32(IntPtr hdc, [MarshalAs(UnmanagedType.LPWStr)] string str, int len, ref Size size);
 
         [DllImport("gdi32.dll", EntryPoint = "GetTextExtentExPointW")]
-        private static extern bool GetTextExtentExPoint(IntPtr hDc, [MarshalAs(UnmanagedType.LPWStr)]string str, int nLength, int nMaxExtent, int[] lpnFit, int[] alpDx, ref Size size);
+        private static extern bool GetTextExtentExPoint(IntPtr hDc, [MarshalAs(UnmanagedType.LPWStr)] string str, int nLength, int nMaxExtent, int[] lpnFit, int[] alpDx, ref Size size);
 
         [DllImport("gdi32.dll", EntryPoint = "TextOutW")]
         private static extern bool TextOut(IntPtr hdc, int x, int y, [MarshalAs(UnmanagedType.LPWStr)] string str, int len);
@@ -301,7 +298,6 @@ namespace YamuiFramework.Helper {
             }
         }
 
-
         [StructLayout(LayoutKind.Sequential)]
         private struct BlendFunction {
             public byte BlendOp;
@@ -339,7 +335,6 @@ namespace YamuiFramework.Helper {
         #endregion
     }
 
-
     /// <summary>      
     /// See [http://msdn.microsoft.com/en-us/library/windows/desktop/dd162498(v=vs.85).aspx][15]      
     /// </summary>      
@@ -367,6 +362,6 @@ namespace YamuiFramework.Helper {
         WordEllipsis = 0x00040000,
         NoFullWidthCharBreak = 0x00080000,
         HidePrefix = 0x00100000,
-        ProfixOnly = 0x00200000,
+        ProfixOnly = 0x00200000
     }
 }

@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// Represents a word inside an inline box
     /// </summary>
-    internal sealed class CssRectWord : CssRect
-    {
+    internal sealed class CssRectWord : CssRect {
         #region Fields and Consts
 
         /// <summary>
@@ -43,7 +41,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
@@ -52,8 +49,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="hasSpaceBefore">was there a whitespace before the word chars (before trim)</param>
         /// <param name="hasSpaceAfter">was there a whitespace after the word chars (before trim)</param>
         public CssRectWord(CssBox owner, string text, bool hasSpaceBefore, bool hasSpaceAfter)
-            : base(owner)
-        {
+            : base(owner) {
             _text = text;
             _hasSpaceBefore = hasSpaceBefore;
             _hasSpaceAfter = hasSpaceAfter;
@@ -62,16 +58,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// was there a whitespace before the word chars (before trim)
         /// </summary>
-        public override bool HasSpaceBefore
-        {
+        public override bool HasSpaceBefore {
             get { return _hasSpaceBefore; }
         }
 
         /// <summary>
         /// was there a whitespace after the word chars (before trim)
         /// </summary>
-        public override bool HasSpaceAfter
-        {
+        public override bool HasSpaceAfter {
             get { return _hasSpaceAfter; }
         }
 
@@ -79,12 +73,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets a bool indicating if this word is composed only by spaces.
         /// Spaces include tabs and line breaks
         /// </summary>
-        public override bool IsSpaces
-        {
-            get
-            {
-                foreach (var c in Text)
-                {
+        public override bool IsSpaces {
+            get {
+                foreach (var c in Text) {
                     if (!char.IsWhiteSpace(c))
                         return false;
                 }
@@ -95,16 +86,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets if the word is composed by only a line break
         /// </summary>
-        public override bool IsLineBreak
-        {
+        public override bool IsLineBreak {
             get { return Text == "\n"; }
         }
 
         /// <summary>
         /// Gets the text of the word
         /// </summary>
-        public override string Text
-        {
+        public override string Text {
             get { return _text; }
         }
 
@@ -112,8 +101,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Represents this word for debugging purposes
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("{0} ({1} char{2})", Text.Replace(' ', '-').Replace("\n", "\\n"), Text.Length, Text.Length != 1 ? "s" : string.Empty);
         }
     }

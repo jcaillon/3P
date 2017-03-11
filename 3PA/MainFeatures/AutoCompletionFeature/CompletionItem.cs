@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,12 +26,10 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
     internal class CompletionItem : FilteredTypeListItem {
-
         /// <summary>
         /// Type of completion
         /// </summary>
@@ -81,12 +78,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <param name="toApplyOnFlag"></param>
         public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
                 if (flag == 0 || !Flags.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
             }
         }
-        
+
         /// <summary>
         /// The piece of text displayed in the list
         /// </summary>
@@ -103,7 +100,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// if the value is strictly inferior to 0, the button for this type will not appear
         /// on the bottom of list
         /// </summary>
-        public override int ItemType { get { return (int) Type; } }
+        public override int ItemType {
+            get { return (int) Type; }
+        }
 
         /// <summary>
         /// return the image that will be used to identify this item
@@ -112,29 +111,29 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// bottom buttons will be that of the first item found for the given type
         /// </summary>
         public override Image ItemTypeImage {
-            get {
-                return Utils.GetImageFromStr(((CompletionType)ItemType).ToString());
-            }
+            get { return Utils.GetImageFromStr(((CompletionType) ItemType).ToString()); }
         }
 
         /// <summary>
         /// The text that describes this item type
         /// </summary>
-        public override string ItemTypeText { 
-            get {
-                return "Category : <span class='SubTextColor'><b>" + ((CompletionType)ItemType) + "</b></span><br><br>"; 
-            }
+        public override string ItemTypeText {
+            get { return "Category : <span class='SubTextColor'><b>" + ((CompletionType) ItemType) + "</b></span><br><br>"; }
         }
 
         /// <summary>
         /// return true if the item is to be highlighted
         /// </summary>
-        public override bool IsRowHighlighted { get { return false; } }
+        public override bool IsRowHighlighted {
+            get { return false; }
+        }
 
         /// <summary>
         /// return a string containing the subtext to display
         /// </summary>
-        public override string SubText { get { return SubString; } }
+        public override string SubText {
+            get { return SubString; }
+        }
 
         /// <summary>
         /// return a list of images to be displayed (in reverse order) for the item
@@ -143,10 +142,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get {
                 var outList = new List<Image>();
                 foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
                     if (flag == 0 || !Flags.HasFlag(flag)) continue;
 
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
                     if (tryImg != null) {
                         outList.Add(tryImg);
                     }
@@ -154,7 +153,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return outList;
             }
         }
-
     }
 
     internal enum CompletionType {
@@ -173,7 +171,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Keyword,
         KeywordObject,
         FieldPk,
-        Field,
+        Field
     }
-
 }

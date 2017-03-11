@@ -33,9 +33,7 @@ using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli {
-
     internal partial class AppliForm : YamuiMainAppli {
-
         #region fields
 
         /// <summary>
@@ -53,7 +51,7 @@ namespace _3PA.MainFeatures.Appli {
         protected override CreateParams CreateParams {
             get {
                 var Params = base.CreateParams;
-                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                Params.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return Params;
             }
         }
@@ -73,27 +71,27 @@ namespace _3PA.MainFeatures.Appli {
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", PageNames.SetEnvironment.ToString(), new SetEnvironment()),
                     new YamuiSecMenu("DEPLOYMENT RULES", PageNames.DeploymentRules.ToString(), new SetDeploymentRules()),
-                    new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
+                    new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo())
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
                 new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
-                //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
-                    new YamuiSecMenu("DEPLOY YOUR APPLICATION", PageNames.MassCompiler.ToString(), new DoDeployPage()),
+                    //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
+                    new YamuiSecMenu("DEPLOY YOUR APPLICATION", PageNames.MassCompiler.ToString(), new DoDeployPage())
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General", "Compilation" })),
+                    new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> {"General", "Compilation"})),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
-                    new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
-                    new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
-                    new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
-                    new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
+                    new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> {"Updates"})),
+                    new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> {"Auto-completion"})),
+                    new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> {"Code edition"})),
+                    new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> {"File explorer", "Code explorer", "Tooltip"})),
                     new YamuiSecMenu("OTHERS", "others", new OthersPage()),
                     new YamuiSecMenu("SHORTCUTS", null, new ShortCutsPage()),
                     new YamuiSecMenu("SHARE/EXPORT CONFIG", PageNames.ExportShareConf.ToString(), new ExportPage())
                 })
             });
 
-            CreateTopLinks(new List<string> { "FEEDBACK", "REPORT A BUG", "HELP" }, (sender, tabArgs) => {
+            CreateTopLinks(new List<string> {"FEEDBACK", "REPORT A BUG", "HELP"}, (sender, tabArgs) => {
                 switch (tabArgs.SelectedIndex) {
                     case 0:
                         Process.Start(@"https://github.com/jcaillon/3P/issues/3");
@@ -113,7 +111,6 @@ namespace _3PA.MainFeatures.Appli {
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
-
         }
 
         #endregion
@@ -176,8 +173,6 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         #endregion
-
-
     }
 
     internal enum PageNames {
@@ -190,5 +185,4 @@ namespace _3PA.MainFeatures.Appli {
         MassCompiler,
         DeploymentRules
     }
-
 }

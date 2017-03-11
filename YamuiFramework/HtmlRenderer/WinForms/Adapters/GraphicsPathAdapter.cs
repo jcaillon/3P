@@ -22,13 +22,11 @@ using System.Drawing.Drawing2D;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms graphics path object for core.
     /// </summary>
-    internal sealed class GraphicsPathAdapter : RGraphicsPath
-    {
+    internal sealed class GraphicsPathAdapter : RGraphicsPath {
         /// <summary>
         /// The actual WinForms graphics path instance.
         /// </summary>
@@ -42,43 +40,36 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// The actual WinForms graphics path instance.
         /// </summary>
-        public GraphicsPath GraphicsPath
-        {
+        public GraphicsPath GraphicsPath {
             get { return _graphicsPath; }
         }
 
-        public override void Start(double x, double y)
-        {
+        public override void Start(double x, double y) {
             _lastPoint = new RPoint(x, y);
         }
 
-        public override void LineTo(double x, double y)
-        {
-            _graphicsPath.AddLine((float)_lastPoint.X, (float)_lastPoint.Y, (float)x, (float)y);
+        public override void LineTo(double x, double y) {
+            _graphicsPath.AddLine((float) _lastPoint.X, (float) _lastPoint.Y, (float) x, (float) y);
             _lastPoint = new RPoint(x, y);
         }
 
-        public override void ArcTo(double x, double y, double size, Corner corner)
-        {
-            float left = (float)(Math.Min(x, _lastPoint.X) - (corner == Corner.TopRight || corner == Corner.BottomRight ? size : 0));
-            float top = (float)(Math.Min(y, _lastPoint.Y) - (corner == Corner.BottomLeft || corner == Corner.BottomRight ? size : 0));
-            _graphicsPath.AddArc(left, top, (float)size * 2, (float)size * 2, GetStartAngle(corner), 90);
+        public override void ArcTo(double x, double y, double size, Corner corner) {
+            float left = (float) (Math.Min(x, _lastPoint.X) - (corner == Corner.TopRight || corner == Corner.BottomRight ? size : 0));
+            float top = (float) (Math.Min(y, _lastPoint.Y) - (corner == Corner.BottomLeft || corner == Corner.BottomRight ? size : 0));
+            _graphicsPath.AddArc(left, top, (float) size*2, (float) size*2, GetStartAngle(corner), 90);
             _lastPoint = new RPoint(x, y);
         }
 
-        public override void Dispose()
-        {
+        public override void Dispose() {
             _graphicsPath.Dispose();
         }
 
         /// <summary>
         /// Get arc start angle for the given corner.
         /// </summary>
-        private static int GetStartAngle(Corner corner)
-        {
+        private static int GetStartAngle(Corner corner) {
             int startAngle;
-            switch (corner)
-            {
+            switch (corner) {
                 case Corner.TopLeft:
                     startAngle = 180;
                     break;

@@ -26,15 +26,14 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiLinkDesigner")]
     [ToolboxBitmap(typeof(LinkLabel))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButtonLink : YamuiButton {
-
         #region Fields
 
         private FontFunction _function = FontFunction.Link;
+
         [DefaultValue(FontFunction.Normal)]
         [Category("Yamui")]
         public FontFunction Function {
@@ -48,10 +47,10 @@ namespace YamuiFramework.Controls {
 
         public YamuiButtonLink() {
             SetStyle(ControlStyles.SupportsTransparentBackColor |
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                     ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.ResizeRedraw |
+                     ControlStyles.UserPaint |
+                     ControlStyles.AllPaintingInWmPaint, true);
         }
 
         #endregion
@@ -75,7 +74,6 @@ namespace YamuiFramework.Controls {
     }
 
     internal class YamuiLinkDesigner : ControlDesigner {
-
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
             properties.Remove("Padding");

@@ -24,22 +24,19 @@ using System.Drawing.Text;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
-using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 using YamuiFramework.HtmlRenderer.WinForms.Adapters;
 using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms
-{
+namespace YamuiFramework.HtmlRenderer.WinForms {
     /// <summary>
     /// Low level handling of Html Renderer logic, this class is used by <see cref="HtmlParser"/>, 
     /// <see cref="HtmlLabel"/>, <see cref="HtmlToolTip"/> and <see cref="HtmlRender"/>.<br/>
     /// </summary>
     /// <seealso cref="HtmlContainerInt"/>
-    public sealed class HtmlContainer : IDisposable
-    {
+    public sealed class HtmlContainer : IDisposable {
         #region Fields and Consts
 
         /// <summary>
@@ -54,12 +51,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public HtmlContainer()
-        {
+        public HtmlContainer() {
             _htmlContainerInt = new HtmlContainerInt(WinFormsAdapter.Instance);
         }
 
@@ -67,8 +62,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Raised when the user clicks on a link in the html.<br/>
         /// Allows canceling the execution of the link.
         /// </summary>
-        public event EventHandler<HtmlLinkClickedEventArgs> LinkClicked
-        {
+        public event EventHandler<HtmlLinkClickedEventArgs> LinkClicked {
             add { _htmlContainerInt.LinkClicked += value; }
             remove { _htmlContainerInt.LinkClicked -= value; }
         }
@@ -87,8 +81,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <remarks>
         /// There is no guarantee that the event will be raised on the main thread, it can be raised on thread-pool thread.
         /// </remarks>
-        public event EventHandler<HtmlRefreshEventArgs> Refresh
-        {
+        public event EventHandler<HtmlRefreshEventArgs> Refresh {
             add { _htmlContainerInt.Refresh += value; }
             remove { _htmlContainerInt.Refresh -= value; }
         }
@@ -97,8 +90,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Raised when Html Renderer request scroll to specific location.<br/>
         /// This can occur on document anchor click.
         /// </summary>
-        public event EventHandler<HtmlScrollEventArgs> ScrollChange
-        {
+        public event EventHandler<HtmlScrollEventArgs> ScrollChange {
             add { _htmlContainerInt.ScrollChange += value; }
             remove { _htmlContainerInt.ScrollChange -= value; }
         }
@@ -109,8 +101,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <remarks>
         /// There is no guarantee that the event will be raised on the main thread, it can be raised on thread-pool thread.
         /// </remarks>
-        public event EventHandler<HtmlRenderErrorEventArgs> RenderError
-        {
+        public event EventHandler<HtmlRenderErrorEventArgs> RenderError {
             add { _htmlContainerInt.RenderError += value; }
             remove { _htmlContainerInt.RenderError -= value; }
         }
@@ -120,8 +111,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// This event allows to provide the stylesheet manually or provide new source (file or Uri) to load from.<br/>
         /// If no alternative data is provided the original source will be used.<br/>
         /// </summary>
-        public event EventHandler<HtmlStylesheetLoadEventArgs> StylesheetLoad
-        {
+        public event EventHandler<HtmlStylesheetLoadEventArgs> StylesheetLoad {
             add { _htmlContainerInt.StylesheetLoad += value; }
             remove { _htmlContainerInt.StylesheetLoad -= value; }
         }
@@ -130,8 +120,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Raised when an image is about to be loaded by file path or URI.<br/>
         /// This event allows to provide the image manually, if not handled the image will be loaded from file or download from URI.
         /// </summary>
-        public event EventHandler<HtmlImageLoadEventArgs> ImageLoad
-        {
+        public event EventHandler<HtmlImageLoadEventArgs> ImageLoad {
             add { _htmlContainerInt.ImageLoad += value; }
             remove { _htmlContainerInt.ImageLoad -= value; }
         }
@@ -139,8 +128,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// The internal core html container
         /// </summary>
-        internal HtmlContainerInt HtmlContainerInt
-        {
+        internal HtmlContainerInt HtmlContainerInt {
             get { return _htmlContainerInt; }
         }
 
@@ -157,13 +145,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// using <see cref="TextRenderingHint.ClearTypeGridFit"/> doesn't work well with transparent background.
         /// </para>
         /// </remarks>
-        public bool UseGdiPlusTextRendering
-        {
+        public bool UseGdiPlusTextRendering {
             get { return _useGdiPlusTextRendering; }
-            set
-            {
-                if (_useGdiPlusTextRendering != value)
-                {
+            set {
+                if (_useGdiPlusTextRendering != value) {
                     _useGdiPlusTextRendering = value;
                     _htmlContainerInt.RequestRefresh(true);
                 }
@@ -173,16 +158,14 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// the parsed stylesheet data used for handling the html
         /// </summary>
-        public CssData CssData
-        {
+        public CssData CssData {
             get { return _htmlContainerInt.CssData; }
         }
 
         /// <summary>
         /// Gets or sets a value indicating if anti-aliasing should be avoided for geometry like backgrounds and borders (default - false).
         /// </summary>
-        public bool AvoidGeometryAntialias
-        {
+        public bool AvoidGeometryAntialias {
             get { return _htmlContainerInt.AvoidGeometryAntialias; }
             set { _htmlContainerInt.AvoidGeometryAntialias = value; }
         }
@@ -197,8 +180,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// ports to achieve better performance.<br/>
         /// Asynchronously image loading should be avoided when the full html content must be available during render, like render to image.
         /// </remarks>
-        public bool AvoidAsyncImagesLoading
-        {
+        public bool AvoidAsyncImagesLoading {
             get { return _htmlContainerInt.AvoidAsyncImagesLoading; }
             set { _htmlContainerInt.AvoidAsyncImagesLoading = value; }
         }
@@ -216,8 +198,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Early image loading may also effect the layout if image without known size above the current scroll location are loaded as they
         /// will push the html elements down.
         /// </remarks>
-        public bool AvoidImagesLateLoading
-        {
+        public bool AvoidImagesLateLoading {
             get { return _htmlContainerInt.AvoidImagesLateLoading; }
             set { _htmlContainerInt.AvoidImagesLateLoading = value; }
         }
@@ -226,8 +207,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Is content selection is enabled for the rendered html (default - true).<br/>
         /// If set to 'false' the rendered html will be static only with ability to click on links.
         /// </summary>
-        public bool IsSelectionEnabled
-        {
+        public bool IsSelectionEnabled {
             get { return _htmlContainerInt.IsSelectionEnabled; }
             set { _htmlContainerInt.IsSelectionEnabled = value; }
         }
@@ -235,8 +215,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// Is the build-in context menu enabled and will be shown on mouse right click (default - true)
         /// </summary>
-        public bool IsContextMenuEnabled
-        {
+        public bool IsContextMenuEnabled {
             get { return _htmlContainerInt.IsContextMenuEnabled; }
             set { _htmlContainerInt.IsContextMenuEnabled = value; }
         }
@@ -249,8 +228,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Element that is rendered at location (50,100) with offset of (0,200) will not be rendered as it
         /// will be at -100 therefore outside the client rectangle.
         /// </example>
-        public Point ScrollOffset
-        {
+        public Point ScrollOffset {
             get { return Utils.ConvertRound(_htmlContainerInt.ScrollOffset); }
             set { _htmlContainerInt.ScrollOffset = Utils.Convert(value); }
         }
@@ -259,8 +237,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// The top-left most location of the rendered html.<br/>
         /// This will offset the top-left corner of the rendered html.
         /// </summary>
-        public PointF Location
-        {
+        public PointF Location {
             get { return Utils.Convert(_htmlContainerInt.Location); }
             set { _htmlContainerInt.Location = Utils.Convert(value); }
         }
@@ -272,8 +249,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <see cref="ActualSize"/> can be exceed the max size by layout restrictions (unwrappable line, set image size, etc.).<br/>
         /// Set zero for unlimited (width\height separately).<br/>
         /// </summary>
-        public SizeF MaxSize
-        {
+        public SizeF MaxSize {
             get { return Utils.Convert(_htmlContainerInt.MaxSize); }
             set { _htmlContainerInt.MaxSize = Utils.Convert(value); }
         }
@@ -281,8 +257,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// The actual size of the rendered html (after layout)
         /// </summary>
-        public SizeF ActualSize
-        {
+        public SizeF ActualSize {
             get { return Utils.Convert(_htmlContainerInt.ActualSize); }
             internal set { _htmlContainerInt.ActualSize = Utils.Convert(value); }
         }
@@ -290,16 +265,14 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// Get the currently selected text segment in the html.
         /// </summary>
-        public string SelectedText
-        {
+        public string SelectedText {
             get { return _htmlContainerInt.SelectedText; }
         }
 
         /// <summary>
         /// Copy the currently selected html segment with style.
         /// </summary>
-        public string SelectedHtml
-        {
+        public string SelectedHtml {
             get { return _htmlContainerInt.SelectedHtml; }
         }
 
@@ -308,8 +281,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="htmlSource">the html to init with, init empty if not given</param>
         /// <param name="baseCssData">optional: the stylesheet to init with, init default if not given</param>
-        public void SetHtml(string htmlSource, CssData baseCssData = null)
-        {
+        public void SetHtml(string htmlSource, CssData baseCssData = null) {
             _htmlContainerInt.SetHtml(htmlSource, baseCssData);
         }
 
@@ -318,8 +290,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="styleGen">Optional: controls the way styles are generated when html is generated (default: <see cref="HtmlGenerationStyle.Inline"/>)</param>
         /// <returns>generated html</returns>
-        public string GetHtml(HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline)
-        {
+        public string GetHtml(HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline) {
             return _htmlContainerInt.GetHtml(styleGen);
         }
 
@@ -330,8 +301,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="location">the location to find the attribute at</param>
         /// <param name="attribute">the attribute key to get value by</param>
         /// <returns>found attribute value or null if not found</returns>
-        public string GetAttributeAt(Point location, string attribute)
-        {
+        public string GetAttributeAt(Point location, string attribute) {
             return _htmlContainerInt.GetAttributeAt(Utils.Convert(location), attribute);
         }
 
@@ -339,11 +309,9 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Get all the links in the HTML with the element rectangle and href data.
         /// </summary>
         /// <returns>collection of all the links in the HTML</returns>
-        public List<LinkElementData<RectangleF>> GetLinks()
-        {
+        public List<LinkElementData<RectangleF>> GetLinks() {
             var linkElements = new List<LinkElementData<RectangleF>>();
-            foreach (var link in HtmlContainerInt.GetLinks())
-            {
+            foreach (var link in HtmlContainerInt.GetLinks()) {
                 linkElements.Add(new LinkElementData<RectangleF>(link.Id, link.Href, Utils.Convert(link.Rectangle)));
             }
             return linkElements;
@@ -354,8 +322,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="location">the location to find the link at</param>
         /// <returns>css link href if exists or null</returns>
-        public string GetLinkAt(Point location)
-        {
+        public string GetLinkAt(Point location) {
             return _htmlContainerInt.GetLinkAt(Utils.Convert(location));
         }
 
@@ -366,22 +333,19 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="elementId">the id of the element to get its rectangle</param>
         /// <returns>the rectangle of the element or null if not found</returns>
-        public RectangleF? GetElementRectangle(string elementId)
-        {
+        public RectangleF? GetElementRectangle(string elementId) {
             var r = _htmlContainerInt.GetElementRectangle(elementId);
-            return r.HasValue ? Utils.Convert(r.Value) : (RectangleF?)null;
+            return r.HasValue ? Utils.Convert(r.Value) : (RectangleF?) null;
         }
 
         /// <summary>
         /// Measures the bounds of box and children, recursively.
         /// </summary>
         /// <param name="g">Device context to draw</param>
-        public void PerformLayout(Graphics g)
-        {
+        public void PerformLayout(Graphics g) {
             ArgChecker.AssertArgNotNull(g, "g");
 
-            using (var ig = new GraphicsAdapter(g, _useGdiPlusTextRendering))
-            {
+            using (var ig = new GraphicsAdapter(g, _useGdiPlusTextRendering)) {
                 _htmlContainerInt.PerformLayout(ig);
             }
         }
@@ -390,12 +354,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Render the html using the given device.
         /// </summary>
         /// <param name="g">the device to use to render</param>
-        public void PerformPaint(Graphics g)
-        {
+        public void PerformPaint(Graphics g) {
             ArgChecker.AssertArgNotNull(g, "g");
 
-            using (var ig = new GraphicsAdapter(g, _useGdiPlusTextRendering))
-            {
+            using (var ig = new GraphicsAdapter(g, _useGdiPlusTextRendering)) {
                 _htmlContainerInt.PerformPaint(ig);
             }
         }
@@ -405,8 +367,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="e">the mouse event args</param>
-        public void HandleMouseDown(Control parent, MouseEventArgs e)
-        {
+        public void HandleMouseDown(Control parent, MouseEventArgs e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
@@ -418,8 +379,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="e">the mouse event args</param>
-        public void HandleMouseUp(Control parent, MouseEventArgs e)
-        {
+        public void HandleMouseUp(Control parent, MouseEventArgs e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
@@ -431,8 +391,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
         /// <param name="e">mouse event args</param>
-        public void HandleMouseDoubleClick(Control parent, MouseEventArgs e)
-        {
+        public void HandleMouseDoubleClick(Control parent, MouseEventArgs e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
@@ -444,8 +403,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
         /// <param name="e">the mouse event args</param>
-        public void HandleMouseMove(Control parent, MouseEventArgs e)
-        {
+        public void HandleMouseMove(Control parent, MouseEventArgs e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
@@ -456,8 +414,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Handle mouse leave to handle hover cursor.
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
-        public void HandleMouseLeave(Control parent)
-        {
+        public void HandleMouseLeave(Control parent) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
             _htmlContainerInt.HandleMouseLeave(new ControlAdapter(parent, _useGdiPlusTextRendering));
@@ -468,35 +425,30 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="e">the pressed key</param>
-        public void HandleKeyDown(Control parent, KeyEventArgs e)
-        {
+        public void HandleKeyDown(Control parent, KeyEventArgs e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
             _htmlContainerInt.HandleKeyDown(new ControlAdapter(parent, _useGdiPlusTextRendering), CreateKeyEevent(e));
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             _htmlContainerInt.Dispose();
         }
-
 
         #region Private methods
 
         /// <summary>
         /// Create HtmlRenderer mouse event from win forms mouse event.
         /// </summary>
-        private static RMouseEvent CreateMouseEvent(MouseEventArgs e)
-        {
+        private static RMouseEvent CreateMouseEvent(MouseEventArgs e) {
             return new RMouseEvent((e.Button & MouseButtons.Left) != 0);
         }
 
         /// <summary>
         /// Create HtmlRenderer key event from win forms key event.
         /// </summary>
-        private static RKeyEvent CreateKeyEevent(KeyEventArgs e)
-        {
+        private static RKeyEvent CreateKeyEevent(KeyEventArgs e) {
             return new RKeyEvent(e.Control, e.KeyCode == Keys.A, e.KeyCode == Keys.C);
         }
 

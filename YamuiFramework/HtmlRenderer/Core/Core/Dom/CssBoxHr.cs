@@ -23,21 +23,18 @@ using YamuiFramework.HtmlRenderer.Core.Core.Handlers;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// CSS box for hr element.
     /// </summary>
-    internal sealed class CssBoxHr : CssBox
-    {
+    internal sealed class CssBoxHr : CssBox {
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="parent">the parent box of this box</param>
         /// <param name="tag">the html tag data of this box</param>
         public CssBoxHr(CssBox parent, HtmlTag tag)
-            : base(parent, tag)
-        {
+            : base(parent, tag) {
             Display = CssConstants.Block;
         }
 
@@ -46,8 +43,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Performs layout of the DOM structure creating lines by set bounds restrictions.
         /// </summary>
         /// <param name="g">Device context to use</param>
-        protected override void PerformLayoutImp(RGraphics g)
-        {
+        protected override void PerformLayoutImp(RGraphics g) {
             if (Display == CssConstants.None)
                 return;
 
@@ -67,8 +63,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                            - ActualMarginLeft - ActualMarginRight - ActualBorderLeftWidth - ActualBorderRightWidth;
 
             //Check width if not auto
-            if (Width != CssConstants.Auto && !string.IsNullOrEmpty(Width))
-            {
+            if (Width != CssConstants.Auto && !string.IsNullOrEmpty(Width)) {
                 width = CssValueParser.ParseLength(Width, width, this);
             }
 
@@ -76,16 +71,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                 width = minwidth;
 
             double height = ActualHeight;
-            if (height < 1)
-            {
+            if (height < 1) {
                 height = Size.Height + ActualBorderTopWidth + ActualBorderBottomWidth;
             }
-            if (height < 1)
-            {
+            if (height < 1) {
                 height = 2;
             }
-            if (height <= 2 && ActualBorderTopWidth < 1 && ActualBorderBottomWidth < 1)
-            {
+            if (height <= 2 && ActualBorderTopWidth < 1 && ActualBorderBottomWidth < 1) {
                 BorderTopStyle = BorderBottomStyle = CssConstants.Solid;
                 BorderTopWidth = "1px";
                 BorderBottomWidth = "1px";
@@ -100,21 +92,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Paints the fragment
         /// </summary>
         /// <param name="g">the device to draw to</param>
-        protected override void PaintImp(RGraphics g)
-        {
+        protected override void PaintImp(RGraphics g) {
             var offset = HtmlContainer != null ? HtmlContainer.ScrollOffset : RPoint.Empty;
             var rect = new RRect(Bounds.X + offset.X, Bounds.Y + offset.Y, Bounds.Width, Bounds.Height);
 
-            if (rect.Height > 2 && RenderUtils.IsColorVisible(ActualBackgroundColor))
-            {
+            if (rect.Height > 2 && RenderUtils.IsColorVisible(ActualBackgroundColor)) {
                 g.DrawRectangle(g.GetSolidBrush(ActualBackgroundColor), rect.X, rect.Y, rect.Width, rect.Height);
             }
 
             var b1 = g.GetSolidBrush(ActualBorderTopColor);
             BordersDrawHandler.DrawBorder(Border.Top, g, this, b1, rect);
 
-            if (rect.Height > 1)
-            {
+            if (rect.Height > 1) {
                 var b2 = g.GetSolidBrush(ActualBorderLeftColor);
                 BordersDrawHandler.DrawBorder(Border.Left, g, this, b2, rect);
 

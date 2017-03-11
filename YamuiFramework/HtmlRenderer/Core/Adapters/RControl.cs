@@ -20,14 +20,12 @@
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters {
     /// <summary>
     /// Adapter for platform specific control object - used to handle updating the control that the html is rendered on.<br/>
     /// Not relevant for platforms that don't render HTML on UI element.
     /// </summary>
-    public abstract class RControl
-    {
+    public abstract class RControl {
         /// <summary>
         /// The platform adapter.
         /// </summary>
@@ -36,8 +34,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <summary>
         /// Init control with platform adapter.
         /// </summary>
-        protected RControl(RAdapter adapter)
-        {
+        protected RControl(RAdapter adapter) {
             ArgChecker.AssertArgNotNull(adapter, "adapter");
             _adapter = adapter;
         }
@@ -45,8 +42,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <summary>
         /// The platform adapter.
         /// </summary>
-        public RAdapter Adapter
-        {
+        public RAdapter Adapter {
             get { return _adapter; }
         }
 

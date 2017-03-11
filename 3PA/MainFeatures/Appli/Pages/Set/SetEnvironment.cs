@@ -32,7 +32,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetEnvironment : YamuiPage {
-
         #region fields
 
         private ViewMode _currentMode;
@@ -49,7 +48,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // sets buttons behavior
             foreach (var control in scrollPanel.ContentPanel.Controls) {
                 if (control is YamuiButtonImage) {
-                    var x = (YamuiButtonImage)control;
+                    var x = (YamuiButtonImage) control;
                     if (x.Name.StartsWith("btleft")) {
                         // Left button
                         x.BackGrndImage = ImageResources.SelectFile;
@@ -60,7 +59,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         x.BackGrndImage = ImageResources.OpenInExplorer;
                         x.ButtonPressed += OpenFileOnButtonPressed;
                         x.MouseDown += OpenFileOnMouseDown;
-                        toolTip.SetToolTip(x, (string.IsNullOrEmpty((string)(x.Tag ?? string.Empty)) ? "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer" : "Click to <b>open the directory</b> in the windows explorer"));
+                        toolTip.SetToolTip(x, (string.IsNullOrEmpty((string) (x.Tag ?? string.Empty)) ? "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer" : "Click to <b>open the directory</b> in the windows explorer"));
                     }
                 }
             }
@@ -79,7 +78,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
             toolTip.SetToolTip(textbox1, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
-   
+
             toolTip.SetToolTip(btDbEdit, "Click to <b>edit</b> this database definition (name and .pf path)");
             toolTip.SetToolTip(btDbAdd, "Click to <b>add</b> a new database definition (name and .pf path)<br>for the current environment");
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
@@ -127,7 +126,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // buttons
             btDbDeleteDownload.BackGrndImage = ImageResources.Delete;
             btDbView.BackGrndImage = ImageResources.ViewFile;
-            
+
             btAdd.BackGrndImage = ImageResources.Add;
             btCancel.BackGrndImage = ImageResources.Cancel;
             btSave.BackGrndImage = ImageResources.Save;
@@ -140,7 +139,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbSave.BackGrndImage = ImageResources.Save;
             btDbEdit.BackGrndImage = ImageResources.Edit;
             btDbDelete.BackGrndImage = ImageResources.Del;
-            
 
             btEdit.ButtonPressed += BtModifyOnButtonPressed;
             btAdd.ButtonPressed += BtAddOnButtonPressed;
@@ -153,8 +151,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
             btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
             btDbSave.ButtonPressed += BtDbSaveOnButtonPressed;
-            btDbCancel.ButtonPressed += BtDbCancelOnButtonPressed;         
-            
+            btDbCancel.ButtonPressed += BtDbCancelOnButtonPressed;
+
             btDbDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
             btDbDownload.ButtonPressed += BtDownloadOnButtonPressed;
             btDbView.ButtonPressed += BtDbViewOnButtonPressed;
@@ -187,7 +185,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #region Update view / update Model
 
         private bool Save() {
-
             switch (_currentMode) {
                 case ViewMode.DbDelete:
                     ProEnvironment.Current.RemoveCurrentPfPath();
@@ -209,7 +206,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 case ViewMode.Edit:
                 case ViewMode.Copy:
                     // mandatory fields
-                    foreach (var box in new List<YamuiTextBox> { flName }.Where(box => string.IsNullOrWhiteSpace(box.Text))) {
+                    foreach (var box in new List<YamuiTextBox> {flName}.Where(box => string.IsNullOrWhiteSpace(box.Text))) {
                         BlinkTextBox(box, ThemeManager.Current.GenericErrorColor);
                         return false;
                     }
@@ -287,7 +284,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             // empty database cb
                             cbDatabase.DataSource = new List<string>();
                             if (envLetterList.Count > 0) {
-
                                 // hide the combo if there is only one item
                                 if (envLetterList.Count == 1) {
                                     cbSuffix.Hide();
@@ -364,12 +360,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         var defaultEnv = new ProEnvironment.ProEnvironmentObject();
                         tgCompLocally.Checked = defaultEnv.CompileLocally;
                         tgCompWithLst.Checked = defaultEnv.CompileWithListing;
-
                     } else if (mode == ViewMode.DbAdd) {
                         // reset fields when adding a new pf
                         flDatabase.Text = string.Empty;
                         textbox1.Text = string.Empty;
-
                     } else {
                         // fill details
                         flName.Text = ProEnvironment.Current.Name;
@@ -505,7 +499,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" });
+            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"});
             if (answ == 0 || answ == 1) {
                 if (answ == 1)
                     _unsafeDelete = true;
@@ -624,7 +618,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="buttonName"></param>
         /// <returns></returns>
         private YamuiTextBox GetTextBoxByName(string buttonName) {
-            return (YamuiTextBox)Controls.Find("textbox" + buttonName.Substring(buttonName.Length - 1, 1), true).FirstOrDefault();
+            return (YamuiTextBox) Controls.Find("textbox" + buttonName.Substring(buttonName.Length - 1, 1), true).FirstOrDefault();
         }
 
         /// <summary>
@@ -636,6 +630,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textBox.UseCustomBackColor = true;
             Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
+
         private void BlinkButton(YamuiButton button, Color blinkColor) {
             button.UseCustomBackColor = true;
             Transition.run(button, "BackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(1, 300), (o, args) => { button.UseCustomBackColor = false; });
@@ -647,11 +642,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void EnableAllTextBoxes(bool newStatus) {
             foreach (var control in scrollPanel.ContentPanel.Controls) {
                 if (control is YamuiTextBox)
-                    ((YamuiTextBox)control).Enabled = newStatus;
+                    ((YamuiTextBox) control).Enabled = newStatus;
             }
         }
 
         #endregion
-
     }
 }

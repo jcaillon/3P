@@ -21,7 +21,6 @@ using System;
 
 namespace YamuiFramework.HtmlRenderer.Core.Core.Entities {
     public sealed class BoxClickedEventArgs : EventArgs {
-
         /// <summary>
         /// The value of the attribute "clickable" of the box
         /// </summary>

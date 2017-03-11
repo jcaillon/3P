@@ -23,13 +23,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     /// <summary>
     /// Utility method for handling CSS stuff.
     /// </summary>
-    internal static class CssUtils
-    {
+    internal static class CssUtils {
         #region Fields and Consts
 
         /// <summary>
@@ -39,12 +37,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
 
         #endregion
 
-
         /// <summary>
         /// Brush for selection background
         /// </summary>
-        public static RColor DefaultSelectionBackcolor
-        {
+        public static RColor DefaultSelectionBackcolor {
             get { return _defaultSelectionBackcolor; }
         }
 
@@ -54,11 +50,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="g"></param>
         /// <param name="box"></param>
         /// <returns></returns>
-        public static double WhiteSpace(RGraphics g, CssBoxProperties box)
-        {
+        public static double WhiteSpace(RGraphics g, CssBoxProperties box) {
             double w = box.ActualFont.GetWhitespaceWidth(g);
-            if (!(String.IsNullOrEmpty(box.WordSpacing) || box.WordSpacing == CssConstants.Normal))
-            {
+            if (!(String.IsNullOrEmpty(box.WordSpacing) || box.WordSpacing == CssConstants.Normal)) {
                 w += CssValueParser.ParseLength(box.WordSpacing, 0, box, true);
             }
             return w;
@@ -71,10 +65,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="cssBox">the CSS box to get it's property value</param>
         /// <param name="propName">the name of the CSS property</param>
         /// <returns>the value of the property, null if no such property exists</returns>
-        public static string GetPropertyValue(CssBox cssBox, string propName)
-        {
-            switch (propName)
-            {
+        public static string GetPropertyValue(CssBox cssBox, string propName) {
+            switch (propName) {
                 case "border-bottom-width":
                     return cssBox.BorderBottomWidth;
                 case "border-left-width":
@@ -212,10 +204,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="cssBox">the CSS box to set it's property value</param>
         /// <param name="propName">the name of the CSS property</param>
         /// <param name="value">the value to set</param>
-        public static void SetPropertyValue(CssBox cssBox, string propName, string value)
-        {
-            switch (propName)
-            {
+        public static void SetPropertyValue(CssBox cssBox, string propName, string value) {
+            switch (propName) {
                 case "border-bottom-width":
                     cssBox.BorderBottomWidth = value;
                     break;

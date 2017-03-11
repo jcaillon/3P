@@ -25,8 +25,7 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// Base class for css box to handle the css properties.<br/>
     /// Has field and property for every css property that can be set, the properties add additional parsing like
@@ -34,8 +33,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
     /// Has additional fields to control the location and size of the box and 'actual' css values for some properties
     /// that require additional calculations and parsing.<br/>
     /// </summary>
-    internal abstract class CssBoxProperties
-    {
+    internal abstract class CssBoxProperties {
         #region CSS Fields
 
         private string _backgroundColor = "transparent";
@@ -106,7 +104,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         #region Fields
 
         /// <summary>
@@ -160,134 +157,108 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         #region CSS Properties
 
-        public string BorderBottomWidth
-        {
+        public string BorderBottomWidth {
             get { return _borderBottomWidth; }
-            set
-            {
+            set {
                 _borderBottomWidth = value;
                 _actualBorderBottomWidth = Single.NaN;
             }
         }
 
-        public string BorderLeftWidth
-        {
+        public string BorderLeftWidth {
             get { return _borderLeftWidth; }
-            set
-            {
+            set {
                 _borderLeftWidth = value;
                 _actualBorderLeftWidth = Single.NaN;
             }
         }
 
-        public string BorderRightWidth
-        {
+        public string BorderRightWidth {
             get { return _borderRightWidth; }
-            set
-            {
+            set {
                 _borderRightWidth = value;
                 _actualBorderRightWidth = Single.NaN;
             }
         }
 
-        public string BorderTopWidth
-        {
+        public string BorderTopWidth {
             get { return _borderTopWidth; }
-            set
-            {
+            set {
                 _borderTopWidth = value;
                 _actualBorderTopWidth = Single.NaN;
             }
         }
 
-        public string BorderBottomStyle
-        {
+        public string BorderBottomStyle {
             get { return _borderBottomStyle; }
             set { _borderBottomStyle = value; }
         }
 
-        public string BorderLeftStyle
-        {
+        public string BorderLeftStyle {
             get { return _borderLeftStyle; }
             set { _borderLeftStyle = value; }
         }
 
-        public string BorderRightStyle
-        {
+        public string BorderRightStyle {
             get { return _borderRightStyle; }
             set { _borderRightStyle = value; }
         }
 
-        public string BorderTopStyle
-        {
+        public string BorderTopStyle {
             get { return _borderTopStyle; }
             set { _borderTopStyle = value; }
         }
 
-        public string BorderBottomColor
-        {
+        public string BorderBottomColor {
             get { return _borderBottomColor; }
-            set
-            {
+            set {
                 _borderBottomColor = value;
                 _actualBorderBottomColor = RColor.Empty;
             }
         }
 
-        public string BorderLeftColor
-        {
+        public string BorderLeftColor {
             get { return _borderLeftColor; }
-            set
-            {
+            set {
                 _borderLeftColor = value;
                 _actualBorderLeftColor = RColor.Empty;
             }
         }
 
-        public string BorderRightColor
-        {
+        public string BorderRightColor {
             get { return _borderRightColor; }
-            set
-            {
+            set {
                 _borderRightColor = value;
                 _actualBorderRightColor = RColor.Empty;
             }
         }
 
-        public string BorderTopColor
-        {
+        public string BorderTopColor {
             get { return _borderTopColor; }
-            set
-            {
+            set {
                 _borderTopColor = value;
                 _actualBorderTopColor = RColor.Empty;
             }
         }
 
-        public string BorderSpacing
-        {
+        public string BorderSpacing {
             get { return _borderSpacing; }
             set { _borderSpacing = value; }
         }
 
-        public string BorderCollapse
-        {
+        public string BorderCollapse {
             get { return _borderCollapse; }
             set { _borderCollapse = value; }
         }
 
-        public string CornerRadius
-        {
+        public string CornerRadius {
             get { return _cornerRadius; }
-            set
-            {
+            set {
                 MatchCollection r = RegexParserUtils.Match(RegexParserUtils.CssLength, value);
 
-                switch (r.Count)
-                {
+                switch (r.Count) {
                     case 1:
                         CornerNeRadius = r[0].Value;
                         CornerNwRadius = r[0].Value;
@@ -317,350 +288,286 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             }
         }
 
-        public string CornerNwRadius
-        {
+        public string CornerNwRadius {
             get { return _cornerNwRadius; }
             set { _cornerNwRadius = value; }
         }
 
-        public string CornerNeRadius
-        {
+        public string CornerNeRadius {
             get { return _cornerNeRadius; }
             set { _cornerNeRadius = value; }
         }
 
-        public string CornerSeRadius
-        {
+        public string CornerSeRadius {
             get { return _cornerSeRadius; }
             set { _cornerSeRadius = value; }
         }
 
-        public string CornerSwRadius
-        {
+        public string CornerSwRadius {
             get { return _cornerSwRadius; }
             set { _cornerSwRadius = value; }
         }
 
-        public string MarginBottom
-        {
+        public string MarginBottom {
             get { return _marginBottom; }
             set { _marginBottom = value; }
         }
 
-        public string MarginLeft
-        {
+        public string MarginLeft {
             get { return _marginLeft; }
             set { _marginLeft = value; }
         }
 
-        public string MarginRight
-        {
+        public string MarginRight {
             get { return _marginRight; }
             set { _marginRight = value; }
         }
 
-        public string MarginTop
-        {
+        public string MarginTop {
             get { return _marginTop; }
             set { _marginTop = value; }
         }
 
-        public string PaddingBottom
-        {
+        public string PaddingBottom {
             get { return _paddingBottom; }
-            set
-            {
+            set {
                 _paddingBottom = value;
                 _actualPaddingBottom = double.NaN;
             }
         }
 
-        public string PaddingLeft
-        {
+        public string PaddingLeft {
             get { return _paddingLeft; }
-            set
-            {
+            set {
                 _paddingLeft = value;
                 _actualPaddingLeft = double.NaN;
             }
         }
 
-        public string PaddingRight
-        {
+        public string PaddingRight {
             get { return _paddingRight; }
-            set
-            {
+            set {
                 _paddingRight = value;
                 _actualPaddingRight = double.NaN;
             }
         }
 
-        public string PaddingTop
-        {
+        public string PaddingTop {
             get { return _paddingTop; }
-            set
-            {
+            set {
                 _paddingTop = value;
                 _actualPaddingTop = double.NaN;
             }
         }
 
-        public string Left
-        {
+        public string Left {
             get { return _left; }
             set { _left = value; }
         }
 
-        public string Top
-        {
+        public string Top {
             get { return _top; }
             set { _top = value; }
         }
 
-        public string Width
-        {
+        public string Width {
             get { return _width; }
             set { _width = value; }
         }
 
-        public string MaxWidth
-        {
+        public string MaxWidth {
             get { return _maxWidth; }
             set { _maxWidth = value; }
         }
 
-        public string Height
-        {
+        public string Height {
             get { return _height; }
             set { _height = value; }
         }
 
-        public string BackgroundColor
-        {
+        public string BackgroundColor {
             get { return _backgroundColor; }
             set { _backgroundColor = value; }
         }
 
-        public string BackgroundImage
-        {
+        public string BackgroundImage {
             get { return _backgroundImage; }
             set { _backgroundImage = value; }
         }
 
-        public string BackgroundPosition
-        {
+        public string BackgroundPosition {
             get { return _backgroundPosition; }
             set { _backgroundPosition = value; }
         }
 
-        public string BackgroundRepeat
-        {
+        public string BackgroundRepeat {
             get { return _backgroundRepeat; }
             set { _backgroundRepeat = value; }
         }
 
-        public string BackgroundGradient
-        {
+        public string BackgroundGradient {
             get { return _backgroundGradient; }
             set { _backgroundGradient = value; }
         }
 
-        public string BackgroundGradientAngle
-        {
+        public string BackgroundGradientAngle {
             get { return _backgroundGradientAngle; }
             set { _backgroundGradientAngle = value; }
         }
 
-        public string Color
-        {
+        public string Color {
             get { return _color; }
-            set
-            {
+            set {
                 _color = value;
                 _actualColor = RColor.Empty;
             }
         }
 
-        public string Display
-        {
+        public string Display {
             get { return _display; }
             set { _display = value; }
         }
 
-        public string Direction
-        {
+        public string Direction {
             get { return _direction; }
             set { _direction = value; }
         }
 
-        public string EmptyCells
-        {
+        public string EmptyCells {
             get { return _emptyCells; }
             set { _emptyCells = value; }
         }
 
-        public string Float
-        {
+        public string Float {
             get { return _float; }
             set { _float = value; }
         }
 
-        public string Position
-        {
+        public string Position {
             get { return _position; }
             set { _position = value; }
         }
 
-        public string LineHeight
-        {
+        public string LineHeight {
             get { return _lineHeight; }
             set { _lineHeight = string.Format(NumberFormatInfo.InvariantInfo, "{0}px", CssValueParser.ParseLength(value, Size.Height, this, CssConstants.Em)); }
         }
 
-        public string VerticalAlign
-        {
+        public string VerticalAlign {
             get { return _verticalAlign; }
             set { _verticalAlign = value; }
         }
 
-        public string TextIndent
-        {
+        public string TextIndent {
             get { return _textIndent; }
             set { _textIndent = NoEms(value); }
         }
 
-        public string TextAlign
-        {
+        public string TextAlign {
             get { return _textAlign; }
             set { _textAlign = value; }
         }
 
-        public string TextDecoration
-        {
+        public string TextDecoration {
             get { return _textDecoration; }
             set { _textDecoration = value; }
         }
 
-        public string WhiteSpace
-        {
+        public string WhiteSpace {
             get { return _whiteSpace; }
             set { _whiteSpace = value; }
         }
 
-        public string Visibility
-        {
+        public string Visibility {
             get { return _visibility; }
             set { _visibility = value; }
         }
 
-        public string WordSpacing
-        {
+        public string WordSpacing {
             get { return _wordSpacing; }
             set { _wordSpacing = NoEms(value); }
         }
 
-        public string WordBreak
-        {
+        public string WordBreak {
             get { return _wordBreak; }
             set { _wordBreak = value; }
         }
 
-        public string FontFamily
-        {
+        public string FontFamily {
             get { return _fontFamily; }
             set { _fontFamily = value; }
         }
 
-        public string FontSize
-        {
+        public string FontSize {
             get { return _fontSize; }
-            set
-            {
+            set {
                 string length = RegexParserUtils.Search(RegexParserUtils.CssLength, value);
 
-                if (length != null)
-                {
+                if (length != null) {
                     string computedValue;
                     CssLength len = new CssLength(length);
 
-                    if (len.HasError)
-                    {
+                    if (len.HasError) {
                         computedValue = "medium";
-                    }
-                    else if (len.Unit == CssUnit.Ems && GetParent() != null)
-                    {
+                    } else if (len.Unit == CssUnit.Ems && GetParent() != null) {
                         computedValue = len.ConvertEmToPoints(GetParent().ActualFont.Size).ToString();
-                    }
-                    else
-                    {
+                    } else {
                         computedValue = len.ToString();
                     }
 
                     _fontSize = computedValue;
-                }
-                else
-                {
+                } else {
                     _fontSize = value;
                 }
             }
         }
 
-        public string FontStyle
-        {
+        public string FontStyle {
             get { return _fontStyle; }
             set { _fontStyle = value; }
         }
 
-        public string FontVariant
-        {
+        public string FontVariant {
             get { return _fontVariant; }
             set { _fontVariant = value; }
         }
 
-        public string FontWeight
-        {
+        public string FontWeight {
             get { return _fontWeight; }
             set { _fontWeight = value; }
         }
 
-        public string ListStyle
-        {
+        public string ListStyle {
             get { return _listStyle; }
             set { _listStyle = value; }
         }
 
-        public string Overflow
-        {
+        public string Overflow {
             get { return _overflow; }
             set { _overflow = value; }
         }
 
-        public string ListStylePosition
-        {
+        public string ListStylePosition {
             get { return _listStylePosition; }
             set { _listStylePosition = value; }
         }
 
-        public string ListStyleImage
-        {
+        public string ListStyleImage {
             get { return _listStyleImage; }
             set { _listStyleImage = value; }
         }
 
-        public string ListStyleType
-        {
+        public string ListStyleType {
             get { return _listStyleType; }
             set { _listStyleType = value; }
         }
 
         #endregion
 
-
         /// <summary>
         /// Gets or sets the location of the box
         /// </summary>
-        public RPoint Location
-        {
+        public RPoint Location {
             get { return _location; }
             set { _location = value; }
         }
@@ -668,8 +575,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets or sets the size of the box
         /// </summary>
-        public RSize Size
-        {
+        public RSize Size {
             get { return _size; }
             set { _size = value; }
         }
@@ -677,24 +583,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the bounds of the box
         /// </summary>
-        public RRect Bounds
-        {
+        public RRect Bounds {
             get { return new RRect(Location, Size); }
         }
 
         /// <summary>
         /// Gets the width available on the box, counting padding and margin.
         /// </summary>
-        public double AvailableWidth
-        {
+        public double AvailableWidth {
             get { return Size.Width - ActualBorderLeftWidth - ActualPaddingLeft - ActualPaddingRight - ActualBorderRightWidth; }
         }
 
         /// <summary>
         /// Gets the right of the box. When setting, it will affect only the width of the box.
         /// </summary>
-        public double ActualRight
-        {
+        public double ActualRight {
             get { return Location.X + Size.Width; }
             set { Size = new RSize(value - Location.X, Size.Height); }
         }
@@ -703,8 +606,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets or sets the bottom of the box. 
         /// (When setting, alters only the Size.Height of the box)
         /// </summary>
-        public double ActualBottom
-        {
+        public double ActualBottom {
             get { return Location.Y + Size.Height; }
             set { Size = new RSize(Size.Width, value - Location.Y); }
         }
@@ -712,52 +614,44 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the left of the client rectangle (Where content starts rendering)
         /// </summary>
-        public double ClientLeft
-        {
+        public double ClientLeft {
             get { return Location.X + ActualBorderLeftWidth + ActualPaddingLeft; }
         }
 
         /// <summary>
         /// Gets the top of the client rectangle (Where content starts rendering)
         /// </summary>
-        public double ClientTop
-        {
+        public double ClientTop {
             get { return Location.Y + ActualBorderTopWidth + ActualPaddingTop; }
         }
 
         /// <summary>
         /// Gets the right of the client rectangle
         /// </summary>
-        public double ClientRight
-        {
+        public double ClientRight {
             get { return ActualRight - ActualPaddingRight - ActualBorderRightWidth; }
         }
 
         /// <summary>
         /// Gets the bottom of the client rectangle
         /// </summary>
-        public double ClientBottom
-        {
+        public double ClientBottom {
             get { return ActualBottom - ActualPaddingBottom - ActualBorderBottomWidth; }
         }
 
         /// <summary>
         /// Gets the client rectangle
         /// </summary>
-        public RRect ClientRectangle
-        {
+        public RRect ClientRectangle {
             get { return RRect.FromLTRB(ClientLeft, ClientTop, ClientRight, ClientBottom); }
         }
 
         /// <summary>
         /// Gets the actual height
         /// </summary>
-        public double ActualHeight
-        {
-            get
-            {
-                if (double.IsNaN(_actualHeight))
-                {
+        public double ActualHeight {
+            get {
+                if (double.IsNaN(_actualHeight)) {
                     _actualHeight = CssValueParser.ParseLength(Height, Size.Height, this);
                 }
                 return _actualHeight;
@@ -767,12 +661,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual height
         /// </summary>
-        public double ActualWidth
-        {
-            get
-            {
-                if (double.IsNaN(_actualWidth))
-                {
+        public double ActualWidth {
+            get {
+                if (double.IsNaN(_actualWidth)) {
                     _actualWidth = CssValueParser.ParseLength(Width, Size.Width, this);
                 }
                 return _actualWidth;
@@ -782,12 +673,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual top's padding
         /// </summary>
-        public double ActualPaddingTop
-        {
-            get
-            {
-                if (double.IsNaN(_actualPaddingTop))
-                {
+        public double ActualPaddingTop {
+            get {
+                if (double.IsNaN(_actualPaddingTop)) {
                     _actualPaddingTop = CssValueParser.ParseLength(PaddingTop, Size.Width, this);
                 }
                 return _actualPaddingTop;
@@ -797,12 +685,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual padding on the left
         /// </summary>
-        public double ActualPaddingLeft
-        {
-            get
-            {
-                if (double.IsNaN(_actualPaddingLeft))
-                {
+        public double ActualPaddingLeft {
+            get {
+                if (double.IsNaN(_actualPaddingLeft)) {
                     _actualPaddingLeft = CssValueParser.ParseLength(PaddingLeft, Size.Width, this);
                 }
                 return _actualPaddingLeft;
@@ -812,12 +697,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Padding of the bottom
         /// </summary>
-        public double ActualPaddingBottom
-        {
-            get
-            {
-                if (double.IsNaN(_actualPaddingBottom))
-                {
+        public double ActualPaddingBottom {
+            get {
+                if (double.IsNaN(_actualPaddingBottom)) {
                     _actualPaddingBottom = CssValueParser.ParseLength(PaddingBottom, Size.Width, this);
                 }
                 return _actualPaddingBottom;
@@ -827,12 +709,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual padding on the right
         /// </summary>
-        public double ActualPaddingRight
-        {
-            get
-            {
-                if (double.IsNaN(_actualPaddingRight))
-                {
+        public double ActualPaddingRight {
+            get {
+                if (double.IsNaN(_actualPaddingRight)) {
                     _actualPaddingRight = CssValueParser.ParseLength(PaddingRight, Size.Width, this);
                 }
                 return _actualPaddingRight;
@@ -842,12 +721,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual top's Margin
         /// </summary>
-        public double ActualMarginTop
-        {
-            get
-            {
-                if (double.IsNaN(_actualMarginTop))
-                {
+        public double ActualMarginTop {
+            get {
+                if (double.IsNaN(_actualMarginTop)) {
                     if (MarginTop == CssConstants.Auto)
                         MarginTop = "0";
                     var actualMarginTop = CssValueParser.ParseLength(MarginTop, Size.Width, this);
@@ -862,8 +738,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// The margin top value if was effected by margin collapse.
         /// </summary>
-        public double CollapsedMarginTop
-        {
+        public double CollapsedMarginTop {
             get { return double.IsNaN(_collapsedMarginTop) ? 0 : _collapsedMarginTop; }
             set { _collapsedMarginTop = value; }
         }
@@ -871,12 +746,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Margin on the left
         /// </summary>
-        public double ActualMarginLeft
-        {
-            get
-            {
-                if (double.IsNaN(_actualMarginLeft))
-                {
+        public double ActualMarginLeft {
+            get {
+                if (double.IsNaN(_actualMarginLeft)) {
                     if (MarginLeft == CssConstants.Auto)
                         MarginLeft = "0";
                     var actualMarginLeft = CssValueParser.ParseLength(MarginLeft, Size.Width, this);
@@ -891,12 +763,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Margin of the bottom
         /// </summary>
-        public double ActualMarginBottom
-        {
-            get
-            {
-                if (double.IsNaN(_actualMarginBottom))
-                {
+        public double ActualMarginBottom {
+            get {
+                if (double.IsNaN(_actualMarginBottom)) {
                     if (MarginBottom == CssConstants.Auto)
                         MarginBottom = "0";
                     var actualMarginBottom = CssValueParser.ParseLength(MarginBottom, Size.Width, this);
@@ -911,12 +780,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Margin on the right
         /// </summary>
-        public double ActualMarginRight
-        {
-            get
-            {
-                if (double.IsNaN(_actualMarginRight))
-                {
+        public double ActualMarginRight {
+            get {
+                if (double.IsNaN(_actualMarginRight)) {
                     if (MarginRight == CssConstants.Auto)
                         MarginRight = "0";
                     var actualMarginRight = CssValueParser.ParseLength(MarginRight, Size.Width, this);
@@ -931,15 +797,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual top border width
         /// </summary>
-        public double ActualBorderTopWidth
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderTopWidth))
-                {
+        public double ActualBorderTopWidth {
+            get {
+                if (double.IsNaN(_actualBorderTopWidth)) {
                     _actualBorderTopWidth = CssValueParser.GetActualBorderWidth(BorderTopWidth, this);
-                    if (string.IsNullOrEmpty(BorderTopStyle) || BorderTopStyle == CssConstants.None)
-                    {
+                    if (string.IsNullOrEmpty(BorderTopStyle) || BorderTopStyle == CssConstants.None) {
                         _actualBorderTopWidth = 0f;
                     }
                 }
@@ -950,15 +812,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Left border width
         /// </summary>
-        public double ActualBorderLeftWidth
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderLeftWidth))
-                {
+        public double ActualBorderLeftWidth {
+            get {
+                if (double.IsNaN(_actualBorderLeftWidth)) {
                     _actualBorderLeftWidth = CssValueParser.GetActualBorderWidth(BorderLeftWidth, this);
-                    if (string.IsNullOrEmpty(BorderLeftStyle) || BorderLeftStyle == CssConstants.None)
-                    {
+                    if (string.IsNullOrEmpty(BorderLeftStyle) || BorderLeftStyle == CssConstants.None) {
                         _actualBorderLeftWidth = 0f;
                     }
                 }
@@ -969,15 +827,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Bottom border width
         /// </summary>
-        public double ActualBorderBottomWidth
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderBottomWidth))
-                {
+        public double ActualBorderBottomWidth {
+            get {
+                if (double.IsNaN(_actualBorderBottomWidth)) {
                     _actualBorderBottomWidth = CssValueParser.GetActualBorderWidth(BorderBottomWidth, this);
-                    if (string.IsNullOrEmpty(BorderBottomStyle) || BorderBottomStyle == CssConstants.None)
-                    {
+                    if (string.IsNullOrEmpty(BorderBottomStyle) || BorderBottomStyle == CssConstants.None) {
                         _actualBorderBottomWidth = 0f;
                     }
                 }
@@ -988,15 +842,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Right border width
         /// </summary>
-        public double ActualBorderRightWidth
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderRightWidth))
-                {
+        public double ActualBorderRightWidth {
+            get {
+                if (double.IsNaN(_actualBorderRightWidth)) {
                     _actualBorderRightWidth = CssValueParser.GetActualBorderWidth(BorderRightWidth, this);
-                    if (string.IsNullOrEmpty(BorderRightStyle) || BorderRightStyle == CssConstants.None)
-                    {
+                    if (string.IsNullOrEmpty(BorderRightStyle) || BorderRightStyle == CssConstants.None) {
                         _actualBorderRightWidth = 0f;
                     }
                 }
@@ -1007,12 +857,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual top border Color
         /// </summary>
-        public RColor ActualBorderTopColor
-        {
-            get
-            {
-                if (_actualBorderTopColor.IsEmpty)
-                {
+        public RColor ActualBorderTopColor {
+            get {
+                if (_actualBorderTopColor.IsEmpty) {
                     _actualBorderTopColor = GetActualColor(BorderTopColor);
                 }
                 return _actualBorderTopColor;
@@ -1024,12 +871,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Left border Color
         /// </summary>
-        public RColor ActualBorderLeftColor
-        {
-            get
-            {
-                if ((_actualBorderLeftColor.IsEmpty))
-                {
+        public RColor ActualBorderLeftColor {
+            get {
+                if ((_actualBorderLeftColor.IsEmpty)) {
                     _actualBorderLeftColor = GetActualColor(BorderLeftColor);
                 }
                 return _actualBorderLeftColor;
@@ -1039,12 +883,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Bottom border Color
         /// </summary>
-        public RColor ActualBorderBottomColor
-        {
-            get
-            {
-                if ((_actualBorderBottomColor.IsEmpty))
-                {
+        public RColor ActualBorderBottomColor {
+            get {
+                if ((_actualBorderBottomColor.IsEmpty)) {
                     _actualBorderBottomColor = GetActualColor(BorderBottomColor);
                 }
                 return _actualBorderBottomColor;
@@ -1054,12 +895,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual Right border Color
         /// </summary>
-        public RColor ActualBorderRightColor
-        {
-            get
-            {
-                if ((_actualBorderRightColor.IsEmpty))
-                {
+        public RColor ActualBorderRightColor {
+            get {
+                if ((_actualBorderRightColor.IsEmpty)) {
                     _actualBorderRightColor = GetActualColor(BorderRightColor);
                 }
                 return _actualBorderRightColor;
@@ -1069,12 +907,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual length of the north west corner
         /// </summary>
-        public double ActualCornerNw
-        {
-            get
-            {
-                if (double.IsNaN(_actualCornerNw))
-                {
+        public double ActualCornerNw {
+            get {
+                if (double.IsNaN(_actualCornerNw)) {
                     _actualCornerNw = CssValueParser.ParseLength(CornerNwRadius, 0, this);
                 }
                 return _actualCornerNw;
@@ -1084,12 +919,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual length of the north east corner
         /// </summary>
-        public double ActualCornerNe
-        {
-            get
-            {
-                if (double.IsNaN(_actualCornerNe))
-                {
+        public double ActualCornerNe {
+            get {
+                if (double.IsNaN(_actualCornerNe)) {
                     _actualCornerNe = CssValueParser.ParseLength(CornerNeRadius, 0, this);
                 }
                 return _actualCornerNe;
@@ -1099,12 +931,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual length of the south east corner
         /// </summary>
-        public double ActualCornerSe
-        {
-            get
-            {
-                if (double.IsNaN(_actualCornerSe))
-                {
+        public double ActualCornerSe {
+            get {
+                if (double.IsNaN(_actualCornerSe)) {
                     _actualCornerSe = CssValueParser.ParseLength(CornerSeRadius, 0, this);
                 }
                 return _actualCornerSe;
@@ -1114,12 +943,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual length of the south west corner
         /// </summary>
-        public double ActualCornerSw
-        {
-            get
-            {
-                if (double.IsNaN(_actualCornerSw))
-                {
+        public double ActualCornerSw {
+            get {
+                if (double.IsNaN(_actualCornerSw)) {
                     _actualCornerSw = CssValueParser.ParseLength(CornerSwRadius, 0, this);
                 }
                 return _actualCornerSw;
@@ -1129,16 +955,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets a value indicating if at least one of the corners of the box is rounded
         /// </summary>
-        public bool IsRounded
-        {
+        public bool IsRounded {
             get { return ActualCornerNe > 0f || ActualCornerNw > 0f || ActualCornerSe > 0f || ActualCornerSw > 0f; }
         }
 
         /// <summary>
         /// Gets the actual width of whitespace between words.
         /// </summary>
-        public double ActualWordSpacing
-        {
+        public double ActualWordSpacing {
             get { return _actualWordSpacing; }
         }
 
@@ -1146,12 +970,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// 
         /// Gets the actual color for the text.
         /// </summary>
-        public RColor ActualColor
-        {
-            get
-            {
-                if (_actualColor.IsEmpty)
-                {
+        public RColor ActualColor {
+            get {
+                if (_actualColor.IsEmpty) {
                     _actualColor = GetActualColor(Color);
                 }
 
@@ -1162,12 +983,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual background color of the box
         /// </summary>
-        public RColor ActualBackgroundColor
-        {
-            get
-            {
-                if (_actualBackgroundColor.IsEmpty)
-                {
+        public RColor ActualBackgroundColor {
+            get {
+                if (_actualBackgroundColor.IsEmpty) {
                     _actualBackgroundColor = GetActualColor(BackgroundColor);
                 }
 
@@ -1178,12 +996,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the second color that creates a gradient for the background
         /// </summary>
-        public RColor ActualBackgroundGradient
-        {
-            get
-            {
-                if (_actualBackgroundGradient.IsEmpty)
-                {
+        public RColor ActualBackgroundGradient {
+            get {
+                if (_actualBackgroundGradient.IsEmpty) {
                     _actualBackgroundGradient = GetActualColor(BackgroundGradient);
                 }
                 return _actualBackgroundGradient;
@@ -1193,12 +1008,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual angle specified for the background gradient
         /// </summary>
-        public double ActualBackgroundGradientAngle
-        {
-            get
-            {
-                if (double.IsNaN(_actualBackgroundGradientAngle))
-                {
+        public double ActualBackgroundGradientAngle {
+            get {
+                if (double.IsNaN(_actualBackgroundGradientAngle)) {
                     _actualBackgroundGradientAngle = CssValueParser.ParseNumber(BackgroundGradientAngle, 360f);
                 }
 
@@ -1209,38 +1021,30 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual font of the parent
         /// </summary>
-        public RFont ActualParentFont
-        {
+        public RFont ActualParentFont {
             get { return GetParent() == null ? ActualFont : GetParent().ActualFont; }
         }
 
         /// <summary>
         /// Gets the font that should be actually used to paint the text of the box
         /// </summary>
-        public RFont ActualFont
-        {
-            get
-            {
-                if (_actualFont == null)
-                {
-                    if (string.IsNullOrEmpty(FontFamily))
-                    {
+        public RFont ActualFont {
+            get {
+                if (_actualFont == null) {
+                    if (string.IsNullOrEmpty(FontFamily)) {
                         FontFamily = CssConstants.DefaultFont;
                     }
-                    if (string.IsNullOrEmpty(FontSize))
-                    {
+                    if (string.IsNullOrEmpty(FontSize)) {
                         FontSize = CssConstants.FontSize.ToString(CultureInfo.InvariantCulture) + "pt";
                     }
 
                     RFontStyle st = RFontStyle.Regular;
 
-                    if (FontStyle == CssConstants.Italic || FontStyle == CssConstants.Oblique)
-                    {
+                    if (FontStyle == CssConstants.Italic || FontStyle == CssConstants.Oblique) {
                         st |= RFontStyle.Italic;
                     }
 
-                    if (FontWeight != CssConstants.Normal && FontWeight != CssConstants.Lighter && !string.IsNullOrEmpty(FontWeight) && FontWeight != CssConstants.Inherit)
-                    {
+                    if (FontWeight != CssConstants.Normal && FontWeight != CssConstants.Lighter && !string.IsNullOrEmpty(FontWeight) && FontWeight != CssConstants.Inherit) {
                         st |= RFontStyle.Bold;
                     }
 
@@ -1250,8 +1054,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                     if (GetParent() != null)
                         parentSize = GetParent().ActualFont.Size;
 
-                    switch (FontSize)
-                    {
+                    switch (FontSize) {
                         case CssConstants.Medium:
                             fsize = CssConstants.FontSize;
                             break;
@@ -1284,8 +1087,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                             break;
                     }
 
-                    if (fsize <= 1f)
-                    {
+                    if (fsize <= 1f) {
                         fsize = CssConstants.FontSize;
                     }
 
@@ -1300,13 +1102,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the line height
         /// </summary>
-        public double ActualLineHeight
-        {
-            get
-            {
-                if (double.IsNaN(_actualLineHeight))
-                {
-                    _actualLineHeight = .9f * CssValueParser.ParseLength(LineHeight, Size.Height, this);
+        public double ActualLineHeight {
+            get {
+                if (double.IsNaN(_actualLineHeight)) {
+                    _actualLineHeight = .9f*CssValueParser.ParseLength(LineHeight, Size.Height, this);
                 }
                 return _actualLineHeight;
             }
@@ -1315,12 +1114,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the text indentation (on first line only)
         /// </summary>
-        public double ActualTextIndent
-        {
-            get
-            {
-                if (double.IsNaN(_actualTextIndent))
-                {
+        public double ActualTextIndent {
+            get {
+                if (double.IsNaN(_actualTextIndent)) {
                     _actualTextIndent = CssValueParser.ParseLength(TextIndent, Size.Width, this);
                 }
 
@@ -1331,24 +1127,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual horizontal border spacing for tables
         /// </summary>
-        public double ActualBorderSpacingHorizontal
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderSpacingHorizontal))
-                {
+        public double ActualBorderSpacingHorizontal {
+            get {
+                if (double.IsNaN(_actualBorderSpacingHorizontal)) {
                     MatchCollection matches = RegexParserUtils.Match(RegexParserUtils.CssLength, BorderSpacing);
 
-                    if (matches.Count == 0)
-                    {
+                    if (matches.Count == 0) {
                         _actualBorderSpacingHorizontal = 0;
-                    }
-                    else if (matches.Count > 0)
-                    {
+                    } else if (matches.Count > 0) {
                         _actualBorderSpacingHorizontal = CssValueParser.ParseLength(matches[0].Value, 1, this);
                     }
                 }
-
 
                 return _actualBorderSpacingHorizontal;
             }
@@ -1357,24 +1146,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual vertical border spacing for tables
         /// </summary>
-        public double ActualBorderSpacingVertical
-        {
-            get
-            {
-                if (double.IsNaN(_actualBorderSpacingVertical))
-                {
+        public double ActualBorderSpacingVertical {
+            get {
+                if (double.IsNaN(_actualBorderSpacingVertical)) {
                     MatchCollection matches = RegexParserUtils.Match(RegexParserUtils.CssLength, BorderSpacing);
 
-                    if (matches.Count == 0)
-                    {
+                    if (matches.Count == 0) {
                         _actualBorderSpacingVertical = 0;
-                    }
-                    else if (matches.Count == 1)
-                    {
+                    } else if (matches.Count == 1) {
                         _actualBorderSpacingVertical = CssValueParser.ParseLength(matches[0].Value, 1, this);
-                    }
-                    else
-                    {
+                    } else {
                         _actualBorderSpacingVertical = CssValueParser.ParseLength(matches[1].Value, 1, this);
                     }
                 }
@@ -1392,8 +1173,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets the height of the font in the specified units
         /// </summary>
         /// <returns></returns>
-        public double GetEmHeight()
-        {
+        public double GetEmHeight() {
             return ActualFont.Height;
         }
 
@@ -1401,11 +1181,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Ensures that the specified length is converted to pixels if necessary
         /// </summary>
         /// <param name="length"></param>
-        protected string NoEms(string length)
-        {
+        protected string NoEms(string length) {
             var len = new CssLength(length);
-            if (len.Unit == CssUnit.Ems)
-            {
+            if (len.Unit == CssUnit.Ems) {
                 length = len.ConvertEmToPixels(GetEmHeight()).ToString();
             }
             return length;
@@ -1418,8 +1196,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="style">optional: the style to set</param>
         /// <param name="width">optional: the width to set</param>
         /// <param name="color">optional: the color to set</param>
-        protected void SetAllBorders(string style = null, string width = null, string color = null)
-        {
+        protected void SetAllBorders(string style = null, string width = null, string color = null) {
             if (style != null)
                 BorderLeftStyle = BorderTopStyle = BorderRightStyle = BorderBottomStyle = style;
             if (width != null)
@@ -1431,13 +1208,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Measures the width of whitespace between words (set <see cref="ActualWordSpacing"/>).
         /// </summary>
-        protected void MeasureWordSpacing(RGraphics g)
-        {
-            if (double.IsNaN(ActualWordSpacing))
-            {
+        protected void MeasureWordSpacing(RGraphics g) {
+            if (double.IsNaN(ActualWordSpacing)) {
                 _actualWordSpacing = CssUtils.WhiteSpace(g, this);
-                if (WordSpacing != CssConstants.Normal)
-                {
+                if (WordSpacing != CssConstants.Normal) {
                     string len = RegexParserUtils.Search(RegexParserUtils.CssLength, WordSpacing);
                     _actualWordSpacing += CssValueParser.ParseLength(len, 1, this);
                 }
@@ -1449,10 +1223,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// </summary>
         /// <param name="everything">Set to true to inherit all CSS properties instead of only the ineritables</param>
         /// <param name="p">Box to inherit the properties</param>
-        protected void InheritStyle(CssBox p, bool everything)
-        {
-            if (p != null)
-            {
+        protected void InheritStyle(CssBox p, bool everything) {
+            if (p != null) {
                 _borderSpacing = p._borderSpacing;
                 _borderCollapse = p._borderCollapse;
                 _color = p._color;
@@ -1475,8 +1247,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                 _wordBreak = p.WordBreak;
                 _direction = p._direction;
 
-                if (everything)
-                {
+                if (everything) {
                     _backgroundColor = p._backgroundColor;
                     _backgroundGradient = p._backgroundGradient;
                     _backgroundGradientAngle = p._backgroundGradientAngle;

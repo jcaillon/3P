@@ -20,8 +20,7 @@
 using System.Collections.Generic;
 using System.Timers;
 
-namespace YamuiFramework.Animations.Transitions
-{
+namespace YamuiFramework.Animations.Transitions {
     /// <summary>
     /// This class is responsible for running transitions. It holds the timer that
     /// triggers transaction animation. 
@@ -37,8 +36,7 @@ namespace YamuiFramework.Animations.Transitions
     /// back into the running transitions, which do the actual work of the transition.
     /// 
     /// </remarks>
-    internal class TransitionManager
-    {
+    internal class TransitionManager {
         #region Public methods
 
         /// <summary>
@@ -52,10 +50,8 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Singleton's getInstance method.
         /// </summary>
-        public static TransitionManager getInstance()
-        {
-            if (m_Instance == null)
-            {
+        public static TransitionManager getInstance() {
+            if (m_Instance == null) {
                 m_Instance = new TransitionManager();
             }
             return m_Instance;
@@ -65,10 +61,8 @@ namespace YamuiFramework.Animations.Transitions
         /// You register a transition with the manager here. This will start to run
         /// the transition as the manager's timer ticks.
         /// </summary>
-        public void register(Transition transition)
-        {
-            lock (m_Lock)
-            {
+        public void register(Transition transition) {
+            lock (m_Lock) {
                 // We check to see if the properties of this transition
                 // are already being animated by any existing transitions...
                 removeDuplicates(transition);
@@ -89,11 +83,9 @@ namespace YamuiFramework.Animations.Transitions
         /// transition passed in. If so, we remove the duplicated properties from the 
         /// older transitions.
         /// </summary>
-        private void removeDuplicates(Transition transition)
-        {
+        private void removeDuplicates(Transition transition) {
             // We look through the set of transitions we're currently managing...
-            foreach (KeyValuePair<Transition, bool> pair in m_Transitions)
-            {
+            foreach (KeyValuePair<Transition, bool> pair in m_Transitions) {
                 removeDuplicates(transition, pair.Key);
             }
         }
@@ -102,8 +94,7 @@ namespace YamuiFramework.Animations.Transitions
         /// Finds any properties in the old-transition that are also in the new one,
         /// and removes them from the old one.
         /// </summary>
-        private void removeDuplicates(Transition newTransition, Transition oldTransition)
-        {
+        private void removeDuplicates(Transition newTransition, Transition oldTransition) {
             // Note: This checking might be a bit more efficient if it did the checking
             //       with a set rather than looking through lists. That said, it is only done 
             //       when transitions are added (which isn't very often) rather than on the
@@ -115,18 +106,15 @@ namespace YamuiFramework.Animations.Transitions
 
             // We loop through the old properties backwards (as we may be removing 
             // items from the list if we find a match)...
-            for (int i = oldProperties.Count - 1; i >= 0; i--)
-            {
+            for (int i = oldProperties.Count - 1; i >= 0; i--) {
                 // We get one of the properties from the old transition...
                 Transition.TransitionedPropertyInfo oldProperty = oldProperties[i];
 
                 // Is this property part of the new transition?
-                foreach (Transition.TransitionedPropertyInfo newProperty in newProperties)
-                {
+                foreach (Transition.TransitionedPropertyInfo newProperty in newProperties) {
                     if (oldProperty.target == newProperty.target
                         &&
-                        oldProperty.propertyInfo == newProperty.propertyInfo)
-                    {
+                        oldProperty.propertyInfo == newProperty.propertyInfo) {
                         // The old transition contains the same property as the new one,
                         // so we remove it from the old transition...
                         oldTransition.removeProperty(oldProperty);
@@ -138,8 +126,7 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Private constructor (for singleton).
         /// </summary>
-        private TransitionManager()
-        {
+        private TransitionManager() {
             m_Timer = new Timer(33); // it was 15ms, set to 33ms for 30 frames per second
             m_Timer.Elapsed += onTimerElapsed;
             m_Timer.Enabled = true;
@@ -148,31 +135,26 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Called when the timer ticks.
         /// </summary>
-        private void onTimerElapsed(object sender, ElapsedEventArgs e)
-        {
+        private void onTimerElapsed(object sender, ElapsedEventArgs e) {
             // We turn the timer off while we process the tick, in case the
             // actions take longer than the tick itself...
-            if (m_Timer == null)
-            {
+            if (m_Timer == null) {
                 return;
             }
             m_Timer.Enabled = false;
 
             IList<Transition> listTransitions;
-            lock (m_Lock)
-            {
+            lock (m_Lock) {
                 // We take a copy of the collection of transitions as elements 
                 // might be removed as we iterate through it...
                 listTransitions = new List<Transition>();
-                foreach (KeyValuePair<Transition, bool> pair in m_Transitions)
-                {
+                foreach (KeyValuePair<Transition, bool> pair in m_Transitions) {
                     listTransitions.Add(pair.Key);
                 }
             }
 
             // We tick the timer for each transition we're managing...
-            foreach (Transition transition in listTransitions)
-            {
+            foreach (Transition transition in listTransitions) {
                 transition.onTimer();
             }
 
@@ -183,15 +165,13 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Called when a transition has completed. 
         /// </summary>
-        private void onTransitionCompleted(object sender, Transition.Args e)
-        {
+        private void onTransitionCompleted(object sender, Transition.Args e) {
             // We stop observing the transition...
-            Transition transition = (Transition)sender;
+            Transition transition = (Transition) sender;
             transition.TransitionCompletedEvent -= onTransitionCompleted;
 
             // We remove the transition from the collection we're managing...
-            lock (m_Lock)
-            {
+            lock (m_Lock) {
                 m_Transitions.Remove(transition);
             }
         }
@@ -218,5 +198,3 @@ namespace YamuiFramework.Animations.Transitions
         #endregion
     }
 }
-
-

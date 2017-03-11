@@ -19,13 +19,11 @@
 #endregion
 using System;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Stores a set of four floating-point numbers that represent the location and size of a rectangle. 
     /// </summary>
-    public struct RRect
-    {
+    public struct RRect {
         #region Fields and Consts
 
         /// <summary>
@@ -41,7 +39,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
 
         #endregion
 
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="RRect" /> class with the specified location and size.
         /// </summary>
@@ -49,8 +46,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="y">The y-coordinate of the upper-left corner of the rectangle. </param>
         /// <param name="width">The width of the rectangle. </param>
         /// <param name="height">The height of the rectangle. </param>
-        public RRect(double x, double y, double width, double height)
-        {
+        public RRect(double x, double y, double width, double height) {
             _x = x;
             _y = y;
             _width = width;
@@ -62,8 +58,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </summary>
         /// <param name="location">A <see cref="RPoint" /> that represents the upper-left corner of the rectangular region.</param>
         /// <param name="size">A <see cref="RSize" /> that represents the width and height of the rectangular region.</param>
-        public RRect(RPoint location, RSize size)
-        {
+        public RRect(RPoint location, RSize size) {
             _x = location.X;
             _y = location.Y;
             _width = size.Width;
@@ -74,11 +69,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// Gets or sets the coordinates of the upper-left corner of this <see cref="RRect" /> structure.
         /// </summary>
         /// <returns>A <see cref="RPoint" /> that represents the upper-left corner of this <see cref="RRect" /> structure.</returns>
-        public RPoint Location
-        {
+        public RPoint Location {
             get { return new RPoint(X, Y); }
-            set
-            {
+            set {
                 X = value.X;
                 Y = value.Y;
             }
@@ -88,11 +81,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// Gets or sets the size of this <see cref="RRect" />.
         /// </summary>
         /// <returns>A <see cref="RSize" /> that represents the width and height of this <see cref="RRect" /> structure.</returns>
-        public RSize Size
-        {
+        public RSize Size {
             get { return new RSize(Width, Height); }
-            set
-            {
+            set {
                 Width = value.Width;
                 Height = value.Height;
             }
@@ -104,8 +95,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The x-coordinate of the upper-left corner of this <see cref="RRect" /> structure.
         /// </returns>
-        public double X
-        {
+        public double X {
             get { return _x; }
             set { _x = value; }
         }
@@ -116,8 +106,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The y-coordinate of the upper-left corner of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Y
-        {
+        public double Y {
             get { return _y; }
             set { _y = value; }
         }
@@ -128,8 +117,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The width of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Width
-        {
+        public double Width {
             get { return _width; }
             set { _width = value; }
         }
@@ -140,8 +128,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The height of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Height
-        {
+        public double Height {
             get { return _height; }
             set { _height = value; }
         }
@@ -152,8 +139,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The x-coordinate of the left edge of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Left
-        {
+        public double Left {
             get { return X; }
         }
 
@@ -163,8 +149,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         ///     The y-coordinate of the top edge of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Top
-        {
+        public double Top {
             get { return Y; }
         }
 
@@ -180,8 +165,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         cref="RRect.Width" />
         ///     of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Right
-        {
+        public double Right {
             get { return X + Width; }
         }
 
@@ -197,8 +181,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         cref="RRect.Height" />
         ///     of this <see cref="RRect" /> structure.
         /// </returns>
-        public double Bottom
-        {
+        public double Bottom {
             get { return Y + Height; }
         }
 
@@ -214,8 +197,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         cref="RRect.Height" />
         ///     property of this <see cref="RRect" /> has a value of zero; otherwise, false.
         /// </returns>
-        public bool IsEmpty
-        {
+        public bool IsEmpty {
             get {
                 if (Width > 0.0)
                     return Height <= 0.0;
@@ -256,8 +238,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="right">
         ///     The <see cref="RRect" /> structure that is to the right of the inequality operator.
         /// </param>
-        public static bool operator !=(RRect left, RRect right)
-        {
+        public static bool operator !=(RRect left, RRect right) {
             return !(left == right);
         }
 
@@ -271,8 +252,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="top">The y-coordinate of the upper-left corner of the rectangular region. </param>
         /// <param name="right">The x-coordinate of the lower-right corner of the rectangular region. </param>
         /// <param name="bottom">The y-coordinate of the lower-right corner of the rectangular region. </param>
-        public static RRect FromLTRB(double left, double top, double right, double bottom)
-        {
+        public static RRect FromLTRB(double left, double top, double right, double bottom) {
             return new RRect(left, top, right - left, bottom - top);
         }
 
@@ -287,11 +267,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="obj">
         ///     The <see cref="T:System.Object" /> to test.
         /// </param>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             if (!(obj is RRect))
                 return false;
-            var rectangleF = (RRect)obj;
+            var rectangleF = (RRect) obj;
             if (Math.Abs(rectangleF.X - X) < 0.001 && Math.Abs(rectangleF.Y - Y) < 0.001 && Math.Abs(rectangleF.Width - Width) < 0.001)
                 return Math.Abs(rectangleF.Height - Height) < 0.001;
             return false;
@@ -322,8 +301,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     structure; otherwise false.
         /// </returns>
         /// <param name="pt">The <see cref="RPoint" /> to test.</param>
-        public bool Contains(RPoint pt)
-        {
+        public bool Contains(RPoint pt) {
             return Contains(pt.X, pt.Y);
         }
 
@@ -355,20 +333,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <param name="y">
         ///     The amount to inflate this <see cref="RRect" /> structure vertically.
         /// </param>
-        public void Inflate(double x, double y)
-        {
+        public void Inflate(double x, double y) {
             X -= x;
             Y -= y;
-            Width += 2f * x;
-            Height += 2f * y;
+            Width += 2f*x;
+            Height += 2f*y;
         }
 
         /// <summary>
         ///     Inflates this <see cref="RRect" /> by the specified amount.
         /// </summary>
         /// <param name="size">The amount to inflate this rectangle. </param>
-        public void Inflate(RSize size)
-        {
+        public void Inflate(RSize size) {
             Inflate(size.Width, size.Height);
         }
 
@@ -383,8 +359,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </param>
         /// <param name="x">The amount to inflate the copy of the rectangle horizontally. </param>
         /// <param name="y">The amount to inflate the copy of the rectangle vertically. </param>
-        public static RRect Inflate(RRect rect, double x, double y)
-        {
+        public static RRect Inflate(RRect rect, double x, double y) {
             RRect rectangleF = rect;
             rectangleF.Inflate(x, y);
             return rectangleF;
@@ -397,8 +372,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     structure.
         /// </summary>
         /// <param name="rect">The rectangle to intersect. </param>
-        public void Intersect(RRect rect)
-        {
+        public void Intersect(RRect rect) {
             RRect rectangleF = Intersect(rect, this);
             X = rectangleF.X;
             Y = rectangleF.Y;
@@ -417,8 +391,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </returns>
         /// <param name="a">A rectangle to intersect. </param>
         /// <param name="b">A rectangle to intersect. </param>
-        public static RRect Intersect(RRect a, RRect b)
-        {
+        public static RRect Intersect(RRect a, RRect b) {
             double x = Math.Max(a.X, b.X);
             double num1 = Math.Min(a.X + a.Width, b.X + b.Width);
             double y = Math.Max(a.Y, b.Y);
@@ -449,8 +422,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </returns>
         /// <param name="a">A rectangle to union. </param>
         /// <param name="b">A rectangle to union. </param>
-        public static RRect Union(RRect a, RRect b)
-        {
+        public static RRect Union(RRect a, RRect b) {
             double x = Math.Min(a.X, b.X);
             double num1 = Math.Max(a.X + a.Width, b.X + b.Width);
             double y = Math.Min(a.Y, b.Y);
@@ -462,8 +434,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     Adjusts the location of this rectangle by the specified amount.
         /// </summary>
         /// <param name="pos">The amount to offset the location. </param>
-        public void Offset(RPoint pos)
-        {
+        public void Offset(RPoint pos) {
             Offset(pos.X, pos.Y);
         }
 
@@ -472,8 +443,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </summary>
         /// <param name="x">The amount to offset the location horizontally. </param>
         /// <param name="y">The amount to offset the location vertically. </param>
-        public void Offset(double x, double y)
-        {
+        public void Offset(double x, double y) {
             X += x;
             Y += y;
         }
@@ -482,9 +452,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     Gets the hash code for this <see cref="RRect" /> structure. For information about the use of hash codes, see Object.GetHashCode.
         /// </summary>
         /// <returns>The hash code for this <see cref="RRect" /></returns>
-        public override int GetHashCode()
-        {
-            return (int)(uint)X ^ ((int)(uint)Y << 13 | (int)((uint)Y >> 19)) ^ ((int)(uint)Width << 26 | (int)((uint)Width >> 6)) ^ ((int)(uint)Height << 7 | (int)((uint)Height >> 25));
+        public override int GetHashCode() {
+            return (int) (uint) X ^ ((int) (uint) Y << 13 | (int) ((uint) Y >> 19)) ^ ((int) (uint) Width << 26 | (int) ((uint) Width >> 6)) ^ ((int) (uint) Height << 7 | (int) ((uint) Height >> 25));
         }
 
         /// <summary>
@@ -493,8 +462,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <returns>
         /// A string that contains the position, width, and height of this <see cref="RRect" /> structure for example, "{X=20, Y=20, Width=100, Height=50}".
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return "{X=" + X + ",Y=" + Y + ",Width=" + Width + ",Height=" + Height + "}";
         }
     }

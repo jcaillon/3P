@@ -27,9 +27,7 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
-
     internal static class ParserHandler {
-
         #region event
 
         /// <summary>
@@ -55,7 +53,7 @@ namespace _3PA.MainFeatures.Parser {
         private static ReaderWriterLockSlim _parserLock = new ReaderWriterLockSlim();
 
         private static ReaderWriterLockSlim _timerLock = new ReaderWriterLockSlim();
-        
+
         private static Timer _parserTimer;
 
         /// <summary>
@@ -151,7 +149,6 @@ namespace _3PA.MainFeatures.Parser {
         /// (you can also set forceAsync = true if doNow = true to do the parsing asynchronously, BE CAREFUL!!)
         /// </summary>
         public static void ParseCurrentDocument(bool doNow = false, bool forceAsync = false) {
-
             // parse immediatly
             if (doNow) {
                 ParseCurrentDocumentTick(forceAsync);
@@ -162,7 +159,7 @@ namespace _3PA.MainFeatures.Parser {
             if (_timerLock.TryEnterWriteLock(50)) {
                 try {
                     if (_parserTimer == null) {
-                        _parserTimer = new Timer { AutoReset = false, Interval = 800 };
+                        _parserTimer = new Timer {AutoReset = false, Interval = 800};
                         _parserTimer.Elapsed += (sender, args) => ParseCurrentDocumentTick();
                         _parserTimer.Start();
                     } else {
@@ -216,9 +213,7 @@ namespace _3PA.MainFeatures.Parser {
 
                             //watch.Stop();
                             //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
-
                         } while (!_lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-
                     } finally {
                         _parserLock.ExitWriteLock();
                     }
@@ -226,7 +221,6 @@ namespace _3PA.MainFeatures.Parser {
 
                 if (OnParseEnded != null)
                     OnParseEnded();
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
             } finally {
@@ -237,6 +231,5 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         #endregion
-
     }
 }

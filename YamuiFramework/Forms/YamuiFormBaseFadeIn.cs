@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiFormBaseShadowFadeIn.cs) is part of YamuiFramework.
+// This file (YamuiFormBaseFadeIn.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,12 +23,10 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 
 namespace YamuiFramework.Forms {
-
     /// <summary>
     /// Form class that adds a fade in/out animation on form show/close
     /// </summary>
     public class YamuiFormBaseFadeIn : YamuiFormBase {
-
         #region Private
 
         private bool _closingAnimationOnGoing;
@@ -75,9 +73,7 @@ namespace YamuiFramework.Forms {
                 _closingAnimationOnGoing = true;
                 e.Cancel = true;
                 if (AnimationDuration > 0) {
-                    Transition.run(this, "AnimationOpacity", 1d, -0.01d, new TransitionType_Acceleration(AnimationDuration), (o, args1) => {
-                        Dispose();
-                    });
+                    Transition.run(this, "AnimationOpacity", 1d, -0.01d, new TransitionType_Acceleration(AnimationDuration), (o, args1) => { Dispose(); });
                 } else {
                     Close();
                     Dispose();
@@ -85,7 +81,6 @@ namespace YamuiFramework.Forms {
             } else {
                 base.OnClosing(e);
             }
-
         }
 
         #endregion
@@ -99,7 +94,7 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-        
+
         #region Show
 
         /// <summary>
@@ -130,6 +125,5 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
 }

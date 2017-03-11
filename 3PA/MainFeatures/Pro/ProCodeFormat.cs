@@ -17,18 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal static class ProCodeFormat {
-
         /// <summary>
         /// Returns a string that describes the errors found by the parser (relative to block start/end)
         /// </summary>
@@ -48,7 +44,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Tries to re-indent the code of the whole document
         /// </summary>
         public static void CorrectCodeIndentation() {
-
             // handle spam (2s min between 2 indent)
             if (Utils.IsSpamming("CorrectCodeIndentation", 20000))
                 return;
@@ -68,7 +63,7 @@ namespace _3PA.MainFeatures.Pro {
             var dic = ParserHandler.AblParser.LineInfo;
             while (dic.ContainsKey(i)) {
                 if (canIndent)
-                    Npp.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
+                    Npp.GetLine(i).Indentation = dic[i].BlockDepth*indentWidth;
                 else
                     x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;

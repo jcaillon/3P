@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Parser {
     /// base abstract class for ParsedItem
     /// </summary>
     internal abstract class ParsedItem {
-
         /// <summary>
         /// Name of the parsed item
         /// </summary>
@@ -196,7 +195,7 @@ namespace _3PA.MainFeatures.Parser {
         Output = 1073741824,
         Return = 2147483648,
 
-        Primary = 4294967296,
+        Primary = 4294967296
     }
 
     #endregion
@@ -207,20 +206,17 @@ namespace _3PA.MainFeatures.Parser {
     /// The "root" scope of a file
     /// </summary>
     internal class ParsedFile : ParsedScopeItem {
-
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
         public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) {}
-
     }
 
     /// <summary>
     /// Procedure parsed item
     /// </summary>
     internal class ParsedPreProcBlock : ParsedScopeItem {
-
         /// <summary>
         /// type of this block
         /// </summary>
@@ -250,7 +246,7 @@ namespace _3PA.MainFeatures.Parser {
         RunTimeAttributes,
 
         // before that, this is an ANALYSE-SUSPEND block, below are the other pre-processed block
-        IfEndIf,
+        IfEndIf
     }
 
     /// <summary>
@@ -287,6 +283,7 @@ namespace _3PA.MainFeatures.Parser {
         /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
         /// </summary>
         public string Extend { get; set; }
+
         public string Parameters { get; set; }
 
         protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
@@ -299,7 +296,6 @@ namespace _3PA.MainFeatures.Parser {
     /// Function parsed item
     /// </summary>
     internal class ParsedPrototype : ParsedFunction {
-
         /// <summary>
         /// true if it's a simple FORWARD and the implementation is in the same proc,
         /// false otherwise (meaning we matched a IN)
@@ -319,7 +315,6 @@ namespace _3PA.MainFeatures.Parser {
     /// Function parsed item
     /// </summary>
     internal class ParsedImplementation : ParsedFunction {
-
         /// <summary>
         /// true if this function is an implementation AND has a prototype
         /// </summary>
@@ -423,6 +418,7 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
+
         public ParsedRun(string name, Token token, string left) : base(name, token) {
             Left = left;
         }
@@ -524,7 +520,6 @@ namespace _3PA.MainFeatures.Parser {
     /// Define parsed item
     /// </summary>
     internal class ParsedDefine : ParsedItem {
-
         /// <summary>
         /// contains as or like
         /// </summary>
@@ -783,6 +778,7 @@ namespace _3PA.MainFeatures.Parser {
     #endregion
 
     #region OOP classes
+
     /*
     /// <summary>
     /// Class
@@ -912,6 +908,6 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
     */
+
     #endregion
-    
 }

@@ -17,12 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using Microsoft.Win32;
-
 namespace _3PA.Lib {
     public class TortoiseWrapper {
-
         #region Singleton
 
         private static TortoiseWrapper _gitInstance;
@@ -86,6 +82,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
 }

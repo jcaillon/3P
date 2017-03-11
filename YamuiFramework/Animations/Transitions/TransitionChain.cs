@@ -19,17 +19,13 @@
 #endregion
 using System.Collections.Generic;
 
-namespace YamuiFramework.Animations.Transitions
-{
-    internal class TransitionChain
-    {
+namespace YamuiFramework.Animations.Transitions {
+    internal class TransitionChain {
         #region Public methods
 
-        public TransitionChain(params Transition[] transitions)
-        {
+        public TransitionChain(params Transition[] transitions) {
             // We store the list of transitions...
-            foreach (Transition transition in transitions)
-            {
+            foreach (Transition transition in transitions) {
                 m_listTransitions.AddLast(transition);
             }
 
@@ -44,10 +40,8 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Runs the next transition in the list.
         /// </summary>
-        private void runNextTransition()
-        {
-            if (m_listTransitions.Count == 0)
-            {
+        private void runNextTransition() {
+            if (m_listTransitions.Count == 0) {
                 return;
             }
 
@@ -62,10 +56,9 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Called when the transition we have just run has completed.
         /// </summary>
-        private void onTransitionCompleted(object sender, Transition.Args e)
-        {
+        private void onTransitionCompleted(object sender, Transition.Args e) {
             // We unregister from the completed event...
-            Transition transition = (Transition)sender;
+            Transition transition = (Transition) sender;
             transition.TransitionCompletedEvent -= onTransitionCompleted;
 
             // We remove the completed transition from our collection, and

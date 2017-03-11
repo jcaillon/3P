@@ -31,6 +31,7 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(RadioButton))]
     public class YamuiColorRadioButton : RadioButton {
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseBorder { get; set; }
@@ -38,9 +39,11 @@ namespace YamuiFramework.Controls {
         private bool _isHovered;
         //private bool _isPressed;
         //private bool _isFocused;
+
         #endregion
 
         #region Constructor
+
         public YamuiColorRadioButton() {
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
@@ -50,9 +53,11 @@ namespace YamuiFramework.Controls {
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
         }
+
         #endregion
 
         #region Paint Methods
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -71,7 +76,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
@@ -91,7 +96,6 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-
             if (!Checked && _isHovered)
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonHoverBack))
                     e.Graphics.FillRectangle(b, new Rectangle(0, 0, Width, Height));
@@ -108,6 +112,7 @@ namespace YamuiFramework.Controls {
             using (SolidBrush b = new SolidBrush(BackColor))
                 e.Graphics.FillRectangle(b, boxRect);
         }
+
         #endregion
 
         #region Managing isHovered, isPressed, isFocused
@@ -160,7 +165,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     internal class YamuiColorRadioButtonDesigner : ControlDesigner {

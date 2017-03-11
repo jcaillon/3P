@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// Border types
     /// </summary>
-    internal enum Border
-    {
+    internal enum Border {
         Top,
         Right,
         Bottom,

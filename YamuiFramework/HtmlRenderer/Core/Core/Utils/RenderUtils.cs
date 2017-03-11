@@ -21,20 +21,17 @@ using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     /// <summary>
     /// Provides some drawing functionality
     /// </summary>
-    internal static class RenderUtils
-    {
+    internal static class RenderUtils {
         /// <summary>
         /// Check if the given color is visible if painted (has alpha and color values)
         /// </summary>
         /// <param name="color">the color to check</param>
         /// <returns>true - visible, false - not visible</returns>
-        public static bool IsColorVisible(RColor color)
-        {
+        public static bool IsColorVisible(RColor color) {
             return color.A > 0;
         }
 
@@ -46,13 +43,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="g">the graphics to clip</param>
         /// <param name="box">the box that is rendered to get containing blocks</param>
         /// <returns>true - was clipped, false - not clipped</returns>
-        public static bool ClipGraphicsByOverflow(RGraphics g, CssBox box)
-        {
+        public static bool ClipGraphicsByOverflow(RGraphics g, CssBox box) {
             var containingBlock = box.ContainingBlock;
-            while (true)
-            {
-                if (containingBlock.Overflow == CssConstants.Hidden)
-                {
+            while (true) {
+                if (containingBlock.Overflow == CssConstants.Hidden) {
                     var prevClip = g.GetClip();
                     var rect = box.ContainingBlock.ClientRectangle;
                     rect.X -= 2; // TODO:a find better way to fix it
@@ -75,8 +69,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="g">the device to draw into</param>
         /// <param name="htmlContainer"></param>
         /// <param name="r">the rectangle to draw icon in</param>
-        public static void DrawImageLoadingIcon(RGraphics g, HtmlContainerInt htmlContainer, RRect r)
-        {
+        public static void DrawImageLoadingIcon(RGraphics g, HtmlContainerInt htmlContainer, RRect r) {
             g.DrawRectangle(g.GetPen(RColor.LightGray), r.Left + 3, r.Top + 3, 13, 14);
             var image = htmlContainer.Adapter.GetLoadingImage();
             g.DrawImage(image, new RRect(r.Left + 4, r.Top + 4, image.Width, image.Height));
@@ -88,8 +81,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="g">the device to draw into</param>
         /// <param name="htmlContainer"></param>
         /// <param name="r">the rectangle to draw icon in</param>
-        public static void DrawImageErrorIcon(RGraphics g, HtmlContainerInt htmlContainer, RRect r)
-        {
+        public static void DrawImageErrorIcon(RGraphics g, HtmlContainerInt htmlContainer, RRect r) {
             g.DrawRectangle(g.GetPen(RColor.LightGray), r.Left + 2, r.Top + 2, 15, 15);
             var image = htmlContainer.Adapter.GetLoadingFailedImage();
             g.DrawImage(image, new RRect(r.Left + 3, r.Top + 3, image.Width, image.Height));
@@ -109,8 +101,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="seRadius">Radius of the south east corner</param>
         /// <param name="swRadius">Radius of the south west corner</param>
         /// <returns>GraphicsPath with the lines of the rounded rectangle ready to be painted</returns>
-        public static RGraphicsPath GetRoundRect(RGraphics g, RRect rect, double nwRadius, double neRadius, double seRadius, double swRadius)
-        {
+        public static RGraphicsPath GetRoundRect(RGraphics g, RRect rect, double nwRadius, double neRadius, double seRadius, double swRadius) {
             var path = g.GetGraphicsPath();
 
             path.Start(rect.Left + nwRadius, rect.Top);

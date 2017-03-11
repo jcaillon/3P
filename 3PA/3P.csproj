@@ -46,6 +46,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -106,19 +107,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HtmlResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Lib\MarkdownDeep\Abbreviation.cs" />
-    <Compile Include="Lib\MarkdownDeep\Block.cs" />
-    <Compile Include="Lib\MarkdownDeep\BlockProcessor.cs" />
-    <Compile Include="Lib\MarkdownDeep\FootnoteReference.cs" />
-    <Compile Include="Lib\MarkdownDeep\HtmlTag.cs" />
-    <Compile Include="Lib\MarkdownDeep\LinkDefinition.cs" />
-    <Compile Include="Lib\MarkdownDeep\LinkInfo.cs" />
-    <Compile Include="Lib\MarkdownDeep\MardownDeep.cs" />
-    <Compile Include="Lib\MarkdownDeep\SpanFormatter.cs" />
-    <Compile Include="Lib\MarkdownDeep\StringScanner.cs" />
-    <Compile Include="Lib\MarkdownDeep\TableSpec.cs" />
-    <Compile Include="Lib\MarkdownDeep\Token.cs" />
-    <Compile Include="Lib\MarkdownDeep\Utils.cs" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -133,6 +121,8 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\MarkDownSharp\Markdown.cs" />
+    <Compile Include="Lib\NanoXmlParser.cs" />
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
     <Compile Include="Lib\RegistryWrapper.cs" />
@@ -209,6 +199,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\Parser\NppAutoCompParser.cs" />
     <Compile Include="MainFeatures\Parser\Parser2.cs" />
     <Compile Include="MainFeatures\Pro\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\DeployProfile.cs" />

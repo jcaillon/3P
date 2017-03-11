@@ -27,10 +27,8 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer(typeof(ScrollPageDesigner))]
     public class YamuiScrollPanel : UserControl {
-
         #region fields
 
         /// <summary>
@@ -83,7 +81,7 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
-            
+
             _contentPanel = new YamuiInternalPanel {
                 Location = new Point(0, 0),
                 Width = Width,
@@ -145,22 +143,20 @@ namespace YamuiFramework.Controls {
 
         private void HandleWindowsProc(Message message) {
             switch (message.Msg) {
-
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
                     // delta negative when scrolling up
-                    var delta = -((short)(message.WParam.ToInt64() >> 16));
-                    DoScroll(Math.Sign(delta) * _thumbRectangle.Height / 2);
+                    var delta = -((short) (message.WParam.ToInt64() >> 16));
+                    DoScroll(Math.Sign(delta)*_thumbRectangle.Height/2);
                     break;
 
-                case (int)WinApi.Messages.WM_LBUTTONDOWN:
+                case (int) WinApi.Messages.WM_LBUTTONDOWN:
                     var mousePosRelativeToThis = PointToClient(MousePosition);
 
                     // mouse in scrollbar
                     if (_barRectangle.Contains(mousePosRelativeToThis)) {
-
                         var thumbRect = _thumbRectangle;
                         thumbRect.X -= _thumbPadding;
-                        thumbRect.Width += _thumbPadding * 2;
+                        thumbRect.Width += _thumbPadding*2;
 
                         // mouse in thumb
                         if (thumbRect.Contains(mousePosRelativeToThis)) {
@@ -173,14 +169,14 @@ namespace YamuiFramework.Controls {
                     }
                     break;
 
-                case (int)WinApi.Messages.WM_LBUTTONUP:
+                case (int) WinApi.Messages.WM_LBUTTONUP:
                     if (_isPressed) {
                         _isPressed = false;
                         Invalidate();
                     }
                     break;
 
-                case (int)WinApi.Messages.WM_MOUSEMOVE:
+                case (int) WinApi.Messages.WM_MOUSEMOVE:
                     // hover thumb
                     var controlPos = PointToScreen(Location);
                     var mousePosInControl = new Point(MousePosition.X - controlPos.X, MousePosition.Y - controlPos.Y);
@@ -201,7 +197,7 @@ namespace YamuiFramework.Controls {
                         }
                         _lastMouseMove = currentlMouse;
                     }
- 
+
                     break;
             }
         }
@@ -241,12 +237,11 @@ namespace YamuiFramework.Controls {
                 // maximum free space to scroll in the panel
                 float scrollSpace = _contentPanel.Height - Height;
                 // % in the scroll bar to % in the panel
-                _contentPanel.Top = (int)(scrollSpace/100*percentScrolled)*-1;
+                _contentPanel.Top = (int) (scrollSpace/100*percentScrolled)*-1;
             }
         }
 
         protected override void OnResize(EventArgs e) {
-
             // in designer mode, we need the internal panel to fit the page so the user don't get confused
             if (DesignMode) {
                 _contentPanel.Location = new Point(0, 0);
@@ -264,14 +259,13 @@ namespace YamuiFramework.Controls {
         }
 
         public void OnResizedContentPanel() {
-
             // if the content is not too tall, no need to display the scroll bars
             if (_contentPanel.Height <= Height) {
                 _contentPanel.Width = Width;
                 HasScrolls = false;
             } else {
                 // thumb heigh is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = Math.Max((int)(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
+                _thumbRectangle.Height = Math.Max((int) (_barRectangle.Height*((float) Height/_contentPanel.Height)) - _thumbPadding*2, 10);
                 _contentPanel.Width = Width - 10;
                 HasScrolls = true;
             }
@@ -287,7 +281,6 @@ namespace YamuiFramework.Controls {
         #region internal content panel
 
         public class YamuiInternalPanel : YamuiSimplePanel {
-
             public YamuiScrollPanel OwnerPanel { get; set; }
 
             public new DockStyle Dock {
@@ -300,13 +293,12 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     internal class ScrollPageDesigner : ParentControlDesigner {
         public override void Initialize(IComponent component) {
             base.Initialize(component);
-            EnableDesignMode(((YamuiScrollPanel)Control).ContentPanel, "ContentPanel");
+            EnableDesignMode(((YamuiScrollPanel) Control).ContentPanel, "ContentPanel");
         }
     }
 }

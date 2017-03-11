@@ -33,16 +33,16 @@ using _3PA.MainFeatures.Pro;
 using _3PA.Tests;
 
 namespace _3PA.MainFeatures {
-     
     /// <summary>
     /// This class handle the Main context menu (and its children)
     /// It also has knownledge of the shortcuts for each item in the menu
     /// </summary>
     internal class AppliMenu {
-
         #region Core
 
         private static AppliMenu _instance;
+
+        private static YamuiMenu _popup;
 
         /// <summary>
         /// Set to null to reset the instance
@@ -64,12 +64,12 @@ namespace _3PA.MainFeatures {
         /// Closes the visible menu (if any)
         /// </summary>
         public static bool ForceCloseMenu() {
-            if (YamuiWaterfallMenu.ListOfOpenededMenuHandle != null && YamuiWaterfallMenu.ListOfOpenededMenuHandle.Count > 0) {
-                var curCtrl = (Control.FromHandle(YamuiWaterfallMenu.ListOfOpenededMenuHandle[0]));
-                var curMenu = curCtrl as YamuiWaterfallMenu;
-                if (curMenu != null) {
-                    curMenu.CloseAll();
-                    return true;
+            if (_popup != null) {
+                try {
+                    _popup.Close();
+                    _popup.Dispose();
+                } catch (Exception) {
+                    // ignored
                 }
             }
             return false;
@@ -84,7 +84,7 @@ namespace _3PA.MainFeatures {
                 ForceCloseMenu();
 
                 // open requested menu
-                var popup = new YamuiMenu {
+                _popup = new YamuiMenu {
                     HtmlTitle = "<div class='contextMenuTitle'><img src='" + menuLogo + "' width='16' Height='16' style='padding-right: 5px; padding-top: 1px;'>" + menuTitle + "</span>",
                     SpawnLocation = Cursor.Position,
                     MenuList = menuList,
@@ -92,8 +92,9 @@ namespace _3PA.MainFeatures {
                     DisplayFilterBox = true,
                     FormMinSize = new Size(minWidth, 0)
                 };
-                popup.ClicItemWrapper = item => {
-                    if (item.OnClic != null && !item.CanExpand) {
+                _popup.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
+                _popup.ClicItemWrapper = item => {
+                    if (item.OnClic != null) {
                         try {
                             item.OnClic(item);
                         } catch (Exception e) {
@@ -101,7 +102,7 @@ namespace _3PA.MainFeatures {
                         }
                     }
                 };
-                popup.Show(new WindowWrapper(Npp.HandleNpp));
+                _popup.Show(new WindowWrapper(Npp.HandleNpp));
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
             }
@@ -120,7 +121,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static void ShowDatabaseToolsMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem)item).ToList(), "Database tools", "DatabaseTools");
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem) item).ToList(), "Database tools", "DatabaseTools");
         }
 
         public static void ShowEnvMenuAtCursor() {
@@ -129,11 +130,11 @@ namespace _3PA.MainFeatures {
         }
 
         public static void ShowMiscMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem)item).ToList(), "Miscellaneous", "Miscellaneous");
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Miscellaneous", "Miscellaneous");
         }
 
         public static void ShowEditCodeMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._editCodeList).Select(item => (YamuiMenuItem)item).ToList(), "Edit code", "EditCode");
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._editCodeList).Select(item => (YamuiMenuItem) item).ToList(), "Edit code", "EditCode");
         }
 
         /// <summary>
@@ -160,9 +161,7 @@ namespace _3PA.MainFeatures {
         /// Returns a list containing all the keys used in the menu's items
         /// </summary>
         public List<Keys> GetMenuKeysList {
-            get {
-                return (from item in ShortcutableItemList where item.Shortcut.IsSet select item.Shortcut.Key).ToList();
-            }
+            get { return (from item in ShortcutableItemList where item.Shortcut.IsSet select item.Shortcut.Key).ToList(); }
         }
 
         /// <summary>
@@ -187,7 +186,6 @@ namespace _3PA.MainFeatures {
         #region Life and death
 
         private AppliMenu() {
-
             // List of item that can be assigned to a shortcut
             ShortcutableItemList = new List<MenuItem> {
                 // add the main menu here, so it can appear in the list of shortcut to set
@@ -205,7 +203,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, item => ProGenerateCode.DeleteCode<ParsedProcedure>(), "Delete_procedure", ""),
                 new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, item => ProGenerateCode.DeleteCode<ParsedImplementation>(), "Delete_function", ""),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, item => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S"),
+                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, item => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
             };
 
             #endregion
@@ -214,7 +212,7 @@ namespace _3PA.MainFeatures {
 
             _editCodeList = new List<MenuItem> {
                 new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProGenerateCode.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
-                new MenuItem(this, "Correct document indentation", ImageResources.FormatCode,item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I"),
+                new MenuItem(this, "Correct document indentation", ImageResources.FormatCode, item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I")
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
             };
 
@@ -225,7 +223,7 @@ namespace _3PA.MainFeatures {
             _miscMenuList = new List<MenuItem> {
                 new MenuItem(this, "Edit current file info", ImageResources.FileInfo, item => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
                 new MenuItem(this, "Insert title block", ImageResources.TitleBlock, item => ProGenerateCode.AddTitleBlockAtCaret(), "Insert_title_block", "Ctrl+Alt+M"),
-                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => ProGenerateCode.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => ProGenerateCode.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M")
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
             };
 
@@ -234,17 +232,15 @@ namespace _3PA.MainFeatures {
             #region database tools
 
             _databaseTools = new List<MenuItem> {
-                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, item => ProMisc.OpenDbAdmin(), "Data_admin", "") { Generic = true },
-                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, item => ProMisc.OpenDictionary(), "Data_dictionary", "") { Generic = true },
-                new MenuItem(true) { Generic = true }, // --------------------------
-                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, item => ProMisc.OpenDataDigger(), "Data_digger", "") { Generic = true },
-                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, item => ProMisc.OpenDataReader(), "Data_reader", "") { Generic = true },
-
-
+                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, item => ProMisc.OpenDbAdmin(), "Data_admin", "") {Generic = true},
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, item => ProMisc.OpenDictionary(), "Data_dictionary", "") {Generic = true},
+                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, item => ProMisc.OpenDataDigger(), "Data_digger", "") {Generic = true},
+                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, item => ProMisc.OpenDataReader(), "Data_reader", "") {Generic = true}
             };
 
             #endregion
-            
+
             #region Main menu
 
             var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, item => ProMisc.GoToDefinition(), "Go_To_Definition", "Ctrl+B");
@@ -255,26 +251,26 @@ namespace _3PA.MainFeatures {
             goToPreviousJump.SubText = "Ctrl + Middle click  /  " + goToPreviousJump.SubText;
 
             MainMenuList = new List<MenuItem> {
-                new MenuItem(this, "Show main window", ImageResources.MainWindow, item => Appli.Appli.ToggleView(), "Open_main_window", "Alt+Space") { Generic = true },
+                new MenuItem(this, "Show main window", ImageResources.MainWindow, item => Appli.Appli.ToggleView(), "Open_main_window", "Alt+Space") {Generic = true},
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, item => AutoCompletion.OnShowCompleteSuggestionList(), "Show_Suggestion_List", "Ctrl+Space"),
-                new MenuItem(true) { Generic = true }, // --------------------------
-                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") { Generic = true },
+                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") {Generic = true},
                 new MenuItem(this, "Check syntax", ImageResources.CheckCode, item => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
                 new MenuItem(this, "Compile", ImageResources.CompileCode, item => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
                 new MenuItem(this, "Run program", ImageResources.RunCode, item => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
                 new MenuItem(this, "Prolint code", ImageResources.ProlintCode, item => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
-                new MenuItem(this, "Deploy current file", ImageResources.Deploy, item => ProMisc.DeployCurrentFile(), "Deploy", "Ctrl+Alt+Prior") { Generic = true },
-                new MenuItem(true) { Generic = true }, // --------------------------
-                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") { Generic = true },
+                new MenuItem(this, "Deploy current file", ImageResources.Deploy, item => ProMisc.DeployCurrentFile(), "Deploy", "Ctrl+Alt+Prior") {Generic = true},
+                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") {Generic = true},
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, item => ProMisc.OpenCurrentInAppbuilder(), "Send_appbuilder", "Alt+O"),
-                new MenuItem(true) { Generic = true }, // --------------------------
-                new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.Instance.StartSearch(), "Search_file", "Alt+Q") { Generic = true },
+                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.Instance.StartSearch(), "Search_file", "Alt+Q") {Generic = true},
                 goToDefItem,
                 goToPreviousJump,
                 //new MenuItem(this, "New 4GL file", ImageResources.GenerateCode, ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N") {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
-                new MenuItem(true) { Generic = true }, // --------------------------
+                new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Switch environment", ImageResources.Env, item => ShowEnvMenuAtCursor(), "Switch_env", "Ctrl+E") {
                     Generic = true
                 },
@@ -294,7 +290,7 @@ namespace _3PA.MainFeatures {
                     Generic = true,
                     Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(true) { Generic = true }, // --------------------------
+                new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Options", ImageResources.ShowOptions, item => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
             };
 
@@ -305,19 +301,18 @@ namespace _3PA.MainFeatures {
             if (Config.IsDevelopper) {
                 MainMenuList.Add(
                     new MenuItem(this, "Tests", ImageResources.Tests, null, null, null, new List<MenuItem> {
-                            new MenuItem(this, "DebugTest1", ImageResources.TestTube, item => PlugDebug.DebugTest1(), "DebugTest1", "Ctrl+OemQuotes") {Generic = true},
-                            new MenuItem(this, "DebugTest2", ImageResources.TestTube, item => PlugDebug.DebugTest2(), "DebugTest2", "Alt+OemQuotes") {Generic = true},
-                            new MenuItem(this, "DebugTest3", ImageResources.TestTube, item => PlugDebug.DebugTest3(), "DebugTest3", "Shift+OemQuotes") {Generic = true},
-                            new MenuItem(this, "Parse current file", ImageResources.TestTube, item => PlugDebug.ParseCurrentFile(), "ParseCurrentFile", "") {Generic = true},
-                            new MenuItem(this, "Parse reference file", ImageResources.TestTube, item => PlugDebug.ParseReferenceFile(), "ParseReferenceFile", "") {Generic = true},
-                            new MenuItem(this, "Parse all files", ImageResources.TestTube, item => PlugDebug.ParseAllFiles(), "ParseAllFiles", "") {Generic = true},
-                        }) {
+                        new MenuItem(this, "DebugTest1", ImageResources.TestTube, item => PlugDebug.DebugTest1(), "DebugTest1", "Ctrl+OemQuotes") {Generic = true},
+                        new MenuItem(this, "DebugTest2", ImageResources.TestTube, item => PlugDebug.DebugTest2(), "DebugTest2", "Alt+OemQuotes") {Generic = true},
+                        new MenuItem(this, "DebugTest3", ImageResources.TestTube, item => PlugDebug.DebugTest3(), "DebugTest3", "Shift+OemQuotes") {Generic = true},
+                        new MenuItem(this, "Parse current file", ImageResources.TestTube, item => PlugDebug.ParseCurrentFile(), "ParseCurrentFile", "") {Generic = true},
+                        new MenuItem(this, "Parse reference file", ImageResources.TestTube, item => PlugDebug.ParseReferenceFile(), "ParseReferenceFile", "") {Generic = true},
+                        new MenuItem(this, "Parse all files", ImageResources.TestTube, item => PlugDebug.ParseAllFiles(), "ParseAllFiles", "") {Generic = true}
+                    }) {
                         Generic = true
                     });
             }
 
             #endregion
-
         }
 
         #endregion
@@ -340,7 +335,7 @@ namespace _3PA.MainFeatures {
                     var newSub = new YamuiMenuItem {
                         DisplayText = env.Suffix,
                         ItemImage = ImageResources.EnvSuffix,
-                        OnClic = (item) => ProEnvironment.SetCurrent(name, suffix, null),
+                        OnClic = item => ProEnvironment.SetCurrent(name, suffix, null),
                         IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && suffix.Equals(Config.Instance.EnvSuffix),
                         IsExpanded = true
                     };
@@ -348,16 +343,17 @@ namespace _3PA.MainFeatures {
                         existingItem.Children.Add(newSub);
                     else {
                         // also add the first sub item..
-                        var firstItemSuffix = ((string)existingItem.Data) ?? "";
+                        var firstItemSuffix = ((string) existingItem.Data) ?? "";
                         existingItem.Children = new List<FilteredTypeTreeListItem> {
                             new YamuiMenuItem {
                                 DisplayText = firstItemSuffix,
                                 ItemImage = ImageResources.EnvSuffix,
-                                OnClic = (item) => ProEnvironment.SetCurrent(name, firstItemSuffix, null),
+                                OnClic = item => ProEnvironment.SetCurrent(name, firstItemSuffix, null),
                                 IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && firstItemSuffix.Equals(Config.Instance.EnvSuffix),
                                 IsExpanded = true
                             },
-                            newSub };
+                            newSub
+                        };
                     }
                     existingItem.SubText = existingItem.Children.Count.ToString();
                 } else {
@@ -365,7 +361,7 @@ namespace _3PA.MainFeatures {
                     _envMenuList.Add(new MenuItem(false) {
                         DisplayText = env.Name,
                         ItemImage = ImageResources.EnvName,
-                        OnClic = (item) => ProEnvironment.SetCurrent(name, suffix, null),
+                        OnClic = item => ProEnvironment.SetCurrent(name, suffix, null),
                         Data = env.Suffix,
                         IsExpanded = true
                     });
@@ -374,13 +370,11 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 
     #region MenuItem
 
     internal sealed class MenuItem : YamuiMenuItem {
-
         /// <summary>
         /// Key of the item in the shortcut dictionnary stored in the config,
         /// must not be null if you want to be able to set a shortcut for the item
@@ -424,7 +418,6 @@ namespace _3PA.MainFeatures {
 
             // shortcut?
             if (!string.IsNullOrEmpty(itemId)) {
-
                 ItemId = itemId;
                 ItemSpec = defaultKey;
 
@@ -433,7 +426,6 @@ namespace _3PA.MainFeatures {
                     Config.Instance.ShortCuts.Remove(ItemId);
                 }
 
-                
                 Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
 
                 if (!string.IsNullOrEmpty(ItemSpec)) {
@@ -449,11 +441,12 @@ namespace _3PA.MainFeatures {
             // action?
             OnClic = action;
 
-            IsExpanded = true;
+            // default is not expanded
+            IsExpanded = false;
         }
 
         public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action<YamuiMenuItem> action, string itemId, string defaultKey) :
-            this(menuToRegisterTo, name, img, action, itemId, defaultKey, null) { }
+            this(menuToRegisterTo, name, img, action, itemId, defaultKey, null) {}
 
         /// <summary>
         /// constructor for separators
@@ -464,5 +457,4 @@ namespace _3PA.MainFeatures {
     }
 
     #endregion
-
 }

@@ -22,13 +22,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers {
     /// <summary>
     /// Contains all the paint code to paint different background images.
     /// </summary>
-    internal static class BackgroundImageDrawHandler
-    {
+    internal static class BackgroundImageDrawHandler {
         /// <summary>
         /// Draw the background image of the given box in the given rectangle.<br/>
         /// Handle background-repeat and background-position values.
@@ -37,8 +35,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="box">the box to draw its background image</param>
         /// <param name="imageLoadHandler">the handler that loads image to draw</param>
         /// <param name="rectangle">the rectangle to draw image in</param>
-        public static void DrawBackgroundImage(RGraphics g, CssBox box, ImageLoadHandler imageLoadHandler, RRect rectangle)
-        {
+        public static void DrawBackgroundImage(RGraphics g, CssBox box, ImageLoadHandler imageLoadHandler, RRect rectangle) {
             // image size depends if specific rectangle given in image loader
             var imgSize = new RSize(imageLoadHandler.Rectangle == RRect.Empty ? imageLoadHandler.Image.Width : imageLoadHandler.Rectangle.Width,
                 imageLoadHandler.Rectangle == RRect.Empty ? imageLoadHandler.Image.Height : imageLoadHandler.Rectangle.Height);
@@ -58,8 +55,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
             lRectangle.Intersect(g.GetClip());
             g.PushClip(lRectangle);
 
-            switch (box.BackgroundRepeat)
-            {
+            switch (box.BackgroundRepeat) {
                 case "no-repeat":
                     g.DrawImage(imageLoadHandler.Image, destRect, srcRect);
                     break;
@@ -77,7 +73,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
             g.PopClip();
         }
 
-
         #region Private methods
 
         /// <summary>
@@ -87,34 +82,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="rectangle">the rectangle to position image in</param>
         /// <param name="imgSize">the size of the image</param>
         /// <returns>the top-left location</returns>
-        private static RPoint GetLocation(string backgroundPosition, RRect rectangle, RSize imgSize)
-        {
+        private static RPoint GetLocation(string backgroundPosition, RRect rectangle, RSize imgSize) {
             double left = rectangle.Left;
-            if (backgroundPosition.IndexOf("left", StringComparison.OrdinalIgnoreCase) > -1)
-            {
+            if (backgroundPosition.IndexOf("left", StringComparison.OrdinalIgnoreCase) > -1) {
                 left = (rectangle.Left + .5f);
-            }
-            else if (backgroundPosition.IndexOf("right", StringComparison.OrdinalIgnoreCase) > -1)
-            {
+            } else if (backgroundPosition.IndexOf("right", StringComparison.OrdinalIgnoreCase) > -1) {
                 left = rectangle.Right - imgSize.Width;
-            }
-            else if (backgroundPosition.IndexOf("0", StringComparison.OrdinalIgnoreCase) < 0)
-            {
-                left = (rectangle.Left + (rectangle.Width - imgSize.Width) / 2 + .5f);
+            } else if (backgroundPosition.IndexOf("0", StringComparison.OrdinalIgnoreCase) < 0) {
+                left = (rectangle.Left + (rectangle.Width - imgSize.Width)/2 + .5f);
             }
 
             double top = rectangle.Top;
-            if (backgroundPosition.IndexOf("top", StringComparison.OrdinalIgnoreCase) > -1)
-            {
+            if (backgroundPosition.IndexOf("top", StringComparison.OrdinalIgnoreCase) > -1) {
                 top = rectangle.Top;
-            }
-            else if (backgroundPosition.IndexOf("bottom", StringComparison.OrdinalIgnoreCase) > -1)
-            {
+            } else if (backgroundPosition.IndexOf("bottom", StringComparison.OrdinalIgnoreCase) > -1) {
                 top = rectangle.Bottom - imgSize.Height;
-            }
-            else if (backgroundPosition.IndexOf("0", StringComparison.OrdinalIgnoreCase) < 0)
-            {
-                top = (rectangle.Top + (rectangle.Height - imgSize.Height) / 2 + .5f);
+            } else if (backgroundPosition.IndexOf("0", StringComparison.OrdinalIgnoreCase) < 0) {
+                top = (rectangle.Top + (rectangle.Height - imgSize.Height)/2 + .5f);
             }
 
             return new RPoint(left, top);
@@ -124,13 +108,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Draw the background image at the required location repeating it over the X axis.<br/>
         /// Adjust location to left if starting location doesn't include all the range (adjusted to center or right).
         /// </summary>
-        private static void DrawRepeatX(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize)
-        {
+        private static void DrawRepeatX(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize) {
             while (destRect.X > rectangle.X)
                 destRect.X -= imgSize.Width;
 
-            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location))
-            {
+            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location)) {
                 g.DrawRectangle(brush, rectangle.X, destRect.Y, rectangle.Width, srcRect.Height);
             }
         }
@@ -139,13 +121,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Draw the background image at the required location repeating it over the Y axis.<br/>
         /// Adjust location to top if starting location doesn't include all the range (adjusted to center or bottom).
         /// </summary>
-        private static void DrawRepeatY(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize)
-        {
+        private static void DrawRepeatY(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize) {
             while (destRect.Y > rectangle.Y)
                 destRect.Y -= imgSize.Height;
 
-            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location))
-            {
+            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location)) {
                 g.DrawRectangle(brush, destRect.X, rectangle.Y, srcRect.Width, rectangle.Height);
             }
         }
@@ -154,15 +134,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Draw the background image at the required location repeating it over the X and Y axis.<br/>
         /// Adjust location to left-top if starting location doesn't include all the range (adjusted to center or bottom/right).
         /// </summary>
-        private static void DrawRepeat(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize)
-        {
+        private static void DrawRepeat(RGraphics g, ImageLoadHandler imageLoadHandler, RRect rectangle, RRect srcRect, RRect destRect, RSize imgSize) {
             while (destRect.X > rectangle.X)
                 destRect.X -= imgSize.Width;
             while (destRect.Y > rectangle.Y)
                 destRect.Y -= imgSize.Height;
 
-            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location))
-            {
+            using (var brush = g.GetTextureBrush(imageLoadHandler.Image, srcRect, destRect.Location)) {
                 g.DrawRectangle(brush, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
             }
         }

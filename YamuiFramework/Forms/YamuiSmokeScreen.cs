@@ -24,9 +24,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-
     public class YamuiSmokeScreen : Form {
-
         #region fields
 
         private Rectangle _pageRectangle;
@@ -36,9 +34,7 @@ namespace YamuiFramework.Forms {
         /// Opacity, scaled on the owner's opacity
         /// </summary>
         public new double Opacity {
-            get {
-                return base.Opacity;
-            }
+            get { return base.Opacity; }
             set {
                 if (Owner != null)
                     base.Opacity = value*Owner.Opacity;

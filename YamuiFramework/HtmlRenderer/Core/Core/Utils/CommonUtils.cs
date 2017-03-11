@@ -25,8 +25,7 @@ using System.Net;
 using System.Text;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     internal delegate void ActionInt<in T>(T obj);
 
     internal delegate void ActionInt<in T1, in T2>(T1 arg1, T2 arg2);
@@ -36,39 +35,37 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
     /// <summary>
     /// Utility methods for general stuff.
     /// </summary>
-    internal static class CommonUtils
-    {
+    internal static class CommonUtils {
         #region Fields and Consts
 
         /// <summary>
         /// Table to convert numbers into roman digits
         /// </summary>
         private static readonly string[,] _romanDigitsTable = {
-            { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX" },
-            { "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC" },
-            { "", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM" },
-            {
+            {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"},
+            {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"},
+            {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"}, {
                 "", "M", "MM", "MMM", "M(V)", "(V)", "(V)M",
                 "(V)MM", "(V)MMM", "M(X)"
             }
         };
 
         private static readonly string[,] _hebrewDigitsTable = {
-            { "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט" },
-            { "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ" },
-            { "ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק" }
+            {"א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"},
+            {"י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"},
+            {"ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק"}
         };
 
         private static readonly string[,] _georgianDigitsTable = {
-            { "ა", "ბ", "გ", "დ", "ე", "ვ", "ზ", "ჱ", "თ" },
-            { "ი", "პ", "ლ", "მ", "ნ", "ჲ", "ო", "პ", "ჟ" },
-            { "რ", "ს", "ტ", "ჳ", "ფ", "ქ", "ღ", "ყ", "შ" }
+            {"ა", "ბ", "გ", "დ", "ე", "ვ", "ზ", "ჱ", "თ"},
+            {"ი", "პ", "ლ", "მ", "ნ", "ჲ", "ო", "პ", "ჟ"},
+            {"რ", "ს", "ტ", "ჳ", "ფ", "ქ", "ღ", "ყ", "შ"}
         };
 
         private static readonly string[,] _armenianDigitsTable = {
-            { "Ա", "Բ", "Գ", "Դ", "Ե", "Զ", "Է", "Ը", "Թ" },
-            { "Ժ", "Ի", "Լ", "Խ", "Ծ", "Կ", "Հ", "Ձ", "Ղ" },
-            { "Ճ", "Մ", "Յ", "Ն", "Շ", "Ո", "Չ", "Պ", "Ջ" }
+            {"Ա", "Բ", "Գ", "Դ", "Ե", "Զ", "Է", "Ը", "Թ"},
+            {"Ժ", "Ի", "Լ", "Խ", "Ծ", "Կ", "Հ", "Ձ", "Ղ"},
+            {"Ճ", "Մ", "Յ", "Ն", "Շ", "Ո", "Չ", "Պ", "Ջ"}
         };
 
         private static readonly string[] _hiraganaDigitsTable = {
@@ -81,14 +78,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
 
         #endregion
 
-
         /// <summary>
         /// Check if the given char is of Asian range.
         /// </summary>
         /// <param name="ch">the character to check</param>
         /// <returns>true - Asian char, false - otherwise</returns>
-        public static bool IsAsianCharecter(char ch)
-        {
+        public static bool IsAsianCharecter(char ch) {
             return ch >= 0x4e00 && ch <= 0xFA2D;
         }
 
@@ -98,8 +93,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="ch">the character to check</param>
         /// <param name="hex">optional: is hex digit check</param>
         /// <returns>true - is digit, false - not a digit</returns>
-        public static bool IsDigit(char ch, bool hex = false)
-        {
+        public static bool IsDigit(char ch, bool hex = false) {
             return (ch >= '0' && ch <= '9') || (hex && ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')));
         }
 
@@ -109,8 +103,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="ch">the character to check</param>
         /// <param name="hex">optional: is hex digit check</param>
         /// <returns>true - is digit, false - not a digit</returns>
-        public static int ToDigit(char ch, bool hex = false)
-        {
+        public static int ToDigit(char ch, bool hex = false) {
             if (ch >= '0' && ch <= '9')
                 return ch - '0';
             if (hex) {
@@ -126,8 +119,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <summary>
         /// Get size that is max of <paramref name="size"/> and <paramref name="other"/> for width and height separately.
         /// </summary>
-        public static RSize Max(RSize size, RSize other)
-        {
+        public static RSize Max(RSize size, RSize other) {
             return new RSize(Math.Max(size.Width, other.Width), Math.Max(size.Height, other.Height));
         }
 
@@ -136,17 +128,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="path">the path to get uri for</param>
         /// <returns>uri or null if not valid</returns>
-        public static Uri TryGetUri(string path)
-        {
-            try
-            {
-                if (Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute))
-                {
+        public static Uri TryGetUri(string path) {
+            try {
+                if (Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute)) {
                     return new Uri(path);
                 }
-            }
-            catch
-            { }
+            } catch {}
 
             return null;
         }
@@ -159,10 +146,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="dic">the dictionary</param>
         /// <param name="defaultValue">optional: the default value to return of no elements found in dictionary </param>
         /// <returns>first element or default value</returns>
-        public static TValue GetFirstValueOrDefault<TKey, TValue>(IDictionary<TKey, TValue> dic, TValue defaultValue = default(TValue))
-        {
-            if (dic != null)
-            {
+        public static TValue GetFirstValueOrDefault<TKey, TValue>(IDictionary<TKey, TValue> dic, TValue defaultValue = default(TValue)) {
+            if (dic != null) {
                 foreach (var value in dic)
                     return value.Value;
             }
@@ -174,14 +159,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="path">the path to get file info for</param>
         /// <returns>file info or null if not valid</returns>
-        public static FileInfo TryGetFileInfo(string path)
-        {
-            try
-            {
+        public static FileInfo TryGetFileInfo(string path) {
+            try {
                 return new FileInfo(path);
-            }
-            catch
-            { }
+            } catch {}
 
             return null;
         }
@@ -191,10 +172,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="client">the web client to get the response content type from</param>
         /// <returns>response content type or null</returns>
-        public static string GetResponseContentType(WebClient client)
-        {
-            foreach (string header in client.ResponseHeaders)
-            {
+        public static string GetResponseContentType(WebClient client) {
+            foreach (string header in client.ResponseHeaders) {
                 if (header.Equals("Content-Type", StringComparison.InvariantCultureIgnoreCase))
                     return client.ResponseHeaders[header];
             }
@@ -206,13 +185,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="imageUri">The online image uri.</param>
         /// <returns>The path of the file on the disk.</returns>
-        public static FileInfo GetLocalfileName(Uri imageUri)
-        {
+        public static FileInfo GetLocalfileName(Uri imageUri) {
             StringBuilder fileNameBuilder = new StringBuilder();
             string absoluteUri = imageUri.AbsoluteUri;
             int lastSlash = absoluteUri.LastIndexOf('/');
-            if (lastSlash == -1)
-            {
+            if (lastSlash == -1) {
                 return null;
             }
 
@@ -222,30 +199,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
 
             string restOfUri = absoluteUri.Substring(lastSlash + 1);
             int indexOfParams = restOfUri.IndexOf('?');
-            if (indexOfParams == -1)
-            {
+            if (indexOfParams == -1) {
                 string ext = ".cache";
                 int indexOfDot = restOfUri.IndexOf('.');
-                if (indexOfDot > -1)
-                {
+                if (indexOfDot > -1) {
                     ext = restOfUri.Substring(indexOfDot);
                     restOfUri = restOfUri.Substring(0, indexOfDot);
                 }
 
                 fileNameBuilder.Append(restOfUri);
                 fileNameBuilder.Append(ext);
-            }
-            else
-            {
+            } else {
                 int indexOfDot = restOfUri.IndexOf('.');
-                if (indexOfDot == -1 || indexOfDot > indexOfParams)
-                {
+                if (indexOfDot == -1 || indexOfDot > indexOfParams) {
                     //The uri is not for a filename
                     fileNameBuilder.Append(restOfUri);
                     fileNameBuilder.Append(".cache");
-                }
-                else if (indexOfParams > indexOfDot)
-                {
+                } else if (indexOfParams > indexOfDot) {
                     //Adds the filename without extension.
                     fileNameBuilder.Append(restOfUri, 0, indexOfDot);
                     //Adds the parameters
@@ -256,8 +226,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
             }
 
             var validFileName = GetValidFileName(fileNameBuilder.ToString());
-            if (validFileName.Length > 25)
-            {
+            if (validFileName.Length > 25) {
                 validFileName = validFileName.Substring(0, 24) + validFileName.Substring(24).GetHashCode() + Path.GetExtension(validFileName);
             }
 
@@ -271,12 +240,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="idx">the index to start substring search from</param>
         /// <param name="length">return the length of the found string</param>
         /// <returns>the index of the substring, -1 if no valid sub-string found</returns>
-        public static int GetNextSubString(string str, int idx, out int length)
-        {
+        public static int GetNextSubString(string str, int idx, out int length) {
             while (idx < str.Length && Char.IsWhiteSpace(str[idx]))
                 idx++;
-            if (idx < str.Length)
-            {
+            if (idx < str.Length) {
                 var endIdx = idx + 1;
                 while (endIdx < str.Length && !Char.IsWhiteSpace(str[endIdx]))
                     endIdx++;
@@ -292,12 +259,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>true - equals, false - not equals</returns>
-        public static bool SubStringEquals(string str, int idx, int length, string str2)
-        {
-            if (length == str2.Length && idx + length <= str.Length)
-            {
-                for (int i = 0; i < length; i++)
-                {
+        public static bool SubStringEquals(string str, int idx, int length, string str2) {
+            if (length == str2.Length && idx + length <= str.Length) {
+                for (int i = 0; i < length; i++) {
                     if (Char.ToLowerInvariant(str[idx + i]) != Char.ToLowerInvariant(str2[i]))
                         return false;
                 }
@@ -311,12 +275,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="source">The possibly-not-valid filename</param>
         /// <returns>A valid filename.</returns>
-        private static string GetValidFileName(string source)
-        {
+        private static string GetValidFileName(string source) {
             string retVal = source;
             char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
-            foreach (var invalidFileNameChar in invalidFileNameChars)
-            {
+            foreach (var invalidFileNameChar in invalidFileNameChars) {
                 retVal = retVal.Replace(invalidFileNameChar, '_');
             }
             return retVal;
@@ -328,41 +290,32 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="number">the number to convert</param>
         /// <param name="style">the css style to convert by</param>
         /// <returns>converted string</returns>
-        public static string ConvertToAlphaNumber(int number, string style = CssConstants.UpperAlpha)
-        {
+        public static string ConvertToAlphaNumber(int number, string style = CssConstants.UpperAlpha) {
             if (number == 0)
                 return string.Empty;
 
-            if (style.Equals(CssConstants.LowerGreek, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.LowerGreek, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToGreekNumber(number);
             }
-            if (style.Equals(CssConstants.LowerRoman, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.LowerRoman, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToRomanNumbers(number, true);
             }
-            if (style.Equals(CssConstants.UpperRoman, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.UpperRoman, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToRomanNumbers(number, false);
             }
-            if (style.Equals(CssConstants.Armenian, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.Armenian, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToSpecificNumbers(number, _armenianDigitsTable);
             }
-            if (style.Equals(CssConstants.Georgian, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.Georgian, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToSpecificNumbers(number, _georgianDigitsTable);
             }
-            if (style.Equals(CssConstants.Hebrew, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.Hebrew, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToSpecificNumbers(number, _hebrewDigitsTable);
             }
-            if (style.Equals(CssConstants.Hiragana, StringComparison.InvariantCultureIgnoreCase) || style.Equals(CssConstants.HiraganaIroha, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.Hiragana, StringComparison.InvariantCultureIgnoreCase) || style.Equals(CssConstants.HiraganaIroha, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToSpecificNumbers2(number, _hiraganaDigitsTable);
             }
-            if (style.Equals(CssConstants.Katakana, StringComparison.InvariantCultureIgnoreCase) || style.Equals(CssConstants.KatakanaIroha, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (style.Equals(CssConstants.Katakana, StringComparison.InvariantCultureIgnoreCase) || style.Equals(CssConstants.KatakanaIroha, StringComparison.InvariantCultureIgnoreCase)) {
                 return ConvertToSpecificNumbers2(number, _satakanaDigitsTable);
             }
             var lowercase = style.Equals(CssConstants.LowerAlpha, StringComparison.InvariantCultureIgnoreCase) || style.Equals(CssConstants.LowerLatin, StringComparison.InvariantCultureIgnoreCase);
@@ -375,22 +328,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="number">the number to convert</param>
         /// <param name="lowercase">is to use lowercase</param>
         /// <returns>the roman number string</returns>
-        private static string ConvertToEnglishNumber(int number, bool lowercase)
-        {
+        private static string ConvertToEnglishNumber(int number, bool lowercase) {
             var sb = string.Empty;
             int alphStart = lowercase ? 97 : 65;
-            while (number > 0)
-            {
-                var n = number % 26 - 1;
-                if (n >= 0)
-                {
-                    sb = (Char)(alphStart + n) + sb;
-                    number = number / 26;
-                }
-                else
-                {
-                    sb = (Char)(alphStart + 25) + sb;
-                    number = (number - 1) / 26;
+            while (number > 0) {
+                var n = number%26 - 1;
+                if (n >= 0) {
+                    sb = (Char) (alphStart + n) + sb;
+                    number = number/26;
+                } else {
+                    sb = (Char) (alphStart + 25) + sb;
+                    number = (number - 1)/26;
                 }
             }
 
@@ -402,23 +350,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="number">the number to convert</param>
         /// <returns>the roman number string</returns>
-        private static string ConvertToGreekNumber(int number)
-        {
+        private static string ConvertToGreekNumber(int number) {
             var sb = string.Empty;
-            while (number > 0)
-            {
-                var n = number % 24 - 1;
+            while (number > 0) {
+                var n = number%24 - 1;
                 if (n > 16)
                     n++;
-                if (n >= 0)
-                {
-                    sb = (Char)(945 + n) + sb;
-                    number = number / 24;
-                }
-                else
-                {
-                    sb = (Char)(945 + 24) + sb;
-                    number = (number - 1) / 25;
+                if (n >= 0) {
+                    sb = (Char) (945 + n) + sb;
+                    number = number/24;
+                } else {
+                    sb = (Char) (945 + 24) + sb;
+                    number = (number - 1)/25;
                 }
             }
 
@@ -431,14 +374,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="number">the number to convert</param>
         /// <param name="lowercase">if to use lowercase letters for roman digits</param>
         /// <returns>the roman number string</returns>
-        private static string ConvertToRomanNumbers(int number, bool lowercase)
-        {
+        private static string ConvertToRomanNumbers(int number, bool lowercase) {
             var sb = string.Empty;
-            for (int i = 1000, j = 3; i > 0; i /= 10, j--)
-            {
-                int digit = number / i;
+            for (int i = 1000, j = 3; i > 0; i /= 10, j--) {
+                int digit = number/i;
                 sb += string.Format(_romanDigitsTable[j, digit]);
-                number -= digit * i;
+                number -= digit*i;
             }
             return lowercase ? sb.ToLower() : sb;
         }
@@ -449,15 +390,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="number">the number to convert</param>
         /// <param name="alphabet">the alphabet system to use</param>
         /// <returns>the number string</returns>
-        private static string ConvertToSpecificNumbers(int number, string[,] alphabet)
-        {
+        private static string ConvertToSpecificNumbers(int number, string[,] alphabet) {
             int level = 0;
             var sb = string.Empty;
-            while (number > 0 && level < alphabet.GetLength(0))
-            {
-                var n = number % 10;
+            while (number > 0 && level < alphabet.GetLength(0)) {
+                var n = number%10;
                 if (n > 0)
-                    sb = alphabet[level, number % 10 - 1].ToString(CultureInfo.InvariantCulture) + sb;
+                    sb = alphabet[level, number%10 - 1].ToString(CultureInfo.InvariantCulture) + sb;
                 number /= 10;
                 level++;
             }
@@ -470,18 +409,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="number">the number to convert</param>
         /// <param name="alphabet">the alphabet system to use</param>
         /// <returns>the number string</returns>
-        private static string ConvertToSpecificNumbers2(int number, string[] alphabet)
-        {
-            for (int i = 20; i > 0; i--)
-            {
-                if (number > 49 * i - i + 1)
+        private static string ConvertToSpecificNumbers2(int number, string[] alphabet) {
+            for (int i = 20; i > 0; i--) {
+                if (number > 49*i - i + 1)
                     number++;
             }
 
             var sb = string.Empty;
-            while (number > 0)
-            {
-                sb = alphabet[Math.Max(0, number % 49 - 1)].ToString(CultureInfo.InvariantCulture) + sb;
+            while (number > 0) {
+                sb = alphabet[Math.Max(0, number%49 - 1)].ToString(CultureInfo.InvariantCulture) + sb;
                 number /= 49;
             }
             return sb;

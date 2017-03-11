@@ -25,13 +25,11 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// Layout engine for tables executing the complex layout of tables with rows/columns/headers/etc.
     /// </summary>
-    internal sealed class CssLayoutEngineTable
-    {
+    internal sealed class CssLayoutEngineTable {
         #region Fields and Consts
 
         /// <summary>
@@ -73,13 +71,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="tableBox"></param>
-        private CssLayoutEngineTable(CssBox tableBox)
-        {
+        private CssLayoutEngineTable(CssBox tableBox) {
             _tableBox = tableBox;
         }
 
@@ -89,27 +85,19 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// </summary>
         /// <param name="tableBox">the table box to calculate the spacing for</param>
         /// <returns>the calculated spacing</returns>
-        public static double GetTableSpacing(CssBox tableBox)
-        {
+        public static double GetTableSpacing(CssBox tableBox) {
             int count = 0;
             int columns = 0;
-            foreach (var box in tableBox.Boxes)
-            {
-                if (box.Display == CssConstants.TableColumn)
-                {
+            foreach (var box in tableBox.Boxes) {
+                if (box.Display == CssConstants.TableColumn) {
                     columns += GetSpan(box);
-                }
-                else if (box.Display == CssConstants.TableRowGroup)
-                {
-                    foreach (CssBox cr in tableBox.Boxes)
-                    {
+                } else if (box.Display == CssConstants.TableRowGroup) {
+                    foreach (CssBox cr in tableBox.Boxes) {
                         count++;
                         if (cr.Display == CssConstants.TableRow)
                             columns = Math.Max(columns, cr.Boxes.Count);
                     }
-                }
-                else if (box.Display == CssConstants.TableRow)
-                {
+                } else if (box.Display == CssConstants.TableRow) {
                     count++;
                     columns = Math.Max(columns, box.Boxes.Count);
                 }
@@ -120,7 +108,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             }
 
             // +1 columns because padding is between the cell and table borders
-            return (columns + 1) * GetHorizontalSpacing(tableBox);
+            return (columns + 1)*GetHorizontalSpacing(tableBox);
         }
 
         /// <summary>
@@ -128,22 +116,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// </summary>
         /// <param name="g"></param>
         /// <param name="tableBox"> </param>
-        public static void PerformLayout(RGraphics g, CssBox tableBox)
-        {
+        public static void PerformLayout(RGraphics g, CssBox tableBox) {
             ArgChecker.AssertArgNotNull(g, "g");
             ArgChecker.AssertArgNotNull(tableBox, "tableBox");
 
-            try
-            {
+            try {
                 var table = new CssLayoutEngineTable(tableBox);
                 table.Layout(g);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 tableBox.HtmlContainer.ReportError(HtmlRenderErrorType.Layout, "Failed table layout", ex);
             }
         }
-
 
         #region Private Methods
 
@@ -151,8 +134,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Analyzes the Table and assigns values to this CssTable object.
         /// To be called from the constructor
         /// </summary>
-        private void Layout(RGraphics g)
-        {
+        private void Layout(RGraphics g) {
             MeasureWords(_tableBox, g);
 
             // get the table boxes into the proper fields
@@ -182,12 +164,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Get the table boxes into the proper fields.
         /// </summary>
-        private void AssignBoxKinds()
-        {
-            foreach (var box in _tableBox.Boxes)
-            {
-                switch (box.Display)
-                {
+        private void AssignBoxKinds() {
+            foreach (var box in _tableBox.Boxes) {
+                switch (box.Display) {
                     case CssConstants.TableCaption:
                         _caption = box;
                         break;
@@ -216,21 +195,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                             _columns.Add(box);
                         break;
                     case CssConstants.TableColumnGroup:
-                        if (box.Boxes.Count == 0)
-                        {
+                        if (box.Boxes.Count == 0) {
                             int gspan = GetSpan(box);
-                            for (int i = 0; i < gspan; i++)
-                            {
+                            for (int i = 0; i < gspan; i++) {
                                 _columns.Add(box);
                             }
-                        }
-                        else
-                        {
-                            foreach (CssBox bb in box.Boxes)
-                            {
+                        } else {
+                            foreach (CssBox bb in box.Boxes) {
                                 int bbspan = GetSpan(bb);
-                                for (int i = 0; i < bbspan; i++)
-                                {
+                                for (int i = 0; i < bbspan; i++) {
                                     _columns.Add(bb);
                                 }
                             }
@@ -251,30 +224,22 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Insert EmptyBoxes for vertical cell spanning.
         /// </summary>
-        private void InsertEmptyBoxes()
-        {
-            if (!_tableBox._tableFixed)
-            {
+        private void InsertEmptyBoxes() {
+            if (!_tableBox._tableFixed) {
                 int currow = 0;
                 List<CssBox> rows = _bodyrows;
 
-                foreach (CssBox row in rows)
-                {
-                    for (int k = 0; k < row.Boxes.Count; k++)
-                    {
+                foreach (CssBox row in rows) {
+                    for (int k = 0; k < row.Boxes.Count; k++) {
                         CssBox cell = row.Boxes[k];
                         int rowspan = GetRowSpan(cell);
                         int realcol = GetCellRealColumnIndex(row, cell); //Real column of the cell
 
-                        for (int i = currow + 1; i < currow + rowspan; i++)
-                        {
-                            if (rows.Count > i)
-                            {
+                        for (int i = currow + 1; i < currow + rowspan; i++) {
+                            if (rows.Count > i) {
                                 int colcount = 0;
-                                for (int j = 0; j < rows[i].Boxes.Count; j++)
-                                {
-                                    if (colcount == realcol)
-                                    {
+                                for (int j = 0; j < rows[i].Boxes.Count; j++) {
+                                    if (colcount == realcol) {
                                         rows[i].Boxes.Insert(colcount, new CssSpacingBox(_tableBox, ref cell, currow));
                                         break;
                                     }
@@ -295,15 +260,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Determine Row and Column Count, and ColumnWidths
         /// </summary>
         /// <returns></returns>
-        private double CalculateCountAndWidth()
-        {
+        private double CalculateCountAndWidth() {
             //Columns
-            if (_columns.Count > 0)
-            {
+            if (_columns.Count > 0) {
                 _columnCount = _columns.Count;
-            }
-            else
-            {
+            } else {
                 foreach (CssBox b in _allRows)
                     _columnCount = Math.Max(_columnCount, b.Boxes.Count);
             }
@@ -315,11 +276,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
             double availCellSpace = GetAvailableCellWidth();
 
-            if (_columns.Count > 0)
-            {
+            if (_columns.Count > 0) {
                 // Fill ColumnWidths array by scanning column widths
-                for (int i = 0; i < _columns.Count; i++)
-                {
+                for (int i = 0; i < _columns.Count; i++) {
                     CssLength len = new CssLength(_columns[i].Width); //Get specified width
 
                     if (len.Number > 0) //If some width specified
@@ -327,33 +286,25 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                         if (len.IsPercentage) //Get width as a percentage
                         {
                             _columnWidths[i] = CssValueParser.ParseNumber(_columns[i].Width, availCellSpace);
-                        }
-                        else if (len.Unit == CssUnit.Pixels || len.Unit == CssUnit.None)
-                        {
+                        } else if (len.Unit == CssUnit.Pixels || len.Unit == CssUnit.None) {
                             _columnWidths[i] = len.Number; //Get width as an absolute-pixel value
                         }
                     }
                 }
-            }
-            else
-            {
+            } else {
                 // Fill ColumnWidths array by scanning width in table-cell definitions
-                foreach (CssBox row in _allRows)
-                {
+                foreach (CssBox row in _allRows) {
                     //Check for column width in table-cell definitions
-                    for (int i = 0; i < _columnCount; i++)
-                    {
+                    for (int i = 0; i < _columnCount; i++) {
                         if (i < 20 || double.IsNaN(_columnWidths[i])) // limit column width check
                         {
-                            if (i < row.Boxes.Count && row.Boxes[i].Display == CssConstants.TableCell)
-                            {
+                            if (i < row.Boxes.Count && row.Boxes[i].Display == CssConstants.TableCell) {
                                 double len = CssValueParser.ParseLength(row.Boxes[i].Width, availCellSpace, row.Boxes[i]);
                                 if (len > 0) //If some width specified
                                 {
                                     int colspan = GetColSpan(row.Boxes[i]);
                                     len /= Convert.ToSingle(colspan);
-                                    for (int j = i; j < i + colspan; j++)
-                                    {
+                                    for (int j = i; j < i + colspan; j++) {
                                         _columnWidths[j] = double.IsNaN(_columnWidths[j]) ? len : Math.Max(_columnWidths[j], len);
                                     }
                                 }
@@ -369,8 +320,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// 
         /// </summary>
         /// <param name="availCellSpace"></param>
-        private void DetermineMissingColumnWidths(double availCellSpace)
-        {
+        private void DetermineMissingColumnWidths(double availCellSpace) {
             double occupedSpace = 0f;
             if (_widthSpecified) //If a width was specified,
             {
@@ -378,8 +328,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                 int numOfNans = 0;
 
                 //Calculate number of NaNs and occupied space
-                foreach (double colWidth in _columnWidths)
-                {
+                foreach (double colWidth in _columnWidths) {
                     if (double.IsNaN(colWidth))
                         numOfNans++;
                     else
@@ -388,30 +337,25 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                 var orgNumOfNans = numOfNans;
 
                 double[] orgColWidths = null;
-                if (numOfNans < _columnWidths.Length)
-                {
+                if (numOfNans < _columnWidths.Length) {
                     orgColWidths = new double[_columnWidths.Length];
                     for (int i = 0; i < _columnWidths.Length; i++)
                         orgColWidths[i] = _columnWidths[i];
                 }
 
-                if (numOfNans > 0)
-                {
+                if (numOfNans > 0) {
                     // Determine the max width for each column
                     double[] minFullWidths, maxFullWidths;
                     GetColumnsMinMaxWidthByContent(true, out minFullWidths, out maxFullWidths);
 
                     // set the columns that can fulfill by the max width in a loop because it changes the nanWidth
                     int oldNumOfNans;
-                    do
-                    {
+                    do {
                         oldNumOfNans = numOfNans;
 
-                        for (int i = 0; i < _columnWidths.Length; i++)
-                        {
-                            var nanWidth = (availCellSpace - occupedSpace) / numOfNans;
-                            if (double.IsNaN(_columnWidths[i]) && nanWidth > maxFullWidths[i])
-                            {
+                        for (int i = 0; i < _columnWidths.Length; i++) {
+                            var nanWidth = (availCellSpace - occupedSpace)/numOfNans;
+                            if (double.IsNaN(_columnWidths[i]) && nanWidth > maxFullWidths[i]) {
                                 _columnWidths[i] = maxFullWidths[i];
                                 numOfNans--;
                                 occupedSpace += maxFullWidths[i];
@@ -419,57 +363,46 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                         }
                     } while (oldNumOfNans != numOfNans);
 
-                    if (numOfNans > 0)
-                    {
+                    if (numOfNans > 0) {
                         // Determine width that will be assigned to un assigned widths
-                        double nanWidth = (availCellSpace - occupedSpace) / numOfNans;
+                        double nanWidth = (availCellSpace - occupedSpace)/numOfNans;
 
-                        for (int i = 0; i < _columnWidths.Length; i++)
-                        {
+                        for (int i = 0; i < _columnWidths.Length; i++) {
                             if (double.IsNaN(_columnWidths[i]))
                                 _columnWidths[i] = nanWidth;
                         }
                     }
                 }
 
-                if (numOfNans == 0 && occupedSpace < availCellSpace)
-                {
-                    if (orgNumOfNans > 0)
-                    {
+                if (numOfNans == 0 && occupedSpace < availCellSpace) {
+                    if (orgNumOfNans > 0) {
                         // spread extra width between all non width specified columns
-                        double extWidth = (availCellSpace - occupedSpace) / orgNumOfNans;
+                        double extWidth = (availCellSpace - occupedSpace)/orgNumOfNans;
                         for (int i = 0; i < _columnWidths.Length; i++)
                             if (orgColWidths == null || double.IsNaN(orgColWidths[i]))
                                 _columnWidths[i] += extWidth;
-                    }
-                    else
-                    {
+                    } else {
                         // spread extra width between all columns with respect to relative sizes
                         for (int i = 0; i < _columnWidths.Length; i++)
-                            _columnWidths[i] += (availCellSpace - occupedSpace) * (_columnWidths[i] / occupedSpace);
+                            _columnWidths[i] += (availCellSpace - occupedSpace)*(_columnWidths[i]/occupedSpace);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 //Get the minimum and maximum full length of NaN boxes
                 double[] minFullWidths, maxFullWidths;
                 GetColumnsMinMaxWidthByContent(true, out minFullWidths, out maxFullWidths);
 
-                for (int i = 0; i < _columnWidths.Length; i++)
-                {
+                for (int i = 0; i < _columnWidths.Length; i++) {
                     if (double.IsNaN(_columnWidths[i]))
                         _columnWidths[i] = minFullWidths[i];
                     occupedSpace += _columnWidths[i];
                 }
 
                 // spread extra width between all columns
-                for (int i = 0; i < _columnWidths.Length; i++)
-                {
-                    if (maxFullWidths[i] > _columnWidths[i])
-                    {
+                for (int i = 0; i < _columnWidths.Length; i++) {
+                    if (maxFullWidths[i] > _columnWidths[i]) {
                         var temp = _columnWidths[i];
-                        _columnWidths[i] = Math.Min(_columnWidths[i] + (availCellSpace - occupedSpace) / Convert.ToSingle(_columnWidths.Length - i), maxFullWidths[i]);
+                        _columnWidths[i] = Math.Min(_columnWidths[i] + (availCellSpace - occupedSpace)/Convert.ToSingle(_columnWidths.Length - i), maxFullWidths[i]);
                         occupedSpace = occupedSpace + _columnWidths[i] - temp;
                     }
                 }
@@ -480,12 +413,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// While table width is larger than it should, and width is reductable.<br/>
         /// If table max width is limited by we need to lower the columns width even if it will result in clipping<br/>
         /// </summary>
-        private void EnforceMaximumSize()
-        {
+        private void EnforceMaximumSize() {
             int curCol = 0;
             var widthSum = GetWidthSum();
-            while (widthSum > GetAvailableTableWidth() && CanReduceWidth())
-            {
+            while (widthSum > GetAvailableTableWidth() && CanReduceWidth()) {
                 while (!CanReduceWidth(curCol))
                     curCol++;
 
@@ -499,11 +430,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
             // if table max width is limited by we need to lower the columns width even if it will result in clipping
             var maxWidth = GetMaxTableWidth();
-            if (maxWidth < 90999)
-            {
+            if (maxWidth < 90999) {
                 widthSum = GetWidthSum();
-                if (maxWidth < widthSum)
-                {
+                if (maxWidth < widthSum) {
                     //Get the minimum and maximum full length of NaN boxes
                     double[] minFullWidths, maxFullWidths;
                     GetColumnsMinMaxWidthByContent(false, out minFullWidths, out maxFullWidths);
@@ -515,39 +444,32 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                     // either min for all column is not enought and we need to lower it more resulting in clipping
                     // or we now have extra space so we can give it to columns than need it
                     widthSum = GetWidthSum();
-                    if (maxWidth < widthSum)
-                    {
+                    if (maxWidth < widthSum) {
                         // lower the width of columns starting from the largest one until the max width is satisfied
                         for (int a = 0; a < 15 && maxWidth < widthSum - 0.1; a++) // limit iteration so bug won't create infinite loop
                         {
                             int nonMaxedColumns = 0;
                             double largeWidth = 0f, secLargeWidth = 0f;
-                            for (int i = 0; i < _columnWidths.Length; i++)
-                            {
-                                if (_columnWidths[i] > largeWidth + 0.1)
-                                {
+                            for (int i = 0; i < _columnWidths.Length; i++) {
+                                if (_columnWidths[i] > largeWidth + 0.1) {
                                     secLargeWidth = largeWidth;
                                     largeWidth = _columnWidths[i];
                                     nonMaxedColumns = 1;
-                                }
-                                else if (_columnWidths[i] > largeWidth - 0.1)
-                                {
+                                } else if (_columnWidths[i] > largeWidth - 0.1) {
                                     nonMaxedColumns++;
                                 }
                             }
 
-                            double decrease = secLargeWidth > 0 ? largeWidth - secLargeWidth : (widthSum - maxWidth) / _columnWidths.Length;
-                            if (decrease * nonMaxedColumns > widthSum - maxWidth)
-                                decrease = (widthSum - maxWidth) / nonMaxedColumns;
+                            double decrease = secLargeWidth > 0 ? largeWidth - secLargeWidth : (widthSum - maxWidth)/_columnWidths.Length;
+                            if (decrease*nonMaxedColumns > widthSum - maxWidth)
+                                decrease = (widthSum - maxWidth)/nonMaxedColumns;
                             for (int i = 0; i < _columnWidths.Length; i++)
                                 if (_columnWidths[i] > largeWidth - 0.1)
                                     _columnWidths[i] -= decrease;
 
                             widthSum = GetWidthSum();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         // spread extra width to columns that didn't reached max width where trying to spread it between all columns
                         for (int a = 0; a < 15 && maxWidth > widthSum + 0.1; a++) // limit iteration so bug won't create infinite loop
                         {
@@ -559,11 +481,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                                 nonMaxedColumns = _columnWidths.Length;
 
                             bool hit = false;
-                            double minIncrement = (maxWidth - widthSum) / nonMaxedColumns;
-                            for (int i = 0; i < _columnWidths.Length; i++)
-                            {
-                                if (_columnWidths[i] + 0.1 < maxFullWidths[i])
-                                {
+                            double minIncrement = (maxWidth - widthSum)/nonMaxedColumns;
+                            for (int i = 0; i < _columnWidths.Length; i++) {
+                                if (_columnWidths[i] + 0.1 < maxFullWidths[i]) {
                                     minIncrement = Math.Min(minIncrement, maxFullWidths[i] - _columnWidths[i]);
                                     hit = true;
                                 }
@@ -583,23 +503,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Check for minimum sizes (increment widths if necessary)
         /// </summary>
-        private void EnforceMinimumSize()
-        {
-            foreach (CssBox row in _allRows)
-            {
-                foreach (CssBox cell in row.Boxes)
-                {
+        private void EnforceMinimumSize() {
+            foreach (CssBox row in _allRows) {
+                foreach (CssBox cell in row.Boxes) {
                     int colspan = GetColSpan(cell);
                     int col = GetCellRealColumnIndex(row, cell);
                     int affectcol = col + colspan - 1;
 
-                    if (_columnWidths.Length > col && _columnWidths[col] < GetColumnMinWidths()[col])
-                    {
+                    if (_columnWidths.Length > col && _columnWidths[col] < GetColumnMinWidths()[col]) {
                         double diff = GetColumnMinWidths()[col] - _columnWidths[col];
                         _columnWidths[affectcol] = GetColumnMinWidths()[affectcol];
 
-                        if (col < _columnWidths.Length - 1)
-                        {
+                        if (col < _columnWidths.Length - 1) {
                             _columnWidths[col + 1] -= diff;
                         }
                     }
@@ -611,8 +526,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Layout the cells by the calculated table layout
         /// </summary>
         /// <param name="g"></param>
-        private void LayoutCells(RGraphics g)
-        {
+        private void LayoutCells(RGraphics g) {
             double startx = Math.Max(_tableBox.ClientLeft + GetHorizontalSpacing(), 0);
             double starty = Math.Max(_tableBox.ClientTop + GetVerticalSpacing(), 0);
             double cury = starty;
@@ -620,14 +534,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             double maxBottom = 0f;
             int currentrow = 0;
 
-            for (int i = 0; i < _allRows.Count; i++)
-            {
+            for (int i = 0; i < _allRows.Count; i++) {
                 var row = _allRows[i];
                 double curx = startx;
                 int curCol = 0;
 
-                for (int j = 0; j < row.Boxes.Count; j++)
-                {
+                for (int j = 0; j < row.Boxes.Count; j++) {
                     CssBox cell = row.Boxes[j];
                     if (curCol >= _columnWidths.Length)
                         break;
@@ -641,15 +553,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
                     //Alter max bottom only if row is cell's row + cell's rowspan - 1
                     CssSpacingBox sb = cell as CssSpacingBox;
-                    if (sb != null)
-                    {
-                        if (sb.EndRow == currentrow)
-                        {
+                    if (sb != null) {
+                        if (sb.EndRow == currentrow) {
                             maxBottom = Math.Max(maxBottom, sb.ExtendedBox.ActualBottom);
                         }
-                    }
-                    else if (rowspan == 1)
-                    {
+                    } else if (rowspan == 1) {
                         maxBottom = Math.Max(maxBottom, cell.ActualBottom);
                     }
                     maxRight = Math.Max(maxRight, cell.ActualRight);
@@ -657,17 +565,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                     curx = cell.ActualRight + GetHorizontalSpacing();
                 }
 
-                foreach (CssBox cell in row.Boxes)
-                {
+                foreach (CssBox cell in row.Boxes) {
                     CssSpacingBox spacer = cell as CssSpacingBox;
 
-                    if (spacer == null && GetRowSpan(cell) == 1)
-                    {
+                    if (spacer == null && GetRowSpan(cell) == 1) {
                         cell.ActualBottom = maxBottom;
                         CssLayoutEngine.ApplyCellVerticalAlignment(g, cell);
-                    }
-                    else if (spacer != null && spacer.EndRow == currentrow)
-                    {
+                    } else if (spacer != null && spacer.EndRow == currentrow) {
                         spacer.ExtendedBox.ActualBottom = maxBottom;
                         CssLayoutEngine.ApplyCellVerticalAlignment(g, spacer.ExtendedBox);
                     }
@@ -685,11 +589,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the spanned width of a cell (With of all columns it spans minus one).
         /// </summary>
-        private double GetSpannedMinWidth(CssBox row, CssBox cell, int realcolindex, int colspan)
-        {
+        private double GetSpannedMinWidth(CssBox row, CssBox cell, int realcolindex, int colspan) {
             double w = 0f;
-            for (int i = realcolindex; i < row.Boxes.Count || i < realcolindex + colspan - 1; i++)
-            {
+            for (int i = realcolindex; i < row.Boxes.Count || i < realcolindex + colspan - 1; i++) {
                 if (i < GetColumnMinWidths().Length)
                     w += GetColumnMinWidths()[i];
             }
@@ -702,12 +604,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="row"></param>
         /// <param name="cell"></param>
         /// <returns></returns>
-        private static int GetCellRealColumnIndex(CssBox row, CssBox cell)
-        {
+        private static int GetCellRealColumnIndex(CssBox row, CssBox cell) {
             int i = 0;
 
-            foreach (CssBox b in row.Boxes)
-            {
+            foreach (CssBox b in row.Boxes) {
                 if (b.Equals(cell))
                     break;
                 i += GetColSpan(b);
@@ -722,13 +622,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="column"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        private double GetCellWidth(int column, CssBox b)
-        {
+        private double GetCellWidth(int column, CssBox b) {
             double colspan = Convert.ToSingle(GetColSpan(b));
             double sum = 0f;
 
-            for (int i = column; i < column + colspan; i++)
-            {
+            for (int i = column; i < column + colspan; i++) {
                 if (column >= _columnWidths.Length)
                     break;
                 if (_columnWidths.Length <= i)
@@ -736,7 +634,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
                 sum += _columnWidths[i];
             }
 
-            sum += (colspan - 1) * GetHorizontalSpacing();
+            sum += (colspan - 1)*GetHorizontalSpacing();
 
             return sum; // -b.ActualBorderLeftWidth - b.ActualBorderRightWidth - b.ActualPaddingRight - b.ActualPaddingLeft;
         }
@@ -745,13 +643,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets the colspan of the specified box
         /// </summary>
         /// <param name="b"></param>
-        private static int GetColSpan(CssBox b)
-        {
+        private static int GetColSpan(CssBox b) {
             string att = b.GetAttribute("colspan", "1");
             int colspan;
 
-            if (!int.TryParse(att, out colspan))
-            {
+            if (!int.TryParse(att, out colspan)) {
                 return 1;
             }
 
@@ -762,13 +658,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets the rowspan of the specified box
         /// </summary>
         /// <param name="b"></param>
-        private static int GetRowSpan(CssBox b)
-        {
+        private static int GetRowSpan(CssBox b) {
             string att = b.GetAttribute("rowspan", "1");
             int rowspan;
 
-            if (!int.TryParse(att, out rowspan))
-            {
+            if (!int.TryParse(att, out rowspan)) {
                 return 1;
             }
 
@@ -780,12 +674,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// </summary>
         /// <param name="box">the box to measure</param>
         /// <param name="g">Device to use</param>
-        private static void MeasureWords(CssBox box, RGraphics g)
-        {
-            if (box != null)
-            {
-                foreach (var childBox in box.Boxes)
-                {
+        private static void MeasureWords(CssBox box, RGraphics g) {
+            if (box != null) {
+                foreach (var childBox in box.Boxes) {
                     childBox.MeasureWordsSize(g);
                     MeasureWords(childBox, g);
                 }
@@ -797,12 +688,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// by checking the minimum widths of all cells
         /// </summary>
         /// <returns></returns>
-        private bool CanReduceWidth()
-        {
-            for (int i = 0; i < _columnWidths.Length; i++)
-            {
-                if (CanReduceWidth(i))
-                {
+        private bool CanReduceWidth() {
+            for (int i = 0; i < _columnWidths.Length; i++) {
+                if (CanReduceWidth(i)) {
                     return true;
                 }
             }
@@ -816,8 +704,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// </summary>
         /// <param name="columnIndex"></param>
         /// <returns></returns>
-        private bool CanReduceWidth(int columnIndex)
-        {
+        private bool CanReduceWidth(int columnIndex) {
             if (_columnWidths.Length >= columnIndex || GetColumnMinWidths().Length >= columnIndex)
                 return false;
             return _columnWidths[columnIndex] > GetColumnMinWidths()[columnIndex];
@@ -832,12 +719,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// The table's width can be larger than the result of this method, because of the minimum 
         /// size that individual boxes.
         /// </remarks>
-        private double GetAvailableTableWidth()
-        {
+        private double GetAvailableTableWidth() {
             CssLength tblen = new CssLength(_tableBox.Width);
 
-            if (tblen.Number > 0)
-            {
+            if (tblen.Number > 0) {
                 _widthSpecified = true;
                 return CssValueParser.ParseLength(_tableBox.Width, _tableBox.ParentBox.AvailableWidth, _tableBox);
             }
@@ -853,11 +738,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// The table's width can be larger than the result of this method, because of the minimum 
         /// size that individual boxes.
         /// </remarks>
-        private double GetMaxTableWidth()
-        {
+        private double GetMaxTableWidth() {
             var tblen = new CssLength(_tableBox.MaxWidth);
-            if (tblen.Number > 0)
-            {
+            if (tblen.Number > 0) {
                 _widthSpecified = true;
                 return CssValueParser.ParseLength(_tableBox.MaxWidth, _tableBox.ParentBox.AvailableWidth, _tableBox);
             }
@@ -872,28 +755,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="onlyNans">if to measure only columns that have no calculated width</param>
         /// <param name="minFullWidths">return the min width for each column - the min width possible without clipping content</param>
         /// <param name="maxFullWidths">return the max width for each column - the max width the cell content can take without wrapping</param>
-        private void GetColumnsMinMaxWidthByContent(bool onlyNans, out double[] minFullWidths, out double[] maxFullWidths)
-        {
+        private void GetColumnsMinMaxWidthByContent(bool onlyNans, out double[] minFullWidths, out double[] maxFullWidths) {
             maxFullWidths = new double[_columnWidths.Length];
             minFullWidths = new double[_columnWidths.Length];
 
-            foreach (CssBox row in _allRows)
-            {
-                for (int i = 0; i < row.Boxes.Count; i++)
-                {
+            foreach (CssBox row in _allRows) {
+                for (int i = 0; i < row.Boxes.Count; i++) {
                     int col = GetCellRealColumnIndex(row, row.Boxes[i]);
                     col = _columnWidths.Length > col ? col : _columnWidths.Length - 1;
 
-                    if ((!onlyNans || double.IsNaN(_columnWidths[col])) && i < row.Boxes.Count)
-                    {
+                    if ((!onlyNans || double.IsNaN(_columnWidths[col])) && i < row.Boxes.Count) {
                         double minWidth, maxWidth;
                         row.Boxes[i].GetMinMaxWidth(out minWidth, out maxWidth);
 
                         var colSpan = GetColSpan(row.Boxes[i]);
-                        minWidth = minWidth / colSpan;
-                        maxWidth = maxWidth / colSpan;
-                        for (int j = 0; j < colSpan; j++)
-                        {
+                        minWidth = minWidth/colSpan;
+                        maxWidth = maxWidth/colSpan;
+                        for (int j = 0; j < colSpan; j++) {
                             minFullWidths[col + j] = Math.Max(minFullWidths[col + j], minWidth);
                             maxFullWidths[col + j] = Math.Max(maxFullWidths[col + j], maxWidth);
                         }
@@ -909,17 +787,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <remarks>
         /// It takes away the cell-spacing from <see cref="GetAvailableTableWidth"/>
         /// </remarks>
-        private double GetAvailableCellWidth()
-        {
-            return GetAvailableTableWidth() - GetHorizontalSpacing() * (_columnCount + 1) - _tableBox.ActualBorderLeftWidth - _tableBox.ActualBorderRightWidth;
+        private double GetAvailableCellWidth() {
+            return GetAvailableTableWidth() - GetHorizontalSpacing()*(_columnCount + 1) - _tableBox.ActualBorderLeftWidth - _tableBox.ActualBorderRightWidth;
         }
 
         /// <summary>
         /// Gets the current sum of column widths
         /// </summary>
         /// <returns></returns>
-        private double GetWidthSum()
-        {
+        private double GetWidthSum() {
             double f = 0f;
 
             foreach (double t in _columnWidths) {
@@ -929,7 +805,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             }
 
             //Take cell-spacing
-            f += GetHorizontalSpacing() * (_columnWidths.Length + 1);
+            f += GetHorizontalSpacing()*(_columnWidths.Length + 1);
 
             //Take table borders
             f += _tableBox.ActualBorderLeftWidth + _tableBox.ActualBorderRightWidth;
@@ -941,8 +817,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Gets the span attribute of the tag of the specified box
         /// </summary>
         /// <param name="b"></param>
-        private static int GetSpan(CssBox b)
-        {
+        private static int GetSpan(CssBox b) {
             double f = CssValueParser.ParseNumber(b.GetAttribute("span"), 1);
 
             return Math.Max(1, Convert.ToInt32(f));
@@ -951,20 +826,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the minimum width of each column
         /// </summary>
-        private double[] GetColumnMinWidths()
-        {
-            if (_columnMinWidths == null)
-            {
+        private double[] GetColumnMinWidths() {
+            if (_columnMinWidths == null) {
                 _columnMinWidths = new double[_columnWidths.Length];
 
-                foreach (CssBox row in _allRows)
-                {
-                    foreach (CssBox cell in row.Boxes)
-                    {
+                foreach (CssBox row in _allRows) {
+                    foreach (CssBox cell in row.Boxes) {
                         int colspan = GetColSpan(cell);
                         int col = GetCellRealColumnIndex(row, cell);
                         int affectcol = Math.Min(col + colspan, _columnMinWidths.Length) - 1;
-                        double spannedwidth = GetSpannedMinWidth(row, cell, col, colspan) + (colspan - 1) * GetHorizontalSpacing();
+                        double spannedwidth = GetSpannedMinWidth(row, cell, col, colspan) + (colspan - 1)*GetHorizontalSpacing();
 
                         _columnMinWidths[affectcol] = Math.Max(_columnMinWidths[affectcol], cell.GetMinimumWidth() - spannedwidth);
                     }
@@ -977,24 +848,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Gets the actual horizontal spacing of the table
         /// </summary>
-        private double GetHorizontalSpacing()
-        {
+        private double GetHorizontalSpacing() {
             return _tableBox.BorderCollapse == CssConstants.Collapse ? -1f : _tableBox.ActualBorderSpacingHorizontal;
         }
 
         /// <summary>
         /// Gets the actual horizontal spacing of the table
         /// </summary>
-        private static double GetHorizontalSpacing(CssBox box)
-        {
+        private static double GetHorizontalSpacing(CssBox box) {
             return box.BorderCollapse == CssConstants.Collapse ? -1f : box.ActualBorderSpacingHorizontal;
         }
 
         /// <summary>
         /// Gets the actual vertical spacing of the table
         /// </summary>
-        private double GetVerticalSpacing()
-        {
+        private double GetVerticalSpacing() {
             return _tableBox.BorderCollapse == CssConstants.Collapse ? -1f : _tableBox.ActualBorderSpacingVertical;
         }
 

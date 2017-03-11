@@ -30,12 +30,10 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// Displays a list of items that can them be filtered by their DisplayText value
     /// </summary>
     public class YamuiFilteredList : YamuiScrollList {
-
         #region constants
 
         protected const int MinRowHeight = 20;
@@ -45,7 +43,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #region private fields
 
         protected Predicate<FilteredListItem> _filterPredicate;
-        
+
         protected List<FilteredListItem> _initialItems;
         protected ReaderWriterLockSlim _initItemsLock = new ReaderWriterLockSlim();
 
@@ -160,7 +158,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region Set
-        
+
         /// <summary>
         /// Set the items that will be displayed in the list
         /// </summary>
@@ -199,7 +197,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// it also sorts the list of items
         /// </summary>
         protected virtual List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
-
             IEnumerable<FilteredListItem> items;
 
             if (!string.IsNullOrEmpty(_filterString)) {
@@ -220,7 +217,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region Draw list
-        
+
         /// <summary>
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
@@ -278,7 +275,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     string highlightText = txt.Substring(range.First, range.Length);
                     Size textToHighlightSize = TextRenderer.MeasureText(g, highlightText, FontManager.GetStandardFont(), r.Size, flags);
                     float textToHighlightLeft = r.X + precedingTextSize.Width;
-                    float textToHighlightTop = r.Top + ((r.Height - textToHighlightSize.Height) / 2);
+                    float textToHighlightTop = r.Top + ((r.Height - textToHighlightSize.Height)/2);
 
                     // Draw a filled frame around our range of letters
                     DrawSubstringFrame(g, textToHighlightLeft, textToHighlightTop, textToHighlightSize.Width, textToHighlightSize.Height);
@@ -334,6 +331,5 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-
     }
 }

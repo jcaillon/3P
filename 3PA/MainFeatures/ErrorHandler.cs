@@ -33,9 +33,7 @@ using _3PA.Lib;
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
-
     internal static class ErrorHandler {
-
         /// <summary>
         /// Allows to keep track of the messages already displayed to the user
         /// </summary>
@@ -48,7 +46,6 @@ namespace _3PA.MainFeatures {
         /// renames said file with the suffix "_errors"
         /// </summary>
         public static void ShowErrors(Exception e, string message, string fileName) {
-
             if (UserCommunication.Ready) {
                 UserCommunication.Notify("An error has occurred while loading the following file :<div>" + (fileName + "_errors").ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.",
                     MessageImg.MsgPoison, "File load error", message,
@@ -73,7 +70,6 @@ namespace _3PA.MainFeatures {
         /// <param name="e"></param>
         /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message = null) {
-
             if (LogError(e, message)) {
                 if (UserCommunication.Ready) {
                     // show it to the user
@@ -85,7 +81,6 @@ namespace _3PA.MainFeatures {
                                 args.Handled = true;
                             }
                         });
-
                 } else {
                     // show an old school message
                     MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -95,7 +90,7 @@ namespace _3PA.MainFeatures {
 
         /// <summary>
         /// Log a piece of information
-        /// returns false if the error already occured during the session, true otherwise
+        /// returns false if the error already occurred during the session, true otherwise
         /// </summary>
         public static bool LogError(Exception e, string message = null) {
             if (e == null)
@@ -103,6 +98,11 @@ namespace _3PA.MainFeatures {
 
             try {
                 var info = GetExceptionInfo(e);
+
+                // make sure that this error actually concerns 3P!
+                if (!info.fullException.ContainsFast("YamuiFramework.") &&
+                    !info.fullException.ContainsFast("_3PA."))
+                    return false;
 
                 // don't show the same error twice in a session
                 var excepUniqueId = info.originMethod + info.originLine;
@@ -148,7 +148,6 @@ namespace _3PA.MainFeatures {
         /// Sends the given report to the web service of 3P
         /// </summary>
         private static void SendBugReport(ExceptionInfo bugReport) {
-
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.BugsPostWebWervice);
             wb.Serialize(bugReport);
 
@@ -191,11 +190,13 @@ namespace _3PA.MainFeatures {
                 };
             return output;
         }
-        
+
         #region global error handler callbacks
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs e) {
-            ShowErrors((Exception)e.ExceptionObject, "Unhandled error");
+            var ex = e.ExceptionObject as Exception;
+            if (ex != null)
+                ShowErrors(ex, "Error not handled");
         }
 
         public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {
@@ -207,7 +208,6 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 
     #region ExceptionInfo
@@ -228,5 +228,4 @@ namespace _3PA.MainFeatures {
     }
 
     #endregion
-
 }

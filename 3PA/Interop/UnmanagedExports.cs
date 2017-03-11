@@ -28,13 +28,11 @@ using _3PA.Lib;
 // ReSharper disable UnusedParameter.Local
 
 namespace _3PA.Interop {
-
     /// <summary>
     /// Main entry point for Npp,
     /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
     /// </summary>
     internal static class UnmanagedExports {
-
         #region fields
 
         /// <summary>
@@ -112,7 +110,7 @@ namespace _3PA.Interop {
         /// </summary>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void beNotified(IntPtr notifyCode) {
-            SCNotification nc = (SCNotification)Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
+            SCNotification nc = (SCNotification) Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
             Plug.OnNppNotification(nc);
         }
 

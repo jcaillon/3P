@@ -28,12 +28,10 @@ using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.HtmlRenderer.WinForms {
-
     /// <summary>
     /// Provides HTML rendering on the tooltips
     /// </summary>
     public class HtmlToolTip : ToolTip {
-
         #region Fields and Consts
 
         /// <summary>
@@ -86,7 +84,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
 #endif
 
         #endregion
-        
+
         /// <summary>
         /// Init.
         /// </summary>
@@ -105,8 +103,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             Popup += OnToolTipPopup;
             Draw += OnToolTipDraw;
             Disposed += OnToolTipDisposed;
-
-            
 
 #if !MONO
             _linkHandlingTimer = new Timer();
@@ -222,7 +218,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             set { HtmlContainer.MaxSize = value; }
         }
 
-
         #region Private methods
 
         /// <summary>
@@ -240,8 +235,8 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             }
 
             //Set the size of the tooltip
-            var desiredWidth = (int)Math.Ceiling(MaximumSize.Width > 0 ? Math.Min(HtmlContainer.ActualSize.Width, MaximumSize.Width) : HtmlContainer.ActualSize.Width);
-            var desiredHeight = (int)Math.Ceiling(MaximumSize.Height > 0 ? Math.Min(HtmlContainer.ActualSize.Height, MaximumSize.Height) : HtmlContainer.ActualSize.Height);
+            var desiredWidth = (int) Math.Ceiling(MaximumSize.Width > 0 ? Math.Min(HtmlContainer.ActualSize.Width, MaximumSize.Width) : HtmlContainer.ActualSize.Width);
+            var desiredHeight = (int) Math.Ceiling(MaximumSize.Height > 0 ? Math.Min(HtmlContainer.ActualSize.Height, MaximumSize.Height) : HtmlContainer.ActualSize.Height);
             e.ToolTipSize = new Size(desiredWidth, desiredHeight);
 
 #if !MONO
@@ -410,6 +405,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         private void OnToolTipDraw(object sender, DrawToolTipEventArgs e) {
             OnToolTipDraw(e);
         }
+
         private void OnRenderError(object sender, HtmlRenderErrorEventArgs e) {
             OnRenderError(e);
         }
@@ -426,6 +422,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         private void OnLinkClicked(object sender, HtmlLinkClickedEventArgs e) {
             OnLinkClicked(e);
         }
+
         private void OnLinkHandlingTimerTick(object sender, EventArgs e) {
             OnLinkHandlingTimerTick(e);
         }

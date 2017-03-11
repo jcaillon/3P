@@ -20,8 +20,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace YamuiFramework.Animations.Transitions
-{
+namespace YamuiFramework.Animations.Transitions {
     /// <summary>
     /// This class allows you to create user-defined transition types. You specify these
     /// as a list of TransitionElements. Each of these defines: 
@@ -54,37 +53,31 @@ namespace YamuiFramework.Animations.Transitions
     /// heights each time.
     /// 
     /// </summary>
-    public class TransitionType_UserDefined : ITransitionType
-    {
+    public class TransitionType_UserDefined : ITransitionType {
         #region Public methods
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public TransitionType_UserDefined()
-        {
-        }
+        public TransitionType_UserDefined() {}
 
         /// <summary>
         /// Constructor. You pass in the list of TransitionElements and the total time
         /// (in milliseconds) for the transition.
         /// </summary>
-        public TransitionType_UserDefined(IList<TransitionElement> elements, int iTransitionTime)
-        {
+        public TransitionType_UserDefined(IList<TransitionElement> elements, int iTransitionTime) {
             setup(elements, iTransitionTime);
         }
 
         /// <summary>
         /// Sets up the transitions. 
         /// </summary>
-        public void setup(IList<TransitionElement> elements, int iTransitionTime)
-        {
+        public void setup(IList<TransitionElement> elements, int iTransitionTime) {
             m_Elements = elements;
             m_dTransitionTime = iTransitionTime;
 
             // We check that the elements list has some members...
-            if (elements.Count == 0)
-            {
+            if (elements.Count == 0) {
                 throw new Exception("The list of elements passed to the constructor of TransitionType_UserDefined had zero elements. It must have at least one element.");
             }
         }
@@ -96,9 +89,8 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Called to find the value for the movement of properties for the time passed in.
         /// </summary>
-        public void onTimer(int iTime, out double dPercentage, out bool bCompleted)
-        {
-            double dTransitionTimeFraction = iTime / m_dTransitionTime;
+        public void onTimer(int iTime, out double dPercentage, out bool bCompleted) {
+            double dTransitionTimeFraction = iTime/m_dTransitionTime;
 
             // We find the information for the element that we are currently processing...
             double dElementStartTime;
@@ -111,13 +103,12 @@ namespace YamuiFramework.Animations.Transitions
             // We find how far through this element we are as a fraction...
             double dElementInterval = dElementEndTime - dElementStartTime;
             double dElementElapsedTime = dTransitionTimeFraction - dElementStartTime;
-            double dElementTimeFraction = dElementElapsedTime / dElementInterval;
+            double dElementTimeFraction = dElementElapsedTime/dElementInterval;
 
             // We convert the time-fraction to an fraction of the movement within the
             // element using the interpolation method...
             double dElementDistance;
-            switch (eInterpolationMethod)
-            {
+            switch (eInterpolationMethod) {
                 case InterpolationMethod.Linear:
                     dElementDistance = dElementTimeFraction;
                     break;
@@ -143,15 +134,12 @@ namespace YamuiFramework.Animations.Transitions
             dPercentage = Utility.interpolate(dElementStartValue, dElementEndValue, dElementDistance);
 
             // Has the transition completed?
-            if (iTime >= m_dTransitionTime)
-            {
+            if (iTime >= m_dTransitionTime) {
                 // The transition has completed, so we make sure that
                 // it is at its final value...
                 bCompleted = true;
                 dPercentage = dElementEndValue;
-            }
-            else
-            {
+            } else {
                 bCompleted = false;
             }
         }
@@ -159,8 +147,7 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Returns the element info for the time-fraction passed in. 
         /// </summary>
-        private void getElementInfo(double dTimeFraction, out double dStartTime, out double dEndTime, out double dStartValue, out double dEndValue, out InterpolationMethod eInterpolationMethod)
-        {
+        private void getElementInfo(double dTimeFraction, out double dStartTime, out double dEndTime, out double dStartValue, out double dEndValue, out InterpolationMethod eInterpolationMethod) {
             // We need to return the start and end values for the current element. So this
             // means finding the element for the time passed in as well as the previous element.
 
@@ -169,19 +156,16 @@ namespace YamuiFramework.Animations.Transitions
             // it will be the same one again, but it may have moved to a subsequent
             // on (maybe even skipping elements if enough time has passed)...
             int iCount = m_Elements.Count;
-            for (; m_iCurrentElement < iCount; ++m_iCurrentElement)
-            {
+            for (; m_iCurrentElement < iCount; ++m_iCurrentElement) {
                 TransitionElement element = m_Elements[m_iCurrentElement];
-                double dElementEndTime = element.EndTime / 100.0;
-                if (dTimeFraction < dElementEndTime)
-                {
+                double dElementEndTime = element.EndTime/100.0;
+                if (dTimeFraction < dElementEndTime) {
                     break;
                 }
             }
 
             // If we have gone past the last element, we just use the last element...
-            if (m_iCurrentElement == iCount)
-            {
+            if (m_iCurrentElement == iCount) {
                 m_iCurrentElement = iCount - 1;
             }
 
@@ -189,17 +173,16 @@ namespace YamuiFramework.Animations.Transitions
             // case where we are currently in the first element, in which case they are zeros...
             dStartTime = 0.0;
             dStartValue = 0.0;
-            if (m_iCurrentElement > 0)
-            {
+            if (m_iCurrentElement > 0) {
                 TransitionElement previousElement = m_Elements[m_iCurrentElement - 1];
-                dStartTime = previousElement.EndTime / 100.0;
-                dStartValue = previousElement.EndValue / 100.0;
+                dStartTime = previousElement.EndTime/100.0;
+                dStartValue = previousElement.EndValue/100.0;
             }
 
             // We get the end values from the current element...
             TransitionElement currentElement = m_Elements[m_iCurrentElement];
-            dEndTime = currentElement.EndTime / 100.0;
-            dEndValue = currentElement.EndValue / 100.0;
+            dEndTime = currentElement.EndTime/100.0;
+            dEndValue = currentElement.EndValue/100.0;
             eInterpolationMethod = currentElement.InterpolationMethod;
         }
 

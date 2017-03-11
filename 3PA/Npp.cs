@@ -32,12 +32,10 @@ using _3PA.MainFeatures;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA {
-
     /// <summary>
     /// This class contains very generic wrappers for basic Notepad++ functionality
     /// </summary>
     internal static partial class Npp {
-
         #region CurrentFile Info
 
         #region private
@@ -93,17 +91,23 @@ namespace _3PA {
             /// <summary>
             /// file name
             /// </summary>
-            public string FileName { get { return System.IO.Path.GetFileName(Path); } }
+            public string FileName {
+                get { return System.IO.Path.GetFileName(Path); }
+            }
 
             /// <summary>
             /// Directory of file
             /// </summary>
-            public string DirectoryName { get { return System.IO.Path.GetDirectoryName(Path); } }
+            public string DirectoryName {
+                get { return System.IO.Path.GetDirectoryName(Path); }
+            }
 
             /// <summary>
             /// Extension of file
             /// </summary>
-            public string Extension { get { return System.IO.Path.GetExtension(Path); } }
+            public string Extension {
+                get { return System.IO.Path.GetExtension(Path); }
+            }
 
             /// <summary>
             /// Gets the path of the current document
@@ -172,7 +176,7 @@ namespace _3PA {
         }
 
         #endregion
-        
+
         #endregion
 
         /// <summary>
@@ -186,15 +190,11 @@ namespace _3PA {
         }
 
         public static bool IsNppWindowFocused {
-            get {
-                return (Win32Api.GetForegroundWindow() == HandleNpp);
-            }
+            get { return (Win32Api.GetForegroundWindow() == HandleNpp); }
         }
 
         public static bool IsScintillaFocused {
-            get {
-                return (Win32Api.GetForegroundWindow() == HandleScintilla);
-            }
+            get { return (Win32Api.GetForegroundWindow() == HandleScintilla); }
         }
 
         /// <summary>
@@ -203,9 +203,9 @@ namespace _3PA {
         /// <returns></returns>
         public static Screen NppScreen {
             get {
-                Rectangle nppRect =  Win32Api.GetWindowRect(HandleScintilla);
+                Rectangle nppRect = Win32Api.GetWindowRect(HandleScintilla);
                 var nppLoc = nppRect.Location;
-                nppLoc.Offset(nppRect.Width / 2, nppRect.Height / 2);
+                nppLoc.Offset(nppRect.Width/2, nppRect.Height/2);
                 return Screen.FromPoint(nppLoc);
             }
         }
@@ -266,7 +266,6 @@ namespace _3PA {
                     SetSel(GetPosFromLineColumn(line, column));
                 else
                     SetSel(GetLine(line).Position);
-
             }
             GrabFocus();
             Plug.OnUpdateSelection();
@@ -300,7 +299,7 @@ namespace _3PA {
         /// <param name="image"></param>
         /// <param name="pluginId"></param>
         public static void SetToolbarImage(Bitmap image, int pluginId) {
-            var tbIcons = new toolbarIcons { hToolbarBmp = image.GetHbitmap() };
+            var tbIcons = new toolbarIcons {hToolbarBmp = image.GetHbitmap()};
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
@@ -353,7 +352,7 @@ namespace _3PA {
         /// <returns></returns>
         private static List<string> GetOpenedFiles(NppMsg view, NppMsg mode) {
             var output = new List<string>();
-            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)view);
+            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) view);
             using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
                 if (Win32Api.SendMessage(HandleNpp, mode, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
@@ -369,7 +368,7 @@ namespace _3PA {
         /// <returns></returns>
         public static string GetSessionFiles(string sessionFilePath) {
             var output = new StringBuilder();
-            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
             if (nbFile > 0) {
                 using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
                     if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
@@ -392,11 +391,9 @@ namespace _3PA {
             if (GetOpenedFiles().Contains(file)) {
                 SwitchToDocument(file);
                 return true;
-            } 
+            }
             return ((int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
-        
-
 
         /// <summary>
         /// returns npp's folder path
@@ -430,10 +427,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetNppExePath {
-            get {
-                return Path.Combine(GetNppDirectory(), "notepad++.exe");
-            }
-            
+            get { return Path.Combine(GetNppDirectory(), "notepad++.exe"); }
         }
 
         /// <summary>
@@ -443,13 +437,12 @@ namespace _3PA {
         public static string GetNppVersion {
             get {
                 if (string.IsNullOrEmpty(_nppVersion)) {
-                var nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
-                var lowWord = (nppVersion & 0x0000FFFF).ToString();
-                _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
+                    var nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
+                    var lowWord = (nppVersion & 0x0000FFFF).ToString();
+                    _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
                 return _nppVersion;
             }
-
         }
 
         private static string _nppVersion;

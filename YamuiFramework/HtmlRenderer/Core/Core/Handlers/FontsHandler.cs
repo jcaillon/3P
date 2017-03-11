@@ -23,13 +23,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers {
     /// <summary>
     /// Utilities for fonts and fonts families handling.
     /// </summary>
-    internal sealed class FontsHandler
-    {
+    internal sealed class FontsHandler {
         #region Fields and Consts
 
         /// <summary>
@@ -54,12 +52,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public FontsHandler(RAdapter adapter)
-        {
+        public FontsHandler(RAdapter adapter) {
             ArgChecker.AssertArgNotNull(adapter, "global");
 
             _adapter = adapter;
@@ -70,14 +66,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="family">the font to check</param>
         /// <returns>true - font exists by given family name, false - otherwise</returns>
-        public bool IsFontExists(string family)
-        {
+        public bool IsFontExists(string family) {
             bool exists = _existingFontFamilies.ContainsKey(family);
-            if (!exists)
-            {
+            if (!exists) {
                 string mappedFamily;
-                if (_fontsMapping.TryGetValue(family, out mappedFamily))
-                {
+                if (_fontsMapping.TryGetValue(family, out mappedFamily)) {
                     exists = _existingFontFamilies.ContainsKey(mappedFamily);
                 }
             }
@@ -88,8 +81,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Adds a font family to be used.
         /// </summary>
         /// <param name="fontFamily">The font family to add.</param>
-        public void AddFontFamily(RFontFamily fontFamily)
-        {
+        public void AddFontFamily(RFontFamily fontFamily) {
             ArgChecker.AssertArgNotNull(fontFamily, "family");
 
             _existingFontFamilies[fontFamily.Name] = fontFamily;
@@ -102,8 +94,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="fromFamily">the font family to replace</param>
         /// <param name="toFamily">the font family to replace with</param>
-        public void AddFontFamilyMapping(string fromFamily, string toFamily)
-        {
+        public void AddFontFamilyMapping(string fromFamily, string toFamily) {
             ArgChecker.AssertArgNotNullOrEmpty(fromFamily, "fromFamily");
             ArgChecker.AssertArgNotNullOrEmpty(toFamily, "toFamily");
 
@@ -115,27 +106,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Improve performance not to create same font multiple times.
         /// </summary>
         /// <returns>cached font instance</returns>
-        public RFont GetCachedFont(string family, double size, RFontStyle style)
-        {
+        public RFont GetCachedFont(string family, double size, RFontStyle style) {
             var font = TryGetFont(family, size, style);
-            if (font == null)
-            {
-                if (!_existingFontFamilies.ContainsKey(family))
-                {
+            if (font == null) {
+                if (!_existingFontFamilies.ContainsKey(family)) {
                     string mappedFamily;
-                    if (_fontsMapping.TryGetValue(family, out mappedFamily))
-                    {
+                    if (_fontsMapping.TryGetValue(family, out mappedFamily)) {
                         font = TryGetFont(mappedFamily, size, style);
-                        if (font == null)
-                        {
+                        if (font == null) {
                             font = CreateFont(mappedFamily, size, style);
                             _fontsCache[mappedFamily][size][style] = font;
                         }
                     }
                 }
 
-                if (font == null)
-                {
+                if (font == null) {
                     font = CreateFont(family, size, style);
                 }
 
@@ -144,33 +129,24 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
             return font;
         }
 
-
         #region Private methods
 
         /// <summary>
         /// Get cached font if it exists in cache or null if it is not.
         /// </summary>
-        private RFont TryGetFont(string family, double size, RFontStyle style)
-        {
+        private RFont TryGetFont(string family, double size, RFontStyle style) {
             RFont font = null;
-            if (_fontsCache.ContainsKey(family))
-            {
+            if (_fontsCache.ContainsKey(family)) {
                 var a = _fontsCache[family];
-                if (a.ContainsKey(size))
-                {
+                if (a.ContainsKey(size)) {
                     var b = a[size];
-                    if (b.ContainsKey(style))
-                    {
+                    if (b.ContainsKey(style)) {
                         font = b[style];
                     }
-                }
-                else
-                {
+                } else {
                     _fontsCache[family][size] = new Dictionary<RFontStyle, RFont>();
                 }
-            }
-            else
-            {
+            } else {
                 _fontsCache[family] = new Dictionary<double, Dictionary<RFontStyle, RFont>>();
                 _fontsCache[family][size] = new Dictionary<RFontStyle, RFont>();
             }
@@ -180,17 +156,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         // create font (try using existing font family to support custom fonts)
         /// </summary>
-        private RFont CreateFont(string family, double size, RFontStyle style)
-        {
+        private RFont CreateFont(string family, double size, RFontStyle style) {
             RFontFamily fontFamily;
-            try
-            {
+            try {
                 return _existingFontFamilies.TryGetValue(family, out fontFamily)
                     ? _adapter.CreateFont(fontFamily, size, style)
                     : _adapter.CreateFont(family, size, style);
-            }
-            catch
-            {
+            } catch {
                 // handle possibility of no requested style exists for the font, use regular then
                 return _existingFontFamilies.TryGetValue(family, out fontFamily)
                     ? _adapter.CreateFont(fontFamily, size, RFontStyle.Regular)

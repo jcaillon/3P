@@ -29,7 +29,6 @@ using System.Text;
 using System.Threading;
 
 namespace _3PA.Lib {
-
     public static class DropToWindows {
         public static void DropToAppBuilder(string prowin32Path, string pfPath, string filename) {
             /*
@@ -46,21 +45,21 @@ namespace _3PA.Lib {
     }
 
     public static class DropFileToWindow {
-
         #region "give window focus"
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetForegroundWindow(IntPtr hwnd);
+
         #endregion
 
         public static void Do(string strToFindInCommandLine, string strToFindInCommandLine2, string filename, bool giveFocus = true) {
-            Do(strToFindInCommandLine, strToFindInCommandLine2, new List<string>(new[] { filename }), giveFocus);
+            Do(strToFindInCommandLine, strToFindInCommandLine2, new List<string>(new[] {filename}), giveFocus);
         }
 
         public static void Do(string strToFindInCommandLine, string strToFindInCommandLine2, IList<string> filename, bool giveFocus = true) {
-
             int procID = 0;
 
             string wmiQuery = "select ProcessId, CommandLine from Win32_Process";
@@ -137,14 +136,12 @@ namespace _3PA.Lib {
             public uint pFiles;
             public int x;
             public int y;
-            [MarshalAs(UnmanagedType.Bool)]
-            public bool fNC;
-            [MarshalAs(UnmanagedType.Bool)]
-            public bool fWide;
+            [MarshalAs(UnmanagedType.Bool)] public bool fNC;
+            [MarshalAs(UnmanagedType.Bool)] public bool fWide;
         }
 
         public static void DropFile(IntPtr hWnd, MmdDropFile file) {
-            DropFile(hWnd, new[] { file });
+            DropFile(hWnd, new[] {file});
         }
 
         public static void DropFile(IntPtr hWnd, IList<MmdDropFile> files) {
@@ -157,7 +154,7 @@ namespace _3PA.Lib {
             var hGlobal = Marshal.AllocHGlobal(dropFilesSize + names.Length);
 
             var dropFiles = new DropFiles {
-                pFiles = (uint)dropFilesSize,
+                pFiles = (uint) dropFilesSize,
                 x = 0,
                 y = 0,
                 fNC = false,
@@ -181,16 +178,14 @@ namespace _3PA.Lib {
                             success = true;
 
                             try {
-                                i.File.Stream.CopyTo(i.Pipe, (int)i.File.Stream.Length);
+                                i.File.Stream.CopyTo(i.Pipe, (int) i.File.Stream.Length);
                                 i.Pipe.WaitForPipeDrain();
-                            } catch (IOException) {
-                            }
+                            } catch (IOException) {}
 
                             i.Pipe.Dispose();
                             i.File.Stream.Dispose();
                             handle.Set();
-                        } catch (ObjectDisposedException) {
-                        }
+                        } catch (ObjectDisposedException) {}
                     }, null);
 
                     if (i.File.Timeout != -1)
@@ -213,27 +208,19 @@ namespace _3PA.Lib {
         public string FileName { get; set; }
 
         public string FullName {
-            get {
-                return IsPipe ? @"\\.\pipe\" + FileName : FileName;
-            }
+            get { return IsPipe ? @"\\.\pipe\" + FileName : FileName; }
         }
 
         public Stream Stream { get; set; }
 
         public bool IsPipe {
-            get {
-                return Stream != null;
-            }
+            get { return Stream != null; }
         }
 
-        public int Timeout {
-            get;
-            set;
-        }
+        public int Timeout { get; set; }
 
         public MmdDropFile(string fileName)
-            : this(fileName, null) {
-        }
+            : this(fileName, null) {}
 
         public MmdDropFile(string fileName, Stream stream) {
             Timeout = -1;

@@ -26,12 +26,10 @@ using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
     internal class NppInterfaceForm : YamuiFormBase {
-
         #region constant
 
         private static readonly Point CloakedPosition = new Point(-10000, -10000);
@@ -92,7 +90,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return createParams;
             }
         }
@@ -105,7 +103,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Create a new npp interface form, please set CurrentForegroundWindow
         /// </summary>
         public NppInterfaceForm() {
-
             ShowInTaskbar = false;
             Movable = true;
 
@@ -184,13 +181,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// instead of closing, cloak this form (invisible)
         /// </summary>
         protected override void OnClosing(CancelEventArgs e) {
-            if ((bool)Tag) 
+            if ((bool) Tag)
                 return;
             e.Cancel = true;
             Cloack();
             base.OnClosing(e);
         }
-        
+
         protected override void OnActivated(EventArgs e) {
             IsActivated = true;
             Opacity = FocusedOpacity;
@@ -210,6 +207,5 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         #endregion
-
     }
 }

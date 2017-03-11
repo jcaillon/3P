@@ -19,18 +19,17 @@
 #endregion
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
     internal partial class HomePage : YamuiPage {
-
         #region fields
 
         #endregion
 
         #region constructor
+
         public HomePage() {
             InitializeComponent();
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)

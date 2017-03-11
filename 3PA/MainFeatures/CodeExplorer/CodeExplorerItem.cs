@@ -27,12 +27,10 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-
     /// <summary>
     /// base class
     /// </summary>
     internal class CodeExplorerItem : FilteredTypeTreeListItem {
-       
         /// <summary>
         /// the branch to which this item belongs (if the item is not part of the "root")
         /// </summary>
@@ -79,7 +77,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// This item should be on the root of the tree?
         /// </summary>
-        public bool IsRoot { get { return Branch == CodeExplorerBranch.Root || Branch == CodeExplorerBranch.MainBlock; } }
+        public bool IsRoot {
+            get { return Branch == CodeExplorerBranch.Root || Branch == CodeExplorerBranch.MainBlock; }
+        }
 
         /// <summary>
         /// Apply an action for each flag of the item
@@ -87,12 +87,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <param name="toApplyOnFlag"></param>
         public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
                 if (flag == 0 || !Flags.HasFlag(flag)) continue;
                 toApplyOnFlag(name, flag);
             }
         }
-
 
         /// <summary>
         /// The piece of text displayed in the list
@@ -103,14 +102,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// return the image to display for this item
         /// If null, the image corresponding to ItemTypeImage will be used instead
         /// </summary>
-        public override Image ItemImage { get { return null; } }
+        public override Image ItemImage {
+            get { return null; }
+        }
 
         /// <summary>
         /// return this item type (a unique int for each item type)
         /// if the value is strictly inferior to 0, the button for this type will not appear
         /// on the bottom of list
         /// </summary>
-        public override int ItemType { get { return IconType > 0 ? (int)IconType : (int) Branch + 666; } }
+        public override int ItemType {
+            get { return IconType > 0 ? (int) IconType : (int) Branch + 666; }
+        }
 
         /// <summary>
         /// return the image that will be used to identify this item
@@ -119,29 +122,29 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// bottom buttons will be that of the first item found for the given type
         /// </summary>
         public override Image ItemTypeImage {
-            get {
-                return Utils.GetImageFromStr(IconType > 0 ? IconType.ToString() : Branch.ToString());
-            }
+            get { return Utils.GetImageFromStr(IconType > 0 ? IconType.ToString() : Branch.ToString()); }
         }
 
         /// <summary>
         /// The text that describes this item type
         /// </summary>
         public override string ItemTypeText {
-            get {
-                return "Category : <span class='SubTextColor'><b>" + IconType + "</b></span><br><br>";
-            }
+            get { return "Category : <span class='SubTextColor'><b>" + IconType + "</b></span><br><br>"; }
         }
 
         /// <summary>
         /// return true if the item is to be highlighted
         /// </summary>
-        public override bool IsRowHighlighted { get { return false; } }
+        public override bool IsRowHighlighted {
+            get { return false; }
+        }
 
         /// <summary>
         /// return a string containing the subtext to display
         /// </summary>
-        public override string SubText { get { return SubString; } }
+        public override string SubText {
+            get { return SubString; }
+        }
 
         /// <summary>
         /// return a list of images to be displayed (in reverse order) for the item
@@ -150,10 +153,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             get {
                 var outList = new List<Image>();
                 foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
                     if (flag == 0 || !Flags.HasFlag(flag)) continue;
 
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
                     if (tryImg != null)
                         outList.Add(tryImg);
                 }
@@ -165,7 +168,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// to override, that should return the list of the children for this item (if any) or null
         /// </summary>
         public override List<FilteredTypeTreeListItem> Children { get; set; }
-
     }
 
     /// <summary>
@@ -174,48 +176,27 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     internal enum CodeExplorerBranch {
-        [Description("Root")]
-        Root,
-        [Description("Appbuilder blocks")]
-        Block,
-        [Description("Program parameters")]
-        ProgramParameter,
-        [Description("ON events")]
-        OnEvent,
-        [Description("Main block")]
-        MainBlock,
-        [Description("Includes")]
-        Include,
-        [Description("External procedures")]
-        ExternalProcedure,
-        [Description("Procedures")]
-        Procedure,
-        [Description("Functions")]
-        Function,
-        [Description("Subscribe")]
-        Subscribe,
-        [Description("Publish")]
-        Publish,
-        [Description("Unsubscribe")]
-        Unsubscribe,
-        [Description("Defined temp-tables")]
-        DefinedTempTable,
-        [Description("Run internal routine")]
-        Run,
-        [Description("Run external procedure")]
-        RunExternal,
-        [Description("Static function calls")]
-        StaticFunctionCall,
-        [Description("Internal dynamic function calls")]
-        DynamicFunctionCall,
-        [Description("External dynamic function calls")]
-        DynamicFunctionCallExternal,
-        [Description("Browse definitions")]
-        Browse,
-        [Description("Tables used")]
-        TableUsed,
-        [Description("Temp-tables used")]
-        TempTableUsed
+        [Description("Root")] Root,
+        [Description("Appbuilder blocks")] Block,
+        [Description("Program parameters")] ProgramParameter,
+        [Description("ON events")] OnEvent,
+        [Description("Main block")] MainBlock,
+        [Description("Includes")] Include,
+        [Description("External procedures")] ExternalProcedure,
+        [Description("Procedures")] Procedure,
+        [Description("Functions")] Function,
+        [Description("Subscribe")] Subscribe,
+        [Description("Publish")] Publish,
+        [Description("Unsubscribe")] Unsubscribe,
+        [Description("Defined temp-tables")] DefinedTempTable,
+        [Description("Run internal routine")] Run,
+        [Description("Run external procedure")] RunExternal,
+        [Description("Static function calls")] StaticFunctionCall,
+        [Description("Internal dynamic function calls")] DynamicFunctionCall,
+        [Description("External dynamic function calls")] DynamicFunctionCallExternal,
+        [Description("Browse definitions")] Browse,
+        [Description("Tables used")] TableUsed,
+        [Description("Temp-tables used")] TempTableUsed
     }
 
     /// <summary>
@@ -238,5 +219,4 @@ namespace _3PA.MainFeatures.CodeExplorer {
         TempTable,
         Parameter
     }
-
 }

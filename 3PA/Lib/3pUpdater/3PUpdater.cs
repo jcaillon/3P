@@ -27,7 +27,6 @@ using _3PA.Properties;
 
 namespace _3PA.Lib._3pUpdater {
     internal class _3PUpdater {
-
         #region private fields
 
         private static _3PUpdater _instance;
@@ -53,7 +52,6 @@ namespace _3PA.Lib._3pUpdater {
         /// Use to method to a file that needs to be moved AFTER npp is shutdown
         /// </summary>
         public bool AddFileToMove(string from, string to) {
-
             if (string.IsNullOrEmpty(from) || !File.Exists(from) || string.IsNullOrEmpty(to) || !Directory.Exists(Path.GetDirectoryName(to) ?? ""))
                 return false;
 
@@ -82,12 +80,10 @@ namespace _3PA.Lib._3pUpdater {
             try {
                 // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
                 if (Utils.FileWriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? Resources._3pUpdater_user : Resources._3pUpdater)) {
-
                     // execute it, don't wait for the end
                     var process = new Process {StartInfo = {FileName = Config.FileUpdaterExe, WindowStyle = ProcessWindowStyle.Hidden}};
                     process.Start();
                 }
-
             } catch (Exception e) {
                 if (!(e is Win32Exception))
                     ErrorHandler.LogError(e);
@@ -95,7 +91,6 @@ namespace _3PA.Lib._3pUpdater {
         }
 
         #endregion
-
 
         private enum TypeOfExeNeeded {
             None,

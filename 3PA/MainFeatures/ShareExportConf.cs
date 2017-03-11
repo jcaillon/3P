@@ -31,7 +31,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures {
     internal static class ShareExportConf {
-
         #region fields
 
         private static List<ConfLine> _list;
@@ -178,9 +177,7 @@ namespace _3PA.MainFeatures {
         public static void StartCheckingForUpdates() {
             // check for updates every now and then (15min)
             // ReSharper disable once ObjectCreationAsStatement
-            new ReccurentAction(() => {
-                UpdateList(Config.Instance.SharedConfFolder);
-            }, 1000 * 60 * 15);
+            new ReccurentAction(() => { UpdateList(Config.Instance.SharedConfFolder); }, 1000*60*15);
         }
 
         /// <summary>
@@ -233,7 +230,6 @@ namespace _3PA.MainFeatures {
                                 confLine.DistantNbFiles++;
                             }
                         }
-
                     } else {
                         confLine.LocalExists = !string.IsNullOrEmpty(confLine.LocalPath) && File.Exists(confLine.LocalPath);
                         confLine.DistantExists = !string.IsNullOrEmpty(confLine.DistantPath) && File.Exists(confLine.DistantPath);
@@ -245,7 +241,6 @@ namespace _3PA.MainFeatures {
                         if (!string.IsNullOrEmpty(confLine.DistantPath) && confLine.DistantExists) {
                             confLine.DistantTime = File.GetLastWriteTime(confLine.DistantPath);
                         }
-
                     }
 
                     // if the difference between the two dates are small, correct it (it sometimes happen, even when the files are strictly identical)
@@ -279,7 +274,6 @@ namespace _3PA.MainFeatures {
                         args.Handled = true;
                     }, 10);
                 }
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while fetching info on the distant files");
             }
@@ -290,7 +284,7 @@ namespace _3PA.MainFeatures {
         #region generic methods
 
         private static void DoDelete(ConfLine conf) {
-            var answ = UserCommunication.Message("Do you really want to delete this file?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
+            var answ = UserCommunication.Message("Do you really want to delete this file?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "No, Cancel"}, true);
             if (answ == 0) {
                 Utils.DeleteFile(conf.LocalPath);
                 if (conf.OnImport != null)
@@ -302,7 +296,7 @@ namespace _3PA.MainFeatures {
 
         private static void DoFetch(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.DistantPath)) {
-                var answ = (_dontWarnFetch || _silentUpdate) ? 0 : UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
+                var answ = (_dontWarnFetch || _silentUpdate) ? 0 : UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"}, true);
                 if (answ == 0 || answ == 1) {
                     if (answ == 1)
                         _dontWarnFetch = true;
@@ -321,7 +315,7 @@ namespace _3PA.MainFeatures {
 
         private static void DoPush(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.LocalPath)) {
-                var answ = _dontWarnPush ? 0 : UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Push", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
+                var answ = _dontWarnPush ? 0 : UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Push", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"}, true);
                 if (answ == 0 || answ == 1) {
                     if (answ == 1)
                         _dontWarnPush = true;
@@ -341,7 +335,6 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 
     #region ConfLine class
@@ -349,42 +342,52 @@ namespace _3PA.MainFeatures {
     internal class ConfLine {
         public string HandledItem { get; set; }
         public string Label { get; set; }
+
         /// <summary>
         /// Action executed when the user click on delete
         /// </summary>
         public Action<ConfLine> OnDelete { get; set; }
+
         /// <summary>
         /// Action executed when the user click on export
         /// </summary>
         public Action<ConfLine> OnExport { get; set; }
+
         /// <summary>
         /// Action executed when the user click on fetch
         /// </summary>
         public Action<ConfLine> OnFetch { get; set; }
+
         /// <summary>
         /// Action executed when the user click on push
         /// </summary>
         public Action<ConfLine> OnPush { get; set; }
+
         /// <summary>
         /// Action executed when the user click on import
         /// </summary>
         public Action<ConfLine> OnImport { get; set; }
+
         public DateTime LocalTime { get; set; }
         public DateTime DistantTime { get; set; }
         public bool LocalExists { get; set; }
         public bool DistantExists { get; set; }
         public string LocalPath { get; set; }
         public string DistantPath { get; set; }
+
         /// <summary>
         /// true if the conf line is actually a directory
         /// </summary>
         public bool IsDir { get; set; }
+
         public int LocalNbFiles { get; set; }
         public int DistantNbFiles { get; set; }
+
         /// <summary>
         /// true if the user checked this option to automatically update this conf line
         /// </summary>
         public bool AutoUpdate { get; set; }
+
         public bool NeedUpdate { get; set; }
     }
 

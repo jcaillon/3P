@@ -20,13 +20,11 @@
 using System;
 using System.Text;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Represents an ARGB (alpha, red, green, blue) color.
     /// </summary>
-    public struct RColor
-    {
+    public struct RColor {
         #region Fields and Consts
 
         /// <summary>
@@ -39,82 +37,71 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
 
         #endregion
 
-
-        private RColor(long value)
-        {
+        private RColor(long value) {
             _value = value;
         }
 
         /// <summary>
         /// Gets a system-defined color.
         /// </summary>
-        public static RColor Transparent
-        {
+        public static RColor Transparent {
             get { return new RColor(0); }
         }
 
         /// <summary>
         ///     Gets a system-defined color that has an ARGB value of #FF000000.
         /// </summary>
-        public static RColor Black
-        {
+        public static RColor Black {
             get { return FromArgb(0, 0, 0); }
         }
 
         /// <summary>
         /// Gets a system-defined color that has an ARGB value of #FFFFFFFF.
         /// </summary>
-        public static RColor White
-        {
+        public static RColor White {
             get { return FromArgb(255, 255, 255); }
         }
 
         /// <summary>
         /// Gets a system-defined color that has an ARGB value of #FFF5F5F5.
         /// </summary>
-        public static RColor WhiteSmoke
-        {
+        public static RColor WhiteSmoke {
             get { return FromArgb(245, 245, 245); }
         }
 
         /// <summary>
         /// Gets a system-defined color that has an ARGB value of #FFD3D3D3.
         /// </summary>
-        public static RColor LightGray
-        {
+        public static RColor LightGray {
             get { return FromArgb(211, 211, 211); }
         }
 
         /// <summary>
         ///     Gets the red component value of this <see cref="RColor" /> structure.
         /// </summary>
-        public byte R
-        {
-            get { return (byte)((ulong)(_value >> 16) & byte.MaxValue); }
+        public byte R {
+            get { return (byte) ((ulong) (_value >> 16) & byte.MaxValue); }
         }
 
         /// <summary>
         ///     Gets the green component value of this <see cref="RColor" /> structure.
         /// </summary>
-        public byte G
-        {
-            get { return (byte)((ulong)(_value >> 8) & byte.MaxValue); }
+        public byte G {
+            get { return (byte) ((ulong) (_value >> 8) & byte.MaxValue); }
         }
 
         /// <summary>
         ///     Gets the blue component value of this <see cref="RColor" /> structure.
         /// </summary>
-        public byte B
-        {
-            get { return (byte)((ulong)_value & byte.MaxValue); }
+        public byte B {
+            get { return (byte) ((ulong) _value & byte.MaxValue); }
         }
 
         /// <summary>
         ///     Gets the alpha component value of this <see cref="RColor" /> structure.
         /// </summary>
-        public byte A
-        {
-            get { return (byte)((ulong)(_value >> 24) & byte.MaxValue); }
+        public byte A {
+            get { return (byte) ((ulong) (_value >> 24) & byte.MaxValue); }
         }
 
         /// <summary>
@@ -124,8 +111,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     This property returns true if this color is uninitialized; otherwise, false.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public bool IsEmpty
-        {
+        public bool IsEmpty {
             get { return _value == 0; }
         }
 
@@ -142,8 +128,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="RColor" /> that is to the right of the equality operator.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static bool operator ==(RColor left, RColor right)
-        {
+        public static bool operator ==(RColor left, RColor right) {
             return left._value == right._value;
         }
 
@@ -160,8 +145,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="RColor" /> that is to the right of the inequality operator.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static bool operator !=(RColor left, RColor right)
-        {
+        public static bool operator !=(RColor left, RColor right) {
             return !(left == right);
         }
 
@@ -179,13 +163,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     <paramref name="alpha" />, <paramref name="red" />, <paramref name="green" />, or <paramref name="blue" /> is less than 0 or greater than 255.
         /// </exception>
         /// <filterpriority>1</filterpriority>
-        public static RColor FromArgb(int alpha, int red, int green, int blue)
-        {
+        public static RColor FromArgb(int alpha, int red, int green, int blue) {
             CheckByte(alpha);
             CheckByte(red);
             CheckByte(green);
             CheckByte(blue);
-            return new RColor((uint)(red << 16 | green << 8 | blue | alpha << 24) & (long)uint.MaxValue);
+            return new RColor((uint) (red << 16 | green << 8 | blue | alpha << 24) & (long) uint.MaxValue);
         }
 
         /// <summary>
@@ -207,8 +190,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     <paramref name="red" />, <paramref name="green" />, or <paramref name="blue" /> is less than 0 or greater than 255.
         /// </exception>
         /// <filterpriority>1</filterpriority>
-        public static RColor FromArgb(int red, int green, int blue)
-        {
+        public static RColor FromArgb(int red, int green, int blue) {
             return FromArgb(byte.MaxValue, red, green, blue);
         }
 
@@ -226,11 +208,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// </returns>
         /// <param name="obj">The object to test. </param>
         /// <filterpriority>1</filterpriority>
-        public override bool Equals(object obj)
-        {
-            if (obj is RColor)
-            {
-                var color = (RColor)obj;
+        public override bool Equals(object obj) {
+            if (obj is RColor) {
+                var color = (RColor) obj;
                 return _value == color._value;
             }
             return false;
@@ -243,21 +223,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     An integer value that specifies the hash code for this <see cref="RColor" />.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return _value.GetHashCode();
         }
 
         /// <summary>
         ///     Converts this <see cref="RColor" /> structure to a human-readable string.
         /// </summary>
-        public override string ToString()
-        {
+        public override string ToString() {
             var stringBuilder = new StringBuilder(32);
             stringBuilder.Append(GetType().Name);
             stringBuilder.Append(" [");
-            if (_value != 0)
-            {
+            if (_value != 0) {
                 stringBuilder.Append("A=");
                 stringBuilder.Append(A);
                 stringBuilder.Append(", R=");
@@ -266,18 +243,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
                 stringBuilder.Append(G);
                 stringBuilder.Append(", B=");
                 stringBuilder.Append(B);
-            }
-            else
+            } else
                 stringBuilder.Append("Empty");
             stringBuilder.Append("]");
             return stringBuilder.ToString();
         }
 
-
         #region Private methods
 
-        private static void CheckByte(int value)
-        {
+        private static void CheckByte(int value) {
             if (value >= 0 && value <= byte.MaxValue)
                 return;
             throw new ArgumentException("InvalidEx2BoundArgument");

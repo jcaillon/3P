@@ -30,8 +30,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Handlers;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core {
     /// <summary>
     /// Low level handling of Html Renderer logic.<br/>
     /// Allows html layout and rendering without association to actual control, those allowing to handle html rendering on any graphics object.<br/>
@@ -86,8 +85,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
     /// Raised when an error occurred during html rendering.<br/>
     /// </para>
     /// </remarks>
-    public sealed class HtmlContainerInt : IDisposable
-    {
+    public sealed class HtmlContainerInt : IDisposable {
         #region Fields and Consts
 
         /// <summary>
@@ -180,12 +178,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public HtmlContainerInt(RAdapter adapter)
-        {
+        public HtmlContainerInt(RAdapter adapter) {
             ArgChecker.AssertArgNotNull(adapter, "global");
 
             _adapter = adapter;
@@ -195,16 +191,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// 
         /// </summary>
-        internal RAdapter Adapter
-        {
+        internal RAdapter Adapter {
             get { return _adapter; }
         }
 
         /// <summary>
         /// parser for CSS data
         /// </summary>
-        internal CssParser CssParser
-        {
+        internal CssParser CssParser {
             get { return _cssParser; }
         }
 
@@ -213,7 +207,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Allows canceling the execution of the link.
         /// </summary>
         public event EventHandler<HtmlLinkClickedEventArgs> LinkClicked;
-
 
         /// <summary>
         /// Raised when the user clicks on a box with the attribute "clickable"
@@ -258,16 +251,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// the parsed stylesheet data used for handling the html
         /// </summary>
-        public CssData CssData
-        {
+        public CssData CssData {
             get { return _cssData; }
         }
 
         /// <summary>
         /// Gets or sets a value indicating if anti-aliasing should be avoided for geometry like backgrounds and borders (default - false).
         /// </summary>
-        public bool AvoidGeometryAntialias
-        {
+        public bool AvoidGeometryAntialias {
             get { return _avoidGeometryAntialias; }
             set { _avoidGeometryAntialias = value; }
         }
@@ -282,8 +273,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// ports to achieve better performance.<br/>
         /// Asynchronously image loading should be avoided when the full html content must be available during render, like render to image.
         /// </remarks>
-        public bool AvoidAsyncImagesLoading
-        {
+        public bool AvoidAsyncImagesLoading {
             get { return _avoidAsyncImagesLoading; }
             set { _avoidAsyncImagesLoading = value; }
         }
@@ -301,8 +291,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Early image loading may also effect the layout if image without known size above the current scroll location are loaded as they
         /// will push the html elements down.
         /// </remarks>
-        public bool AvoidImagesLateLoading
-        {
+        public bool AvoidImagesLateLoading {
             get { return _avoidImagesLateLoading; }
             set { _avoidImagesLateLoading = value; }
         }
@@ -311,8 +300,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Is content selection is enabled for the rendered html (default - true).<br/>
         /// If set to 'false' the rendered html will be static only with ability to click on links.
         /// </summary>
-        public bool IsSelectionEnabled
-        {
+        public bool IsSelectionEnabled {
             get { return _isSelectionEnabled; }
             set { _isSelectionEnabled = value; }
         }
@@ -320,8 +308,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// Is the build-in context menu enabled and will be shown on mouse right click (default - true)
         /// </summary>
-        public bool IsContextMenuEnabled
-        {
+        public bool IsContextMenuEnabled {
             get { return _isContextMenuEnabled; }
             set { _isContextMenuEnabled = value; }
         }
@@ -334,8 +321,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Element that is rendered at location (50,100) with offset of (0,200) will not be rendered as it
         /// will be at -100 therefore outside the client rectangle.
         /// </example>
-        public RPoint ScrollOffset
-        {
+        public RPoint ScrollOffset {
             get { return _scrollOffset; }
             set { _scrollOffset = value; }
         }
@@ -344,8 +330,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// The top-left most location of the rendered html.<br/>
         /// This will offset the top-left corner of the rendered html.
         /// </summary>
-        public RPoint Location
-        {
+        public RPoint Location {
             get { return _location; }
             set { _location = value; }
         }
@@ -357,8 +342,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <see cref="ActualSize"/> can be exceed the max size by layout restrictions (unwrapable line, set image size, etc.).<br/>
         /// Set zero for unlimited (width\height separately).<br/>
         /// </summary>
-        public RSize MaxSize
-        {
+        public RSize MaxSize {
             get { return _maxSize; }
             set { _maxSize = value; }
         }
@@ -366,8 +350,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// The actual size of the rendered html (after layout)
         /// </summary>
-        public RSize ActualSize
-        {
+        public RSize ActualSize {
             get { return _actualSize; }
             set { _actualSize = value; }
         }
@@ -375,32 +358,28 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// Get the currently selected text segment in the html.
         /// </summary>
-        public string SelectedText
-        {
+        public string SelectedText {
             get { return _selectionHandler.GetSelectedText(); }
         }
 
         /// <summary>
         /// Copy the currently selected html segment with style.
         /// </summary>
-        public string SelectedHtml
-        {
+        public string SelectedHtml {
             get { return _selectionHandler.GetSelectedHtml(); }
         }
 
         /// <summary>
         /// the root css box of the parsed html
         /// </summary>
-        internal CssBox Root
-        {
+        internal CssBox Root {
             get { return _root; }
         }
 
         /// <summary>
         /// the text fore color use for selected text
         /// </summary>
-        internal RColor SelectionForeColor
-        {
+        internal RColor SelectionForeColor {
             get { return _selectionForeColor; }
             set { _selectionForeColor = value; }
         }
@@ -408,8 +387,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// the back-color to use for selected text
         /// </summary>
-        internal RColor SelectionBackColor
-        {
+        internal RColor SelectionBackColor {
             get { return _selectionBackColor; }
             set { _selectionBackColor = value; }
         }
@@ -419,17 +397,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="htmlSource">the html to init with, init empty if not given</param>
         /// <param name="baseCssData">optional: the stylesheet to init with, init default if not given</param>
-        public void SetHtml(string htmlSource, CssData baseCssData = null)
-        {
+        public void SetHtml(string htmlSource, CssData baseCssData = null) {
             Clear();
-            if (!string.IsNullOrEmpty(htmlSource))
-            {
+            if (!string.IsNullOrEmpty(htmlSource)) {
                 _cssData = baseCssData ?? _adapter.DefaultCssData;
 
                 DomParser parser = new DomParser(_cssParser);
                 _root = parser.GenerateCssTree(htmlSource, this, ref _cssData);
-                if (_root != null)
-                {
+                if (_root != null) {
                     _selectionHandler = new SelectionHandler(_root);
                 }
             }
@@ -438,13 +413,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// Clear the content of the HTML container releasing any resources used to render previously existing content.
         /// </summary>
-        public void Clear()
-        {
+        public void Clear() {
             if (_hoverBoxes != null)
                 _hoverBoxes.Clear();
 
-            if (_root != null)
-            {
+            if (_root != null) {
                 _root.Dispose();
                 _root = null;
                 if (_selectionHandler != null)
@@ -458,8 +431,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="styleGen">Optional: controls the way styles are generated when html is generated (default: <see cref="HtmlGenerationStyle.Inline"/>)</param>
         /// <returns>generated html</returns>
-        public string GetHtml(HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline)
-        {
+        public string GetHtml(HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline) {
             return DomUtils.GenerateHtml(_root, styleGen);
         }
 
@@ -470,8 +442,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="location">the location to find the attribute at</param>
         /// <param name="attribute">the attribute key to get value by</param>
         /// <returns>found attribute value or null if not found</returns>
-        public string GetAttributeAt(RPoint location, string attribute)
-        {
+        public string GetAttributeAt(RPoint location, string attribute) {
             ArgChecker.AssertArgNotNullOrEmpty(attribute, "attribute");
 
             var cssBox = DomUtils.GetCssBox(_root, OffsetByScroll(location));
@@ -482,14 +453,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Get all the links in the HTML with the element rectangle and href data.
         /// </summary>
         /// <returns>collection of all the links in the HTML</returns>
-        public List<LinkElementData<RRect>> GetLinks()
-        {
+        public List<LinkElementData<RRect>> GetLinks() {
             var linkBoxes = new List<CssBox>();
             DomUtils.GetAllLinkBoxes(_root, linkBoxes);
 
             var linkElements = new List<LinkElementData<RRect>>();
-            foreach (var box in linkBoxes)
-            {
+            foreach (var box in linkBoxes) {
                 linkElements.Add(new LinkElementData<RRect>(box.GetAttribute("id"), box.GetAttribute("href"), CommonUtils.GetFirstValueOrDefault(box.Rectangles, box.Bounds)));
             }
             return linkElements;
@@ -500,8 +469,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="location">the location to find the link at</param>
         /// <returns>css link href if exists or null</returns>
-        public string GetLinkAt(RPoint location)
-        {
+        public string GetLinkAt(RPoint location) {
             var link = DomUtils.GetLinkBox(_root, OffsetByScroll(location));
             return link != null ? link.HrefLink : null;
         }
@@ -513,34 +481,30 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="elementId">the id of the element to get its rectangle</param>
         /// <returns>the rectangle of the element or null if not found</returns>
-        public RRect? GetElementRectangle(string elementId)
-        {
+        public RRect? GetElementRectangle(string elementId) {
             ArgChecker.AssertArgNotNullOrEmpty(elementId, "elementId");
 
             var box = DomUtils.GetBoxById(_root, elementId.ToLower());
-            return box != null ? CommonUtils.GetFirstValueOrDefault(box.Rectangles, box.Bounds) : (RRect?)null;
+            return box != null ? CommonUtils.GetFirstValueOrDefault(box.Rectangles, box.Bounds) : (RRect?) null;
         }
 
         /// <summary>
         /// Measures the bounds of box and children, recursively.
         /// </summary>
         /// <param name="g">Device context to draw</param>
-        public void PerformLayout(RGraphics g)
-        {
+        public void PerformLayout(RGraphics g) {
             ArgChecker.AssertArgNotNull(g, "g");
 
             _actualSize = RSize.Empty;
-            if (_root != null)
-            {
+            if (_root != null) {
                 // if width is not restricted we set it to large value to get the actual later
                 _root.Size = new RSize(_maxSize.Width > 0 ? _maxSize.Width : 99999, 0);
                 _root.Location = _location;
                 _root.PerformLayout(g);
 
-                if (_maxSize.Width <= 0.1)
-                {
+                if (_maxSize.Width <= 0.1) {
                     // in case the width is not restricted we need to double layout, first will find the width so second can layout by it (center alignment)
-                    _root.Size = new RSize((int)Math.Ceiling(_actualSize.Width), 0);
+                    _root.Size = new RSize((int) Math.Ceiling(_actualSize.Width), 0);
                     _actualSize = RSize.Empty;
                     _root.PerformLayout(g);
                 }
@@ -551,24 +515,20 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Render the html using the given device.
         /// </summary>
         /// <param name="g">the device to use to render</param>
-        public void PerformPaint(RGraphics g)
-        {
+        public void PerformPaint(RGraphics g) {
             ArgChecker.AssertArgNotNull(g, "g");
 
             bool pushedClip = false;
-            if (MaxSize.Height > 0)
-            {
+            if (MaxSize.Height > 0) {
                 pushedClip = true;
                 g.PushClip(new RRect(_location, _maxSize));
             }
 
-            if (_root != null)
-            {
+            if (_root != null) {
                 _root.Paint(g);
             }
 
-            if (pushedClip)
-            {
+            if (pushedClip) {
                 g.PopClip();
             }
         }
@@ -578,17 +538,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="location">the location of the mouse</param>
-        public void HandleMouseDown(RControl parent, RPoint location)
-        {
+        public void HandleMouseDown(RControl parent, RPoint location) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
-            try
-            {
+            try {
                 if (_selectionHandler != null)
                     _selectionHandler.HandleMouseDown(parent, OffsetByScroll(location), IsMouseInContainer(location));
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed mouse down handle", ex);
             }
         }
@@ -599,34 +555,25 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="location">the location of the mouse</param>
         /// <param name="e">the mouse event data</param>
-        public void HandleMouseUp(RControl parent, RPoint location, RMouseEvent e)
-        {
+        public void HandleMouseUp(RControl parent, RPoint location, RMouseEvent e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
-            try
-            {
+            try {
                 HandleBoxClicked(1, location);
 
-                if (_selectionHandler != null && IsMouseInContainer(location))
-                {
+                if (_selectionHandler != null && IsMouseInContainer(location)) {
                     var ignore = _selectionHandler.HandleMouseUp(parent, e.LeftButton);
-                    if (!ignore && e.LeftButton)
-                    {
+                    if (!ignore && e.LeftButton) {
                         var loc = OffsetByScroll(location);
                         var link = DomUtils.GetLinkBox(_root, loc);
-                        if (link != null)
-                        {
+                        if (link != null) {
                             HandleLinkClicked(parent, location, link);
                         }
                     }
                 }
-            }
-            catch (HtmlLinkClickedException)
-            {
+            } catch (HtmlLinkClickedException) {
                 throw;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed mouse up handle", ex);
             }
         }
@@ -636,19 +583,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
         /// <param name="location">the location of the mouse</param>
-        public void HandleMouseDoubleClick(RControl parent, RPoint location)
-        {
+        public void HandleMouseDoubleClick(RControl parent, RPoint location) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
-            try
-            {
+            try {
                 HandleBoxClicked(2, location);
 
                 if (_selectionHandler != null && IsMouseInContainer(location))
                     _selectionHandler.SelectWord(parent, OffsetByScroll(location));
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed mouse double click handle", ex);
             }
         }
@@ -677,12 +620,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
         /// <param name="location">the location of the mouse</param>
-        public void HandleMouseMove(RControl parent, RPoint location)
-        {
+        public void HandleMouseMove(RControl parent, RPoint location) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
-            try
-            {
+            try {
                 var loc = OffsetByScroll(location);
                 if (_selectionHandler != null && IsMouseInContainer(location))
                     _selectionHandler.HandleMouseMove(parent, loc);
@@ -707,9 +648,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
                         RequestRefresh(true);
                 }
                  */
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed mouse move handle", ex);
             }
         }
@@ -718,17 +657,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Handle mouse leave to handle hover cursor.
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
-        public void HandleMouseLeave(RControl parent)
-        {
+        public void HandleMouseLeave(RControl parent) {
             ArgChecker.AssertArgNotNull(parent, "parent");
 
-            try
-            {
+            try {
                 if (_selectionHandler != null)
                     _selectionHandler.HandleMouseLeave(parent);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed mouse leave handle", ex);
             }
         }
@@ -738,30 +673,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="e">the pressed key</param>
-        public void HandleKeyDown(RControl parent, RKeyEvent e)
-        {
+        public void HandleKeyDown(RControl parent, RKeyEvent e) {
             ArgChecker.AssertArgNotNull(parent, "parent");
             ArgChecker.AssertArgNotNull(e, "e");
 
-            try
-            {
-                if (e.Control && _selectionHandler != null)
-                {
+            try {
+                if (e.Control && _selectionHandler != null) {
                     // select all
-                    if (e.AKeyCode)
-                    {
+                    if (e.AKeyCode) {
                         _selectionHandler.SelectAll(parent);
                     }
 
                     // copy currently selected text
-                    if (e.CKeyCode)
-                    {
+                    if (e.CKeyCode) {
                         _selectionHandler.CopySelectedHtml();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.KeyboardMouse, "Failed key down handle", ex);
             }
         }
@@ -770,17 +698,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Raise the stylesheet load event with the given event args.
         /// </summary>
         /// <param name="args">the event args</param>
-        internal void RaiseHtmlStylesheetLoadEvent(HtmlStylesheetLoadEventArgs args)
-        {
-            try
-            {
-                if (StylesheetLoad != null)
-                {
+        internal void RaiseHtmlStylesheetLoadEvent(HtmlStylesheetLoadEventArgs args) {
+            try {
+                if (StylesheetLoad != null) {
                     StylesheetLoad(this, args);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.CssParsing, "Failed stylesheet load event", ex);
             }
         }
@@ -789,17 +712,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Raise the image load event with the given event args.
         /// </summary>
         /// <param name="args">the event args</param>
-        internal void RaiseHtmlImageLoadEvent(HtmlImageLoadEventArgs args)
-        {
-            try
-            {
-                if (ImageLoad != null)
-                {
+        internal void RaiseHtmlImageLoadEvent(HtmlImageLoadEventArgs args) {
+            try {
+                if (ImageLoad != null) {
                     ImageLoad(this, args);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.Image, "Failed image load event", ex);
             }
         }
@@ -808,17 +726,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Request invalidation and re-layout of the control hosting the renderer.
         /// </summary>
         /// <param name="layout">is re-layout is required for the refresh</param>
-        public void RequestRefresh(bool layout)
-        {
-            try
-            {
-                if (Refresh != null)
-                {
+        public void RequestRefresh(bool layout) {
+            try {
+                if (Refresh != null) {
                     Refresh(this, new HtmlRefreshEventArgs(layout));
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 ReportError(HtmlRenderErrorType.General, "Failed refresh request", ex);
             }
         }
@@ -829,17 +742,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="type">the type of error to report</param>
         /// <param name="message">the error message</param>
         /// <param name="exception">optional: the exception that occured</param>
-        internal void ReportError(HtmlRenderErrorType type, string message, Exception exception = null)
-        {
-            try
-            {
-                if (RenderError != null)
-                {
+        internal void ReportError(HtmlRenderErrorType type, string message, Exception exception = null) {
+            try {
+                if (RenderError != null) {
                     RenderError(this, new HtmlRenderErrorEventArgs(type, message, exception));
                 }
-            }
-            catch
-            { }
+            } catch {}
         }
 
         /// <summary>
@@ -848,43 +756,31 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="location">the location of the mouse</param>
         /// <param name="link">the link that was clicked</param>
-        internal void HandleLinkClicked(RControl parent, RPoint location, CssBox link)
-        {
-            if (LinkClicked != null)
-            {
+        internal void HandleLinkClicked(RControl parent, RPoint location, CssBox link) {
+            if (LinkClicked != null) {
                 var args = new HtmlLinkClickedEventArgs(link.HrefLink, link.HtmlTag.Attributes);
-                try
-                {
+                try {
                     LinkClicked(this, args);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     throw new HtmlLinkClickedException("Error in link clicked intercept", ex);
                 }
                 if (args.Handled)
                     return;
             }
 
-            if (!string.IsNullOrEmpty(link.HrefLink))
-            {
-                if (link.HrefLink.StartsWith("#") && link.HrefLink.Length > 1)
-                {
-                    if (ScrollChange != null)
-                    {
+            if (!string.IsNullOrEmpty(link.HrefLink)) {
+                if (link.HrefLink.StartsWith("#") && link.HrefLink.Length > 1) {
+                    if (ScrollChange != null) {
                         var rect = GetElementRectangle(link.HrefLink.Substring(1));
-                        if (rect.HasValue)
-                        {
+                        if (rect.HasValue) {
                             ScrollChange(this, new HtmlScrollEventArgs(rect.Value.Location));
                             HandleMouseMove(parent, location);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     if (!string.IsNullOrEmpty(link.HrefLink) && Directory.Exists(link.HrefLink)) {
                         Process.Start("explorer.exe", "\"" + link.HrefLink + "\"");
-                    }
-                    else {
+                    } else {
                         if (!string.IsNullOrEmpty(link.HrefLink) && File.Exists(link.HrefLink)) {
                             var process = new ProcessStartInfo(link.HrefLink) {UseShellExecute = true};
                             Process.Start(process);
@@ -903,8 +799,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="box">the box that has the hover selector</param>
         /// <param name="block">the css block with the css data with the selector</param>
-        internal void AddHoverBox(CssBox box, CssBlock block)
-        {
+        internal void AddHoverBox(CssBox box, CssBlock block) {
             ArgChecker.AssertArgNotNull(box, "box");
             ArgChecker.AssertArgNotNull(block, "block");
 
@@ -918,11 +813,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         /// <filterpriority>2</filterpriority>
-        public void Dispose()
-        {
+        public void Dispose() {
             Dispose(true);
         }
-
 
         #region Private methods
 
@@ -931,8 +824,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </summary>
         /// <param name="location">the location to adjust</param>
         /// <returns>the adjusted location</returns>
-        private RPoint OffsetByScroll(RPoint location)
-        {
+        private RPoint OffsetByScroll(RPoint location) {
             return new RPoint(location.X - ScrollOffset.X, location.Y - ScrollOffset.Y);
         }
 
@@ -940,20 +832,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Check if the mouse is currently on the html container.<br/>
         /// Relevant if the html container is not filled in the hosted control (location is not zero and the size is not the full size of the control).
         /// </summary>
-        private bool IsMouseInContainer(RPoint location)
-        {
+        private bool IsMouseInContainer(RPoint location) {
             return location.X >= _location.X && location.X <= _location.X + _actualSize.Width && location.Y >= _location.Y + ScrollOffset.Y && location.Y <= _location.Y + ScrollOffset.Y + _actualSize.Height;
         }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        private void Dispose(bool all)
-        {
-            try
-            {
-                if (all)
-                {
+        private void Dispose(bool all) {
+            try {
+                if (all) {
                     LinkClicked = null;
                     Refresh = null;
                     RenderError = null;
@@ -968,9 +856,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
                 if (_selectionHandler != null)
                     _selectionHandler.Dispose();
                 _selectionHandler = null;
-            }
-            catch
-            { }
+            } catch {}
         }
 
         #endregion

@@ -29,12 +29,10 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
-    [ToolboxBitmap(typeof (Button))]
+    [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButton : Button {
-
         #region Properties
 
         /// <summary>
@@ -72,10 +70,11 @@ namespace YamuiFramework.Controls {
         public Image BackGrndImage {
             get { return _backGrndImage; }
             set {
-                _backGrndImage = value; 
+                _backGrndImage = value;
                 Invalidate();
             }
         }
+
         private Image _backGrndImage;
 
         /// <summary>
@@ -145,7 +144,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Category("Yamui")]
         public event EventHandler<EventArgs> ButtonPressed;
-        
+
         #endregion
 
         #region private fields
@@ -172,7 +171,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Methods
-        
+
         protected virtual void OnButtonPressed(EventArgs eventArgs) {
             // we could do something here, like preventing the user to click the button when the OnClick is being ran
             if (ButtonPressed != null) {
@@ -182,7 +181,7 @@ namespace YamuiFramework.Controls {
                     e.Handled = true;
             }
         }
-        
+
         /// <summary>
         /// Programatically triggers the OnKeyDown event
         /// </summary>
@@ -231,7 +230,6 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnPaint(PaintEventArgs e) {
-
             var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
             var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
             var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
@@ -259,10 +257,9 @@ namespace YamuiFramework.Controls {
 
             // text + image
             if (BackGrndImage != null || !SetImgSize.IsEmpty) {
-
                 // ReSharper disable once PossibleNullReferenceException
                 Size imgSize = !SetImgSize.IsEmpty ? SetImgSize : BackGrndImage.Size;
-                float gap = ((float) ClientRectangle.Height - imgSize.Height) / 2;
+                float gap = ((float) ClientRectangle.Height - imgSize.Height)/2;
                 var rectImg = new RectangleF(gap, gap, imgSize.Width, imgSize.Height);
 
                 if (DesignMode || BackGrndImage == null) {
@@ -277,8 +274,7 @@ namespace YamuiFramework.Controls {
 
                 // text
                 int xPos = (int) (gap*2 + 0.5) + imgSize.Width;
-                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos - (int)(gap + 0.5), ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
-
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos - (int) (gap + 0.5), ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
             } else {
                 // text only
                 TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));

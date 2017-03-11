@@ -44,7 +44,6 @@ namespace _3PA {
     /// The entry points for this plugin are the following :<br></br>
     /// - Main (through UnmanagedExports)<br></br>
     /// - OnNppNotification (through UnmanagedExports)<br></br>
-    /// - OnWndProcMessage<br></br>
     /// - OnMouseMessage<br></br>
     /// - OnKeyDown<br></br>
     /// </summary>
@@ -86,7 +85,7 @@ namespace _3PA {
         public static Npp.NppFile PreviousFile {
             get { return _previousFile ?? (_previousFile = new Npp.NppFile()); }
         }
-        
+
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
@@ -95,10 +94,10 @@ namespace _3PA {
         /// <summary>
         /// Allows us to know when a file is opened for the first time (to change encoding for instance)
         /// </summary>
-        private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase); 
+        private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
-        
+
         #region Called with no conditions
 
         #region Start
@@ -206,7 +205,6 @@ namespace _3PA {
                 }
 
                 return true;
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Plugin startup");
             }
@@ -214,7 +212,6 @@ namespace _3PA {
         }
 
         internal static void DoPlugStart() {
-
             if (OnPlugReady != null)
                 OnPlugReady();
 
@@ -290,7 +287,6 @@ namespace _3PA {
                 Appli.ForceClose();
                 UserCommunication.ForceClose();
                 AppliMenu.ForceCloseMenu();
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Stop");
             }
@@ -301,7 +297,6 @@ namespace _3PA {
         #region On mouse message
 
         private static bool MouseMessageHandler(Win32Api.WindowsMessageMouse message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
-
             switch (message) {
                 // middle click : go to definition
                 case Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN:
@@ -313,7 +308,7 @@ namespace _3PA {
                         }
                     }
                     return true;
-                    //break;
+                //break;
                 // (CTRL + ) Right click : show main menu
                 case Win32Api.WindowsMessageMouse.WM_RBUTTONUP:
                     if (KeyboardMonitor.GetModifiers.IsCtrl) {
@@ -350,7 +345,6 @@ namespace _3PA {
             }
 
             return false;
-
         }
 
         #endregion
@@ -378,32 +372,6 @@ namespace _3PA {
                 // Autocompletion 
                 if (AutoCompletion.IsVisible) {
                     handled = AutoCompletion.PerformKeyDown(e);
-                } else {
-                    /*
-                    // snippet ?
-                    if (e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
-                        if (!e.Control && !e.Alt && !e.Shift) {
-                            if (!Snippets.InsertionActive) {
-                                //no snippet insertion in progress
-                                if (e.KeyCode == Keys.Tab) {
-                                    if (Snippets.TriggerCodeSnippetInsertion()) {
-                                        handled = true;
-                                    }
-                                }
-                            } else {
-                                //there is a snippet insertion in progress
-                                if (e.KeyCode == Keys.Tab) {
-                                    if (Snippets.NavigateToNextParam())
-                                        handled = true;
-                                } else if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.Return) {
-                                    Snippets.FinalizeCurrent();
-                                    if (e.KeyCode == Keys.Return)
-                                        handled = true;
-                                }
-                            }
-                        }
-                    }
-                    */
                 }
 
                 // next tooltip
@@ -415,10 +383,10 @@ namespace _3PA {
                     InfoToolTip.TryToShowIndex();
                     handled = true;
                 }
-                                        
+
                 if (handled)
                     return true;
-                
+
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
                 // It only works "almost normally" if we ShowDialog() the form?!
@@ -441,7 +409,6 @@ namespace _3PA {
                 // Close interfacePopups
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp || e.KeyCode == Keys.Next || e.KeyCode == Keys.Prior)
                     ClosePopups();
-
             } catch (Exception ex) {
                 ErrorHandler.ShowErrors(ex, "Occured in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
             }
@@ -453,11 +420,10 @@ namespace _3PA {
         /// Check if the key/keymodifiers correspond to a item in the menu, if yes, returns this item and execute .Do()
         /// </summary>
         private static MenuItem TriggeredMenuItem(List<MenuItem> list, bool isSpamming, KeyEventArgs e, ref bool handled) {
-
             // check if the user triggered a 3P function defined in the AppliMenu
             foreach (var item in list) {
                 // shortcut corresponds to the item?
-                if ((byte)e.KeyCode == item.Shortcut._key &&
+                if ((byte) e.KeyCode == item.Shortcut._key &&
                     e.Control == item.Shortcut.IsCtrl &&
                     e.Shift == item.Shortcut.IsShift &&
                     e.Alt == item.Shortcut.IsAlt &&
@@ -488,7 +454,6 @@ namespace _3PA {
         /// Called when a file is about to be closed in notepad++
         /// </summary>
         private static void OnNppFileBeforeClose() {
-
             // remove the file from the opened files list
             if (_openedFileList.Contains(Npp.CurrentFile.Path)) {
                 _openedFileList.Remove(Npp.CurrentFile.Path);
@@ -502,8 +467,7 @@ namespace _3PA {
         /// <summary>
         /// Called when a new file is opened in notepad++
         /// </summary>
-        private static void OnNppFileOpened() {
-        }
+        private static void OnNppFileOpened() {}
 
         #endregion
 
@@ -514,7 +478,6 @@ namespace _3PA {
         /// no matter if the document is a Progress file or not
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
-
             // update current scintilla
             Npp.UpdateScintilla();
 
@@ -523,7 +486,7 @@ namespace _3PA {
             PreviousFile.IsProgress = Npp.CurrentFile.IsProgress;
             Npp.CurrentFile.Update();
             Npp.CurrentFile.FileInfoObject = FilesInfo.GetFileInfo(Npp.CurrentFile.Path);
-            
+
             // if the file has just been opened
             if (!_openedFileList.Contains(Npp.CurrentFile.Path)) {
                 _openedFileList.Add(Npp.CurrentFile.Path);
@@ -532,7 +495,7 @@ namespace _3PA {
                 if (Config.Instance.AutoSwitchEncodingTo != NppEncodingFormat._Automatic_default && !string.IsNullOrEmpty(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
                     if (Npp.CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
                         NppMenuCmd cmd;
-                        if (Enum.TryParse(((int)Config.Instance.AutoSwitchEncodingTo).ToString(), true, out cmd))
+                        if (Enum.TryParse(((int) Config.Instance.AutoSwitchEncodingTo).ToString(), true, out cmd))
                             Npp.RunCommand(cmd);
                     }
                 }
@@ -551,7 +514,6 @@ namespace _3PA {
         }
 
         public static void DoNppDocumentSwitched(bool initiating = false) {
-
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyOptionsForScintilla();
 
@@ -595,7 +557,6 @@ namespace _3PA {
         /// no matter if the document is a Progress file or not
         /// </summary>
         public static void DoNppDocumentSaved() {
-
             // the user can open a .txt and save it as a .p
             DoNppBufferActivated();
 
@@ -636,13 +597,9 @@ namespace _3PA {
             */
             // we are still entering a keyword
             if (Abl.IsCharAllowedInVariables(c)) {
-                ActionsAfterUpdateUi.Enqueue(() => {
-                    OnCharAddedWordContinue(c);
-                });
+                ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordContinue(c); });
             } else {
-                ActionsAfterUpdateUi.Enqueue(() => {
-                    OnCharAddedWordEnd(c);
-                });
+                ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordEnd(c); });
             }
         }
 
@@ -687,14 +644,13 @@ namespace _3PA {
                         AutoCompletion.UseCurrentSuggestion(-offset);
                     }
                 }
-                
+
                 // replace semicolon by a point
                 if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && Npp.CurrentFile.IsProgress)
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
                 AutoCompletion.UpdateAutocompletion(true);
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
             }
@@ -705,7 +661,6 @@ namespace _3PA {
         #region OnSciUpdateUi
 
         public static void OnSciUpdateUi(SCNotification nc) {
-
             // we need to set the indentation when we received this notification, not before or it's overwritten
             while (ActionsAfterUpdateUi.Any()) {
                 ActionsAfterUpdateUi.Dequeue()();
@@ -729,8 +684,7 @@ namespace _3PA {
             bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
 
             // if the text has changed
-            if (deletedText || (nc.modificationType & (int)SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
-
+            if (deletedText || (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
                 // observe modifications to lines (MANDATORY)
                 Npp.UpdateLinesInfo(nc, !deletedText);
 
@@ -756,7 +710,6 @@ namespace _3PA {
         /// When the user click on the margin
         /// </summary>
         public static void OnSciMarginClick(SCNotification nc) {
-
             if (!Npp.CurrentFile.IsProgress)
                 return;
 
@@ -815,7 +768,6 @@ namespace _3PA {
         /// Called when the user saves the current document (just before it saves itself)
         /// </summary>
         public static void OnNppFileBeforeSaved() {
-
             if (!Npp.CurrentFile.IsProgress)
                 return;
 
@@ -872,7 +824,7 @@ namespace _3PA {
         private static int _tabWidth = -1;
         private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
 
-        private static int[] _initiatedScintilla = {0,0};
+        private static int[] _initiatedScintilla = {0, 0};
         private static bool _hasBeenInit;
 
         /// <summary>
@@ -880,14 +832,13 @@ namespace _3PA {
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         internal static void ApplyOptionsForScintilla() {
-
             // need to do this stuff uniquely for both scintilla
             var curScintilla = Npp.CurrentScintilla; // 0 or 1
             if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
-                Npp.EventMask = (int)(SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);
+                Npp.EventMask = (int) (SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);
                 _initiatedScintilla[curScintilla] = 1;
             }
 
@@ -922,7 +873,6 @@ namespace _3PA {
             Npp.CaretColor = currentStyle.CaretColor.ForeColor;
             Npp.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
             Npp.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
-
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -946,7 +896,6 @@ namespace _3PA {
             Npp.CaretColor = NppConfig.Instance.Stylers.CaretFg;
             Npp.SetFoldMarginColors(true, NppConfig.Instance.Stylers.FoldMarginBg, NppConfig.Instance.Stylers.FoldMarginFg);
             Npp.SetFoldMarginMarkersColor(NppConfig.Instance.Stylers.FoldMarginMarkerFg, NppConfig.Instance.Stylers.FoldMarginMarkerBg, NppConfig.Instance.Stylers.FoldMarginMarkerActiveFg);
-           
         }
 
         #endregion
@@ -962,6 +911,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

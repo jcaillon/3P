@@ -22,7 +22,6 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFtp : YamuiPage {
-
         #region fields
 
         #endregion
@@ -60,8 +59,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region private data management
 
-
         #endregion
     }
-
 }

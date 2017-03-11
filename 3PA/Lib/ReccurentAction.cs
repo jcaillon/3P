@@ -30,7 +30,6 @@ namespace _3PA.Lib {
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
     public class ReccurentAction : IDisposable {
-
         #region private fields
 
         private Timer _timer;
@@ -138,7 +137,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
-
     }
 }

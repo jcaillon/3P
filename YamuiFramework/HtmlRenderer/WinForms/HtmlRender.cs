@@ -23,14 +23,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using YamuiFramework.HtmlRenderer.Core.Core;
-using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 using YamuiFramework.HtmlRenderer.WinForms.Adapters;
 using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms
-{
+namespace YamuiFramework.HtmlRenderer.WinForms {
     /// <summary>
     /// Standalone static class for simple and direct HTML rendering.<br/>
     /// For WinForms UI prefer using HTML controls: <see cref="HtmlPanel"/> or <see cref="HtmlLabel"/>.<br/>
@@ -91,8 +89,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
     /// HtmlRender.RenderToImage(existingImage, "<![CDATA[<div>Hello <b>World</b></div>]]>");<br/>
     /// </para>
     /// </example>
-    public static class HtmlRender
-    {
+    public static class HtmlRender {
         /// <summary>
         /// Adds a font family to be used in html rendering.<br/>
         /// The added font will be used by all rendering function including <see cref="HtmlContainer"/> and all WinForms controls.
@@ -103,8 +100,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// If loaded from file then the file must not be deleted.
         /// </remarks>
         /// <param name="fontFamily">The font family to add.</param>
-        public static void AddFontFamily(FontFamily fontFamily)
-        {
+        public static void AddFontFamily(FontFamily fontFamily) {
             ArgChecker.AssertArgNotNull(fontFamily, "fontFamily");
 
             WinFormsAdapter.Instance.AddFontFamily(new FontFamilyAdapter(fontFamily));
@@ -120,8 +116,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </remarks>
         /// <param name="fromFamily">the font family to replace</param>
         /// <param name="toFamily">the font family to replace with</param>
-        public static void AddFontFamilyMapping(string fromFamily, string toFamily)
-        {
+        public static void AddFontFamilyMapping(string fromFamily, string toFamily) {
             ArgChecker.AssertArgNotNullOrEmpty(fromFamily, "fromFamily");
             ArgChecker.AssertArgNotNullOrEmpty(toFamily, "toFamily");
 
@@ -137,8 +132,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="stylesheet">the stylesheet source to parse</param>
         /// <param name="combineWithDefault">true - combine the parsed css data with default css data, false - return only the parsed css data</param>
         /// <returns>the parsed css data</returns>
-        public static CssData ParseStyleSheet(string stylesheet, bool combineWithDefault = true)
-        {
+        public static CssData ParseStyleSheet(string stylesheet, bool combineWithDefault = true) {
             return CssData.Parse(WinFormsAdapter.Instance, stylesheet, combineWithDefault);
         }
 
@@ -157,8 +151,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the size required for the html</returns>
         public static SizeF Measure(Graphics g, string html, float maxWidth = 0, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return Measure(g, html, maxWidth, cssData, false, stylesheetLoad, imageLoad);
         }
@@ -178,8 +171,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the size required for the html</returns>
         public static SizeF MeasureGdiPlus(Graphics g, string html, float maxWidth = 0, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return Measure(g, html, maxWidth, cssData, true, stylesheetLoad, imageLoad);
         }
@@ -202,8 +194,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
         public static SizeF Render(Graphics g, string html, float left = 0, float top = 0, float maxWidth = 0, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return RenderClip(g, html, new PointF(left, top), new SizeF(maxWidth, 0), cssData, false, stylesheetLoad, imageLoad);
         }
@@ -226,8 +217,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
         public static SizeF Render(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return RenderClip(g, html, location, maxSize, cssData, false, stylesheetLoad, imageLoad);
         }
@@ -250,8 +240,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
         public static SizeF RenderGdiPlus(Graphics g, string html, float left = 0, float top = 0, float maxWidth = 0, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return RenderClip(g, html, new PointF(left, top), new SizeF(maxWidth, 0), cssData, true, stylesheetLoad, imageLoad);
         }
@@ -274,8 +263,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
         public static SizeF RenderGdiPlus(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(g, "g");
             return RenderClip(g, html, location, maxSize, cssData, true, stylesheetLoad, imageLoad);
         }
@@ -295,8 +283,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="stylesheetLoad">optional: can be used to overwrite stylesheet resolution logic</param>
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         public static void RenderToImage(Image image, string html, PointF location = new PointF(), CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(image, "image");
             var maxSize = new SizeF(image.Size.Width - location.X, image.Size.Height - location.Y);
             RenderToImage(image, html, location, maxSize, cssData, stylesheetLoad, imageLoad);
@@ -316,20 +303,16 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="stylesheetLoad">optional: can be used to overwrite stylesheet resolution logic</param>
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         public static void RenderToImage(Image image, string html, PointF location, SizeF maxSize, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             ArgChecker.AssertArgNotNull(image, "image");
 
-            if (!string.IsNullOrEmpty(html))
-            {
+            if (!string.IsNullOrEmpty(html)) {
                 // create memory buffer from desktop handle that supports alpha channel
                 IntPtr dib;
                 var memoryHdc = Win32Utils.CreateMemoryHdc(IntPtr.Zero, image.Width, image.Height, out dib);
-                try
-                {
+                try {
                     // create memory buffer graphics to use for HTML rendering
-                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc))
-                    {
+                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc)) {
                         // draw the image to the memory buffer to be the background of the rendered html
                         memoryGraphics.DrawImageUnscaled(image, 0, 0);
 
@@ -339,9 +322,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
 
                     // copy from memory buffer to image
                     CopyBufferToImage(memoryHdc, image);
-                }
-                finally
-                {
+                } finally {
                     Win32Utils.ReleaseMemoryHdc(memoryHdc, dib);
                 }
             }
@@ -364,24 +345,20 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <returns>the generated image of the html</returns>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="backgroundColor"/> is <see cref="Color.Transparent"/></exception>.
         public static Image RenderToImage(string html, Size size, Color backgroundColor = new Color(), CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             if (backgroundColor == Color.Transparent)
                 throw new ArgumentOutOfRangeException("backgroundColor", "Transparent background in not supported");
 
             // create the final image to render into
             var image = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
 
-            if (!string.IsNullOrEmpty(html))
-            {
+            if (!string.IsNullOrEmpty(html)) {
                 // create memory buffer from desktop handle that supports alpha channel
                 IntPtr dib;
                 var memoryHdc = Win32Utils.CreateMemoryHdc(IntPtr.Zero, image.Width, image.Height, out dib);
-                try
-                {
+                try {
                     // create memory buffer graphics to use for HTML rendering
-                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc))
-                    {
+                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc)) {
                         memoryGraphics.Clear(backgroundColor != Color.Empty ? backgroundColor : Color.White);
 
                         // render HTML into the memory buffer
@@ -390,9 +367,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
 
                     // copy from memory buffer to image
                     CopyBufferToImage(memoryHdc, image);
-                }
-                finally
-                {
+                } finally {
                     Win32Utils.ReleaseMemoryHdc(memoryHdc, dib);
                 }
             }
@@ -421,8 +396,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <returns>the generated image of the html</returns>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="backgroundColor"/> is <see cref="Color.Transparent"/></exception>.
         public static Image RenderToImage(string html, int maxWidth = 0, int maxHeight = 0, Color backgroundColor = new Color(), CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             return RenderToImage(html, Size.Empty, new Size(maxWidth, maxHeight), backgroundColor, cssData, stylesheetLoad, imageLoad);
         }
 
@@ -448,16 +422,14 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <returns>the generated image of the html</returns>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="backgroundColor"/> is <see cref="Color.Transparent"/></exception>.
         public static Image RenderToImage(string html, Size minSize, Size maxSize, Color backgroundColor = new Color(), CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             if (backgroundColor == Color.Transparent)
                 throw new ArgumentOutOfRangeException("backgroundColor", "Transparent background in not supported");
 
             if (string.IsNullOrEmpty(html))
                 return new Bitmap(0, 0, PixelFormat.Format32bppArgb);
 
-            using (var container = new HtmlContainer())
-            {
+            using (var container = new HtmlContainer()) {
                 container.AvoidAsyncImagesLoading = true;
                 container.AvoidImagesLateLoading = true;
 
@@ -476,20 +448,16 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 // create memory buffer from desktop handle that supports alpha channel
                 IntPtr dib;
                 var memoryHdc = Win32Utils.CreateMemoryHdc(IntPtr.Zero, image.Width, image.Height, out dib);
-                try
-                {
+                try {
                     // render HTML into the memory buffer
-                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc))
-                    {
+                    using (var memoryGraphics = Graphics.FromHdc(memoryHdc)) {
                         memoryGraphics.Clear(backgroundColor != Color.Empty ? backgroundColor : Color.White);
                         container.PerformPaint(memoryGraphics);
                     }
 
                     // copy from memory buffer to image
                     CopyBufferToImage(memoryHdc, image);
-                }
-                finally
-                {
+                } finally {
                     Win32Utils.ReleaseMemoryHdc(memoryHdc, dib);
                 }
 
@@ -513,12 +481,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the generated image of the html</returns>
         public static Image RenderToImageGdiPlus(string html, Size size, TextRenderingHint textRenderingHint = TextRenderingHint.AntiAlias, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             var image = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
 
-            using (var g = Graphics.FromImage(image))
-            {
+            using (var g = Graphics.FromImage(image)) {
                 g.TextRenderingHint = textRenderingHint;
                 RenderHtml(g, html, PointF.Empty, size, cssData, true, stylesheetLoad, imageLoad);
             }
@@ -545,8 +511,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the generated image of the html</returns>
         public static Image RenderToImageGdiPlus(string html, int maxWidth = 0, int maxHeight = 0, TextRenderingHint textRenderingHint = TextRenderingHint.AntiAlias, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             return RenderToImageGdiPlus(html, Size.Empty, new Size(maxWidth, maxHeight), textRenderingHint, cssData, stylesheetLoad, imageLoad);
         }
 
@@ -570,13 +535,11 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the generated image of the html</returns>
         public static Image RenderToImageGdiPlus(string html, Size minSize, Size maxSize, TextRenderingHint textRenderingHint = TextRenderingHint.AntiAlias, CssData cssData = null,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad = null, EventHandler<HtmlImageLoadEventArgs> imageLoad = null) {
             if (string.IsNullOrEmpty(html))
                 return new Bitmap(0, 0, PixelFormat.Format32bppArgb);
 
-            using (var container = new HtmlContainer())
-            {
+            using (var container = new HtmlContainer()) {
                 container.AvoidAsyncImagesLoading = true;
                 container.AvoidImagesLateLoading = true;
                 container.UseGdiPlusTextRendering = true;
@@ -594,8 +557,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 var image = new Bitmap(finalSize.Width, finalSize.Height, PixelFormat.Format32bppArgb);
 
                 // render HTML into the image
-                using (var g = Graphics.FromImage(image))
-                {
+                using (var g = Graphics.FromImage(image)) {
                     g.TextRenderingHint = textRenderingHint;
                     container.PerformPaint(g);
                 }
@@ -603,7 +565,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 return image;
             }
         }
-
 
         #region Private methods
 
@@ -619,13 +580,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the size required for the html</returns>
         private static SizeF Measure(Graphics g, string html, float maxWidth, CssData cssData, bool useGdiPlusTextRendering,
-            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad)
-        {
+            EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad) {
             SizeF actualSize = SizeF.Empty;
-            if (!string.IsNullOrEmpty(html))
-            {
-                using (var container = new HtmlContainer())
-                {
+            if (!string.IsNullOrEmpty(html)) {
+                using (var container = new HtmlContainer()) {
                     container.MaxSize = new SizeF(maxWidth, 0);
                     container.AvoidAsyncImagesLoading = true;
                     container.AvoidImagesLateLoading = true;
@@ -652,12 +610,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="minSize">the minimal size of the rendered html (zero - not limit the width/height)</param>
         /// <param name="maxSize">the maximum size of the rendered html, if not zero and html cannot be layout within the limit it will be clipped (zero - not limit the width/height)</param>
         /// <returns>return: the size of the html to be rendered within the min/max limits</returns>
-        private static Size MeasureHtmlByRestrictions(HtmlContainer htmlContainer, Size minSize, Size maxSize)
-        {
+        private static Size MeasureHtmlByRestrictions(HtmlContainer htmlContainer, Size minSize, Size maxSize) {
             // use desktop created graphics to measure the HTML
             using (var g = Graphics.FromHwnd(IntPtr.Zero))
-            using (var mg = new GraphicsAdapter(g, htmlContainer.UseGdiPlusTextRendering))
-            {
+            using (var mg = new GraphicsAdapter(g, htmlContainer.UseGdiPlusTextRendering)) {
                 var sizeInt = HtmlRendererUtils.MeasureHtmlByRestrictions(mg, htmlContainer.HtmlContainerInt, Utils.Convert(minSize), Utils.Convert(maxSize));
                 return Utils.ConvertRound(sizeInt);
             }
@@ -681,19 +637,16 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="stylesheetLoad">optional: can be used to overwrite stylesheet resolution logic</param>
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
-        private static SizeF RenderClip(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData, bool useGdiPlusTextRendering, EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad)
-        {
+        private static SizeF RenderClip(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData, bool useGdiPlusTextRendering, EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad) {
             Region prevClip = null;
-            if (maxSize.Height > 0)
-            {
+            if (maxSize.Height > 0) {
                 prevClip = g.Clip;
                 g.SetClip(new RectangleF(location, maxSize));
             }
 
             var actualSize = RenderHtml(g, html, location, maxSize, cssData, useGdiPlusTextRendering, stylesheetLoad, imageLoad);
 
-            if (prevClip != null)
-            {
+            if (prevClip != null) {
                 g.SetClip(prevClip, CombineMode.Replace);
             }
 
@@ -717,14 +670,11 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <param name="stylesheetLoad">optional: can be used to overwrite stylesheet resolution logic</param>
         /// <param name="imageLoad">optional: can be used to overwrite image resolution logic</param>
         /// <returns>the actual size of the rendered html</returns>
-        private static SizeF RenderHtml(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData, bool useGdiPlusTextRendering, EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad)
-        {
+        private static SizeF RenderHtml(Graphics g, string html, PointF location, SizeF maxSize, CssData cssData, bool useGdiPlusTextRendering, EventHandler<HtmlStylesheetLoadEventArgs> stylesheetLoad, EventHandler<HtmlImageLoadEventArgs> imageLoad) {
             SizeF actualSize = SizeF.Empty;
 
-            if (!string.IsNullOrEmpty(html))
-            {
-                using (var container = new HtmlContainer())
-                {
+            if (!string.IsNullOrEmpty(html)) {
+                using (var container = new HtmlContainer()) {
                     container.Location = location;
                     container.MaxSize = maxSize;
                     container.AvoidAsyncImagesLoading = true;
@@ -753,10 +703,8 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="memoryHdc">the source memory bitmap buffer to copy from</param>
         /// <param name="image">the destination bitmap image to copy to</param>
-        private static void CopyBufferToImage(IntPtr memoryHdc, Image image)
-        {
-            using (var imageGraphics = Graphics.FromImage(image))
-            {
+        private static void CopyBufferToImage(IntPtr memoryHdc, Image image) {
+            using (var imageGraphics = Graphics.FromImage(image)) {
                 var imgHdc = imageGraphics.GetHdc();
                 Win32Utils.BitBlt(imgHdc, 0, 0, image.Width, image.Height, memoryHdc, 0, 0, Win32Utils.BitBltCopy);
                 imageGraphics.ReleaseHdc(imgHdc);

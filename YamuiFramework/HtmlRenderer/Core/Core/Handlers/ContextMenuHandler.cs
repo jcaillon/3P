@@ -25,13 +25,11 @@ using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers {
     /// <summary>
     /// Handle context menu.
     /// </summary>
-    internal sealed class ContextMenuHandler : IDisposable
-    {
+    internal sealed class ContextMenuHandler : IDisposable {
         #region Fields and Consts
 
         /// <summary>
@@ -111,14 +109,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
 
         #endregion
 
-
         /// <summary>
         /// Init context menu items strings.
         /// </summary>
-        static ContextMenuHandler()
-        {
-            if (CultureInfo.CurrentUICulture.Name.StartsWith("fr", StringComparison.InvariantCultureIgnoreCase))
-            {
+        static ContextMenuHandler() {
+            if (CultureInfo.CurrentUICulture.Name.StartsWith("fr", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Tout sélectionner";
                 _copy = "Copier";
                 _copyLink = "Copier l'adresse du lien";
@@ -128,9 +123,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Enregistrer l'image sous...";
                 _openVideo = "Ouvrir la vidéo";
                 _copyVideoUrl = "Copier l'URL de l'vidéo";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("de", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("de", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Alle auswählen";
                 _copy = "Kopieren";
                 _copyLink = "Link-Adresse kopieren";
@@ -140,9 +133,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Bild speichern unter...";
                 _openVideo = "Video öffnen";
                 _copyVideoUrl = "Video-URL kopieren";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("it", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("it", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Seleziona tutto";
                 _copy = "Copia";
                 _copyLink = "Copia indirizzo del link";
@@ -152,9 +143,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Salva immagine con nome...";
                 _openVideo = "Apri il video";
                 _copyVideoUrl = "Copia URL video";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("es", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("es", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Seleccionar todo";
                 _copy = "Copiar";
                 _copyLink = "Copiar dirección de enlace";
@@ -164,9 +153,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Guardar imagen como...";
                 _openVideo = "Abrir video";
                 _copyVideoUrl = "Copiar URL de la video";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("ru", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("ru", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Выбрать все";
                 _copy = "Копировать";
                 _copyLink = "Копировать адрес ссылки";
@@ -176,9 +163,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Сохранить изображение как...";
                 _openVideo = "Открыть видео";
                 _copyVideoUrl = "Копировать адрес видео";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("sv", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("sv", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Välj allt";
                 _copy = "Kopiera";
                 _copyLink = "Kopiera länkadress";
@@ -188,9 +173,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Spara bild som...";
                 _openVideo = "Öppna video";
                 _copyVideoUrl = "Kopiera video URL";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("hu", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("hu", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Összes kiválasztása";
                 _copy = "Másolás";
                 _copyLink = "Hivatkozás címének másolása";
@@ -200,9 +183,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Kép mentése másként...";
                 _openVideo = "Videó megnyitása";
                 _copyVideoUrl = "Videó URL másolása";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("cs", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("cs", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Vybrat vše";
                 _copy = "Kopírovat";
                 _copyLink = "Kopírovat adresu odkazu";
@@ -212,9 +193,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Uložit snímek jako...";
                 _openVideo = "Otevřít video";
                 _copyVideoUrl = "Kopírovat URL video";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("da", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("da", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Vælg alt";
                 _copy = "Kopiér";
                 _copyLink = "Kopier link-adresse";
@@ -224,9 +203,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Gem billede som...";
                 _openVideo = "Åbn video";
                 _copyVideoUrl = "Kopier video-URL";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("nl", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("nl", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Alles selecteren";
                 _copy = "Kopiëren";
                 _copyLink = "Link adres kopiëren";
@@ -236,9 +213,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Bewaar afbeelding als...";
                 _openVideo = "Video openen";
                 _copyVideoUrl = "URL video kopiëren";
-            }
-            else if (CultureInfo.CurrentUICulture.Name.StartsWith("fi", StringComparison.InvariantCultureIgnoreCase))
-            {
+            } else if (CultureInfo.CurrentUICulture.Name.StartsWith("fi", StringComparison.InvariantCultureIgnoreCase)) {
                 _selectAll = "Valitse kaikki";
                 _copy = "Kopioi";
                 _copyLink = "Kopioi linkin osoite";
@@ -248,9 +223,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _saveImage = "Tallena kuva nimellä...";
                 _openVideo = "Avaa video";
                 _copyVideoUrl = "Kopioi video URL";
-            }
-            else
-            {
+            } else {
                 _selectAll = "Select all";
                 _copy = "Copy";
                 _copyLink = "Copy link address";
@@ -268,8 +241,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="selectionHandler">the selection handler linked to the context menu handler</param>
         /// <param name="htmlContainer">the html container the handler is on</param>
-        public ContextMenuHandler(SelectionHandler selectionHandler, HtmlContainerInt htmlContainer)
-        {
+        public ContextMenuHandler(SelectionHandler selectionHandler, HtmlContainerInt htmlContainer) {
             ArgChecker.AssertArgNotNull(selectionHandler, "selectionHandler");
             ArgChecker.AssertArgNotNull(htmlContainer, "htmlContainer");
 
@@ -283,10 +255,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="parent">the parent control to show the context menu on</param>
         /// <param name="rect">the rectangle that was clicked to show context menu</param>
         /// <param name="link">the link that was clicked to show context menu on</param>
-        public void ShowContextMenu(RControl parent, CssRect rect, CssBox link)
-        {
-            try
-            {
+        public void ShowContextMenu(RControl parent, CssRect rect, CssBox link) {
+            try {
                 DisposeContextMenu();
 
                 _parentControl = parent;
@@ -294,51 +264,41 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                 _currentLink = link;
                 _contextMenu = _htmlContainer.Adapter.GetContextMenu();
 
-                if (rect != null)
-                {
+                if (rect != null) {
                     bool isVideo = false;
-                    if (link != null)
-                    {
-                        isVideo = link is CssBoxFrame && ((CssBoxFrame)link).IsVideo;
+                    if (link != null) {
+                        isVideo = link is CssBoxFrame && ((CssBoxFrame) link).IsVideo;
                         var linkExist = !string.IsNullOrEmpty(link.HrefLink);
                         _contextMenu.AddItem(isVideo ? _openVideo : _openLink, linkExist, OnOpenLinkClick);
-                        if (_htmlContainer.IsSelectionEnabled)
-                        {
+                        if (_htmlContainer.IsSelectionEnabled) {
                             _contextMenu.AddItem(isVideo ? _copyVideoUrl : _copyLink, linkExist, OnCopyLinkClick);
                         }
                         _contextMenu.AddDivider();
                     }
 
-                    if (rect.IsImage && !isVideo)
-                    {
+                    if (rect.IsImage && !isVideo) {
                         _contextMenu.AddItem(_saveImage, rect.Image != null, OnSaveImageClick);
-                        if (_htmlContainer.IsSelectionEnabled)
-                        {
+                        if (_htmlContainer.IsSelectionEnabled) {
                             _contextMenu.AddItem(_copyImageLink, !string.IsNullOrEmpty(_currentRect.OwnerBox.GetAttribute("src")), OnCopyImageLinkClick);
                             _contextMenu.AddItem(_copyImage, rect.Image != null, OnCopyImageClick);
                         }
                         _contextMenu.AddDivider();
                     }
 
-                    if (_htmlContainer.IsSelectionEnabled)
-                    {
+                    if (_htmlContainer.IsSelectionEnabled) {
                         _contextMenu.AddItem(_copy, rect.Selected, OnCopyClick);
                     }
                 }
 
-                if (_htmlContainer.IsSelectionEnabled)
-                {
+                if (_htmlContainer.IsSelectionEnabled) {
                     _contextMenu.AddItem(_selectAll, true, OnSelectAllClick);
                 }
 
-                if (_contextMenu.ItemsCount > 0)
-                {
+                if (_contextMenu.ItemsCount > 0) {
                     _contextMenu.RemoveLastDivider();
                     _contextMenu.Show(parent, parent.MouseLocation);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to show context menu", ex);
             }
         }
@@ -347,51 +307,37 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         /// <filterpriority>2</filterpriority>
-        public void Dispose()
-        {
+        public void Dispose() {
             DisposeContextMenu();
         }
-
 
         #region Private methods
 
         /// <summary>
         /// Dispose of the last used context menu.
         /// </summary>
-        private void DisposeContextMenu()
-        {
-            try
-            {
+        private void DisposeContextMenu() {
+            try {
                 if (_contextMenu != null)
                     _contextMenu.Dispose();
                 _contextMenu = null;
                 _parentControl = null;
                 _currentRect = null;
                 _currentLink = null;
-            }
-            catch
-            { }
+            } catch {}
         }
 
         /// <summary>
         /// Handle link click.
         /// </summary>
-        private void OnOpenLinkClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnOpenLinkClick(object sender, EventArgs eventArgs) {
+            try {
                 _currentLink.HtmlContainer.HandleLinkClicked(_parentControl, _parentControl.MouseLocation, _currentLink);
-            }
-            catch (HtmlLinkClickedException)
-            {
+            } catch (HtmlLinkClickedException) {
                 throw;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to open link", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -399,18 +345,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Copy the href of a link to clipboard.
         /// </summary>
-        private void OnCopyLinkClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnCopyLinkClick(object sender, EventArgs eventArgs) {
+            try {
                 _htmlContainer.Adapter.SetToClipboard(_currentLink.HrefLink);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to copy link url to clipboard", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -418,19 +358,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Open save as dialog to save the image
         /// </summary>
-        private void OnSaveImageClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnSaveImageClick(object sender, EventArgs eventArgs) {
+            try {
                 var imageSrc = _currentRect.OwnerBox.GetAttribute("src");
                 _htmlContainer.Adapter.SaveToFile(_currentRect.Image, Path.GetFileName(imageSrc) ?? "image", Path.GetExtension(imageSrc) ?? "png");
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to save image", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -438,18 +372,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Copy the image source to clipboard.
         /// </summary>
-        private void OnCopyImageLinkClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnCopyImageLinkClick(object sender, EventArgs eventArgs) {
+            try {
                 _htmlContainer.Adapter.SetToClipboard(_currentRect.OwnerBox.GetAttribute("src"));
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to copy image url to clipboard", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -457,18 +385,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Copy image object to clipboard.
         /// </summary>
-        private void OnCopyImageClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnCopyImageClick(object sender, EventArgs eventArgs) {
+            try {
                 _htmlContainer.Adapter.SetToClipboard(_currentRect.Image);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to copy image to clipboard", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -476,18 +398,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Copy selected text.
         /// </summary>
-        private void OnCopyClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnCopyClick(object sender, EventArgs eventArgs) {
+            try {
                 _selectionHandler.CopySelectedHtml();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to copy text to clipboard", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }
@@ -495,18 +411,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Select all text.
         /// </summary>
-        private void OnSelectAllClick(object sender, EventArgs eventArgs)
-        {
-            try
-            {
+        private void OnSelectAllClick(object sender, EventArgs eventArgs) {
+            try {
                 _selectionHandler.SelectAll(_parentControl);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.ContextMenu, "Failed to select all text", ex);
-            }
-            finally
-            {
+            } finally {
                 DisposeContextMenu();
             }
         }

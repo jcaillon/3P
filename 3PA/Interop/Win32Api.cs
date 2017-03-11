@@ -27,11 +27,9 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace _3PA.Interop {
-
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class Win32Api {
-
         #region SendMessage
 
         /// <summary>
@@ -59,53 +57,54 @@ namespace _3PA.Interop {
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
 
         public static IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam) {
-            return SendMessage(hWnd, (uint)msg, wParam, lParam);
+            return SendMessage(hWnd, (uint) msg, wParam, lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr((uint) lParam));
-        }        
-        
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), new IntPtr((uint) lParam));
+        }
+
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr(lParam));
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam.ToPointer());
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), lParam.ToPointer());
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out long lParam) {
             IntPtr outVal;
-            IntPtr retval = SendMessage(hWnd, (uint)msg, new IntPtr(wParam), out outVal);
+            IntPtr retval = SendMessage(hWnd, (uint) msg, new IntPtr(wParam), out outVal);
             lParam = outVal.ToInt64();
             return retval;
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam) {
-            return SendMessage(hWnd, (uint)msg, wParam, new IntPtr(lParam));
+            return SendMessage(hWnd, (uint) msg, wParam, new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, StringBuilder lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), lParam);
         }
+
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, string lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, string lParam) {
-            return SendMessage(hWnd, (uint)msg, wParam, lParam);
+            return SendMessage(hWnd, (uint) msg, wParam, lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, string lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), lParam);
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), lParam);
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, int lParam) {
-            return SendMessage(hWnd, (uint)msg, new IntPtr(wParam), new IntPtr(lParam));
+            return SendMessage(hWnd, (uint) msg, new IntPtr(wParam), new IntPtr(lParam));
         }
 
         public static IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam) {
@@ -137,7 +136,7 @@ namespace _3PA.Interop {
                 focusedControl = Control.FromHandle(focusedHandle);
             }
             return focusedControl;
-        } 
+        }
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -251,6 +250,7 @@ namespace _3PA.Interop {
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
         public const int DwmwaTransitionsForcedisabled = 3;
+
         #endregion
 
         #region SetHook
@@ -292,6 +292,7 @@ namespace _3PA.Interop {
             public int cxRightWidth;
             public int cyTopHeight;
             public int cyBottomHeight;
+
             public MARGINS(int Left, int Right, int Top, int Bottom) {
                 cxLeftWidth = Left;
                 cxRightWidth = Right;
@@ -315,7 +316,10 @@ namespace _3PA.Interop {
             public int x;
             public int y;
 
-            public POINT(int x, int y) { this.x = x; this.y = y; }
+            public POINT(int x, int y) {
+                this.x = x;
+                this.y = y;
+            }
         }
 
         #endregion
@@ -451,7 +455,6 @@ namespace _3PA.Interop {
             WM_GETDLGCODE = 0x0087,
             WM_SYNCPAINT = 0x0088,
 
-
             WM_NCMOUSEMOVE = 0x00A0,
             WM_NCLBUTTONDOWN = 0x00A1,
             WM_NCLBUTTONUP = 0x00A2,
@@ -556,7 +559,6 @@ namespace _3PA.Interop {
             WM_MDICASCADE = 0x0227,
             WM_MDIICONARRANGE = 0x0228,
             WM_MDIGETACTIVE = 0x0229,
-
 
             WM_MDISETMENU = 0x0230,
             WM_ENTERSIZEMOVE = 0x0231,
@@ -750,25 +752,25 @@ namespace _3PA.Interop {
             private bool _disposed;
 
             public ClikeStringArray(int num, int stringCapacity) {
-                _nativeArray = Marshal.AllocHGlobal((num + 1) * IntPtr.Size);
+                _nativeArray = Marshal.AllocHGlobal((num + 1)*IntPtr.Size);
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < num; i++) {
                     IntPtr item = Marshal.AllocHGlobal(stringCapacity);
-                    Marshal.WriteIntPtr((IntPtr)((int)_nativeArray + (i * IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i*IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr)((int)_nativeArray + (num * IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (num*IntPtr.Size)), IntPtr.Zero);
             }
 
             public ClikeStringArray(List<string> lstStrings) {
-                _nativeArray = Marshal.AllocHGlobal((lstStrings.Count + 1) * IntPtr.Size);
+                _nativeArray = Marshal.AllocHGlobal((lstStrings.Count + 1)*IntPtr.Size);
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < lstStrings.Count; i++) {
                     IntPtr item = Marshal.StringToHGlobalUni(lstStrings[i]);
-                    Marshal.WriteIntPtr((IntPtr)((int)_nativeArray + (i * IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i*IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr)((int)_nativeArray + (lstStrings.Count * IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (lstStrings.Count*IntPtr.Size)), IntPtr.Zero);
             }
 
             public IntPtr NativePointer {
@@ -811,8 +813,5 @@ namespace _3PA.Interop {
         }
 
         #endregion
-
     }
-
-
 }

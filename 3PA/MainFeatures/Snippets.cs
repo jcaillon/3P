@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
 using _3PA.Interop;
@@ -28,7 +27,6 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures {
-
     internal class SnippetContext {
         public static int IndicatorId = 8;
         public List<List<Point>> ParametersGroups = new List<List<Point>>();
@@ -39,16 +37,15 @@ namespace _3PA.MainFeatures {
     }
 
     internal static class Snippets {
-
         public static SnippetContext LocSnippetContext;
         static public Dictionary<string, string> Map = new Dictionary<string, string>();
 
-        static public bool InsertionActive { get { return LocSnippetContext != null; } }
+        static public bool InsertionActive {
+            get { return LocSnippetContext != null; }
+        }
 
         static public IEnumerable<string> Keys {
-            get {
-                return Map.Keys;
-            }
+            get { return Map.Keys; }
         }
 
         public static bool Contains(string snippetTag) {
@@ -57,7 +54,7 @@ namespace _3PA.MainFeatures {
             }
         }
 
-        public static void Init() { }
+        public static void Init() {}
 
         public static string GetTemplate(string snippetTag) {
             lock (Map) {
@@ -66,8 +63,6 @@ namespace _3PA.MainFeatures {
                 return null;
             }
         }
-
-        
 
         static void Read(string file) {
             //Debug.Assert(false);
@@ -86,23 +81,20 @@ namespace _3PA.MainFeatures {
                 } else
                     buffer.AppendLine(line);
             },
-            Encoding.Default);
+                Encoding.Default);
 
             if (currentTag != "")
                 Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));
         }
 
         public static bool TriggerCodeSnippetInsertion() {
-
             if (InsertionActive) return false; // do no insert a snippet within a snippet!
 
-            
             string token = Npp.GetKeyword(Npp.CurrentPosition);
             var curPos = Npp.CurrentPosition;
             Point tokenPoints = new Point(curPos - token.Length, curPos);
 
             if (Contains(token)) {
-
                 string replacement = GetTemplate(token);
 
                 if (replacement != null) {
@@ -165,7 +157,6 @@ namespace _3PA.MainFeatures {
                 Npp.SetSelection(currentParam.X, currentParam.X);
                 string currentParamDetectedText = Npp.GetAblWordAtPosition(Npp.CurrentPosition);
 
-
                 if (currentParamOriginalText != currentParamDetectedText) {
                     //current parameter is modified, indicator is destroyed so restore the indicator first
                     indic.Add(currentParam.X, currentParam.X + currentParamDetectedText.Length);
@@ -185,7 +176,7 @@ namespace _3PA.MainFeatures {
 
                     foreach (var param in paramsToUpdate) {
                         ReplaceTextAtIndicator(currentParamDetectedText, indicators[param.Index]);
-                        indicators = indic.FindRanges().ToArray();//needs refreshing as the document is modified
+                        indicators = indic.FindRanges().ToArray(); //needs refreshing as the document is modified
                     }
                 }
 
@@ -240,7 +231,6 @@ namespace _3PA.MainFeatures {
         }
 
         public static void PrepareForIncertion(string rawText, int charsOffset, int documentOffset = 0) {
-            
             LocSnippetContext = new SnippetContext();
 
             LocSnippetContext.ReplacementString = rawText;
@@ -277,12 +267,10 @@ namespace _3PA.MainFeatures {
 
             if (LocSnippetContext.Parameters.Any())
                 LocSnippetContext.CurrentParameter = LocSnippetContext.Parameters.FirstOrDefault();
-
         }
 
         static public void EditSnippetsConfig() {
             Npp.OpenFile(Config.FileSnippets);
         }
-
     }
 }

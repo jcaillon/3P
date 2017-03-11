@@ -32,12 +32,10 @@ using _3PA.Images;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
-
     /// <summary>
     /// This page is built programatically
     /// </summary>
     internal partial class ExportPage : YamuiPage {
-
         #region fields
 
         private bool _isCheckingDistant;
@@ -45,6 +43,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         #region constructor
+
         public ExportPage() {
             InitializeComponent();
 
@@ -81,7 +80,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             var iNbLine = 0;
             var yPos = btRefresh.Location.Y + 35;
             foreach (var confLine in ShareExportConf.List) {
-
                 var xPos = btDownloadAll.Location.X - 25;
 
                 // label
@@ -314,7 +312,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         private void OpenFileOnButtonPressed(object sender, EventArgs eventArgs) {
-            var conf = (ConfLine)((YamuiButtonImage)sender).Tag;
+            var conf = (ConfLine) ((YamuiButtonImage) sender).Tag;
             var pathToOpen = ((YamuiButtonImage) sender).Name.StartsWith("bto_") ? conf.LocalPath : conf.DistantPath;
             if (conf.IsDir)
                 Utils.OpenFolder(pathToOpen);
@@ -322,11 +320,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Npp.OpenFile(pathToOpen);
         }
 
-
         private void OpenFileOnMouseDown(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Right) {
-                var conf = (ConfLine)((YamuiButtonImage)sender).Tag;
-                var pathToOpen = ((YamuiButtonImage)sender).Name.StartsWith("bto_") ? conf.LocalPath : conf.DistantPath;
+                var conf = (ConfLine) ((YamuiButtonImage) sender).Tag;
+                var pathToOpen = ((YamuiButtonImage) sender).Name.StartsWith("bto_") ? conf.LocalPath : conf.DistantPath;
                 if (conf.IsDir)
                     Utils.OpenFolder(pathToOpen);
                 else
@@ -350,8 +347,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         private void ToggleControlOnCheckedChanged(object sender, EventArgs eventArgs) {
-            var cb = (YamuiCheckBox)sender;
-            var confLine = (ConfLine)cb.Tag;
+            var cb = (YamuiCheckBox) sender;
+            var confLine = (ConfLine) cb.Tag;
             var list = Config.Instance.AutoUpdateConfList.Split(',').ToList();
             if (cb.Checked) {
                 list.Add(confLine.Label);
@@ -361,7 +358,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
             Config.Instance.AutoUpdateConfList = string.Join(",", list);
         }
-
 
         private void BtRefreshOnButtonPressed(object sender, EventArgs eventArgs) {
             RefreshList();
@@ -374,14 +370,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             List<YamuiMenuItem> itemList = new List<YamuiMenuItem>();
             foreach (var path in Config.Instance.SharedConfHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
-                    itemList.Add(new YamuiMenuItem {ItemImage = ImageResources.FolderType, DisplayText = path, OnClic = (item) => {
-                        if (IsHandleCreated) {
-                            BeginInvoke((Action) delegate {
-                                fl_directory.Text = path;
-                                RefreshList();
-                            });
+                    itemList.Add(new YamuiMenuItem {
+                        ItemImage = ImageResources.FolderType, DisplayText = path, OnClic = item => {
+                            if (IsHandleCreated) {
+                                BeginInvoke((Action) delegate {
+                                    fl_directory.Text = path;
+                                    RefreshList();
+                                });
+                            }
                         }
-                    }});
+                    });
                 }
             }
             if (itemList.Count > 0) {
@@ -422,7 +420,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     // invoke on ui thread
                     if (IsHandleCreated) {
                         BeginInvoke((Action) delegate {
-
                             // we save the directory in the historic
                             if (sharedDirOk) {
                                 var list = Config.Instance.SharedConfHistoric.Split(',').ToList();
@@ -439,7 +436,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                             var iNbLine = 0;
 
                             foreach (var confLine in ShareExportConf.List) {
-
                                 // open
                                 ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
 
@@ -481,7 +477,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                                 iNbLine++;
                             }
 
-
                             // download all button
                             if (nbMaj > 0)
                                 btDownloadAll.Show();
@@ -489,7 +484,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                                 btDownloadAll.Hide();
                         });
                     }
-
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while fetching distant files");
                 }
@@ -506,8 +500,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         #endregion
-
     }
-
-
 }

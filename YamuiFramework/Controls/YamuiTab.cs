@@ -29,12 +29,10 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     /// <summary>
     /// Basically, this class is a better tabControl, documentation to be done later 
     /// </summary>
     public sealed class YamuiTab : UserControl {
-
         #region Fields
 
         public bool GoBackButtonHasTabStop = false;
@@ -43,6 +41,7 @@ namespace YamuiFramework.Controls {
         /// Content of the form, the page displayed in it
         /// </summary>
         private List<YamuiMainMenu> _content;
+
         private bool _showingHidden;
         private Point _currentPoint = new Point(0, 0);
         private YamuiPage _currentPage;
@@ -80,17 +79,16 @@ namespace YamuiFramework.Controls {
 
         public void Init() {
             // draw the go back button
-            _goBackButton = new YamuiButtonChar() {
+            _goBackButton = new YamuiButtonChar {
                 IconFontName = YamuiButtonChar.IconFontNameEnum.Wingdings,
                 ButtonChar = "ç",
                 FakeDisabled = true,
                 Size = new Size(27, 27),
-                TabStop = false,
+                TabStop = false
             };
             _goBackButton.ButtonPressed += GoBackButtonOnButtonPressed;
             Controls.Add(_goBackButton);
             _goBackButton.Location = new Point(0, 6);
-
 
             // draw the menus
             _mainButtons = new YamuiTabButtons(CurrentMainMenuList, 0) {
@@ -201,7 +199,7 @@ namespace YamuiFramework.Controls {
                 }
             }
         }
-        
+
         private void MainButtonsOnTabPressed(object sender, TabPressedEventArgs tabPressedEventArgs) {
             var wantedIndex = tabPressedEventArgs.SelectedIndex;
             if (wantedIndex == CurrentMainMenuIndex)
@@ -285,13 +283,12 @@ namespace YamuiFramework.Controls {
             if (_animSmokeScreen == null) {
                 _animSmokeScreen = new YamuiTabAnimation(_owner, new Rectangle(Left + Padding.Left, Top + Padding.Top, Width - Padding.Left - Padding.Right, Height - Padding.Top - Padding.Bottom)) {Opacity = 0d};
                 return false;
-            } else {
-                _animSmokeScreen.Refresh();
             }
+            _animSmokeScreen.Refresh();
 
             // show the background image or not
             var firstScrollPage = Utilities.GetFirst(_currentPage, typeof(YamuiScrollPanel));
-            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPanel)firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
+            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPanel) firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
 
             _animSmokeScreen.GoHide = false;
 
@@ -310,7 +307,7 @@ namespace YamuiFramework.Controls {
 
         #region Paint
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
@@ -321,7 +318,6 @@ namespace YamuiFramework.Controls {
         #region YamuiTabAnimation
 
         internal class YamuiTabAnimation : YamuiSmokeScreen {
-
             #region fields
 
             /// <summary>
@@ -360,11 +356,9 @@ namespace YamuiFramework.Controls {
             }
 
             #endregion
-
         }
 
         #endregion
-
     }
 
     #region Menu specs

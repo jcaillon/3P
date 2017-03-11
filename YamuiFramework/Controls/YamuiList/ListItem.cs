@@ -28,7 +28,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// Describes a basic item of a scroll list
     /// </summary>
     public class ListItem {
-
         #region private
 
         #endregion
@@ -51,7 +50,6 @@ namespace YamuiFramework.Controls.YamuiList {
         public virtual bool IsSeparator { get; set; }
 
         #endregion
-
     }
 
     #endregion
@@ -63,7 +61,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// the method FilterApply allows to compute the attributes
     /// </summary>
     public class FilteredListItem : ListItem {
-
         #region Constructor
 
         public FilteredListItem() {
@@ -98,7 +95,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         /// <remarks>Internal use only!</remarks>
         public void InternalFilterApply(string lowerCaseFilterString) {
-
             InternalFilterMatchedRanges = new List<CharacterRange>();
             InternalFilterFullyMatch = true;
             InternalFilterDispertionLevel = 0;
@@ -106,13 +102,13 @@ namespace YamuiFramework.Controls.YamuiList {
             // not filtering, everything should be included
             if (string.IsNullOrEmpty(lowerCaseFilterString))
                 return;
-            
+
             // exclude the separator items and empty text from a match when searching
             if (IsSeparator || string.IsNullOrEmpty(DisplayText)) {
                 InternalFilterFullyMatch = false;
                 return;
             }
-            
+
             var lcText = DisplayText.ToLower();
             var textLenght = lcText.Length;
             var filterLenght = lowerCaseFilterString.Length;
@@ -167,7 +163,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-
     }
 
     #endregion
@@ -179,7 +174,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// be used to quickly filter the items through a set of "type" buttons
     /// </summary>
     public class FilteredTypeListItem : FilteredListItem {
-
         #region Virtual properties
 
         /// <summary>
@@ -224,7 +218,6 @@ namespace YamuiFramework.Controls.YamuiList {
         public virtual List<Image> TagImages { get; set; }
 
         #endregion
-
     }
 
     #endregion
@@ -235,7 +228,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// Each item is now view as a node of the tree, allows to view the list as a tree
     /// </summary>
     public class FilteredTypeTreeListItem : FilteredTypeListItem {
-
         #region constant
 
         // used for the PathDescriptor property
@@ -358,10 +350,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public int Level { get; private set; }
 
         #endregion
-
-
     }
 
     #endregion
-
 }

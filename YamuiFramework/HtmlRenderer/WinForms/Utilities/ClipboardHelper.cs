@@ -21,8 +21,7 @@ using System;
 using System.Text;
 using System.Windows.Forms;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Utilities {
     /// <summary>
     /// Helper to encode and set HTML fragment to clipboard.<br/>
     /// See http://theartofdev.wordpress.com/2012/11/11/setting-html-and-plain-text-formatting-to-clipboard/.<br/>
@@ -31,8 +30,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Utilities
     /// <remarks>
     /// The MIT License (MIT) Copyright (c) 2014 Arthur Teplitzki.
     /// </remarks>
-    internal static class ClipboardHelper
-    {
+    internal static class ClipboardHelper {
         #region Fields and Consts
 
         /// <summary>
@@ -65,7 +63,6 @@ EndSelection:<<<<<<<<4";
         private static readonly char[] _byteCount = new char[1];
 
         #endregion
-
 
         /// <summary>
         /// Create <see cref="DataObject"/> with given html and plain-text ready to be used for clipboard or drag and drop.<br/>
@@ -103,11 +100,10 @@ EndSelection:<<<<<<<<4";
         /// </remarks>
         /// <param name="html">a html fragment</param>
         /// <param name="plainText">the plain text</param>
-        public static DataObject CreateDataObject(string html, string plainText)
-        {
+        public static DataObject CreateDataObject(string html, string plainText) {
             html = html ?? String.Empty;
             var htmlFragment = GetHtmlDataString(html);
-            
+
             // re-encode the string so it will work correctly (fixed in CLR 4.0)
             if (Environment.Version.Major < 4 && html.Length != Encoding.UTF8.GetByteCount(html))
                 htmlFragment = Encoding.Default.GetString(Encoding.UTF8.GetBytes(htmlFragment));
@@ -128,8 +124,7 @@ EndSelection:<<<<<<<<4";
         /// </example>
         /// <param name="html">a html fragment</param>
         /// <param name="plainText">the plain text</param>
-        public static void CopyToClipboard(string html, string plainText)
-        {
+        public static void CopyToClipboard(string html, string plainText) {
             var dataObject = CreateDataObject(html, plainText);
             Clipboard.SetDataObject(dataObject, true);
         }
@@ -138,14 +133,12 @@ EndSelection:<<<<<<<<4";
         /// Clears clipboard and sets the given plain text fragment to the clipboard.<br/>
         /// </summary>
         /// <param name="plainText">the plain text</param>
-        public static void CopyToClipboard(string plainText)
-        {
+        public static void CopyToClipboard(string plainText) {
             var dataObject = new DataObject();
             dataObject.SetData(DataFormats.Text, plainText);
             dataObject.SetData(DataFormats.UnicodeText, plainText);
             Clipboard.SetDataObject(dataObject, true);
         }
-
 
         #region Private/Protected methods
 
@@ -154,8 +147,7 @@ EndSelection:<<<<<<<<4";
         /// </summary>
         /// <param name="html">the html to generate for</param>
         /// <returns>the resulted string</returns>
-        private static string GetHtmlDataString(string html)
-        {
+        private static string GetHtmlDataString(string html) {
             var sb = new StringBuilder();
             sb.AppendLine(Header);
             sb.AppendLine(@"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">");
@@ -170,13 +162,11 @@ EndSelection:<<<<<<<<4";
             int htmlOpenEndIdx = htmlOpenIdx > -1 ? html.IndexOf('>', htmlOpenIdx) + 1 : -1;
             int htmlCloseIdx = html.LastIndexOf("</html", StringComparison.OrdinalIgnoreCase);
 
-            if (fragmentStartIdx < 0 && fragmentEndIdx < 0)
-            {
+            if (fragmentStartIdx < 0 && fragmentEndIdx < 0) {
                 int bodyOpenIdx = html.IndexOf("<body", StringComparison.OrdinalIgnoreCase);
                 int bodyOpenEndIdx = bodyOpenIdx > -1 ? html.IndexOf('>', bodyOpenIdx) + 1 : -1;
 
-                if (htmlOpenEndIdx < 0 && bodyOpenEndIdx < 0)
-                {
+                if (htmlOpenEndIdx < 0 && bodyOpenEndIdx < 0) {
                     // the given html doesn't contain html or body tags so we need to add them and place start/end fragments around the given html only
                     sb.Append("<html><body>");
                     sb.Append(StartFragment);
@@ -185,9 +175,7 @@ EndSelection:<<<<<<<<4";
                     fragmentEnd = GetByteCount(sb);
                     sb.Append(EndFragment);
                     sb.Append("</body></html>");
-                }
-                else
-                {
+                } else {
                     // insert start/end fragments in the proper place (related to html/body tags if exists) so the paste will work correctly
                     int bodyCloseIdx = html.LastIndexOf("</body", StringComparison.OrdinalIgnoreCase);
 
@@ -215,9 +203,7 @@ EndSelection:<<<<<<<<4";
                     if (htmlCloseIdx < 0)
                         sb.Append("</html>");
                 }
-            }
-            else
-            {
+            } else {
                 // handle html with existing start\end fragments just need to calculate the correct bytes offset (surround with html tag if missing)
                 if (htmlOpenEndIdx < 0)
                     sb.Append("<html>");
@@ -245,12 +231,10 @@ EndSelection:<<<<<<<<4";
         /// <param name="start">optional: the start index to calculate from (default - start of string)</param>
         /// <param name="end">optional: the end index to calculate to (default - end of string)</param>
         /// <returns>the number of bytes required to encode the string in UTF-8</returns>
-        private static int GetByteCount(StringBuilder sb, int start = 0, int end = -1)
-        {
+        private static int GetByteCount(StringBuilder sb, int start = 0, int end = -1) {
             int count = 0;
             end = end > -1 ? end : sb.Length;
-            for (int i = start; i < end; i++)
-            {
+            for (int i = start; i < end; i++) {
                 _byteCount[0] = sb[i];
                 count += Encoding.UTF8.GetByteCount(_byteCount);
             }

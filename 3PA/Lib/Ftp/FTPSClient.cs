@@ -31,7 +31,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib.Ftp {
     /*
@@ -61,23 +60,20 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// No SSL/TLS support. Used for standard FTP connections.
         /// </summary>
-        [Description("No SSL/TLS support. Used for standard FTP connections.")]
-        ClearText = 0,
+        [Description("No SSL/TLS support. Used for standard FTP connections.")] ClearText = 0,
 
         /// <summary>
         /// Requests a SSL/TLS connection during authentication. 
         /// Authentication is performed using <see cref="ClearText"/> if SSL/TLS is not supported by the server.
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection during authentication.")]
-        CredentialsRequested = 1,
+        [Description("Requests a SSL/TLS connection during authentication.")] CredentialsRequested = 1,
 
         /// <summary>
         /// Requires a SSL/TLS connection during authentication. 
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
-        [Description("Requires a SSL/TLS connection during authentication.")]
-        CredentialsRequired = 2 | CredentialsRequested,
+        [Description("Requires a SSL/TLS connection during authentication.")] CredentialsRequired = 2 | CredentialsRequested,
 
         /// <summary>
         /// Requests a SSL/TLS connection on the control channel. 
@@ -85,8 +81,7 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequested"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
-        [Description("Requests a SSL/TLS connection on the control channel.")]
-        ControlChannelRequested = 4 | CredentialsRequested,
+        [Description("Requests a SSL/TLS connection on the control channel.")] ControlChannelRequested = 4 | CredentialsRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on the control channel. 
@@ -94,49 +89,46 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequired"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
-        [Description("Requires a SSL/TLS connection on the control channel.")]
-        ControlChannelRequired = CredentialsRequired | ControlChannelRequested,
+        [Description("Requires a SSL/TLS connection on the control channel.")] ControlChannelRequired = CredentialsRequired | ControlChannelRequested,
 
         /// <summary>
         /// Requests a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequested"/>.
         /// Data transfers are not encrypted is not supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection on the data channel.")]
-        DataChannelRequested = 8 | CredentialsRequested,
+        [Description("Requests a SSL/TLS connection on the data channel.")] DataChannelRequested = 8 | CredentialsRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequired"/>.
         /// </summary>
-        [Description("Requires a SSL/TLS connection on the data channel.")]
-        DataChannelRequired = 16 | DataChannelRequested | CredentialsRequired,
+        [Description("Requires a SSL/TLS connection on the data channel.")] DataChannelRequired = 16 | DataChannelRequested | CredentialsRequired,
 
         /// <summary>
         /// Requests a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequested"/> and <see cref="DataChannelRequested"/>.
         /// Control channel commands and data transfers are not encrypted is not supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection on both control and data channels.")]
-        ControlAndDataChannelsRequested = ControlChannelRequested | DataChannelRequested,
+        [Description("Requests a SSL/TLS connection on both control and data channels.")] ControlAndDataChannelsRequested = ControlChannelRequested | DataChannelRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequired"/> and <see cref="DataChannelRequired"/>.
         /// </summary>
-        [Description("Requires a SSL/TLS connection on both control and data channels.")]
-        ControlAndDataChannelsRequired = ControlChannelRequired | DataChannelRequired,
+        [Description("Requires a SSL/TLS connection on both control and data channels.")] ControlAndDataChannelsRequired = ControlChannelRequired | DataChannelRequired,
 
         /// <summary>
         /// Implicit SSL/TLS, not supported by RFC 4217. Both control channel and data channel are always encrypted.
         /// </summary>
-        [Description("Implicit SSL/TLS. Both control channel and data channel are always encrypted.")]
-        Implicit = 32 | ControlAndDataChannelsRequired
+        [Description("Implicit SSL/TLS. Both control channel and data channel are always encrypted.")] Implicit = 32 | ControlAndDataChannelsRequired
     }
 
     /// <summary>
     /// Possible actions occurring during a file transfer.
     /// </summary>
     public enum ETransferActions {
-        LocalDirectoryCreated, RemoteDirectoryCreated,
-        FileUploaded, FileUploadingStatus,
-        FileDownloaded, FileDownloadingStatus
+        LocalDirectoryCreated,
+        RemoteDirectoryCreated,
+        FileUploaded,
+        FileUploadingStatus,
+        FileDownloaded,
+        FileDownloadingStatus
     }
 
     /// <summary>
@@ -147,10 +139,12 @@ namespace _3PA.Lib.Ftp {
         /// Interpret as is.
         /// </summary>
         Verbatim,
+
         /// <summary>
         /// Interpret as wildcard, where <c>*</c> means 0 or more chars having any value and <c>?</c> means one char having any value. 
         /// </summary>
         Wildcard,
+
         /// <summary>
         /// Interpret as a regular expression.
         /// </summary>
@@ -176,13 +170,13 @@ namespace _3PA.Lib.Ftp {
     /// <param name="fileTransferSize"><c>null</c> if not available (e.g. the server does not support the SIZE command).</param>
     /// <param name="cancel"></param>
     public delegate void FileTransferCallback(FtpsClient sender, ETransferActions action,
-                                              string localObjectName, string remoteObjectName,
-                                              ulong fileTransmittedBytes, ulong? fileTransferSize,
-                                              ref bool cancel);
+        string localObjectName, string remoteObjectName,
+        ulong fileTransmittedBytes, ulong? fileTransferSize,
+        ref bool cancel);
 
     public delegate void LogCommandEventHandler(object sender, LogCommandEventArgs args);
-    public delegate void LogServerReplyEventHandler(object sender, LogServerReplyEventArgs args);
 
+    public delegate void LogServerReplyEventHandler(object sender, LogServerReplyEventArgs args);
 
     /// <summary>
     /// Class used to connect to an FTP/FTPS server. 
@@ -197,12 +191,25 @@ namespace _3PA.Lib.Ftp {
     /// Requirements: MS Framework 2.0 and above or Mono 2.0 and above.
     /// </remarks>
     public sealed class FtpsClient : IDisposable {
-
         #region Private Enums
 
-        enum EProtCode { C, S, E, P }
-        enum EAuthMechanism { Tls }
-        enum ERepType { A, E, I, L }
+        enum EProtCode {
+            C,
+            S,
+            E,
+            P
+        }
+
+        enum EAuthMechanism {
+            Tls
+        }
+
+        enum ERepType {
+            A,
+            E,
+            I,
+            L
+        }
 
         #endregion
 
@@ -246,6 +253,7 @@ namespace _3PA.Lib.Ftp {
         /// 0 means no check
         /// </summary>
         int _sslMinKeyExchangeAlgStrength;
+
         int _sslMinCipherAlgStrength;
         int _sslMinHashAlgStrength;
 
@@ -296,18 +304,14 @@ namespace _3PA.Lib.Ftp {
         /// The current text encoding
         /// </summary>
         public ETextEncoding TextEncoding {
-            get {
-                return _textEncoding;
-            }
+            get { return _textEncoding; }
         }
 
         /// <summary>
         /// The current transfer mode
         /// </summary>
         public ETransferMode TransferMode {
-            get {
-                return _transferMode;
-            }
+            get { return _transferMode; }
         }
 
         /// <summary>
@@ -329,18 +333,14 @@ namespace _3PA.Lib.Ftp {
         /// </summary>
         /// <values><c>null</c> if the connection is not encrypted</value>
         public X509Certificate RemoteCertificate {
-            get {
-                return _ctrlSslStream != null ? _ctrlSslStream.RemoteCertificate : null;
-            }
+            get { return _ctrlSslStream != null ? _ctrlSslStream.RemoteCertificate : null; }
         }
 
         /// <summary>
         /// The key exchange, hash and cipher algorithms used by the SSL/TLS connection or <c>null</c> if encryption is not used.
         /// </summary>
         public SslInfo SslInfo {
-            get {
-                return _sslInfo;
-            }
+            get { return _sslInfo; }
         }
 
         /// <summary>
@@ -348,18 +348,14 @@ namespace _3PA.Lib.Ftp {
         /// </summary>
         /// <value><c>null</c> if the connection is not using a client certificate</value>
         public X509Certificate LocalCertificate {
-            get {
-                return _ctrlSslStream != null ? _ctrlSslStream.LocalCertificate : null;
-            }
+            get { return _ctrlSslStream != null ? _ctrlSslStream.LocalCertificate : null; }
         }
 
         /// <summary>
         /// Returns true if the keep alive thread has been started
         /// </summary>
         public bool KeepAliveStarted {
-            get {
-                return _keepAliveThread != null;
-            }
+            get { return _keepAliveThread != null; }
         }
 
         /// <summary>
@@ -375,15 +371,11 @@ namespace _3PA.Lib.Ftp {
         #region private Properties
 
         private bool IsControlChannelEncrypted {
-            get {
-                return _ctrlSslStream != null;
-            }
+            get { return _ctrlSslStream != null; }
         }
 
         private bool IsDataChannelOpen {
-            get {
-                return (_dataClient != null);
-            }
+            get { return (_dataClient != null); }
         }
 
         #endregion
@@ -428,7 +420,7 @@ namespace _3PA.Lib.Ftp {
         }
 
         public string Connect(string hostname, NetworkCredential credential, EsslSupportMode sslSupportMode,
-                            RemoteCertificateValidationCallback userValidateServerCertificate) {
+            RemoteCertificateValidationCallback userValidateServerCertificate) {
             // Default implicit FTPS port is 990, default standard and explicit FTPS port is 21
             int port = (sslSupportMode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21;
             return Connect(hostname, port, credential, sslSupportMode, userValidateServerCertificate, null, 0, 0, 0, null);
@@ -451,11 +443,11 @@ namespace _3PA.Lib.Ftp {
         /// <param name="timeout">Connection timeout in ms. <c>null</c> can be specifiad to keep the default value of 120s.</param>
         /// <returns>The text of the \"welcome message\" sent by the server.</returns>
         public string Connect(string hostname, int port, NetworkCredential credential, EsslSupportMode sslSupportMode,
-                            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
-                            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
-                            int? timeout) {
+            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
+            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
+            int? timeout) {
             return Connect(hostname, port, credential, sslSupportMode, userValidateServerCertificate, x509ClientCert,
-                           sslMinKeyExchangeAlgStrength, sslMinCipherAlgStrength, sslMinHashAlgStrength, timeout, true);
+                sslMinKeyExchangeAlgStrength, sslMinCipherAlgStrength, sslMinHashAlgStrength, timeout, true);
         }
 
         /// <summary>
@@ -476,13 +468,12 @@ namespace _3PA.Lib.Ftp {
         /// <param name="useCtrlEndPointAddressForData"><c>true</c> to use the control channel remote address for data connections instead of the address returned by PASV</param>
         /// <returns>The text of the \"welcome message\" sent by the server.</returns>
         public string Connect(string hostname, int port, NetworkCredential credential, EsslSupportMode sslSupportMode,
-                            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
-                            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
-                            int? timeout, bool useCtrlEndPointAddressForData) {
+            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
+            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
+            int? timeout, bool useCtrlEndPointAddressForData) {
             return Connect(hostname, port, credential, sslSupportMode, userValidateServerCertificate, x509ClientCert,
-                           sslMinKeyExchangeAlgStrength, sslMinCipherAlgStrength, sslMinHashAlgStrength, timeout, true, EDataConnectionMode.Passive);
+                sslMinKeyExchangeAlgStrength, sslMinCipherAlgStrength, sslMinHashAlgStrength, timeout, true, EDataConnectionMode.Passive);
         }
-
 
         /// <summary>
         /// Connects to a FTP server using the provided parameters. 
@@ -503,9 +494,9 @@ namespace _3PA.Lib.Ftp {
         /// <param name="dataConnectionMode">Active or Passive data connection mode</param>
         /// <returns>The text of the \"welcome message\" sent by the server.</returns>
         public string Connect(string hostname, int port, NetworkCredential credential, EsslSupportMode sslSupportMode,
-                            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
-                            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
-                            int? timeout, bool useCtrlEndPointAddressForData, EDataConnectionMode dataConnectionMode) {
+            RemoteCertificateValidationCallback userValidateServerCertificate, X509Certificate x509ClientCert,
+            int sslMinKeyExchangeAlgStrength, int sslMinCipherAlgStrength, int sslMinHashAlgStrength,
+            int? timeout, bool useCtrlEndPointAddressForData, EDataConnectionMode dataConnectionMode) {
             Close();
 
             // Anonymous authentication
@@ -669,7 +660,7 @@ namespace _3PA.Lib.Ftp {
         /// <returns>The file transmission size in bytes, based on the current transfer mode or <c>null</c> if the SIZE command is not supported.</returns>
         public ulong? GetFileTransferSize(string remoteFileName) {
             // RFC 3659 4.3. SIZE must be included in the FEAT reply
-            return CheckFeature("SIZE") ? (ulong?)SizeCmd(remoteFileName) : null;
+            return CheckFeature("SIZE") ? (ulong?) SizeCmd(remoteFileName) : null;
         }
 
         /// <summary>
@@ -725,10 +716,9 @@ namespace _3PA.Lib.Ftp {
                         n = s.Read(buf, 0, buf.Length);
                         if (n > 0) {
                             fs.Write(buf, 0, n);
-                            totalBytes += (ulong)n;
+                            totalBytes += (ulong) n;
                         }
-                    }
-                    while (n > 0);
+                    } while (n > 0);
 
                     fs.Close();
                 }
@@ -752,8 +742,8 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// </remarks>
         public void GetFiles(string remoteDirectoryName, string localDirectoryName,
-                             string filePattern, EPatternStyle patternStyle, bool recursive,
-                             FileTransferCallback transferCallback) {
+            string filePattern, EPatternStyle patternStyle, bool recursive,
+            FileTransferCallback transferCallback) {
             GetFiles(remoteDirectoryName, localDirectoryName, filePattern, patternStyle, recursive, transferCallback, new List<string>());
         }
 
@@ -874,7 +864,6 @@ namespace _3PA.Lib.Ftp {
                 return SendFile(localFileName, remoteFileName, s, transferCallback);
         }
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -885,8 +874,8 @@ namespace _3PA.Lib.Ftp {
         /// <param name="recursive"></param>
         /// <param name="transferCallback"></param>
         public void PutFiles(string localDirectoryName, string remoteDirectoryName,
-                             string filePattern, EPatternStyle patternStyle, bool recursive,
-                             FileTransferCallback transferCallback) {
+            string filePattern, EPatternStyle patternStyle, bool recursive,
+            FileTransferCallback transferCallback) {
             Regex regex = null;
             if (filePattern != null) {
                 string fileRegexPattern = GetRegexPattern(filePattern, patternStyle);
@@ -1041,8 +1030,7 @@ namespace _3PA.Lib.Ftp {
                         // ignored, it means the folder doesn't exist
                     }
                     endPos = curDir.LastIndexOf("/", StringComparison.CurrentCultureIgnoreCase);
-                }
-                while (endPos > -1);
+                } while (endPos > -1);
                 if (!curDir.Equals(remoteDirName)) {
                     do {
                         endPos = remoteDirName.IndexOf("/", endPos + 1, StringComparison.CurrentCultureIgnoreCase);
@@ -1050,8 +1038,7 @@ namespace _3PA.Lib.Ftp {
                             curDir = remoteDirName.Substring(0, endPos);
                             MkdCmd(curDir);
                         }
-                    }
-                    while (endPos > -1);
+                    } while (endPos > -1);
                     MkdCmd(remoteDirName);
                 }
             }
@@ -1088,7 +1075,7 @@ namespace _3PA.Lib.Ftp {
             string listData = GetDataString();
             GetReply();
 
-            return new List<string>(listData.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            return new List<string>(listData.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries));
         }
 
         public IList<DirectoryListItem> GetDirectoryList() {
@@ -1181,7 +1168,7 @@ namespace _3PA.Lib.Ftp {
         /// <returns></returns>
         public DateTime? GetFileModificationTime(string remoteFileName) {
             // RFC 3659 3.3. MDTM must be included in the FEAT reply
-            return CheckFeature("MDTM") ? (DateTime?)MdtmCmd(remoteFileName) : null;
+            return CheckFeature("MDTM") ? (DateTime?) MdtmCmd(remoteFileName) : null;
         }
 
         /// <summary>
@@ -1359,8 +1346,8 @@ namespace _3PA.Lib.Ftp {
         }
 
         private void CallTransferCallback(FileTransferCallback transferCallback, ETransferActions transferAction,
-                                          string localObjectName, string remoteObjectName,
-                                          ulong fileTransmittedBytes, ulong? fileTransferSize) {
+            string localObjectName, string remoteObjectName,
+            ulong fileTransmittedBytes, ulong? fileTransferSize) {
             if (transferCallback != null) {
                 bool cancel = false;
                 transferCallback(this, transferAction, localObjectName, remoteObjectName, fileTransmittedBytes, fileTransferSize, ref cancel);
@@ -1374,7 +1361,7 @@ namespace _3PA.Lib.Ftp {
 
             ulong? fileTransferSize = null;
             if (transferCallback != null)
-                fileTransferSize = (ulong)(new FileInfo(localFileName).Length);
+                fileTransferSize = (ulong) (new FileInfo(localFileName).Length);
 
             using (FileStream fs = File.OpenRead(localFileName)) {
                 byte[] buf = new byte[1024];
@@ -1385,10 +1372,9 @@ namespace _3PA.Lib.Ftp {
                     n = fs.Read(buf, 0, buf.Length);
                     if (n > 0) {
                         s.Write(buf, 0, n);
-                        totalBytes += (ulong)n;
+                        totalBytes += (ulong) n;
                     }
-                }
-                while (n > 0);
+                } while (n > 0);
 
                 fs.Close();
             }
@@ -1421,11 +1407,11 @@ namespace _3PA.Lib.Ftp {
 
         private FtpStream EndStreamCommand(FtpStream.EAllowedOperation allowedOp) {
             return new FtpStream(GetDataStream(), allowedOp,
-                                 delegate {
-                                     CloseDataConnection();
-                                     if (_waitingCompletionReply)
-                                         GetReply();
-                                 });
+                delegate {
+                    CloseDataConnection();
+                    if (_waitingCompletionReply)
+                        GetReply();
+                });
         }
 
         private Stream GetDataStream() {
@@ -1455,8 +1441,7 @@ namespace _3PA.Lib.Ftp {
                 do {
                     n = s.Read(buf, 0, buf.Length);
                     data.Append(Encoding.UTF8.GetString(buf, 0, n));
-                }
-                while (n != 0);
+                } while (n != 0);
 
                 return data.ToString();
             } finally {
@@ -1572,7 +1557,6 @@ namespace _3PA.Lib.Ftp {
 
             if (_sslMinHashAlgStrength > 0 && sslStream.HashStrength < _sslMinHashAlgStrength)
                 throw new FtpSslException("The SSL/TSL hash algorithm strength does not fulfill the requirements: " + sslStream.HashStrength);
-
         }
 
         private void SwitchCtrlToClearMode() {
@@ -1630,7 +1614,7 @@ namespace _3PA.Lib.Ftp {
             for (i = 0; i < addr.Length; i++)
                 addr[i] = byte.Parse(parts[i]);
 
-            int port = byte.Parse(parts[4]) * 256 + byte.Parse(parts[5]);
+            int port = byte.Parse(parts[4])*256 + byte.Parse(parts[5]);
 
             dataEndPoint = new IPEndPoint(new IPAddress(addr), port);
             return dataEndPoint;
@@ -1642,7 +1626,7 @@ namespace _3PA.Lib.Ftp {
                 throw new FtpProtocolException(reply);
 
             int port = int.Parse(parts[3]);
-            return new IPEndPoint(((IPEndPoint)_ctrlClient.Client.LocalEndPoint).Address, port);
+            return new IPEndPoint(((IPEndPoint) _ctrlClient.Client.LocalEndPoint).Address, port);
         }
 
         private FtpReply HandleCmd(string command) {
@@ -1724,8 +1708,7 @@ namespace _3PA.Lib.Ftp {
 
                         reply.Message += "\r\n" + replyLine.TrimStart();
                     }
-                }
-                while (!replyDone);
+                } while (!replyDone);
 
                 _waitingCompletionReply = (reply.Code < 200);
 
@@ -1747,8 +1730,7 @@ namespace _3PA.Lib.Ftp {
                 // Be polite
                 try {
                     QuitCmd(false);
-                } catch (Exception) {
-                }
+                } catch (Exception) {}
 
                 if (_ctrlSslStream != null) {
                     _ctrlSslStream.Close();
@@ -1866,7 +1848,7 @@ namespace _3PA.Lib.Ftp {
             int port = SetupActiveDataConnectionStep1();
 
             byte[] addr = (_ctrlClient.Client.LocalEndPoint as IPEndPoint).Address.GetAddressBytes();
-            string portStr = string.Format("{0},{1},{2},{3},{4},{5}", addr[0], addr[1], addr[2], addr[3], port / 256, port % 256);
+            string portStr = string.Format("{0},{1},{2},{3},{4},{5}", addr[0], addr[1], addr[2], addr[3], port/256, port%256);
 
             FtpReply reply = HandleCmd("PORT " + portStr);
         }
@@ -1880,9 +1862,8 @@ namespace _3PA.Lib.Ftp {
         }
 
         private AddressFamily GetCtrlConnAddressFamily() {
-            return ((IPEndPoint)_ctrlClient.Client.LocalEndPoint).AddressFamily;
+            return ((IPEndPoint) _ctrlClient.Client.LocalEndPoint).AddressFamily;
         }
-
 
         private void SetupDataConnection() {
             if (_dataConnectionMode == EDataConnectionMode.Active)
@@ -1926,7 +1907,6 @@ namespace _3PA.Lib.Ftp {
 
         #region RFC 2228
 
-
         private void AuthCmd(EAuthMechanism authMech) {
             HandleCmd("AUTH " + authMech);
             SwitchCtrlToSslMode();
@@ -1951,7 +1931,7 @@ namespace _3PA.Lib.Ftp {
 
         private IList<string> FeatCmd() {
             FtpReply reply = HandleCmd("FEAT");
-            IList<string> features = new List<string>(reply.Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            IList<string> features = new List<string>(reply.Message.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries));
             features.RemoveAt(0);
             features.RemoveAt(features.Count - 1);
 
@@ -1973,6 +1953,7 @@ namespace _3PA.Lib.Ftp {
             // The caller has to close the data connection
             SetupPassiveDataConnection(dataEndPoint);
         }
+
         #endregion
 
         #region RFC 2640

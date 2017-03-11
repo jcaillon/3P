@@ -20,13 +20,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Entities {
     /// <summary>
     /// Raised when the user clicks on a link in the html.
     /// </summary>
-    public sealed class HtmlLinkClickedEventArgs : EventArgs
-    {
+    public sealed class HtmlLinkClickedEventArgs : EventArgs {
         /// <summary>
         /// the link href that was clicked
         /// </summary>
@@ -46,8 +44,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// Init.
         /// </summary>
         /// <param name="link">the link href that was clicked</param>
-        public HtmlLinkClickedEventArgs(string link, Dictionary<string, string> attributes)
-        {
+        public HtmlLinkClickedEventArgs(string link, Dictionary<string, string> attributes) {
             _link = link;
             _attributes = attributes;
         }
@@ -55,30 +52,26 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// <summary>
         /// the link href that was clicked
         /// </summary>
-        public string Link
-        {
+        public string Link {
             get { return _link; }
         }
 
         /// <summary>
         /// collection of all the attributes that are defined on the link element
         /// </summary>
-        public Dictionary<string, string> Attributes
-        {
+        public Dictionary<string, string> Attributes {
             get { return _attributes; }
         }
 
         /// <summary>
         /// use to cancel the execution of the link
         /// </summary>
-        public bool Handled
-        {
+        public bool Handled {
             get { return _handled; }
             set { _handled = value; }
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("Link: {0}, Handled: {1}", _link, _handled);
         }
     }

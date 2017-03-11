@@ -24,12 +24,10 @@ using System.Linq;
 using YamuiFramework.Helper;
 
 namespace YamuiFramework.Themes {
-
     /// <summary>
     /// Holds a theme configuration for the YamuiFramework
     /// </summary>
     public class YamuiTheme : GenericThemeHolder {
-
         #region Stored in the config file
 
         public string PageBackGroundImage = "";
@@ -185,7 +183,7 @@ namespace YamuiFramework.Themes {
         public Color LabelsBg(Color controlBackColor, bool useCustomBackColor) {
             return !useCustomBackColor ? Color.Transparent : controlBackColor;
         }
-        
+
         /// <summary>
         ///     This class is used for tab controls (back color is also used for tab pages)
         /// </summary>
@@ -315,6 +313,5 @@ namespace YamuiFramework.Themes {
         }
 
         #endregion
-        
     }
 }

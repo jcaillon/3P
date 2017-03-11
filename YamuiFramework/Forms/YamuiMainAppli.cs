@@ -34,9 +34,7 @@ using YamuiFramework.Themes;
 using Timer = System.Timers.Timer;
 
 namespace YamuiFramework.Forms {
-
     public class YamuiMainAppli : YamuiFormButtons {
-
         #region Fields
 
         protected override Padding DefaultPadding {
@@ -48,7 +46,6 @@ namespace YamuiFramework.Forms {
         /// </summary>
         [Browsable(false)]
         public bool HasModalOpened { get; set; }
-
 
         private YamuiTab _contentTab;
 
@@ -129,7 +126,7 @@ namespace YamuiFramework.Forms {
                     Text = "",
                     Size = new Size(Width - 21, 16),
                     Location = new Point(1, Height - 17),
-                    Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+                    Anchor = AnchorStyles.Bottom | AnchorStyles.Left
                 };
                 Controls.Add(_bottomNotif);
             }
@@ -157,7 +154,6 @@ namespace YamuiFramework.Forms {
         /// Small class to animate a text display
         /// </summary>
         internal class YamuiNotifLabel : UserControl {
-
             #region public fields
 
             /// <summary>
@@ -191,7 +187,7 @@ namespace YamuiFramework.Forms {
                             _durationTimer.Elapsed += DurationTimerOnElapsed;
                         }
                         _durationTimer.Stop();
-                        _durationTimer.Interval = Math.Max(Duration, 3) * 1000;
+                        _durationTimer.Interval = Math.Max(Duration, 3)*1000;
                         _durationTimer.Start();
                     }
                 }
@@ -280,7 +276,6 @@ namespace YamuiFramework.Forms {
             }
 
             #endregion
-
         }
 
         #endregion
@@ -303,8 +298,6 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
-
     }
 
     #region Designer
@@ -318,5 +311,4 @@ namespace YamuiFramework.Forms {
     }
 
     #endregion
-
 }

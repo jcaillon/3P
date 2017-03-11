@@ -30,14 +30,12 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     /// <summary>
     /// Implements some of the methods/fields of a combo box
     /// </summary>
     [Designer("YamuiFramework.Controls.YamuiComboBoxDesigner")]
     [ToolboxBitmap(typeof(ComboBox))]
     public sealed class YamuiComboBox : YamuiButton {
-
         #region private
 
         private string _waterMark = "";
@@ -94,9 +92,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object DataSource {
-            get {
-                return _originalDataSource;
-            }
+            get { return _originalDataSource; }
             set {
                 _originalDataSource = value;
                 if (value == null) {
@@ -131,9 +127,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex {
-            get {
-                return _selectedIndex;
-            }
+            get { return _selectedIndex; }
             set {
                 if (value >= 0 && value < _listItems.Count) {
                     _selectedIndex = value;
@@ -149,9 +143,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object SelectedItem {
-            get {
-                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseObject : null;
-            }
+            get { return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].BaseObject : null; }
         }
 
         /// <summary>
@@ -159,9 +151,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public String SelectedText {
-            get {
-                return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].DisplayText : null;
-            }
+            get { return SelectedIndex >= 0 && SelectedIndex < _listItems.Count ? _listItems[SelectedIndex].DisplayText : null; }
             set {
                 if (value == null)
                     return;
@@ -217,7 +207,7 @@ namespace YamuiFramework.Controls {
                         try {
                             var prop = item.GetType().GetProperty(ValueMember);
                             if (prop.PropertyType == typeof(string)) {
-                                if (((string)prop.GetValue(item, null)).Equals(value)) {
+                                if (((string) prop.GetValue(item, null)).Equals(value)) {
                                     newIdx = i;
                                     break;
                                 }
@@ -239,7 +229,7 @@ namespace YamuiFramework.Controls {
                     SelectedIndex = newIdx;
             }
         }
-        
+
         #endregion
 
         #region private methods
@@ -262,7 +252,6 @@ namespace YamuiFramework.Controls {
         /// Initializes the internal list with either the Datasource only or Datasource + Display text
         /// </summary>
         private void InitList() {
-
             // simple list of strings?
             if (_datasource != null) {
                 if (_datasource.Exists(o => o is string)) {
@@ -305,7 +294,6 @@ namespace YamuiFramework.Controls {
         /// </summary>
         private void DisplayPopup(string initialString) {
             if (_listItems != null && _listItems.Count > 0) {
-
                 var displayFilterBox = !string.IsNullOrEmpty(initialString) || _listItems.Count > 15;
 
                 // correct default selected
@@ -322,7 +310,7 @@ namespace YamuiFramework.Controls {
                     Resizable = false,
                     Movable = false,
                     FormMinSize = new Size(Width, 0),
-                    AutocompletionLineHeight = (displayFilterBox ? -1 : 1) * Height,
+                    AutocompletionLineHeight = (displayFilterBox ? -1 : 1)*Height,
                     InitialFilterString = initialString
                 };
 
@@ -348,14 +336,14 @@ namespace YamuiFramework.Controls {
                 _listPopup.YamuiList.IndexChanged += list => {
                     var item = list.SelectedItem;
                     if (item != null) {
-                        SelectedIndex = ((YamuiComboItem)item).Index;
+                        SelectedIndex = ((YamuiComboItem) item).Index;
                         if (SelectedIndexChangedByUser != null)
                             SelectedIndexChangedByUser(this);
                     }
                 };
             }
         }
-        
+
         #endregion
 
         #region Override
@@ -364,11 +352,10 @@ namespace YamuiFramework.Controls {
         /// on key down
         /// </summary>
         protected override void OnKeyDown(KeyEventArgs e) {
-
             // pressing a letter opens the popup in filter mode
             try {
                 var c = WinApi.GetCharFromKey(e.KeyValue);
-                if (c != null && char.IsLetterOrDigit((char)c)) {
+                if (c != null && char.IsLetterOrDigit((char) c)) {
                     DisplayPopup(c.ToString());
                     e.Handled = true;
                 }
@@ -441,7 +428,6 @@ namespace YamuiFramework.Controls {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-
             var hasItems = _listItems.Count > 0;
             var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled && hasItems);
             var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled && hasItems);
@@ -467,27 +453,25 @@ namespace YamuiFramework.Controls {
                     e.Graphics.DrawRectangle(p, borderRect);
                 }
             }
-            
+
             // draw the down arrow
             using (SolidBrush b = new SolidBrush(foreColor)) {
-                e.Graphics.FillPolygon(b, new[] { new Point(ClientRectangle.Width - 20, ClientRectangle.Height / 2 - 2), new Point(ClientRectangle.Width - 9, ClientRectangle.Height / 2 - 2), new Point(ClientRectangle.Width - 15, ClientRectangle.Height / 2 + 4) });
+                e.Graphics.FillPolygon(b, new[] {new Point(ClientRectangle.Width - 20, ClientRectangle.Height/2 - 2), new Point(ClientRectangle.Width - 9, ClientRectangle.Height/2 - 2), new Point(ClientRectangle.Width - 15, ClientRectangle.Height/2 + 4)});
             }
-            
+
             // text
             if (!IsFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
                 TextRenderer.DrawText(e.Graphics, WaterMark, FontManager.GetFont(FontFunction.WaterMark), new Rectangle(0, 0, ClientRectangle.Width - 20, ClientRectangle.Height), YamuiThemeManager.Current.ButtonWatermarkFore, FontManager.GetTextFormatFlags(TextAlign));
             } else {
                 TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(0, 0, ClientRectangle.Width - 20, ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
             }
-
         }
-        
+
         #endregion
 
         #region YamuiComboItem
 
         private class YamuiComboItem : YamuiMenuItem {
-
             /// <summary>
             /// Stores the base object for this item
             /// </summary>
@@ -497,12 +481,8 @@ namespace YamuiFramework.Controls {
             /// Index of this item
             /// </summary>
             public int Index { get; set; }
-
         }
 
         #endregion
-
-
     }
-
 }

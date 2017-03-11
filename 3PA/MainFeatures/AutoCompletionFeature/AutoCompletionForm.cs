@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (AutoCompletionForm.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
@@ -6,7 +25,6 @@ using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
-
         #region public fields
 
         /// <summary>
@@ -53,7 +71,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region DrawContent
 
         private void DrawContent() {
-
             // init menu form
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.Manual;
@@ -70,16 +87,16 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             YamuiList.KeyPressed += YamuiListOnKeyPressed;
             YamuiList.MouseLeft += YamuiListOnMouseLeft;
             YamuiList.IndexChanged += YamuiListOnIndexChanged;
-            
+
             // add control
             Controls.Add(YamuiList);
 
             // Size the form
-            Height = BorderWidth * 2 + Config.Instance.AutoCompleteShowListOfXSuggestions * YamuiList.RowHeight + YamuiList.BottomHeight;
+            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*YamuiList.RowHeight + YamuiList.BottomHeight;
             Width = Config.Instance.AutoCompleteWidth;
-            
+
             // Set minimum size
-            MinimumSize = new Size(200, BorderWidth * 2 + 2 * YamuiList.RowHeight + YamuiList.BottomHeight);
+            MinimumSize = new Size(200, BorderWidth*2 + 2*YamuiList.RowHeight + YamuiList.BottomHeight);
 
             // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
@@ -102,7 +119,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 ResizeFormToFitScreen();
             });
         }
-        
+
         #region Events
 
         /// <summary>
@@ -110,9 +127,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         protected override void OnResizeEnd(EventArgs e) {
             Config.Instance.AutoCompleteWidth = Width;
-            var nbRows = (int) Math.Floor((float) (Height - BorderWidth * 2 - YamuiList.BottomHeight) / YamuiList.RowHeight);
+            var nbRows = (int) Math.Floor((float) (Height - BorderWidth*2 - YamuiList.BottomHeight)/YamuiList.RowHeight);
             Config.Instance.AutoCompleteShowListOfXSuggestions = nbRows;
-            Height = BorderWidth * 2 + Config.Instance.AutoCompleteShowListOfXSuggestions * YamuiList.RowHeight + YamuiList.BottomHeight;
+            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*YamuiList.RowHeight + YamuiList.BottomHeight;
             base.OnResizeEnd(e);
         }
 
@@ -139,6 +156,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 e.Handled = true;
             }
         }
+
         private void YamuiListOnTabPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
             if (InsertSuggestion != null && Config.Instance.AutoCompleteUseTabToAccept) {
                 InsertSuggestion(yamuiScrollList.SelectedItem as CompletionItem);
@@ -154,7 +172,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (list != null && Movable && e.Button == MouseButtons.Left && (new Rectangle(0, list.Height - list.BottomHeight, list.Width, list.BottomHeight)).Contains(e.Location)) {
                 // do as if the cursor was on the title bar
                 WinApi.ReleaseCapture();
-                WinApi.SendMessage(Handle, (uint)WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int)WinApi.HitTest.HTCAPTION), new IntPtr(0));
+                WinApi.SendMessage(Handle, (uint) WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int) WinApi.HitTest.HTCAPTION), new IntPtr(0));
             }
         }
 
@@ -168,6 +186,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
     }
 }

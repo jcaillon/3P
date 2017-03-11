@@ -25,7 +25,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Fonts {
-
     public enum FontFunction {
         AppliTitle,
         Small,
@@ -43,7 +42,6 @@ namespace YamuiFramework.Fonts {
     }
 
     public static class FontManager {
-
         public static Font GetStandardFont() {
             return GetFont(FontFunction.Normal);
         }
@@ -152,15 +150,12 @@ namespace YamuiFramework.Fonts {
         }
 
         internal class FontResolver : IFontResolver {
-
             private Dictionary<Tuple<string, float, FontStyle>, Font> _savedFonts = new Dictionary<Tuple<string, float, FontStyle>, Font>();
 
             public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
-
                 // we didn't already created the font?
                 var key = new Tuple<string, float, FontStyle>(familyName, emSize, fontStyle);
                 if (!_savedFonts.ContainsKey(key)) {
-
                     // create it
                     Font fontTester = new Font(familyName, emSize, fontStyle, unit);
                     if (fontTester.Name != familyName) {
@@ -173,7 +168,8 @@ namespace YamuiFramework.Fonts {
                     _savedFonts.Add(key, fontTester);
                 }
 
-                return _savedFonts[key]; ;
+                return _savedFonts[key];
+                ;
             }
 
             private PrivateFontCollection _pfc = new PrivateFontCollection();
@@ -210,8 +206,5 @@ namespace YamuiFramework.Fonts {
         }
 
         #endregion
-
     }
-
-
 }

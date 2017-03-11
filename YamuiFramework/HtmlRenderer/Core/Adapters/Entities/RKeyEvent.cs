@@ -19,13 +19,11 @@
 #endregion
 using YamuiFramework.HtmlRenderer.Core.Core;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Even class for handling keyboard events in <see cref="HtmlContainerInt"/>.
     /// </summary>
-    public sealed class RKeyEvent
-    {
+    public sealed class RKeyEvent {
         /// <summary>
         /// is control is pressed
         /// </summary>
@@ -44,8 +42,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <summary>
         /// Init.
         /// </summary>
-        public RKeyEvent(bool control, bool aKeyCode, bool cKeyCode)
-        {
+        public RKeyEvent(bool control, bool aKeyCode, bool cKeyCode) {
             _control = control;
             _aKeyCode = aKeyCode;
             _cKeyCode = cKeyCode;
@@ -54,24 +51,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <summary>
         /// is control is pressed
         /// </summary>
-        public bool Control
-        {
+        public bool Control {
             get { return _control; }
         }
 
         /// <summary>
         /// is 'A' key is pressed
         /// </summary>
-        public bool AKeyCode
-        {
+        public bool AKeyCode {
             get { return _aKeyCode; }
         }
 
         /// <summary>
         /// is 'C' key is pressed
         /// </summary>
-        public bool CKeyCode
-        {
+        public bool CKeyCode {
             get { return _cKeyCode; }
         }
     }

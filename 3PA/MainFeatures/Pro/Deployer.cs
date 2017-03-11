@@ -28,9 +28,7 @@ using _3PA.Data;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal class Deployer {
-
         #region Static
 
         #region public event
@@ -80,7 +78,6 @@ namespace _3PA.MainFeatures.Pro {
         /// if the file is present in the Config dir, use it
         /// </summary>
         public static void Import() {
-
             var outputMessage = new StringBuilder();
 
             // get all the rules
@@ -94,22 +91,21 @@ namespace _3PA.MainFeatures.Pro {
 
                 // new transfer rule
                 if (items.Length == 7) {
-
                     DeployType type;
                     if (!Enum.TryParse(items[3].Trim(), true, out type))
                         type = DeployType.Copy;
 
                     var obj = new DeployTransferRule {
-                        Step = step, 
-                        NameFilter = items[1].Trim(), 
-                        SuffixFilter = items[2].Trim(), 
+                        Step = step,
+                        NameFilter = items[1].Trim(),
+                        SuffixFilter = items[2].Trim(),
                         Type = type,
-                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true"), 
+                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true"),
                         Line = lineNb + 1,
                         SourcePattern = items[5].Trim(),
                         DeployTarget = items[6].Trim().Replace('/', '\\')
                     };
-                    
+
                     obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
                     if (obj.ShouldDeployTargetReplaceDollar)
                         obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
@@ -131,14 +127,13 @@ namespace _3PA.MainFeatures.Pro {
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _fullDeployRulesList.Add(obj);
-
                 } else if (items.Length == 5) {
                     // new filter rule
 
                     var obj = new DeployFilterRule {
-                        Step = step, 
-                        NameFilter = items[1].Trim(), 
-                        SuffixFilter = items[2].Trim(), 
+                        Step = step,
+                        NameFilter = items[1].Trim(),
+                        SuffixFilter = items[2].Trim(),
                         Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
                         SourcePattern = items[4].Trim()
                     };
@@ -146,8 +141,6 @@ namespace _3PA.MainFeatures.Pro {
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern))
                         _fullDeployRulesList.Add(obj);
-
-
                 } else if (items.Length == 4) {
                     // new variable
 
@@ -191,9 +184,7 @@ namespace _3PA.MainFeatures.Pro {
             var strBuilder = new StringBuilder();
 
             if (rules.Any()) {
-
                 if (rules.Exists(rule => rule is DeployVariableRule)) {
-
                     strBuilder.Append("<h2 style='padding-top: 0px; margin-top: 0px;'>Path variables</h2>");
                     strBuilder.Append("<table width='100%;'>");
                     strBuilder.Append("<tr class='CompPathHead'><td align='center' width='9%'>Application<br>Name</td><td align='center' width='9%'>Application<br>Suffix</td><td align='center' width='13%'>Var<br>Name</td><td width='69%' align='right'>Path</td></tr>");
@@ -203,12 +194,11 @@ namespace _3PA.MainFeatures.Pro {
                         strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + WebUtility.HtmlEncode(rule.VariableName) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.Path.Length > 45 ? "..." + rule.Path.Substring(rule.Path.Length - 45) : rule.Path) + "</td></tr>");
                         alt = !alt;
                     }
-                    
+
                     strBuilder.Append("</table>");
                 }
 
                 if (rules.Exists(rule => rule is DeployFilterRule)) {
-
                     strBuilder.Append("<h2 style='padding-top: 0px; margin-top: 0px;'>Filter rules</h2>");
                     strBuilder.Append("<table width='100%;'>");
                     strBuilder.Append("<tr class='CompPathHead'><td align='center' width='5%'>Step</td><td align='center' width='9%'>Application<br>Name</td><td align='center' width='9%'>Application<br>Suffix</td><td align='center' width='8%'>Rule<br>Type</td><td width='69%' align='right'>Source path pattern</td></tr>");
@@ -223,7 +213,6 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 if (rules.Exists(rule => rule is DeployTransferRule)) {
-
                     strBuilder.Append("<h2>Transfer rules</h2>");
                     strBuilder.Append("<table width='100%;'>");
                     strBuilder.Append("<tr class='CompPathHead'><td align='center' width='5%'>Step</td><td align='center' width='9%'>Application<br>Name</td><td align='center' width='9%'>Application<br>Suffix</td><td align='center' width='6%'>Rule<br>Type</td><td align='center' width='5%'>Next?</td><td width='33%'>Source path pattern</td><td width='33%' align='right'>Deployment target</td></tr>");
@@ -236,7 +225,6 @@ namespace _3PA.MainFeatures.Pro {
 
                     strBuilder.Append("</table>");
                 }
-
             } else {
                 strBuilder.Append("<b>No rules defined yet!</b><br>Modify the rules file to get started");
             }
@@ -249,17 +237,15 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Object
-        
+
         #region Fields
 
         /// <summary>
         /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
         /// </summary>
-        
         private List<DeployRule> _deployRulesList;
 
         private List<DeployVariableRule> _deployVarList;
-
 
         /// <summary>
         /// Allows us to keep track of the opened zip needed for this deployment
@@ -308,13 +294,11 @@ namespace _3PA.MainFeatures.Pro {
         public List<DeployRule> DeployRules {
             get {
                 if (_deployRulesList == null) {
-
                     // Need to match the application name / suffix filter with the current env
                     _deployRulesList = GetFullDeployRulesList.Where(item => ProEnv.Name.RegexMatch(item.NameFilter.WildCardToRegex()) && ProEnv.Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())).ToNonNullList();
 
                     // sort the rules
                     _deployRulesList.Sort((item1, item2) => {
-
                         // exact name match first
                         int compare = item2.NameFilter.EqualsCi(ProEnv.Name).CompareTo(item1.NameFilter.EqualsCi(ProEnv.Name));
                         if (compare != 0)
@@ -344,7 +328,6 @@ namespace _3PA.MainFeatures.Pro {
                         var itemTransfer2 = item2 as DeployTransferRule;
 
                         if (itemTransfer1 != null && itemTransfer2 != null) {
-
                             // continue first
                             compare = itemTransfer2.ContinueAfterThisRule.CompareTo(itemTransfer1.ContinueAfterThisRule);
                             if (compare != 0)
@@ -394,16 +377,14 @@ namespace _3PA.MainFeatures.Pro {
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
         /// </summary>
         public List<FileToDeploy> GetTargetDirsNeededForFile(string sourcePath, int step) {
-
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && ProEnv.CompileLocally)
-                return new List<FileToDeploy> { new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true) };
+                return new List<FileToDeploy> {new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true)};
 
             var outList = new List<FileToDeploy>();
 
             // for each transfer rule that match the source pattern
             foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step)) {
-
                 string outPath;
 
                 var deployTarget = ReplaceVariablesIn(rule.DeployTarget);
@@ -428,7 +409,6 @@ namespace _3PA.MainFeatures.Pro {
 
             // nothing matched?
             if (outList.Count == 0) {
-
                 // for the compilation, move to deployment directory
                 if (step == 0)
                     outList.Add(new FileToDeploy(ProEnv.BaseCompilationPath, DeployType.Move, true));
@@ -462,7 +442,6 @@ namespace _3PA.MainFeatures.Pro {
         /// this list is filtered thanks to the rules given (also, for step == 0, only progress files are listed)
         /// </summary>
         public HashSet<string> GetFilesList(List<string> listOfFolderPath, SearchOption searchOptions, int step) {
-
             // constructs the list of all the files (unique) accross the different folders
             var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -478,7 +457,6 @@ namespace _3PA.MainFeatures.Pro {
                     if (!filesToCompile.Contains(filePath) && IsFilePassingFilters(filePath, includeFiltersList, excludeFiltersList))
                         filesToCompile.Add(filePath);
                 }
-
             }
 
             return filesToCompile;
@@ -515,7 +493,6 @@ namespace _3PA.MainFeatures.Pro {
         /// and one .lst if the option has been checked
         /// </summary>
         public List<FileToDeploy> DeployFilesForStep(int step, List<string> listOfSourceDir, SearchOption searchOptions, Action<float> updateDeploymentPercentage = null) {
-
             var outputList = new List<FileToDeploy>();
 
             // list the files to deploy
@@ -531,9 +508,8 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy a given list of files (can reduce the list if there are duplicated items so it returns it)
         /// </summary>
         public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage = null) {
-
-            int[] totalFile = { 0 };
-            int[] nbFilesDone = { 0 };
+            int[] totalFile = {0};
+            int[] nbFilesDone = {0};
 
             // make sure to transfer a given file only once at the same place (happens with .cls file since a source
             // can have several .r files generated if it is used in another classes)
@@ -579,18 +555,17 @@ namespace _3PA.MainFeatures.Pro {
                             } catch (Exception e) {
                                 ErrorHandler.ShowErrors(e, "Couldn't create/open the .zip file");
                             }
-
                         }
 
                         // we didn't create the zip? then we need to remove this file if it exists
-                        if (_filesToRemoveFromZip.ContainsKey(deploy.ArchivePath)) 
+                        if (_filesToRemoveFromZip.ContainsKey(deploy.ArchivePath))
                             _filesToRemoveFromZip[deploy.ArchivePath].Add(deploy.RelativePathInArchive.Replace('\\', '/'));
                     }
                 }
             });
 
             #endregion
-            
+
             #region for .pl deployments, we treat them before anything else
 
             // for PL, we need to MOVE each file into a temporary folder with the internal structure of the .pl file,
@@ -601,11 +576,9 @@ namespace _3PA.MainFeatures.Pro {
                 .ToNonNullList();
 
             if (plDeployments.Count > 0) {
-
                 // then we create a unique temporary folder for each .pl
                 var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var pathPl in plDeployments.Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath)).Select(deploy => deploy.ArchivePath).Distinct()) {
-
                     // create a unique temp folder for this .pl
                     if (!dicPlToTempFolder.ContainsKey(pathPl)) {
                         var plDirPath = Path.GetDirectoryName(pathPl);
@@ -621,7 +594,6 @@ namespace _3PA.MainFeatures.Pro {
 
                 // for each .pl that needs to be created...
                 foreach (var pl in dicPlToTempFolder) {
-
                     var pl1 = pl;
                     var onePlDeployments = plDeployments
                         .Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath) && deploy.ArchivePath.Equals(pl1.Key))
@@ -663,7 +635,6 @@ namespace _3PA.MainFeatures.Pro {
 
                     // for each subfolder in the .pl
                     foreach (var plSubFolder in dicTempFolderToPl) {
-
                         var onePlSubFolderDeployments = onePlDeployments
                             .Where(deploy => plSubFolder.Key.Equals(Path.GetDirectoryName(deploy.ToTemp)))
                             .ToNonNullList();
@@ -676,7 +647,7 @@ namespace _3PA.MainFeatures.Pro {
                             if (deploy.IsOk)
                                 nbFilesDone[0]++;
                             if (updateDeploymentPercentage != null)
-                                updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
+                                updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
                         });
 
                         // now we just need to add the content of temp folders into the .pl
@@ -685,10 +656,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (!prolibExe.TryDoWait(true))
                             prolibMessage.Append(prolibExe.ErrorOutput);
 
-                        Parallel.ForEach(onePlSubFolderDeployments, deploy => {
-                            deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
-                        });
-
+                        Parallel.ForEach(onePlSubFolderDeployments, deploy => { deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From); });
                     }
 
                     // compress .pl
@@ -720,13 +688,12 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-
             // do a deployment action for each file (parallel for MOVE and COPY)
             Parallel.ForEach(deployToDo.Where(deploy => deploy.DeployType >= DeployType.Copy), file => {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
+                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
             });
             // don't use parallel for the other types
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
@@ -744,7 +711,7 @@ namespace _3PA.MainFeatures.Pro {
             _openedZip.Clear();
 
             #endregion
-            
+
             return deployToDo;
         }
 
@@ -755,7 +722,6 @@ namespace _3PA.MainFeatures.Pro {
             if (!file.IsOk) {
                 if (File.Exists(file.From)) {
                     switch (file.DeployType) {
-
                         case DeployType.Copy:
                             file.IsOk = Utils.CopyFile(file.From, file.To);
                             break;
@@ -778,7 +744,6 @@ namespace _3PA.MainFeatures.Pro {
                                 file.IsOk = false;
                             }
                             break;
-
                     }
                 }
                 return true;
@@ -805,15 +770,13 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-        
-        #endregion
 
+        #endregion
     }
 
     #region DeployRule
 
     public abstract class DeployRule {
-
         /// <summary>
         /// Step to which the rule applies : 0 = compilation, 1 = deployment of all files, 2+ = extra
         /// </summary>
@@ -828,11 +791,9 @@ namespace _3PA.MainFeatures.Pro {
         /// This compilation path applies to a given Env letter (can be empty)
         /// </summary>
         public string SuffixFilter { get; set; }
-
     }
 
     public class DeployTransferRule : DeployRule {
-
         /// <summary>
         /// The type of transfer that should occur for this compilation path
         /// </summary>
@@ -862,11 +823,9 @@ namespace _3PA.MainFeatures.Pro {
         /// The line from which we read this info, allows to sort by line
         /// </summary>
         public int Line { get; set; }
-
     }
 
     public class DeployFilterRule : DeployRule {
-
         /// <summary>
         /// true if the rule is about including a file (+) false if about excluding (-)
         /// </summary>
@@ -884,7 +843,6 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     public class DeployVariableRule : DeployRule {
-
         /// <summary>
         /// the name of the variable, format &lt;XXX&gt;
         /// </summary>
@@ -916,7 +874,6 @@ namespace _3PA.MainFeatures.Pro {
     #region TransferNeeded
 
     public class TransferNeeded {
-
         /// <summary>
         /// target directory for the deployment
         /// </summary>
@@ -944,7 +901,6 @@ namespace _3PA.MainFeatures.Pro {
     #region FileToDeploy
 
     public class FileToDeploy {
-
         /// <summary>
         /// The path of input file that was originally compiled to trigger this move
         /// </summary>
@@ -998,9 +954,9 @@ namespace _3PA.MainFeatures.Pro {
             FinalDeploy = finalDeploy;
         }
 
-        public FileToDeploy Set(string origin, string @from, string to) {
+        public FileToDeploy Set(string origin, string from, string to) {
             Origin = origin;
-            From = @from;
+            From = from;
             To = to;
             return this;
         }
@@ -1008,15 +964,14 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Returns a copy if this object, setting properties in the meantime
         /// </summary>
-        public FileToDeploy Copy(string origin, string @from, string to) {
+        public FileToDeploy Copy(string origin, string from, string to) {
             return new FileToDeploy(TargetDir, DeployType, FinalDeploy) {
                 Origin = origin,
-                From = @from,
-                To = to,
+                From = from,
+                To = to
             };
         }
     }
 
     #endregion
-
 }

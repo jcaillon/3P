@@ -26,7 +26,6 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {
-
         #region constructor
 
         public OthersPage() {
@@ -49,8 +48,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             btSave.BackGrndImage = ImageResources.Save;
             btSave.ButtonPressed += BtSaveOnButtonPressed;
 
-            cbEncoding.DataSource = Enum.GetNames(typeof (NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
-            
+            cbEncoding.DataSource = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
+
             UpdateView();
 
             // dynamically reorder the controls for a correct tab order on notepad++

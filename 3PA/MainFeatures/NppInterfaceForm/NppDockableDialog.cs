@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (NppDockableDialog.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using YamuiFramework.Helper;
@@ -7,9 +26,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {
-
         #region private
 
         protected string _dialogDescription = "?";
@@ -30,11 +47,11 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Does the form exists and is visible?
         /// </summary>
         public bool IsVisible {
-            get { return !(Form == null || !(bool)Form.SafeSyncInvoke(form => form.Visible)); }
+            get { return !(Form == null || !(bool) Form.SafeSyncInvoke(form => form.Visible)); }
         }
-        
+
         public int DockableCommandIndex { get; set; }
-        
+
         #endregion
 
         #region Methods
@@ -42,9 +59,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <summary>
         /// Initialize the form, should set RealForm = new T()
         /// </summary>
-        protected virtual void InitForm() {
-
-        }
+        protected virtual void InitForm() {}
 
         public void Toggle(bool doShow) {
             if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
@@ -59,7 +74,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             try {
                 // initialize if not done
                 if (_fakeForm == null) {
-
                     // register fake form to Npp
                     _fakeForm = new NppDockableDialogEmptyForm();
                     NppTbData nppTbData = new NppTbData {
@@ -67,7 +81,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                         pszName = AssemblyInfo.AssemblyProduct + " - " + _dialogDescription,
                         dlgID = DockableCommandIndex,
                         uMask = _formDefaultPos | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                        hIconTab = (uint)Utils.GetIconFromImage(_iconImage).Handle,
+                        hIconTab = (uint) Utils.GetIconFromImage(_iconImage).Handle,
                         pszModuleName = AssemblyInfo.AssemblyProduct
                     };
                     IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));

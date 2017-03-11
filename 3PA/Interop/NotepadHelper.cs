@@ -25,7 +25,6 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace _3PA.Interop {
-
     [StructLayout(LayoutKind.Sequential)]
     internal struct NppData {
         public IntPtr _nppHandle;
@@ -35,8 +34,7 @@ namespace _3PA.Interop {
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct FuncItem {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-        public string _itemName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string _itemName;
         public Action _pFunc;
         public int _cmdID;
         public bool _init2Check;
@@ -49,33 +47,36 @@ namespace _3PA.Interop {
         List<IntPtr> _shortCutKeys;
         IntPtr _nativePointer;
         bool _disposed;
+
         public FuncItems() {
             _funcItems = new List<FuncItem>();
             _sizeFuncItem = Marshal.SizeOf(typeof(FuncItem));
             _shortCutKeys = new List<IntPtr>();
         }
+
         [DllImport("kernel32")]
         static extern void RtlMoveMemory(IntPtr Destination, IntPtr Source, int Length);
+
         public void Add(FuncItem funcItem) {
-            int oldSize = _funcItems.Count * _sizeFuncItem;
+            int oldSize = _funcItems.Count*_sizeFuncItem;
             _funcItems.Add(funcItem);
-            int newSize = _funcItems.Count * _sizeFuncItem;
+            int newSize = _funcItems.Count*_sizeFuncItem;
             IntPtr newPointer = Marshal.AllocHGlobal(newSize);
             if (_nativePointer != IntPtr.Zero) {
                 RtlMoveMemory(newPointer, _nativePointer, oldSize);
                 Marshal.FreeHGlobal(_nativePointer);
             }
-            IntPtr ptrPosNewItem = (IntPtr)(newPointer.ToInt64() + oldSize);
+            IntPtr ptrPosNewItem = (IntPtr) (newPointer.ToInt64() + oldSize);
             byte[] aB = Encoding.Unicode.GetBytes(funcItem._itemName + "\0");
             Marshal.Copy(aB, 0, ptrPosNewItem, aB.Length);
-            ptrPosNewItem = (IntPtr)(ptrPosNewItem.ToInt64() + 128);
+            ptrPosNewItem = (IntPtr) (ptrPosNewItem.ToInt64() + 128);
             IntPtr p = (funcItem._pFunc != null) ? Marshal.GetFunctionPointerForDelegate(funcItem._pFunc) : IntPtr.Zero;
             Marshal.WriteIntPtr(ptrPosNewItem, p);
-            ptrPosNewItem = (IntPtr)(ptrPosNewItem.ToInt64() + IntPtr.Size);
+            ptrPosNewItem = (IntPtr) (ptrPosNewItem.ToInt64() + IntPtr.Size);
             Marshal.WriteInt64(ptrPosNewItem, funcItem._cmdID);
-            ptrPosNewItem = (IntPtr)(ptrPosNewItem.ToInt64() + 4);
+            ptrPosNewItem = (IntPtr) (ptrPosNewItem.ToInt64() + 4);
             Marshal.WriteInt64(ptrPosNewItem, Convert.ToInt64(funcItem._init2Check));
-            ptrPosNewItem = (IntPtr)(ptrPosNewItem.ToInt64() + 4);
+            ptrPosNewItem = (IntPtr) (ptrPosNewItem.ToInt64() + 4);
             if (funcItem._pShKey._key != 0) {
                 IntPtr newShortCutKey = Marshal.AllocHGlobal(4);
                 Marshal.StructureToPtr(funcItem._pShKey, newShortCutKey, false);
@@ -83,25 +84,33 @@ namespace _3PA.Interop {
             } else Marshal.WriteIntPtr(ptrPosNewItem, IntPtr.Zero);
             _nativePointer = newPointer;
         }
+
         public void RefreshItems() {
             IntPtr ptrPosItem = _nativePointer;
             for (int i = 0; i < _funcItems.Count; i++) {
                 FuncItem updatedItem = new FuncItem();
                 updatedItem._itemName = _funcItems[i]._itemName;
-                ptrPosItem = (IntPtr)(ptrPosItem.ToInt64() + 128);
+                ptrPosItem = (IntPtr) (ptrPosItem.ToInt64() + 128);
                 updatedItem._pFunc = _funcItems[i]._pFunc;
-                ptrPosItem = (IntPtr)(ptrPosItem.ToInt64() + IntPtr.Size);
+                ptrPosItem = (IntPtr) (ptrPosItem.ToInt64() + IntPtr.Size);
                 updatedItem._cmdID = Marshal.ReadInt32(ptrPosItem);
-                ptrPosItem = (IntPtr)(ptrPosItem.ToInt64() + 4);
+                ptrPosItem = (IntPtr) (ptrPosItem.ToInt64() + 4);
                 updatedItem._init2Check = _funcItems[i]._init2Check;
-                ptrPosItem = (IntPtr)(ptrPosItem.ToInt64() + 4);
+                ptrPosItem = (IntPtr) (ptrPosItem.ToInt64() + 4);
                 updatedItem._pShKey = _funcItems[i]._pShKey;
-                ptrPosItem = (IntPtr)(ptrPosItem.ToInt64() + IntPtr.Size);
+                ptrPosItem = (IntPtr) (ptrPosItem.ToInt64() + IntPtr.Size);
                 _funcItems[i] = updatedItem;
             }
         }
-        public IntPtr NativePointer { get { return _nativePointer; } }
-        public List<FuncItem> Items { get { return _funcItems; } }
+
+        public IntPtr NativePointer {
+            get { return _nativePointer; }
+        }
+
+        public List<FuncItem> Items {
+            get { return _funcItems; }
+        }
+
         public void Dispose() {
             if (!_disposed) {
                 foreach (IntPtr ptr in _shortCutKeys) Marshal.FreeHGlobal(ptr);
@@ -109,6 +118,7 @@ namespace _3PA.Interop {
                 _disposed = true;
             }
         }
+
         ~FuncItems() {
             Dispose();
         }
@@ -125,6 +135,7 @@ namespace _3PA.Interop {
             _isShift = Convert.ToByte(parts.Contains("Shift"));
             _isAlt = Convert.ToByte(parts.Contains("Alt"));
         }
+
         public ShortcutKey(bool isCtrl, bool isAlt, bool isShift, Keys key) {
             // the types 'bool' and 'char' have a size of 1 byte only!
             _isCtrl = Convert.ToByte(isCtrl);
@@ -132,13 +143,24 @@ namespace _3PA.Interop {
             _isShift = Convert.ToByte(isShift);
             _key = Convert.ToByte(key);
         }
+
         public byte _isCtrl;
         public byte _isAlt;
         public byte _isShift;
         public byte _key;
-        public bool IsCtrl { get { return _isCtrl != 0; } }
-        public bool IsShift { get { return _isShift != 0; } }
-        public bool IsAlt { get { return _isAlt != 0; } }
+
+        public bool IsCtrl {
+            get { return _isCtrl != 0; }
+        }
+
+        public bool IsShift {
+            get { return _isShift != 0; }
+        }
+
+        public bool IsAlt {
+            get { return _isAlt != 0; }
+        }
+
         public bool IsSet {
             get { return _key != 0; }
         }
@@ -155,8 +177,12 @@ namespace _3PA.Interop {
     [StructLayout(LayoutKind.Sequential)]
     internal struct RECT {
         public RECT(int left, int top, int right, int bottom) {
-            Left = left; Top = top; Right = right; Bottom = bottom;
+            Left = left;
+            Top = top;
+            Right = right;
+            Bottom = bottom;
         }
+
         public int Left;
         public int Top;
         public int Right;
@@ -165,27 +191,76 @@ namespace _3PA.Interop {
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct NppTbData {
-        public IntPtr hClient;            // HWND: client Window Handle
-        public string pszName;            // TCHAR*: name of plugin (shown in window)
-        public int dlgID;                // int: a funcItem provides the function pointer to start a dialog. Please parse here these ID
+        public IntPtr hClient; // HWND: client Window Handle
+        public string pszName; // TCHAR*: name of plugin (shown in window)
+        public int dlgID; // int: a funcItem provides the function pointer to start a dialog. Please parse here these ID
         // user modifications
-        public NppTbMsg uMask;                // UINT: mask params: look to above defines
-        public uint hIconTab;            // HICON: icon for tabs
-        public string pszAddInfo;        // TCHAR*: for plugin to display additional informations
+        public NppTbMsg uMask; // UINT: mask params: look to above defines
+        public uint hIconTab; // HICON: icon for tabs
+        public string pszAddInfo; // TCHAR*: for plugin to display additional informations
         // internal data, do not use !!!
-        public RECT rcFloat;            // RECT: floating position
-        public int iPrevCont;           // int: stores the privious container (toggling between float and dock)
-        public string pszModuleName;    // const TCHAR*: it's the plugin file name. It's used to identify the plugin
+        public RECT rcFloat; // RECT: floating position
+        public int iPrevCont; // int: stores the privious container (toggling between float and dock)
+        public string pszModuleName; // const TCHAR*: it's the plugin file name. It's used to identify the plugin
     }
 
     internal enum LangType {
-        L_TEXT, L_PHP, L_C, L_CPP, L_CS, L_OBJC, L_JAVA, L_RC,
-        L_HTML, L_XML, L_MAKEFILE, L_PASCAL, L_BATCH, L_INI, L_ASCII, L_USER,
-        L_ASP, L_SQL, L_VB, L_JS, L_CSS, L_PERL, L_PYTHON, L_LUA,
-        L_TEX, L_FORTRAN, L_BASH, L_FLASH, L_NSIS, L_TCL, L_LISP, L_SCHEME,
-        L_ASM, L_DIFF, L_PROPS, L_PS, L_RUBY, L_SMALLTALK, L_VHDL, L_KIX, L_AU3,
-        L_CAML, L_ADA, L_VERILOG, L_MATLAB, L_HASKELL, L_INNO, L_SEARCHRESULT,
-        L_CMAKE, L_YAML, L_COBOL, L_GUI4CLI, L_D, L_POWERSHELL, L_R, L_JSP,
+        L_TEXT,
+        L_PHP,
+        L_C,
+        L_CPP,
+        L_CS,
+        L_OBJC,
+        L_JAVA,
+        L_RC,
+        L_HTML,
+        L_XML,
+        L_MAKEFILE,
+        L_PASCAL,
+        L_BATCH,
+        L_INI,
+        L_ASCII,
+        L_USER,
+        L_ASP,
+        L_SQL,
+        L_VB,
+        L_JS,
+        L_CSS,
+        L_PERL,
+        L_PYTHON,
+        L_LUA,
+        L_TEX,
+        L_FORTRAN,
+        L_BASH,
+        L_FLASH,
+        L_NSIS,
+        L_TCL,
+        L_LISP,
+        L_SCHEME,
+        L_ASM,
+        L_DIFF,
+        L_PROPS,
+        L_PS,
+        L_RUBY,
+        L_SMALLTALK,
+        L_VHDL,
+        L_KIX,
+        L_AU3,
+        L_CAML,
+        L_ADA,
+        L_VERILOG,
+        L_MATLAB,
+        L_HASKELL,
+        L_INNO,
+        L_SEARCHRESULT,
+        L_CMAKE,
+        L_YAML,
+        L_COBOL,
+        L_GUI4CLI,
+        L_D,
+        L_POWERSHELL,
+        L_R,
+        L_JSP,
         // The end of enumated language type, so it should be always at the end
         L_EXTERNAL
     }
@@ -207,21 +282,21 @@ namespace _3PA.Interop {
         CONT_BOTTOM = 3,
         DOCKCONT_MAX = 4,
         // mask params for plugins of internal dialogs
-        DWS_ICONTAB = 0x00000001,            // Icon for tabs are available
-        DWS_ICONBAR = 0x00000002,            // Icon for icon bar are available (currently not supported)
-        DWS_ADDINFO = 0x00000004,            // Additional information are in use
+        DWS_ICONTAB = 0x00000001, // Icon for tabs are available
+        DWS_ICONBAR = 0x00000002, // Icon for icon bar are available (currently not supported)
+        DWS_ADDINFO = 0x00000004, // Additional information are in use
         DWS_PARAMSALL = (DWS_ICONTAB | DWS_ICONBAR | DWS_ADDINFO),
         // default docking values for first call of plugin
-        DWS_DF_CONT_LEFT = (CONT_LEFT << 28),    // default docking on left
-        DWS_DF_CONT_RIGHT = (CONT_RIGHT << 28),    // default docking on right
-        DWS_DF_CONT_TOP = (CONT_TOP << 28),        // default docking on top
-        DWS_DF_CONT_BOTTOM = (CONT_BOTTOM << 28),    // default docking on bottom
-        DWS_DF_FLOATING = 0x80000000            // default state is floating
+        DWS_DF_CONT_LEFT = (CONT_LEFT << 28), // default docking on left
+        DWS_DF_CONT_RIGHT = (CONT_RIGHT << 28), // default docking on right
+        DWS_DF_CONT_TOP = (CONT_TOP << 28), // default docking on top
+        DWS_DF_CONT_BOTTOM = (CONT_BOTTOM << 28), // default docking on bottom
+        DWS_DF_FLOATING = 0x80000000 // default state is floating
     }
 
     internal enum NppMsg : uint {
         //Here you can find how to use these messages : http://notepad-plus.sourceforge.net/uk/plugins-HOWTO.php
-        NPPMSG = (0x400/*WM_USER*/ + 1000),
+        NPPMSG = (0x400 /*WM_USER*/+ 1000),
         NPPM_GETCURRENTSCINTILLA = (NPPMSG + 4),
         NPPM_GETCURRENTLANGTYPE = (NPPMSG + 5),
         NPPM_SETCURRENTLANGTYPE = (NPPMSG + 6),
@@ -455,63 +530,63 @@ namespace _3PA.Interop {
         // Returns: TRUE if successful, FALSE otherwise. startNumber will also be set to 0 if unsuccessful
 
         NPPM_GETLANGUAGENAME = (NPPMSG + 83),
-	    // INT NPPM_GETLANGUAGENAME(int langType, TCHAR *langName),
-	    // Get programing language name from the given language type (LangType),
-	    // Return value is the number of copied character / number of character to copy (\0 is not included),
-	    // You should call this function 2 times - the first time you pass langName as NULL to get the number of characters to copy.
+        // INT NPPM_GETLANGUAGENAME(int langType, TCHAR *langName),
+        // Get programing language name from the given language type (LangType),
+        // Return value is the number of copied character / number of character to copy (\0 is not included),
+        // You should call this function 2 times - the first time you pass langName as NULL to get the number of characters to copy.
         // You allocate a buffer of the length of (the number of characters + 1), then call NPPM_GETLANGUAGENAME function the 2nd time
-	    // by passing allocated buffer as argument langName
+        // by passing allocated buffer as argument langName
 
-	    NPPM_GETLANGUAGEDESC = (NPPMSG + 84),
-	    // INT NPPM_GETLANGUAGEDESC(int langType, TCHAR *langDesc),
-	    // Get programing language short description from the given language type (LangType),
-	    // Return value is the number of copied character / number of character to copy (\0 is not included),
-	    // You should call this function 2 times - the first time you pass langDesc as NULL to get the number of characters to copy.
+        NPPM_GETLANGUAGEDESC = (NPPMSG + 84),
+        // INT NPPM_GETLANGUAGEDESC(int langType, TCHAR *langDesc),
+        // Get programing language short description from the given language type (LangType),
+        // Return value is the number of copied character / number of character to copy (\0 is not included),
+        // You should call this function 2 times - the first time you pass langDesc as NULL to get the number of characters to copy.
         // You allocate a buffer of the length of (the number of characters + 1), then call NPPM_GETLANGUAGEDESC function the 2nd time
-	    // by passing allocated buffer as argument langDesc
+        // by passing allocated buffer as argument langDesc
 
-	    NPPM_SHOWDOCSWITCHER   = (NPPMSG + 85),
-	    // VOID NPPM_ISDOCSWITCHERSHOWN(0, BOOL toShowOrNot),
-	    // Send this message to show or hide doc switcher.
-	    // if toShowOrNot is TRUE then show doc switcher, otherwise hide it.
+        NPPM_SHOWDOCSWITCHER = (NPPMSG + 85),
+        // VOID NPPM_ISDOCSWITCHERSHOWN(0, BOOL toShowOrNot),
+        // Send this message to show or hide doc switcher.
+        // if toShowOrNot is TRUE then show doc switcher, otherwise hide it.
 
-	    NPPM_ISDOCSWITCHERSHOWN   = (NPPMSG + 86),
-	    // BOOL NPPM_ISDOCSWITCHERSHOWN(0, 0),
-	    // Check to see if doc switcher is shown.
+        NPPM_ISDOCSWITCHERSHOWN = (NPPMSG + 86),
+        // BOOL NPPM_ISDOCSWITCHERSHOWN(0, 0),
+        // Check to see if doc switcher is shown.
 
-	    NPPM_GETAPPDATAPLUGINSALLOWED   = (NPPMSG + 87),
-	    // BOOL NPPM_GETAPPDATAPLUGINSALLOWED(0, 0),
-	    // Check to see if loading plugins from "%APPDATA%\Notepad++\plugins" is allowed.
+        NPPM_GETAPPDATAPLUGINSALLOWED = (NPPMSG + 87),
+        // BOOL NPPM_GETAPPDATAPLUGINSALLOWED(0, 0),
+        // Check to see if loading plugins from "%APPDATA%\Notepad++\plugins" is allowed.
 
-	    NPPM_GETCURRENTVIEW   = (NPPMSG + 88),
-	    // INT NPPM_GETCURRENTVIEW(0, 0),
-	    // Return: current edit view of Notepad++. Only 2 possible values: 0 = Main, 1 = Secondary
+        NPPM_GETCURRENTVIEW = (NPPMSG + 88),
+        // INT NPPM_GETCURRENTVIEW(0, 0),
+        // Return: current edit view of Notepad++. Only 2 possible values: 0 = Main, 1 = Secondary
 
-	    NPPM_DOCSWITCHERDISABLECOLUMN   = (NPPMSG + 89),
-	    // VOID NPPM_DOCSWITCHERDISABLECOLUMN(0, BOOL disableOrNot),
-	    // Disable or enable extension column of doc switcher
+        NPPM_DOCSWITCHERDISABLECOLUMN = (NPPMSG + 89),
+        // VOID NPPM_DOCSWITCHERDISABLECOLUMN(0, BOOL disableOrNot),
+        // Disable or enable extension column of doc switcher
 
-	    NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR   = (NPPMSG + 90),
-	    // INT NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR(0, 0),
-	    // Return: current editor default foreground color. You should convert the returned value in COLORREF
+        NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR = (NPPMSG + 90),
+        // INT NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR(0, 0),
+        // Return: current editor default foreground color. You should convert the returned value in COLORREF
 
-	    NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR   = (NPPMSG + 91),
-	    // INT NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR(0, 0),
-	    // Return: current editor default background color. You should convert the returned value in COLORREF
+        NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR = (NPPMSG + 91),
+        // INT NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR(0, 0),
+        // Return: current editor default background color. You should convert the returned value in COLORREF
 
-	    NPPM_SETSMOOTHFONT   = (NPPMSG + 92),
-	    // VOID NPPM_SETSMOOTHFONT(0, BOOL setSmoothFontOrNot),
+        NPPM_SETSMOOTHFONT = (NPPMSG + 92),
+        // VOID NPPM_SETSMOOTHFONT(0, BOOL setSmoothFontOrNot),
 
-	    NPPM_SETEDITORBORDEREDGE   = (NPPMSG + 93),
-	    // VOID NPPM_SETEDITORBORDEREDGE(0, BOOL withEditorBorderEdgeOrNot),
+        NPPM_SETEDITORBORDEREDGE = (NPPMSG + 93),
+        // VOID NPPM_SETEDITORBORDEREDGE(0, BOOL withEditorBorderEdgeOrNot),
 
-	    NPPM_SAVEFILE = (NPPMSG + 94),
-	    // VOID NPPM_SAVEFILE(0, const TCHAR *fileNameToSave),
+        NPPM_SAVEFILE = (NPPMSG + 94),
+        // VOID NPPM_SAVEFILE(0, const TCHAR *fileNameToSave),
 
-	    NPPM_DISABLEAUTOUPDATE = (NPPMSG + 95), // 2119 in decimal
-	    // VOID NPPM_DISABLEAUTOUPDATE(0, 0),
+        NPPM_DISABLEAUTOUPDATE = (NPPMSG + 95), // 2119 in decimal
+        // VOID NPPM_DISABLEAUTOUPDATE(0, 0),
 
-        RUNCOMMAND_USER = (0x400/*WM_USER*/ + 3000),
+        RUNCOMMAND_USER = (0x400 /*WM_USER*/+ 3000),
         NPPM_GETFULLCURRENTPATH = (RUNCOMMAND_USER + FULL_CURRENT_PATH),
         NPPM_GETCURRENTDIRECTORY = (RUNCOMMAND_USER + CURRENT_DIRECTORY),
         NPPM_GETFILENAME = (RUNCOMMAND_USER + FILE_NAME),
@@ -605,11 +680,11 @@ namespace _3PA.Interop {
         //scnNotification->nmhdr.code = NPPN_FILEBEFOREOPEN;
         //scnNotification->nmhdr.hwndFrom = hwndNpp;
         //scnNotification->nmhdr.idFrom = NULL;
-        NPPN_FILELOADFAILED = (NPPN_FIRST + 15),  // To notify plugins that file open operation failed
+        NPPN_FILELOADFAILED = (NPPN_FIRST + 15), // To notify plugins that file open operation failed
         //scnNotification->nmhdr.code = NPPN_FILEOPENFAILED;
         //scnNotification->nmhdr.hwndFrom = hwndNpp;
         //scnNotification->nmhdr.idFrom = BufferID;
-        NPPN_READONLYCHANGED = (NPPN_FIRST + 16),  // To notify plugins that current document change the readonly status,
+        NPPN_READONLYCHANGED = (NPPN_FIRST + 16), // To notify plugins that current document change the readonly status,
         //scnNotification->nmhdr.code = NPPN_READONLYCHANGED;
         //scnNotification->nmhdr.hwndFrom = bufferID;
         //scnNotification->nmhdr.idFrom = docStatus;
@@ -617,7 +692,7 @@ namespace _3PA.Interop {
         //       docStatus can be combined by DOCSTAUS_READONLY and DOCSTAUS_BUFFERDIRTY
         DOCSTAUS_READONLY = 1,
         DOCSTAUS_BUFFERDIRTY = 2,
-        NPPN_DOCORDERCHANGED = (NPPN_FIRST + 16),  // To notify plugins that document order is changed
+        NPPN_DOCORDERCHANGED = (NPPN_FIRST + 16) // To notify plugins that document order is changed
         //scnNotification->nmhdr.code = NPPN_DOCORDERCHANGED;
         //scnNotification->nmhdr.hwndFrom = newIndex;
         //scnNotification->nmhdr.idFrom = BufferID;
@@ -666,8 +741,8 @@ namespace _3PA.Interop {
     /// A built-in Notepad++ menu command.
     /// </summary>
     internal enum NppMenuCmd {
-
         #region File
+
         FileNew = (Idm.File + 1),
         FileOpen = (Idm.File + 2),
         FileClose = (Idm.File + 3),
@@ -688,9 +763,11 @@ namespace _3PA.Interop {
         FileRename = (Idm.File + 17),
         FileOpenAllRecentFiles = (Idm.Edit + 40),
         FileCleanRecentFileList = (Idm.Edit + 41),
+
         #endregion
 
         #region Edit
+
         EditCut = (Idm.Edit + 1),
         EditCopy = (Idm.Edit + 2),
         EditUndo = (Idm.Edit + 3),
@@ -724,9 +801,11 @@ namespace _3PA.Interop {
         EditAutoComplete = (50000 + 0),
         EditAutoCompleteCurrentFile = (50000 + 1),
         EditFuncionCallTip = (50000 + 2),
+
         #endregion
 
         #region Search
+
         SearchFind = (Idm.Search + 1),
         SearchFindNext = (Idm.Search + 2),
         SearchReplace = (Idm.Search + 3),
@@ -756,9 +835,11 @@ namespace _3PA.Interop {
         SearchMarkAllExt5 = (Idm.Search + 30),
         SearchUnmarkAllExt5 = (Idm.Search + 31),
         SearchClearAllMarks = (Idm.Search + 32),
+
         #endregion
 
         #region View
+
         //IDM.ViewToolbarHide = (IDM.View + 1),
         ViewToolbarReduce = (Idm.View + 2),
         ViewToolbarEnlarge = (Idm.View + 3),
@@ -825,9 +906,11 @@ namespace _3PA.Interop {
         ViewGoToNewInstance = 10003,
         ViewLoadInNewInstance = 10004,
         ViewSwitchToOtherView = (Idm.View + 72),
+
         #endregion
 
         #region Format
+
         FormatToDos = (Idm.Format + 1),
         FormatToUnix = (Idm.Format + 2),
         FormatToMac = (Idm.Format + 3),
@@ -841,9 +924,11 @@ namespace _3PA.Interop {
         FormatConvertUtf8 = (Idm.Format + 11),
         FormatConvertUnicodeBigEndian = (Idm.Format + 12),
         FormatConvertUnicodeLittleEndian = (Idm.Format + 13),
+
         #endregion
 
         #region FormatEncode
+
         Arabic_ISO_8859_6 = (Idm.FormatEncode + 14),
         Arabic_OEM_720 = (Idm.FormatEncode + 25),
         Arabic_Windows_1256 = (Idm.FormatEncode + 6),
@@ -893,9 +978,11 @@ namespace _3PA.Interop {
         Western_European_OEM_US = (Idm.FormatEncode + 24),
         Western_European_Windows_1252 = (Idm.FormatEncode + 2),
         Western_European_Windows_1258 = (Idm.FormatEncode + 8),
+
         #endregion
 
         #region Language
+
         LangStyleConfigDialog = (Idm.Lang + 1),
         LangC = (Idm.Lang + 2),
         LangCpp = (Idm.Lang + 3),
@@ -949,9 +1036,11 @@ namespace _3PA.Interop {
         LangExternalLimit = (Idm.Lang + 79),
         LangUser = (Idm.Lang + 80),
         LangUserLimit = (Idm.Lang + 110),
+
         #endregion
 
         #region About
+
         AboutHomePage = (Idm.About + 1),
         AboutProjectPage = (Idm.About + 2),
         AboutOnlineHelp = (Idm.About + 3),
@@ -960,9 +1049,11 @@ namespace _3PA.Interop {
         AboutUpdateNpp = (Idm.About + 6),
         AboutWikiFaq = (Idm.About + 7),
         AboutHelp = (Idm.About + 8),
+
         #endregion
 
         #region Settings
+
         SettingTabSize = (Idm.Setting + 1),
         SettingTabReplaceSpace = (Idm.Setting + 2),
         SettingHistorySize = (Idm.Setting + 3),
@@ -974,14 +1065,17 @@ namespace _3PA.Interop {
         SettingRememberLastSession = (Idm.Setting + 10),
         SettingPreferences = (Idm.Setting + 11),
         SettingAutoCnbChar = (Idm.Setting + 15),
+
         #endregion
 
         #region Macro
+
         MacroStartRecording = (Idm.Edit + 18),
         MacroStopRecording = (Idm.Edit + 19),
         MacroPLaybackRecorded = (Idm.Edit + 21),
         MacroSaveCurrent = (Idm.Edit + 25),
         MacroRunMultiDialog = (Idm.Edit + 32)
+
         #endregion
     }
 
@@ -1035,7 +1129,7 @@ namespace _3PA.Interop {
         Western_European_OEM_863_French = (Idm.FormatEncode + 36),
         Western_European_OEM_US = (Idm.FormatEncode + 24),
         Western_European_Windows_1252 = (Idm.FormatEncode + 2),
-        Western_European_Windows_1258 = (Idm.FormatEncode + 8),
+        Western_European_Windows_1258 = (Idm.FormatEncode + 8)
     }
 
     [Flags]

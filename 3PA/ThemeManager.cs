@@ -35,9 +35,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA {
-
     internal static class ThemeManager {
-
         #region Allows to initiate stuff 
 
         public static void OnStartUp() {
@@ -67,20 +65,16 @@ namespace _3PA {
             }
             set {
                 _currentTheme = value;
-                try { 
-
+                try {
                     YamuiThemeManager.Current = _currentTheme;
                     // we set the color for the YamuiTheme, but we also need to do it for the Theme...
                     _currentTheme.SetColorValues(typeof(Theme));
-
                 } catch (Exception e) {
                     // either display the error immediatly or when the plugin is fully loaded...
                     if (Plug.PluginIsReady)
                         ErrorHandler.ShowErrors(e, "Loading a theme");
                     else {
-                        Plug.OnPlugReady += () => {
-                            ErrorHandler.ShowErrors(e, "Loading a theme");
-                        };
+                        Plug.OnPlugReady += () => { ErrorHandler.ShowErrors(e, "Loading a theme"); };
                     }
                 }
             }
@@ -121,7 +115,7 @@ namespace _3PA {
         public static void RefreshApplicationWithTheme(Theme theme) {
             Current = theme;
             Config.Instance.AccentColor = theme.AccentColor;
-            
+
             // force the autocomplete to redraw
             AutoCompletion.ForceClose();
             CodeExplorer.Instance.ApplyColorSettings();
@@ -231,15 +225,12 @@ namespace _3PA {
         #region Theme class
 
         public class Theme : YamuiTheme {
-
             // special for 3P
             public Color GenericLinkColor = Color.FromArgb(95, 158, 142);
             public Color GenericErrorColor = Color.OrangeRed;
-
         }
 
         #endregion
-
     }
 
     #region Message image
@@ -262,5 +253,4 @@ namespace _3PA {
     }
 
     #endregion
-
 }

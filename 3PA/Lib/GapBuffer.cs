@@ -25,7 +25,6 @@ using System.Globalization;
 using System.Threading;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// Represents a strongly typed collection of objects that can be accessed by index. Insertions and 
     /// deletions to the collection near the same relative index are optimized.
@@ -35,7 +34,6 @@ namespace _3PA.Lib {
     [Serializable]
     [DebuggerDisplay("Count = {Count}")]
     public class GapBuffer<T> : IList<T>, IList {
-
         #region Fields
 
         private const int MinCapacity = 4;
@@ -45,8 +43,7 @@ namespace _3PA.Lib {
         private int _gapEnd;
         private int _version;
 
-        [NonSerialized]
-        private object _syncRoot;
+        [NonSerialized] private object _syncRoot;
 
         #endregion Fields
 
@@ -74,9 +71,7 @@ namespace _3PA.Lib {
         /// <see cref="Capacity"/> is set to a value that is less than <see cref="Count"/>. 
         /// </exception>
         public int Capacity {
-            get {
-                return _buffer.Length;
-            }
+            get { return _buffer.Length; }
             set {
                 // Is there any work to do?
                 if (value == _buffer.Length)
@@ -105,7 +100,6 @@ namespace _3PA.Lib {
             }
         }
 
-
         /// <summary>
         /// Gets the number of elements actually contained in the <see cref="GapBuffer{T}"/>.
         /// </summary>
@@ -113,35 +107,28 @@ namespace _3PA.Lib {
         /// The number of elements actually contained in the <see cref="GapBuffer{T}"/>.
         /// </value>
         public int Count {
-            get {
-                return _buffer.Length - (_gapEnd - _gapStart);
-            }
+            get { return _buffer.Length - (_gapEnd - _gapStart); }
         }
-
 
         // Explicit IList implementation
         bool IList.IsFixedSize {
             get { return false; }
         }
 
-
         // Explicit IList implementation
         bool IList.IsReadOnly {
             get { return false; }
         }
-
 
         // Explicit ICollection<T> implementation
         bool ICollection<T>.IsReadOnly {
             get { return false; }
         }
 
-
         // Explicit ICollection implementation
         bool ICollection.IsSynchronized {
             get { return false; }
         }
-
 
         // Explicit ICollection implementation
         object ICollection.SyncRoot {
@@ -152,7 +139,6 @@ namespace _3PA.Lib {
                 return _syncRoot;
             }
         }
-
 
         /// <summary>
         /// Gets or sets the element at the specified index. 
@@ -188,13 +174,12 @@ namespace _3PA.Lib {
             }
         }
 
-
         // Explicit IList implementation
         object IList.this[int index] {
             get { return this[index]; }
             set {
                 VerifyValueType(value);
-                this[index] = (T)value;
+                this[index] = (T) value;
             }
         }
 
@@ -211,14 +196,12 @@ namespace _3PA.Lib {
             Insert(Count, item);
         }
 
-
         // Explicit IList implementation
         int IList.Add(object value) {
             VerifyValueType(value);
-            Add((T)value);
+            Add((T) value);
             return (Count - 1);
         }
-
 
         /// <summary>
         /// Adds the elements of the specified collection to the end of the <see cref="GapBuffer{T}"/>. 
@@ -230,7 +213,6 @@ namespace _3PA.Lib {
         public void AddRange(IEnumerable<T> collection) {
             InsertRange(Count, collection);
         }
-
 
         /// <summary>
         /// Removes all elements from the <see cref="GapBuffer{T}"/>.
@@ -244,7 +226,6 @@ namespace _3PA.Lib {
             _gapEnd = _buffer.Length;
             _version++;
         }
-
 
         /// <summary>
         /// Determines whether an element is in the <see cref="GapBuffer{T}"/>. 
@@ -269,11 +250,10 @@ namespace _3PA.Lib {
             return false;
         }
 
-
         // Explicit IList implementation
         bool IList.Contains(object value) {
             if (IsCompatibleObject(value))
-                return Contains((T)value);
+                return Contains((T) value);
 
             return false;
         }
@@ -308,22 +288,19 @@ namespace _3PA.Lib {
             if (arrayIndex >= array.Length || arrayIndex + Count > array.Length)
                 throw new ArgumentException(@"Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.", "arrayIndex");
 
-
             // Copy the spans into the destination array at the offset
             Array.Copy(_buffer, 0, array, arrayIndex, _gapStart);
             Array.Copy(_buffer, _gapEnd, array, arrayIndex + _gapStart, _buffer.Length - _gapEnd);
         }
 
-
         // Explicit ICollection implementation
         void ICollection.CopyTo(Array array, int arrayIndex) {
             try {
-                CopyTo((T[])array, arrayIndex);
+                CopyTo((T[]) array, arrayIndex);
             } catch (InvalidCastException) {
                 throw new ArgumentException(@"Target array type is not compatible with the type of items in the collection.", "array");
             }
         }
-
 
         /// <summary>
         /// Returns an enumerator that iterates through the <see cref="GapBuffer{T}"/>.
@@ -333,18 +310,15 @@ namespace _3PA.Lib {
             return new Enumerator(this);
         }
 
-
         // Explicit IEnumerable implementation
         IEnumerator IEnumerable.GetEnumerator() {
             return new Enumerator(this);
         }
 
-
         // Explicit IEnumerable<T> implementation
         IEnumerator<T> IEnumerable<T>.GetEnumerator() {
             return new Enumerator(this);
         }
-
 
         /// <summary>
         /// Searches for the specified object and returns the zero-based index of the first 
@@ -369,15 +343,13 @@ namespace _3PA.Lib {
             return index;
         }
 
-
         // Explicit IList implementation
         int IList.IndexOf(object item) {
             if (IsCompatibleObject(item))
-                return IndexOf((T)item);
+                return IndexOf((T) item);
 
             return -1;
         }
-
 
         /// <summary>
         /// Inserts an element into the <see cref="GapBuffer{T}"/> at the specified index. Consecutive operations
@@ -403,13 +375,11 @@ namespace _3PA.Lib {
             _version++;
         }
 
-
         // Explicit IList implementation
         void IList.Insert(int index, object item) {
             VerifyValueType(item);
-            Insert(index, (T)item);
+            Insert(index, (T) item);
         }
-
 
         /// <summary>
         /// Inserts the elements of a collection into the <see cref="GapBuffer{T}"/> at the specified index. 
@@ -431,7 +401,6 @@ namespace _3PA.Lib {
 
             if (index < 0 || index > Count)
                 throw new ArgumentOutOfRangeException("index", @"Index must be non-negative and less than the size of the collection.");
-
 
             ICollection<T> col = collection as ICollection<T>;
             if (col != null) {
@@ -457,7 +426,6 @@ namespace _3PA.Lib {
             _version++;
         }
 
-
         /// <summary>
         /// Removes the first occurrence of a specific object from the <see cref="GapBuffer{T}"/>. 
         /// </summary>
@@ -477,13 +445,11 @@ namespace _3PA.Lib {
             return true;
         }
 
-
         // Explicit IList implementation
         void IList.Remove(object item) {
             if (IsCompatibleObject(item))
-                Remove((T)item);
+                Remove((T) item);
         }
-
 
         /// <summary>
         /// Removes the element at the specified index of the <see cref="GapBuffer{T}"/>. 
@@ -504,7 +470,6 @@ namespace _3PA.Lib {
             _gapEnd++;
             _version++;
         }
-
 
         /// <summary>
         /// Removes a range of elements from the <see cref="GapBuffer{T}"/>.
@@ -528,7 +493,6 @@ namespace _3PA.Lib {
             if (count < 0 || size - index < count)
                 throw new ArgumentOutOfRangeException("count", @"Count must be positive and count must refer to a location within the string/array/collection.");
 
-
             // Move the gap over the index and increase the gap size
             // by the number of elements removed. Easy as pie!
 
@@ -540,19 +504,17 @@ namespace _3PA.Lib {
             }
         }
 
-
         /// <summary>
         /// Sets the <see cref="Capacity"/> to the actual number of elements in the <see cref="GapBuffer{T}"/>, 
         /// if that number is less than a threshold value. 
         /// </summary>
         public void TrimExcess() {
             int size = Count;
-            int threshold = (int)(_buffer.Length * 0.9);
+            int threshold = (int) (_buffer.Length*0.9);
             if (size < threshold) {
                 Capacity = size;
             }
         }
-
 
         // Moves the gap start to the given index
         private void PlaceGapStart(int index) {
@@ -593,20 +555,18 @@ namespace _3PA.Lib {
             }
         }
 
-
         // Expands the interal array if the required size isn't available
         private void EnsureGapCapacity(int required) {
             // Is the available space in the gap?
             if (required > (_gapEnd - _gapStart)) {
                 // Calculate a new size (double the size necessary)
-                int newCapacity = (Count + required) * 2;
+                int newCapacity = (Count + required)*2;
                 if (newCapacity < MinCapacity)
                     newCapacity = MinCapacity;
 
                 Capacity = newCapacity;
             }
         }
-
 
         private static bool IsCompatibleObject(object value) {
             // Ensure the object is compatible with the generic type
@@ -616,7 +576,6 @@ namespace _3PA.Lib {
 
             return true;
         }
-
 
         private static void VerifyValueType(object value) {
             // Throw an exception if the object is not compatible with
@@ -635,7 +594,6 @@ namespace _3PA.Lib {
         /// </summary>
         [Serializable]
         public struct Enumerator : IEnumerator<T> {
-
             #region Fields
 
             private T _current;
@@ -666,7 +624,6 @@ namespace _3PA.Lib {
             public T Current {
                 get { return _current; }
             }
-
 
             // Explicit IEnumerator implementation
             object IEnumerator.Current {
@@ -709,14 +666,12 @@ namespace _3PA.Lib {
                 return false;
             }
 
-
             /// <summary>
             /// Releases all resources used by the <see cref="GapBuffer{T}.Enumerator"/>. 
             /// </summary>
             public void Dispose() {
                 // Nothing to release here
             }
-
 
             // Explicit IEnumerator implementation
             void IEnumerator.Reset() {

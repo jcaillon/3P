@@ -29,8 +29,7 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers {
     /// <summary>
     /// Handler for all loading image logic.<br/>
     /// <p>
@@ -49,8 +48,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
     /// Disposing image load handler will also cancel download of image from the web.
     /// </para>
     /// </remarks>
-    internal sealed class ImageLoadHandler : IDisposable
-    {
+    internal sealed class ImageLoadHandler : IDisposable {
         #region Fields and Consts
 
         /// <summary>
@@ -100,14 +98,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="htmlContainer">the container of the html to handle load image for</param>
         /// <param name="loadCompleteCallback">callback raised when image load process is complete with image or without</param>
-        public ImageLoadHandler(HtmlContainerInt htmlContainer, ActionInt<RImage, RRect, bool> loadCompleteCallback)
-        {
+        public ImageLoadHandler(HtmlContainerInt htmlContainer, ActionInt<RImage, RRect, bool> loadCompleteCallback) {
             ArgChecker.AssertArgNotNull(htmlContainer, "htmlContainer");
             ArgChecker.AssertArgNotNull(loadCompleteCallback, "loadCompleteCallback");
 
@@ -118,16 +114,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// the image instance of the loaded image
         /// </summary>
-        public RImage Image
-        {
+        public RImage Image {
             get { return _image; }
         }
 
         /// <summary>
         /// the image rectangle restriction as returned from image load event
         /// </summary>
-        public RRect Rectangle
-        {
+        public RRect Rectangle {
             get { return _imageRectangle; }
         }
 
@@ -145,35 +139,24 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="src">the source of the image to load</param>
         /// <param name="attributes">the collection of attributes on the element to use in event</param>
         /// <returns>the image object (null if failed)</returns>
-        public void LoadImage(string src, Dictionary<string, string> attributes)
-        {
-            try
-            {
+        public void LoadImage(string src, Dictionary<string, string> attributes) {
+            try {
                 var args = new HtmlImageLoadEventArgs(src, attributes, OnHtmlImageLoadEventCallback);
                 _htmlContainer.RaiseHtmlImageLoadEvent(args);
                 _asyncCallback = !_htmlContainer.AvoidAsyncImagesLoading;
 
-                if (!args.Handled)
-                {
-                    if (!string.IsNullOrEmpty(src))
-                    {
-                        if (src.StartsWith("data:image", StringComparison.CurrentCultureIgnoreCase))
-                        {
+                if (!args.Handled) {
+                    if (!string.IsNullOrEmpty(src)) {
+                        if (src.StartsWith("data:image", StringComparison.CurrentCultureIgnoreCase)) {
                             SetFromInlineData(src);
-                        }
-                        else
-                        {
+                        } else {
                             SetImageFromPath(src);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         ImageLoadComplete(false);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Exception in handling image source", ex);
                 ImageLoadComplete(false);
             }
@@ -182,12 +165,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose()
-        {
+        public void Dispose() {
             _disposed = true;
             ReleaseObjects();
         }
-
 
         #region Private methods
 
@@ -197,23 +178,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="path">the path to the image to load (file path or uri)</param>
         /// <param name="image">the image to load</param>
         /// <param name="imageRectangle">optional: limit to specific rectangle of the image and not all of it</param>
-        private void OnHtmlImageLoadEventCallback(string path, object image, RRect imageRectangle)
-        {
-            if (!_disposed)
-            {
+        private void OnHtmlImageLoadEventCallback(string path, object image, RRect imageRectangle) {
+            if (!_disposed) {
                 _imageRectangle = imageRectangle;
 
-                if (image != null)
-                {
+                if (image != null) {
                     _image = _htmlContainer.Adapter.ConvertImage(image);
                     ImageLoadComplete(_asyncCallback);
-                }
-                else if (!string.IsNullOrEmpty(path))
-                {
+                } else if (!string.IsNullOrEmpty(path)) {
                     SetImageFromPath(path);
-                }
-                else
-                {
+                } else {
                     ImageLoadComplete(_asyncCallback);
                 }
             }
@@ -223,8 +197,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// LoadFromRaw the image from inline base64 encoded string data.
         /// </summary>
         /// <param name="src">the source that has the base64 encoded image</param>
-        private void SetFromInlineData(string src)
-        {
+        private void SetFromInlineData(string src) {
             _image = GetImageFromData(src);
             if (_image == null)
                 _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Failed extract image from inline data");
@@ -237,14 +210,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="src">the source that has the base64 encoded image</param>
         /// <returns>image from base64 data string or null if failed</returns>
-        private RImage GetImageFromData(string src)
-        {
-            var s = src.Substring(src.IndexOf(':') + 1).Split(new[] { ',' }, 2);
-            if (s.Length == 2)
-            {
+        private RImage GetImageFromData(string src) {
+            var s = src.Substring(src.IndexOf(':') + 1).Split(new[] {','}, 2);
+            if (s.Length == 2) {
                 int imagePartsCount = 0, base64PartsCount = 0;
-                foreach (var part in s[0].Split(';'))
-                {
+                foreach (var part in s[0].Split(';')) {
                     var pPart = part.Trim();
                     if (pPart.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
                         imagePartsCount++;
@@ -252,8 +222,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                         base64PartsCount++;
                 }
 
-                if (imagePartsCount > 0)
-                {
+                if (imagePartsCount > 0) {
                     byte[] imageData = base64PartsCount > 0 ? Convert.FromBase64String(s[1].Trim()) : new UTF8Encoding().GetBytes(Uri.UnescapeDataString(s[1].Trim()));
                     return _htmlContainer.Adapter.ImageFromStream(new MemoryStream(imageData));
                 }
@@ -265,22 +234,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// LoadFromRaw image from path of image file or URL.
         /// </summary>
         /// <param name="path">the file path or uri to load image from</param>
-        private void SetImageFromPath(string path)
-        {
+        private void SetImageFromPath(string path) {
             var uri = CommonUtils.TryGetUri(path);
-            if (uri != null && uri.Scheme != "file")
-            {
+            if (uri != null && uri.Scheme != "file") {
                 SetImageFromUrl(uri);
-            }
-            else
-            {
+            } else {
                 var fileInfo = CommonUtils.TryGetFileInfo(uri != null ? uri.AbsolutePath : path);
-                if (fileInfo != null)
-                {
+                if (fileInfo != null) {
                     SetImageFromFile(fileInfo);
-                }
-                else
-                {
+                } else {
                     _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Failed load image, invalid source: " + path);
                     ImageLoadComplete(false);
                 }
@@ -291,17 +253,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// LoadFromRaw the image file on thread-pool thread and calling <see cref="ImageLoadComplete"/> after.
         /// </summary>
         /// <param name="source">the file path to get the image from</param>
-        private void SetImageFromFile(FileInfo source)
-        {
-            if (source.Exists)
-            {
+        private void SetImageFromFile(FileInfo source) {
+            if (source.Exists) {
                 if (_htmlContainer.AvoidAsyncImagesLoading)
                     LoadImageFromFile(source);
                 else
                     ThreadPool.QueueUserWorkItem(state => LoadImageFromFile(source));
-            }
-            else
-            {
+            } else {
                 ImageLoadComplete();
             }
         }
@@ -311,20 +269,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Calling <see cref="ImageLoadComplete"/> on the main thread and not thread-pool.
         /// </summary>
         /// <param name="source">the file path to get the image from</param>
-        private void LoadImageFromFile(FileInfo source)
-        {
-            try
-            {
-                if (source.Exists)
-                {
+        private void LoadImageFromFile(FileInfo source) {
+            try {
+                if (source.Exists) {
                     _imageFileStream = File.Open(source.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     _image = _htmlContainer.Adapter.ImageFromStream(_imageFileStream);
                     _releaseImageObject = true;
                 }
                 ImageLoadComplete();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Failed to load image from disk: " + source, ex);
                 ImageLoadComplete();
             }
@@ -335,15 +288,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Create local file name in temp folder from the URI, if the file already exists use it as it has already been downloaded.
         /// If not download the file using <see cref="DownloadImageFromUrlAsync"/>.
         /// </summary>
-        private void SetImageFromUrl(Uri source)
-        {
+        private void SetImageFromUrl(Uri source) {
             var filePath = CommonUtils.GetLocalfileName(source);
-            if (filePath.Exists && filePath.Length > 0)
-            {
+            if (filePath.Exists && filePath.Length > 0) {
                 SetImageFromFile(filePath);
-            }
-            else
-            {
+            } else {
                 if (_htmlContainer.AvoidAsyncImagesLoading)
                     DownloadImageFromUrl(source, filePath);
                 else
@@ -355,18 +304,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Download the requested file in the URI to the given file path.<br/>
         /// Use async sockets API to download from web, <see cref="OnDownloadImageCompleted(object,System.ComponentModel.AsyncCompletedEventArgs)"/>.
         /// </summary>
-        private void DownloadImageFromUrl(Uri source, FileInfo filePath)
-        {
-            try
-            {
-                using (var client = _client = new WebClient())
-                {
+        private void DownloadImageFromUrl(Uri source, FileInfo filePath) {
+            try {
+                using (var client = _client = new WebClient()) {
                     client.DownloadFile(source, filePath.FullName);
                     OnDownloadImageCompleted(false, null, filePath, client);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 OnDownloadImageCompleted(false, ex, null, null);
             }
         }
@@ -376,19 +320,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Use async sockets API to download from web, <see cref="OnDownloadImageCompleted(object,System.ComponentModel.AsyncCompletedEventArgs)"/>.
         /// </summary>
         /// <param name="data">key value pair of URL and file info to download the file to</param>
-        private void DownloadImageFromUrlAsync(object data)
-        {
-            var uri = ((KeyValuePair<Uri, FileInfo>)data).Key;
-            var filePath = ((KeyValuePair<Uri, FileInfo>)data).Value;
+        private void DownloadImageFromUrlAsync(object data) {
+            var uri = ((KeyValuePair<Uri, FileInfo>) data).Key;
+            var filePath = ((KeyValuePair<Uri, FileInfo>) data).Value;
 
-            try
-            {
+            try {
                 _client = new WebClient();
                 _client.DownloadFileCompleted += OnDownloadImageCompleted;
                 _client.DownloadFileAsync(uri, filePath.FullName, filePath);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 OnDownloadImageCompleted(false, ex, null, null);
             }
         }
@@ -397,18 +337,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// On download image complete to local file use <see cref="LoadImageFromFile"/> to load the image file.<br/>
         /// If the download canceled do nothing, if failed report error.
         /// </summary>
-        private void OnDownloadImageCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            try
-            {
-                using (var client = (WebClient)sender)
-                {
+        private void OnDownloadImageCompleted(object sender, AsyncCompletedEventArgs e) {
+            try {
+                using (var client = (WebClient) sender) {
                     client.DownloadFileCompleted -= OnDownloadImageCompleted;
-                    OnDownloadImageCompleted(e.Cancelled, e.Error, (FileInfo)e.UserState, client);
+                    OnDownloadImageCompleted(e.Cancelled, e.Error, (FileInfo) e.UserState, client);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 OnDownloadImageCompleted(false, ex, null, null);
             }
         }
@@ -417,27 +352,19 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// On download image complete to local file use <see cref="LoadImageFromFile"/> to load the image file.<br/>
         /// If the download canceled do nothing, if failed report error.
         /// </summary>
-        private void OnDownloadImageCompleted(bool cancelled, Exception error, FileInfo filePath, WebClient client)
-        {
-            if (!cancelled && !_disposed)
-            {
-                if (error == null)
-                {
+        private void OnDownloadImageCompleted(bool cancelled, Exception error, FileInfo filePath, WebClient client) {
+            if (!cancelled && !_disposed) {
+                if (error == null) {
                     filePath.Refresh();
                     var contentType = CommonUtils.GetResponseContentType(client);
-                    if (contentType != null && contentType.StartsWith("image", StringComparison.OrdinalIgnoreCase))
-                    {
+                    if (contentType != null && contentType.StartsWith("image", StringComparison.OrdinalIgnoreCase)) {
                         LoadImageFromFile(filePath);
-                    }
-                    else
-                    {
+                    } else {
                         _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Failed to load image, not image content type: " + contentType);
                         ImageLoadComplete();
                         filePath.Delete();
                     }
-                }
-                else
-                {
+                } else {
                     _htmlContainer.ReportError(HtmlRenderErrorType.Image, "Failed to load image from URL: " + client.BaseAddress, error);
                     ImageLoadComplete();
                 }
@@ -447,8 +374,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Flag image load complete and request refresh for re-layout and invalidate.
         /// </summary>
-        private void ImageLoadComplete(bool async = true)
-        {
+        private void ImageLoadComplete(bool async = true) {
             // can happen if some operation return after the handler was disposed
             if (_disposed)
                 ReleaseObjects();
@@ -459,20 +385,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Release the image and client objects.
         /// </summary>
-        private void ReleaseObjects()
-        {
-            if (_releaseImageObject && _image != null)
-            {
+        private void ReleaseObjects() {
+            if (_releaseImageObject && _image != null) {
                 _image.Dispose();
                 _image = null;
             }
-            if (_imageFileStream != null)
-            {
+            if (_imageFileStream != null) {
                 _imageFileStream.Dispose();
                 _imageFileStream = null;
             }
-            if (_client != null)
-            {
+            if (_client != null) {
                 _client.CancelAsync();
                 _client.Dispose();
                 _client = null;

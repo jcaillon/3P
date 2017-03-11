@@ -21,13 +21,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
-
     /// <summary>
     /// This class facilitates the use of StyeEx or SetStyles for annotations and syntax highlighting
     /// It creates the byte array of styles for the text it is fed with
     /// </summary>
     internal class StylerHelper {
-
         #region private fields
 
         private List<byte> _styleArray = new List<byte>();
@@ -65,6 +63,5 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         #endregion
-
     }
 }

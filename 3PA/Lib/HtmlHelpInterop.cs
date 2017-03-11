@@ -45,6 +45,5 @@ namespace _3PA.Lib {
         public static int DisplayIndex(int caller, string file, string index) {
             return HtmlHelp(caller, file, (uint) HTMLHelpCommand.HH_DISPLAY_INDEX, index);
         }
-        
     }
 }

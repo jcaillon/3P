@@ -20,14 +20,12 @@
 using System;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters {
     /// <summary>
     /// Adapter for platform specific context menu - used to create and show context menu at specific location.<br/>
     /// Not relevant for platforms that don't render HTML on UI element.
     /// </summary>
-    public abstract class RContextMenu : IDisposable
-    {
+    public abstract class RContextMenu : IDisposable {
         /// <summary>
         /// The total number of items in the context menu
         /// </summary>

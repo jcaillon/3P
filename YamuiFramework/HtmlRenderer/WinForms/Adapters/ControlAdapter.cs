@@ -23,13 +23,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms Control for core.
     /// </summary>
-    internal sealed class ControlAdapter : RControl
-    {
+    internal sealed class ControlAdapter : RControl {
         /// <summary>
         /// the underline win forms control.
         /// </summary>
@@ -44,8 +42,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// Init.
         /// </summary>
         public ControlAdapter(Control control, bool useGdiPlusTextRendering)
-            : base(WinFormsAdapter.Instance)
-        {
+            : base(WinFormsAdapter.Instance) {
             ArgChecker.AssertArgNotNull(control, "control");
 
             _control = control;
@@ -55,56 +52,45 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// Get the underline win forms control
         /// </summary>
-        public Control Control
-        {
+        public Control Control {
             get { return _control; }
         }
 
-        public override RPoint MouseLocation
-        {
+        public override RPoint MouseLocation {
             get { return Utils.Convert(_control.PointToClient(Control.MousePosition)); }
         }
 
-        public override bool LeftMouseButton
-        {
+        public override bool LeftMouseButton {
             get { return (Control.MouseButtons & MouseButtons.Left) != 0; }
         }
 
-        public override bool RightMouseButton
-        {
+        public override bool RightMouseButton {
             get { return (Control.MouseButtons & MouseButtons.Right) != 0; }
         }
 
-        public override void SetCursorDefault()
-        {
+        public override void SetCursorDefault() {
             _control.Cursor = Cursors.Default;
         }
 
-        public override void SetCursorHand()
-        {
+        public override void SetCursorHand() {
             _control.Cursor = Cursors.Hand;
         }
 
-        public override void SetCursorIBeam()
-        {
+        public override void SetCursorIBeam() {
             _control.Cursor = Cursors.IBeam;
         }
 
-        public override void DoDragDropCopy(object dragDropData)
-        {
+        public override void DoDragDropCopy(object dragDropData) {
             _control.DoDragDrop(dragDropData, DragDropEffects.Copy);
         }
 
-        public override void MeasureString(string str, RFont font, double maxWidth, out int charFit, out double charFitWidth)
-        {
-            using (var g = new GraphicsAdapter(_control.CreateGraphics(), _useGdiPlusTextRendering, true))
-            {
+        public override void MeasureString(string str, RFont font, double maxWidth, out int charFit, out double charFitWidth) {
+            using (var g = new GraphicsAdapter(_control.CreateGraphics(), _useGdiPlusTextRendering, true)) {
                 g.MeasureString(str, font, maxWidth, out charFit, out charFitWidth);
             }
         }
 
-        public override void Invalidate()
-        {
+        public override void Invalidate() {
             _control.Invalidate();
         }
     }

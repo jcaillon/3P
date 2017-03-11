@@ -17,10 +17,8 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core
-{
-    internal static class CssDefaults
-    {
+namespace YamuiFramework.HtmlRenderer.Core.Core {
+    internal static class CssDefaults {
         /// <summary>
         /// CSS Specification's Default Style Sheet for HTML 4
         /// </summary>

@@ -32,10 +32,9 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.InfoToolTip {
-
     internal static class InfoToolTip {
-
         #region fields
+
         // The tooltip form
         private static InfoToolTipForm _form;
 
@@ -56,6 +55,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// If a tooltip is opened and it's a parsed item, this point leads to its definition
         /// </summary>
         public static Point GoToDefinitionPoint = new Point(-1, -1);
+
         public static string GoToDefinitionFile;
 
         /// <summary>
@@ -73,6 +73,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// is used to make sure that we finish to display a tooltip before trying to display another one
         /// </summary>
         private static object _thisLock = new object();
+
         #endregion
 
         #region public misc
@@ -152,9 +153,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Method called when the tooltip is opened to help the user during autocompletion
         /// </summary>
         public static void ShowToolTipFromAutocomplete(CompletionItem item, AutoCompletionForm parentForm) {
-            if (Config.Instance.ToolTipDeactivate) 
+            if (Config.Instance.ToolTipDeactivate)
                 return;
-            
+
             bool lockTaken = false;
             try {
                 Monitor.TryEnter(_thisLock, 0, ref lockTaken);
@@ -163,7 +164,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 InitIfneeded();
 
                 // sets the tooltip content
-                _currentCompletionList = new List<CompletionItem> { item };
+                _currentCompletionList = new List<CompletionItem> {item};
                 SetToolTip();
 
                 // update position
@@ -173,10 +174,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _openedForCompletion = true;
                 if (!_form.Visible)
                     _form.UnCloack();
-
             } finally {
                 if (lockTaken) Monitor.Exit(_thisLock);
-            } 
+            }
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         Npp.Goto(split[1], int.Parse(split[2]), int.Parse(split[3]));
                         Cloak();
                     }
-                break;
+                    break;
                 case "gotodefinition":
                     ProMisc.GoToDefinition();
                     break;
@@ -220,6 +220,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             }
             htmlLinkClickedEventArgs.Handled = handled;
         }
+
         #endregion
 
         #region SetToolTip text
@@ -228,12 +229,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
-
             var popupMinWidth = 250;
             var toDisplay = new StringBuilder();
 
             GoToDefinitionFile = null;
-            
+
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
             if (data == null) return;
@@ -262,12 +262,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             </tr>
                         </table>
                     </td>");
-                if (_currentCompletionList.Count > 1)
-                    toDisplay.Append(@"
-                        <td class='ToolTipCount'>" +
-                            (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
-                        </td>");
+            if (_currentCompletionList.Count > 1)
                 toDisplay.Append(@"
+                        <td class='ToolTipCount'>" +
+                                 (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
+                        </td>");
+            toDisplay.Append(@"
                     </tr>
                 </table>");
 
@@ -276,15 +276,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 switch (data.Type) {
                     case CompletionType.TempTable:
                     case CompletionType.Table:
-                        popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
+                        popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width/2);
                         // buffer
                         if (data.FromParser) {
                             if (data.ParsedItem is ParsedDefine) {
                                 toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(data.SubString)));
                             }
                             if (data.ParsedItem is ParsedTable && !string.IsNullOrEmpty(data.SubString)) {
-                                toDisplay.Append(FormatRow("Is like", (data.SubString.Contains("?")) ? "Unknow table [" + ((ParsedTable)data.ParsedItem).LcLikeTable + "]" : data.SubString.Replace("Like ", "")));
-                            } 
+                                toDisplay.Append(FormatRow("Is like", (data.SubString.Contains("?")) ? "Unknow table [" + ((ParsedTable) data.ParsedItem).LcLikeTable + "]" : data.SubString.Replace("Like ", "")));
+                            }
                         }
 
                         var tbItem = ParserHandler.FindAnyTableOrBufferByName(data.DisplayText);
@@ -337,7 +337,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                                 toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
                             }
                             toDisplay.Append(FormatRow("Type", FormatSubString(data.SubString)));
-                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable)data.ParsedItem).Name));
+                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable) data.ParsedItem).Name));
                             if (!string.IsNullOrEmpty(fieldFound.Description))
                                 toDisplay.Append(FormatRow("Description", fieldFound.Description));
                             if (!string.IsNullOrEmpty(fieldFound.Format))
@@ -346,7 +346,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                                 toDisplay.Append(FormatRow("Initial value", fieldFound.InitialValue));
                             toDisplay.Append(FormatRow("Order", fieldFound.Order.ToString()));
                         }
-  
+
                         break;
                     case CompletionType.Procedure:
                         // find its parameters
@@ -375,7 +375,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         else
                             toDisplay.Append("None");
 
-                        var funcImplem =  data.ParsedItem as ParsedImplementation;
+                        var funcImplem = data.ParsedItem as ParsedImplementation;
                         if (funcImplem != null) {
                             toDisplay.Append(FormatSubtitle("PROTOTYPE"));
                             if (funcImplem.HasPrototype)
@@ -402,7 +402,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         // for the keywords define and create, we try to match the second keyword that goes with it
                         if (data.KeywordType == KeywordType.Statement &&
                             (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
-                                var lineStr = Npp.GetLine(Npp.LineFromPosition(Npp.GetPositionFromMouseLocation())).Text;
+                            var lineStr = Npp.GetLine(Npp.LineFromPosition(Npp.GetPositionFromMouseLocation())).Text;
                             var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
                             foreach (var word in listOfSecWords) {
                                 if (lineStr.ContainsFast(word)) {
@@ -447,10 +447,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var preprocItem = (ParsedPreProcVariable) data.ParsedItem;
                         if (preprocItem.UndefinedLine > 0)
                             toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
-                            toDisplay.Append(FormatSubtitle("VALUE"));
-                            toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
-                            toDisplay.Append(preprocItem.Value);
-                            toDisplay.Append(@"</div>");
+                        toDisplay.Append(FormatSubtitle("VALUE"));
+                        toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+                        toDisplay.Append(preprocItem.Value);
+                        toDisplay.Append(@"</div>");
                         break;
                     case CompletionType.Snippet:
                         // TODO
@@ -473,7 +473,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append(@"</div>");
                         }
                         break;
-
                 }
             } catch (Exception e) {
                 toDisplay.Append("Error when appending info :<br>" + e + "<br>");
@@ -489,15 +488,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // Flags
             var flagStrBuilder = new StringBuilder();
-            data.DoForEachFlag((name, flag) => {
-                flagStrBuilder.Append(FormatRowWithImg(name, "<b>" + name + "</b>"));
-            });
+            data.DoForEachFlag((name, flag) => { flagStrBuilder.Append(FormatRowWithImg(name, "<b>" + name + "</b>")); });
             if (flagStrBuilder.Length > 0) {
                 toDisplay.Append(FormatSubtitle("FLAGS"));
                 toDisplay.Append(flagStrBuilder);
             }
 
-            
             toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
                 [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
@@ -507,13 +503,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 GoToDefinitionFile = data.ParsedItem.FilePath;
             }
             if (_currentCompletionList.Count > 1)
-                toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
+                toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char) 242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
             toDisplay.Append("</div>");
 
             toDisplay.Append("</div>");
 
             _form.SetText(toDisplay.ToString(), popupMinWidth);
-
         }
 
         #region formatting functions
@@ -620,6 +615,5 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         #endregion
-
     }
 }

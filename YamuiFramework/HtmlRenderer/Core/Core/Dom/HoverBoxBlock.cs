@@ -19,13 +19,11 @@
 #endregion
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// CSS boxes that have ":hover" selector on them.
     /// </summary>
-    internal sealed class HoverBoxBlock
-    {
+    internal sealed class HoverBoxBlock {
         /// <summary>
         /// the box that has :hover css on
         /// </summary>
@@ -39,8 +37,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Init.
         /// </summary>
-        public HoverBoxBlock(CssBox cssBox, CssBlock cssBlock)
-        {
+        public HoverBoxBlock(CssBox cssBox, CssBlock cssBlock) {
             _cssBox = cssBox;
             _cssBlock = cssBlock;
         }
@@ -48,16 +45,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// the box that has :hover css on
         /// </summary>
-        public CssBox CssBox
-        {
+        public CssBox CssBox {
             get { return _cssBox; }
         }
 
         /// <summary>
         /// the :hover style block data
         /// </summary>
-        public CssBlock CssBlock
-        {
+        public CssBlock CssBlock {
             get { return _cssBlock; }
         }
     }

@@ -19,16 +19,14 @@
 #endregion
 using System;
 
-namespace YamuiFramework.Animations.Transitions
-{
+namespace YamuiFramework.Animations.Transitions {
     /// <summary>
     /// Interface for all types we can perform transitions on. 
     /// Each type (e.g. int, double, Color) that we can perform a transition on 
     /// needs to have its own class that implements this interface. These classes 
     /// tell the transition system how to act on objects of that type.
     /// </summary>
-    internal interface IManagedType
-    {
+    internal interface IManagedType {
         /// <summary>
         /// Returns the Type that the instance is managing.
         /// </summary>
@@ -40,12 +38,11 @@ namespace YamuiFramework.Animations.Transitions
         /// </summary>
         object copy(object o);
 
-		/// <summary>
-		/// Returns an object holding the value between the start and end corresponding
-		/// to the percentage passed in. (Note: the percentage can be less than 0% or
-		/// greater than 100%.)
-		/// </summary>
-		object getIntermediateValue(object start, object end, double dPercentage);
-
+        /// <summary>
+        /// Returns an object holding the value between the start and end corresponding
+        /// to the percentage passed in. (Note: the percentage can be less than 0% or
+        /// greater than 100%.)
+        /// </summary>
+        object getIntermediateValue(object start, object end, double dPercentage);
     }
 }

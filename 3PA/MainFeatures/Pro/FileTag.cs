@@ -26,12 +26,9 @@ using System.Text.RegularExpressions;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal static class FileTag {
-
         #region fields
 
-        
         private static Dictionary<string, List<FileTagObject>> _filesInfo = new Dictionary<string, List<FileTagObject>>(StringComparer.CurrentCultureIgnoreCase);
         public const string DefaultTag = "DefaultTag";
         public const string LastTag = "LastTag";
@@ -68,14 +65,13 @@ namespace _3PA.MainFeatures.Pro {
                         });
                     }
                 }
-            }, 
-            Encoding.Default);
+            },
+                Encoding.Default);
 
             if (!_filesInfo.ContainsKey(DefaultTag))
                 SetFileTags(DefaultTag, "", "", "", "", "", "", "");
             if (!_filesInfo.ContainsKey(LastTag))
                 SetFileTags(LastTag, "", "", "", "", "", "", "");
-
         }
 
         /// <summary>
@@ -100,7 +96,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         public static List<FileTagObject> GetFileTagsList(string filename) {
-            return Contains(filename) ? _filesInfo[filename] : new List<FileTagObject> ();
+            return Contains(filename) ? _filesInfo[filename] : new List<FileTagObject>();
         }
 
         public static FileTagObject GetLastFileTag(string filename) {
@@ -131,7 +127,7 @@ namespace _3PA.MainFeatures.Pro {
                 _filesInfo[filename].RemoveAll(o => o.CorrectionNumber == nb);
                 _filesInfo[filename].Add(obj);
             } else {
-                _filesInfo.Add(filename, new List<FileTagObject> { obj });
+                _filesInfo.Add(filename, new List<FileTagObject> {obj});
             }
         }
 
@@ -180,8 +176,6 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-
     }
 
     #region File tag object
@@ -197,6 +191,4 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     #endregion
-
-
 }

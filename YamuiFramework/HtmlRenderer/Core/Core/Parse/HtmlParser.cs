@@ -22,54 +22,42 @@ using System.Collections.Generic;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Parse {
     /// <summary>
     /// 
     /// </summary>
-    internal static class HtmlParser
-    {
+    internal static class HtmlParser {
         /// <summary>
         /// Parses the source html to css boxes tree structure.
         /// </summary>
         /// <param name="source">the html source to parse</param>
-        public static CssBox ParseDocument(string source)
-        {
+        public static CssBox ParseDocument(string source) {
             var root = CssBox.CreateBlock();
             var curBox = root;
 
             int endIdx = 0;
             int startIdx = 0;
-            while (startIdx >= 0)
-            {
+            while (startIdx >= 0) {
                 var tagIdx = source.IndexOf('<', startIdx);
-                if (tagIdx >= 0 && tagIdx < source.Length)
-                {
+                if (tagIdx >= 0 && tagIdx < source.Length) {
                     // add the html text as anon css box to the structure
                     AddTextBox(source, startIdx, tagIdx, ref curBox);
 
-                    if (source[tagIdx + 1] == '!')
-                    {
-                        if (source[tagIdx + 2] == '-')
-                        {
+                    if (source[tagIdx + 1] == '!') {
+                        if (source[tagIdx + 2] == '-') {
                             // skip the html comment elements (<!-- bla -->)
                             startIdx = source.IndexOf("-->", tagIdx + 2);
                             endIdx = startIdx > 0 ? startIdx + 3 : tagIdx + 2;
-                        }
-                        else
-                        {
+                        } else {
                             // skip the html crap elements (<!crap bla>)
                             startIdx = source.IndexOf(">", tagIdx + 2);
                             endIdx = startIdx > 0 ? startIdx + 1 : tagIdx + 2;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         // parse element tag to css box structure
                         endIdx = ParseHtmlTag(source, tagIdx, ref curBox) + 1;
 
-                        if (curBox.HtmlTag != null && curBox.HtmlTag.Name.Equals(HtmlConstants.Style, StringComparison.OrdinalIgnoreCase))
-                        {
+                        if (curBox.HtmlTag != null && curBox.HtmlTag.Name.Equals(HtmlConstants.Style, StringComparison.OrdinalIgnoreCase)) {
                             var endIdxS = endIdx;
                             endIdx = source.IndexOf("</style>", endIdx, StringComparison.OrdinalIgnoreCase);
                             if (endIdx > -1)
@@ -81,12 +69,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             }
 
             // handle pieces of html without proper structure
-            if (endIdx > -1 && endIdx < source.Length)
-            {
+            if (endIdx > -1 && endIdx < source.Length) {
                 // there is text after the end of last element
                 var endText = new SubString(source, endIdx, source.Length - endIdx);
-                if (!endText.IsEmptyOrWhitespace())
-                {
+                if (!endText.IsEmptyOrWhitespace()) {
                     var abox = CssBox.CreateBox(root);
                     abox.Text = endText;
                 }
@@ -94,7 +80,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
             return root;
         }
-
 
         #region Private methods
 
@@ -107,11 +92,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="startIdx">the start of the html part</param>
         /// <param name="tagIdx">the index of the next html tag</param>
         /// <param name="curBox">the current box in html tree parsing</param>
-        private static void AddTextBox(string source, int startIdx, int tagIdx, ref CssBox curBox)
-        {
+        private static void AddTextBox(string source, int startIdx, int tagIdx, ref CssBox curBox) {
             var text = tagIdx > startIdx ? new SubString(source, startIdx, tagIdx - startIdx) : null;
-            if (text != null)
-            {
+            if (text != null) {
                 var abox = CssBox.CreateBox(curBox);
                 abox.Text = text;
             }
@@ -124,41 +107,30 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="tagIdx">the index of the next html tag</param>
         /// <param name="curBox">the current box in html tree parsing</param>
         /// <returns>the end of the parsed part, the new start index</returns>
-        private static int ParseHtmlTag(string source, int tagIdx, ref CssBox curBox)
-        {
+        private static int ParseHtmlTag(string source, int tagIdx, ref CssBox curBox) {
             var endIdx = source.IndexOf('>', tagIdx + 1);
-            if (endIdx > 0)
-            {
+            if (endIdx > 0) {
                 string tagName;
                 Dictionary<string, string> tagAttributes;
                 var length = endIdx - tagIdx + 1 - (source[endIdx - 1] == '/' ? 1 : 0);
-                if (ParseHtmlTag(source, tagIdx, length, out tagName, out tagAttributes))
-                {
-                    if (!HtmlUtils.IsSingleTag(tagName) && curBox.ParentBox != null)
-                    {
+                if (ParseHtmlTag(source, tagIdx, length, out tagName, out tagAttributes)) {
+                    if (!HtmlUtils.IsSingleTag(tagName) && curBox.ParentBox != null) {
                         // need to find the parent tag to go one level up
                         curBox = DomUtils.FindParent(curBox.ParentBox, tagName, curBox);
                     }
-                }
-                else if (!string.IsNullOrEmpty(tagName))
-                {
+                } else if (!string.IsNullOrEmpty(tagName)) {
                     //new SubString(source, lastEnd + 1, tagmatch.Index - lastEnd - 1)
                     var isSingle = HtmlUtils.IsSingleTag(tagName) || source[endIdx - 1] == '/';
                     var tag = new HtmlTag(tagName, isSingle, tagAttributes);
 
-                    if (isSingle)
-                    {
+                    if (isSingle) {
                         // the current box is not changed
                         CssBox.CreateBox(tag, curBox);
-                    }
-                    else
-                    {
+                    } else {
                         // go one level down, make the new box the current box
                         curBox = CssBox.CreateBox(tag, curBox);
                     }
-                }
-                else
-                {
+                } else {
                     endIdx = tagIdx + 1;
                 }
             }
@@ -175,15 +147,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="name">return the name of the html tag</param>
         /// <param name="attributes">return the dictionary of tag attributes</param>
         /// <returns>true - the tag is closing tag, false - otherwise</returns>
-        private static bool ParseHtmlTag(string source, int idx, int length, out string name, out Dictionary<string, string> attributes)
-        {
+        private static bool ParseHtmlTag(string source, int idx, int length, out string name, out Dictionary<string, string> attributes) {
             idx++;
             length = length - (source[idx + length - 3] == '/' ? 3 : 2);
 
             // Check if is end tag
             var isClosing = false;
-            if (source[idx] == '/')
-            {
+            if (source[idx] == '/') {
                 idx++;
                 length--;
                 isClosing = true;
@@ -197,8 +167,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             name = source.Substring(idx, spaceIdx - idx).ToLower();
 
             attributes = null;
-            if (!isClosing && idx + length > spaceIdx)
-            {
+            if (!isClosing && idx + length > spaceIdx) {
                 ExtractAttributes(source, spaceIdx, length - (spaceIdx - idx), out attributes);
             }
 
@@ -212,13 +181,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="idx">the start index of the tag attributes in the source</param>
         /// <param name="length">the length of the tag attributes from the start index in the source</param>
         /// <param name="attributes">return the dictionary of tag attributes</param>
-        private static void ExtractAttributes(string source, int idx, int length, out Dictionary<string, string> attributes)
-        {
+        private static void ExtractAttributes(string source, int idx, int length, out Dictionary<string, string> attributes) {
             attributes = null;
 
             int startIdx = idx;
-            while (startIdx < idx + length)
-            {
+            while (startIdx < idx + length) {
                 while (startIdx < idx + length && char.IsWhiteSpace(source, startIdx))
                     startIdx++;
 
@@ -226,8 +193,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 while (endIdx < idx + length && !char.IsWhiteSpace(source, endIdx) && source[endIdx] != '=')
                     endIdx++;
 
-                if (startIdx < idx + length)
-                {
+                if (startIdx < idx + length) {
                     var key = source.Substring(startIdx, endIdx - startIdx);
 
                     startIdx = endIdx + 1;
@@ -236,8 +202,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
                     bool hasPChar = false;
                     char pChar = source[startIdx];
-                    if (pChar == '"' || pChar == '\'')
-                    {
+                    if (pChar == '"' || pChar == '\'') {
                         hasPChar = true;
                         startIdx++;
                     }
@@ -249,8 +214,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     var value = source.Substring(startIdx, endIdx - startIdx);
                     value = HtmlUtils.DecodeHtml(value);
 
-                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
-                    {
+                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value)) {
                         if (attributes == null)
                             attributes = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
                         attributes[key.ToLower()] = value;

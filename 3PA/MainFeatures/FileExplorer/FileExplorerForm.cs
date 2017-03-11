@@ -36,9 +36,7 @@ using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.FileExplorer {
-
     internal partial class FileExplorerForm : NppDockableDialogForm {
-
         #region Private
 
         private string[] _explorerDirStr;
@@ -79,12 +77,16 @@ namespace _3PA.MainFeatures.FileExplorer {
         private volatile bool _refreshRequiredWhileRefreshing;
 
         #endregion
-        
-        #region Fields public
-        
-        public YamuiFilteredTypeTreeList YamuiList { get { return yamuiList; } }
 
-        public YamuiFilterBox FilterBox { get { return filterbox; } }
+        #region Fields public
+
+        public YamuiFilteredTypeTreeList YamuiList {
+            get { return yamuiList; }
+        }
+
+        public YamuiFilterBox FilterBox {
+            get { return filterbox; }
+        }
 
         #endregion
 
@@ -161,7 +163,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Image = ImageResources.Collapse,
                     OnClic = buttonExpandRetract_Click,
                     ToolTip = "Toggle <b>Expand/Collapse</b>"
-                },
+                }
             };
             filterbox.Initialize(yamuiList);
 
@@ -179,7 +181,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
-            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
+            _explorerDirStr = new[] {"Local path ", "Compilation path", "Propath", "Everywhere"};
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
 
             RefreshGotoDirButton();
@@ -190,13 +192,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
 
             #endregion
-
         }
 
         #endregion
 
         #region core
-        
+
         /// <summary>
         /// Check/uncheck the menu depending on this form visibility
         /// </summary>
@@ -234,7 +235,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void RefreshFileListAction() {
-
             // get the list of FileObjects
             _initialObjectsList = new List<FileListItem>();
             switch (Config.Instance.FileExplorerDirectoriesToExplore) {
@@ -290,20 +290,20 @@ namespace _3PA.MainFeatures.FileExplorer {
                 ErrorHandler.ShowErrors(e, "Error while showing the list of files");
             }
         }
-        
+
         #endregion
 
         #region File list events
 
         private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs keyEventArgs) {
-            var curItem = (FileListItem)yamuiList.SelectedItem;
+            var curItem = (FileListItem) yamuiList.SelectedItem;
             if (curItem == null)
                 return;
             Utils.OpenAnyLink(curItem.FullPath);
         }
 
         private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs e) {
-            var curItem = (FileListItem)yamuiList.SelectedItem;
+            var curItem = (FileListItem) yamuiList.SelectedItem;
             if (curItem == null)
                 return;
 
@@ -330,7 +330,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (IsHandleCreated) {
                 BeginInvoke((Action) delegate {
                     btGotoDir.Visible = Config.Instance.FileExplorerDirectoriesToExplore <= 1;
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerDirectoriesToExplore);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerDirectoriesToExplore);
                     btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
                     btDirectory.Invalidate();
                     lbDirectory.Text = _explorerDirStr[Config.Instance.FileExplorerDirectoriesToExplore];
@@ -373,7 +373,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region Current file
 
-        private int _currentOperation = - 1;
+        private int _currentOperation = -1;
 
         public void FilesInfoOnUpdatedOperation(UpdatedOperationEventArgs updatedOperationEventArgs) {
             this.SafeInvoke(form => {
@@ -381,8 +381,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                     return;
 
                 // status text, take the last flag found
-                foreach (var name in Enum.GetNames(typeof (CurrentOperation))) {
-                    CurrentOperation flag = (CurrentOperation) Enum.Parse(typeof (CurrentOperation), name);
+                foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
+                    CurrentOperation flag = (CurrentOperation) Enum.Parse(typeof(CurrentOperation), name);
                     if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
                         lbStatus.Text = flag.GetAttribute<CurrentOperationAttr>().Name;
                     }
@@ -490,8 +490,5 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         #endregion
-
     }
-    
-
 }

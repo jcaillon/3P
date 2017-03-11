@@ -26,21 +26,20 @@ using System.Xml.Serialization;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal class ProEnvironment {
-
         #region ProEnvironmentObject
 
         [Serializable]
         internal class ProEnvironmentObject {
-
             #region Exported fields
+
             /// <summary>
             /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
             /// </summary>
 
             // primary key
             public string Name = "";
+
             public string Suffix = "";
 
             // label
@@ -62,8 +61,7 @@ namespace _3PA.MainFeatures.Pro {
             /// <summary>
             /// Deployment directory
             /// </summary>
-            [XmlElement(ElementName = "BaseCompilationPath")]
-            public string BaseCompilationPath = "";
+            [XmlElement(ElementName = "BaseCompilationPath")] public string BaseCompilationPath = "";
 
             public string ProwinPath = "";
             public string CmdLineParameters = "";
@@ -107,10 +105,10 @@ namespace _3PA.MainFeatures.Pro {
                 ExtraPf = toCopy.ExtraPf;
                 IniPath = toCopy.IniPath;
                 ExtraProPath = toCopy.ExtraProPath;
-                
+
                 BaseLocalPath = toCopy.BaseLocalPath;
                 BaseCompilationPath = toCopy.BaseCompilationPath;
-                
+
                 ProwinPath = toCopy.ProwinPath;
                 CmdLineParameters = toCopy.CmdLineParameters;
                 LogFilePath = toCopy.LogFilePath;
@@ -140,7 +138,7 @@ namespace _3PA.MainFeatures.Pro {
             public bool RemoveCurrentPfPath() {
                 if (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
                     DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
-                    SetCurrent(null, null,null);
+                    SetCurrent(null, null, null);
                     return true;
                 }
                 return false;
@@ -226,7 +224,6 @@ namespace _3PA.MainFeatures.Pro {
             /// returns an empty string if nothing is found, otherwise returns the fullpath of the file
             /// </summary>
             public string FindFirstFileInPropath(string fileName) {
-
                 if (_savedFoundFiles.ContainsKey(fileName))
                     return _savedFoundFiles[fileName];
 
@@ -248,7 +245,6 @@ namespace _3PA.MainFeatures.Pro {
             /// Find a file in the propath and if it can't find it, in the env base local path
             /// </summary>
             public string FindFirstFileInEnv(string fileToFind) {
-
                 if (_savedFoundFiles.ContainsKey(fileToFind))
                     return _savedFoundFiles[fileToFind];
 
@@ -342,7 +338,7 @@ namespace _3PA.MainFeatures.Pro {
             public string ProlibPath {
                 get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
-            
+
             /// <summary>
             /// Use this method to know if the CONNECT define for the current environment connects the database in
             /// single user mode (returns false if not or if no database connection is set)
@@ -365,7 +361,6 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             #endregion
-
         }
 
         #endregion
@@ -405,7 +400,7 @@ namespace _3PA.MainFeatures.Pro {
             get {
                 if (_listOfEnv.Count == 0) {
                     if (!File.Exists(Config.FileProEnv)) {
-                        _listOfEnv = new List<ProEnvironmentObject> { new ProEnvironmentObject { Name = "Default", Label = "A default environment (empty)" } };
+                        _listOfEnv = new List<ProEnvironmentObject> {new ProEnvironmentObject {Name = "Default", Label = "A default environment (empty)"}};
                     } else
                         Object2Xml<ProEnvironmentObject>.LoadFromFile(_listOfEnv, Config.FileProEnv);
                 }
@@ -505,8 +500,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
     }
-
-    
 }

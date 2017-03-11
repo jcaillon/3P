@@ -26,7 +26,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
-
         #region private fields
 
         private static YamuiColorRadioButton _checkButton;
@@ -145,6 +144,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 FilesInfo.UpdateFileStatus();
             }
         }
-
     }
 }

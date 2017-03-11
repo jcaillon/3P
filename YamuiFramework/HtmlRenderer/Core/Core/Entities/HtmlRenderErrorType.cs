@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Entities {
     /// <summary>
     /// Enum of possible error types that can be reported.
     /// </summary>
-    public enum HtmlRenderErrorType
-    {
+    public enum HtmlRenderErrorType {
         General = 0,
         CssParsing = 1,
         HtmlParsing = 2,

@@ -29,30 +29,29 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-
     /// <summary>
     /// Form class that adds the top right buttons + resize
     /// </summary>
     public class YamuiFormButtons : YamuiFormBaseFadeIn {
-
         #region constants
 
         protected const int FormButtonWidth = 25;
         protected const int ResizeIconSize = 14;
 
         #endregion
-        
+
         #region Private
 
         /// <summary>
         /// Tooltip for close buttons
         /// </summary>
         private HtmlToolTip _mainFormToolTip = new HtmlToolTip();
+
         private Dictionary<WindowButtons, YamuiFormButton> _windowButtonList;
         private int _captionBarHeight = FormButtonWidth + BorderWidth;
 
         #endregion
-        
+
         #region Properties
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace YamuiFramework.Forms {
         protected override Padding DefaultPadding {
             get { return new Padding(BorderWidth, 20, BorderWidth + ResizeIconSize, BorderWidth + ResizeIconSize); }
         }
-        
+
         #endregion
 
         #region Enum
@@ -103,7 +102,7 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-        
+
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
@@ -139,28 +138,27 @@ namespace YamuiFramework.Forms {
             base.WndProc(ref m);
 
             switch (m.Msg) {
-                case (int)WinApi.Messages.WM_GETMINMAXINFO:
+                case (int) WinApi.Messages.WM_GETMINMAXINFO:
                     // allows the window to be maximized at teh size of the working area instead of the whole screen size
                     OnGetMinMaxInfo(m.HWnd, m.LParam);
                     break;
 
-                case (int)WinApi.Messages.WM_SIZE:
+                case (int) WinApi.Messages.WM_SIZE:
                     if (_windowButtonList != null) {
                         YamuiFormButton btn;
                         _windowButtonList.TryGetValue(WindowButtons.Maximize, out btn);
                         if (WindowState == FormWindowState.Normal && btn != null)
                             btn.Text = @"1";
-                        if (WindowState == FormWindowState.Maximized && btn != null) 
+                        if (WindowState == FormWindowState.Maximized && btn != null)
                             btn.Text = @"2";
                     }
                     break;
             }
-
         }
 
         [SecuritySafeCritical]
         private unsafe void OnGetMinMaxInfo(IntPtr hwnd, IntPtr lParam) {
-            var pmmi = (WinApi.MINMAXINFO*)lParam;
+            var pmmi = (WinApi.MINMAXINFO*) lParam;
             var s = Screen.FromHandle(hwnd);
             pmmi->ptMaxSize.x = s.WorkingArea.Width;
             pmmi->ptMaxSize.y = s.WorkingArea.Height;
@@ -176,7 +174,7 @@ namespace YamuiFramework.Forms {
             if (output != WinApi.HitTest.HTCLIENT)
                 return output;
 
-            var vPoint = new Point((short)lparam, (short)((int)lparam >> 16));
+            var vPoint = new Point((short) lparam, (short) ((int) lparam >> 16));
             if (RectangleToScreen(new Rectangle(0, 0, ClientRectangle.Width, CaptionBarHeight)).Contains(vPoint))
                 return WinApi.HitTest.HTCAPTION;
 
@@ -186,7 +184,7 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region Events
-        
+
         /// <summary>
         /// On load of the form
         /// </summary>
@@ -220,7 +218,6 @@ namespace YamuiFramework.Forms {
                     AddWindowButton(WindowButtons.CloseAllVisible);
                 UpdateWindowButtonPosition();
             }
-
         }
 
         protected override void OnResizeEnd(EventArgs e) {
@@ -238,17 +235,17 @@ namespace YamuiFramework.Forms {
         [SecuritySafeCritical]
         public void RemoveCloseButton() {
             var hMenu = WinApi.GetSystemMenu(Handle, false);
-            if (hMenu == IntPtr.Zero) 
+            if (hMenu == IntPtr.Zero)
                 return;
 
             var n = WinApi.GetMenuItemCount(hMenu);
-            if (n <= 0) 
+            if (n <= 0)
                 return;
 
-            WinApi.RemoveMenu(hMenu, (uint)(n - 1), WinApi.MfByposition | WinApi.MfRemove);
-            WinApi.RemoveMenu(hMenu, (uint)(n - 2), WinApi.MfByposition | WinApi.MfRemove);
+            WinApi.RemoveMenu(hMenu, (uint) (n - 1), WinApi.MfByposition | WinApi.MfRemove);
+            WinApi.RemoveMenu(hMenu, (uint) (n - 2), WinApi.MfByposition | WinApi.MfRemove);
             WinApi.DrawMenuBar(Handle);
-        }       
+        }
 
         /// <summary>
         /// Add a particular button on the right top of the form
@@ -276,7 +273,7 @@ namespace YamuiFramework.Forms {
                     _mainFormToolTip.SetToolTip(newButton, "<b>" + (WindowState == FormWindowState.Normal ? "Maximize" : "Restore") + "</b> this window");
                     break;
                 case WindowButtons.CloseAllVisible:
-                    newButton.Text = ((char)(126)).ToString();
+                    newButton.Text = ((char) (126)).ToString();
                     _mainFormToolTip.SetToolTip(newButton, "<b>Close all</b> notification windows");
                     break;
             }
@@ -297,8 +294,8 @@ namespace YamuiFramework.Forms {
         private void OnWindowButtonClick(object sender, EventArgs e) {
             var btn = sender as YamuiFormButton;
             if (btn == null) return;
-            if (((MouseEventArgs)e).Button != MouseButtons.Left) return;
-            var btnFlag = (WindowButtons)btn.Tag;
+            if (((MouseEventArgs) e).Button != MouseButtons.Left) return;
+            var btnFlag = (WindowButtons) btn.Tag;
             switch (btnFlag) {
                 case WindowButtons.Close:
                     Close();
@@ -324,7 +321,7 @@ namespace YamuiFramework.Forms {
         private void UpdateWindowButtonPosition() {
             if (!ControlBox) return;
 
-            var priorityOrder = new Dictionary<int, WindowButtons>(3) { { 0, WindowButtons.Close }, { 1, WindowButtons.Maximize }, { 2, WindowButtons.Minimize } };
+            var priorityOrder = new Dictionary<int, WindowButtons>(3) {{0, WindowButtons.Close}, {1, WindowButtons.Maximize}, {2, WindowButtons.Minimize}};
 
             var buttonsWidth = 0;
 
@@ -341,7 +338,6 @@ namespace YamuiFramework.Forms {
         }
 
         public class YamuiFormButton : Label {
-
             #region Constructor
 
             public YamuiFormButton() {
@@ -349,13 +345,14 @@ namespace YamuiFramework.Forms {
                     ControlStyles.AllPaintingInWmPaint |
                     ControlStyles.OptimizedDoubleBuffer |
                     ControlStyles.ResizeRedraw |
-                    ControlStyles.UserPaint, 
+                    ControlStyles.UserPaint,
                     true);
             }
 
             #endregion
 
             #region Paint Methods
+
             protected override void OnPaint(PaintEventArgs e) {
                 if (_isPressed)
                     e.Graphics.Clear(YamuiThemeManager.Current.AccentColor);
@@ -413,7 +410,5 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
-
 }

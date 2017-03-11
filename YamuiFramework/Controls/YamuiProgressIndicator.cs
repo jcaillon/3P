@@ -28,11 +28,9 @@ using System.Windows.Forms.Design;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiProgressIndicatorDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
     public class YamuiProgressIndicator : UserControl {
-
         #region fields
 
         [DefaultValue(false)]
@@ -61,7 +59,6 @@ namespace YamuiFramework.Controls {
                 if (value < 3) _circleCount = 3;
                 else _circleCount = value;
                 SetCirclePoints();
-
             }
         }
 
@@ -74,6 +71,7 @@ namespace YamuiFramework.Controls {
         private readonly BufferedGraphicsContext _bufferContext = BufferedGraphicsManager.Current;
         private readonly Timer _tmrAnimate = new Timer();
         private UnitVector _unitVector = new UnitVector();
+
         #endregion
 
         #region constructor
@@ -100,6 +98,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region paint
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -118,7 +117,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             if (!UseCustomBackColor)
@@ -133,9 +132,11 @@ namespace YamuiFramework.Controls {
 
             _graphicsBuffer.Render(e.Graphics);
         }
+
         #endregion
 
         #region private methods
+
         private void _tmrAnimate_Tick(object sender, EventArgs e) {
             if (_circleIndex.Equals(0)) {
                 _circleIndex = _circlePoints.Length - 1;
@@ -190,7 +191,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     struct UnitVector {
@@ -201,14 +201,14 @@ namespace YamuiFramework.Controls {
             _startPoint = startPoint;
 
             // Convert degrees to angle
-            double radian = Math.PI * angleInDegrees / 180.0;
-            if (radian > Math.PI * 2) radian = Math.PI * 2;
+            double radian = Math.PI*angleInDegrees/180.0;
+            if (radian > Math.PI*2) radian = Math.PI*2;
             if (radian < 0) radian = 0;
 
             // Set rise over run
             _rise = _run = length;
-            _rise = Math.Sin(radian) * _rise;
-            _run = Math.Cos(radian) * _run;
+            _rise = Math.Sin(radian)*_rise;
+            _run = Math.Cos(radian)*_run;
         }
 
         /// <summary>
@@ -217,8 +217,8 @@ namespace YamuiFramework.Controls {
         /// </summary>
         public PointF EndPoint {
             get {
-                float xPos = (float)(_startPoint.Y + _rise);
-                float yPos = (float)(_startPoint.X + _run);
+                float xPos = (float) (_startPoint.Y + _rise);
+                float yPos = (float) (_startPoint.X + _run);
                 // x and y pos will be swapped because we are working with rise/run
                 return new PointF(yPos, xPos);
             }
@@ -226,7 +226,6 @@ namespace YamuiFramework.Controls {
     }
 
     internal class YamuiProgressIndicatorDesigner : ControlDesigner {
-
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
 

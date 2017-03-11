@@ -24,13 +24,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms context menu for core.
     /// </summary>
-    internal sealed class ContextMenuAdapter : RContextMenu
-    {
+    internal sealed class ContextMenuAdapter : RContextMenu {
         #region Fields and Consts
 
         /// <summary>
@@ -40,28 +38,23 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public ContextMenuAdapter()
-        {
+        public ContextMenuAdapter() {
             _contextMenu = new ContextMenuStrip();
             _contextMenu.ShowImageMargin = false;
         }
 
-        public override int ItemsCount
-        {
+        public override int ItemsCount {
             get { return _contextMenu.Items.Count; }
         }
 
-        public override void AddDivider()
-        {
+        public override void AddDivider() {
             _contextMenu.Items.Add("-");
         }
 
-        public override void AddItem(string text, bool enabled, EventHandler onClick)
-        {
+        public override void AddItem(string text, bool enabled, EventHandler onClick) {
             ArgChecker.AssertArgNotNullOrEmpty(text, "text");
             ArgChecker.AssertArgNotNull(onClick, "onClick");
 
@@ -69,19 +62,16 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
             item.Enabled = enabled;
         }
 
-        public override void RemoveLastDivider()
-        {
+        public override void RemoveLastDivider() {
             if (_contextMenu.Items[_contextMenu.Items.Count - 1].Text == string.Empty)
                 _contextMenu.Items.RemoveAt(_contextMenu.Items.Count - 1);
         }
 
-        public override void Show(RControl parent, RPoint location)
-        {
-            _contextMenu.Show(((ControlAdapter)parent).Control, Utils.ConvertRound(location));
+        public override void Show(RControl parent, RPoint location) {
+            _contextMenu.Show(((ControlAdapter) parent).Control, Utils.ConvertRound(location));
         }
 
-        public override void Dispose()
-        {
+        public override void Dispose() {
             _contextMenu.Dispose();
         }
     }

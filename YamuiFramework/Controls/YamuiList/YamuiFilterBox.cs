@@ -27,13 +27,11 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// This usercontrol displays a filter box (textbox + buttons) that should be associated
     /// to a yamuiFilteredTypeList or treeList
     /// </summary>
     public class YamuiFilterBox : UserControl {
-
         #region Constant
 
         private const string ModeButtonSearchTooltip = "The current mode is <b>Search mode</b><br>Click to <b>switch to filter mode</b>";
@@ -44,7 +42,7 @@ namespace YamuiFramework.Controls.YamuiList {
         private const string DefaultWatermarkSearchText = "Search here!";
 
         #endregion
-        
+
         #region Properties
 
         /// <summary>
@@ -131,7 +129,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-        
+
         #region Private
 
         private YamuiTextBox _filterBox = new YamuiTextBox();
@@ -143,11 +141,10 @@ namespace YamuiFramework.Controls.YamuiList {
         private HtmlToolTip _tooltip = new HtmlToolTip();
 
         #endregion
-        
+
         #region Life and death
 
         public YamuiFilterBox() {
-
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
@@ -157,7 +154,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // this usercontrol should not be able to get the focus
             SetStyle(ControlStyles.Selectable, false);
-
         }
 
         protected override void Dispose(bool disposing) {
@@ -196,7 +192,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         private void DrawControl() {
-
             Controls.Clear();
 
             var treeList = AssociatedList as YamuiFilteredTypeTreeList;
@@ -219,7 +214,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     Controls.Add(extraButton);
                     ExtraButtonsList.Add(extraButton);
                     if (button.ToolTip != null)
-                       _tooltip.SetToolTip(extraButton, button.ToolTip);
+                        _tooltip.SetToolTip(extraButton, button.ToolTip);
                     xLeftPos += button.Image.Width;
                 }
                 xLeftPos += 5;
@@ -324,7 +319,6 @@ namespace YamuiFramework.Controls.YamuiList {
         #region YamuiFilterBoxButton
 
         public struct YamuiFilterBoxButton {
-
             /// <summary>
             /// Image used for the button
             /// </summary>
@@ -342,8 +336,5 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-
     }
-
-
 }

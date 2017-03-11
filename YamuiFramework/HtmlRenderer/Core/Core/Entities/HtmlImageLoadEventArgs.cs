@@ -22,8 +22,7 @@ using System.Collections.Generic;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Entities {
     /// <summary>
     /// Callback used in <see cref="HtmlImageLoadEventArgs"/> to allow setting image externally and async.<br/>
     /// The callback can provide path to image file path, URL or the actual image to use.<br/>
@@ -44,8 +43,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
     /// provide file path to load the image from. Can also use the asynchronous image overwrite not to block HTML rendering is applicable.<br/>
     /// If no alternative data is provided the original source will be used.<br/>
     /// </summary>
-    public sealed class HtmlImageLoadEventArgs : EventArgs
-    {
+    public sealed class HtmlImageLoadEventArgs : EventArgs {
         #region Fields and Consts
 
         /// <summary>
@@ -70,15 +68,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="src">the source of the image (file path or Uri)</param>
         /// <param name="attributes">collection of all the attributes that are defined on the image element</param>
         /// <param name="callback">Callback used to allow setting image externally and async.</param>
-        internal HtmlImageLoadEventArgs(string src, Dictionary<string, string> attributes, HtmlImageLoadCallback callback)
-        {
+        internal HtmlImageLoadEventArgs(string src, Dictionary<string, string> attributes, HtmlImageLoadCallback callback) {
             _src = src;
             _attributes = attributes;
             _callback = callback;
@@ -87,16 +83,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// <summary>
         /// the source of the image (file path, URL or inline data)
         /// </summary>
-        public string Src
-        {
+        public string Src {
             get { return _src; }
         }
 
         /// <summary>
         /// collection of all the attributes that are defined on the image element or CSS style
         /// </summary>
-        public Dictionary<string, string> Attributes
-        {
+        public Dictionary<string, string> Attributes {
             get { return _attributes; }
         }
 
@@ -104,8 +98,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// Indicate the image load is handled asynchronously.
         /// Cancel this image loading and overwrite the image asynchronously using callback method.<br/>
         /// </summary>
-        public bool Handled
-        {
+        public bool Handled {
             get { return _handled; }
             set { _handled = value; }
         }
@@ -114,8 +107,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// Callback to overwrite the loaded image with error image.<br/>
         /// Can be called directly from delegate handler or asynchronously after setting <see cref="Handled"/> to True.<br/>
         /// </summary>
-        public void Callback()
-        {
+        public void Callback() {
             _handled = true;
             _callback(null, null, new RRect());
         }
@@ -125,8 +117,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// Can be called directly from delegate handler or asynchronously after setting <see cref="Handled"/> to True.<br/>
         /// </summary>
         /// <param name="path">the path to the image to load (file path or URL)</param>
-        public void Callback(string path)
-        {
+        public void Callback(string path) {
             ArgChecker.AssertArgNotNullOrEmpty(path, "path");
 
             _handled = true;
@@ -141,8 +132,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// </summary>
         /// <param name="path">the path to the image to load (file path or URL)</param>
         /// <param name="imageRectangle">optional: limit to specific rectangle of the image and not all of it</param>
-        public void Callback(string path, double x, double y, double width, double height)
-        {
+        public void Callback(string path, double x, double y, double width, double height) {
             ArgChecker.AssertArgNotNullOrEmpty(path, "path");
 
             _handled = true;
@@ -156,8 +146,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// be used from the loaded image and not all of it, also the rectangle will be used for size and not the actual image size.<br/> 
         /// </summary>
         /// <param name="image">the image to load</param>
-        public void Callback(Object image)
-        {
+        public void Callback(Object image) {
             ArgChecker.AssertArgNotNull(image, "image");
 
             _handled = true;
@@ -172,8 +161,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Entities
         /// </summary>
         /// <param name="image">the image to load</param>
         /// <param name="imageRectangle">optional: limit to specific rectangle of the image and not all of it</param>
-        public void Callback(Object image, double x, double y, double width, double height)
-        {
+        public void Callback(Object image, double x, double y, double width, double height) {
             ArgChecker.AssertArgNotNull(image, "image");
 
             _handled = true;

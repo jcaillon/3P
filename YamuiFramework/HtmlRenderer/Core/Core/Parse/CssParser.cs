@@ -26,19 +26,17 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Parse {
     /// <summary>
     /// Parser to parse CSS stylesheet source string into CSS objects.
     /// </summary>
-    internal sealed class CssParser
-    {
+    internal sealed class CssParser {
         #region Fields and Consts
 
         /// <summary>
         /// split CSS rule
         /// </summary>
-        private static readonly char[] _cssBlockSplitters = { '}', ';' };
+        private static readonly char[] _cssBlockSplitters = {'}', ';'};
 
         /// <summary>
         /// 
@@ -53,16 +51,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <summary>
         /// The chars to trim the css class name by
         /// </summary>
-        private static readonly char[] _cssClassTrimChars = { '\r', '\n', '\t', ' ', '-', '!', '<', '>' };
+        private static readonly char[] _cssClassTrimChars = {'\r', '\n', '\t', ' ', '-', '!', '<', '>'};
 
         #endregion
-
 
         /// <summary>
         /// Init.
         /// </summary>
-        public CssParser(RAdapter adapter)
-        {
+        public CssParser(RAdapter adapter) {
             ArgChecker.AssertArgNotNull(adapter, "global");
 
             _valueParser = new CssValueParser(adapter);
@@ -80,11 +76,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="stylesheet">raw css stylesheet to parse</param>
         /// <param name="combineWithDefault">true - combine the parsed css data with default css data, false - return only the parsed css data</param>
         /// <returns>the CSS data with parsed CSS objects (never null)</returns>
-        public CssData ParseStyleSheet(string stylesheet, bool combineWithDefault)
-        {
+        public CssData ParseStyleSheet(string stylesheet, bool combineWithDefault) {
             var cssData = combineWithDefault ? _adapter.DefaultCssData.Clone() : new CssData();
-            if (!string.IsNullOrEmpty(stylesheet))
-            {
+            if (!string.IsNullOrEmpty(stylesheet)) {
                 ParseStyleSheet(cssData, stylesheet);
             }
             return cssData;
@@ -98,10 +92,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="cssData">the CSS data to fill with parsed CSS objects</param>
         /// <param name="stylesheet">raw css stylesheet to parse</param>
-        public void ParseStyleSheet(CssData cssData, string stylesheet)
-        {
-            if (!String.IsNullOrEmpty(stylesheet))
-            {
+        public void ParseStyleSheet(CssData cssData, string stylesheet) {
+            if (!String.IsNullOrEmpty(stylesheet)) {
                 stylesheet = RemoveStylesheetComments(stylesheet);
 
                 ParseStyleBlocks(cssData, stylesheet);
@@ -116,8 +108,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="className">the name of the css class of the block</param>
         /// <param name="blockSource">the CSS block to parse</param>
         /// <returns>the created CSS block instance</returns>
-        public CssBlock ParseCssBlock(string className, string blockSource)
-        {
+        public CssBlock ParseCssBlock(string className, string blockSource) {
             return ParseCssBlockImp(className, blockSource);
         }
 
@@ -127,8 +118,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="value">the font-family value to parse</param>
         /// <returns>parsed font-family value</returns>
-        public string ParseFontFamily(string value)
-        {
+        public string ParseFontFamily(string value) {
             return ParseFontFamilyProperty(value);
         }
 
@@ -137,11 +127,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="colorStr">color string value to parse</param>
         /// <returns>color value</returns>
-        public RColor ParseColor(string colorStr)
-        {
+        public RColor ParseColor(string colorStr) {
             return _valueParser.GetActualColor(colorStr);
         }
-
 
         #region Private methods
 
@@ -150,16 +138,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="stylesheet">the stylesheet to remove comments from</param>
         /// <returns>stylesheet without comments</returns>
-        private static string RemoveStylesheetComments(string stylesheet)
-        {
+        private static string RemoveStylesheetComments(string stylesheet) {
             StringBuilder sb = null;
 
             int prevIdx = 0, startIdx = 0;
-            while (startIdx > -1 && startIdx < stylesheet.Length)
-            {
+            while (startIdx > -1 && startIdx < stylesheet.Length) {
                 startIdx = stylesheet.IndexOf("/*", startIdx);
-                if (startIdx > -1)
-                {
+                if (startIdx > -1) {
                     if (sb == null)
                         sb = new StringBuilder(stylesheet.Length);
                     sb.Append(stylesheet.Substring(prevIdx, startIdx - prevIdx));
@@ -169,9 +154,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                         endIdx = stylesheet.Length;
 
                     prevIdx = startIdx = endIdx + 2;
-                }
-                else if (sb != null)
-                {
+                } else if (sb != null) {
                     sb.Append(stylesheet.Substring(prevIdx));
                 }
             }
@@ -185,15 +168,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="cssData">the CSS data to fill with parsed CSS objects</param>
         /// <param name="stylesheet">the stylesheet to parse</param>
-        private void ParseStyleBlocks(CssData cssData, string stylesheet)
-        {
+        private void ParseStyleBlocks(CssData cssData, string stylesheet) {
             var startIdx = 0;
             int endIdx = 0;
-            while (startIdx < stylesheet.Length && endIdx > -1)
-            {
+            while (startIdx < stylesheet.Length && endIdx > -1) {
                 endIdx = startIdx;
-                while (endIdx + 1 < stylesheet.Length)
-                {
+                while (endIdx + 1 < stylesheet.Length) {
                     endIdx++;
                     if (stylesheet[endIdx] == '}')
                         startIdx = endIdx + 1;
@@ -202,11 +182,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 }
 
                 int midIdx = endIdx + 1;
-                if (endIdx > -1)
-                {
+                if (endIdx > -1) {
                     endIdx++;
-                    while (endIdx < stylesheet.Length)
-                    {
+                    while (endIdx < stylesheet.Length) {
                         if (stylesheet[endIdx] == '{')
                             startIdx = midIdx + 1;
                         if (stylesheet[endIdx] == '}')
@@ -214,8 +192,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                         endIdx++;
                     }
 
-                    if (endIdx < stylesheet.Length)
-                    {
+                    if (endIdx < stylesheet.Length) {
                         while (Char.IsWhiteSpace(stylesheet[startIdx]))
                             startIdx++;
                         var substring = stylesheet.Substring(startIdx, endIdx - startIdx + 1);
@@ -232,12 +209,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="cssData">the CSS data to fill with parsed CSS objects</param>
         /// <param name="stylesheet">the stylesheet to parse</param>
-        private void ParseMediaStyleBlocks(CssData cssData, string stylesheet)
-        {
+        private void ParseMediaStyleBlocks(CssData cssData, string stylesheet) {
             int startIdx = 0;
             string atrule;
-            while ((atrule = RegexParserUtils.GetCssAtRules(stylesheet, ref startIdx)) != null)
-            {
+            while ((atrule = RegexParserUtils.GetCssAtRules(stylesheet, ref startIdx)) != null) {
                 //Just process @media rules
                 if (!atrule.StartsWith("@media", StringComparison.InvariantCultureIgnoreCase))
                     continue;
@@ -245,26 +220,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 //Extract specified media types
                 MatchCollection types = RegexParserUtils.Match(RegexParserUtils.CssMediaTypes, atrule);
 
-                if (types.Count == 1)
-                {
+                if (types.Count == 1) {
                     string line = types[0].Value;
 
-                    if (line.StartsWith("@media", StringComparison.InvariantCultureIgnoreCase) && line.EndsWith("{"))
-                    {
+                    if (line.StartsWith("@media", StringComparison.InvariantCultureIgnoreCase) && line.EndsWith("{")) {
                         //Get specified media types in the at-rule
                         string[] media = line.Substring(6, line.Length - 7).Split(' ');
 
                         //Scan media types
-                        foreach (string t in media)
-                        {
-                            if (!String.IsNullOrEmpty(t.Trim()))
-                            {
+                        foreach (string t in media) {
+                            if (!String.IsNullOrEmpty(t.Trim())) {
                                 //Get blocks inside the at-rule
                                 var insideBlocks = RegexParserUtils.Match(RegexParserUtils.CssBlocks, atrule);
 
                                 //Scan blocks and feed them to the style sheet
-                                foreach (Match insideBlock in insideBlocks)
-                                {
+                                foreach (Match insideBlock in insideBlocks) {
                                     FeedStyleBlock(cssData, insideBlock.Value, t.Trim());
                                 }
                             }
@@ -281,23 +251,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="cssData"> </param>
         /// <param name="block">the CSS block to handle</param>
         /// <param name="media">optional: the media (default - all)</param>
-        private void FeedStyleBlock(CssData cssData, string block, string media = "all")
-        {
+        private void FeedStyleBlock(CssData cssData, string block, string media = "all") {
             int startIdx = block.IndexOf("{", StringComparison.Ordinal);
             int endIdx = startIdx > -1 ? block.IndexOf("}", startIdx) : -1;
-            if (startIdx > -1 && endIdx > -1)
-            {
+            if (startIdx > -1 && endIdx > -1) {
                 string blockSource = block.Substring(startIdx + 1, endIdx - startIdx - 1);
                 var classes = block.Substring(0, startIdx).Split(',');
 
-                foreach (string cls in classes)
-                {
+                foreach (string cls in classes) {
                     string className = cls.Trim(_cssClassTrimChars);
-                    if (!String.IsNullOrEmpty(className))
-                    {
+                    if (!String.IsNullOrEmpty(className)) {
                         var newblock = ParseCssBlockImp(className, blockSource);
-                        if (newblock != null)
-                        {
+                        if (newblock != null) {
                             cssData.AddCssBlock(media, newblock);
                         }
                     }
@@ -311,19 +276,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="className">the name of the css class of the block</param>
         /// <param name="blockSource">the CSS block to parse</param>
         /// <returns>the created CSS block instance</returns>
-        private CssBlock ParseCssBlockImp(string className, string blockSource)
-        {
+        private CssBlock ParseCssBlockImp(string className, string blockSource) {
             className = className.ToLower();
             string psedoClass = null;
             var colonIdx = className.IndexOf(":", StringComparison.Ordinal);
-            if (colonIdx > -1 && !className.StartsWith("::"))
-            {
+            if (colonIdx > -1 && !className.StartsWith("::")) {
                 psedoClass = colonIdx < className.Length - 1 ? className.Substring(colonIdx + 1).Trim() : null;
                 className = className.Substring(0, colonIdx).Trim();
             }
 
-            if (!string.IsNullOrEmpty(className) && (psedoClass == null || psedoClass == "link" || psedoClass == "hover"))
-            {
+            if (!string.IsNullOrEmpty(className) && (psedoClass == null || psedoClass == "link" || psedoClass == "hover")) {
                 string firstClass;
                 var selectors = ParseCssBlockSelector(className, out firstClass);
 
@@ -341,17 +303,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="className">the class selector to parse</param>
         /// <param name="firstClass">return the main class the css block is on</param>
         /// <returns>returns the hierarchy of classes or null if single class selector</returns>
-        private static List<CssBlockSelectorItem> ParseCssBlockSelector(string className, out string firstClass)
-        {
+        private static List<CssBlockSelectorItem> ParseCssBlockSelector(string className, out string firstClass) {
             List<CssBlockSelectorItem> selectors = null;
 
             firstClass = null;
             int endIdx = className.Length - 1;
-            while (endIdx > -1)
-            {
+            while (endIdx > -1) {
                 bool directParent = false;
-                while (char.IsWhiteSpace(className[endIdx]) || className[endIdx] == '>')
-                {
+                while (char.IsWhiteSpace(className[endIdx]) || className[endIdx] == '>') {
                     directParent = directParent || className[endIdx] == '>';
                     endIdx--;
                 }
@@ -360,26 +319,20 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 while (startIdx > -1 && !char.IsWhiteSpace(className[startIdx]) && className[startIdx] != '>')
                     startIdx--;
 
-                if (startIdx > -1)
-                {
+                if (startIdx > -1) {
                     if (selectors == null)
                         selectors = new List<CssBlockSelectorItem>();
 
                     var subclass = className.Substring(startIdx + 1, endIdx - startIdx);
 
-                    if (firstClass == null)
-                    {
+                    if (firstClass == null) {
                         firstClass = subclass;
-                    }
-                    else
-                    {
+                    } else {
                         while (char.IsWhiteSpace(className[startIdx]) || className[startIdx] == '>')
                             startIdx--;
                         selectors.Add(new CssBlockSelectorItem(subclass, directParent));
                     }
-                }
-                else if (firstClass != null)
-                {
+                } else if (firstClass != null) {
                     selectors.Add(new CssBlockSelectorItem(className.Substring(0, endIdx + 1), directParent));
                 }
 
@@ -395,26 +348,22 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="blockSource">the raw css block to parse</param>
         /// <returns>dictionary with parsed css block properties</returns>
-        private Dictionary<string, string> ParseCssBlockProperties(string blockSource)
-        {
+        private Dictionary<string, string> ParseCssBlockProperties(string blockSource) {
             var properties = new Dictionary<string, string>();
             int startIdx = 0;
-            while (startIdx < blockSource.Length)
-            {
+            while (startIdx < blockSource.Length) {
                 int endIdx = blockSource.IndexOfAny(_cssBlockSplitters, startIdx);
                 if (endIdx < 0)
                     endIdx = blockSource.Length - 1;
 
                 var splitIdx = blockSource.IndexOf(':', startIdx, endIdx - startIdx);
-                if (splitIdx > -1)
-                {
+                if (splitIdx > -1) {
                     //Extract property name and value
                     startIdx = startIdx + (blockSource[startIdx] == ' ' ? 1 : 0);
                     var adjEndIdx = endIdx - (blockSource[endIdx] == ' ' || blockSource[endIdx] == ';' ? 1 : 0);
                     string propName = blockSource.Substring(startIdx, splitIdx - startIdx).Trim().ToLower();
                     splitIdx = splitIdx + (blockSource[splitIdx + 1] == ' ' ? 2 : 1);
-                    if (adjEndIdx >= splitIdx)
-                    {
+                    if (adjEndIdx >= splitIdx) {
                         string propValue = blockSource.Substring(splitIdx, adjEndIdx - splitIdx + 1).Trim();
                         if (!propValue.StartsWith("url", StringComparison.InvariantCultureIgnoreCase))
                             propValue = propValue.ToLower();
@@ -433,73 +382,41 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="propName">the name of the css property to add</param>
         /// <param name="propValue">the value of the css property to add</param>
         /// <param name="properties">the properties collection to add to</param>
-        private void AddProperty(string propName, string propValue, Dictionary<string, string> properties)
-        {
+        private void AddProperty(string propName, string propValue, Dictionary<string, string> properties) {
             // remove !important css crap
             propValue = propValue.Replace("!important", string.Empty).Trim();
 
-            if (propName == "width" || propName == "height" || propName == "lineheight")
-            {
+            if (propName == "width" || propName == "height" || propName == "lineheight") {
                 ParseLengthProperty(propName, propValue, properties);
-            }
-            else if (propName == "color" || propName == "backgroundcolor" || propName == "bordertopcolor" || propName == "borderbottomcolor" || propName == "borderleftcolor" || propName == "borderrightcolor")
-            {
+            } else if (propName == "color" || propName == "backgroundcolor" || propName == "bordertopcolor" || propName == "borderbottomcolor" || propName == "borderleftcolor" || propName == "borderrightcolor") {
                 ParseColorProperty(propName, propValue, properties);
-            }
-            else if (propName == "font")
-            {
+            } else if (propName == "font") {
                 ParseFontProperty(propValue, properties);
-            }
-            else if (propName == "border")
-            {
+            } else if (propName == "border") {
                 ParseBorderProperty(propValue, null, properties);
-            }
-            else if (propName == "border-left")
-            {
+            } else if (propName == "border-left") {
                 ParseBorderProperty(propValue, "-left", properties);
-            }
-            else if (propName == "border-top")
-            {
+            } else if (propName == "border-top") {
                 ParseBorderProperty(propValue, "-top", properties);
-            }
-            else if (propName == "border-right")
-            {
+            } else if (propName == "border-right") {
                 ParseBorderProperty(propValue, "-right", properties);
-            }
-            else if (propName == "border-bottom")
-            {
+            } else if (propName == "border-bottom") {
                 ParseBorderProperty(propValue, "-bottom", properties);
-            }
-            else if (propName == "margin")
-            {
+            } else if (propName == "margin") {
                 ParseMarginProperty(propValue, properties);
-            }
-            else if (propName == "border-style")
-            {
+            } else if (propName == "border-style") {
                 ParseBorderStyleProperty(propValue, properties);
-            }
-            else if (propName == "border-width")
-            {
+            } else if (propName == "border-width") {
                 ParseBorderWidthProperty(propValue, properties);
-            }
-            else if (propName == "border-color")
-            {
+            } else if (propName == "border-color") {
                 ParseBorderColorProperty(propValue, properties);
-            }
-            else if (propName == "padding")
-            {
+            } else if (propName == "padding") {
                 ParsePaddingProperty(propValue, properties);
-            }
-            else if (propName == "background-image")
-            {
+            } else if (propName == "background-image") {
                 properties["background-image"] = ParseBackgroundImageProperty(propValue);
-            }
-            else if (propName == "font-family")
-            {
+            } else if (propName == "font-family") {
                 properties["font-family"] = ParseFontFamilyProperty(propValue);
-            }
-            else
-            {
+            } else {
                 properties[propName] = propValue;
             }
         }
@@ -510,10 +427,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="propName">the name of the css property to add</param>
         /// <param name="propValue">the value of the css property to add</param>
         /// <param name="properties">the properties collection to add to</param>
-        private static void ParseLengthProperty(string propName, string propValue, Dictionary<string, string> properties)
-        {
-            if (CssValueParser.IsValidLength(propValue) || propValue.Equals(CssConstants.Auto, StringComparison.OrdinalIgnoreCase))
-            {
+        private static void ParseLengthProperty(string propName, string propValue, Dictionary<string, string> properties) {
+            if (CssValueParser.IsValidLength(propValue) || propValue.Equals(CssConstants.Auto, StringComparison.OrdinalIgnoreCase)) {
                 properties[propName] = propValue;
             }
         }
@@ -524,10 +439,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="propName">the name of the css property to add</param>
         /// <param name="propValue">the value of the css property to add</param>
         /// <param name="properties">the properties collection to add to</param>
-        private void ParseColorProperty(string propName, string propValue, Dictionary<string, string> properties)
-        {
-            if (_valueParser.IsColorValid(propValue))
-            {
+        private void ParseColorProperty(string propName, string propValue, Dictionary<string, string> properties) {
+            if (_valueParser.IsColorValid(propValue)) {
                 properties[propName] = propValue;
             }
         }
@@ -537,13 +450,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private void ParseFontProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private void ParseFontProperty(string propValue, Dictionary<string, string> properties) {
             int mustBePos;
             string mustBe = RegexParserUtils.Search(RegexParserUtils.CssFontSizeAndLineHeight, propValue, out mustBePos);
 
-            if (!string.IsNullOrEmpty(mustBe))
-            {
+            if (!string.IsNullOrEmpty(mustBe)) {
                 mustBe = mustBe.Trim();
                 //Check for style||variant||weight on the left
                 string leftSide = propValue.Substring(0, mustBePos);
@@ -559,8 +470,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 string fontSize = mustBe;
                 string lineHeight = string.Empty;
 
-                if (mustBe.Contains("/") && mustBe.Length > mustBe.IndexOf("/", StringComparison.Ordinal) + 1)
-                {
+                if (mustBe.Contains("/") && mustBe.Length > mustBe.IndexOf("/", StringComparison.Ordinal) + 1) {
                     int slashPos = mustBe.IndexOf("/", StringComparison.Ordinal);
                     fontSize = mustBe.Substring(0, slashPos);
                     lineHeight = mustBe.Substring(slashPos + 1);
@@ -586,15 +496,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse</param>
         /// <returns>parsed value</returns>
-        private static string ParseBackgroundImageProperty(string propValue)
-        {
+        private static string ParseBackgroundImageProperty(string propValue) {
             int startIdx = propValue.IndexOf("url(", StringComparison.InvariantCultureIgnoreCase);
-            if (startIdx > -1)
-            {
+            if (startIdx > -1) {
                 startIdx += 4;
                 var endIdx = propValue.IndexOf(')', startIdx);
-                if (endIdx > -1)
-                {
+                if (endIdx > -1) {
                     endIdx -= 1;
                     while (startIdx < endIdx && (char.IsWhiteSpace(propValue[startIdx]) || propValue[startIdx] == '\'' || propValue[startIdx] == '"'))
                         startIdx++;
@@ -614,11 +521,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse</param>
         /// <returns>parsed font-family value</returns>
-        private string ParseFontFamilyProperty(string propValue)
-        {
+        private string ParseFontFamilyProperty(string propValue) {
             int start = 0;
-            while (start > -1 && start < propValue.Length)
-            {
+            while (start > -1 && start < propValue.Length) {
                 while (char.IsWhiteSpace(propValue[start]) || propValue[start] == ',' || propValue[start] == '\'' || propValue[start] == '"')
                     start++;
                 var end = propValue.IndexOf(',', start);
@@ -630,8 +535,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
                 var font = propValue.Substring(start, adjEnd - start + 1);
 
-                if (_adapter.IsFontExists(font))
-                {
+                if (_adapter.IsFontExists(font)) {
                     return font;
                 }
 
@@ -647,24 +551,20 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="direction">the left, top, right or bottom direction of the border to parse</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private void ParseBorderProperty(string propValue, string direction, Dictionary<string, string> properties)
-        {
+        private void ParseBorderProperty(string propValue, string direction, Dictionary<string, string> properties) {
             string borderWidth;
             string borderStyle;
             string borderColor;
             ParseBorder(propValue, out borderWidth, out borderStyle, out borderColor);
 
-            if (direction != null)
-            {
+            if (direction != null) {
                 if (borderWidth != null)
                     properties["border" + direction + "-width"] = borderWidth;
                 if (borderStyle != null)
                     properties["border" + direction + "-style"] = borderStyle;
                 if (borderColor != null)
                     properties["border" + direction + "-color"] = borderColor;
-            }
-            else
-            {
+            } else {
                 if (borderWidth != null)
                     ParseBorderWidthProperty(borderWidth, properties);
                 if (borderStyle != null)
@@ -679,8 +579,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private static void ParseMarginProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private static void ParseMarginProperty(string propValue, Dictionary<string, string> properties) {
             string bottom, top, left, right;
             SplitMultiDirectionValues(propValue, out left, out top, out right, out bottom);
 
@@ -699,8 +598,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private static void ParseBorderStyleProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private static void ParseBorderStyleProperty(string propValue, Dictionary<string, string> properties) {
             string bottom, top, left, right;
             SplitMultiDirectionValues(propValue, out left, out top, out right, out bottom);
 
@@ -719,8 +617,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private static void ParseBorderWidthProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private static void ParseBorderWidthProperty(string propValue, Dictionary<string, string> properties) {
             string bottom, top, left, right;
             SplitMultiDirectionValues(propValue, out left, out top, out right, out bottom);
 
@@ -739,8 +636,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private static void ParseBorderColorProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private static void ParseBorderColorProperty(string propValue, Dictionary<string, string> properties) {
             string bottom, top, left, right;
             SplitMultiDirectionValues(propValue, out left, out top, out right, out bottom);
 
@@ -759,8 +655,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="propValue">the value of the property to parse to specific values</param>
         /// <param name="properties">the properties collection to add the specific properties to</param>
-        private static void ParsePaddingProperty(string propValue, Dictionary<string, string> properties)
-        {
+        private static void ParsePaddingProperty(string propValue, Dictionary<string, string> properties) {
             string bottom, top, left, right;
             SplitMultiDirectionValues(propValue, out left, out top, out right, out bottom);
 
@@ -777,15 +672,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <summary>
         /// Split multi direction value into the proper direction values (left, top, right, bottom).
         /// </summary>
-        private static void SplitMultiDirectionValues(string propValue, out string left, out string top, out string right, out string bottom)
-        {
+        private static void SplitMultiDirectionValues(string propValue, out string left, out string top, out string right, out string bottom) {
             top = null;
             left = null;
             right = null;
             bottom = null;
             string[] values = SplitValues(propValue);
-            switch (values.Length)
-            {
+            switch (values.Length) {
                 case 1:
                     top = left = right = bottom = values[0];
                     break;
@@ -813,21 +706,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="value">Value to be splitted</param>
         /// <param name="separator"> </param>
         /// <returns>Splitted and trimmed values</returns>
-        private static string[] SplitValues(string value, char separator = ' ')
-        {
+        private static string[] SplitValues(string value, char separator = ' ') {
             //TODO: CRITICAL! Don't split values on parenthesis (like rgb(0, 0, 0)) or quotes ("strings")
 
-            if (!string.IsNullOrEmpty(value))
-            {
+            if (!string.IsNullOrEmpty(value)) {
                 string[] values = value.Split(separator);
                 List<string> result = new List<string>();
 
-                foreach (string t in values)
-                {
+                foreach (string t in values) {
                     string val = t.Trim();
 
-                    if (!string.IsNullOrEmpty(val))
-                    {
+                    if (!string.IsNullOrEmpty(val)) {
                         result.Add(val);
                     }
                 }
@@ -845,15 +734,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="width"> </param>
         /// <param name="style"></param>
         /// <param name="color"></param>
-        public void ParseBorder(string value, out string width, out string style, out string color)
-        {
+        public void ParseBorder(string value, out string width, out string style, out string color) {
             width = style = color = null;
-            if (!string.IsNullOrEmpty(value))
-            {
+            if (!string.IsNullOrEmpty(value)) {
                 int idx = 0;
                 int length;
-                while ((idx = CommonUtils.GetNextSubString(value, idx, out length)) > -1)
-                {
+                while ((idx = CommonUtils.GetNextSubString(value, idx, out length)) > -1) {
                     if (width == null)
                         width = ParseBorderWidth(value, idx, length);
                     if (style == null)
@@ -870,10 +756,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>found border width value or null</returns>
-        private static string ParseBorderWidth(string str, int idx, int length)
-        {
-            if ((length > 2 && char.IsDigit(str[idx])) || (length > 3 && str[idx] == '.'))
-            {
+        private static string ParseBorderWidth(string str, int idx, int length) {
+            if ((length > 2 && char.IsDigit(str[idx])) || (length > 3 && str[idx] == '.')) {
                 string unit = null;
                 if (CommonUtils.SubStringEquals(str, idx + length - 2, 2, CssConstants.Px))
                     unit = CssConstants.Px;
@@ -892,14 +776,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 else if (CommonUtils.SubStringEquals(str, idx + length - 2, 2, CssConstants.Pc))
                     unit = CssConstants.Pc;
 
-                if (unit != null)
-                {
+                if (unit != null) {
                     if (CssValueParser.IsFloat(str, idx, length - 2))
                         return str.Substring(idx, length);
                 }
-            }
-            else
-            {
+            } else {
                 if (CommonUtils.SubStringEquals(str, idx, length, CssConstants.Thin))
                     return CssConstants.Thin;
                 if (CommonUtils.SubStringEquals(str, idx, length, CssConstants.Medium))
@@ -915,8 +796,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>found border width value or null</returns>
-        private static string ParseBorderStyle(string str, int idx, int length)
-        {
+        private static string ParseBorderStyle(string str, int idx, int length) {
             if (CommonUtils.SubStringEquals(str, idx, length, CssConstants.None))
                 return CssConstants.None;
             if (CommonUtils.SubStringEquals(str, idx, length, CssConstants.Solid))
@@ -945,8 +825,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>found border width value or null</returns>
-        private string ParseBorderColor(string str, int idx, int length)
-        {
+        private string ParseBorderColor(string str, int idx, int length) {
             RColor color;
             return _valueParser.TryGetColor(str, idx, length, out color) ? str.Substring(idx, length) : null;
         }

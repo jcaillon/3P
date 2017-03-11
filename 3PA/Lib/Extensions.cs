@@ -27,12 +27,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using _3PA.Lib.MarkdownDeep;
-using _3PA.MainFeatures;
+using _3PA.Lib.MarkDownSharp.MarkdownSharp;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This class regroups all the extension methods
     /// </summary>
@@ -50,7 +47,7 @@ namespace _3PA.Lib {
         public static T GetAttributeFrom<T>(this object instance, string propertyName) where T : Attribute {
             var attrType = typeof(T);
             var property = instance.GetType().GetProperty(propertyName);
-            return (T)property.GetCustomAttributes(attrType, false).First();
+            return (T) property.GetCustomAttributes(attrType, false).First();
         }
 
         /// <summary>
@@ -142,7 +139,6 @@ namespace _3PA.Lib {
             return (b & (1 << pos)) != 0;
         }
 
-
         /// <summary>
         /// Returns true if the bit at the given position is set to true
         /// </summary>
@@ -175,7 +171,7 @@ namespace _3PA.Lib {
             if (name != null) {
                 FieldInfo field = type.GetField(name);
                 if (field != null) {
-                    var attributeArray = (T[])Attribute.GetCustomAttributes(field, typeof(T), true);
+                    var attributeArray = (T[]) Attribute.GetCustomAttributes(field, typeof(T), true);
                     return attributeArray;
                 }
             }
@@ -206,7 +202,7 @@ namespace _3PA.Lib {
         /// currentOperation.GetAttribute!EnumAttribute>().Value 
         /// </summary>
         [AttributeUsage(AttributeTargets.Field)]
-        public class EnumAttribute : Attribute { }
+        public class EnumAttribute : Attribute {}
 
         /// <summary>
         /// Decorate enum values with [Description("Description for Foo")] and get their description with x.Foo.GetDescription()
@@ -335,7 +331,7 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string MdToHtml(this string text) {
             var md = new Markdown();
-            return md.ConvertToHtml(text);
+            return md.Transform(text);
         }
 
         /// <summary>
@@ -366,8 +362,8 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string BreakText(this string text, int lineLength, string eolString = "\n") {
             var charCount = 0;
-            var lines = text.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
-                .GroupBy(w => (charCount += w.Length + 1) / lineLength)
+            var lines = text.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries)
+                .GroupBy(w => (charCount += w.Length + 1)/lineLength)
                 .Select(g => String.Join(" ", g));
             return String.Join(eolString, lines.ToArray());
         }
@@ -440,7 +436,7 @@ namespace _3PA.Lib {
         /// <param name="needle"></param>
         /// <returns></returns>
         public static int CountOccurences(this string haystack, string needle) {
-            return (haystack.Length - haystack.Replace(needle, "").Length) / needle.Length;
+            return (haystack.Length - haystack.Replace(needle, "").Length)/needle.Length;
         }
 
         /// <summary>
@@ -453,7 +449,6 @@ namespace _3PA.Lib {
             //string.Equals(a, b, StringComparison.CurrentCultureIgnoreCase);
             return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase);
         }
-
 
         /// <summary>
         /// convert the word to Title Case
@@ -486,6 +481,20 @@ namespace _3PA.Lib {
                     outStr += '_';
             }
             return outStr;
+        }
+
+        /// <summary>
+        /// Does the char array contains a given char
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="toFind"></param>
+        /// <returns></returns>
+        public static bool Contains(this char[] array, char toFind) {
+            foreach (var chr in array) {
+                if (chr == toFind)
+                    return true;
+            }
+            return false;
         }
 
         #endregion

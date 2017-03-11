@@ -23,13 +23,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Handlers;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// CSS box for image element.
     /// </summary>
-    internal sealed class CssBoxImage : CssBox
-    {
+    internal sealed class CssBoxImage : CssBox {
         #region Fields and Consts
 
         /// <summary>
@@ -49,15 +47,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="parent">the parent box of this box</param>
         /// <param name="tag">the html tag data of this box</param>
         public CssBoxImage(CssBox parent, HtmlTag tag)
-            : base(parent, tag)
-        {
+            : base(parent, tag) {
             _imageWord = new CssRectImage(this);
             Words.Add(_imageWord);
         }
@@ -65,8 +61,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Get the image of this image box.
         /// </summary>
-        public RImage Image
-        {
+        public RImage Image {
             get { return _imageWord.Image; }
         }
 
@@ -74,11 +69,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Paints the fragment
         /// </summary>
         /// <param name="g">the device to draw to</param>
-        protected override void PaintImp(RGraphics g)
-        {
+        protected override void PaintImp(RGraphics g) {
             // load image iff it is in visible rectangle
-            if (_imageLoadHandler == null)
-            {
+            if (_imageLoadHandler == null) {
                 _imageLoadHandler = new ImageLoadHandler(HtmlContainer, OnLoadImageComplete);
                 _imageLoadHandler.LoadImage(GetAttribute("src"), HtmlTag != null ? HtmlTag.Attributes : null);
             }
@@ -99,33 +92,24 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             r.X = Math.Floor(r.X);
             r.Y = Math.Floor(r.Y);
 
-            if (_imageWord.Image != null)
-            {
-                if (r.Width > 0 && r.Height > 0)
-                {
+            if (_imageWord.Image != null) {
+                if (r.Width > 0 && r.Height > 0) {
                     if (_imageWord.ImageRectangle == RRect.Empty)
                         g.DrawImage(_imageWord.Image, r);
                     else
                         g.DrawImage(_imageWord.Image, r, _imageWord.ImageRectangle);
 
-                    if (_imageWord.Selected)
-                    {
+                    if (_imageWord.Selected) {
                         g.DrawRectangle(GetSelectionBackBrush(g, true), _imageWord.Left + offset.X, _imageWord.Top + offset.Y, _imageWord.Width + 2, DomUtils.GetCssLineBoxByWord(_imageWord).LineHeight);
                     }
                 }
-            }
-            else if (_imageLoadingComplete)
-            {
-                if (_imageLoadingComplete && r.Width > 19 && r.Height > 19)
-                {
+            } else if (_imageLoadingComplete) {
+                if (_imageLoadingComplete && r.Width > 19 && r.Height > 19) {
                     RenderUtils.DrawImageErrorIcon(g, HtmlContainer, r);
                 }
-            }
-            else
-            {
+            } else {
                 RenderUtils.DrawImageLoadingIcon(g, HtmlContainer, r);
-                if (r.Width > 19 && r.Height > 19)
-                {
+                if (r.Width > 19 && r.Height > 19) {
                     g.DrawRectangle(g.GetPen(RColor.LightGray), r.X, r.Y, r.Width, r.Height);
                 }
             }
@@ -138,12 +122,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// Assigns words its width and height
         /// </summary>
         /// <param name="g">the device to use</param>
-        internal override void MeasureWordsSize(RGraphics g)
-        {
-            if (!_wordsSizeMeasured)
-            {
-                if (_imageLoadHandler == null && (HtmlContainer.AvoidAsyncImagesLoading || HtmlContainer.AvoidImagesLateLoading))
-                {
+        internal override void MeasureWordsSize(RGraphics g) {
+            if (!_wordsSizeMeasured) {
+                if (_imageLoadHandler == null && (HtmlContainer.AvoidAsyncImagesLoading || HtmlContainer.AvoidImagesLateLoading)) {
                     _imageLoadHandler = new ImageLoadHandler(HtmlContainer, OnLoadImageComplete);
                     _imageLoadHandler.LoadImage(GetAttribute("src"), HtmlTag != null ? HtmlTag.Attributes : null);
                 }
@@ -158,21 +139,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public override void Dispose()
-        {
+        public override void Dispose() {
             if (_imageLoadHandler != null)
                 _imageLoadHandler.Dispose();
             base.Dispose();
         }
-
 
         #region Private methods
 
         /// <summary>
         /// Set error image border on the image box.
         /// </summary>
-        private void SetErrorBorder()
-        {
+        private void SetErrorBorder() {
             SetAllBorders(CssConstants.Solid, "2px", "#A0A0A0");
             BorderRightColor = BorderBottomColor = "#E3E3E3";
         }
@@ -183,20 +161,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
         /// <param name="image">the image loaded or null if failed</param>
         /// <param name="rectangle">the source rectangle to draw in the image (empty - draw everything)</param>
         /// <param name="async">is the callback was called async to load image call</param>
-        private void OnLoadImageComplete(RImage image, RRect rectangle, bool async)
-        {
+        private void OnLoadImageComplete(RImage image, RRect rectangle, bool async) {
             _imageWord.Image = image;
             _imageWord.ImageRectangle = rectangle;
             _imageLoadingComplete = true;
             _wordsSizeMeasured = false;
 
-            if (_imageLoadingComplete && image == null)
-            {
+            if (_imageLoadingComplete && image == null) {
                 SetErrorBorder();
             }
 
-            if (!HtmlContainer.AvoidImagesLateLoading || async)
-            {
+            if (!HtmlContainer.AvoidImagesLateLoading || async) {
                 var width = new CssLength(Width);
                 var height = new CssLength(Height);
                 var layout = (width.Number <= 0 || width.Unit != CssUnit.Pixels) || (height.Number <= 0 || height.Unit != CssUnit.Pixels);

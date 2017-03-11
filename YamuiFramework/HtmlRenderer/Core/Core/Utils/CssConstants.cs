@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     /// <summary>
     /// String constants to avoid typing errors.
     /// </summary>
-    internal static class CssConstants
-    {
+    internal static class CssConstants {
         public const string Absolute = "absolute";
         public const string Auto = "auto";
         public const string Baseline = "baseline";

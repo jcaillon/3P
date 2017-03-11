@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
@@ -29,13 +30,13 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-
     public class YamuiMenu : YamuiFormBaseShadow {
 
         #region Private
-        
+
         private Action<YamuiMenuItem> _clickItemWrapper;
         private Size _formMinSize = new Size(0, 20);
+        private bool _isExpanded = true;
 
         #endregion
 
@@ -122,8 +123,8 @@ namespace YamuiFramework.Forms {
         protected override CreateParams CreateParams {
             get {
                 var createParams = base.CreateParams;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOPMOST;
                 return createParams;
             }
         }
@@ -151,7 +152,6 @@ namespace YamuiFramework.Forms {
         #region DrawContent
 
         private void DrawContent() {
-
             // init menu form
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.Manual;
@@ -159,7 +159,7 @@ namespace YamuiFramework.Forms {
             Controls.Clear();
 
             // evaluates the width needed to draw the control
-            var maxWidth = MenuList.Select(item => item.Level * 8 + TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
+            var maxWidth = MenuList.Select(item => item.Level*8 + TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] {0}).Max();
             maxWidth += MenuList.Exists(item => item.SubText != null) ? 10 : 0;
             maxWidth += (MenuList.Exists(item => item.ItemImage != null) ? 35 : 8) + 30;
             if (FormMaxSize.Width > 0)
@@ -167,7 +167,7 @@ namespace YamuiFramework.Forms {
             if (FormMinSize.Width > 0)
                 maxWidth = maxWidth.ClampMin(FormMinSize.Width);
             Width = maxWidth;
-            
+
             int yPos = BorderWidth;
 
             // title
@@ -177,7 +177,7 @@ namespace YamuiFramework.Forms {
                     Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                     Location = new Point(BorderWidth, yPos),
                     AutoSizeHeightOnly = true,
-                    Width = Width - BorderWidth * 2,
+                    Width = Width - BorderWidth*2,
                     BackColor = Color.Transparent,
                     Text = HtmlTitle,
                     IsSelectionEnabled = false,
@@ -193,6 +193,16 @@ namespace YamuiFramework.Forms {
                 FilterBox.Location = new Point(BorderWidth, yPos + 5);
                 FilterBox.Size = new Size(Width - BorderWidth*2, 20);
                 FilterBox.Padding = new Padding(5, 0, 5, 0);
+                if (MenuList.Exists(item => item.CanExpand)) {
+                    _isExpanded = MenuList.Exists(item => item.IsExpanded);
+                    FilterBox.ExtraButtons = new List<YamuiFilterBox.YamuiFilterBoxButton> {
+                        new YamuiFilterBox.YamuiFilterBoxButton {
+                            Image = _isExpanded ? Resources.Resources.Collapse : Resources.Resources.Expand,
+                            OnClic = buttonExpandRetract_Click,
+                            ToolTip = "Toggle <b>Expand/Collapse</b>"
+                        },
+                    };
+                }
                 yPos += 30;
             }
 
@@ -206,14 +216,14 @@ namespace YamuiFramework.Forms {
             YamuiList.MouseDown += YamuiListOnMouseDown;
             YamuiList.EnterPressed += YamuiListOnEnterPressed;
             YamuiList.RowClicked += YamuiListOnRowClicked;
-            yPos += YamuiList.Items.Count.ClampMin(1) * YamuiList.RowHeight;
+            yPos += YamuiList.Items.Count.ClampMin(1)*YamuiList.RowHeight;
 
             if (YamuiList.Items.Count > 0) {
                 var selectedIdx = YamuiList.Items.Cast<YamuiMenuItem>().ToList().FindIndex(item => item.IsSelectedByDefault);
                 if (selectedIdx > 0)
                     YamuiList.SelectedItemIndex = selectedIdx;
             }
-            
+
             // add controls
             if (title != null)
                 Controls.Add(title);
@@ -235,7 +245,7 @@ namespace YamuiFramework.Forms {
             Location = AutocompletionLineHeight != 0 ? GetBestAutocompPosition(SpawnLocation, AutocompletionLineHeight) : GetBestMenuPosition(SpawnLocation);
             ResizeFormToFitScreen();
             MinimumSize = Size;
-            
+
             // default focus
             if (DisplayFilterBox)
                 FilterBox.ClearAndFocusFilter();
@@ -286,8 +296,17 @@ namespace YamuiFramework.Forms {
             if (list != null && Movable && e.Button == MouseButtons.Left && (new Rectangle(0, list.Height - list.BottomHeight, list.Width, list.BottomHeight)).Contains(e.Location)) {
                 // do as if the cursor was on the title bar
                 WinApi.ReleaseCapture();
-                WinApi.SendMessage(Handle, (uint)WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int)WinApi.HitTest.HTCAPTION), new IntPtr(0));
+                WinApi.SendMessage(Handle, (uint) WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int) WinApi.HitTest.HTCAPTION), new IntPtr(0));
             }
+        }
+
+        private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
+            if (_isExpanded)
+                YamuiList.ForceAllToCollapse();
+            else
+                YamuiList.ForceAllToExpand();
+            _isExpanded = !_isExpanded;
+            FilterBox.ExtraButtonsList[0].BackGrndImage = _isExpanded ? Resources.Resources.Collapse : Resources.Resources.Expand;
         }
 
         #endregion
@@ -364,11 +383,12 @@ namespace YamuiFramework.Forms {
             /// </summary>
             public bool NoCanExpandItem { get; set; }
 
+            protected new int _nodeExpandClickMargin = 28;
+
             /// <summary>
             /// Called by default to paint the row if no OnRowPaint is defined
             /// </summary>
             protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-
                 // background
                 var backColor = item.IsSeparator ?
                     YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
@@ -406,13 +426,11 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
-
     }
-    
+
     #region YamuiMenuItem
 
     public class YamuiMenuItem : FilteredTypeTreeListItem {
-
         /// <summary>
         /// Action to execute on clic
         /// </summary>
@@ -424,10 +442,10 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public bool IsSelectedByDefault { get; set; }
 
-        public override int ItemType { get { return -1; } }
-
+        public override int ItemType {
+            get { return -1; }
+        }
     }
 
     #endregion
-
 }

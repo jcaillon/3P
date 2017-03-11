@@ -24,13 +24,11 @@ using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers {
     /// <summary>
     /// Handler for text selection in the html.
     /// </summary>
-    internal sealed class SelectionHandler : IDisposable
-    {
+    internal sealed class SelectionHandler : IDisposable {
         #region Fields and Consts
 
         /// <summary>
@@ -122,13 +120,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
         /// <param name="root">the root of the handled html tree</param>
-        public SelectionHandler(CssBox root)
-        {
+        public SelectionHandler(CssBox root) {
             ArgChecker.AssertArgNotNull(root, "root");
 
             _root = root;
@@ -139,10 +135,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Select all the words in the html.
         /// </summary>
         /// <param name="control">the control hosting the html to invalidate</param>
-        public void SelectAll(RControl control)
-        {
-            if (_root.HtmlContainer.IsSelectionEnabled)
-            {
+        public void SelectAll(RControl control) {
+            if (_root.HtmlContainer.IsSelectionEnabled) {
                 ClearSelection();
                 SelectAllWords(_root);
                 control.Invalidate();
@@ -154,13 +148,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="control">the control hosting the html to invalidate</param>
         /// <param name="loc">the location to select word at</param>
-        public void SelectWord(RControl control, RPoint loc)
-        {
-            if (_root.HtmlContainer.IsSelectionEnabled)
-            {
+        public void SelectWord(RControl control, RPoint loc) {
+            if (_root.HtmlContainer.IsSelectionEnabled) {
                 var word = DomUtils.GetCssBoxWord(_root, loc);
-                if (word != null)
-                {
+                if (word != null) {
                     word.Selection = this;
                     _selectionStartPoint = loc;
                     _selectionStart = _selectionEnd = word;
@@ -175,42 +166,32 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="loc">the location of the mouse on the html</param>
         /// <param name="isMouseInContainer"> </param>
-        public void HandleMouseDown(RControl parent, RPoint loc, bool isMouseInContainer)
-        {
+        public void HandleMouseDown(RControl parent, RPoint loc, bool isMouseInContainer) {
             bool clear = !isMouseInContainer;
-            if (isMouseInContainer)
-            {
+            if (isMouseInContainer) {
                 _mouseDownInControl = true;
                 _isDoubleClickSelect = (DateTime.Now - _lastMouseDown).TotalMilliseconds < 400;
                 _lastMouseDown = DateTime.Now;
                 _mouseDownOnSelectedWord = false;
 
-                if (_root.HtmlContainer.IsSelectionEnabled && parent.LeftMouseButton)
-                {
+                if (_root.HtmlContainer.IsSelectionEnabled && parent.LeftMouseButton) {
                     var word = DomUtils.GetCssBoxWord(_root, loc);
-                    if (word != null && word.Selected)
-                    {
+                    if (word != null && word.Selected) {
                         _mouseDownOnSelectedWord = true;
-                    }
-                    else
-                    {
+                    } else {
                         clear = true;
                     }
-                }
-                else if (parent.RightMouseButton)
-                {
+                } else if (parent.RightMouseButton) {
                     var rect = DomUtils.GetCssBoxWord(_root, loc);
                     var link = DomUtils.GetLinkBox(_root, loc);
-                    if (_root.HtmlContainer.IsContextMenuEnabled)
-                    {
+                    if (_root.HtmlContainer.IsContextMenuEnabled) {
                         _contextMenuHandler.ShowContextMenu(parent, rect, link);
                     }
                     clear = rect == null || !rect.Selected;
                 }
             }
 
-            if (clear)
-            {
+            if (clear) {
                 ClearSelection();
                 parent.Invalidate();
             }
@@ -222,15 +203,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="parent">the control hosting the html to invalidate</param>
         /// <param name="leftMouseButton">is the left mouse button has been released</param>
         /// <returns>is the mouse up should be ignored</returns>
-        public bool HandleMouseUp(RControl parent, bool leftMouseButton)
-        {
+        public bool HandleMouseUp(RControl parent, bool leftMouseButton) {
             bool ignore = false;
             _mouseDownInControl = false;
-            if (_root.HtmlContainer.IsSelectionEnabled)
-            {
+            if (_root.HtmlContainer.IsSelectionEnabled) {
                 ignore = _inSelection;
-                if (!_inSelection && leftMouseButton && _mouseDownOnSelectedWord)
-                {
+                if (!_inSelection && leftMouseButton && _mouseDownOnSelectedWord) {
                     ClearSelection();
                     parent.Invalidate();
                 }
@@ -247,42 +225,30 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
         /// <param name="loc">the location of the mouse on the html</param>
-        public void HandleMouseMove(RControl parent, RPoint loc)
-        {
-            if (_root.HtmlContainer.IsSelectionEnabled && _mouseDownInControl && parent.LeftMouseButton)
-            {
-                if (_mouseDownOnSelectedWord)
-                {
+        public void HandleMouseMove(RControl parent, RPoint loc) {
+            if (_root.HtmlContainer.IsSelectionEnabled && _mouseDownInControl && parent.LeftMouseButton) {
+                if (_mouseDownOnSelectedWord) {
                     // make sure not to start drag-drop on click but when it actually moves as it fucks mouse-up
                     if ((DateTime.Now - _lastMouseDown).TotalMilliseconds > 200)
                         StartDragDrop(parent);
-                }
-                else
-                {
+                } else {
                     HandleSelection(parent, loc, !_isDoubleClickSelect);
                     _inSelection = _selectionStart != null && _selectionEnd != null && (_selectionStart != _selectionEnd || _selectionStartIndex != _selectionEndIndex);
                 }
-            }
-            else
-            {
+            } else {
                 // Handle mouse hover over the html to change the cursor depending if hovering word, link of other.
                 var link = DomUtils.GetLinkBox(_root, loc);
-                if (link != null)
-                {
+                if (link != null) {
                     _cursorChanged = true;
                     parent.SetCursorHand();
-                }
-                else if (_root.HtmlContainer.IsSelectionEnabled)
-                {
+                } else if (_root.HtmlContainer.IsSelectionEnabled) {
                     var word = DomUtils.GetCssBoxWord(_root, loc);
                     _cursorChanged = word != null && !word.IsImage && !(word.Selected && (word.SelectedStartIndex < 0 || word.Left + word.SelectedStartOffset <= loc.X) && (word.SelectedEndOffset < 0 || word.Left + word.SelectedEndOffset >= loc.X));
                     if (_cursorChanged)
                         parent.SetCursorIBeam();
                     else
                         parent.SetCursorDefault();
-                }
-                else if (_cursorChanged)
-                {
+                } else if (_cursorChanged) {
                     parent.SetCursorDefault();
                 }
             }
@@ -292,10 +258,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// On mouse leave change the cursor back to default.
         /// </summary>
         /// <param name="parent">the control hosting the html to set cursor and invalidate</param>
-        public void HandleMouseLeave(RControl parent)
-        {
-            if (_cursorChanged)
-            {
+        public void HandleMouseLeave(RControl parent) {
+            if (_cursorChanged) {
                 _cursorChanged = false;
                 parent.SetCursorDefault();
             }
@@ -305,10 +269,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Copy the currently selected html segment to clipboard.<br/>
         /// Copy rich html text and plain text.
         /// </summary>
-        public void CopySelectedHtml()
-        {
-            if (_root.HtmlContainer.IsSelectionEnabled)
-            {
+        public void CopySelectedHtml() {
+            if (_root.HtmlContainer.IsSelectionEnabled) {
                 var html = DomUtils.GenerateHtml(_root, HtmlGenerationStyle.Inline, true);
                 var plainText = DomUtils.GetSelectedPlainText(_root);
                 if (!string.IsNullOrEmpty(plainText))
@@ -319,16 +281,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Get the currently selected text segment in the html.<br/>
         /// </summary>
-        public string GetSelectedText()
-        {
+        public string GetSelectedText() {
             return _root.HtmlContainer.IsSelectionEnabled ? DomUtils.GetSelectedPlainText(_root) : null;
         }
 
         /// <summary>
         /// Copy the currently selected html segment with style.<br/>
         /// </summary>
-        public string GetSelectedHtml()
-        {
+        public string GetSelectedHtml() {
             return _root.HtmlContainer.IsSelectionEnabled ? DomUtils.GenerateHtml(_root, HtmlGenerationStyle.Inline, true) : null;
         }
 
@@ -341,8 +301,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// </remarks>
         /// <param name="word">the word to return the selection start index for</param>
         /// <returns>data value or -1 if not applicable</returns>
-        public int GetSelectingStartIndex(CssRect word)
-        {
+        public int GetSelectingStartIndex(CssRect word) {
             return word == (_backwardSelection ? _selectionEnd : _selectionStart) ? (_backwardSelection ? _selectionEndIndex : _selectionStartIndex) : -1;
         }
 
@@ -354,8 +313,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Handles backward selecting by returning the selection end data instead of start.
         /// </remarks>
         /// <param name="word">the word to return the selection end index for</param>
-        public int GetSelectedEndIndexOffset(CssRect word)
-        {
+        public int GetSelectedEndIndexOffset(CssRect word) {
             return word == (_backwardSelection ? _selectionStart : _selectionEnd) ? (_backwardSelection ? _selectionStartIndex : _selectionEndIndex) : -1;
         }
 
@@ -367,8 +325,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Handles backward selecting by returning the selection end data instead of start.
         /// </remarks>
         /// <param name="word">the word to return the selection start offset for</param>
-        public double GetSelectedStartOffset(CssRect word)
-        {
+        public double GetSelectedStartOffset(CssRect word) {
             return word == (_backwardSelection ? _selectionEnd : _selectionStart) ? (_backwardSelection ? _selectionEndOffset : _selectionStartOffset) : -1;
         }
 
@@ -380,8 +337,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Handles backward selecting by returning the selection end data instead of start.
         /// </remarks>
         /// <param name="word">the word to return the selection end offset for</param>
-        public double GetSelectedEndOffset(CssRect word)
-        {
+        public double GetSelectedEndOffset(CssRect word) {
             return word == (_backwardSelection ? _selectionStart : _selectionEnd) ? (_backwardSelection ? _selectionStartOffset : _selectionEndOffset) : -1;
         }
 
@@ -389,11 +345,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         /// <filterpriority>2</filterpriority>
-        public void Dispose()
-        {
+        public void Dispose() {
             _contextMenuHandler.Dispose();
         }
-
 
         #region Private methods
 
@@ -404,40 +358,30 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="control">the control hosting the html to invalidate</param>
         /// <param name="loc">the mouse location</param>
         /// <param name="allowPartialSelect">true - partial word selection allowed, false - only full words selection</param>
-        private void HandleSelection(RControl control, RPoint loc, bool allowPartialSelect)
-        {
+        private void HandleSelection(RControl control, RPoint loc, bool allowPartialSelect) {
             // get the line under the mouse or nearest from the top
             var lineBox = DomUtils.GetCssLineBox(_root, loc);
-            if (lineBox != null)
-            {
+            if (lineBox != null) {
                 // get the word under the mouse
                 var word = DomUtils.GetCssBoxWord(lineBox, loc);
 
                 // if no word found under the mouse use the last or the first word in the line
-                if (word == null && lineBox.Words.Count > 0)
-                {
-                    if (loc.Y > lineBox.LineBottom)
-                    {
+                if (word == null && lineBox.Words.Count > 0) {
+                    if (loc.Y > lineBox.LineBottom) {
                         // under the line
                         word = lineBox.Words[lineBox.Words.Count - 1];
-                    }
-                    else if (loc.X < lineBox.Words[0].Left)
-                    {
+                    } else if (loc.X < lineBox.Words[0].Left) {
                         // before the line
                         word = lineBox.Words[0];
-                    }
-                    else if (loc.X > lineBox.Words[lineBox.Words.Count - 1].Right)
-                    {
+                    } else if (loc.X > lineBox.Words[lineBox.Words.Count - 1].Right) {
                         // at the end of the line
                         word = lineBox.Words[lineBox.Words.Count - 1];
                     }
                 }
 
                 // if there is matching word
-                if (word != null)
-                {
-                    if (_selectionStart == null)
-                    {
+                if (word != null) {
+                    if (_selectionStart == null) {
                         // on start set the selection start word
                         _selectionStartPoint = loc;
                         _selectionStart = word;
@@ -451,13 +395,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
                         CalculateWordCharIndexAndOffset(control, word, loc, false);
 
                     ClearSelection(_root);
-                    if (CheckNonEmptySelection(loc, allowPartialSelect))
-                    {
+                    if (CheckNonEmptySelection(loc, allowPartialSelect)) {
                         CheckSelectionDirection();
                         SelectWordsInRange(_root, _backwardSelection ? _selectionEnd : _selectionStart, _backwardSelection ? _selectionStart : _selectionEnd);
-                    }
-                    else
-                    {
+                    } else {
                         _selectionEnd = null;
                     }
 
@@ -471,8 +412,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <summary>
         /// Clear the current selection.
         /// </summary>
-        private void ClearSelection()
-        {
+        private void ClearSelection() {
             // clear drag and drop
             _dragDropData = null;
 
@@ -492,14 +432,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Clear the selection from all the words in the css box recursively.
         /// </summary>
         /// <param name="box">the css box to selectionStart clear at</param>
-        private static void ClearSelection(CssBox box)
-        {
-            foreach (var word in box.Words)
-            {
+        private static void ClearSelection(CssBox box) {
+            foreach (var word in box.Words) {
                 word.Selection = null;
             }
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 ClearSelection(childBox);
             }
         }
@@ -508,10 +445,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Start drag & drop operation on the currently selected html segment.
         /// </summary>
         /// <param name="control">the control to start the drag & drop on</param>
-        private void StartDragDrop(RControl control)
-        {
-            if (_dragDropData == null)
-            {
+        private void StartDragDrop(RControl control) {
+            if (_dragDropData == null) {
                 var html = DomUtils.GenerateHtml(_root, HtmlGenerationStyle.Inline, true);
                 var plainText = DomUtils.GetSelectedPlainText(_root);
                 _dragDropData = control.Adapter.GetClipboardDataObject(html, plainText);
@@ -523,15 +458,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Select all the words that are under <paramref name="box"/> DOM hierarchy.<br/>
         /// </summary>
         /// <param name="box">the box to start select all at</param>
-        public void SelectAllWords(CssBox box)
-        {
-            foreach (var word in box.Words)
-            {
+        public void SelectAllWords(CssBox box) {
+            foreach (var word in box.Words) {
                 word.Selection = this;
             }
 
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 SelectAllWords(childBox);
             }
         }
@@ -542,8 +474,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="loc"></param>
         /// <param name="allowPartialSelect">true - partial word selection allowed, false - only full words selection</param>
         /// <returns>true - is non empty selection, false - empty selection</returns>
-        private bool CheckNonEmptySelection(RPoint loc, bool allowPartialSelect)
-        {
+        private bool CheckNonEmptySelection(RPoint loc, bool allowPartialSelect) {
             // full word selection is never empty
             if (!allowPartialSelect)
                 return true;
@@ -562,8 +493,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="root">the root of the DOM sub-tree the selection is in</param>
         /// <param name="selectionStart">selection start word limit</param>
         /// <param name="selectionEnd">selection end word limit</param>
-        private void SelectWordsInRange(CssBox root, CssRect selectionStart, CssRect selectionEnd)
-        {
+        private void SelectWordsInRange(CssBox root, CssRect selectionStart, CssRect selectionEnd) {
             bool inSelection = false;
             SelectWordsInRange(root, selectionStart, selectionEnd, ref inSelection);
         }
@@ -576,29 +506,22 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="selectionEnd">selection end word limit</param>
         /// <param name="inSelection">used to know the traversal is currently in selected range</param>
         /// <returns></returns>
-        private bool SelectWordsInRange(CssBox box, CssRect selectionStart, CssRect selectionEnd, ref bool inSelection)
-        {
-            foreach (var boxWord in box.Words)
-            {
-                if (!inSelection && boxWord == selectionStart)
-                {
+        private bool SelectWordsInRange(CssBox box, CssRect selectionStart, CssRect selectionEnd, ref bool inSelection) {
+            foreach (var boxWord in box.Words) {
+                if (!inSelection && boxWord == selectionStart) {
                     inSelection = true;
                 }
-                if (inSelection)
-                {
+                if (inSelection) {
                     boxWord.Selection = this;
 
-                    if (selectionStart == selectionEnd || boxWord == selectionEnd)
-                    {
+                    if (selectionStart == selectionEnd || boxWord == selectionEnd) {
                         return true;
                     }
                 }
             }
 
-            foreach (var childBox in box.Boxes)
-            {
-                if (SelectWordsInRange(childBox, selectionStart, selectionEnd, ref inSelection))
-                {
+            foreach (var childBox in box.Boxes) {
+                if (SelectWordsInRange(childBox, selectionStart, selectionEnd, ref inSelection)) {
                     return true;
                 }
             }
@@ -614,19 +537,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="word">the word to calculate its index and offset</param>
         /// <param name="loc">the location to calculate for</param>
         /// <param name="selectionStart">to set the starting or ending char and offset data</param>
-        private void CalculateWordCharIndexAndOffset(RControl control, CssRect word, RPoint loc, bool selectionStart)
-        {
+        private void CalculateWordCharIndexAndOffset(RControl control, CssRect word, RPoint loc, bool selectionStart) {
             int selectionIndex;
             double selectionOffset;
             CalculateWordCharIndexAndOffset(control, word, loc, selectionStart, out selectionIndex, out selectionOffset);
 
-            if (selectionStart)
-            {
+            if (selectionStart) {
                 _selectionStartIndex = selectionIndex;
                 _selectionStartOffset = selectionOffset;
-            }
-            else
-            {
+            } else {
                 _selectionEndIndex = selectionIndex;
                 _selectionEndOffset = selectionOffset;
             }
@@ -645,29 +564,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// <param name="inclusive">is to include the first character in the calculation</param>
         /// <param name="selectionIndex">return the index of the char under the location</param>
         /// <param name="selectionOffset">return the offset of the char under the location</param>
-        private static void CalculateWordCharIndexAndOffset(RControl control, CssRect word, RPoint loc, bool inclusive, out int selectionIndex, out double selectionOffset)
-        {
+        private static void CalculateWordCharIndexAndOffset(RControl control, CssRect word, RPoint loc, bool inclusive, out int selectionIndex, out double selectionOffset) {
             selectionIndex = 0;
             selectionOffset = 0f;
             var offset = loc.X - word.Left;
-            if (word.Text == null)
-            {
+            if (word.Text == null) {
                 // not a text word - set full selection
                 selectionIndex = -1;
                 selectionOffset = -1;
-            }
-            else if (offset > word.Width - word.OwnerBox.ActualWordSpacing || loc.Y > DomUtils.GetCssLineBoxByWord(word).LineBottom)
-            {
+            } else if (offset > word.Width - word.OwnerBox.ActualWordSpacing || loc.Y > DomUtils.GetCssLineBoxByWord(word).LineBottom) {
                 // mouse under the line, to the right of the word - set to the end of the word
                 selectionIndex = word.Text.Length;
                 selectionOffset = word.Width;
-            }
-            else if (offset > 0)
-            {
+            } else if (offset > 0) {
                 // calculate partial word selection
                 int charFit;
                 double charFitWidth;
-                var maxWidth = offset + (inclusive ? 0 : 1.5f * word.LeftGlyphPadding);
+                var maxWidth = offset + (inclusive ? 0 : 1.5f*word.LeftGlyphPadding);
                 control.MeasureString(word.Text, word.OwnerBox.ActualFont, maxWidth, out charFit, out charFitWidth);
 
                 selectionIndex = charFit;
@@ -679,18 +592,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Handlers
         /// Check if the selection direction is forward or backward.<br/>
         /// Is the selection start word is before the selection end word in DFS traversal.
         /// </summary>
-        private void CheckSelectionDirection()
-        {
-            if (_selectionStart == _selectionEnd)
-            {
+        private void CheckSelectionDirection() {
+            if (_selectionStart == _selectionEnd) {
                 _backwardSelection = _selectionStartIndex > _selectionEndIndex;
-            }
-            else if (DomUtils.GetCssLineBoxByWord(_selectionStart) == DomUtils.GetCssLineBoxByWord(_selectionEnd))
-            {
+            } else if (DomUtils.GetCssLineBoxByWord(_selectionStart) == DomUtils.GetCssLineBoxByWord(_selectionEnd)) {
                 _backwardSelection = _selectionStart.Left > _selectionEnd.Left;
-            }
-            else
-            {
+            } else {
                 _backwardSelection = _selectionStart.Top >= _selectionEnd.Bottom;
             }
         }

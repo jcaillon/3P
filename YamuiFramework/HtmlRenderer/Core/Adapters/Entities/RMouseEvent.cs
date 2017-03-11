@@ -19,13 +19,11 @@
 #endregion
 using YamuiFramework.HtmlRenderer.Core.Core;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Even class for handling keyboard events in <see cref="HtmlContainerInt"/>.
     /// </summary>
-    public sealed class RMouseEvent
-    {
+    public sealed class RMouseEvent {
         /// <summary>
         /// Is the left mouse button participated in the event
         /// </summary>
@@ -34,16 +32,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         /// <summary>
         /// Init.
         /// </summary>
-        public RMouseEvent(bool leftButton)
-        {
+        public RMouseEvent(bool leftButton) {
             _leftButton = leftButton;
         }
 
         /// <summary>
         /// Is the left mouse button participated in the event
         /// </summary>
-        public bool LeftButton
-        {
+        public bool LeftButton {
             get { return _leftButton; }
         }
     }

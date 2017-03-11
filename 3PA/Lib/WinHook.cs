@@ -35,7 +35,6 @@ namespace _3PA.Lib {
     }
 
     internal class KeyboardMonitor : WindowsHook<KeyboardMonitor> {
-
         #region private
 
         private HashSet<Keys> _keysToIntercept = new HashSet<Keys>();
@@ -75,7 +74,7 @@ namespace _3PA.Lib {
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            var key = (Keys)(wParam.ToInt64());
+            var key = (Keys) (wParam.ToInt64());
             long context = lParam.ToInt64();
 
             // bypass the normal keydown handler, send all the messages
@@ -138,7 +137,6 @@ namespace _3PA.Lib {
     /// Monitors the mouse actions
     /// </summary>
     internal class MouseMonitor : WindowsHook<MouseMonitor> {
-
         #region public
 
         /// <summary>
@@ -182,33 +180,32 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
             if (GetMouseMessage == null)
                 return false;
-            if (!_messagesToIntercept.Contains((uint)wParam))
+            if (!_messagesToIntercept.Contains((uint) wParam))
                 return false;
-            Win32Api.MOUSEHOOKSTRUCT ms = (Win32Api.MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(Win32Api.MOUSEHOOKSTRUCT));
-            return GetMouseMessage((Win32Api.WindowsMessageMouse)wParam, ms);
+            Win32Api.MOUSEHOOKSTRUCT ms = (Win32Api.MOUSEHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(Win32Api.MOUSEHOOKSTRUCT));
+            return GetMouseMessage((Win32Api.WindowsMessageMouse) wParam, ms);
         }
 
         #endregion
     }
 
     #endregion
-    
+
     #region GetMessage hook
 
     internal class CallWndProcMonitor : WindowsHook<CallWndProcMonitor> {
-
         #region public
 
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetMessage;
+
         public delegate void MessageHandler(Win32Api.MSG message, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
@@ -217,8 +214,8 @@ namespace _3PA.Lib {
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
         public void Add(params Win32Api.WindowsMessage[] messages) {
-            foreach (Win32Api.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
-                _messagesToIntercept.Add((uint)key);
+            foreach (Win32Api.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint) key)))
+                _messagesToIntercept.Add((uint) key);
         }
 
         public void Clear() {
@@ -234,11 +231,10 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            Win32Api.MSG nc = (Win32Api.MSG)Marshal.PtrToStructure(lParam, typeof(Win32Api.MSG));
+            Win32Api.MSG nc = (Win32Api.MSG) Marshal.PtrToStructure(lParam, typeof(Win32Api.MSG));
             if (GetMessage == null)
                 return false;
             if (_messagesToIntercept.Contains(nc.message)) {
@@ -257,13 +253,13 @@ namespace _3PA.Lib {
     #region Cbt hook
 
     internal class CbtMonitor : WindowsHook<CbtMonitor> {
-
         #region public
 
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetCode;
+
         public delegate void MessageHandler(Win32Api.HCBT code);
 
         /// <summary>
@@ -284,7 +280,7 @@ namespace _3PA.Lib {
         private int ThisCallBackFunction(int code, IntPtr wParam, IntPtr lParam) {
             if (code >= 0) {
                 if (GetCode != null)
-                    GetCode((Win32Api.HCBT)code);
+                    GetCode((Win32Api.HCBT) code);
             }
             return Win32Api.CallNextHookEx(InternalHook, code, wParam, lParam);
         }
@@ -340,5 +336,4 @@ namespace _3PA.Lib {
     */
 
     #endregion
-
 }

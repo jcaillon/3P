@@ -24,13 +24,11 @@ using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Parse {
     /// <summary>
     /// Parse CSS properties values like numbers, Urls, etc.
     /// </summary>
-    internal sealed class CssValueParser
-    {
+    internal sealed class CssValueParser {
         #region Fields and Consts
 
         /// <summary>
@@ -40,12 +38,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public CssValueParser(RAdapter adapter)
-        {
+        public CssValueParser(RAdapter adapter) {
             ArgChecker.AssertArgNotNull(adapter, "global");
 
             _adapter = adapter;
@@ -56,22 +52,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>true - valid double number, false - otherwise</returns>
-        public static bool IsFloat(string str, int idx, int length)
-        {
+        public static bool IsFloat(string str, int idx, int length) {
             if (length < 1)
                 return false;
 
             bool sawDot = false;
-            for (int i = 0; i < length; i++)
-            {
-                if (str[idx + i] == '.')
-                {
+            for (int i = 0; i < length; i++) {
+                if (str[idx + i] == '.') {
                     if (sawDot)
                         return false;
                     sawDot = true;
-                }
-                else if (!char.IsDigit(str[idx + i]))
-                {
+                } else if (!char.IsDigit(str[idx + i])) {
                     return false;
                 }
             }
@@ -83,13 +74,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>true - valid int number, false - otherwise</returns>
-        public static bool IsInt(string str, int idx, int length)
-        {
+        public static bool IsInt(string str, int idx, int length) {
             if (length < 1)
                 return false;
 
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 if (!char.IsDigit(str[idx + i]))
                     return false;
             }
@@ -101,17 +90,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="value">the string value to check</param>
         /// <returns>true - valid, false - invalid</returns>
-        public static bool IsValidLength(string value)
-        {
-            if (value.Length > 1)
-            {
+        public static bool IsValidLength(string value) {
+            if (value.Length > 1) {
                 string number = string.Empty;
-                if (value.EndsWith("%"))
-                {
+                if (value.EndsWith("%")) {
                     number = value.Substring(0, value.Length - 1);
-                }
-                else if (value.Length > 2)
-                {
+                } else if (value.Length > 2) {
                     number = value.Substring(0, value.Length - 2);
                 }
                 double stub;
@@ -126,10 +110,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="number">Number to be parsed</param>
         /// <param name="hundredPercent">Number that represents the 100% if parsed number is a percentage</param>
         /// <returns>Parsed number. Zero if error while parsing.</returns>
-        public static double ParseNumber(string number, double hundredPercent)
-        {
-            if (string.IsNullOrEmpty(number))
-            {
+        public static double ParseNumber(string number, double hundredPercent) {
+            if (string.IsNullOrEmpty(number)) {
                 return 0f;
             }
 
@@ -140,14 +122,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             if (isPercent)
                 toParse = number.Substring(0, number.Length - 1);
 
-            if (!double.TryParse(toParse, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out result))
-            {
+            if (!double.TryParse(toParse, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out result)) {
                 return 0f;
             }
 
-            if (isPercent)
-            {
-                result = (result / 100f) * hundredPercent;
+            if (isPercent) {
+                result = (result/100f)*hundredPercent;
             }
 
             return result;
@@ -161,8 +141,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="fontAdjust">if the length is in pixels and the length is font related it needs to use 72/96 factor</param>
         /// <param name="box"></param>
         /// <returns>the parsed length value with adjustments</returns>
-        public static double ParseLength(string length, double hundredPercent, CssBoxProperties box, bool fontAdjust = false)
-        {
+        public static double ParseLength(string length, double hundredPercent, CssBoxProperties box, bool fontAdjust = false) {
             return ParseLength(length, hundredPercent, box.GetEmHeight(), null, fontAdjust, false);
         }
 
@@ -174,8 +153,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="box"></param>
         /// <param name="defaultUnit"></param>
         /// <returns>the parsed length value with adjustments</returns>
-        public static double ParseLength(string length, double hundredPercent, CssBoxProperties box, string defaultUnit)
-        {
+        public static double ParseLength(string length, double hundredPercent, CssBoxProperties box, string defaultUnit) {
             return ParseLength(length, hundredPercent, box.GetEmHeight(), defaultUnit, false, false);
         }
 
@@ -189,8 +167,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="fontAdjust">if the length is in pixels and the length is font related it needs to use 72/96 factor</param>
         /// <param name="returnPoints">Allows the return double to be in points. If false, result will be pixels</param>
         /// <returns>the parsed length value with adjustments</returns>
-        public static double ParseLength(string length, double hundredPercent, double emFactor, string defaultUnit, bool fontAdjust, bool returnPoints)
-        {
+        public static double ParseLength(string length, double hundredPercent, double emFactor, string defaultUnit, bool fontAdjust, bool returnPoints) {
             //Return zero if no length specified, zero specified
             if (string.IsNullOrEmpty(length) || length == "0")
                 return 0f;
@@ -210,16 +187,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             string number = hasUnit ? length.Substring(0, length.Length - 2) : length;
 
             //TODO: Units behave different in paper and in screen!
-            switch (unit)
-            {
+            switch (unit) {
                 case CssConstants.Em:
                     factor = emFactor;
                     break;
                 case CssConstants.Ex:
-                    factor = emFactor / 2;
+                    factor = emFactor/2;
                     break;
                 case CssConstants.Px:
-                    factor = fontAdjust ? 72f / 96f : 1f; //TODO:a check support for hi dpi
+                    factor = fontAdjust ? 72f/96f : 1f; //TODO:a check support for hi dpi
                     break;
                 case CssConstants.Mm:
                     factor = 3.779527559f; //3 pixels per millimeter
@@ -231,10 +207,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     factor = 96f; //96 pixels per inch
                     break;
                 case CssConstants.Pt:
-                    factor = 96f / 72f; // 1 point = 1/72 of inch
+                    factor = 96f/72f; // 1 point = 1/72 of inch
 
-                    if (returnPoints)
-                    {
+                    if (returnPoints) {
                         return ParseNumber(number, hundredPercent);
                     }
 
@@ -247,17 +222,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     break;
             }
 
-            return factor * ParseNumber(number, hundredPercent);
+            return factor*ParseNumber(number, hundredPercent);
         }
 
         /// <summary>
         /// Get the unit to use for the length, use default if no unit found in length string.
         /// </summary>
-        private static string GetUnit(string length, string defaultUnit, out bool hasUnit)
-        {
+        private static string GetUnit(string length, string defaultUnit, out bool hasUnit) {
             var unit = length.Length >= 3 ? length.Substring(length.Length - 2, 2) : string.Empty;
-            switch (unit)
-            {
+            switch (unit) {
                 case CssConstants.Em:
                 case CssConstants.Ex:
                 case CssConstants.Px:
@@ -281,8 +254,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="colorValue">color string value to parse</param>
         /// <returns>true - valid, false - invalid</returns>
-        public bool IsColorValid(string colorValue)
-        {
+        public bool IsColorValid(string colorValue) {
             RColor color;
             return TryGetColor(colorValue, 0, colorValue.Length, out color);
         }
@@ -292,8 +264,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="colorValue">color string value to parse</param>
         /// <returns>Color value</returns>
-        public RColor GetActualColor(string colorValue)
-        {
+        public RColor GetActualColor(string colorValue) {
             RColor color;
             TryGetColor(colorValue, 0, colorValue.Length, out color);
             return color;
@@ -307,28 +278,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="length">substring length</param>
         /// <param name="color">return the parsed color</param>
         /// <returns>true - valid color, false - otherwise</returns>
-        public bool TryGetColor(string str, int idx, int length, out RColor color)
-        {
-            try
-            {
+        public bool TryGetColor(string str, int idx, int length, out RColor color) {
+            try {
                 if (!string.IsNullOrEmpty(str)) {
-                    if (length > 1 && str[idx] == '#')
-                    {
+                    if (length > 1 && str[idx] == '#') {
                         return GetColorByHex(str, idx, length, out color);
                     }
-                    if (length > 10 && CommonUtils.SubStringEquals(str, idx, 4, "rgb(") && str[length - 1] == ')')
-                    {
+                    if (length > 10 && CommonUtils.SubStringEquals(str, idx, 4, "rgb(") && str[length - 1] == ')') {
                         return GetColorByRgb(str, idx, length, out color);
                     }
-                    if (length > 13 && CommonUtils.SubStringEquals(str, idx, 5, "rgba(") && str[length - 1] == ')')
-                    {
+                    if (length > 13 && CommonUtils.SubStringEquals(str, idx, 5, "rgba(") && str[length - 1] == ')') {
                         return GetColorByRgba(str, idx, length, out color);
                     }
                     return GetColorByName(str, idx, length, out color);
                 }
-            }
-            catch
-            { }
+            } catch {}
             color = RColor.Black;
             return false;
         }
@@ -339,15 +303,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="borderValue"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static double GetActualBorderWidth(string borderValue, CssBoxProperties b)
-        {
-            if (string.IsNullOrEmpty(borderValue))
-            {
+        public static double GetActualBorderWidth(string borderValue, CssBoxProperties b) {
+            if (string.IsNullOrEmpty(borderValue)) {
                 return GetActualBorderWidth(CssConstants.Medium, b);
             }
 
-            switch (borderValue)
-            {
+            switch (borderValue) {
                 case CssConstants.Thin:
                     return 1f;
                 case CssConstants.Medium:
@@ -359,35 +320,29 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             }
         }
 
-
         #region Private methods
 
         /// <summary>
         /// Get color by parsing given hex value color string (#A28B34).
         /// </summary>
         /// <returns>true - valid color, false - otherwise</returns>
-        private static bool GetColorByHex(string str, int idx, int length, out RColor color)
-        {
+        private static bool GetColorByHex(string str, int idx, int length, out RColor color) {
             int r = -1;
             int g = -1;
             int b = -1;
-            if (length == 7)
-            {
+            if (length == 7) {
                 r = ParseHexInt(str, idx + 1, 2);
                 g = ParseHexInt(str, idx + 3, 2);
                 b = ParseHexInt(str, idx + 5, 2);
-            }
-            else if (length == 4)
-            {
+            } else if (length == 4) {
                 r = ParseHexInt(str, idx + 1, 1);
-                r = r * 16 + r;
+                r = r*16 + r;
                 g = ParseHexInt(str, idx + 2, 1);
-                g = g * 16 + g;
+                g = g*16 + g;
                 b = ParseHexInt(str, idx + 3, 1);
-                b = b * 16 + b;
+                b = b*16 + b;
             }
-            if (r > -1 && g > -1 && b > -1)
-            {
+            if (r > -1 && g > -1 && b > -1) {
                 color = RColor.FromArgb(r, g, b);
                 return true;
             }
@@ -399,28 +354,23 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Get color by parsing given RGB value color string (RGB(255,180,90))
         /// </summary>
         /// <returns>true - valid color, false - otherwise</returns>
-        private static bool GetColorByRgb(string str, int idx, int length, out RColor color)
-        {
+        private static bool GetColorByRgb(string str, int idx, int length, out RColor color) {
             int r = -1;
             int g = -1;
             int b = -1;
 
-            if (length > 10)
-            {
+            if (length > 10) {
                 int s = idx + 4;
                 r = ParseIntAtIndex(str, ref s);
-                if (s < idx + length)
-                {
+                if (s < idx + length) {
                     g = ParseIntAtIndex(str, ref s);
                 }
-                if (s < idx + length)
-                {
+                if (s < idx + length) {
                     b = ParseIntAtIndex(str, ref s);
                 }
             }
 
-            if (r > -1 && g > -1 && b > -1)
-            {
+            if (r > -1 && g > -1 && b > -1) {
                 color = RColor.FromArgb(r, g, b);
                 return true;
             }
@@ -432,34 +382,28 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Get color by parsing given RGBA value color string (RGBA(255,180,90,180))
         /// </summary>
         /// <returns>true - valid color, false - otherwise</returns>
-        private static bool GetColorByRgba(string str, int idx, int length, out RColor color)
-        {
+        private static bool GetColorByRgba(string str, int idx, int length, out RColor color) {
             int r = -1;
             int g = -1;
             int b = -1;
             int a = -1;
 
-            if (length > 13)
-            {
+            if (length > 13) {
                 int s = idx + 5;
                 r = ParseIntAtIndex(str, ref s);
 
-                if (s < idx + length)
-                {
+                if (s < idx + length) {
                     g = ParseIntAtIndex(str, ref s);
                 }
-                if (s < idx + length)
-                {
+                if (s < idx + length) {
                     b = ParseIntAtIndex(str, ref s);
                 }
-                if (s < idx + length)
-                {
+                if (s < idx + length) {
                     a = ParseIntAtIndex(str, ref s);
                 }
             }
 
-            if (r > -1 && g > -1 && b > -1 && a > -1)
-            {
+            if (r > -1 && g > -1 && b > -1 && a > -1) {
                 color = RColor.FromArgb(a, r, g, b);
                 return true;
             }
@@ -471,8 +415,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Get color by given name, including .NET name.
         /// </summary>
         /// <returns>true - valid color, false - otherwise</returns>
-        private bool GetColorByName(string str, int idx, int length, out RColor color)
-        {
+        private bool GetColorByName(string str, int idx, int length, out RColor color) {
             color = _adapter.GetColor(str.Substring(idx, length));
             return color.A > 0;
         }
@@ -485,8 +428,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="str">the string to parse</param>
         /// <param name="startIdx">the index to start parsing at</param>
         /// <returns>parsed int or 0</returns>
-        private static int ParseIntAtIndex(string str, ref int startIdx)
-        {
+        private static int ParseIntAtIndex(string str, ref int startIdx) {
             int len = 0;
             while (char.IsWhiteSpace(str, startIdx))
                 startIdx++;
@@ -502,19 +444,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>int value, -1 if not valid</returns>
-        private static int ParseInt(string str, int idx, int length)
-        {
+        private static int ParseInt(string str, int idx, int length) {
             if (length < 1)
                 return -1;
 
             int num = 0;
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 int c = str[idx + i];
                 if (!(c >= 48 && c <= 57))
                     return -1;
 
-                num = num * 10 + c - 48;
+                num = num*10 + c - 48;
             }
             return num;
         }
@@ -524,19 +464,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Assume given substring is not empty and all indexes are valid!<br/>
         /// </summary>
         /// <returns>int value, -1 if not valid</returns>
-        private static int ParseHexInt(string str, int idx, int length)
-        {
+        private static int ParseHexInt(string str, int idx, int length) {
             if (length < 1)
                 return -1;
 
             int num = 0;
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 int c = str[idx + i];
                 if (!(c >= 48 && c <= 57) && !(c >= 65 && c <= 70) && !(c >= 97 && c <= 102))
                     return -1;
 
-                num = num * 16 + (c <= 57 ? c - 48 : (10 + c - (c <= 70 ? 65 : 97)));
+                num = num*16 + (c <= 57 ? c - 48 : (10 + c - (c <= 70 ? 65 : 97)));
             }
             return num;
         }

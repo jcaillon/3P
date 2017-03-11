@@ -20,18 +20,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
-    internal static class HtmlUtils
-    {
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
+    internal static class HtmlUtils {
         #region Fields and Consts
 
         /// <summary>
         /// List of html tags that don't have content
         /// </summary>
         private static readonly List<string> _list = new List<string>(
-            new[]
-            {
+            new[] {
                 "area", "base", "basefont", "br", "col",
                 "frame", "hr", "img", "input", "isindex",
                 "link", "meta", "param"
@@ -55,12 +52,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        static HtmlUtils()
-        {
+        static HtmlUtils() {
             _decodeOnly["nbsp"] = ' ';
             _decodeOnly["rdquo"] = '"';
             _decodeOnly["lsquo"] = '\'';
@@ -310,8 +305,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="tagName">the tag to check (must be lower case)</param>
         /// <returns>true - is single tag, false - otherwise</returns>
-        public static bool IsSingleTag(string tagName)
-        {
+        public static bool IsSingleTag(string tagName) {
             return _list.Contains(tagName);
         }
 
@@ -321,16 +315,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="str">the string to decode</param>
         /// <returns>decoded string</returns>
-        public static string DecodeHtml(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
+        public static string DecodeHtml(string str) {
+            if (!string.IsNullOrEmpty(str)) {
                 str = DecodeHtmlCharByCode(str);
 
                 str = DecodeHtmlCharByName(str);
 
-                foreach (var encPair in _encodeDecode)
-                {
+                foreach (var encPair in _encodeDecode) {
                     str = str.Replace(encPair.Key, encPair.Value);
                 }
             }
@@ -343,18 +334,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="str">the string to encode</param>
         /// <returns>encoded string</returns>
-        public static string EncodeHtml(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
-                for (int i = _encodeDecode.Length - 1; i >= 0; i--)
-                {
+        public static string EncodeHtml(string str) {
+            if (!string.IsNullOrEmpty(str)) {
+                for (int i = _encodeDecode.Length - 1; i >= 0; i--) {
                     str = str.Replace(_encodeDecode[i].Value, _encodeDecode[i].Key);
                 }
             }
             return str;
         }
-
 
         #region Private methods
 
@@ -363,17 +350,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="str">the string to decode</param>
         /// <returns>decoded string</returns>
-        private static string DecodeHtmlCharByCode(string str)
-        {
+        private static string DecodeHtmlCharByCode(string str) {
             var idx = str.IndexOf("&#", StringComparison.OrdinalIgnoreCase);
-            while (idx > -1)
-            {
+            while (idx > -1) {
                 bool hex = str.Length > idx + 3 && char.ToLower(str[idx + 2]) == 'x';
                 var endIdx = idx + 2 + (hex ? 1 : 0);
 
                 long num = 0;
                 while (endIdx < str.Length && CommonUtils.IsDigit(str[endIdx], hex))
-                    num = num * (hex ? 16 : 10) + CommonUtils.ToDigit(str[endIdx++], hex);
+                    num = num*(hex ? 16 : 10) + CommonUtils.ToDigit(str[endIdx++], hex);
                 endIdx += (endIdx < str.Length && str[endIdx] == ';') ? 1 : 0;
 
                 str = str.Remove(idx, endIdx - idx);
@@ -389,18 +374,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="str">the string to decode</param>
         /// <returns>decoded string</returns>
-        private static string DecodeHtmlCharByName(string str)
-        {
+        private static string DecodeHtmlCharByName(string str) {
             var idx = str.IndexOf('&');
-            while (idx > -1)
-            {
+            while (idx > -1) {
                 var endIdx = str.IndexOf(';', idx);
-                if (endIdx > -1 && endIdx - idx < 8)
-                {
+                if (endIdx > -1 && endIdx - idx < 8) {
                     var key = str.Substring(idx + 1, endIdx - idx - 1);
                     char c;
-                    if (_decodeOnly.TryGetValue(key, out c))
-                    {
+                    if (_decodeOnly.TryGetValue(key, out c)) {
                         str = str.Remove(idx, endIdx - idx + 1);
                         str = str.Insert(idx, c.ToString());
                     }

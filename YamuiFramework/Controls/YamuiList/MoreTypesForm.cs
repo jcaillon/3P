@@ -26,12 +26,10 @@ using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// A class to display a cool custom context menu
     /// </summary>
     public sealed class MoreTypesForm : YamuiFormBaseShadow {
-
         #region private fields
 
         private HtmlToolTip _tooltip = new HtmlToolTip();
@@ -46,8 +44,8 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOPMOST;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return createParams;
             }
         }
@@ -57,7 +55,6 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Life and death
 
         public MoreTypesForm() {
-
             // init menu form
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
@@ -87,7 +84,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         public void Build(Point location, List<int> typeList, Action<object, EventArgs> clickHandler, YamuiFilteredTypeList parentList) {
-
             _parentFilteredList = parentList;
 
             var buttonSize = new Size(YamuiFilteredTypeList.TypeButtonWidth, parentList.BottomHeight);
@@ -96,9 +92,8 @@ namespace YamuiFramework.Controls.YamuiList {
             int xPos = -buttonSize.Width;
             int yPos = 0;
             int nBut = 0;
-            int maxNbButPerRow = (int)Math.Ceiling(Math.Sqrt(typeList.Count));
+            int maxNbButPerRow = (int) Math.Ceiling(Math.Sqrt(typeList.Count));
             foreach (var type in typeList) {
-
                 xPos += buttonSize.Width;
                 if (nBut >= maxNbButPerRow) {
                     yPos += buttonSize.Height;
@@ -126,26 +121,25 @@ namespace YamuiFramework.Controls.YamuiList {
                 button.LostFocus += (sender, args) => CloseIfMouseOut();
                 button.Activated = _parentFilteredList.IsTypeActivated(type);
                 _tooltip.SetToolTip(button, (parentList.TypeText.ContainsKey(type) && parentList.TypeText[type] != null ? parentList.TypeText[type] + "<br>" : "") + YamuiFilteredTypeList.TypeButtonTooltipText);
-                
+
                 if (!_panel.Controls.Contains(button))
                     _panel.Controls.Add(button);
 
                 nBut++;
             }
 
-
             // Size the form
-            Size = new Size(maxNbButPerRow * buttonSize.Width + BorderWidth * 2, (int)Math.Ceiling((double) typeList.Count / maxNbButPerRow) * buttonSize.Height + BorderWidth * 2);
+            Size = new Size(maxNbButPerRow*buttonSize.Width + BorderWidth*2, (int) Math.Ceiling((double) typeList.Count/maxNbButPerRow)*buttonSize.Height + BorderWidth*2);
             MinimumSize = Size;
             MaximumSize = Size;
 
             // menu position
             var screen = Screen.FromPoint(location);
-            if (location.X - MousePaddingInsideForm > screen.WorkingArea.X + screen.WorkingArea.Width / 2) {
+            if (location.X - MousePaddingInsideForm > screen.WorkingArea.X + screen.WorkingArea.Width/2) {
                 location.X = location.X - Width + MousePaddingInsideForm;
             } else
                 location.X -= MousePaddingInsideForm;
-            if (location.Y - MousePaddingInsideForm > screen.WorkingArea.Y + screen.WorkingArea.Height / 2) {
+            if (location.Y - MousePaddingInsideForm > screen.WorkingArea.Y + screen.WorkingArea.Height/2) {
                 location.Y = location.Y - Height + MousePaddingInsideForm;
             } else
                 location.Y -= MousePaddingInsideForm;
@@ -156,13 +150,13 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region Events
-        
+
         protected override void OnMouseLeave(EventArgs e) {
             base.OnMouseLeave(e);
             Close();
             Dispose();
         }
-        
+
         protected override void OnLeave(EventArgs e) {
             base.OnLeave(e);
             Close();
@@ -184,7 +178,5 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-
     }
-
 }

@@ -22,15 +22,13 @@ using System.Collections.Generic;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters {
     /// <summary>
     /// Adapter for platform specific graphics rendering object - used to render graphics and text in platform specific context.<br/>
     /// The core HTML Renderer components use this class for rendering logic, extending this
     /// class in different platform: WinForms, WPF, Metro, PDF, etc.
     /// </summary>
-    public abstract class RGraphics : IDisposable
-    {
+    public abstract class RGraphics : IDisposable {
         #region Fields/Consts
 
         /// <summary>
@@ -45,12 +43,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        protected RGraphics(RAdapter adapter, RRect initialClip)
-        {
+        protected RGraphics(RAdapter adapter, RRect initialClip) {
             ArgChecker.AssertArgNotNull(adapter, "global");
 
             _adapter = adapter;
@@ -62,8 +58,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="color">the color to get the pen for</param>
         /// <returns>pen instance</returns>
-        public RPen GetPen(RColor color)
-        {
+        public RPen GetPen(RColor color) {
             return _adapter.GetPen(color);
         }
 
@@ -72,8 +67,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="color">the color to get the brush for</param>
         /// <returns>solid color brush instance</returns>
-        public RBrush GetSolidBrush(RColor color)
-        {
+        public RBrush GetSolidBrush(RColor color) {
             return _adapter.GetSolidBrush(color);
         }
 
@@ -85,8 +79,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="color2">the end color of the gradient</param>
         /// <param name="angle">the angle to move the gradient from start color to end color in the rectangle</param>
         /// <returns>linear gradient color brush instance</returns>
-        public RBrush GetLinearGradientBrush(RRect rect, RColor color1, RColor color2, double angle)
-        {
+        public RBrush GetLinearGradientBrush(RRect rect, RColor color1, RColor color2, double angle) {
             return _adapter.GetLinearGradientBrush(rect, color1, color2, angle);
         }
 
@@ -94,8 +87,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Gets a Rectangle structure that bounds the clipping region of this Graphics.
         /// </summary>
         /// <returns>A rectangle structure that represents a bounding rectangle for the clipping region of this Graphics.</returns>
-        public RRect GetClip()
-        {
+        public RRect GetClip() {
             return _clipStack.Peek();
         }
 

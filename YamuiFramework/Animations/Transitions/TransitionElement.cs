@@ -17,23 +17,19 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.Animations.Transitions
-{
-    public enum InterpolationMethod
-    {
+namespace YamuiFramework.Animations.Transitions {
+    public enum InterpolationMethod {
         Linear,
         Accleration,
         Deceleration,
         EaseInEaseOut
     }
 
-    public class TransitionElement
-    {
+    public class TransitionElement {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public TransitionElement(double endTime, double endValue, InterpolationMethod interpolationMethod)
-        {
+        public TransitionElement(double endTime, double endValue, InterpolationMethod interpolationMethod) {
             EndTime = endTime;
             EndValue = endValue;
             InterpolationMethod = interpolationMethod;

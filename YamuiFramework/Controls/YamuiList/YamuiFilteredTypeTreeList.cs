@@ -24,11 +24,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// This class is the most complicated, obviously
     /// The difficulty being handling the filter string correctly;
@@ -36,7 +34,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This is not the conventional tree searching but this makes more sense to me
     /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
-
         #region constants
 
         /// <summary>
@@ -66,7 +63,7 @@ namespace YamuiFramework.Controls.YamuiList {
         protected bool _isSearching;
 
         private bool _showTreeBranches = true;
-        private int _nodeExpandClickMargin = 20;
+        protected int _nodeExpandClickMargin = 20;
 
         #endregion
 
@@ -146,7 +143,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public enum SearchModeOption {
             SearchSortWithNoParent,
-            FilterOnlyAndIncludeParent,
+            FilterOnlyAndIncludeParent
         }
 
         #endregion
@@ -157,7 +154,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Set the items that will be displayed in the list
         /// </summary>
         public override void SetItems(List<ListItem> listItems) {
-
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeTreeListItem))
                 throw new Exception("listItems should contain objects of type FilteredTypeTreeListItem");
@@ -178,7 +174,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Returns the full list of items to be displayed, taking into account expanded items
         /// </summary>
         private List<ListItem> GetExpandedItemsList(List<FilteredTypeTreeListItem> list, ForceExpansion forceExpansion) {
-
             if (list == null)
                 return null;
 
@@ -188,7 +183,6 @@ namespace YamuiFramework.Controls.YamuiList {
                 outList.Add(item);
                 var descriptor = item.PathDescriptor;
                 if (item.CanExpand) {
-
                     // force expand/collapse?
                     if (forceExpansion != ForceExpansion.Idle) {
                         if (_savedState.ContainsKey(descriptor))
@@ -228,7 +222,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     var children = GetFullItemsList(item.GetItemChildren());
                     if (children != null)
                         outList.AddRange(children);
-                } 
+                }
             }
             return outList;
         }
@@ -274,7 +268,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Toggle expand/collapse for the an item at the given index
         /// </summary>
         private bool ExpandCollapse(int itemIndex, ForceExpansion forceExpansion) {
-
             var selectedItem = GetItem(itemIndex);
             if (selectedItem == null)
                 return false;
@@ -312,9 +305,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-
             // background
-            var backColor = item.IsSeparator ? 
+            var backColor = item.IsSeparator ?
                 YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
                 YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             e.Graphics.Clear(backColor);
@@ -343,15 +335,14 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // draw the branches of the tree
             if (ShowTreeBranches) {
-                using (var linePen = new Pen(!(curItem.IsDisabled || curItem.IsSeparator) ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) { DashStyle = DashStyle.Solid }) {
-
-                    var pos = drawRect.X + TreeWidth / 2;
+                using (var linePen = new Pen(!(curItem.IsDisabled || curItem.IsSeparator) ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) {DashStyle = DashStyle.Solid}) {
+                    var pos = drawRect.X + TreeWidth/2;
                     if (curItem.Level >= 1)
                         pos += (curItem.Level - 1)*TreeWidth;
 
                     // Draw the horizontal line that goes to the arrow
                     if (curItem.Level > 0 && !curItem.IsSeparator) {
-                        g.DrawLine(linePen, pos, drawRect.Y + drawRect.Height / 2 - 1, pos + (curItem.CanExpand ? TreeWidth / 2 : TreeWidth), drawRect.Y + drawRect.Height / 2 - 1);
+                        g.DrawLine(linePen, pos, drawRect.Y + drawRect.Height/2 - 1, pos + (curItem.CanExpand ? TreeWidth/2 : TreeWidth), drawRect.Y + drawRect.Height/2 - 1);
                     }
 
                     // draw the vertical lines
@@ -359,13 +350,12 @@ namespace YamuiFramework.Controls.YamuiList {
                     while (familyNode != null && familyNode.Level > 0) {
                         // the current item is the last item of its parent
                         if (familyNode.Level == curItem.Level && familyNode.IsLastItem)
-                            g.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height / 2 - 1);
+                            g.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height/2 - 1);
                         else if (!familyNode.IsLastItem)
                             g.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height);
                         familyNode = familyNode.ParentNode;
                         pos -= TreeWidth;
                     }
-                    
                 }
             }
 
@@ -389,9 +379,9 @@ namespace YamuiFramework.Controls.YamuiList {
                 g.PixelOffsetMode = PixelOffsetMode.Half;
                 using (SolidBrush brush = new SolidBrush(arrowColor)) {
                     if (!curItem.IsExpanded)
-                        g.FillPolygon(brush, new[] { new Point(rect.X, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height / 2), new Point(rect.X, rect.Y + rect.Height) });
+                        g.FillPolygon(brush, new[] {new Point(rect.X, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height/2), new Point(rect.X, rect.Y + rect.Height)});
                     else
-                        g.FillPolygon(brush, new[] { new Point(rect.X, rect.Y + rect.Height), new Point(rect.X + rect.Width, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height) });
+                        g.FillPolygon(brush, new[] {new Point(rect.X, rect.Y + rect.Height), new Point(rect.X + rect.Width, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height)});
                 }
             }
 
@@ -408,7 +398,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// We override this for trees so that if an item survives the filter, its parent should be displayed as well
         /// </summary>
         protected override List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
-
             // when searching, the tree must actually behave like a FilteredTypeList
             if (_isSearching) {
                 if (SortingClass != null) {
@@ -426,7 +415,7 @@ namespace YamuiFramework.Controls.YamuiList {
             for (int i = nbItems - 1; i >= 0; i--) {
                 var item = listItems[i] as FilteredTypeTreeListItem;
                 if (item == null) continue;
-                
+
                 // the item must be included
                 if (parentsToInclude.Contains(item.PathDescriptor) || (item.InternalFilterFullyMatch && (FilterPredicate == null || FilterPredicate(item)))) {
                     outList.Add(item);
@@ -471,7 +460,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Events pushed from the button rows
 
         protected override void OnRowMouseMove(object sender, MouseEventArgs args) {
-            ((YamuiListRow)sender).Invalidate(); // force to redraw on mouse move
+            ((YamuiListRow) sender).Invalidate(); // force to redraw on mouse move
             base.OnRowMouseMove(sender, args);
         }
 
@@ -483,15 +472,16 @@ namespace YamuiFramework.Controls.YamuiList {
             if (!_isSearching) {
                 var curItem = SelectedItem as FilteredTypeTreeListItem;
                 if (curItem != null) {
-                    var widthOfArrow = NodeExpandClickMargin;
+                    var widthOfArrow = TreeWidth + NodeExpandClickMargin;
                     for (int i = 0; i <= curItem.Level; i++) {
                         widthOfArrow += TreeWidth;
                     }
-                    if (eventArgs.X <= widthOfArrow)
+                    if (eventArgs.X <= widthOfArrow) {
                         ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+                        return;
+                    }
                 }
             }
-
             base.OnItemClick(sender, eventArgs);
         }
 
@@ -540,9 +530,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (!e.Handled)
                 base.OnKeyDown(e);
         }
-        
+
         #endregion
-
     }
-
 }

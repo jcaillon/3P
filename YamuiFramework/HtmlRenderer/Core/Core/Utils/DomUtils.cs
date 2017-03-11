@@ -25,13 +25,11 @@ using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Utils {
     /// <summary>
     /// Utility class for traversing DOM structure and execution stuff on it.
     /// </summary>
-    internal sealed class DomUtils
-    {
+    internal sealed class DomUtils {
         /// <summary>
         /// Check if the given location is inside the given box deep.<br/>
         /// Check inner boxes and all lines that the given box spans to.
@@ -39,15 +37,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to check</param>
         /// <param name="location">the location to check</param>
         /// <returns>true - location inside the box, false - otherwise</returns>
-        public static bool IsInBox(CssBox box, RPoint location)
-        {
-            foreach (var line in box.Rectangles)
-            {
+        public static bool IsInBox(CssBox box, RPoint location) {
+            foreach (var line in box.Rectangles) {
                 if (line.Value.Contains(location))
                     return true;
             }
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 if (IsInBox(childBox, location))
                     return true;
             }
@@ -59,12 +54,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="box">the box to check</param>
         /// <returns>true - only inline child boxes, false - otherwise</returns>
-        public static bool ContainsInlinesOnly(CssBox box)
-        {
-            foreach (CssBox b in box.Boxes)
-            {
-                if (!b.IsInline)
-                {
+        public static bool ContainsInlinesOnly(CssBox box) {
+            foreach (CssBox b in box.Boxes) {
+                if (!b.IsInline) {
                     return false;
                 }
             }
@@ -79,12 +71,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="tagName"></param>
         /// <param name="box"></param>
         public static CssBox FindParent(CssBox root, string tagName, CssBox box) {
-            if (box == null)
-            {
+            if (box == null) {
                 return root;
             }
-            if (box.HtmlTag != null && box.HtmlTag.Name.Equals(tagName, StringComparison.CurrentCultureIgnoreCase))
-            {
+            if (box.HtmlTag != null && box.HtmlTag.Name.Equals(tagName, StringComparison.CurrentCultureIgnoreCase)) {
                 return box.ParentBox ?? root;
             }
             return FindParent(root, tagName, box.ParentBox);
@@ -94,18 +84,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// Gets the previous sibling of this box.
         /// </summary>
         /// <returns>Box before this one on the tree. Null if its the first</returns>
-        public static CssBox GetPreviousSibling(CssBox b)
-        {
-            if (b.ParentBox != null)
-            {
+        public static CssBox GetPreviousSibling(CssBox b) {
+            if (b.ParentBox != null) {
                 int index = b.ParentBox.Boxes.IndexOf(b);
-                if (index > 0)
-                {
+                if (index > 0) {
                     int diff = 1;
                     CssBox sib = b.ParentBox.Boxes[index - diff];
 
-                    while ((sib.Display == CssConstants.None || sib.Position == CssConstants.Absolute) && index - diff - 1 >= 0)
-                    {
+                    while ((sib.Display == CssConstants.None || sib.Position == CssConstants.Absolute) && index - diff - 1 >= 0) {
                         sib = b.ParentBox.Boxes[index - ++diff];
                     }
 
@@ -119,23 +105,19 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// Gets the previous sibling of this box.
         /// </summary>
         /// <returns>Box before this one on the tree. Null if its the first</returns>
-        public static CssBox GetPreviousContainingBlockSibling(CssBox b)
-        {
+        public static CssBox GetPreviousContainingBlockSibling(CssBox b) {
             var conBlock = b;
             int index = conBlock.ParentBox.Boxes.IndexOf(conBlock);
-            while (conBlock.ParentBox != null && index < 1 && conBlock.Display != CssConstants.Block && conBlock.Display != CssConstants.Table && conBlock.Display != CssConstants.TableCell && conBlock.Display != CssConstants.ListItem)
-            {
+            while (conBlock.ParentBox != null && index < 1 && conBlock.Display != CssConstants.Block && conBlock.Display != CssConstants.Table && conBlock.Display != CssConstants.TableCell && conBlock.Display != CssConstants.ListItem) {
                 conBlock = conBlock.ParentBox;
                 index = conBlock.ParentBox != null ? conBlock.ParentBox.Boxes.IndexOf(conBlock) : -1;
             }
             conBlock = conBlock.ParentBox;
-            if (conBlock != null && index > 0)
-            {
+            if (conBlock != null && index > 0) {
                 int diff = 1;
                 CssBox sib = conBlock.Boxes[index - diff];
 
-                while ((sib.Display == CssConstants.None || sib.Position == CssConstants.Absolute) && index - diff - 1 >= 0)
-                {
+                while ((sib.Display == CssConstants.None || sib.Position == CssConstants.Absolute) && index - diff - 1 >= 0) {
                     sib = conBlock.Boxes[index - ++diff];
                 }
 
@@ -148,10 +130,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// fix word space for first word in inline tag.
         /// </summary>
         /// <param name="box">the box to check</param>
-        public static bool IsBoxHasWhitespace(CssBox box)
-        {
-            if (!box.Words[0].IsImage && box.Words[0].HasSpaceBefore && box.IsInline)
-            {
+        public static bool IsBoxHasWhitespace(CssBox box) {
+            if (!box.Words[0].IsImage && box.Words[0].HasSpaceBefore && box.IsInline) {
                 var sib = GetPreviousContainingBlockSibling(box);
                 if (sib != null && sib.IsInline)
                     return true;
@@ -163,17 +143,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// Gets the next sibling of this box.
         /// </summary>
         /// <returns>Box before this one on the tree. Null if its the first</returns>
-        public static CssBox GetNextSibling(CssBox b)
-        {
+        public static CssBox GetNextSibling(CssBox b) {
             CssBox sib = null;
-            if (b.ParentBox != null)
-            {
+            if (b.ParentBox != null) {
                 var index = b.ParentBox.Boxes.IndexOf(b) + 1;
-                while (index <= b.ParentBox.Boxes.Count - 1)
-                {
+                while (index <= b.ParentBox.Boxes.Count - 1) {
                     var pSib = b.ParentBox.Boxes[index];
-                    if (pSib.Display != CssConstants.None && pSib.Position != CssConstants.Absolute)
-                    {
+                    if (pSib.Display != CssConstants.None && pSib.Position != CssConstants.Absolute) {
                         sib = pSib;
                         break;
                     }
@@ -190,11 +166,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to start lookup at</param>
         /// <param name="attribute">the attribute to get</param>
         /// <returns>the value of the attribute or null if not found</returns>
-        public static string GetAttribute(CssBox box, string attribute)
-        {
+        public static string GetAttribute(CssBox box, string attribute) {
             string value = null;
-            while (box != null && value == null)
-            {
+            while (box != null && value == null) {
                 value = box.GetAttribute(attribute, null);
                 box = box.ParentBox;
             }
@@ -209,16 +183,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="location">the location to find the box by</param>
         /// <param name="visible">Optional: if to get only visible boxes (default - true)</param>
         /// <returns>css link box if exists or null</returns>
-        public static CssBox GetCssBox(CssBox box, RPoint location, bool visible = true)
-        {
-            if (box != null)
-            {
-                if ((!visible || box.Visibility == CssConstants.Visible) && (box.Bounds.IsEmpty || box.Bounds.Contains(location)))
-                {
-                    foreach (var childBox in box.Boxes)
-                    {
-                        if (CommonUtils.GetFirstValueOrDefault(box.Rectangles, box.Bounds).Contains(location))
-                        {
+        public static CssBox GetCssBox(CssBox box, RPoint location, bool visible = true) {
+            if (box != null) {
+                if ((!visible || box.Visibility == CssConstants.Visible) && (box.Bounds.IsEmpty || box.Bounds.Contains(location))) {
+                    foreach (var childBox in box.Boxes) {
+                        if (CommonUtils.GetFirstValueOrDefault(box.Rectangles, box.Bounds).Contains(location)) {
                             return GetCssBox(childBox, location) ?? childBox;
                         }
                     }
@@ -233,17 +202,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="box">the box to start search from</param>
         /// <param name="linkBoxes">collection to add all link boxes to</param>
-        public static void GetAllLinkBoxes(CssBox box, List<CssBox> linkBoxes)
-        {
-            if (box != null)
-            {
-                if (box.IsClickable && box.Visibility == CssConstants.Visible)
-                {
+        public static void GetAllLinkBoxes(CssBox box, List<CssBox> linkBoxes) {
+            if (box != null) {
+                if (box.IsClickable && box.Visibility == CssConstants.Visible) {
                     linkBoxes.Add(box);
                 }
 
-                foreach (var childBox in box.Boxes)
-                {
+                foreach (var childBox in box.Boxes) {
                     GetAllLinkBoxes(childBox, linkBoxes);
                 }
             }
@@ -256,21 +221,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to start search from</param>
         /// <param name="location">the location to find the box by</param>
         /// <returns>css link box if exists or null</returns>
-        public static CssBox GetLinkBox(CssBox box, RPoint location)
-        {
-            if (box != null)
-            {
-
-                if (box.IsClickable && box.Visibility == CssConstants.Visible)
-                {
+        public static CssBox GetLinkBox(CssBox box, RPoint location) {
+            if (box != null) {
+                if (box.IsClickable && box.Visibility == CssConstants.Visible) {
                     if (IsInBox(box, location))
                         return box;
                 }
 
-                if (box.ClientRectangle.IsEmpty || box.ClientRectangle.Contains(location))
-                {
-                    foreach (var childBox in box.Boxes)
-                    {
+                if (box.ClientRectangle.IsEmpty || box.ClientRectangle.Contains(location)) {
+                    foreach (var childBox in box.Boxes) {
                         var foundBox = GetLinkBox(childBox, location);
                         if (foundBox != null)
                             return foundBox;
@@ -289,7 +248,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <returns></returns>
         public static CssBox SearchClickedBox(CssBox box, RPoint location) {
             if (box != null) {
-
                 if (box.GetAttribute("clickable") != "" && box.ClientRectangle.Contains(location))
                     return box;
 
@@ -311,17 +269,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to start search from</param>
         /// <param name="id">the id to find the box by</param>
         /// <returns>css box if exists or null</returns>
-        public static CssBox GetBoxById(CssBox box, string id)
-        {
-            if (box != null && !string.IsNullOrEmpty(id))
-            {
-                if (box.HtmlTag != null && id.Equals(box.HtmlTag.TryGetAttribute("id"), StringComparison.OrdinalIgnoreCase))
-                {
+        public static CssBox GetBoxById(CssBox box, string id) {
+            if (box != null && !string.IsNullOrEmpty(id)) {
+                if (box.HtmlTag != null && id.Equals(box.HtmlTag.TryGetAttribute("id"), StringComparison.OrdinalIgnoreCase)) {
                     return box;
                 }
 
-                foreach (var childBox in box.Boxes)
-                {
+                foreach (var childBox in box.Boxes) {
                     var foundBox = GetBoxById(childBox, id);
                     if (foundBox != null)
                         return foundBox;
@@ -338,26 +292,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to start search from</param>
         /// <param name="location">the location to find the box at</param>
         /// <returns>css word box if exists or null</returns>
-        public static CssLineBox GetCssLineBox(CssBox box, RPoint location)
-        {
+        public static CssLineBox GetCssLineBox(CssBox box, RPoint location) {
             CssLineBox line = null;
-            if (box != null)
-            {
-                if (box.LineBoxes.Count > 0)
-                {
-                    if (box.HtmlTag == null || box.HtmlTag.Name != "td" || box.Bounds.Contains(location))
-                    {
-                        foreach (var lineBox in box.LineBoxes)
-                        {
-                            foreach (var rect in lineBox.Rectangles)
-                            {
-                                if (rect.Value.Top <= location.Y)
-                                {
+            if (box != null) {
+                if (box.LineBoxes.Count > 0) {
+                    if (box.HtmlTag == null || box.HtmlTag.Name != "td" || box.Bounds.Contains(location)) {
+                        foreach (var lineBox in box.LineBoxes) {
+                            foreach (var rect in lineBox.Rectangles) {
+                                if (rect.Value.Top <= location.Y) {
                                     line = lineBox;
                                 }
 
-                                if (rect.Value.Top > location.Y)
-                                {
+                                if (rect.Value.Top > location.Y) {
                                     return line;
                                 }
                             }
@@ -365,8 +311,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
                     }
                 }
 
-                foreach (var childBox in box.Boxes)
-                {
+                foreach (var childBox in box.Boxes) {
                     line = GetCssLineBox(childBox, location) ?? line;
                 }
             }
@@ -381,27 +326,20 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to start search from</param>
         /// <param name="location">the location to find the box at</param>
         /// <returns>css word box if exists or null</returns>
-        public static CssRect GetCssBoxWord(CssBox box, RPoint location)
-        {
-            if (box != null && box.Visibility == CssConstants.Visible)
-            {
-                if (box.LineBoxes.Count > 0)
-                {
-                    foreach (var lineBox in box.LineBoxes)
-                    {
+        public static CssRect GetCssBoxWord(CssBox box, RPoint location) {
+            if (box != null && box.Visibility == CssConstants.Visible) {
+                if (box.LineBoxes.Count > 0) {
+                    foreach (var lineBox in box.LineBoxes) {
                         var wordBox = GetCssBoxWord(lineBox, location);
                         if (wordBox != null)
                             return wordBox;
                     }
                 }
 
-                if (box.ClientRectangle.IsEmpty || box.ClientRectangle.Contains(location))
-                {
-                    foreach (var childBox in box.Boxes)
-                    {
+                if (box.ClientRectangle.IsEmpty || box.ClientRectangle.Contains(location)) {
+                    foreach (var childBox in box.Boxes) {
                         var foundWord = GetCssBoxWord(childBox, location);
-                        if (foundWord != null)
-                        {
+                        if (foundWord != null) {
                             return foundWord;
                         }
                     }
@@ -418,17 +356,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="lineBox">the line box to search in</param>
         /// <param name="location">the location to find the box at</param>
         /// <returns>css word box if exists or null</returns>
-        public static CssRect GetCssBoxWord(CssLineBox lineBox, RPoint location)
-        {
-            foreach (var rects in lineBox.Rectangles)
-            {
-                foreach (var word in rects.Key.Words)
-                {
+        public static CssRect GetCssBoxWord(CssLineBox lineBox, RPoint location) {
+            foreach (var rects in lineBox.Rectangles) {
+                foreach (var word in rects.Key.Words) {
                     // add word spacing to word width so sentence won't have hols in it when moving the mouse
                     var rect = word.Rectangle;
                     rect.Width += word.OwnerBox.ActualWordSpacing;
-                    if (rect.Contains(location))
-                    {
+                    if (rect.Contains(location)) {
                         return word;
                     }
                 }
@@ -441,19 +375,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="word">the word to search for it's line box</param>
         /// <returns>line box that the word is in</returns>
-        public static CssLineBox GetCssLineBoxByWord(CssRect word)
-        {
+        public static CssLineBox GetCssLineBoxByWord(CssRect word) {
             var box = word.OwnerBox;
-            while (box.LineBoxes.Count == 0)
-            {
+            while (box.LineBoxes.Count == 0) {
                 box = box.ParentBox;
             }
-            foreach (var lineBox in box.LineBoxes)
-            {
-                foreach (var lineWord in lineBox.Words)
-                {
-                    if (lineWord == word)
-                    {
+            foreach (var lineBox in box.LineBoxes) {
+                foreach (var lineWord in lineBox.Words) {
+                    if (lineWord == word) {
                         return lineBox;
                     }
                 }
@@ -466,8 +395,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="root">the DOM box to get selected text from its sub-tree</param>
         /// <returns>the selected plain text string</returns>
-        public static string GetSelectedPlainText(CssBox root)
-        {
+        public static string GetSelectedPlainText(CssBox root) {
             var sb = new StringBuilder();
             var lastWordIndex = GetSelectedPlainText(sb, root);
             return sb.ToString(0, lastWordIndex).Trim();
@@ -481,11 +409,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="styleGen">Optional: controls the way styles are generated when html is generated</param>
         /// <param name="onlySelected">Optional: true - generate only selected html subset, false - generate all (default - false)</param>
         /// <returns>generated html</returns>
-        public static string GenerateHtml(CssBox root, HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline, bool onlySelected = false)
-        {
+        public static string GenerateHtml(CssBox root, HtmlGenerationStyle styleGen = HtmlGenerationStyle.Inline, bool onlySelected = false) {
             var sb = new StringBuilder();
-            if (root != null)
-            {
+            if (root != null) {
                 var selectedBoxes = onlySelected ? CollectSelectedBoxes(root) : null;
                 var selectionRoot = onlySelected ? GetSelectionRoot(root, selectedBoxes) : null;
                 WriteHtml(root.HtmlContainer.CssParser, sb, root, styleGen, selectedBoxes, selectionRoot);
@@ -499,13 +425,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="root">the root to generate tree from</param>
         /// <returns>generated tree</returns>
-        public static string GenerateBoxTree(CssBox root)
-        {
+        public static string GenerateBoxTree(CssBox root) {
             var sb = new StringBuilder();
             GenerateBoxTree(root, sb, 0);
             return sb.ToString();
         }
-
 
         #region Private methods
 
@@ -516,61 +440,50 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="sb">the builder to append the selected text to</param>
         /// <param name="box">the DOM box to get selected text from its sub-tree</param>
         /// <returns>the index of the last word appended</returns>
-        private static int GetSelectedPlainText(StringBuilder sb, CssBox box)
-        {
+        private static int GetSelectedPlainText(StringBuilder sb, CssBox box) {
             int lastWordIndex = 0;
-            foreach (var boxWord in box.Words)
-            {
+            foreach (var boxWord in box.Words) {
                 // append the text of selected word (handle partial selected words)
-                if (boxWord.Selected)
-                {
+                if (boxWord.Selected) {
                     sb.Append(GetSelectedWord(boxWord, true));
                     lastWordIndex = sb.Length;
                 }
             }
 
             // empty span box
-            if (box.Boxes.Count < 1 && box.Text != null && box.Text.IsWhitespace())
-            {
+            if (box.Boxes.Count < 1 && box.Text != null && box.Text.IsWhitespace()) {
                 sb.Append(' ');
             }
 
             // deep traversal
-            if (box.Visibility != CssConstants.Hidden && box.Display != CssConstants.None)
-            {
-                foreach (var childBox in box.Boxes)
-                {
+            if (box.Visibility != CssConstants.Hidden && box.Display != CssConstants.None) {
+                foreach (var childBox in box.Boxes) {
                     var innerLastWordIdx = GetSelectedPlainText(sb, childBox);
                     lastWordIndex = Math.Max(lastWordIndex, innerLastWordIdx);
                 }
             }
 
-            if (sb.Length > 0)
-            {
+            if (sb.Length > 0) {
                 // convert hr to line of dashes
-                if (box.HtmlTag != null && box.HtmlTag.Name == "hr")
-                {
+                if (box.HtmlTag != null && box.HtmlTag.Name == "hr") {
                     if (sb.Length > 1 && sb[sb.Length - 1] != '\n')
                         sb.AppendLine();
                     sb.AppendLine(new string('-', 80));
                 }
 
                 // new line for css block
-                if (box.Display == CssConstants.Block || box.Display == CssConstants.ListItem || box.Display == CssConstants.TableRow)
-                {
+                if (box.Display == CssConstants.Block || box.Display == CssConstants.ListItem || box.Display == CssConstants.TableRow) {
                     if (!(box.IsBrElement && sb.Length > 1 && sb[sb.Length - 1] == '\n'))
                         sb.AppendLine();
                 }
 
                 // space between table cells
-                if (box.Display == CssConstants.TableCell)
-                {
+                if (box.Display == CssConstants.TableCell) {
                     sb.Append(' ');
                 }
 
                 // paragraphs has additional newline for nice formatting
-                if (box.HtmlTag != null && box.HtmlTag.Name == "p")
-                {
+                if (box.HtmlTag != null && box.HtmlTag.Name == "p") {
                     int newlines = 0;
                     for (int i = sb.Length - 1; i >= 0 && char.IsWhiteSpace(sb[i]); i--)
                         newlines += sb[i] == '\n' ? 1 : 0;
@@ -587,8 +500,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="root">the box to check its sub-tree</param>
         /// <returns>the collection to add the selected tags to</returns>
-        private static Dictionary<CssBox, bool> CollectSelectedBoxes(CssBox root)
-        {
+        private static Dictionary<CssBox, bool> CollectSelectedBoxes(CssBox root) {
             var selectedBoxes = new Dictionary<CssBox, bool>();
             var maybeBoxes = new Dictionary<CssBox, bool>();
             CollectSelectedBoxes(root, selectedBoxes, maybeBoxes);
@@ -603,13 +515,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="selectedBoxes">the hash to add the selected boxes to</param>
         /// <param name="maybeBoxes">used to handle boxes that are between selected words but don't have selected word inside</param>
         /// <returns>is the current box is in selected sub-tree</returns>
-        private static bool CollectSelectedBoxes(CssBox box, Dictionary<CssBox, bool> selectedBoxes, Dictionary<CssBox, bool> maybeBoxes)
-        {
+        private static bool CollectSelectedBoxes(CssBox box, Dictionary<CssBox, bool> selectedBoxes, Dictionary<CssBox, bool> maybeBoxes) {
             bool isInSelection = false;
-            foreach (var word in box.Words)
-            {
-                if (word.Selected)
-                {
+            foreach (var word in box.Words) {
+                if (word.Selected) {
                     selectedBoxes[box] = true;
                     foreach (var maybeTag in maybeBoxes)
                         selectedBoxes[maybeTag.Key] = maybeTag.Value;
@@ -618,18 +527,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
                 }
             }
 
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 var childInSelection = CollectSelectedBoxes(childBox, selectedBoxes, maybeBoxes);
-                if (childInSelection)
-                {
+                if (childInSelection) {
                     selectedBoxes[box] = true;
                     isInSelection = true;
                 }
             }
 
-            if (box.HtmlTag != null && selectedBoxes.Count > 0)
-            {
+            if (box.HtmlTag != null && selectedBoxes.Count > 0) {
                 maybeBoxes[box] = true;
             }
 
@@ -642,20 +548,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="root">the root of the boxes tree</param>
         /// <param name="selectedBoxes">the selected boxes to find selection root in</param>
         /// <returns>the box that is the root of selected boxes</returns>
-        private static CssBox GetSelectionRoot(CssBox root, Dictionary<CssBox, bool> selectedBoxes)
-        {
+        private static CssBox GetSelectionRoot(CssBox root, Dictionary<CssBox, bool> selectedBoxes) {
             var selectionRoot = root;
             var selectionRootRun = root;
-            while (true)
-            {
+            while (true) {
                 bool foundRoot = false;
                 CssBox selectedChild = null;
-                foreach (var childBox in selectionRootRun.Boxes)
-                {
-                    if (selectedBoxes.ContainsKey(childBox))
-                    {
-                        if (selectedChild != null)
-                        {
+                foreach (var childBox in selectionRootRun.Boxes) {
+                    if (selectedBoxes.ContainsKey(childBox)) {
+                        if (selectedChild != null) {
                             foundRoot = true;
                             break;
                         }
@@ -674,8 +575,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
             }
 
             // if the selection root doesn't contained any named boxes in it then we must go one level up, otherwise we will miss the selection root box formatting
-            if (!ContainsNamedBox(selectionRoot))
-            {
+            if (!ContainsNamedBox(selectionRoot)) {
                 selectionRootRun = selectionRoot.ParentBox;
                 while (selectionRootRun.ParentBox != null && selectionRootRun.HtmlTag == null)
                     selectionRootRun = selectionRootRun.ParentBox;
@@ -692,10 +592,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="box">the box to check</param>
         /// <returns>true - in sub-tree there is a named box, false - otherwise</returns>
-        private static bool ContainsNamedBox(CssBox box)
-        {
-            foreach (var childBox in box.Boxes)
-            {
+        private static bool ContainsNamedBox(CssBox box) {
+            foreach (var childBox in box.Boxes) {
                 if (childBox.HtmlTag != null || ContainsNamedBox(childBox))
                     return true;
             }
@@ -712,47 +610,37 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="styleGen">Controls the way styles are generated when html is generated</param>
         /// <param name="selectedBoxes">Control if to generate only selected boxes, if given only boxes found in hash will be generated</param>
         /// <param name="selectionRoot">the box the is the root of selected boxes (the first box to contain multiple selected boxes)</param>
-        private static void WriteHtml(CssParser cssParser, StringBuilder sb, CssBox box, HtmlGenerationStyle styleGen, Dictionary<CssBox, bool> selectedBoxes, CssBox selectionRoot)
-        {
-            if (box.HtmlTag == null || selectedBoxes == null || selectedBoxes.ContainsKey(box))
-            {
-                if (box.HtmlTag != null)
-                {
+        private static void WriteHtml(CssParser cssParser, StringBuilder sb, CssBox box, HtmlGenerationStyle styleGen, Dictionary<CssBox, bool> selectedBoxes, CssBox selectionRoot) {
+            if (box.HtmlTag == null || selectedBoxes == null || selectedBoxes.ContainsKey(box)) {
+                if (box.HtmlTag != null) {
                     if (box.HtmlTag.Name != "link" || !box.HtmlTag.Attributes.ContainsKey("href") ||
-                        (!box.HtmlTag.Attributes["href"].StartsWith("property") && !box.HtmlTag.Attributes["href"].StartsWith("method")))
-                    {
+                        (!box.HtmlTag.Attributes["href"].StartsWith("property") && !box.HtmlTag.Attributes["href"].StartsWith("method"))) {
                         WriteHtmlTag(cssParser, sb, box, styleGen);
                         if (box == selectionRoot)
                             sb.Append("<!--StartFragment-->");
                     }
 
-                    if (styleGen == HtmlGenerationStyle.InHeader && box.HtmlTag.Name == "html" && box.HtmlContainer.CssData != null)
-                    {
+                    if (styleGen == HtmlGenerationStyle.InHeader && box.HtmlTag.Name == "html" && box.HtmlContainer.CssData != null) {
                         sb.AppendLine("<head>");
                         WriteStylesheet(sb, box.HtmlContainer.CssData);
                         sb.AppendLine("</head>");
                     }
                 }
 
-                if (box.Words.Count > 0)
-                {
-                    foreach (var word in box.Words)
-                    {
-                        if (selectedBoxes == null || word.Selected)
-                        {
+                if (box.Words.Count > 0) {
+                    foreach (var word in box.Words) {
+                        if (selectedBoxes == null || word.Selected) {
                             var wordText = GetSelectedWord(word, selectedBoxes != null);
                             sb.Append(HtmlUtils.EncodeHtml(wordText));
                         }
                     }
                 }
 
-                foreach (var childBox in box.Boxes)
-                {
+                foreach (var childBox in box.Boxes) {
                     WriteHtml(cssParser, sb, childBox, styleGen, selectedBoxes, selectionRoot);
                 }
 
-                if (box.HtmlTag != null && !box.HtmlTag.IsSingle)
-                {
+                if (box.HtmlTag != null && !box.HtmlTag.IsSingle) {
                     if (box == selectionRoot)
                         sb.Append("<!--EndFragment-->");
                     sb.AppendFormat("</{0}>", box.HtmlTag.Name);
@@ -767,48 +655,38 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="sb">the string builder to write html into</param>
         /// <param name="box">the css box with the html tag to write</param>
         /// <param name="styleGen">Controls the way styles are generated when html is generated</param>
-        private static void WriteHtmlTag(CssParser cssParser, StringBuilder sb, CssBox box, HtmlGenerationStyle styleGen)
-        {
+        private static void WriteHtmlTag(CssParser cssParser, StringBuilder sb, CssBox box, HtmlGenerationStyle styleGen) {
             sb.AppendFormat("<{0}", box.HtmlTag.Name);
 
             // collect all element style properties including from stylesheet
             var tagStyles = new Dictionary<string, string>();
             var tagCssBlock = box.HtmlContainer.CssData.GetCssBlock(box.HtmlTag.Name);
-            if (tagCssBlock != null)
-            {
+            if (tagCssBlock != null) {
                 // TODO:a handle selectors
                 foreach (var cssBlock in tagCssBlock)
                     foreach (var prop in cssBlock.Properties)
                         tagStyles[prop.Key] = prop.Value;
             }
 
-            if (box.HtmlTag.HasAttributes())
-            {
+            if (box.HtmlTag.HasAttributes()) {
                 sb.Append(" ");
-                foreach (var att in box.HtmlTag.Attributes)
-                {
+                foreach (var att in box.HtmlTag.Attributes) {
                     // handle image tags by inserting the image using base64 data
-                    if (styleGen == HtmlGenerationStyle.Inline && att.Key == HtmlConstants.Style)
-                    {
+                    if (styleGen == HtmlGenerationStyle.Inline && att.Key == HtmlConstants.Style) {
                         // if inline style add the styles to the collection
                         var block = cssParser.ParseCssBlock(box.HtmlTag.Name, box.HtmlTag.TryGetAttribute("style"));
                         foreach (var prop in block.Properties)
                             tagStyles[prop.Key] = prop.Value;
-                    }
-                    else if (styleGen == HtmlGenerationStyle.Inline && att.Key == HtmlConstants.Class)
-                    {
+                    } else if (styleGen == HtmlGenerationStyle.Inline && att.Key == HtmlConstants.Class) {
                         // if inline style convert the style class to actual properties and add to collection
                         var cssBlocks = box.HtmlContainer.CssData.GetCssBlock("." + att.Value);
-                        if (cssBlocks != null)
-                        {
+                        if (cssBlocks != null) {
                             // TODO:a handle selectors
                             foreach (var cssBlock in cssBlocks)
                                 foreach (var prop in cssBlock.Properties)
                                     tagStyles[prop.Key] = prop.Value;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         sb.AppendFormat("{0}=\"{1}\" ", att.Key, att.Value);
                     }
                 }
@@ -817,11 +695,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
             }
 
             // if inline style insert the style tag with all collected style properties
-            if (styleGen == HtmlGenerationStyle.Inline && tagStyles.Count > 0)
-            {
+            if (styleGen == HtmlGenerationStyle.Inline && tagStyles.Count > 0) {
                 var cleanTagStyles = StripDefaultStyles(box, tagStyles);
-                if (cleanTagStyles.Count > 0)
-                {
+                if (cleanTagStyles.Count > 0) {
                     sb.Append(" style=\"");
                     foreach (var style in cleanTagStyles)
                         sb.AppendFormat("{0}: {1}; ", style.Key, style.Value);
@@ -840,19 +716,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box the styles apply to, used to know the default style</param>
         /// <param name="tagStyles">the collection of styles to clean</param>
         /// <returns>new cleaned styles collection</returns>
-        private static Dictionary<string, string> StripDefaultStyles(CssBox box, Dictionary<string, string> tagStyles)
-        {
+        private static Dictionary<string, string> StripDefaultStyles(CssBox box, Dictionary<string, string> tagStyles) {
             // ReSharper disable PossibleMultipleEnumeration
             var cleanTagStyles = new Dictionary<string, string>();
             var defaultBlocks = box.HtmlContainer.Adapter.DefaultCssData.GetCssBlock(box.HtmlTag.Name);
-            foreach (var style in tagStyles)
-            {
+            foreach (var style in tagStyles) {
                 bool isDefault = false;
-                foreach (var defaultBlock in defaultBlocks)
-                {
+                foreach (var defaultBlock in defaultBlocks) {
                     string value;
-                    if (defaultBlock.Properties.TryGetValue(style.Key, out value) && value.Equals(style.Value, StringComparison.OrdinalIgnoreCase))
-                    {
+                    if (defaultBlock.Properties.TryGetValue(style.Key, out value) && value.Equals(style.Value, StringComparison.OrdinalIgnoreCase)) {
                         isDefault = true;
                         break;
                     }
@@ -870,17 +742,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// </summary>
         /// <param name="sb">the string builder to write stylesheet into</param>
         /// <param name="cssData">the css data to write to the head</param>
-        private static void WriteStylesheet(StringBuilder sb, CssData cssData)
-        {
+        private static void WriteStylesheet(StringBuilder sb, CssData cssData) {
             sb.AppendLine("<style type=\"text/css\">");
-            foreach (var cssBlocks in cssData.MediaBlocks["all"])
-            {
+            foreach (var cssBlocks in cssData.MediaBlocks["all"]) {
                 sb.Append(cssBlocks.Key);
                 sb.Append(" { ");
-                foreach (var cssBlock in cssBlocks.Value)
-                {
-                    foreach (var property in cssBlock.Properties)
-                    {
+                foreach (var cssBlock in cssBlocks.Value) {
+                    foreach (var property in cssBlock.Properties) {
                         // TODO:a handle selectors
                         sb.AppendFormat("{0}: {1};", property.Key, property.Value);
                     }
@@ -897,16 +765,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="rect">the word to append</param>
         /// <param name="selectedText">is to get selected text or all the text in the word</param>
         private static string GetSelectedWord(CssRect rect, bool selectedText) {
-            if (selectedText && rect.SelectedStartIndex > -1 && rect.SelectedEndIndexOffset > -1)
-            {
+            if (selectedText && rect.SelectedStartIndex > -1 && rect.SelectedEndIndexOffset > -1) {
                 return rect.Text.Substring(rect.SelectedStartIndex, rect.SelectedEndIndexOffset - rect.SelectedStartIndex);
             }
-            if (selectedText && rect.SelectedStartIndex > -1)
-            {
+            if (selectedText && rect.SelectedStartIndex > -1) {
                 return rect.Text.Substring(rect.SelectedStartIndex) + (rect.HasSpaceAfter ? " " : "");
             }
-            if (selectedText && rect.SelectedEndIndexOffset > -1)
-            {
+            if (selectedText && rect.SelectedEndIndexOffset > -1) {
                 return rect.Text.Substring(0, rect.SelectedEndIndexOffset);
             }
             var whitespaceBefore = rect.OwnerBox.Words[0] == rect ? IsBoxHasWhitespace(rect.OwnerBox) : rect.HasSpaceBefore;
@@ -920,21 +785,18 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Utils
         /// <param name="box">the box to generate for</param>
         /// <param name="builder">the string builder to generate to</param>
         /// <param name="indent">the current indent level to set indent of generated text</param>
-        private static void GenerateBoxTree(CssBox box, StringBuilder builder, int indent)
-        {
-            builder.AppendFormat("{0}<{1}", new string(' ', 2 * indent), box.Display);
+        private static void GenerateBoxTree(CssBox box, StringBuilder builder, int indent) {
+            builder.AppendFormat("{0}<{1}", new string(' ', 2*indent), box.Display);
             if (box.HtmlTag != null)
                 builder.AppendFormat(" element=\"{0}\"", box.HtmlTag != null ? box.HtmlTag.Name : string.Empty);
             if (box.Words.Count > 0)
                 builder.AppendFormat(" words=\"{0}\"", box.Words.Count);
             builder.AppendFormat("{0}>\r\n", box.Boxes.Count > 0 ? "" : "/");
-            if (box.Boxes.Count > 0)
-            {
-                foreach (var childBox in box.Boxes)
-                {
+            if (box.Boxes.Count > 0) {
+                foreach (var childBox in box.Boxes) {
                     GenerateBoxTree(childBox, builder, indent + 1);
                 }
-                builder.AppendFormat("{0}</{1}>\r\n", new string(' ', 2 * indent), box.Display);
+                builder.AppendFormat("{0}</{1}>\r\n", new string(' ', 2*indent), box.Display);
             }
         }
 

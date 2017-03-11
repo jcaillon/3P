@@ -17,17 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.IO;
 using YamuiFramework.Controls;
-using _3PA.Data;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetDeploymentRules : YamuiPage {
-
         #region fields
 
         #endregion
@@ -79,6 +75,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         #endregion
-
     }
 }

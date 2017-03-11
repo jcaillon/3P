@@ -44,7 +44,10 @@ namespace _3PA.Lib.Ftp {
     /// Incapsulates a Stream used during FTP get and put commands.
     /// </summary>
     public class FtpStream : Stream {
-        public enum EAllowedOperation { Read = 1, Write = 2 }
+        public enum EAllowedOperation {
+            Read = 1,
+            Write = 2
+        }
 
         Stream _innerStream;
         FtpStreamCallback _streamClosedCallback;
@@ -77,12 +80,8 @@ namespace _3PA.Lib.Ftp {
         }
 
         public override long Position {
-            get {
-                return _innerStream.Position;
-            }
-            set {
-                _innerStream.Position = value;
-            }
+            get { return _innerStream.Position; }
+            set { _innerStream.Position = value; }
         }
 
         public override int Read(byte[] buffer, int offset, int count) {

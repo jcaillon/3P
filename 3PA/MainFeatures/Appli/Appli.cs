@@ -18,17 +18,14 @@
 // ========================================================================
 #endregion
 using System;
-using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.Appli {
-
     /// <summary>
     /// Handles the application main window
     /// </summary>
     internal static class Appli {
-
         public static AppliForm Form {
             get { return _form; }
         }
@@ -83,7 +80,7 @@ namespace _3PA.MainFeatures.Appli {
         public static bool IsFocused() {
             return IsVisible && Win32Api.GetForegroundWindow().Equals(_form.Handle);
         }
-        
+
         /// <summary>
         /// Initializes the main application, since other windows uses this Form reference, 
         /// it must be called pretty soon in the plugin initialization
@@ -124,8 +121,7 @@ namespace _3PA.MainFeatures.Appli {
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return !(_form == null || !(bool)_form.SafeSyncInvoke(form => form.Visible)); }
+            get { return !(_form == null || !(bool) _form.SafeSyncInvoke(form => form.Visible)); }
         }
-
     }
 }

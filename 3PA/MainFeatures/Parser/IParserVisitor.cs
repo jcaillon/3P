@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
-
     internal interface IParserVisitor {
         void PreVisit(Parser parser);
         void Visit(ParsedFile pars);

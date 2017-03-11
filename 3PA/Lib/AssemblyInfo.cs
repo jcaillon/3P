@@ -22,9 +22,7 @@ using System.IO;
 using System.Reflection;
 
 namespace _3PA.Lib {
-
     internal static class AssemblyInfo {
-
         private static Assembly _assembly = Assembly.GetExecutingAssembly();
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace _3PA.Lib {
         public static string AssemblyProduct {
             get {
                 return GetAttributeValue<AssemblyProductAttribute>(a => a.Product,
-                       Path.GetFileNameWithoutExtension(_assembly.CodeBase));
+                    Path.GetFileNameWithoutExtension(_assembly.CodeBase));
             }
         }
 
@@ -43,7 +41,7 @@ namespace _3PA.Lib {
         public static string AssemblyTitle {
             get {
                 return GetAttributeValue<AssemblyTitleAttribute>(a => a.Title,
-                       Path.GetFileNameWithoutExtension(_assembly.CodeBase));
+                    Path.GetFileNameWithoutExtension(_assembly.CodeBase));
             }
         }
 
@@ -63,9 +61,7 @@ namespace _3PA.Lib {
         /// returns true if the soft is in a pre-release build
         /// </summary>
         public static bool IsPreRelease {
-            get {
-                return _assembly.GetName().Version.ToString().EndsWith(".1");
-            }
+            get { return _assembly.GetName().Version.ToString().EndsWith(".1"); }
         }
 
         /// <summary>
@@ -104,10 +100,10 @@ namespace _3PA.Lib {
         }
 
         public static string GetAttributeValue<TAttr>(Func<TAttr,
-          string> resolveFunc, string defaultResult = null) where TAttr : Attribute {
+            string> resolveFunc, string defaultResult = null) where TAttr : Attribute {
             object[] attributes = _assembly.GetCustomAttributes(typeof(TAttr), false);
             if (attributes.Length > 0)
-                return resolveFunc((TAttr)attributes[0]);
+                return resolveFunc((TAttr) attributes[0]);
             return defaultResult;
         }
     }

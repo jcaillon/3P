@@ -28,7 +28,6 @@ using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
     public static class YamuiExtensions {
-
         #region ui thread safe invoke
 
         /// <summary>
@@ -36,9 +35,9 @@ namespace YamuiFramework.Helper {
         /// </summary>
         public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
             if (isi.InvokeRequired) {
-                IAsyncResult result = isi.BeginInvoke(call, new object[] { isi });
+                IAsyncResult result = isi.BeginInvoke(call, new object[] {isi});
                 object endResult = isi.EndInvoke(result);
-                return (TResult)endResult;
+                return (TResult) endResult;
             }
             return call(isi);
         }
@@ -47,7 +46,7 @@ namespace YamuiFramework.Helper {
         /// Executes an action on the thread of the given object
         /// </summary>
         public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] { isi });
+            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] {isi});
             else
                 call(isi);
         }
@@ -57,7 +56,7 @@ namespace YamuiFramework.Helper {
         /// </summary>
         public static object SafeSyncInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
             if (isi.InvokeRequired) {
-                return isi.Invoke(call, new object[] { isi });
+                return isi.Invoke(call, new object[] {isi});
             }
             return call(isi);
         }
@@ -66,7 +65,7 @@ namespace YamuiFramework.Helper {
         /// Executes an action on the thread of the given object
         /// </summary>
         public static void SafeSyncInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) isi.Invoke(call, new object[] { isi });
+            if (isi.InvokeRequired) isi.Invoke(call, new object[] {isi});
             else
                 call(isi);
         }
@@ -94,8 +93,8 @@ namespace YamuiFramework.Helper {
         /// <returns>The return value from the delegate being invoked.</returns>
         public static TResult SafeSyncInvoke<TResult>(this Control control, Func<TResult> method) {
             if (control.InvokeRequired) {
-                return (TResult)control.Invoke(method);
-            } 
+                return (TResult) control.Invoke(method);
+            }
             return method();
         }
 
@@ -228,9 +227,9 @@ namespace YamuiFramework.Helper {
                 var baseColor = splitValues[0].Trim().ApplyColorFunctions();
 
                 if (functionName.StartsWith("dark"))
-                    return baseColor.ModifyColorLuminosity(-1 * ratio / 100);
+                    return baseColor.ModifyColorLuminosity(-1*ratio/100);
                 if (functionName.StartsWith("light"))
-                    return baseColor.ModifyColorLuminosity(ratio / 100);
+                    return baseColor.ModifyColorLuminosity(ratio/100);
 
                 return baseColor;
             }
@@ -269,7 +268,6 @@ namespace YamuiFramework.Helper {
         /// Returns the image in grey scale...
         /// </summary>
         public static Image MakeGreyscale3(this Image original) {
-
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);
 

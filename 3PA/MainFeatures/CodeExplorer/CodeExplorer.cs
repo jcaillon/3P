@@ -17,21 +17,17 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {
-        
         #region Singleton
 
         private static CodeExplorer _instance;
 
-        public static CodeExplorer Instance
-        {
+        public static CodeExplorer Instance {
             get { return _instance ?? (_instance = new CodeExplorer()); }
             set { _instance = value; }
         }
@@ -79,7 +75,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         #endregion
-        
+
         #region public methods
 
         /// <summary>
@@ -89,12 +85,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Form == null) return;
             Form.UpdateTreeData();
         }
+
         public void OnParseStarted() {
             if (Form == null) return;
             Form.Refreshing = true;
         }
 
         #endregion
-
     }
 }

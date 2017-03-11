@@ -32,12 +32,10 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// Display a filterable list in which each item as a type
     /// </summary>
     public class YamuiFilteredTypeList : YamuiFilteredList {
-
         #region constants
 
         public const string TypeButtonTooltipText = @"Left click to <b>filter on/off</b> this type<br>Right click to <b>filter for this type only</b><br><i>(A consecutive right click reactivate all the types)</i><br><i>You can use <b>ALT+RIGHT/LEFT ARROW</b> key to quickly activate one type</i>";
@@ -150,8 +148,8 @@ namespace YamuiFramework.Controls.YamuiList {
                 return item => {
                     var typeItem = item as FilteredTypeListItem;
                     if (typeItem != null) {
-                        return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType] == null || _typeButtons[typeItem.ItemType].Activated) && 
-                            (_filterPredicate == null || _filterPredicate(item));
+                        return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType] == null || _typeButtons[typeItem.ItemType].Activated) &&
+                               (_filterPredicate == null || _filterPredicate(item));
                     }
                     return false;
                 };
@@ -186,7 +184,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-        
+
         #region Paint
 
         protected override void OnPaintBackground(PaintEventArgs e) {
@@ -201,23 +199,22 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-        
+
         #region Set
 
         /// <summary>
         /// Set the items that will be displayed in the list
         /// </summary>
         public override void SetItems(List<ListItem> listItems) {
-
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeListItem))
                 throw new Exception("listItems should contain objects of type FilteredTypeItem");
 
             // measure the space taken by the label "showing x items"
             using (var gImg = new Bitmap(1, 1))
-                using (var g = Graphics.FromImage(gImg)) {
-                    _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
-                }
+            using (var g = Graphics.FromImage(gImg)) {
+                _itemsNbLabelWidth = TextRenderer.MeasureText(g, _nbItems + PaintItemsText, FontManager.GetFont(FontFunction.Small), ClientSize, TextRightFlags).Width.ClampMin(MinItemLabelWidth);
+            }
 
             // set the type buttons needed
             if (_typeListLock.TryEnterWriteLock(-1)) {
@@ -248,7 +245,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     TypeImages.Add(item.ItemType, item.ItemTypeImage);
                     TypeText.Add(item.ItemType, item.ItemTypeText);
                 }
-            }            
+            }
         }
 
         #endregion
@@ -264,8 +261,8 @@ namespace YamuiFramework.Controls.YamuiList {
             if (BottomHeight == 0)
                 return;
 
-            int maxWidthForTypeButtons = Width - BottomPadding * 3 - _itemsNbLabelWidth - 10;
-            _nbDisplayableTypeButton = (int) Math.Floor((decimal) maxWidthForTypeButtons / TypeButtonWidth);
+            int maxWidthForTypeButtons = Width - BottomPadding*3 - _itemsNbLabelWidth - 10;
+            _nbDisplayableTypeButton = (int) Math.Floor((decimal) maxWidthForTypeButtons/TypeButtonWidth);
             _nbDisplayableTypeButton = _nbDisplayableTypeButton.ClampMax(_typeList.Count);
             var buttonsToDisplay = _typeList.Count;
 
@@ -273,7 +270,6 @@ namespace YamuiFramework.Controls.YamuiList {
             int xPos = BottomPadding;
             int nBut = 0;
             foreach (var type in _typeList) {
-
                 // new type, add a button for it
                 if (!_typeButtons.ContainsKey(type)) {
                     _typeButtons.Add(type, new SelectorButton {
@@ -291,7 +287,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 _typeButtons[type].Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
                 _typeButtons[type].Type = type;
                 _typeButtons[type].Activated = _typeButtons[type].Activated;
-                _typeButtons[type].Location = new Point(xPos, Height - BottomHeight / 2 - _typeButtons[type].Height / 2);
+                _typeButtons[type].Location = new Point(xPos, Height - BottomHeight/2 - _typeButtons[type].Height/2);
                 nBut++;
 
                 // show as many button as we can show - 1
@@ -304,7 +300,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         Controls.Remove(_typeButtons[type]);
                 }
             }
-            
+
             // remove buttons that are no longer used
             var tmpDic = new Dictionary<int, SelectorButton>();
             foreach (int key in _typeButtons.Keys) {
@@ -317,11 +313,9 @@ namespace YamuiFramework.Controls.YamuiList {
             }
             _typeButtons = tmpDic;
 
-            if (nBut > 0) { 
-
+            if (nBut > 0) {
                 // if we have enough space to display the last button, hide the more button
                 if (buttonsToDisplay == _nbDisplayableTypeButton) {
-
                     // remove the more button if it exists
                     if (_moreButton != null) {
                         if (Controls.Contains(_moreButton))
@@ -329,7 +323,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 } else {
                     // otherwise, we display a "more button" that opens a small interface to show the extra buttons
-                    if (_moreButton == null) { 
+                    if (_moreButton == null) {
                         _moreButton = new SelectorButton {
                             BackGrndImage = MoreTypesImage ?? Resources.Resources.More,
                             Activated = true,
@@ -342,7 +336,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         _tooltip.SetToolTip(_moreButton, MoreButtonTooltipText);
                     }
 
-                    _moreButton.Location = new Point(xPos, Height - BottomHeight / 2 - _moreButton.Height / 2);
+                    _moreButton.Location = new Point(xPos, Height - BottomHeight/2 - _moreButton.Height/2);
                     if (!Controls.Contains(_moreButton))
                         Controls.Add(_moreButton);
                 }
@@ -357,7 +351,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-
             // background
             var backColor = item.IsSeparator ?
                 YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
@@ -378,14 +371,13 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         protected virtual void DrawFilteredTypeRow(Graphics g, FilteredTypeListItem item, Rectangle drawRect, YamuiListRow row) {
-
             var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
 
             // Highlighted row
             if (item.IsRowHighlighted) {
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
                     GraphicsPath path = new GraphicsPath();
-                    path.AddLines(new[] { new Point(drawRect.X, drawRect.Y), new Point(drawRect.X + drawRect.Height / 2, drawRect.Y), new Point(drawRect.X, drawRect.Y + drawRect.Height / 2), new Point(drawRect.X, drawRect.Y) });
+                    path.AddLines(new[] {new Point(drawRect.X, drawRect.Y), new Point(drawRect.X + drawRect.Height/2, drawRect.Y), new Point(drawRect.X, drawRect.Y + drawRect.Height/2), new Point(drawRect.X, drawRect.Y)});
                     g.FillPath(b, path);
                 }
             }
@@ -395,7 +387,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (img == null && item.ItemTypeImage != null)
                 img = item.ItemTypeImage;
             if (img != null) {
-                var recImg = new Rectangle(new Point(drawRect.X + 1, drawRect.Y + (drawRect.Height - img.Height) / 2), new Size(img.Width, img.Height));
+                var recImg = new Rectangle(new Point(drawRect.X + 1, drawRect.Y + (drawRect.Height - img.Height)/2), new Size(img.Width, img.Height));
                 g.DrawImage(img, recImg);
             }
 
@@ -414,7 +406,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     foreach (var image in listImg) {
                         xPos += image.Width;
-                        g.DrawImage(image, new Rectangle(new Point(drawRect.X + drawRect.Width - xPos, (drawRect.Height - image.Height) / 2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
+                        g.DrawImage(image, new Rectangle(new Point(drawRect.X + drawRect.Width - xPos, (drawRect.Height - image.Height)/2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
                     }
                 }
             }
@@ -426,11 +418,11 @@ namespace YamuiFramework.Controls.YamuiList {
                 var textSize = TextRenderer.MeasureText(subText, textFont);
                 var subColor = !item.IsDisabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
 
-                var drawPoint = new PointF(drawRect.X + drawRect.Width - xPos - textSize.Width - 3, (drawRect.Height / 2) - (textSize.Height / 2) - 1);
+                var drawPoint = new PointF(drawRect.X + drawRect.Width - xPos - textSize.Width - 3, (drawRect.Height/2) - (textSize.Height/2) - 1);
                 // using Drawstring here because TextRender (GDI) can't draw semi transparent text
-                g.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
+                g.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int) (SubTextOpacity*255), subColor)), drawPoint);
 
-                using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {
+                using (var pen = new Pen(Color.FromArgb((int) (SubTextOpacity*0.8*255), subColor), 1) {Alignment = PenAlignment.Left}) {
                     g.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
                 }
             }
@@ -488,7 +480,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             if (_currentButtonIndex > _typeButtons.Count - 1) _currentButtonIndex = 0;
             if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
-            SetActiveType(new List<int> { _typeButtons.ElementAt(_currentButtonIndex).Key });
+            SetActiveType(new List<int> {_typeButtons.ElementAt(_currentButtonIndex).Key});
 
             return true;
         }
@@ -528,7 +520,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-        
+
         #region Active types
 
         /// <summary>
@@ -543,7 +535,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         private void HandleTypeClick(object sender, EventArgs args) {
             var mouseEvent = args as MouseEventArgs;
-            int clickedType = ((SelectorButton)sender).Type;
+            int clickedType = ((SelectorButton) sender).Type;
 
             // on right click
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
@@ -598,7 +590,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
-
     }
 
     #region SelectorButtons
@@ -607,7 +598,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// Button for the type selection
     /// </summary>
     public class SelectorButton : YamuiButtonImage {
-
         #region Fields
 
         private bool _activated;
@@ -623,9 +613,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public int Type { get; set; }
 
         #endregion
-
     }
 
     #endregion
-
 }

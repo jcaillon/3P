@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (AutoComplete.cs) is part of 3P.
+// This file (AutoCompletion.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +29,10 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// This class handles the AutoCompletionForm
     /// </summary>
     internal static class AutoCompletion {
-
         #region Events
 
         /// <summary>
@@ -56,10 +53,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// position of the caret when the autocompletion was opened (from shortcut)
         /// </summary>
         private static int _shownPosition;
+
         private static int _shownLine;
 
         private static AutoCompletionForm _form;
-        
+
         private static bool _needToSetItems;
         private static bool _needToSetActiveTypes;
 
@@ -91,7 +89,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         private static bool _initialized;
 
-
         /// <summary>
         /// The enum and fields below allow to know what type of list must be displayed to the user
         /// </summary>
@@ -106,15 +103,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// stores the current value of the type of list displayed
         /// </summary>
-        private static TypeOfList CurrentTypeOfList
-        {
+        private static TypeOfList CurrentTypeOfList {
             get { return _currentTypeOfList; }
-            set
-            {
+            set {
                 _needToSetActiveTypes = _currentTypeOfList != value;
                 _currentTypeOfList = value;
             }
         }
+
         private static TypeOfList _currentTypeOfList;
 
         #endregion
@@ -194,7 +190,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _shownPosition = Npp.CurrentPosition;
             UpdateAutocompletion(true);
         }
-        
+
         /// <summary>
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
@@ -216,7 +212,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)
-            return found;
+                return found;
 
             // search in tables fields
             var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(position));
@@ -242,7 +238,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-        
+
         #region core mechanism
 
         /// <summary>
@@ -252,7 +248,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void RefreshStaticItems() {
             if (_itemsListLock.TryEnterWriteLock(-1)) {
                 try {
-
                     _staticItems.Clear();
                     _staticItems = Keywords.GetList().ToList();
                     _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionItem {
@@ -268,7 +263,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                     // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
                     _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
-
                 } finally {
                     _itemsListLock.ExitWriteLock();
                 }
@@ -295,14 +289,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void RefreshDynamicItems() {
             if (_itemsListLock.TryEnterWriteLock(-1)) {
                 try {
-
                     // init with static items
                     _savedAllItems.Clear();
                     _savedAllItems = _staticItems.ToList();
 
                     // we add the dynamic items to the list
                     _savedAllItems.AddRange(ParserHandler.ParserVisitor.ParsedCompletionItemsList.ToList());
-
                 } finally {
                     _itemsListLock.ExitWriteLock();
                 }
@@ -323,7 +315,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// the list of completionItem needed and the user is typing a word, increasing the filter
         /// </summary>
         public static void UpdateAutocompletion(bool canChangeListType) {
-
             if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                 return;
 
@@ -369,10 +360,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // if the autocompletion is hidden or if the user is not continuing to type a word, we might want to 
             // change the list of items in the autocompletion
             if (!isAutocompVisible || canChangeListType) {
-
                 // list of fields or tables
                 if (!string.IsNullOrEmpty(previousWord)) {
-
                     // are we entering a field from a known table?
                     var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
                     if (foundTable != null) {
@@ -418,7 +407,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Cloak();
                 return;
             }
-            
+
             ShowSuggestionList(keyword);
         }
 
@@ -426,7 +415,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
         private static void ShowSuggestionList(string keyword) {
-
             if (CurrentItems.Count == 0) {
                 Cloak();
                 return;
@@ -466,7 +454,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
         private static void ShowSuggestionList(AutoCompletionForm form) {
-
             // we changed the list of items to display
             if (_needToSetItems) {
                 form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
@@ -478,12 +465,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
                         form.YamuiList.SetUnactiveType(new List<int> {
-                            (int)CompletionType.KeywordObject
+                            (int) CompletionType.KeywordObject
                         }, false);
                         break;
                     case TypeOfList.KeywordObject:
                         form.YamuiList.SetActiveType(new List<int> {
-                            (int)CompletionType.KeywordObject
+                            (int) CompletionType.KeywordObject
                         }, false);
                         break;
                     default:
@@ -520,7 +507,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             form.SetPosition(point, lineHeight + 2);
             form.UnCloack();
             form.YamuiList.SelectedItemIndex = 0;
-
         }
 
         /// <summary>
@@ -565,7 +551,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <param name="item"></param>
         private static void RememberUseOf(CompletionItem item) {
-
             // handles unwanted rank progression (when the user enter several times the same keyword)
             if (item.DisplayText.Equals(_lastRememberedKeyword))
                 return;
@@ -577,7 +562,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (item.FromParser)
                 RememberUseOfParsedItem(item.DisplayText);
             else if (item.Type == CompletionType.Database || item.Type == CompletionType.Field || item.Type == CompletionType.FieldPk || item.Type == CompletionType.Table)
-                RememberUseOfDatabaseItem(item.DisplayText);                
+                RememberUseOfDatabaseItem(item.DisplayText);
         }
 
         /// <summary>
@@ -635,7 +620,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-        
+
         #region _form handler
 
         /// <summary>
@@ -681,7 +666,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
         /// </summary>
         public static bool PerformKeyDown(KeyEventArgs e) {
-            return IsVisible && (bool)_form.YamuiList.SafeSyncInvoke(list => list.PerformKeyDown(e));
+            return IsVisible && (bool) _form.YamuiList.SafeSyncInvoke(list => list.PerformKeyDown(e));
         }
 
         /// <summary>
@@ -692,6 +677,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
     }
 }

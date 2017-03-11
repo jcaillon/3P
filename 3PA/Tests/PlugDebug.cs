@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -32,26 +31,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Microsoft.Win32.SafeHandles;
-using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
-
     /// <summary>
     /// This class is only for debug/dev purposes, it will not be used in production
     /// </summary>
     internal class PlugDebug {
-
         #region debug
 
         public static void ParseReferenceFile() {
@@ -63,7 +57,6 @@ namespace _3PA.Tests {
         }
 
         public static void ParseAllFiles() {
-
             // create unique temporary folder
             var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "ParseAllFiles_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
             string outNotif = "";
@@ -76,9 +69,8 @@ namespace _3PA.Tests {
 
             foreach (var file in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
                 if (file.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) {
-
                     string outStr = file + " >>> ";
-                    
+
                     var watch = Stopwatch.StartNew();
 
                     Lexer lexer = new Lexer(Utils.ReadAllText(file));
@@ -107,15 +99,14 @@ namespace _3PA.Tests {
             Utils.FileAppendAllText(outFile, parserErrors);
 
             watch2.Stop();
-            
+
             Utils.FileAppendAllText(outFile, "\r\n\r\nTotal time : " + watch2.ElapsedMilliseconds);
 
             UserCommunication.Notify(outNotif + "<br>Done :<br>" + outFile.ToHtmlLink(), 0);
-
         }
 
         #endregion
-        
+
         #region tests and dev
 
         public const int MAX_PATH = 260;
@@ -125,7 +116,7 @@ namespace _3PA.Tests {
         public struct FILETIME {
             public uint dwLowDateTime;
             public uint dwHighDateTime;
-        };
+        }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct WIN32_FIND_DATA {
@@ -134,15 +125,13 @@ namespace _3PA.Tests {
             public FILETIME ftLastAccessTime;
             public FILETIME ftLastWriteTime;
             public uint nFileSizeHigh; //changed all to uint, otherwise you run into unexpected overflow
-            public uint nFileSizeLow;  //|
-            public uint dwReserved0;   //|
-            public uint dwReserved1;   //v
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_PATH)]
-            public string cFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_ALTERNATE)]
-            public string cAlternate;
+            public uint nFileSizeLow; //|
+            public uint dwReserved0; //|
+            public uint dwReserved1; //v
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_PATH)] public string cFileName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_ALTERNATE)] public string cAlternate;
         }
-        
+
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern SafeFindHandle FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
 
@@ -156,12 +145,11 @@ namespace _3PA.Tests {
             // Methods
             [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
             internal SafeFindHandle()
-                : base(true) {
-            }
+                : base(true) {}
 
             public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
                 : base(ownsHandle) {
-                base.SetHandle(preExistingHandle);
+                SetHandle(preExistingHandle);
             }
 
             protected override bool ReleaseHandle() {
@@ -190,18 +178,16 @@ namespace _3PA.Tests {
             // simply remove the \\?\ part in this case or use \\?\UNC\ prefix
             using (SafeFindHandle findHandle = FindFirstFile(@"\\?\" + directory + @"\*", out findData)) {
                 if (!findHandle.IsInvalid) {
-
                     do {
                         if ((findData.dwFileAttributes & FileAttributes.Directory) != 0) {
-
                             if (findData.cFileName != "." && findData.cFileName != "..") {
                                 folders++;
 
                                 int subfiles, subfolders;
                                 string subdirectory = directory + (directory.EndsWith(@"\") ? "" : @"\") +
-                                    findData.cFileName;
-                                if (level != 0)  // allows -1 to do complete search.
-                            {
+                                                      findData.cFileName;
+                                if (level != 0) // allows -1 to do complete search.
+                                {
                                     size += RecurseDirectory(subdirectory, level - 1, out subfiles, out subfolders);
 
                                     folders += subfolders;
@@ -212,12 +198,10 @@ namespace _3PA.Tests {
                             // File
                             files++;
 
-                            size += (long)findData.nFileSizeLow + (long)findData.nFileSizeHigh * 4294967296;
+                            size += findData.nFileSizeLow + findData.nFileSizeHigh*4294967296;
                         }
-                    }
-                    while (FindNextFile(findHandle, out findData));
+                    } while (FindNextFile(findHandle, out findData));
                 }
-
             }
 
             return size;
@@ -243,13 +227,12 @@ namespace _3PA.Tests {
                             // File
                             outList.Add(directory + (directory.EndsWith(@"\") ? "" : @"\") + findData.cFileName);
                         }
-                    }
-                    while (FindNextFile(findHandle, out findData));
+                    } while (FindNextFile(findHandle, out findData));
                 }
             }
             return outList;
         }
-        
+
         public static void DebugTest1() {
             /*
             var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
@@ -261,12 +244,12 @@ namespace _3PA.Tests {
             };
             webServiceJson.Execute();
             */
-            
+
             var list = AppliMenu.Instance.MainMenuList.ToList();
             foreach (var menuItem in list) {
                 menuItem.ItemType = -1;
             }
-            var popup = new YamuiMenu() {
+            var popup = new YamuiMenu {
                 HtmlTitle = "<div align='center'>Yop</div>",
                 SpawnLocation = Cursor.Position,
                 MenuList = list.Cast<YamuiMenuItem>().ToList(),
@@ -324,11 +307,11 @@ namespace _3PA.Tests {
 
         public static void DebugTest3() {
 
-            // File.GetLastWriteTime
-
-            
-            UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
-
+            MeasureIt(() => {
+                var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
+                UserCommunication.Notify(parser.GetWordsList.Count.ToString());
+            });
+            //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
 
             //RunParserTests(Npp.Text);
 
@@ -340,8 +323,6 @@ namespace _3PA.Tests {
                     new List<string> { "ok", "cancel" },
                     true);
              */
-            /*
-             * */
         }
 
         public static void DisplayBugs() {
@@ -363,7 +344,6 @@ namespace _3PA.Tests {
         }
 
         public static void RunParserTests(string content) {
-
             // create unique temporary folder
             var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "RunParserTests_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
 
@@ -432,6 +412,7 @@ namespace _3PA.Tests {
         #endregion
 
         #region extract color scheme from less files
+
         /*
         private static void ExtracFromMultipleLess() {
             var output = @"D:\Profiles\jcaillon\Downloads\bootwatch\out.txt";
@@ -579,20 +560,18 @@ namespace _3PA.Tests {
             return link;
         }
         */
-        #endregion
 
+        #endregion
     }
 
     #region Parser
 
     internal class OutputParserVisitor : IParserVisitor {
-
         public void PreVisit(Parser parser) {
             Output = new StringBuilder();
         }
 
-        public void PostVisit() {
-        }
+        public void PostVisit() {}
 
         public StringBuilder Output;
 
@@ -676,7 +655,6 @@ namespace _3PA.Tests {
     }
 
     internal class OutputLexerVisitor : ILexerVisitor {
-
         public int NbItems;
         public StringBuilder Output = new StringBuilder();
 
@@ -766,6 +744,7 @@ namespace _3PA.Tests {
     #endregion
 
     #region create help file
+
     /*
     internal class CreateHelpConfigFile {
 
@@ -873,6 +852,6 @@ return Regex.Replace(input.Replace(@"<br />", "~n"), "<.*?>", string.Empty).Repl
 
 }
 */
-    #endregion
 
+    #endregion
 }

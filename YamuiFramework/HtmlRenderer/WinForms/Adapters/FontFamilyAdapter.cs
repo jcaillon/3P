@@ -20,13 +20,11 @@
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 
-namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.WinForms.Adapters {
     /// <summary>
     /// Adapter for WinForms Font family object for core.
     /// </summary>
-    internal sealed class FontFamilyAdapter : RFontFamily
-    {
+    internal sealed class FontFamilyAdapter : RFontFamily {
         /// <summary>
         /// the underline win-forms font.
         /// </summary>
@@ -35,21 +33,18 @@ namespace YamuiFramework.HtmlRenderer.WinForms.Adapters
         /// <summary>
         /// Init.
         /// </summary>
-        public FontFamilyAdapter(FontFamily fontFamily)
-        {
+        public FontFamilyAdapter(FontFamily fontFamily) {
             _fontFamily = fontFamily;
         }
 
         /// <summary>
         /// the underline win-forms font family.
         /// </summary>
-        public FontFamily FontFamily
-        {
+        public FontFamily FontFamily {
             get { return _fontFamily; }
         }
 
-        public override string Name
-        {
+        public override string Name {
             get { return _fontFamily.Name; }
         }
     }

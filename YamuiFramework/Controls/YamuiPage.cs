@@ -21,9 +21,7 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     public class YamuiPage : UserControl {
-
         #region constructor
 
         public YamuiPage() {
@@ -45,18 +43,18 @@ namespace YamuiFramework.Controls {
         /// <summary>
         /// Method called by YamuiTab when the page changes to this page
         /// </summary>
-        public virtual void OnShow() { }
+        public virtual void OnShow() {}
 
         /// <summary>
         /// Method called by YamuiTab when the page changes from this one and when the form closes
         /// </summary>
-        public virtual void OnHide() { }
+        public virtual void OnHide() {}
 
         #endregion
 
         #region Paint
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
@@ -64,6 +62,5 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 }

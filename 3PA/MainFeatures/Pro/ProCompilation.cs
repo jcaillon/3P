@@ -26,12 +26,10 @@ using System.Threading;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     /// <summary>
     /// Class used for the mass compiler
     /// </summary>
     internal class ProCompilation {
-
         #region public fields
 
         #region options
@@ -116,17 +114,16 @@ namespace _3PA.MainFeatures.Pro {
         /// Compiles the list of files given
         /// </summary>
         public bool CompileFiles(HashSet<string> filesToCompile) {
-
             // now we do a list of those files, sorted from the biggest (in size) to the smallest file
             var sizeFileList = new List<ProCompilationFile>();
             foreach (var filePath in filesToCompile) {
                 var fileInfo = new FileInfo(filePath);
-                sizeFileList.Add(new ProCompilationFile { Path = filePath, Size = fileInfo.Length });
+                sizeFileList.Add(new ProCompilationFile {Path = filePath, Size = fileInfo.Length});
             }
             sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
-            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
+            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore*Environment.ProcessorCount;
             _listOfCompilationProcesses.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
@@ -154,7 +151,6 @@ namespace _3PA.MainFeatures.Pro {
 
             // lets start the compilation on each process
             foreach (var compilationProcess in _listOfCompilationProcesses) {
-
                 // launch the compile process
                 compilationProcess.ProExecutionObject = new ProExecution {
                     ListToCompile = compilationProcess.FilesToCompile,
@@ -172,12 +168,10 @@ namespace _3PA.MainFeatures.Pro {
             return true;
         }
 
-
         /// <summary>
         /// Use this method to get the overall progression of the compilation (from 0 to 100)
         /// </summary>
         public float GetOverallProgression() {
-
             // if the compilation is over, we need to dipslay the progression of the files being moved...
             if (CompilationDone)
                 return _deployPercentage;
@@ -188,7 +182,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (File.Exists(compilationProcess.ProExecutionObject.ProgressionFilePath))
                     nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
             }
-            return (float) nbFilesDone / NbFilesToCompile * 100;
+            return (float) nbFilesDone/NbFilesToCompile*100;
         }
 
         /// <summary>
@@ -232,12 +226,10 @@ namespace _3PA.MainFeatures.Pro {
             return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && Utils.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog).Contains("(748)"));
         }
 
-
         /// <summary>
         /// Allows to format a small text to explain the errors found in a file and the generated files...
         /// </summary>
         public static string FormatCompilationResult(string sourceFilePath, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
-
             var line = new StringBuilder();
             var nbErrors = 0;
 
@@ -271,14 +263,12 @@ namespace _3PA.MainFeatures.Pro {
         /// This method is executed when the overall compilation is over and allows to do more treatments
         /// </summary>
         private void EndOfCompilation(ProExecution obj) {
-
             // only do stuff we have reached the last running process
             if (_processesRunning > 0 || _hasBeenKilled)
                 return;
 
             // everything ended ok, we do postprocess actions
             if (NumberOfProcesses == NumberOfProcessesEndedOk) {
-
                 // we need to transfer all the files... (keep only distinct target files)
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
                     TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToDeploy());
@@ -358,6 +348,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
     }
 }

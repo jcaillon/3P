@@ -23,13 +23,11 @@ using System.IO;
 using System.Linq;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This classes reads a .ini file
     /// TODO: make it able to write the .ini as well?
     /// </summary>
     public class IniReader {
-
         /// <summary>
         /// Dictonnary of sections, each containing a dictionnary of key/value
         /// </summary>

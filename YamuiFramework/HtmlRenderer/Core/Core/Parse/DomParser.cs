@@ -25,13 +25,11 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Handlers;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Parse {
     /// <summary>
     /// Handle css DOM tree generation from raw html and stylesheet.
     /// </summary>
-    internal sealed class DomParser
-    {
+    internal sealed class DomParser {
         #region Fields and Consts
 
         /// <summary>
@@ -41,12 +39,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        public DomParser(CssParser cssParser)
-        {
+        public DomParser(CssParser cssParser) {
             ArgChecker.AssertArgNotNull(cssParser, "cssParser");
 
             _cssParser = cssParser;
@@ -59,11 +55,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="htmlContainer">the html container to use for reference resolve</param>
         /// <param name="cssData">the css data to use</param>
         /// <returns>the root of the generated tree</returns>
-        public CssBox GenerateCssTree(string html, HtmlContainerInt htmlContainer, ref CssData cssData)
-        {
+        public CssBox GenerateCssTree(string html, HtmlContainerInt htmlContainer, ref CssData cssData) {
             var root = HtmlParser.ParseDocument(html);
-            if (root != null)
-            {
+            if (root != null) {
                 root.HtmlContainer = htmlContainer;
 
                 bool cssDataChanged = false;
@@ -89,7 +83,6 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             return root;
         }
 
-
         #region Private methods
 
         /// <summary>
@@ -101,14 +94,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="htmlContainer">the html container to use for reference resolve</param>
         /// <param name="cssData">the style data to fill with found styles</param>
         /// <param name="cssDataChanged">check if the css data has been modified by the handled html not to change the base css data</param>
-        private void CascadeParseStyles(CssBox box, HtmlContainerInt htmlContainer, ref CssData cssData, ref bool cssDataChanged)
-        {
-            if (box.HtmlTag != null)
-            {
+        private void CascadeParseStyles(CssBox box, HtmlContainerInt htmlContainer, ref CssData cssData, ref bool cssDataChanged) {
+            if (box.HtmlTag != null) {
                 // Check for the <link rel=stylesheet> tag
                 if (box.HtmlTag.Name.Equals("link", StringComparison.CurrentCultureIgnoreCase) &&
-                    box.GetAttribute("rel", string.Empty).Equals("stylesheet", StringComparison.CurrentCultureIgnoreCase))
-                {
+                    box.GetAttribute("rel", string.Empty).Equals("stylesheet", StringComparison.CurrentCultureIgnoreCase)) {
                     CloneCssData(ref cssData, ref cssDataChanged);
                     string stylesheet;
                     CssData stylesheetData;
@@ -120,20 +110,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 }
 
                 // Check for the <style> tag
-                if (box.HtmlTag.Name.Equals("style", StringComparison.CurrentCultureIgnoreCase) && box.Boxes.Count > 0)
-                {
+                if (box.HtmlTag.Name.Equals("style", StringComparison.CurrentCultureIgnoreCase) && box.Boxes.Count > 0) {
                     CloneCssData(ref cssData, ref cssDataChanged);
                     foreach (var child in box.Boxes)
                         _cssParser.ParseStyleSheet(cssData, child.Text.CutSubstring());
                 }
             }
 
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 CascadeParseStyles(childBox, htmlContainer, ref cssData, ref cssDataChanged);
             }
         }
-
 
         /// <summary>
         /// Applies style to all boxes in the tree.<br/>
@@ -143,12 +130,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="box">the box to apply the style to</param>
         /// <param name="cssData">the style data for the html</param>
-        private void CascadeApplyStyles(CssBox box, CssData cssData)
-        {
+        private void CascadeApplyStyles(CssBox box, CssData cssData) {
             box.InheritStyle();
 
-            if (box.HtmlTag != null)
-            {
+            if (box.HtmlTag != null) {
                 // try assign style using all wildcard
                 AssignCssBlocks(box, cssData, "*");
 
@@ -156,14 +141,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 AssignCssBlocks(box, cssData, box.HtmlTag.Name);
 
                 // try assign style using the "class" attribute of the html element
-                if (box.HtmlTag.HasAttribute("class"))
-                {
+                if (box.HtmlTag.HasAttribute("class")) {
                     AssignClassCssBlocks(box, cssData);
                 }
 
                 // try assign style using the "id" attribute of the html element
-                if (box.HtmlTag.HasAttribute("id"))
-                {
+                if (box.HtmlTag.HasAttribute("id")) {
                     var id = box.HtmlTag.TryGetAttribute("id");
                     AssignCssBlocks(box, cssData, "#" + id);
                 }
@@ -171,8 +154,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                 TranslateAttributes(box.HtmlTag, box);
 
                 // Check for the style="" attribute
-                if (box.HtmlTag.HasAttribute("style"))
-                {
+                if (box.HtmlTag.HasAttribute("style")) {
                     var block = _cssParser.ParseCssBlock(box.HtmlTag.Name, box.HtmlTag.TryGetAttribute("style"));
                     if (block != null)
                         AssignCssBlock(box, block);
@@ -180,15 +162,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             }
 
             // cascade text decoration only to boxes that actually have text so it will be handled correctly.
-            if (box.TextDecoration != String.Empty && box.Text == null)
-            {
+            if (box.TextDecoration != String.Empty && box.Text == null) {
                 foreach (var childBox in box.Boxes)
                     childBox.TextDecoration = box.TextDecoration;
                 box.TextDecoration = string.Empty;
             }
 
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 CascadeApplyStyles(childBox, cssData);
             }
         }
@@ -198,16 +178,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="htmlContainer"> </param>
         /// <param name="cssData">the style data</param>
-        private void SetTextSelectionStyle(HtmlContainerInt htmlContainer, CssData cssData)
-        {
+        private void SetTextSelectionStyle(HtmlContainerInt htmlContainer, CssData cssData) {
             htmlContainer.SelectionForeColor = RColor.Empty;
             htmlContainer.SelectionBackColor = RColor.Empty;
 
-            if (cssData.ContainsCssBlock("::selection"))
-            {
+            if (cssData.ContainsCssBlock("::selection")) {
                 var blocks = cssData.GetCssBlock("::selection");
-                foreach (var block in blocks)
-                {
+                foreach (var block in blocks) {
                     if (block.Properties.ContainsKey("color"))
                         htmlContainer.SelectionForeColor = _cssParser.ParseColor(block.Properties["color"]);
                     if (block.Properties.ContainsKey("background-color"))
@@ -222,18 +199,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="box">the css box to assign css to</param>
         /// <param name="cssData">the css data to use to get the matching css blocks</param>
-        private static void AssignClassCssBlocks(CssBox box, CssData cssData)
-        {
+        private static void AssignClassCssBlocks(CssBox box, CssData cssData) {
             var classes = box.HtmlTag.TryGetAttribute("class");
 
             var startIdx = 0;
-            while (startIdx < classes.Length)
-            {
+            while (startIdx < classes.Length) {
                 while (startIdx < classes.Length && classes[startIdx] == ' ')
                     startIdx++;
 
-                if (startIdx < classes.Length)
-                {
+                if (startIdx < classes.Length) {
                     var endIdx = classes.IndexOf(' ', startIdx);
 
                     if (endIdx < 0)
@@ -254,13 +228,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="box">the css box to assign css to</param>
         /// <param name="cssData">the css data to use to get the matching css blocks</param>
         /// <param name="className">the class selector to search for css blocks</param>
-        private static void AssignCssBlocks(CssBox box, CssData cssData, string className)
-        {
+        private static void AssignCssBlocks(CssBox box, CssData cssData, string className) {
             var blocks = cssData.GetCssBlock(className);
-            foreach (var block in blocks)
-            {
-                if (IsBlockAssignableToBox(box, block))
-                {
+            foreach (var block in blocks) {
+                if (IsBlockAssignableToBox(box, block)) {
                     AssignCssBlock(box, block);
                 }
             }
@@ -274,20 +245,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="box">the box to check assign to</param>
         /// <param name="block">the block to check assign of</param>
         /// <returns>true - the block is assignable to the box, false - otherwise</returns>
-        private static bool IsBlockAssignableToBox(CssBox box, CssBlock block)
-        {
+        private static bool IsBlockAssignableToBox(CssBox box, CssBlock block) {
             bool assignable = true;
-            if (block.Selectors != null)
-            {
+            if (block.Selectors != null) {
                 assignable = IsBlockAssignableToBoxWithSelector(box, block);
-            }
-            else if (box.HtmlTag.Name.Equals("a", StringComparison.OrdinalIgnoreCase) && block.Class.Equals("a", StringComparison.OrdinalIgnoreCase) && !box.HtmlTag.HasAttribute("href"))
-            {
+            } else if (box.HtmlTag.Name.Equals("a", StringComparison.OrdinalIgnoreCase) && block.Class.Equals("a", StringComparison.OrdinalIgnoreCase) && !box.HtmlTag.HasAttribute("href")) {
                 assignable = false;
             }
 
-            if (assignable && block.Hover)
-            {
+            if (assignable && block.Hover) {
                 box.HtmlContainer.AddHoverBox(box, block);
                 assignable = false;
             }
@@ -301,13 +267,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="box">the box to check assign to</param>
         /// <param name="block">the block to check assign of</param>
         /// <returns>true - the block is assignable to the box, false - otherwise</returns>
-        private static bool IsBlockAssignableToBoxWithSelector(CssBox box, CssBlock block)
-        {
-            foreach (var selector in block.Selectors)
-            {
+        private static bool IsBlockAssignableToBoxWithSelector(CssBox box, CssBlock block) {
+            foreach (var selector in block.Selectors) {
                 bool matched = false;
-                while (!matched)
-                {
+                while (!matched) {
                     box = box.ParentBox;
                     while (box != null && box.HtmlTag == null)
                         box = box.ParentBox;
@@ -318,15 +281,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     if (box.HtmlTag.Name.Equals(selector.Class, StringComparison.InvariantCultureIgnoreCase))
                         matched = true;
 
-                    if (!matched && box.HtmlTag.HasAttribute("class"))
-                    {
+                    if (!matched && box.HtmlTag.HasAttribute("class")) {
                         var className = box.HtmlTag.TryGetAttribute("class");
                         if (selector.Class.Equals("." + className, StringComparison.InvariantCultureIgnoreCase) || selector.Class.Equals(box.HtmlTag.Name + "." + className, StringComparison.InvariantCultureIgnoreCase))
                             matched = true;
                     }
 
-                    if (!matched && box.HtmlTag.HasAttribute("id"))
-                    {
+                    if (!matched && box.HtmlTag.HasAttribute("id")) {
                         var id = box.HtmlTag.TryGetAttribute("id");
                         if (selector.Class.Equals("#" + id, StringComparison.InvariantCultureIgnoreCase))
                             matched = true;
@@ -344,17 +305,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="box">the css box to assign css to</param>
         /// <param name="block">the css block to assign</param>
-        private static void AssignCssBlock(CssBox box, CssBlock block)
-        {
-            foreach (var prop in block.Properties)
-            {
+        private static void AssignCssBlock(CssBox box, CssBlock block) {
+            foreach (var prop in block.Properties) {
                 var value = prop.Value;
-                if (prop.Value == CssConstants.Inherit && box.ParentBox != null)
-                {
+                if (prop.Value == CssConstants.Inherit && box.ParentBox != null) {
                     value = CssUtils.GetPropertyValue(box.ParentBox, prop.Key);
                 }
-                if (IsStyleOnElementAllowed(box, prop.Key, value))
-                {
+                if (IsStyleOnElementAllowed(box, prop.Key, value)) {
                     CssUtils.SetPropertyValue(box, prop.Key, value);
                 }
             }
@@ -368,12 +325,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="key">the style key to cehck</param>
         /// <param name="value">the style value to check</param>
         /// <returns>true - style allowed, false - not allowed</returns>
-        private static bool IsStyleOnElementAllowed(CssBox box, string key, string value)
-        {
-            if (box.HtmlTag != null && key == HtmlConstants.Display)
-            {
-                switch (box.HtmlTag.Name)
-                {
+        private static bool IsStyleOnElementAllowed(CssBox box, string key, string value) {
+            if (box.HtmlTag != null && key == HtmlConstants.Display) {
+                switch (box.HtmlTag.Name) {
                     case HtmlConstants.Table:
                         return value == CssConstants.Table;
                     case HtmlConstants.Tr:
@@ -402,10 +356,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Clone css data if it has not already been cloned.<br/>
         /// Used to preserve the base css data used when changed by style inside html.
         /// </summary>
-        private static void CloneCssData(ref CssData cssData, ref bool cssDataChanged)
-        {
-            if (!cssDataChanged)
-            {
+        private static void CloneCssData(ref CssData cssData, ref bool cssDataChanged) {
+            if (!cssDataChanged) {
                 cssDataChanged = true;
                 cssData = cssData.Clone();
             }
@@ -416,16 +368,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="tag"></param>
         /// <param name="box"></param>
-        private void TranslateAttributes(HtmlTag tag, CssBox box)
-        {
-            if (tag.HasAttributes())
-            {
-                foreach (string att in tag.Attributes.Keys)
-                {
+        private void TranslateAttributes(HtmlTag tag, CssBox box) {
+            if (tag.HasAttributes()) {
+                foreach (string att in tag.Attributes.Keys) {
                     string value = tag.Attributes[att];
 
-                    switch (att)
-                    {
+                    switch (att) {
                         case HtmlConstants.Align:
                             if (value == HtmlConstants.Left || value == HtmlConstants.Center || value == HtmlConstants.Right || value == HtmlConstants.Justify)
                                 box.TextAlign = value.ToLower();
@@ -443,13 +391,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                                 box.BorderLeftStyle = box.BorderTopStyle = box.BorderRightStyle = box.BorderBottomStyle = CssConstants.Solid;
                             box.BorderLeftWidth = box.BorderTopWidth = box.BorderRightWidth = box.BorderBottomWidth = TranslateLength(value);
 
-                            if (tag.Name == HtmlConstants.Table)
-                            {
+                            if (tag.Name == HtmlConstants.Table) {
                                 if (value != "0")
                                     ApplyTableBorder(box, "1px");
-                            }
-                            else
-                            {
+                            } else {
                                 box.BorderTopStyle = box.BorderLeftStyle = box.BorderRightStyle = box.BorderBottomStyle = CssConstants.Solid;
                             }
                             break;
@@ -505,12 +450,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="htmlLength"></param>
         /// <returns></returns>
-        private static string TranslateLength(string htmlLength)
-        {
+        private static string TranslateLength(string htmlLength) {
             CssLength len = new CssLength(htmlLength);
 
-            if (len.HasError)
-            {
+            if (len.HasError) {
                 return string.Format(NumberFormatInfo.InvariantInfo, "{0}px", htmlLength);
             }
 
@@ -522,10 +465,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="table"></param>
         /// <param name="border"></param>
-        private static void ApplyTableBorder(CssBox table, string border)
-        {
-            SetForAllCells(table, cell =>
-            {
+        private static void ApplyTableBorder(CssBox table, string border) {
+            SetForAllCells(table, cell => {
                 cell.BorderLeftStyle = cell.BorderTopStyle = cell.BorderRightStyle = cell.BorderBottomStyle = CssConstants.Solid;
                 cell.BorderLeftWidth = cell.BorderTopWidth = cell.BorderRightWidth = cell.BorderBottomWidth = border;
             });
@@ -536,8 +477,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="table"></param>
         /// <param name="padding"></param>
-        private static void ApplyTablePadding(CssBox table, string padding)
-        {
+        private static void ApplyTablePadding(CssBox table, string padding) {
             var length = TranslateLength(padding);
             SetForAllCells(table, cell => cell.PaddingLeft = cell.PaddingTop = cell.PaddingRight = cell.PaddingBottom = length);
         }
@@ -548,20 +488,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="table">the table element</param>
         /// <param name="action">the action to execute</param>
-        private static void SetForAllCells(CssBox table, ActionInt<CssBox> action)
-        {
-            foreach (var l1 in table.Boxes)
-            {
-                foreach (var l2 in l1.Boxes)
-                {
-                    if (l2.HtmlTag != null && l2.HtmlTag.Name == "td")
-                    {
+        private static void SetForAllCells(CssBox table, ActionInt<CssBox> action) {
+            foreach (var l1 in table.Boxes) {
+                foreach (var l2 in l1.Boxes) {
+                    if (l2.HtmlTag != null && l2.HtmlTag.Name == "td") {
                         action(l2);
-                    }
-                    else
-                    {
-                        foreach (var l3 in l2.Boxes)
-                        {
+                    } else {
+                        foreach (var l3 in l2.Boxes) {
                             action(l3);
                         }
                     }
@@ -575,13 +508,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// the rendered html.
         /// </summary>
         /// <param name="box">the current box to correct its sub-tree</param>
-        private static void CorrectTextBoxes(CssBox box)
-        {
-            for (int i = box.Boxes.Count - 1; i >= 0; i--)
-            {
+        private static void CorrectTextBoxes(CssBox box) {
+            for (int i = box.Boxes.Count - 1; i >= 0; i--) {
                 var childBox = box.Boxes[i];
-                if (childBox.Text != null)
-                {
+                if (childBox.Text != null) {
                     // is the box has text
                     var keepBox = !childBox.Text.IsEmptyOrWhitespace();
 
@@ -597,19 +527,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     // is first/last box where is in inline box and it's next/previous box is inline
                     keepBox = keepBox || (i == 0 && box.Boxes.Count > 1 && box.Boxes[1].IsInline && box.IsInline) || (i == box.Boxes.Count - 1 && box.Boxes.Count > 1 && box.Boxes[i - 1].IsInline && box.IsInline);
 
-                    if (keepBox)
-                    {
+                    if (keepBox) {
                         // valid text box, parse it to words
                         childBox.ParseToWords();
-                    }
-                    else
-                    {
+                    } else {
                         // remove text box that has no 
                         childBox.ParentBox.Boxes.RemoveAt(i);
                     }
-                }
-                else
-                {
+                } else {
                     // recursive
                     CorrectTextBoxes(childBox);
                 }
@@ -620,19 +545,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Go over all image boxes and if its display style is set to block, put it inside another block but set the image to inline.
         /// </summary>
         /// <param name="box">the current box to correct its sub-tree</param>
-        private static void CorrectImgBoxes(CssBox box)
-        {
-            for (int i = box.Boxes.Count - 1; i >= 0; i--)
-            {
+        private static void CorrectImgBoxes(CssBox box) {
+            for (int i = box.Boxes.Count - 1; i >= 0; i--) {
                 var childBox = box.Boxes[i];
-                if (childBox is CssBoxImage && childBox.Display == CssConstants.Block)
-                {
+                if (childBox is CssBoxImage && childBox.Display == CssConstants.Block) {
                     var block = CssBox.CreateBlock(childBox.ParentBox, null, childBox);
                     childBox.ParentBox = block;
                     childBox.Display = CssConstants.Inline;
-                }
-                else
-                {
+                } else {
                     // recursive
                     CorrectImgBoxes(childBox);
                 }
@@ -647,39 +567,29 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="box">the current box to correct its sub-tree</param>
         /// <param name="followingBlock">used to know if the br is following a box so it should create an empty line or not so it only
         /// move to a new line</param>
-        private static void CorrectLineBreaksBlocks(CssBox box, ref bool followingBlock)
-        {
+        private static void CorrectLineBreaksBlocks(CssBox box, ref bool followingBlock) {
             followingBlock = followingBlock || box.IsBlock;
-            foreach (var childBox in box.Boxes)
-            {
+            foreach (var childBox in box.Boxes) {
                 CorrectLineBreaksBlocks(childBox, ref followingBlock);
                 followingBlock = childBox.Words.Count == 0 && (followingBlock || childBox.IsBlock);
             }
 
             int lastBr = -1;
             CssBox brBox;
-            do
-            {
+            do {
                 brBox = null;
-                for (int i = 0; i < box.Boxes.Count && brBox == null; i++)
-                {
-                    if (i > lastBr && box.Boxes[i].IsBrElement)
-                    {
+                for (int i = 0; i < box.Boxes.Count && brBox == null; i++) {
+                    if (i > lastBr && box.Boxes[i].IsBrElement) {
                         brBox = box.Boxes[i];
                         lastBr = i;
-                    }
-                    else if (box.Boxes[i].Words.Count > 0)
-                    {
+                    } else if (box.Boxes[i].Words.Count > 0) {
                         followingBlock = false;
-                    }
-                    else if (box.Boxes[i].IsBlock)
-                    {
+                    } else if (box.Boxes[i].IsBlock) {
                         followingBlock = true;
                     }
                 }
 
-                if (brBox != null)
-                {
+                if (brBox != null) {
                     brBox.Display = CssConstants.Block;
                     if (followingBlock)
                         brBox.Height = ".95em"; // TODO:a check the height to min-height when it is supported
@@ -692,15 +602,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Need to rearrange the tree so block box will be only the child of other block box.
         /// </summary>
         /// <param name="box">the current box to correct its sub-tree</param>
-        private static void CorrectBlockInsideInline(CssBox box)
-        {
-            try
-            {
-                if (DomUtils.ContainsInlinesOnly(box) && !ContainsInlinesOnlyDeep(box))
-                {
+        private static void CorrectBlockInsideInline(CssBox box) {
+            try {
+                if (DomUtils.ContainsInlinesOnly(box) && !ContainsInlinesOnlyDeep(box)) {
                     var tempRightBox = CorrectBlockInsideInlineImp(box);
-                    while (tempRightBox != null)
-                    {
+                    while (tempRightBox != null) {
                         // loop on the created temp right box for the fixed box until no more need (optimization remove recursion)
                         CssBox newTempRightBox = null;
                         if (DomUtils.ContainsInlinesOnly(tempRightBox) && !ContainsInlinesOnlyDeep(tempRightBox))
@@ -712,16 +618,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     }
                 }
 
-                if (!DomUtils.ContainsInlinesOnly(box))
-                {
-                    foreach (var childBox in box.Boxes)
-                    {
+                if (!DomUtils.ContainsInlinesOnly(box)) {
+                    foreach (var childBox in box.Boxes) {
                         CorrectBlockInsideInline(childBox);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 box.HtmlContainer.ReportError(HtmlRenderErrorType.HtmlParsing, "Failed in block inside inline box correction", ex);
             }
         }
@@ -730,13 +632,11 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// Rearrange the DOM of the box to have block box with boxes before the inner block box and after.
         /// </summary>
         /// <param name="box">the box that has the problem</param>
-        private static CssBox CorrectBlockInsideInlineImp(CssBox box)
-        {
+        private static CssBox CorrectBlockInsideInlineImp(CssBox box) {
             if (box.Display == CssConstants.Inline)
                 box.Display = CssConstants.Block;
 
-            if (box.Boxes.Count > 1 || box.Boxes[0].Boxes.Count > 1)
-            {
+            if (box.Boxes.Count > 1 || box.Boxes[0].Boxes.Count > 1) {
                 var leftBlock = CssBox.CreateBlock(box);
 
                 while (ContainsInlinesOnlyDeep(box.Boxes[0]))
@@ -753,8 +653,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
                     leftBlock.ParentBox = null;
 
                 int minBoxes = leftBlock.ParentBox != null ? 2 : 1;
-                if (box.Boxes.Count > minBoxes)
-                {
+                if (box.Boxes.Count > minBoxes) {
                     // create temp box to handle the tail elements and then get them back so no deep hierarchy is created
                     var tempRightBox = CssBox.CreateBox(box, null, box.Boxes[minBoxes]);
                     while (box.Boxes.Count > minBoxes + 1)
@@ -762,9 +661,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
                     return tempRightBox;
                 }
-            }
-            else if (box.Boxes[0].Display == CssConstants.Inline)
-            {
+            } else if (box.Boxes[0].Display == CssConstants.Inline) {
                 box.Boxes[0].Display = CssConstants.Block;
             }
 
@@ -778,13 +675,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="parentBox">the parent box that has the problem</param>
         /// <param name="badBox">the box to split into different boxes</param>
         /// <param name="leftBlock">the left block box that is created for the split</param>
-        private static void CorrectBlockSplitBadBox(CssBox parentBox, CssBox badBox, CssBox leftBlock)
-        {
+        private static void CorrectBlockSplitBadBox(CssBox parentBox, CssBox badBox, CssBox leftBlock) {
             CssBox leftbox = null;
-            while (badBox.Boxes[0].IsInline && ContainsInlinesOnlyDeep(badBox.Boxes[0]))
-            {
-                if (leftbox == null)
-                {
+            while (badBox.Boxes[0].IsInline && ContainsInlinesOnlyDeep(badBox.Boxes[0])) {
+                if (leftbox == null) {
                     // if there is no elements in the left box there is no reason to keep it
                     leftbox = CssBox.CreateBox(leftBlock, badBox.HtmlTag);
                     leftbox.InheritStyle(badBox, true);
@@ -793,21 +687,16 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
             }
 
             var splitBox = badBox.Boxes[0];
-            if (!ContainsInlinesOnlyDeep(splitBox))
-            {
+            if (!ContainsInlinesOnlyDeep(splitBox)) {
                 CorrectBlockSplitBadBox(parentBox, splitBox, leftBlock);
                 splitBox.ParentBox = null;
-            }
-            else
-            {
+            } else {
                 splitBox.ParentBox = parentBox;
             }
 
-            if (badBox.Boxes.Count > 0)
-            {
+            if (badBox.Boxes.Count > 0) {
                 CssBox rightBox;
-                if (splitBox.ParentBox != null || parentBox.Boxes.Count < 3)
-                {
+                if (splitBox.ParentBox != null || parentBox.Boxes.Count < 3) {
                     rightBox = CssBox.CreateBox(parentBox, badBox.HtmlTag);
                     rightBox.InheritStyle(badBox, true);
 
@@ -816,16 +705,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
                     if (splitBox.ParentBox != null)
                         splitBox.SetBeforeBox(rightBox);
-                }
-                else
-                {
+                } else {
                     rightBox = parentBox.Boxes[2];
                 }
 
                 rightBox.SetAllBoxes(badBox);
-            }
-            else if (splitBox.ParentBox != null && parentBox.Boxes.Count > 1)
-            {
+            } else if (splitBox.ParentBox != null && parentBox.Boxes.Count > 1) {
                 splitBox.SetBeforeBox(parentBox.Boxes[1]);
                 if (splitBox.HtmlTag != null && splitBox.HtmlTag.Name == "br" && (leftbox != null || leftBlock.Boxes.Count > 1))
                     splitBox.Display = CssConstants.Inline;
@@ -839,27 +724,20 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// only inline siblings.
         /// </summary>
         /// <param name="box">the current box to correct its sub-tree</param>
-        private static void CorrectInlineBoxesParent(CssBox box)
-        {
-            if (ContainsVariantBoxes(box))
-            {
-                for (int i = 0; i < box.Boxes.Count; i++)
-                {
-                    if (box.Boxes[i].IsInline)
-                    {
+        private static void CorrectInlineBoxesParent(CssBox box) {
+            if (ContainsVariantBoxes(box)) {
+                for (int i = 0; i < box.Boxes.Count; i++) {
+                    if (box.Boxes[i].IsInline) {
                         var newbox = CssBox.CreateBlock(box, null, box.Boxes[i++]);
-                        while (i < box.Boxes.Count && box.Boxes[i].IsInline)
-                        {
+                        while (i < box.Boxes.Count && box.Boxes[i].IsInline) {
                             box.Boxes[i].ParentBox = newbox;
                         }
                     }
                 }
             }
 
-            if (!DomUtils.ContainsInlinesOnly(box))
-            {
-                foreach (var childBox in box.Boxes)
-                {
+            if (!DomUtils.ContainsInlinesOnly(box)) {
+                foreach (var childBox in box.Boxes) {
                     CorrectInlineBoxesParent(childBox);
                 }
             }
@@ -870,12 +748,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="box">the box to check</param>
         /// <returns>true - only inline child boxes, false - otherwise</returns>
-        private static bool ContainsInlinesOnlyDeep(CssBox box)
-        {
-            foreach (var childBox in box.Boxes)
-            {
-                if (!childBox.IsInline || !ContainsInlinesOnlyDeep(childBox))
-                {
+        private static bool ContainsInlinesOnlyDeep(CssBox box) {
+            foreach (var childBox in box.Boxes) {
+                if (!childBox.IsInline || !ContainsInlinesOnlyDeep(childBox)) {
                     return false;
                 }
             }
@@ -888,12 +763,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="box">the box to check</param>
         /// <returns>true - has variant child boxes, false - otherwise</returns>
-        private static bool ContainsVariantBoxes(CssBox box)
-        {
+        private static bool ContainsVariantBoxes(CssBox box) {
             bool hasBlock = false;
             bool hasInline = false;
-            for (int i = 0; i < box.Boxes.Count && (!hasBlock || !hasInline); i++)
-            {
+            for (int i = 0; i < box.Boxes.Count && (!hasBlock || !hasInline); i++) {
                 var isBlock = !box.Boxes[i].IsInline;
                 hasBlock = hasBlock || isBlock;
                 hasInline = hasInline || !isBlock;

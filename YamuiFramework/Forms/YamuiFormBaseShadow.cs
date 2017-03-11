@@ -22,25 +22,23 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 
 namespace YamuiFramework.Forms {
-    
     /// <summary>
     /// Form class that implements interesting utilities + shadow + onpaint + movable borderless
     /// </summary>
     public class YamuiFormBaseShadow : YamuiFormBase {
-        
         #region Constants
-        
+
         // for the shadow
         protected const int CsDropshadow = 0x00020000;
 
         #endregion
-        
+
         #region private fields
 
         protected bool _mAeroEnabled;
 
         #endregion
-        
+
         #region CreateParams
 
         protected override CreateParams CreateParams {
@@ -54,26 +52,26 @@ namespace YamuiFramework.Forms {
                     _mAeroEnabled = enabled == 1;
                 }
                 if (!_mAeroEnabled)
-                    cp.ClassStyle |= (int)WinApi.WindowClassStyles.DropShadow;
-                
+                    cp.ClassStyle |= (int) WinApi.WindowClassStyles.DropShadow;
+
                 return cp;
             }
         }
 
         #endregion
-        
+
         #region WndProc
-        
+
         protected override void WndProc(ref Message m) {
             if (DesignMode) {
                 base.WndProc(ref m);
                 return;
             }
-        
+
             base.WndProc(ref m);
-        
+
             switch (m.Msg) {
-                case (int)WinApi.Messages.WM_NCPAINT:
+                case (int) WinApi.Messages.WM_NCPAINT:
                     // Allow to display the shadows
                     if (_mAeroEnabled) {
                         var v = 2;
@@ -86,6 +84,5 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
 }

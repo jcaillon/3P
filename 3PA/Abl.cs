@@ -20,9 +20,7 @@
 using System;
 
 namespace _3PA {
-
     internal static class Abl {
-
         /// <summary>
         /// is the char allowed in a variable's name?
         /// </summary>
@@ -85,6 +83,5 @@ namespace _3PA {
                 return true;
             }
         }
-
     }
 }

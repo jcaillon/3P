@@ -30,10 +30,9 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiCheckBoxDesigner")]
     [ToolboxBitmap(typeof(CheckBox))]
-
     public class YamuiCheckBox : CheckBox {
-
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
@@ -82,15 +81,14 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
-
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
             Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
             Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
 
-            var backRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+            var backRect = new Rectangle(0, Height/2 - 6, 12, 12);
             Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
 
             PaintTransparentBackground(e.Graphics, DisplayRectangle);
@@ -110,15 +108,14 @@ namespace YamuiFramework.Controls {
                 if (CheckState != CheckState.Indeterminate) {
                     var checkRect = ClientRectangle;
                     checkRect.Width = 15;
-                    checkRect.Offset(0, Height / 2 - 11);
-                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.9)), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    checkRect.Offset(0, Height/2 - 11);
+                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float) (Height*0.9)), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
                     using (SolidBrush b = new SolidBrush(foreColor)) {
-                        Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
+                        Rectangle boxRect = new Rectangle(4, Height/2 - 2, 5, 5);
                         e.Graphics.FillRectangle(b, boxRect);
                     }
                 }
-
             }
 
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, YamuiThemeManager.Current.FormFore, FontManager.GetTextFormatFlags(TextAlign));
@@ -236,7 +233,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     internal class YamuiCheckBoxDesigner : ControlDesigner {

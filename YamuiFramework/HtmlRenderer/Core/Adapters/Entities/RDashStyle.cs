@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Specifies the style of dashed lines drawn with a <see cref="RPen"/> object.
     /// </summary>
-    public enum RDashStyle
-    {
+    public enum RDashStyle {
         Solid,
         Dash,
         Dot,

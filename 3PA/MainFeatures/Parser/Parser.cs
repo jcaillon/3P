@@ -22,19 +22,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// This class is not actually a parser "per say" but it extracts important information
     /// from the tokens created by the lexer
     /// </summary>
     internal partial class Parser {
-
         #region static
 
         /// <summary>
@@ -179,28 +176,27 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor with a string instead of a lexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) { }
+        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) {}
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
         public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) {
-
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
             // the first of this list represents the file currently being parsed
             _parsedIncludes.Add(
                 new ParsedIncludeFile(
-                    "root", 
+                    "root",
                     new TokenEos(null, 0, 0, 0, 0),
                     // the preprocessed variable {0} equals to the filename...
                     new Dictionary<string, List<Token>> {
-                        {"0", new List<Token> { new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0) }}
-                    }, 
+                        {"0", new List<Token> {new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0)}}
+                    },
                     _filePathBeingParsed,
                     null)
-            );            
+                );
 
             // init context
             _context = new ParseContext {
@@ -274,7 +270,7 @@ namespace _3PA.MainFeatures.Parser {
         #endregion
 
         #region Explore tokens list
-        
+
         /// <summary>
         /// Peek forward x tokens, returns an TokenEof if out of limits
         /// </summary>
@@ -298,7 +294,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Move to the next token
         /// </summary>
         private bool MoveNext() {
-
             // before moving to the next token, we analyze the current token
             if (!_context.IsTokenIsEos && PeekAt(0) is TokenWord) {
                 _context.StatementWordCount++;
@@ -358,7 +353,6 @@ namespace _3PA.MainFeatures.Parser {
         /// contains the info on the current context (as we move through tokens)
         /// </summary>
         internal class ParseContext {
-
             /// <summary>
             /// Keep information on the current scope (file, procedure, function, trigger)
             /// </summary>
@@ -404,14 +398,12 @@ namespace _3PA.MainFeatures.Parser {
             /// to know if the document is correct or not
             /// </summary>
             public Stack<ParsedPreProcBlock> PreProcIfStack { get; set; }
-
         }
 
         /// <summary>
         /// Contains info on a block
         /// </summary>
         internal struct BlockInfo {
-
             /// <summary>
             /// The line of the first token of the statement that contains the "trigger word"
             /// </summary>
@@ -422,6 +414,7 @@ namespace _3PA.MainFeatures.Parser {
             /// In case of a DO, it's necesseraly on the same line of the statement starting token
             /// </summary>
             public int LineTriggerWord { get; set; }
+
             public IndentType IndentType { get; set; }
 
             /// <summary>
@@ -443,6 +436,7 @@ namespace _3PA.MainFeatures.Parser {
             /// A do-end means that the indent extends from the line with the DO to the line with the END
             /// </summary>
             DoEnd,
+
             /// <summary>
             /// A then/else means the indent is only applied until the next first statement ends
             /// </summary>
@@ -450,7 +444,6 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         #endregion
-
     }
 
     #region LineInfo
@@ -459,7 +452,6 @@ namespace _3PA.MainFeatures.Parser {
     /// Contains the info of a specific line number (built during the parsing)
     /// </summary>
     internal class LineInfo {
-
         /// <summary>
         /// Block depth for the current line (= number of indents)
         /// </summary>
@@ -469,7 +461,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Scope for the current line
         /// </summary>
         public ParsedScopeItem Scope { get; set; }
-
 
         public LineInfo(int blockDepth, ParsedScopeItem scope) {
             BlockDepth = blockDepth;
@@ -482,7 +473,6 @@ namespace _3PA.MainFeatures.Parser {
     #region ParserError
 
     internal class ParserError {
-
         /// <summary>
         /// Type of the error
         /// </summary>
@@ -518,24 +508,15 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     internal enum ParserErrorType {
-        [Description("Unexpected block start, this type of block should be created at root level")]
-        UnexpectedBlockStart,
-        [Description("Unexpected block end, the start of this block has not been found")]
-        UnexpectedBlockEnd,
-        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")]
-        UnexpectedUibBlockStart,
-        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")]
-        UnexpectedUibBlockEnd,
-        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")]
-        NotAllowedUibBlockStart,
-        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
-        NotAllowedUibBlockEnd,
-        [Description("&IF pre-processed statement missing an &ENDIF")]
-        MismatchNumberOfIfEndIf,
-        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
-        UnexpectedIfEndIfBlockEnd,
+        [Description("Unexpected block start, this type of block should be created at root level")] UnexpectedBlockStart,
+        [Description("Unexpected block end, the start of this block has not been found")] UnexpectedBlockEnd,
+        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")] UnexpectedUibBlockStart,
+        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")] UnexpectedUibBlockEnd,
+        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")] NotAllowedUibBlockStart,
+        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")] NotAllowedUibBlockEnd,
+        [Description("&IF pre-processed statement missing an &ENDIF")] MismatchNumberOfIfEndIf,
+        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")] UnexpectedIfEndIfBlockEnd
     }
 
     #endregion
-    
 }

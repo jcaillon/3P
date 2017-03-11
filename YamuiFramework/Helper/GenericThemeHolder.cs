@@ -25,14 +25,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>
     /// A class that can be herited to hold themes,
     /// instead of directly carrying Color fields, it only has a dictionnary of property -> value
     /// that is used to fill the Color properties of the class that inherits from this one
     /// </summary>
     public class GenericThemeHolder {
-
         #region fields
 
         /// <summary>
@@ -53,7 +51,6 @@ namespace YamuiFramework.Helper {
         /// Allows to read a given file as a theme file and returns the list of themes read from it
         /// </summary>
         public static List<T> ReadThemeFile<T>(string filePath, byte[] dataResources, Encoding encoding) where T : GenericThemeHolder {
-
             // the dico below will contain key -> values of the theme
             var listOfThemes = new List<T>();
             GenericThemeHolder curTheme = null;
@@ -76,7 +73,7 @@ namespace YamuiFramework.Helper {
                     var pos = line.IndexOf('\t');
                     if (pos >= 0)
                         curTheme.SetStringValues(line.Substring(0, pos).Trim(), line.Substring(pos + 1).Trim());
-                }, 
+                },
                 Encoding.Default,
                 exception => {
                     // rethrow the same exception to the calling method
@@ -126,7 +123,7 @@ namespace YamuiFramework.Helper {
             foreach (var fieldInfo in thisType.GetFields().Where(fieldInfo => SavedStringValues.ContainsKey(fieldInfo.Name) && fieldInfo.DeclaringType == thisType)) {
                 try {
                     var value = SavedStringValues[fieldInfo.Name];
-                    if (fieldInfo.FieldType == typeof (Color)) {
+                    if (fieldInfo.FieldType == typeof(Color)) {
                         fieldInfo.SetValue(this, ColorTranslator.FromHtml(GetHtmlColor(value)));
                     } else if (fieldInfo.FieldType == typeof(string)) {
                         fieldInfo.SetValue(this, value);
@@ -145,6 +142,5 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
     }
 }

@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (NppDockableDialog.cs) is part of 3P.
+// This file (NppDockableDialogForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-
     /// <summary>
     /// Okay so... what is the point of this class?
     /// Basically, if you directly feed a form (that you want to display as a dockable panel) to Npp, you will get screwed
@@ -40,7 +39,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// moved
     /// </summary>
     internal class NppDockableDialogForm : Form {
-
         #region fields
 
         private Rectangle _masterRectangle;
@@ -53,7 +51,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override CreateParams CreateParams {
             get {
                 var Params = base.CreateParams;
-                Params.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                Params.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return Params;
             }
         }
@@ -71,7 +69,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
-
 
             FormBorderStyle = FormBorderStyle.None;
             ControlBox = false;
@@ -183,6 +180,5 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         #endregion
-
     }
 }

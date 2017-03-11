@@ -27,9 +27,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Themes {
-
     public static class YamuiThemeManager {
-
         #region public fields/events
 
         /// <summary>
@@ -188,7 +186,5 @@ namespace YamuiFramework.Themes {
         }
 
         #endregion
-
     }
-
 }

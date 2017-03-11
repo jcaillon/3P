@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (EmptyForm.cs) is part of 3P.
+// This file (NppDockableDialogEmptyForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,12 +22,10 @@ using System.Windows.Forms;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-
     /// <summary>
     /// An empty form that does absolutely nothing
     /// </summary>
     internal partial class NppDockableDialogEmptyForm : Form {
-
         protected override bool ShowWithoutActivation {
             get { return true; }
         }
@@ -44,6 +42,5 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             FormIntegration.UnRegisterToNpp(Handle);
             base.OnClosing(e);
         }
-
     }
 }

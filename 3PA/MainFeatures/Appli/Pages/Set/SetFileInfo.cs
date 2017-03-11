@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
@@ -28,7 +27,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFileInfo : YamuiPage {
-
         #region fields
 
         private FileTagObject _locFileTagObject;
@@ -78,7 +76,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         public override void OnShow() {
-
             // update the info displayed on the screen
             if (!DesignMode)
                 UpdateInfo();
@@ -110,7 +107,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 var i = 2;
                 var lastItemPos = 0;
                 foreach (var fileTag in currentList.OrderByDescending(o => o.CorrectionNumber).ToList()) {
-                    list.Add(new ItemCombo { DisplayText = _filename + " # " + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber });
+                    list.Add(new ItemCombo {DisplayText = _filename + " # " + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber});
                     if (fileTag.CorrectionNumber.Equals(_locFileTagObject.CorrectionNumber))
                         lastItemPos = i;
                     i++;
@@ -118,7 +115,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                 cb_info.DataSource = list;
                 cb_info.SelectedIndex = lastItemPos;
-
             } else {
                 _locFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
 

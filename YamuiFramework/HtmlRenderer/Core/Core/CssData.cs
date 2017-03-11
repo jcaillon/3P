@@ -24,8 +24,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core {
     /// <summary>
     /// Holds parsed stylesheet css blocks arranged by media and classes.<br/>
     /// <seealso cref="CssBlock"/>
@@ -33,8 +32,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
     /// <remarks>
     /// To learn more about CSS blocks visit CSS spec: http://www.w3.org/TR/CSS21/syndata.html#block
     /// </remarks>
-    public sealed class CssData
-    {
+    public sealed class CssData {
         #region Fields and Consts
 
         /// <summary>
@@ -49,12 +47,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        internal CssData()
-        {
+        internal CssData() {
             _mediaBlocks.Add("all", new Dictionary<string, List<CssBlock>>(StringComparer.InvariantCultureIgnoreCase));
         }
 
@@ -68,8 +64,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="stylesheet">the stylesheet source to parse</param>
         /// <param name="combineWithDefault">true - combine the parsed css data with default css data, false - return only the parsed css data</param>
         /// <returns>the parsed css data</returns>
-        public static CssData Parse(RAdapter adapter, string stylesheet, bool combineWithDefault = true)
-        {
+        public static CssData Parse(RAdapter adapter, string stylesheet, bool combineWithDefault = true) {
             CssParser parser = new CssParser(adapter);
             return parser.ParseStyleSheet(stylesheet, combineWithDefault);
         }
@@ -77,8 +72,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <summary>
         /// dictionary of media type to dictionary of css class name to the cssBlocks collection with all the data
         /// </summary>
-        internal IDictionary<string, Dictionary<string, List<CssBlock>>> MediaBlocks
-        {
+        internal IDictionary<string, Dictionary<string, List<CssBlock>>> MediaBlocks {
             get { return _mediaBlocks; }
         }
 
@@ -88,8 +82,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="className">the class selector to check for css blocks by</param>
         /// <param name="media">optional: the css media type (default - all)</param>
         /// <returns>true - has css blocks for the class, false - otherwise</returns>
-        public bool ContainsCssBlock(string className, string media = "all")
-        {
+        public bool ContainsCssBlock(string className, string media = "all") {
             Dictionary<string, List<CssBlock>> mid;
             return _mediaBlocks.TryGetValue(media, out mid) && mid.ContainsKey(className);
         }
@@ -104,12 +97,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// <param name="className">the class selector to get css blocks by</param>
         /// <param name="media">optional: the css media type (default - all)</param>
         /// <returns>collection of css blocks, empty collection if no blocks exists (never null)</returns>
-        public IEnumerable<CssBlock> GetCssBlock(string className, string media = "all")
-        {
+        public IEnumerable<CssBlock> GetCssBlock(string className, string media = "all") {
             List<CssBlock> block = null;
             Dictionary<string, List<CssBlock>> mid;
-            if (_mediaBlocks.TryGetValue(media, out mid))
-            {
+            if (_mediaBlocks.TryGetValue(media, out mid)) {
                 mid.TryGetValue(className, out block);
             }
             return block ?? _emptyArray;
@@ -129,37 +120,29 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// </remarks>
         /// <param name="media">the media type to add the CSS to</param>
         /// <param name="cssBlock">the css block to add</param>
-        public void AddCssBlock(string media, CssBlock cssBlock)
-        {
+        public void AddCssBlock(string media, CssBlock cssBlock) {
             Dictionary<string, List<CssBlock>> mid;
-            if (!_mediaBlocks.TryGetValue(media, out mid))
-            {
+            if (!_mediaBlocks.TryGetValue(media, out mid)) {
                 mid = new Dictionary<string, List<CssBlock>>(StringComparer.InvariantCultureIgnoreCase);
                 _mediaBlocks.Add(media, mid);
             }
 
-            if (!mid.ContainsKey(cssBlock.Class))
-            {
+            if (!mid.ContainsKey(cssBlock.Class)) {
                 var list = new List<CssBlock>();
                 list.Add(cssBlock);
                 mid[cssBlock.Class] = list;
-            }
-            else
-            {
+            } else {
                 bool merged = false;
                 var list = mid[cssBlock.Class];
-                foreach (var block in list)
-                {
-                    if (block.EqualsSelector(cssBlock))
-                    {
+                foreach (var block in list) {
+                    if (block.EqualsSelector(cssBlock)) {
                         merged = true;
                         block.Merge(cssBlock);
                         break;
                     }
                 }
 
-                if (!merged)
-                {
+                if (!merged) {
                     // general block must be first
                     if (cssBlock.Selectors == null)
                         list.Insert(0, cssBlock);
@@ -174,19 +157,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Merge blocks if exists in both.
         /// </summary>
         /// <param name="other">the CSS data to combine with</param>
-        public void Combine(CssData other)
-        {
+        public void Combine(CssData other) {
             ArgChecker.AssertArgNotNull(other, "other");
 
             // for each media block
-            foreach (var mediaBlock in other.MediaBlocks)
-            {
+            foreach (var mediaBlock in other.MediaBlocks) {
                 // for each css class in the media block
-                foreach (var bla in mediaBlock.Value)
-                {
+                foreach (var bla in mediaBlock.Value) {
                     // for each css block of the css class
-                    foreach (var cssBlock in bla.Value)
-                    {
+                    foreach (var cssBlock in bla.Value) {
                         // combine with this
                         AddCssBlock(mediaBlock.Key, cssBlock);
                     }
@@ -198,17 +177,13 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
         /// Create deep copy of the css data with cloned css blocks.
         /// </summary>
         /// <returns>cloned object</returns>
-        public CssData Clone()
-        {
+        public CssData Clone() {
             var clone = new CssData();
-            foreach (var mid in _mediaBlocks)
-            {
+            foreach (var mid in _mediaBlocks) {
                 var cloneMid = new Dictionary<string, List<CssBlock>>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (var blocks in mid.Value)
-                {
+                foreach (var blocks in mid.Value) {
                     var cloneList = new List<CssBlock>();
-                    foreach (var cssBlock in blocks.Value)
-                    {
+                    foreach (var cssBlock in blocks.Value) {
                         cloneList.Add(cssBlock.Clone());
                     }
                     cloneMid[blocks.Key] = cloneList;

@@ -30,7 +30,6 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiNotification : YamuiFormToolWindow {
-
         #region Static
 
         private static List<YamuiNotification> _openNotifications = new List<YamuiNotification>();
@@ -61,7 +60,7 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region Private
-        
+
         private int _duration;
         private YamuiSimplePanel _progressSimplePanel;
         private Transition _closingTransition;
@@ -75,7 +74,6 @@ namespace YamuiFramework.Forms {
         /// Create a new notification, to be displayed with Show() later
         /// </summary>
         public YamuiNotification(string htmlTitle, string htmlMessage, int duration, Screen screenToUse = null, int formMinWidth = 0, int formMaxWidth = 0, int formMaxHeight = 0, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
-
             // close all notif button
             CloseAllBox = true;
             OnCloseAllNotif = CloseAllNotif;
@@ -100,10 +98,10 @@ namespace YamuiFramework.Forms {
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
             formMinWidth = formMinWidth.ClampMin(titleLabel.Width + space);
             var newPadding = Padding;
-            newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 8 : 0); 
+            newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 8 : 0);
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
-            titleLabel.Location = new Point(5,5);
+            titleLabel.Location = new Point(5, 5);
 
             // set content label
             space = Padding.Left + Padding.Right;
@@ -130,10 +128,9 @@ namespace YamuiFramework.Forms {
                     UseCustomBackColor = true
                 };
                 Controls.Add(_progressSimplePanel);
-                _duration = duration * 1000;
+                _duration = duration*1000;
             } else
                 _duration = 0;
-
         }
 
         #endregion
@@ -205,7 +202,5 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
-
 }

@@ -32,7 +32,6 @@ using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiInput : YamuiFormButtons {
-
         #region Fields
 
         public object DataObject;
@@ -73,7 +72,6 @@ namespace YamuiFramework.Forms {
         /// Constructor, you should the method ShwDlg instead
         /// </summary>
         private YamuiInput(string htmlTitle, string htmlMessage, List<string> buttonsList, object dataObject, int formMaxWidth, int formMaxHeight, int formMinWidth, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked) {
-
             InitializeComponent();
 
             var maxWidthInPanel = formMaxWidth - (Padding.Left + Padding.Right);
@@ -82,7 +80,6 @@ namespace YamuiFramework.Forms {
             // if there was an object data passed on, need to check the max width needed to draw the inputs
             DataObject = dataObject;
             if (HasData) {
-
                 // we make a list MemberInfo for each field in the data passed
                 if (DataObject.GetType().IsSimpleType())
                     _items.Add(null);
@@ -112,7 +109,7 @@ namespace YamuiFramework.Forms {
             }
 
             // Set title, it will define a new minimum width for the message box
-            var space = FormButtonWidth * 2 + BorderWidth * 2 + titleLabel.Padding.Left + 5;
+            var space = FormButtonWidth*2 + BorderWidth*2 + titleLabel.Padding.Left + 5;
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
             var newPadding = Padding;
             newPadding.Top = titleLabel.Height + 10;
@@ -127,7 +124,7 @@ namespace YamuiFramework.Forms {
 
             // set content label
             space = Padding.Left + Padding.Right;
-            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, (cumButtonWidth + ButtonPadding + BorderWidth * 2 + 20).ClampMin(formMinWidth - space), maxWidthInPanel);
+            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, (cumButtonWidth + ButtonPadding + BorderWidth*2 + 20).ClampMin(formMinWidth - space), maxWidthInPanel);
             contentLabel.Width = (formMinWidth - space).ClampMin(contentLabel.Width);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
@@ -140,7 +137,6 @@ namespace YamuiFramework.Forms {
 
             // if there was an object data passed on, need to set up inputs for the user to fill in
             if (HasData) {
-
                 // Build rows for each item
                 yPos += 10;
                 for (int i = 0; i < _items.Count; i++) {
@@ -221,7 +217,7 @@ namespace YamuiFramework.Forms {
             cumButtonWidth += newButton.Width + 5;
 
             newButton.ButtonPressed += (sender, args) => {
-                DialogIntResult = (int)((YamuiButton)sender).Tag;
+                DialogIntResult = (int) ((YamuiButton) sender).Tag;
 
                 // the first button triggers the validation
                 if (DialogIntResult == 0) {
@@ -261,30 +257,28 @@ namespace YamuiFramework.Forms {
             if (item == null)
                 val = DataObject;
             else if (item is PropertyInfo)
-                val = ((PropertyInfo)item).GetValue(DataObject, null);
+                val = ((PropertyInfo) item).GetValue(DataObject, null);
             else
-                val = ((FieldInfo)item).GetValue(DataObject);
+                val = ((FieldInfo) item).GetValue(DataObject);
 
             string strValue = val.ConvertToStr();
-            var inputWidth = contentPanel.ContentPanel.Width - _dataLabelWidth - InputPadding * 3;
+            var inputWidth = contentPanel.ContentPanel.Width - _dataLabelWidth - InputPadding*3;
 
             // Build control type
             Control retVal;
 
             if (itemType == typeof(bool)) {
-
                 retVal = new YamuiButtonToggle {
-                    Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
+                    Location = new Point(_dataLabelWidth + InputPadding*2, yPos),
                     Size = new Size(40, 16),
                     Text = null,
-                    Checked = (bool)val
+                    Checked = (bool) val
                 };
 
-            // for enum or list of strings
+                // for enum or list of strings
             } else if (itemType.IsEnum || (itemType == typeof(string) && GetAttr(item) != null && GetAttr(item).AllowListedValuesOnly)) {
-
                 var cb = new YamuiComboBox {
-                    Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
+                    Location = new Point(_dataLabelWidth + InputPadding*2, yPos),
                     Size = new Size(inputWidth, 20),
                     Anchor = Anchor | AnchorStyles.Right
                 };
@@ -302,11 +296,10 @@ namespace YamuiFramework.Forms {
                 cb.Text = strValue;
                 retVal = cb;
 
-            // for everything else
+                // for everything else
             } else {
-
                 var tb = new YamuiTextBox {
-                    Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
+                    Location = new Point(_dataLabelWidth + InputPadding*2, yPos),
                     Size = new Size(inputWidth, 20),
                     Text = strValue,
                     Anchor = Anchor | AnchorStyles.Right,
@@ -352,7 +345,7 @@ namespace YamuiFramework.Forms {
                 Control c = contentPanel.ContentPanel.Controls["input" + i];
                 object val;
                 if (c is YamuiButtonToggle)
-                    val = ((YamuiButtonToggle)c).Checked;
+                    val = ((YamuiButtonToggle) c).Checked;
                 else if (c is YamuiComboBox && itemType.IsEnum) {
                     val = c.Text.ConvertFromStr(itemType);
                     foreach (var name in Enum.GetNames(itemType)) {
@@ -361,17 +354,16 @@ namespace YamuiFramework.Forms {
                             val = name.ConvertFromStr(itemType);
                         }
                     }
-                }
-                else
+                } else
                     val = c.Text.ConvertFromStr(itemType);
 
                 // Apply value to dataObject
                 if (item == null)
                     DataObject = val;
                 else if (item is PropertyInfo)
-                    ((PropertyInfo)item).SetValue(DataObject, val, null);
+                    ((PropertyInfo) item).SetValue(DataObject, val, null);
                 else
-                    ((FieldInfo)item).SetValue(DataObject, val);
+                    ((FieldInfo) item).SetValue(DataObject, val);
             }
             Bound = true;
         }
@@ -389,11 +381,11 @@ namespace YamuiFramework.Forms {
         private YamuiInputAttribute GetAttr(MemberInfo mi) {
             if (mi == null)
                 return null;
-            return (YamuiInputAttribute)Attribute.GetCustomAttribute(mi, typeof(YamuiInputAttribute), true);
+            return (YamuiInputAttribute) Attribute.GetCustomAttribute(mi, typeof(YamuiInputAttribute), true);
         }
 
         private Type GetItemType(MemberInfo mi) {
-            return mi == null ? DataObject.GetType() : (mi is PropertyInfo ? ((PropertyInfo)mi).PropertyType : ((FieldInfo)mi).FieldType);
+            return mi == null ? DataObject.GetType() : (mi is PropertyInfo ? ((PropertyInfo) mi).PropertyType : ((FieldInfo) mi).FieldType);
         }
 
         #endregion
@@ -416,7 +408,6 @@ namespace YamuiFramework.Forms {
         }
 
         private static int Show(IntPtr ownerHandle, string caption, string htmlTitle, string htmlMessage, List<string> buttonsList, ref object data, out YamuiInput msgBox, int maxFormWidth = 0, int maxFormHeight = 0, int minFormWidth = 0, bool waitResponse = true, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
-
             var ownerRect = WinApi.GetWindowRect(ownerHandle);
             var ownerLocation = ownerRect.Location;
             ownerLocation.Offset(ownerRect.Width/2, ownerRect.Height/2);
@@ -439,7 +430,7 @@ namespace YamuiFramework.Forms {
             };
 
             // center parent
-            msgBox.Location = new Point((ownerRect.Width - msgBox.Width) / 2 + ownerRect.X, (ownerRect.Height - msgBox.Height) / 2 + ownerRect.Y);
+            msgBox.Location = new Point((ownerRect.Width - msgBox.Width)/2 + ownerRect.X, (ownerRect.Height - msgBox.Height)/2 + ownerRect.Y);
 
             // get yamui form
             var yamuiForm = FromHandle(ownerHandle) as YamuiMainAppli;
@@ -471,15 +462,13 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
 
     #region YamuiInputDialogItemAttribute
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class YamuiInputAttribute : Attribute {
-
-        public YamuiInputAttribute() { }
+        public YamuiInputAttribute() {}
 
         public YamuiInputAttribute(string label) {
             Label = label;
@@ -508,5 +497,4 @@ namespace YamuiFramework.Forms {
     }
 
     #endregion
-
 }

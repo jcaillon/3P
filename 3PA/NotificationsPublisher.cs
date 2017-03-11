@@ -24,7 +24,6 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA {
-
     internal static partial class Plug {
 
         #region Members
@@ -48,7 +47,6 @@ namespace _3PA {
         /// </summary>
         public static void OnNppNotification(SCNotification nc) {
             try {
-
                 uint code = nc.nmhdr.code;
 
                 #region Basic notifications
@@ -64,7 +62,6 @@ namespace _3PA {
                         // call OnNppReady then OnPlugReady if it all went ok
                         PluginIsReady = DoNppReady();
                         if (PluginIsReady) {
-
                             DoPlugStart();
 
                             // set hooks on mouse/keyboard
@@ -81,47 +78,42 @@ namespace _3PA {
                         DoNppShutDown();
                         return;
                 }
-                
+
                 #endregion
 
                 // Only do stuff when the dll is fully loaded
-                if (!PluginIsReady) 
+                if (!PluginIsReady)
                     return;
 
                 switch (code) {
                     // the user changed the current document
-                    case (uint)NppNotif.NPPN_BUFFERACTIVATED:
+                    case (uint) NppNotif.NPPN_BUFFERACTIVATED:
                         DoNppBufferActivated();
                         return;
 
-                    case (uint)NppNotif.NPPN_FILESAVED:
+                    case (uint) NppNotif.NPPN_FILESAVED:
                         DoNppDocumentSaved();
                         return;
 
-                    case (uint)NppNotif.NPPN_FILEBEFORELOAD:
+                    case (uint) NppNotif.NPPN_FILEBEFORELOAD:
                         // fire when a file is opened (the event NPPN_FILEBEFOREOPEN is fired after SciNotif.SCN_MODIFIED
                         // and just before NppNotif.NPPN_BUFFERACTIVATED so it's not very useful...)
                         DoNppFileBeforeLoad();
                         return;
 
-                    case (uint)NppNotif.NPPN_FILEOPENED:
+                    case (uint) NppNotif.NPPN_FILEOPENED:
                         // on file opened
                         OnNppFileOpened();
                         return;
 
-                    case (uint)NppNotif.NPPN_FILEBEFORECLOSE:
+                    case (uint) NppNotif.NPPN_FILEBEFORECLOSE:
                         // on file closed
                         OnNppFileBeforeClose();
                         return;
 
-                    case (uint)NppNotif.NPPN_FILEBEFORESAVE:
+                    case (uint) NppNotif.NPPN_FILEBEFORESAVE:
                         // on file saved
                         OnNppFileBeforeSaved();
-                        return;
-
-                    case (uint)NppNotif.NPPN_SHORTCUTREMAPPED:
-                        // notify plugins that plugin command shortcut is remapped
-                        //NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
                         return;
 
                     // --------------------------------------------------------
@@ -150,7 +142,7 @@ namespace _3PA {
                         // called each time the user click on a margin
                         OnSciMarginClick(nc);
                         return;
-                        
+
                     case (uint) SciNotif.SCN_MODIFYATTEMPTRO:
                         // Code a checkout when trying to modify a read-only file
                         return;
@@ -164,9 +156,7 @@ namespace _3PA {
                         // when he moves his cursor
                         OnSciDwellEnd();
                         return;
-
                 }
-                
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
             }
@@ -184,7 +174,6 @@ namespace _3PA {
         /// to watch, so it can be called several times safely
         /// </summary>
         public static void SetHooks() {
-
             // Install a WM_KEYDOWN hook
             KeyboardMonitor.Instance.Clear();
             KeyboardMonitor.Instance.Add(
@@ -234,6 +223,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

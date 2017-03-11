@@ -17,13 +17,11 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace YamuiFramework.HtmlRenderer.Core.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters {
     /// <summary>
     /// Adapter for platform specific font object - used to render text using specific font.
     /// </summary>
-    public abstract class RFont
-    {
+    public abstract class RFont {
         /// <summary>
         /// Gets the em-size of this Font measured in the units specified by the Unit property.
         /// </summary>

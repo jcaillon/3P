@@ -22,13 +22,11 @@ using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
     internal class Lexer {
-
         #region private const
 
         private const int LineStartAt = 0;
@@ -197,7 +195,7 @@ namespace _3PA.MainFeatures.Parser {
             ReadChr();
             if (eol == '\r' && PeekAtChr(0) == '\n')
                 ReadChr();
-            
+
             // small exception for progress, to be able to interprete line like :
             // &scope-define varname l'appel~\r\nest bon " 
             // make the scope define line virtually continue on the next line
@@ -232,7 +230,7 @@ namespace _3PA.MainFeatures.Parser {
                 return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
 
             // if we started in a comment, read this token as a comment
-            if (_commentDepth > 0) 
+            if (_commentDepth > 0)
                 return CreateCommentToken();
 
             switch (ch) {
@@ -259,7 +257,7 @@ namespace _3PA.MainFeatures.Parser {
                     // pre-processed directive (i.e. &define, &analyse-suspend, &message)
                     _definePreProcLastLine = _startLine;
                     return new TokenPreProcDirective(
-                        ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), 
+                        ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(),
                         _startLine, _startCol, _startPos, _pos);
 
                 case ' ':
@@ -315,16 +313,15 @@ namespace _3PA.MainFeatures.Parser {
                     // keyword = [a-Z_~]+[\w_-]*
                     if (char.IsLetter(ch) || ch == '_' || ch == '~') {
                         return new TokenWord(
-                            ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), 
+                            ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(),
                             _startLine, _startCol, _startPos, _pos);
                     }
                     // symbol
-                    if (_symbolChars.Any(t => t == ch))
+                    if (_symbolChars.Contains(ch))
                         return CreateSymbolToken();
                     // unknown char
                     ReadChr();
                     return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-
             }
         }
 
@@ -333,7 +330,6 @@ namespace _3PA.MainFeatures.Parser {
         /// returns true if a ~ is used in the word
         /// </summary>
         private bool ReadWord() {
-
             bool readTilde = false;
 
             if (PeekAtChr(0) == '~') {
@@ -405,7 +401,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // case of a preprocessed {&variable} or {1}
             if (ch == '&' || char.IsDigit(ch)) {
-                if (ch == '&') 
+                if (ch == '&')
                     ReadChr();
                 return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
             }
@@ -535,7 +531,6 @@ namespace _3PA.MainFeatures.Parser {
 
                 // new line
                 if (ch == '\r' || ch == '\n') {
-
                     // a string continues at the next line... Except when it's on a &define line
                     if (_definePreProcLastLine == _startLine)
                         break;
@@ -576,6 +571,5 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         #endregion
-
     }
 }

@@ -28,12 +28,10 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiGoBackButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButtonChar : YamuiButton {
-       
         #region Fields
 
         public IconFontNameEnum IconFontName { get; set; }
@@ -48,7 +46,10 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool FakeDisabled {
             get { return _fakeDisabled; }
-            set { _fakeDisabled = value; Invalidate(); }
+            set {
+                _fakeDisabled = value;
+                Invalidate();
+            }
         }
 
         #endregion
@@ -84,7 +85,7 @@ namespace YamuiFramework.Controls {
 
                 designRect.Width += 2;
                 designRect.Height += 2;
-                TextRenderer.DrawText(e.Graphics, ButtonChar, FontManager.GetOtherFont(IconFontName.ToString().Replace("_", " "), FontStyle.Regular, (float)(Height * 0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(e.Graphics, ButtonChar, FontManager.GetOtherFont(IconFontName.ToString().Replace("_", " "), FontStyle.Regular, (float) (Height*0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             } catch {
                 // ignored
             }
@@ -97,12 +98,11 @@ namespace YamuiFramework.Controls {
             Webdings,
             Wingdings,
             Wingdings_2,
-            Wingdings_3,
+            Wingdings_3
         }
-
     }
-    internal class YamuiGoBackButtonDesigner : ControlDesigner {
 
+    internal class YamuiGoBackButtonDesigner : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
             properties.Remove("Padding");

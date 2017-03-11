@@ -34,9 +34,7 @@ using _3PA.MainFeatures.Appli;
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures.Pro {
-
     internal class ProExecution {
-
         #region public fields
 
         /// <summary>
@@ -58,7 +56,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Full path to the directory containing all the files needed for the execution
         /// </summary>
         public string LocalTempDir { get; private set; }
-        
+
         /// <summary>
         /// Full path to a temporary dir created in the deployment directory that host the
         /// TempDir of each execution
@@ -185,7 +183,7 @@ namespace _3PA.MainFeatures.Pro {
             try {
                 if (Process != null)
                     Process.Close();
-                
+
                 // delete temp dir
                 Utils.DeleteDirectory(LocalTempDir, true);
                 Utils.DeleteDirectory(DistantTempDir, true);
@@ -199,7 +197,6 @@ namespace _3PA.MainFeatures.Pro {
                 } else {
                     throw new Exception("Couln't decrease the opened counter...");
                 }
-
             } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
@@ -231,7 +228,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <returns></returns>
         public bool Do(ExecutionType executionType) {
-
             if (ListToCompile == null)
                 ListToCompile = new List<FileToCompile>();
 
@@ -261,13 +257,12 @@ namespace _3PA.MainFeatures.Pro {
             LocalTempDir = Path.Combine(Config.FolderTemp, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
             if (!Utils.CreateDirectory(LocalTempDir))
                 return false;
-            
+
             // for each file of the list
             var filesListPath = Path.Combine(LocalTempDir, "files.list");
             StringBuilder filesListcontent = new StringBuilder();
             var count = 1;
             foreach (var fileToCompile in ListToCompile) {
-
                 if (!File.Exists(fileToCompile.InputPath)) {
                     UserCommunication.Notify("Couldn't find the following file :<br>" + fileToCompile.InputPath, MessageImg.MsgError, "Execution error", "File not found", 10);
                     return false;
@@ -297,30 +292,26 @@ namespace _3PA.MainFeatures.Pro {
                     Config.Instance.CompileForceUseOfTemp ||
                     Path.GetExtension(fileToCompile.InputPath).Equals(".cls")
                     ) {
-
                     var subTempDir = Path.Combine(LocalTempDir, count.ToString());
 
                     // if the deployment dir is not on the same disk as the temp folder, we create a temp dir
                     // as close to the final deployment as possible (= in the deployment base dir!)
                     if (lastDeployment.DeployType != DeployType.Ftp && !string.IsNullOrEmpty(DistantRootTempDir) && DistantRootTempDir.Length > 2 && !DistantRootTempDir.Substring(0, 2).EqualsCi(LocalTempDir.Substring(0, 2))) {
-
                         if (Utils.CreateDirectory(DistantRootTempDir, FileAttributes.Hidden))
                             DistantTempDir = Path.Combine(DistantRootTempDir, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
                         else
                             DistantTempDir = LocalTempDir;
-                            
+
                         subTempDir = Path.Combine(DistantTempDir, count.ToString());
                     }
 
                     if (!Utils.CreateDirectory(subTempDir))
                         return false;
-                        
+
                     fileToCompile.CompOutputDir = subTempDir;
                     fileToCompile.CompOutputLst = Path.Combine(subTempDir, baseFileName + ".lst");
                     fileToCompile.CompOutputR = Path.Combine(subTempDir, baseFileName + ".r");
-
                 } else {
-
                     // if we want to move the r-code somewhere during the deployment, then we will compile the r-code
                     // directly there, because it's faster than generating it in a temp folder and moving it afterward
                     fileToCompile.CompOutputDir = lastDeployment.TargetDir;
@@ -358,7 +349,7 @@ namespace _3PA.MainFeatures.Pro {
                 var fileContent = Utils.ReadAllText(ProEnv.IniPath, encoding);
                 var regex = new Regex("^PROPATH=.*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                 var matches = regex.Match(fileContent);
-                if (matches.Success) 
+                if (matches.Success)
                     fileContent = regex.Replace(fileContent, @"PROPATH=");
                 Utils.FileWriteAllText(baseIniPath, fileContent, encoding);
             }
@@ -382,19 +373,14 @@ namespace _3PA.MainFeatures.Pro {
             var propathToUse = string.Join(",", ProEnv.GetProPathDirList);
             string fileToExecute = "";
 
-
             if (executionType == ExecutionType.Appbuilder) {
                 fileToExecute = ListToCompile.First().InputPath;
-
             } else if (executionType == ExecutionType.Database) {
-
                 // for database extraction, we need to copy the DumpDatabase program
                 fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                 if (!Utils.FileWriteAllBytes(Path.Combine(LocalTempDir, fileToExecute), DataResources.DumpDatabase))
                     return false;
-
             } else if (executionType == ExecutionType.Prolint) {
-
                 // prolint, we need to copy the StartProlint program
                 fileToExecute = "prolint_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                 ProlintOutputPath = Path.Combine(LocalTempDir, "prolint.log");
@@ -416,9 +402,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
                 Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
-
             } else if (executionType == ExecutionType.DeploymentHook) {
-
                 fileToExecute = "hook_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                 StringBuilder hookProc = new StringBuilder();
                 hookProc.AppendLine("&SCOPED-DEFINE ApplicationName " + ProEnv.Name.ProQuoter());
@@ -428,7 +412,6 @@ namespace _3PA.MainFeatures.Pro {
                 hookProc.AppendLine("&SCOPED-DEFINE DeploymentDirectory " + ProEnv.BaseCompilationPath.ProQuoter());
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileDeploymentHook);
                 Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileDeploymentHook, encoding).Replace(@"/*<inserted_3P_values>*/", hookProc.ToString()), encoding);
-
             } else if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader) {
                 // need to init datadigger?
                 if (!File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
@@ -439,9 +422,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
                 // add the datadigger folder to the propath
                 propathToUse = Config.FolderDataDigger + "," + propathToUse;
-
             } else {
-
                 if (ListToCompile.Count == 1)
                     fileToExecute = ListToCompile.First().CompInputPath;
             }
@@ -473,7 +454,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // multiple compilation, we don't want to show all those Prowin in the task bar...
             batchMode = batchMode && !NoBatch;
-            
+
             // Parameters
             StringBuilder Params = new StringBuilder();
 
@@ -556,7 +537,6 @@ namespace _3PA.MainFeatures.Pro {
         /// update the FilesInfo accordingly so the user can see the errors in npp
         /// </summary>
         public Dictionary<string, List<FileError>> LoadErrorLog() {
-
             // we need to correct the files path in the log if needed
             var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
             foreach (var treatedFile in ListToCompile.Where(treatedFile => !treatedFile.CompInputPath.Equals(treatedFile.InputPath))) {
@@ -595,7 +575,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
-
             // end of execution action
             if (OnExecutionEnd != null) {
                 OnExecutionEnd(this);
@@ -647,7 +626,6 @@ namespace _3PA.MainFeatures.Pro {
         /// and displays each notification
         /// </summary>
         private void DisplayPostExecutionNotification() {
-
             // no notifications?
             if (string.IsNullOrEmpty(NotificationOutputPath) || !File.Exists(NotificationOutputPath))
                 return;
@@ -655,17 +633,14 @@ namespace _3PA.MainFeatures.Pro {
             Utils.ForEachLine(NotificationOutputPath, null, (i, line) => {
                 var fields = line.Split('\t').ToList();
                 if (fields.Count == 6) {
-
                     MessageImg messageImg;
                     if (!Enum.TryParse(fields[1], true, out messageImg))
                         messageImg = MessageImg.MsgDebug;
 
                     if (string.IsNullOrEmpty(fields[5]))
-                        UserCommunication.Notify(fields[0], messageImg, fields[2], fields[3], (int)fields[4].ConvertFromStr(typeof(int)));
+                        UserCommunication.Notify(fields[0], messageImg, fields[2], fields[3], (int) fields[4].ConvertFromStr(typeof(int)));
                     else
-                        UserCommunication.NotifyUnique(fields[5], fields[0], messageImg, fields[2], fields[3], args => {
-                            UserCommunication.CloseUniqueNotif(fields[5]);
-                        }, (int)fields[4].ConvertFromStr(typeof(int)));
+                        UserCommunication.NotifyUnique(fields[5], fields[0], messageImg, fields[2], fields[3], args => { UserCommunication.CloseUniqueNotif(fields[5]); }, (int) fields[4].ConvertFromStr(typeof(int)));
                 }
             });
         }
@@ -680,21 +655,17 @@ namespace _3PA.MainFeatures.Pro {
         /// and one .lst if the option has been checked
         /// </summary>
         public List<FileToDeploy> CreateListOfFilesToDeploy() {
-
             var outputList = new List<FileToDeploy>();
             var clsNotFound = new StringBuilder();
 
             foreach (var treatedFile in ListToCompile) {
-
                 // Is the input file a class file?
                 if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
-
                     // if the file we compiled inherits from another class or if another class inherits of our file, 
                     // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
                     try {
                         // for each *.r file
                         foreach (var file in Directory.EnumerateFiles(treatedFile.CompOutputDir, "*.r", SearchOption.AllDirectories)) {
-
                             var relativePath = file.Replace(treatedFile.CompOutputDir, "").TrimStart('\\');
                             var sourcePath = ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
 
@@ -741,9 +712,8 @@ namespace _3PA.MainFeatures.Pro {
 
             return outputList;
         }
-        
+
         #endregion
-        
     }
 
     internal enum ExecutionType {
@@ -765,7 +735,7 @@ namespace _3PA.MainFeatures.Pro {
     internal class FileToCompile {
         // stores the path
         public string InputPath { get; set; }
-        
+
         // stores temporary path used during the compilation
         public string CompInputPath { get; set; }
         public string CompOutputDir { get; set; }
@@ -782,5 +752,4 @@ namespace _3PA.MainFeatures.Pro {
             BaseFileName = Path.GetFileNameWithoutExtension(inputPath);
         }
     }
-
 }

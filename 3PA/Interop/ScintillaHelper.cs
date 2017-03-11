@@ -65,8 +65,10 @@ namespace _3PA.Interop {
     [StructLayout(LayoutKind.Sequential)]
     public struct Sci_CharacterRange {
         public Sci_CharacterRange(int cpmin, int cpmax) {
-            cpMin = cpmin; cpMax = cpmax;
+            cpMin = cpmin;
+            cpMax = cpmax;
         }
+
         public int cpMin;
         public int cpMax;
     }
@@ -86,6 +88,7 @@ namespace _3PA.Interop {
             _sciTextToFind.chrg = chrRange;
             _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
         }
+
         public Sci_TextToFind(int cpmin, int cpmax, string searchText) {
             _sciTextToFind.chrg.cpMin = cpmin;
             _sciTextToFind.chrg.cpMax = cpmax;
@@ -99,19 +102,49 @@ namespace _3PA.Interop {
             public Sci_CharacterRange chrgText;
         }
 
-        public IntPtr NativePointer { get { _initNativeStruct(); return _ptrSciTextToFind; } }
-        public string lpstrText { set { _freeNativeString(); _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(value); } }
-        public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextToFind.chrg; } set { _sciTextToFind.chrg = value; _initNativeStruct(); } }
-        public Sci_CharacterRange chrgText { get { _readNativeStruct(); return _sciTextToFind.chrgText; } }
+        public IntPtr NativePointer {
+            get {
+                _initNativeStruct();
+                return _ptrSciTextToFind;
+            }
+        }
+
+        public string lpstrText {
+            set {
+                _freeNativeString();
+                _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(value);
+            }
+        }
+
+        public Sci_CharacterRange chrg {
+            get {
+                _readNativeStruct();
+                return _sciTextToFind.chrg;
+            }
+            set {
+                _sciTextToFind.chrg = value;
+                _initNativeStruct();
+            }
+        }
+
+        public Sci_CharacterRange chrgText {
+            get {
+                _readNativeStruct();
+                return _sciTextToFind.chrgText;
+            }
+        }
+
         void _initNativeStruct() {
             if (_ptrSciTextToFind == IntPtr.Zero)
                 _ptrSciTextToFind = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextToFind));
             Marshal.StructureToPtr(_sciTextToFind, _ptrSciTextToFind, false);
         }
+
         void _readNativeStruct() {
             if (_ptrSciTextToFind != IntPtr.Zero)
-                _sciTextToFind = (_Sci_TextToFind)Marshal.PtrToStructure(_ptrSciTextToFind, typeof(_Sci_TextToFind));
+                _sciTextToFind = (_Sci_TextToFind) Marshal.PtrToStructure(_ptrSciTextToFind, typeof(_Sci_TextToFind));
         }
+
         void _freeNativeString() {
             if (_sciTextToFind.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextToFind.lpstrText);
         }
@@ -123,6 +156,7 @@ namespace _3PA.Interop {
                 _disposed = true;
             }
         }
+
         ~Sci_TextToFind() {
             Dispose();
         }
@@ -1595,7 +1629,7 @@ namespace _3PA.Interop {
         SC_PERFORMED_USER = 0x10,
         SC_PERFORMED_UNDO = 0x20,
         SC_PERFORMED_REDO = 0x40,
-        SC_LASTSTEPINUNDOREDO = 0x100,
+        SC_LASTSTEPINUNDOREDO = 0x100
     }
 
     [Flags]
@@ -3190,6 +3224,5 @@ namespace _3PA.Interop {
         SCE_V_OUTPUT = 22,
         SCE_V_INOUT = 23,
         SCE_V_PORT_CONNECT = 24
-
     }
 }

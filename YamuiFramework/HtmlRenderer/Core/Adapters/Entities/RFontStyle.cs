@@ -19,14 +19,12 @@
 #endregion
 using System;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     /// Specifies style information applied to text.
     /// </summary>
     [Flags]
-    public enum RFontStyle
-    {
+    public enum RFontStyle {
         Regular = 0,
         Bold = 1,
         Italic = 2,

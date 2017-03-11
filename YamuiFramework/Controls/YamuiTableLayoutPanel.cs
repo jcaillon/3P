@@ -24,10 +24,8 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [ToolboxBitmap(typeof(Panel))]
     public class YamuiTableLayoutPanel : TableLayoutPanel {
-
         #region Fields
 
         [DefaultValue(false)]
@@ -73,19 +71,17 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             if (!UseCustomBackColor && !DontUseTransparentBackGround)
                 PaintTransparentBackground(e.Graphics, DisplayRectangle);
+            else if (!UseCustomBackColor)
+                e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             else
-                if (!UseCustomBackColor)
-                    e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
-                else
-                    e.Graphics.Clear(BackColor);
+                e.Graphics.Clear(BackColor);
         }
 
         #endregion
-
     }
 }

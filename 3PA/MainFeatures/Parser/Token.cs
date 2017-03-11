@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// Token object
     /// </summary>
@@ -34,6 +33,7 @@ namespace _3PA.MainFeatures.Parser {
         /// 0 will correspond to the procedure itself, 1 to the first include and so on...
         /// </summary>
         public ushort OwnerNumber { get; set; }
+
         protected Token(string value, int line, int column, int startPosition, int endPosition) {
             Value = value;
             Line = line;
@@ -41,6 +41,7 @@ namespace _3PA.MainFeatures.Parser {
             StartPosition = startPosition;
             EndPosition = endPosition;
         }
+
         public abstract void Accept(ILexerVisitor visitor);
     }
 
@@ -49,9 +50,11 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class TokenComment : Token {
         public bool IsSingleLine { get; private set; }
+
         public TokenComment(string value, int line, int column, int startPosition, int endPosition, bool isSingleLine) : base(value, line, column, startPosition, endPosition) {
             IsSingleLine = isSingleLine;
         }
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -61,7 +64,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Ex: & if, & analyse, & define...
     /// </summary>
     internal class TokenPreProcDirective : Token {
-        public TokenPreProcDirective(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenPreProcDirective(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -71,7 +75,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Its value is '{', indicates the beggining of an include
     /// </summary>
     internal class TokenInclude : Token {
-        public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -81,7 +86,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Use of a pre-processed variable i.e. {& name}, its value is '{&'
     /// </summary>
     internal class TokenPreProcVariable : Token {
-        public TokenPreProcVariable(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenPreProcVariable(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -91,28 +97,32 @@ namespace _3PA.MainFeatures.Parser {
     /// Eos is end of statement (a .)
     /// </summary>
     internal class TokenEos : Token {
-        public TokenEos(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenEos(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     internal class TokenUnknown : Token {
-        public TokenUnknown(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenUnknown(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     internal class TokenWord : Token {
-        public TokenWord(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenWord(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     internal class TokenNumber : Token {
-        public TokenNumber(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenNumber(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -122,7 +132,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Either a simple or double quote string (handles ~ escape char)
     /// </summary>
     internal class TokenString : Token {
-        public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -134,21 +145,24 @@ namespace _3PA.MainFeatures.Parser {
     /// This matches the properties of the string
     /// </summary>
     internal class TokenStringDescriptor : Token {
-        public TokenStringDescriptor(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenStringDescriptor(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     internal class TokenWhiteSpace : Token {
-        public TokenWhiteSpace(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenWhiteSpace(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     internal class TokenSymbol : Token {
-        public TokenSymbol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenSymbol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -158,7 +172,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Eol is end of line (\r\n or \n)
     /// </summary>
     internal class TokenEol : Token {
-        public TokenEol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenEol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
@@ -168,7 +183,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Eof is end of file
     /// </summary>
     internal class TokenEof : Token {
-        public TokenEof(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public TokenEof(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
+
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }

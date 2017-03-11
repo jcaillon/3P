@@ -26,18 +26,16 @@ using System.Text;
 using System.Windows.Input;
 
 namespace YamuiFramework.Helper {
-
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public static class WinApi {
-
         #region Structs
 
         public enum MapType : uint {
             MAPVK_VK_TO_VSC = 0x0,
             MAPVK_VSC_TO_VK = 0x1,
             MAPVK_VK_TO_CHAR = 0x2,
-            MAPVK_VSC_TO_VK_EX = 0x3,
+            MAPVK_VSC_TO_VK_EX = 0x3
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -45,7 +43,10 @@ namespace YamuiFramework.Helper {
             public int x;
             public int y;
 
-            public POINT(int x, int y) { this.x = x; this.y = y; }
+            public POINT(int x, int y) {
+                this.x = x;
+                this.y = y;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -53,7 +54,10 @@ namespace YamuiFramework.Helper {
             public int cx;
             public int cy;
 
-            public SIZE(int cx, int cy) { this.cx = cx; this.cy = cy; }
+            public SIZE(int cx, int cy) {
+                this.cx = cx;
+                this.cy = cy;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -68,6 +72,7 @@ namespace YamuiFramework.Helper {
             public int Top;
             public int Right;
             public int Bottom;
+
             public RECT(int left, int top, int right, int bottom) {
                 Left = left;
                 Top = top;
@@ -84,6 +89,7 @@ namespace YamuiFramework.Helper {
             public POINT ptMinTrackSize;
             public POINT ptMaxTrackSize;
         }
+
         #endregion
 
         #region Enums
@@ -480,15 +486,14 @@ namespace YamuiFramework.Helper {
             WS_EX_TRANSPARENT = 0x00000020,
 
             /// <summary>Specifies a window that has a border with a raised edge.</summary>
-            WS_EX_WINDOWEDGE = 0x00000100,
-
+            WS_EX_WINDOWEDGE = 0x00000100
         }
 
         /// <summary>
         /// Window Styles.
         /// The following styles can be specified wherever a window style is required. After the control has been created, these styles cannot be modified, except as noted.
         /// </summary>
-        [Flags()]
+        [Flags]
         public enum WindowStyles : uint {
             /// <summary>The window has a thin-line border.</summary>
             WS_BORDER = 0x800000,
@@ -628,7 +633,6 @@ namespace YamuiFramework.Helper {
             VerticalRedraw = 0x1
         }
 
-
         #endregion
 
         #region Fields
@@ -726,7 +730,6 @@ namespace YamuiFramework.Helper {
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wp, IntPtr lp);
 
-        
         #region Get char pressed on key down
 
         [DllImport("user32.dll")]
@@ -761,23 +764,23 @@ namespace YamuiFramework.Helper {
             byte[] keyboardState = new byte[256];
             GetKeyboardState(keyboardState);
 
-            uint scanCode = MapVirtualKey((uint)virtualKey, MapType.MAPVK_VK_TO_VSC);
+            uint scanCode = MapVirtualKey((uint) virtualKey, MapType.MAPVK_VK_TO_VSC);
             StringBuilder stringBuilder = new StringBuilder(2);
 
-            int result = ToUnicode((uint)virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
+            int result = ToUnicode((uint) virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
             switch (result) {
                 case -1:
                     break;
                 case 0:
                     break;
                 case 1: {
-                        ch = stringBuilder[0];
-                        break;
-                    }
+                    ch = stringBuilder[0];
+                    break;
+                }
                 default: {
-                        ch = stringBuilder[0];
-                        break;
-                    }
+                    ch = stringBuilder[0];
+                    break;
+                }
             }
             return ch;
         }
@@ -785,7 +788,5 @@ namespace YamuiFramework.Helper {
         #endregion
 
         #endregion
-
     }
-
 }

@@ -30,18 +30,18 @@ using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.Pro {
-
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
     /// </summary>
     internal static class FilesInfo {
-
         #region event
 
         public delegate void UpdatedOperation(UpdatedOperationEventArgs args);
+
         public static event UpdatedOperation OnUpdatedOperation;
 
         public delegate void UpdatedErrors(UpdatedErrorsEventArgs args);
+
         public static event UpdatedErrors OnUpdatedErrors;
 
         #endregion
@@ -75,7 +75,6 @@ namespace _3PA.MainFeatures.Pro {
         /// <param name="fullPath"></param>
         /// <param name="errorsList"></param>
         public static void UpdateFileErrors(string fullPath, List<FileError> errorsList) {
-
             AddIfNew(fullPath);
 
             if (_sessionInfo[fullPath].FileErrors != null)
@@ -111,11 +110,11 @@ namespace _3PA.MainFeatures.Pro {
         public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight) {
             switch (fontWeight) {
                 case ErrorFontWeight.Bold:
-                    return (byte)(errorLevel + Style.ErrorAnnotBoldStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotBoldStyleOffset);
                 case ErrorFontWeight.Italic:
-                    return (byte)(errorLevel + Style.ErrorAnnotItalicStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotItalicStyleOffset);
                 default:
-                    return (byte)(errorLevel + Style.ErrorAnnotStandardStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotStandardStyleOffset);
             }
         }
 
@@ -152,7 +151,6 @@ namespace _3PA.MainFeatures.Pro {
         /// display an annotation with the message below the line + display a marker in the margin
         /// </summary>
         public static void UpdateErrorsInScintilla() {
-
             // Updates the number of errors in the FileExplorer form and the file status
             UpdateFileStatus();
 
@@ -189,14 +187,12 @@ namespace _3PA.MainFeatures.Pro {
 
             // only show the new errors
             if (_sessionInfo[currentFilePath].HasErrorsNotDisplayed) {
-
                 _sessionInfo[currentFilePath].HasErrorsNotDisplayed = false;
 
                 StylerHelper stylerHelper = new StylerHelper();
                 int lastLine = -2;
                 StringBuilder lastMessage = new StringBuilder();
                 foreach (var fileError in _sessionInfo[currentFilePath].FileErrors) {
-
                     // new line
                     if (lastLine != fileError.Line) {
                         stylerHelper.Clear();
@@ -251,7 +247,6 @@ namespace _3PA.MainFeatures.Pro {
         /// because of the compilation of the given file...
         /// </summary>
         public static bool ClearAllErrors(string filePath, bool clearForCompil = false) {
-
             if (string.IsNullOrEmpty(filePath))
                 return false;
 
@@ -325,8 +320,8 @@ namespace _3PA.MainFeatures.Pro {
 
             lineObj.AnnotationText = null;
             foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
-                if (((int)lineObj.MarkerGet()).IsBitSet((int)errorLevelMarker))
-                    lineObj.MarkerDelete((int)errorLevelMarker);
+                if (((int) lineObj.MarkerGet()).IsBitSet((int) errorLevelMarker))
+                    lineObj.MarkerDelete((int) errorLevelMarker);
         }
 
         /// <summary>
@@ -416,20 +411,18 @@ namespace _3PA.MainFeatures.Pro {
             if (!File.Exists(fullPath))
                 return output;
 
-            var lastLineNbCouple = new[] { -10, -10 };
+            var lastLineNbCouple = new[] {-10, -10};
 
             Utils.ForEachLine(fullPath, null, (i, line) => {
-
                 var fields = line.Split('\t').ToList();
                 if (fields.Count == 8) {
-
                     // new file
                     // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
                     var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
                     var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
                     if (!output.ContainsKey(filePath)) {
                         output.Add(filePath, new List<FileError>());
-                        lastLineNbCouple = new[] { -10, -10 };
+                        lastLineNbCouple = new[] {-10, -10};
                     }
 
                     ErrorLevel errorLevel;
@@ -437,7 +430,7 @@ namespace _3PA.MainFeatures.Pro {
                         errorLevel = ErrorLevel.Error;
 
                     // we store the line/error number couple because we don't want two identical messages to appear
-                    var thisLineNbCouple = new[] { (int)fields[3].ConvertFromStr(typeof(int)), (int)fields[5].ConvertFromStr(typeof(int)) };
+                    var thisLineNbCouple = new[] {(int) fields[3].ConvertFromStr(typeof(int)), (int) fields[5].ConvertFromStr(typeof(int))};
 
                     if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
                         // same line/error number as previously
@@ -457,7 +450,7 @@ namespace _3PA.MainFeatures.Pro {
                         SourcePath = filePath,
                         Level = errorLevel,
                         Line = Math.Max(0, lastLineNbCouple[0] - 1),
-                        Column = Math.Max(0, (int)fields[4].ConvertFromStr(typeof(int)) - 1),
+                        Column = Math.Max(0, (int) fields[4].ConvertFromStr(typeof(int)) - 1),
                         ErrorNumber = lastLineNbCouple[1],
                         Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
                         Help = fields[7].Replace("<br>", "\n").Trim(),
@@ -492,10 +485,10 @@ namespace _3PA.MainFeatures.Pro {
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     internal class FileInfoObject {
-
         private CurrentOperation _currentOperation;
 
         private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
         public CurrentOperation CurrentOperation {
             get {
                 CurrentOperation output = 0;
@@ -545,20 +538,14 @@ namespace _3PA.MainFeatures.Pro {
     /// </summary>
     [Flags]
     internal enum CurrentOperation {
-        [CurrentOperationAttr(Name = "Editing")]
-        Default = 0,
-        [CurrentOperationAttr(Name = "Appbuilder section!")]
-        AppbuilderSection = 32,
+        [CurrentOperationAttr(Name = "Editing")] Default = 0,
+        [CurrentOperationAttr(Name = "Appbuilder section!")] AppbuilderSection = 32,
 
         // above linting, we start a prowin process to do it
-        [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")]
-        Prolint = 64,
-        [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
-        CheckSyntax = 128,
-        [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")]
-        Compile = 216,
-        [CurrentOperationAttr(Name = "Executing", ActionText = "executing")]
-        Run = 512
+        [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")] Prolint = 64,
+        [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")] CheckSyntax = 128,
+        [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")] Compile = 216,
+        [CurrentOperationAttr(Name = "Executing", ActionText = "executing")] Run = 512
     }
 
     /// <summary>
@@ -573,10 +560,12 @@ namespace _3PA.MainFeatures.Pro {
         public string Message { get; set; }
         public string Help { get; set; }
         public bool FromProlint { get; set; }
+
         /// <summary>
         /// indicates if the error appears several times
         /// </summary>
         public int Times { get; set; }
+
         // the path to the file that was compiled to generate this error
         public string CompiledFilePath { get; set; }
     }
@@ -608,18 +597,12 @@ namespace _3PA.MainFeatures.Pro {
     /// and thus must start at 0
     /// </summary>
     internal enum ErrorLevel {
-        [Description("Error(s), good!")]
-        NoErrors,
-        [Description("Info")]
-        Information,
-        [Description("Warning(s)")]
-        Warning,
-        [Description("Huge warning(s)")]
-        StrongWarning,
-        [Description("Error(s)")]
-        Error,
-        [Description("Critical error(s)!")]
-        Critical
+        [Description("Error(s), good!")] NoErrors,
+        [Description("Info")] Information,
+        [Description("Warning(s)")] Warning,
+        [Description("Huge warning(s)")] StrongWarning,
+        [Description("Error(s)")] Error,
+        [Description("Critical error(s)!")] Critical
     }
 
     internal enum ErrorFontWeight {
@@ -634,6 +617,7 @@ namespace _3PA.MainFeatures.Pro {
 
     internal class UpdatedOperationEventArgs : EventArgs {
         public CurrentOperation CurrentOperation { get; private set; }
+
         public UpdatedOperationEventArgs(CurrentOperation currentOperation) {
             CurrentOperation = currentOperation;
         }
@@ -642,6 +626,7 @@ namespace _3PA.MainFeatures.Pro {
     internal class UpdatedErrorsEventArgs : EventArgs {
         public ErrorLevel ErrorLevel { get; private set; }
         public int NbErrors { get; private set; }
+
         public UpdatedErrorsEventArgs(ErrorLevel errorLevel, int nbErrors) {
             ErrorLevel = errorLevel;
             NbErrors = nbErrors;
@@ -649,5 +634,4 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     #endregion
-
 }

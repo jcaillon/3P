@@ -27,7 +27,6 @@ using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA {
-
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -41,7 +40,6 @@ namespace _3PA {
     /// faster execution than with SendMessage<br />
     /// </summary>
     internal static partial class Npp {
-
         #region fields
 
         public const int KeywordMaxLength = 60;
@@ -53,7 +51,7 @@ namespace _3PA {
         #endregion
 
         #region Critical Core
-        
+
         /// <summary>
         /// Returns the current instance of scintilla used
         /// 0/1 corresponding to the main/seconday scintilla currently used
@@ -290,7 +288,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="sciCommand">The command to perform.</param>
         public static void ExecuteCmd(Command sciCommand) {
-            Sci.Send((SciMsg)sciCommand);
+            Sci.Send((SciMsg) sciCommand);
         }
 
         /// <summary>
@@ -379,7 +377,7 @@ namespace _3PA {
         /// Retrieve the height of a particular line of text in pixels.
         /// </summary>
         public static int TextHeight(int line) {
-            return (int)Sci.Send(SciMsg.SCI_TEXTHEIGHT, new IntPtr(line));
+            return (int) Sci.Send(SciMsg.SCI_TEXTHEIGHT, new IntPtr(line));
         }
 
         /// <summary>
@@ -531,8 +529,8 @@ namespace _3PA {
         /// </summary>
         /// <returns>One of the WhitespaceMode enumeration values. The default is WhitespaceMode.Invisible.</returns>
         public static WhitespaceMode ViewWhitespace {
-            get { return (WhitespaceMode)Sci.Send(SciMsg.SCI_GETVIEWWS); }
-            set { Sci.Send(SciMsg.SCI_SETVIEWWS, new IntPtr((int)value)); }
+            get { return (WhitespaceMode) Sci.Send(SciMsg.SCI_GETVIEWWS); }
+            set { Sci.Send(SciMsg.SCI_SETVIEWWS, new IntPtr((int) value)); }
         }
 
         /// <summary>
@@ -576,8 +574,8 @@ namespace _3PA {
         /// The default is Interop.FontQuality.Default.
         /// </returns>
         public static FontQuality FontQuality {
-            get { return (FontQuality)Sci.Send(SciMsg.SCI_GETFONTQUALITY); }
-            set { Sci.Send(SciMsg.SCI_SETFONTQUALITY, new IntPtr((int)value)); }
+            get { return (FontQuality) Sci.Send(SciMsg.SCI_GETFONTQUALITY); }
+            set { Sci.Send(SciMsg.SCI_SETFONTQUALITY, new IntPtr((int) value)); }
         }
 
         /// <summary>
@@ -588,8 +586,8 @@ namespace _3PA {
         /// The default is WrapMode.None.
         /// </returns>
         public static WrapMode WrapMode {
-            get { return (WrapMode)Sci.Send(SciMsg.SCI_GETWRAPMODE); }
-            set { Sci.Send(SciMsg.SCI_SETWRAPMODE, new IntPtr((int)value)); }
+            get { return (WrapMode) Sci.Send(SciMsg.SCI_GETWRAPMODE); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPMODE, new IntPtr((int) value)); }
         }
 
         /// <summary>
@@ -616,8 +614,8 @@ namespace _3PA {
         /// The default is Interop.WrapIndentMode.Fixed.
         /// </returns>
         public static WrapIndentMode WrapIndentMode {
-            get { return (WrapIndentMode)Sci.Send(SciMsg.SCI_GETWRAPINDENTMODE); }
-            set { Sci.Send(SciMsg.SCI_SETWRAPINDENTMODE, new IntPtr((int)value)); }
+            get { return (WrapIndentMode) Sci.Send(SciMsg.SCI_GETWRAPINDENTMODE); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPINDENTMODE, new IntPtr((int) value)); }
         }
 
         /// <summary>
@@ -719,9 +717,7 @@ namespace _3PA {
         /// <returns>true to use tab characters; otherwise, false. The default is true.</returns>
         public static bool UseTabs {
             get { return (Sci.Send(SciMsg.SCI_GETUSETABS).IsTrue()); }
-            set {
-                Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0);
-            }
+            set { Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0); }
         }
 
         /// <summary>
@@ -1950,7 +1946,7 @@ namespace _3PA {
         public static Color CaretColor {
             set { Sci.Send(SciMsg.SCI_SETCARETFORE, new IntPtr(ColorTranslator.ToWin32(value.IsEmpty ? Color.Black : value))); }
         }
-        
+
         /// <summary>
         /// allow changing the colour of the fold margin and fold margin highlight
         /// </summary>
@@ -1964,7 +1960,7 @@ namespace _3PA {
         /// </summary>
         public static void SetFoldMarginMarkersColor(Color bgColor, Color fgColor, Color activeColor) {
             for (int i = 0; i < 7; i++) {
-                var marker = GetMarker(i + (int)SciMsg.SC_MARKNUM_FOLDEREND);
+                var marker = GetMarker(i + (int) SciMsg.SC_MARKNUM_FOLDEREND);
                 marker.SetBackColor(bgColor);
                 marker.SetForeColor(fgColor);
                 marker.SetBackSelectedColor(activeColor);
@@ -2954,7 +2950,7 @@ namespace _3PA {
             /// </summary>
             /// <returns>One of the MarginCursor enumeration values. The default is MarginCursor.Arrow.</returns>
             public MarginCursor Cursor {
-                get { return (MarginCursor)Sci.Send(SciMsg.SCI_GETMARGINCURSORN, new IntPtr(Index)); }
+                get { return (MarginCursor) Sci.Send(SciMsg.SCI_GETMARGINCURSORN, new IntPtr(Index)); }
                 set {
                     var cursor = (int) value;
                     Sci.Send(SciMsg.SCI_SETMARGINCURSORN, new IntPtr(Index), new IntPtr(cursor));
@@ -3842,12 +3838,11 @@ namespace _3PA {
 
             _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
             */
-            
-            var directFunctionPointer = Win32Api.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
+
+            var directFunctionPointer = Win32Api.SendMessage(_scintillaHandle, (int) SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
-            _directFunction = (Win32Api.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (Win32Api.Scintilla_DirectFunction));
-            _directMessagePointer = Win32Api.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
-            
+            _directFunction = (Win32Api.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof(Win32Api.Scintilla_DirectFunction));
+            _directMessagePointer = Win32Api.SendMessage(_scintillaHandle, (int) SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {

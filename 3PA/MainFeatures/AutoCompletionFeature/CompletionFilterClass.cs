@@ -1,14 +1,30 @@
-﻿using _3PA.MainFeatures.Parser;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (CompletionFilterClass.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
-
     /// <summary>
     /// This class is not a singleton (the constructor is public) but we use a static instance
     /// performances and handiness
     /// </summary>
     internal class CompletionFilterClass {
-
         #region private
 
         private int _currentLineNumber = -2;
@@ -33,7 +49,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Returns true if the conditions have changed
         /// </summary>
         public bool UpdateConditions(int currentLineNumber, bool dontCheckLine) {
-
             if (currentLineNumber != _currentLineNumber) {
                 _currentLineNumber = currentLineNumber;
                 _currrentScope = ParserHandler.GetScopeOfLine(currentLineNumber);
@@ -44,7 +59,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             return false;
         }
-
 
         /// <summary>
         /// if true, the item isn't filtered
@@ -76,7 +90,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     if (compData.ParsedItem is ParsedLabel)
                         output = output && _currentLineNumber <= ((ParsedLabel) compData.ParsedItem).UndefinedLine;
                 }
-
             } else if (compData.ParsedItem is ParsedPreProcVariable) {
                 if (_currentLineNumber >= 0) {
                     // if preproc, check line of definition and undefine
@@ -92,7 +105,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-        
     }
-
 }

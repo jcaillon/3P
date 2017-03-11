@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Security;
 using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
@@ -30,13 +29,11 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
-
     /// <summary>
     /// A control that allows you to display a list of items super efficiently,
     /// use SetItems to start
     /// </summary>
     public class YamuiScrollList : UserControl {
-
         #region constants
 
         /// <summary>
@@ -210,7 +207,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     _rows[_selectedRowIndex].Invalidate();
                 }
                 _selectedRowIndex = value;
-                if (0 <= _selectedRowIndex && _selectedRowIndex <_nbRowDisplayed) {
+                if (0 <= _selectedRowIndex && _selectedRowIndex < _nbRowDisplayed) {
                     _rows[_selectedRowIndex].IsSelected = true;
                     _rows[_selectedRowIndex].Invalidate();
                     _selectedItemIndex = _selectedRowIndex + TopIndex;
@@ -347,7 +344,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 if (_itemsLock.TryEnterWriteLock(-1)) {
                     try {
                         _items = value;
-                        _nbItems = _items == null ? 0 :_items.Count;
+                        _nbItems = _items == null ? 0 : _items.Count;
                     } finally {
                         _itemsLock.ExitWriteLock();
                     }
@@ -358,7 +355,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Get the number of items displayed in the list (after all filtering)
         /// </summary>
-        public int NbItems { get { return _nbItems; } }
+        public int NbItems {
+            get { return _nbItems; }
+        }
 
         #endregion
 
@@ -382,8 +381,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Triggered when the selected index changes
         /// </summary>
-        public event Action<YamuiScrollList> IndexChanged;        
-        
+        public event Action<YamuiScrollList> IndexChanged;
+
         /// <summary>
         /// Triggered when a row is clicked (no matter with which button)
         /// You can analyse the MouseEventArgs.Clicks number to know if it's a simple or
@@ -394,8 +393,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Triggered when the mouse moves on a row
         /// </summary>
-        public event Action<YamuiScrollList, MouseEventArgs> RowMouseMove;     
-   
+        public event Action<YamuiScrollList, MouseEventArgs> RowMouseMove;
+
         /// <summary>
         /// Triggered when the row hovered changes
         /// </summary>
@@ -436,7 +435,6 @@ namespace YamuiFramework.Controls.YamuiList {
         #region constructor
 
         public YamuiScrollList() {
-
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
@@ -498,12 +496,12 @@ namespace YamuiFramework.Controls.YamuiList {
             var foreColor = YamuiThemeManager.Current.MenuNormalFore;
             var textFont = FontManager.GetFont(FontStyle.Bold, 11);
             var textSize = TextRenderer.MeasureText(EmptyListString, textFont);
-            var drawPoint = new Point(_listRectangle.Left + _listRectangle.Width / 2 - textSize.Width / 2 - 1, _listRectangle.Top + _listRectangle.Height / 2 - textSize.Height / 2 - 1);
+            var drawPoint = new Point(_listRectangle.Left + _listRectangle.Width/2 - textSize.Width/2 - 1, _listRectangle.Top + _listRectangle.Height/2 - textSize.Height/2 - 1);
             using (var b = new SolidBrush(YamuiThemeManager.Current.MenuNormalBack)) {
                 e.Graphics.FillRectangle(b, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
             }
             TextRenderer.DrawText(e.Graphics, EmptyListString, textFont, drawPoint, foreColor);
-            using (var pen = new Pen(Color.FromArgb((int)(255 * 0.8), foreColor), 1) { Alignment = PenAlignment.Left }) {
+            using (var pen = new Pen(Color.FromArgb((int) (255*0.8), foreColor), 1) {Alignment = PenAlignment.Left}) {
                 e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
             }
         }
@@ -550,7 +548,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             _isSettingItems = false;
         }
-        
+
         #endregion
 
         #region DrawButtons
@@ -559,20 +557,17 @@ namespace YamuiFramework.Controls.YamuiList {
         /// This method just add the number of buttons required to display the list
         /// </summary>
         protected virtual void DrawButtons() {
-
             // we already display the right number of items?
-            if ((_nbRowDisplayed - 1) * RowHeight <= _listRectangle.Height && _listRectangle.Height <= _nbRowDisplayed * RowHeight)
+            if ((_nbRowDisplayed - 1)*RowHeight <= _listRectangle.Height && _listRectangle.Height <= _nbRowDisplayed*RowHeight)
                 return;
 
             // how many items should be displayed?
-            _nbRowDisplayed = _nbItems.ClampMax(_listRectangle.Height / RowHeight + 1);
+            _nbRowDisplayed = _nbItems.ClampMax(_listRectangle.Height/RowHeight + 1);
 
             // for each displayed item of the list
             for (int i = 0; i < _nbRowDisplayed; i++) {
-
                 // need to add button?
                 if (i >= _rows.Count) {
-
                     _rows.Add(new YamuiListRow {
                         Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
                         Name = i.ToString(),
@@ -580,9 +575,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         OnRowPaint = OnRowPaint
                     });
 
-                    _rows[i].KeyDown += (sender, args) => {
-                        OnKeyDown(args);
-                    };
+                    _rows[i].KeyDown += (sender, args) => { OnKeyDown(args); };
                     _rows[i].ButtonPressed += OnRowClick;
                     _rows[i].DoubleClick += OnRowClick;
                     _rows[i].MouseEnter += OnRowMouseEnter;
@@ -593,7 +586,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
 
                 _rows[i].Location = new Point(_listRectangle.Left, _listRectangle.Top + i*RowHeight);
-                _rows[i].Size = new Size(_listRectangle.Width - (HasScrolls ? ScrollWidth : 0), RowHeight.ClampMax(_listRectangle.Height - i * RowHeight));
+                _rows[i].Size = new Size(_listRectangle.Width - (HasScrolls ? ScrollWidth : 0), RowHeight.ClampMax(_listRectangle.Height - i*RowHeight));
                 _rows[i].IsSelected = i == SelectedRowIndex;
 
                 // add it to the visible controls
@@ -605,7 +598,6 @@ namespace YamuiFramework.Controls.YamuiList {
                 if (Controls.Contains(_rows[i]))
                     Controls.Remove(_rows[i]);
             }
-            
         }
 
         /// <summary>
@@ -613,10 +605,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         private void RefreshButtons() {
             if (_nbRowDisplayed > 0) {
-
                 // for each displayed item of the list
                 for (int i = 0; i < _nbRowDisplayed; i++) {
-
                     if (TopIndex + i > _nbItems - 1) {
                         _rows[i].Visible = false;
                     } else {
@@ -627,7 +617,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         if (!_rows[i].Visible)
                             _rows[i].Visible = true;
 
-                        _rows[i].Height = RowHeight.ClampMax(_listRectangle.Height - i * RowHeight);
+                        _rows[i].Height = RowHeight.ClampMax(_listRectangle.Height - i*RowHeight);
                     }
 
                     // repaint
@@ -676,8 +666,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected virtual void RowPaintSeparator(Graphics g, Rectangle drawRect) {
             using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.MenuNormalAltBack)) {
-                var width = (int)(drawRect.Width * 0.45);
-                g.FillRectangle(b, new Rectangle(drawRect.X, drawRect.Y + drawRect.Height / 2 - 2, width, 4));
+                var width = (int) (drawRect.Width*0.45);
+                g.FillRectangle(b, new Rectangle(drawRect.X, drawRect.Y + drawRect.Height/2 - 2, width, 4));
             }
         }
 
@@ -700,7 +690,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // mouse in scrollbar
             if (_scrollRectangle.Contains(mousePosRelativeToThis)) {
-
                 var thumbRect = _thumbRectangle;
                 thumbRect.X -= ThumbPadding;
                 thumbRect.Width += ThumbPadding*2;
@@ -765,7 +754,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void DoScroll(int delta) {
             //TopIndex += -Math.Sign(delta) * _nbRowFullyDisplayed / 2;
-            TopIndex += -Math.Sign(delta) * 3;
+            TopIndex += -Math.Sign(delta)*3;
         }
 
         /// <summary>
@@ -774,8 +763,8 @@ namespace YamuiFramework.Controls.YamuiList {
         protected void ThumbPosToTopIndex(int yPos) {
             yPos -= _scrollRectangle.Top;
             yPos = yPos.Clamp(ThumbPadding, _scrollRectangle.Height - ThumbPadding - _thumbRectangle.Height);
-            var percent = (yPos - ThumbPadding) / (float)(_scrollRectangle.Height - ThumbPadding * 2 - _thumbRectangle.Height);
-            var newTopIndex = (int) Math.Round(percent * (_nbItems - _nbRowFullyDisplayed));
+            var percent = (yPos - ThumbPadding)/(float) (_scrollRectangle.Height - ThumbPadding*2 - _thumbRectangle.Height);
+            var newTopIndex = (int) Math.Round(percent*(_nbItems - _nbRowFullyDisplayed));
             if (TopIndex != newTopIndex)
                 TopIndex = newTopIndex;
         }
@@ -787,7 +776,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (_nbRowFullyDisplayed >= _nbItems)
                 _thumbRectangle.Y = 0;
             else
-                _thumbRectangle.Y = _scrollRectangle.Top + ThumbPadding + (int)Math.Round((float)TopIndex / (_nbItems - _nbRowFullyDisplayed) * (_scrollRectangle.Height - ThumbPadding * 2 - _thumbRectangle.Height));
+                _thumbRectangle.Y = _scrollRectangle.Top + ThumbPadding + (int) Math.Round((float) TopIndex/(_nbItems - _nbRowFullyDisplayed)*(_scrollRectangle.Height - ThumbPadding*2 - _thumbRectangle.Height));
             Invalidate();
         }
 
@@ -803,10 +792,10 @@ namespace YamuiFramework.Controls.YamuiList {
             _scrollRectangle.X = _listRectangle.Left + _listRectangle.Width - _scrollRectangle.Width;
             _thumbRectangle.X = _listRectangle.Left + _listRectangle.Width - _scrollRectangle.Width + ThumbPadding;
 
-            _nbRowFullyDisplayed = (int)Math.Floor((decimal)_listRectangle.Height / RowHeight);
+            _nbRowFullyDisplayed = (int) Math.Floor((decimal) _listRectangle.Height/RowHeight);
 
             // if the content is not too tall, no need to display the scroll bars
-            if (_nbItems * RowHeight <= _listRectangle.Height) {
+            if (_nbItems*RowHeight <= _listRectangle.Height) {
                 foreach (var button in _rows) {
                     button.Width = _listRectangle.Width;
                 }
@@ -818,11 +807,10 @@ namespace YamuiFramework.Controls.YamuiList {
                 HasScrolls = true;
 
                 // thumb height is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = (int)((_scrollRectangle.Height - ThumbPadding * 2) * ((float)_nbRowFullyDisplayed / _nbItems));
+                _thumbRectangle.Height = (int) ((_scrollRectangle.Height - ThumbPadding*2)*((float) _nbRowFullyDisplayed/_nbItems));
                 if (_thumbRectangle.Height < MinThumbHeight)
                     _thumbRectangle.Height = MinThumbHeight;
             }
-
         }
 
         #endregion
@@ -844,7 +832,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected virtual void OnRowMouseEnter(object sender, EventArgs eventArgs) {
             IsHovered = true;
-            HotRow = int.Parse(((YamuiListRow)sender).Name);
+            HotRow = int.Parse(((YamuiListRow) sender).Name);
             if (MouseEnteredRow != null)
                 MouseEnteredRow(this);
         }
@@ -886,7 +874,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
             var pressedKey = e.KeyCode;
             switch (pressedKey) {
-
                 case Keys.Tab:
                     if (TabPressed != null) {
                         TabPressed(this, e);
@@ -913,7 +900,6 @@ namespace YamuiFramework.Controls.YamuiList {
                     ListItem newItem = null;
                     do {
                         switch (pressedKey) {
-
                             case Keys.Up:
                                 newIndex--;
                                 break;
@@ -1036,7 +1022,7 @@ namespace YamuiFramework.Controls.YamuiList {
         private void ComputeBaseRectangle() {
             _listRectangle = new Rectangle(ListPadding.Left, ListPadding.Top, Width - ListPadding.Horizontal, Height - ListPadding.Vertical);
             _scrollRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth, _listRectangle.Top, ScrollWidth, _listRectangle.Height);
-            _thumbRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth + ThumbPadding, _listRectangle.Top + ThumbPadding, ScrollWidth - ThumbPadding * 2, _listRectangle.Height - ThumbPadding * 2);
+            _thumbRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth + ThumbPadding, _listRectangle.Top + ThumbPadding, ScrollWidth - ThumbPadding*2, _listRectangle.Height - ThumbPadding*2);
         }
 
         /// <summary>
@@ -1047,7 +1033,7 @@ namespace YamuiFramework.Controls.YamuiList {
             DrawButtons();
 
             // reposition top index if needed (also refresh buttons and thumb)
-            TopIndex = TopIndex; 
+            TopIndex = TopIndex;
         }
 
         #endregion
@@ -1055,7 +1041,6 @@ namespace YamuiFramework.Controls.YamuiList {
         #region YamuiMenuButton
 
         public class YamuiListRow : YamuiButton {
-
             #region private
 
             private bool _acceptsAnyClick = true;
@@ -1110,11 +1095,8 @@ namespace YamuiFramework.Controls.YamuiList {
             }
 
             #endregion
-
         }
 
         #endregion
-
     }
-
 }

@@ -25,14 +25,12 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     /// <summary>
     /// This class displays items on a list o strings, next to each other
     /// each item is clickable and triggers the TabPressed event that provides
     /// the clicked index
     /// </summary>
     public class YamuiTabButtons : Button {
-
         #region Fields
 
         /// <summary>
@@ -56,6 +54,7 @@ namespace YamuiFramework.Controls {
             add { OnTabPressed += value; }
             remove { OnTabPressed -= value; }
         }
+
         private event EventHandler<TabPressedEventArgs> OnTabPressed;
 
         private bool _isHovered;
@@ -93,7 +92,7 @@ namespace YamuiFramework.Controls {
 
         #region Paint Methods
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             // background
@@ -133,8 +132,8 @@ namespace YamuiFramework.Controls {
                 // draw a | separator?
                 if (DrawSeparator && i != (_listOfButtons.Count - 1)) {
                     using (var pen = new Pen(YamuiThemeManager.Current.TabNormalFore, 1)) {
-                        var xPos = thisTabRekt.X + (WriteFromRight ? SpaceBetweenText / 2 : thisTabRekt.Width - SpaceBetweenText / 2);
-                        e.Graphics.DrawLine(pen, new Point(xPos, (int)(Height * 0.8)), new Point(xPos, Height - (int)(Height * 0.7)));
+                        var xPos = thisTabRekt.X + (WriteFromRight ? SpaceBetweenText/2 : thisTabRekt.Width - SpaceBetweenText/2);
+                        e.Graphics.DrawLine(pen, new Point(xPos, (int) (Height*0.8)), new Point(xPos, Height - (int) (Height*0.7)));
                     }
                 }
 
@@ -298,11 +297,11 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 
     public sealed class TabPressedEventArgs : EventArgs {
         public int SelectedIndex;
+
         public TabPressedEventArgs(int selectedIndex) {
             SelectedIndex = selectedIndex;
         }

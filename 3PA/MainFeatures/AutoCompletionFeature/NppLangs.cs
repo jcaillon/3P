@@ -1,13 +1,32 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (NppLangs.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Xml.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
     /// supported by npp; this file list the extensions for each lang as well as the keywords
@@ -16,17 +35,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
     internal class NppLangs {
-
         #region Singleton
 
         private static NppLangs _instance;
 
         public static NppLangs Instance {
             get {
-                if (_instance == null 
+                if (_instance == null
                     //|| Utils.HasFileChanged(Config.FileNppLangsXml) 
                     || Utils.HasFileChanged(Config.FileNppUserDefinedLang)
-                    || Utils.HasFileChanged(NppConfig.Instance.FileNppStylersPath)) {
+                    //|| Utils.HasFileChanged(NppConfig.Instance.FileNppStylersPath)
+                    ) {
                     _instance = new NppLangs();
                 }
                 return _instance;
@@ -58,22 +77,37 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // fill the dictionary extension -> lang name
 
             // from userDefinedLang.xml
-            FillNameDictionary(XDocument.Load(Config.FileNppUserDefinedLang).Descendants("UserLang").ToList(), true);
+            try {
+                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Config.FileNppUserDefinedLang)).RootNode.SubNodes, true);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e, "Error parsing " + Config.FileNppUserDefinedLang);
+            }
 
             // from langs.xml
-            FillNameDictionary(XDocument.Load(Config.FileNppLangsXml).Descendants("Language").ToList());
+            try {
+                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Config.FileNppLangsXml)).RootNode["Languages"].SubNodes);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e, "Error parsing " + Config.FileNppLangsXml);
+            }
 
             // from stylers.xml
-            FillNameDictionary(XDocument.Load(NppConfig.Instance.FileNppStylersPath).Descendants("LexerType").ToList());
+            try {
+                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(NppConfig.Instance.FileNppStylersPath)).RootNode["LexerStyles"].SubNodes);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e, "Error parsing " + NppConfig.Instance.FileNppStylersPath);
+            }
         }
 
-        private void FillNameDictionary(List<XElement> elements, bool fromUserDefinedLang = false) {
+        /// <summary>
+        /// fill the _langNames and _langDescriptions dictionaries
+        /// </summary>
+        private void FillDictionaries(List<NanoXmlNode> elements, bool fromUserDefinedLang = false) {
             foreach (var lang in elements) {
-                var nameAttr = lang.Attribute("name");
-                var extAttr = lang.Attribute("ext");
+                var nameAttr = lang.GetAttribute(@"name");
+                var extAttr = lang.GetAttribute(@"ext");
                 if (nameAttr != null && extAttr != null) {
                     if (!_langDescriptions.ContainsKey(nameAttr.Value)) {
-                        _langDescriptions.Add(nameAttr.Value, new LangDescription { LangName = nameAttr.Value, IsUserLang = fromUserDefinedLang });
+                        _langDescriptions.Add(nameAttr.Value, new LangDescription {LangName = nameAttr.Value, IsUserLang = fromUserDefinedLang});
                         foreach (var ext in extAttr.Value.Split(' ')) {
                             if (!_langNames.ContainsKey("." + ext))
                                 _langNames.Add("." + ext, nameAttr.Value);
@@ -94,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var langName = GetLangName(fileExtention);
             if (string.IsNullOrEmpty(langName) || !_langDescriptions.ContainsKey(langName))
                 return null;
-            return _langDescriptions[langName];
+            return _langDescriptions[langName].ReadApiFileIfNeeded();
         }
 
         /// <summary>
@@ -108,8 +142,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #region LangDescription
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal class LangDescription {
-
             private List<NppKeyword> _keywords;
 
             /// <summary>
@@ -118,122 +152,173 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             public string LangName { get; set; }
 
             /// <summary>
+            /// Language read from userDefinedLang.xml
+            /// </summary>
+            public bool IsUserLang { get; set; }
+
+            public string commentLine { get; set; }
+            public string commentStart { get; set; }
+            public string commentEnd { get; set; }
+            public string ignoreCase { get; set; }
+            public string startFunc { get; set; }
+            public string stopFunc { get; set; }
+            public string paramSeparator { get; set; }
+            public string terminal { get; set; }
+            public string additionalWordChar { get; set; }
+            public char[] AdditionalWordChar { get; set; }
+
+            /// <summary>
             /// A list of keywords for the language
             /// </summary>
             public List<NppKeyword> Keywords {
-                get {
-                    var apiFilePath = Path.Combine(Config.FolderNppAutocompApis, LangName + ".xml");
-                    if (_keywords != null 
-                        && !Utils.HasFileChanged(apiFilePath)
-                        && (!IsUserLang || !Utils.HasFileChanged(Config.FileNppUserDefinedLang)))
-                        return _keywords;
+                get { return _keywords; }
+            }
 
-                    _keywords = new List<NppKeyword>();
-                    var uniqueKeywords = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+            /// <summary>
+            /// Returns this after checking if we need to read the Api xml file for this language
+            /// </summary>
+            public LangDescription ReadApiFileIfNeeded() {
+                var apiFilePath = Path.Combine(Config.FolderNppAutocompApis, LangName + ".xml");
+                if (_keywords != null
+                    && !Utils.HasFileChanged(apiFilePath)
+                    && (!IsUserLang || !Utils.HasFileChanged(Config.FileNppUserDefinedLang)))
+                    return this;
 
-                    // get keywords from plugins/Apis/
-                    // FORMAT :
-                    // <AutoComplete language="C++">
-                    //    <Environment ignoreCase="no" startFunc="(" stopFunc=")" paramSeparator="," terminal=";" additionalWordChar = "."/>
-                    //    <KeyWord name="abs" func="yes">
-                    //        <Overload retVal="int" descr="Returns absolute value of given integer">
-                    //            <Param name="int number" />
-                    //        </Overload>
-                    //    </KeyWord>
-                    // </AutoComplete>
-                    try {
-                        if (File.Exists(apiFilePath))
-                            foreach (var keywordElmt in XDocument.Load(apiFilePath).Descendants("KeyWord")) {
-                                var attr = keywordElmt.Attribute("name");
-                                if (attr == null)
-                                    continue;
-                                var keyword = attr.Value;
+                _keywords = new List<NppKeyword>();
+                var uniqueKeywords = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
-                                if (!uniqueKeywords.Contains(keyword)) {
-                                    uniqueKeywords.Add(keyword);
-                                    List<NppKeyword.NppOverload> overloads = null;
-                                    foreach (var overload in keywordElmt.Descendants("Overload")) {
-                                        if (overloads == null)
-                                            overloads = new List<NppKeyword.NppOverload>();
-                                        var xAttribute = overload.Attribute("retVal");
-                                        var retVal = xAttribute != null ? xAttribute.Value : string.Empty;
-                                        xAttribute = overload.Attribute("descr");
-                                        var descr = xAttribute != null ? xAttribute.Value : string.Empty;
-                                        var parameters = new List<string>();
-                                        foreach (var para in overload.Descendants("Param")) {
-                                            var attrname = para.Attribute("name");
-                                            if (attrname == null)
-                                                continue;
-                                            parameters.Add(attrname.Value);
-                                        }
-                                        overloads.Add(new NppKeyword.NppOverload {
-                                            ReturnValue = retVal,
-                                            Description = descr,
-                                            Params = parameters
-                                        });
+                // get keywords from plugins/Apis/
+                // FORMAT :
+                // <AutoComplete language="C++">
+                //    <Environment ignoreCase="no" startFunc="(" stopFunc=")" paramSeparator="," terminal=";" additionalWordChar = "."/>
+                //    <KeyWord name="abs" func="yes">
+                //        <Overload retVal="int" descr="Returns absolute value of given integer">
+                //            <Param name="int number" />
+                //        </Overload>
+                //    </KeyWord>
+                // </AutoComplete>
+                try {
+                    if (File.Exists(apiFilePath)) {
+                        var xml = new NanoXmlDocument(Utils.ReadAllText(apiFilePath));
+                        foreach (var keywordElmt in xml.RootNode["AutoComplete"].SubNodes.Where(node => node.Name.Equals("KeyWord"))) {
+                            var attr = keywordElmt.GetAttribute("name");
+                            if (attr == null)
+                                continue;
+                            var keyword = attr.Value;
+
+                            if (!uniqueKeywords.Contains(keyword)) {
+                                uniqueKeywords.Add(keyword);
+                                List<NppKeyword.NppOverload> overloads = null;
+                                foreach (var overload in keywordElmt.SubNodes.Where(node => node.Name.Equals("Overload"))) {
+                                    if (overloads == null)
+                                        overloads = new List<NppKeyword.NppOverload>();
+                                    var xAttribute = overload.GetAttribute("retVal");
+                                    var retVal = xAttribute != null ? xAttribute.Value : string.Empty;
+                                    xAttribute = overload.GetAttribute("descr");
+                                    var descr = xAttribute != null ? xAttribute.Value : string.Empty;
+                                    var parameters = new List<string>();
+                                    foreach (var para in overload.SubNodes.Where(node => node.Name.Equals("Param"))) {
+                                        var attrname = para.GetAttribute("name");
+                                        if (attrname == null)
+                                            continue;
+                                        parameters.Add(attrname.Value);
                                     }
-
-                                    _keywords.Add(new NppKeyword {
-                                        Name = keyword,
-                                        Overloads = overloads
+                                    overloads.Add(new NppKeyword.NppOverload {
+                                        ReturnValue = retVal,
+                                        Description = descr,
+                                        Params = parameters
                                     });
                                 }
+
+                                _keywords.Add(new NppKeyword {
+                                    Name = keyword,
+                                    Overloads = overloads,
+                                    Origin = NppKeywordOrigin.AutoCompApiXml
+                                });
                             }
-                    } catch (Exception) {
-                        // ignored
+                        }
+
+                        // get other info on the language
+                        var envElement = xml.RootNode["AutoComplete"]["Environment"];
+                        if (envElement != null) {
+                            LoadFromAttributes(this, envElement);
+                            if (!string.IsNullOrEmpty(additionalWordChar))
+                                AdditionalWordChar = additionalWordChar.ToArray();
+                        }
                     }
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e, "Error parsing " + apiFilePath);
+                }
 
-                    // get core keywords from langs.xml or userDefinedLang.xml
+                // get core keywords from langs.xml or userDefinedLang.xml
+
+                if (IsUserLang) {
                     try {
-                        if (IsUserLang) {
-
+                        var langElement = new NanoXmlDocument(Utils.ReadAllText(Config.FileNppUserDefinedLang)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
+                        if (langElement != null) {
                             // get the list of keywords from userDefinedLang.xml
-                            var langElement = XDocument.Load(Config.FileNppUserDefinedLang).Descendants("UserLang").FirstOrDefault(x => x.Attribute("name").Value.EqualsCi(LangName));
-                            if (langElement != null)
-                                foreach (var descendant in langElement.Descendants("Keywords")) {
-                                    var xAttribute = descendant.Attribute(@"name");
-                                    if (xAttribute != null && xAttribute.Value.ToLower().StartsWith("keywords"))
-                                        foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
-                                            if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
-                                                uniqueKeywords.Add(keyword);
-                                                _keywords.Add(new NppKeyword {
-                                                    Name = keyword
-                                                });
-                                            }
-                                        }
-                                }
-                        } else {
-
-                            // get the list of keywords from langs.xml
-                            var langElement = XDocument.Load(Config.FileNppLangsXml).Descendants("Language").FirstOrDefault(x => x.Attribute("name").Value.EqualsCi(LangName));
-                            if (langElement != null)
-                                foreach (var descendant in langElement.Descendants("Keywords")) {
-                                    foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
+                            foreach (var descendant in langElement["KeywordLists"].SubNodes) {
+                                var xAttribute = descendant.GetAttribute(@"name");
+                                if (xAttribute != null && xAttribute.Value.StartsWith("keywords", StringComparison.CurrentCultureIgnoreCase)) {
+                                    foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
                                             _keywords.Add(new NppKeyword {
-                                                Name = keyword
+                                                Name = keyword,
+                                                Origin = NppKeywordOrigin.UserLangXml
                                             });
                                         }
                                     }
                                 }
+                            }
                         }
-                    } catch (Exception) {
-                        // ignored
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e, "Error parsing " + Config.FileNppUserDefinedLang);
                     }
+                } else {
+                    try {
+                        var langElement = new NanoXmlDocument(Utils.ReadAllText(Config.FileNppLangsXml)).RootNode["Languages"].SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
+                        if (langElement != null) {
+                            // get the list of keywords from langs.xml
+                            foreach (var descendant in langElement.SubNodes) {
+                                foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
+                                    if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
+                                        uniqueKeywords.Add(keyword);
+                                        _keywords.Add(new NppKeyword {
+                                            Name = keyword,
+                                            Origin = NppKeywordOrigin.LangsXml
+                                        });
+                                    }
+                                }
+                            }
 
-                    return _keywords;
+                            // get other info on the language (comentLine, commentStart, commentEnd)
+                            LoadFromAttributes(this, langElement);
+                        }
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e, "Error parsing " + Config.FileNppLangsXml);
+                    }
                 }
+
+                return this;
             }
 
-            public char[] AdditionalWordChar { get; set; }
+            private void LoadFromAttributes(LangDescription item, NanoXmlNode itemElement) {
+                var properties = typeof(LangDescription).GetProperties();
 
-            /// <summary>
-            /// Language read from userDefinedLang.xml
-            /// </summary>
-            public bool IsUserLang { get; set; }
+                /* loop through fields */
+                foreach (var property in properties) {
+                    if (property.PropertyType == typeof(string)) {
+                        var attr = itemElement.GetAttribute(property.Name);
+                        if (attr != null) {
+                            var val = TypeDescriptor.GetConverter(property.PropertyType).ConvertFromInvariantString(attr.Value);
+                            property.SetValue(item, val, null);
+                        }
+                    }
+                }
+            }
         }
-        
+
         #endregion
 
         #region NppKeyword
@@ -243,6 +328,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         internal class NppKeyword {
             public string Name { get; set; }
+            public NppKeywordOrigin Origin { get; set; }
             public List<NppOverload> Overloads { get; set; }
 
             internal class NppOverload {
@@ -252,8 +338,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
         }
 
+        internal enum NppKeywordOrigin {
+            LangsXml,
+            UserLangXml,
+            AutoCompApiXml
+        }
+
         #endregion
-
-
     }
 }

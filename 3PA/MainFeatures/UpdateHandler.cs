@@ -31,18 +31,17 @@ using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 
 namespace _3PA.MainFeatures {
-
     /// <summary>
     /// Handles the update of this software
     /// </summary>
     internal static class UpdateHandler {
-
         #region fields
 
         /// <summary>
         /// Holds the info about the latest release found on the distant update server
         /// </summary>
         private static ReleaseInfo _latestReleaseInfo;
+
         private static ReccurentAction _checkEveryHourAction;
 
         private static volatile bool _isChecking;
@@ -58,10 +57,8 @@ namespace _3PA.MainFeatures {
         /// check if an update has been done since the last time notepad was closed
         /// </summary>
         public static void CheckForUpdateDone() {
-
             // an update has been done
             if (File.Exists(Config.FileVersionLog)) {
-
                 // The dll is still in the update dir, something went wrong
                 if (File.Exists(Config.FileDownloadedPlugin)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
@@ -81,7 +78,7 @@ namespace _3PA.MainFeatures {
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok" },
+                    new List<string> {"ok"},
                     false);
 
                 // delete update related files/folders
@@ -95,7 +92,6 @@ namespace _3PA.MainFeatures {
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
                     Style.InstallUdl();
             }
-
         }
 
         /// <summary>
@@ -107,7 +103,7 @@ namespace _3PA.MainFeatures {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(true);
-            }, 1000 * 60 * 120);
+            }, 1000*60*120);
         }
 
         /// <summary>
@@ -116,9 +112,7 @@ namespace _3PA.MainFeatures {
         public static void CheckForUpdate() {
             if (!Utils.IsSpamming("updates", 1000)) {
                 UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
-                Task.Factory.StartNew(() => {
-                    CheckForUpdate(false);
-                });
+                Task.Factory.StartNew(() => { CheckForUpdate(false); });
             }
         }
 
@@ -126,7 +120,6 @@ namespace _3PA.MainFeatures {
         /// Gets an object with the latest release info
         /// </summary>
         public static void CheckForUpdate(bool periodicCheck) {
-
             _displayResultNotif = !periodicCheck;
 
             if (_isChecking)
@@ -142,9 +135,7 @@ namespace _3PA.MainFeatures {
                 var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi) {
                     TimeOut = 3000
                 };
-                wb.OnInitHttpWebRequest += request => {
-                    request.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
-                };
+                wb.OnInitHttpWebRequest += request => { request.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"); };
                 wb.OnRequestEnded += WbOnOnRequestEnded;
                 wb.Execute();
             } catch (Exception e) {
@@ -164,15 +155,13 @@ namespace _3PA.MainFeatures {
                     // get the releases
                     var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
                     if (releases != null && releases.Count > 0) {
-
                         // sort
                         releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
-                    
+
                         var localVersion = AssemblyInfo.Version;
                         var outputBody = new StringBuilder();
                         foreach (var release in releases) {
-
-                            if (string.IsNullOrEmpty(release.tag_name)) 
+                            if (string.IsNullOrEmpty(release.tag_name))
                                 continue;
 
                             // For each version higher than the local one, append to the release body
@@ -180,7 +169,6 @@ namespace _3PA.MainFeatures {
                             if (release.tag_name.IsHigherVersionThan(localVersion) &&
                                 (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || !release.prerelease) &&
                                 release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(Config.FileGitHubAssetName))) {
-
                                 // in case something is undefined (but shouldn't happen)
                                 if (string.IsNullOrEmpty(release.tag_name)) release.tag_name = "vX.X.X.X";
                                 if (string.IsNullOrEmpty(release.name)) release.name = "unknown";
@@ -200,7 +188,6 @@ namespace _3PA.MainFeatures {
 
                         // There is a distant version higher than the local one
                         if (_latestReleaseInfo != null) {
-                            
                             // to display all the release notes
                             _latestReleaseInfo.body = outputBody.ToString();
 
@@ -209,15 +196,13 @@ namespace _3PA.MainFeatures {
 
                             Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(Config.FileGitHubAssetName)).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
                             return;
-                        } 
-                        
+                        }
+
                         if (_displayResultNotif) {
                             UserCommunication.NotifyUnique("UpdateChecked", "Congratulations! You already possess the latest <b>" + (!AssemblyInfo.IsPreRelease ? "stable" : "beta") + "</b> version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version, null);
                         }
                     }
-
                 } else {
-
                     // failed to retrieve the list
                     if (_displayResultNotif || Config.Instance.LastCheckUpdateOk)
                         UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on GITHUB.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessful, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach GITHUB", "Connection failed", null);
@@ -226,17 +211,14 @@ namespace _3PA.MainFeatures {
 
                     // check if there is an update available in the Shared config folder
                     if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
-
                         var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
 
                         // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
                         if (File.Exists(potentialUpdate) &&
                             Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
                             (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
-
                             // copy to local update folder and warn the user 
                             if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
-
                                 _latestReleaseInfo = new ReleaseInfo {
                                     name = "Updated from shared directory",
                                     tag_name = Utils.GetDllVersion(Config.FileDownloadedPlugin),
@@ -275,10 +257,8 @@ namespace _3PA.MainFeatures {
             try {
                 // Extract the .zip file
                 if (Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
-
                     // check the presence of the plugin file
                     if (File.Exists(Config.FileDownloadedPlugin)) {
-
                         // set up the update so the .dll file downloaded replaces the current .dll
                         _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
 
@@ -291,11 +271,9 @@ namespace _3PA.MainFeatures {
                         Utils.FileWriteAllText(Config.FileVersionLog, _latestReleaseInfo.body, Encoding.Default);
 
                         NotifyUpdateAvailable();
-                    
                     } else {
                         Utils.DeleteDirectory(Config.FolderUpdate, true);
                     }
-
                 } else {
                     UserCommunication.Notify("I failed to unzip the following file : <br>" + Config.FileLatestReleaseZip + "<br>It contains the update for 3P, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
                 }
@@ -307,7 +285,6 @@ namespace _3PA.MainFeatures {
 
         private static void NotifyUpdateAvailable() {
             if (_latestReleaseInfo != null) {
-
                 _updateAvailableOnRestart = true;
 
                 UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
@@ -319,13 +296,12 @@ namespace _3PA.MainFeatures {
                     Distant version: <b>" + _latestReleaseInfo.tag_name + @"</b><br>
                     Release name: <b>" + _latestReleaseInfo.name + @"</b><br>
                     Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
-                    "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink()+ @"</b><br>" +
-                    (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
+                                                                  "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
+                                                                  (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
+                                                                  (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
                 // stop checking for more updates :)
                 _checkEveryHourAction.Dispose();
-
             }
             _isChecking = false;
         }
@@ -333,7 +309,6 @@ namespace _3PA.MainFeatures {
         #endregion
 
         #region ReleaseInfo
-
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public class Asset {
@@ -365,6 +340,7 @@ namespace _3PA.MainFeatures {
             /// Release name
             /// </summary>
             public string name { get; set; }
+
             public bool prerelease { get; set; }
             public string published_at { get; set; }
             public List<Asset> assets { get; set; }
@@ -376,7 +352,5 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
-
 }

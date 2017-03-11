@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +26,6 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     //TODO: pour gérer les HANDLE attribute, ajouter une colonne aux keywords qui peut soit être vide soit contenir une liste de nombres qui correspondent à un id de handle:
     // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont 1 dans la 5eme colonne
 
@@ -35,16 +33,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// this class handles the static keywords of progress
     /// </summary>
     internal static class Keywords {
-
         #region fields
 
         // Dictionnay of id -> keyword
-        private static Dictionary<string, KeywordDefinition> _keywordList = new Dictionary<string, KeywordDefinition>(); 
+        private static Dictionary<string, KeywordDefinition> _keywordList = new Dictionary<string, KeywordDefinition>();
         private static Dictionary<string, KeywordHelp> _help = new Dictionary<string, KeywordHelp>(StringComparer.CurrentCultureIgnoreCase);
         private static List<KeywordAbbreviation> _abbreviations = new List<KeywordAbbreviation>();
 
         #endregion
-        
+
         #region Import / Export
 
         /// <summary>
@@ -75,8 +72,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         });
                     }
                 }
-            }, 
-            Encoding.Default);
+            },
+                Encoding.Default);
 
             // reads keywords rank
             Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], (i, line) => {
@@ -87,8 +84,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         _keywordList[items[0]].Ranking = val;
                     }
                 }
-            }, 
-            Encoding.Default);
+            },
+                Encoding.Default);
 
             // reads abbreviations
             _abbreviations.Clear();
@@ -100,8 +97,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         ShortText = items[0]
                     });
                 }
-            }, 
-            Encoding.Default);
+            },
+                Encoding.Default);
 
             // reads keywords help
             _help.Clear();
@@ -117,8 +114,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         Synthax = listSynthax
                     });
                 }
-            }, 
-            Encoding.Default);
+            },
+                Encoding.Default);
         }
 
         /// <summary>
@@ -174,13 +171,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
     }
 
     internal class KeywordDefinition {
         public string DisplayText { get; set; }
         public CompletionType Type { get; set; }
-        public int Ranking{ get; set; }
+        public int Ranking { get; set; }
         public KeywordType KeywordType { get; set; }
         public ParseFlag Flag { get; set; }
     }
@@ -219,5 +215,4 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public string Description;
         public List<string> Synthax;
     }
-
 }

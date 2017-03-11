@@ -19,28 +19,27 @@
 #endregion
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using _3PA.Interop;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
-
     /// <summary>
-    /// For every scintilla message that involves a position, the exepect position (expected by scintilla) is the
+    /// For every scintilla message that involves a position, the expect position (expected by scintilla) is the
     /// BYTE position, not the CHAR position (as anyone would assume at first!)
-    /// This class enables you to easily get the correspondance between a BYTE position and a CHAR position,
+    /// This class enables you to easily get the correspondence between a BYTE position and a CHAR position,
     /// it keeps tracks of inserted/deleted lines and register each line's start position, this
     /// information allows us to quickly convert BYTE to CHAR position and vice-versa
     /// </summary>
     internal class DocumentLines {
-
         #region Fields
 
         /// <summary>
         /// This is basically an array of int (except that we don't a List or Array, see GapBuffer for more details)
         /// We store the starting CHAR position of each line of the document 
         /// A line's length is calculated by subtracting its start position from the start of the following line
-        /// thus, a 'phantom' line is added at the end of the document so we can know the lenght of the last line as well
+        /// thus, a 'phantom' line is added at the end of the document so we can know the length of the last line as well
         /// </summary>
         private GapBuffer<int> _linesList;
 
@@ -48,12 +47,13 @@ namespace _3PA.Lib {
         private bool _oneByteCharEncoding;
 
         /// <summary>
-        /// When we insert/delete 1 or x char in a given line, we don't want to immediatly update the 
-        /// starting char position of all the following lines (because adding 1 char is called everytime we press
+        /// When we insert/delete 1 or x char in a given line, we don't want to immediately update the 
+        /// starting char position of all the following lines (because adding 1 char is called every time we press
         /// a key!!), so instead we allow to have a 'hole' in our lines info, we remember on which the hole is
-        /// and its lenght, so we can compute everything accordingdly
+        /// and its length, so we can compute everything accordingly
         /// </summary>
         private int _holeLine;
+
         private int _holeLenght;
 
         #endregion
@@ -76,7 +76,7 @@ namespace _3PA.Lib {
         /// </summary>
         public void OnScnModified(SCNotification scn, bool isInsertion) {
             _lastEncoding = Npp.Encoding;
-            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
+            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default) && !Config.IsDevelopper;
 
             // bypass the hard work for simple encoding
             if (_oneByteCharEncoding)
@@ -86,7 +86,7 @@ namespace _3PA.Lib {
                 OnInsertedText(scn);
             } else {
                 OnDeletedText(scn);
-            } 
+            }
         }
 
         /// <summary>
@@ -94,21 +94,14 @@ namespace _3PA.Lib {
         /// (when switching document for instance)
         /// </summary>
         internal void Reset() {
-            _lastEncoding = Npp.Encoding;
-            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
-
-            // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
-                return;
-
-            _linesList = new GapBuffer<int> { 0, 0 };
+            _linesList = new GapBuffer<int> {0, 0};
             var scn = new SCNotification {
                 linesAdded = SciGetLineCount() - 1,
                 position = 0,
                 length = SciGetLength()
             };
             scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
-            OnInsertedText(scn);
+            OnScnModified(scn, true);
         }
 
         /// <summary>
@@ -162,13 +155,14 @@ namespace _3PA.Lib {
                 SetHoleInLine(startLine + scn.linesAdded, insCharLenght);
                 FillTheHole();
 
-                // We should not have a null lenght, but we actually can :
+                // We should not have a null length, but we actually can :
                 // when a file is modified outside npp, npp suggests to reload it, a modified notification is sent
                 // but is it sent BEFORE the text is actually put into scintilla! So what we do here doesn't work at all
-                // so in that case, we need to refresh the info when the text is acutally inserted, that is after updateui
-                if (TextLength == 0) {
+                // so in that case, we need to refresh the info when the text is actually inserted, that is after updateui
+                // Clarification : the notification sent is correct (nb lines > 0 and length is ok as well), but calling SciLineLength
+                // will always return 0 at this moment!
+                if (TextLength == 0)
                     Plug.ActionsAfterUpdateUi.Enqueue(Reset);
-                }
             }
         }
 
@@ -192,7 +186,8 @@ namespace _3PA.Lib {
         /// </summary>
         private void FillTheHole() {
             // is there even a hole?
-            if (_holeLenght == 0) return;
+            if (_holeLenght == 0)
+                return;
             var totalNbLines = _linesList.Count;
             for (int i = _holeLine + 1; i < totalNbLines; i++) {
                 _linesList[i] += _holeLenght;
@@ -214,7 +209,7 @@ namespace _3PA.Lib {
                 if (_oneByteCharEncoding)
                     return SciGetLineCount();
 
-                return (_linesList.Count - 1);
+                return _linesList.Count - 1;
             }
         }
 
@@ -236,6 +231,9 @@ namespace _3PA.Lib {
         /// this is THE method of this class (since it is the only info we keep on the lines!)
         /// </summary>
         public int CharPositionFromLine(int index) {
+            if (index == 0)
+                return 0;
+
             // bypass the hard work for simple encoding
             if (_oneByteCharEncoding)
                 return SciPositionFromLine(index);
@@ -249,7 +247,26 @@ namespace _3PA.Lib {
                         return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
-                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress);
+                    if (Config.IsDevelopper) {
+                        var outText = new StringBuilder();
+                        var sciTotalLines = SciGetLineCount();
+                        var calcTotalLines = _linesList.Count;
+                        var sciCurPos = 0;
+                        for (int i = 0; i < sciTotalLines; i++) {
+                            outText.Append(sciCurPos);
+                            sciCurPos += SciLineLength(i);
+                            outText.Append("\t");
+                            outText.Append(i < calcTotalLines ? PrivateCharPositionFromLine(i).ToString() : "?");
+                            outText.AppendLine();
+                        }
+                        outText.AppendLine();
+                        outText.Append("FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress + ", nbLines = " + sciTotalLines);
+                        var path = Path.Combine(Config.FolderLog, "doclines_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss_") + ".log");
+                        Utils.FileWriteAllText(path, outText.ToString());
+                        UserCommunication.Notify(path.ToHtmlLink());
+                        Debug.Assert(false);
+                    }
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress + ", realNbLines = " + SciGetLineCount());
                 }
                 return SciPositionFromLine(index);
             }
@@ -289,7 +306,7 @@ namespace _3PA.Lib {
             var low = 0;
             var high = Count - 1;
             while (low <= high) {
-                var mid = low + ((high - low) / 2);
+                var mid = low + ((high - low)/2);
                 var start = CharPositionFromLine(mid);
                 if (pos == start)
                     return mid;
@@ -334,7 +351,7 @@ namespace _3PA.Lib {
             // bypass the hard work for simple encoding
             if (_oneByteCharEncoding)
                 return pos;
-            
+
             var line = SciLineFromPosition(pos);
             var byteStart = SciPositionFromLine(line);
             var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
@@ -412,13 +429,10 @@ namespace _3PA.Lib {
         private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
             if (text == IntPtr.Zero || length == 0)
                 return 0;
-            var count = encoding.GetCharCount((byte*)text, length);
+            var count = encoding.GetCharCount((byte*) text, length);
             return count;
         }
 
         #endregion
-
     }
 }
-
-

@@ -19,13 +19,11 @@
 #endregion
 using System;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities {
     /// <summary>
     ///     Represents an ordered pair of floating-point x- and y-coordinates that defines a point in a two-dimensional plane.
     /// </summary>
-    public struct RPoint
-    {
+    public struct RPoint {
         /// <summary>
         ///     Represents a new instance of the <see cref="RPoint" /> class with member data left uninitialized.
         /// </summary>
@@ -35,16 +33,14 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         private double _x;
         private double _y;
 
-        static RPoint()
-        { }
+        static RPoint() {}
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RPoint" /> class with the specified coordinates.
         /// </summary>
         /// <param name="x">The horizontal position of the point. </param>
         /// <param name="y">The vertical position of the point. </param>
-        public RPoint(double x, double y)
-        {
+        public RPoint(double x, double y) {
             _x = x;
             _y = y;
         }
@@ -59,8 +55,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     are 0; otherwise, false.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public bool IsEmpty
-        {
+        public bool IsEmpty {
             get {
                 if (Math.Abs(_x - 0.0) < 0.001)
                     return Math.Abs(_y - 0.0) < 0.001;
@@ -75,8 +70,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The x-coordinate of this <see cref="RPoint" />.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public double X
-        {
+        public double X {
             get { return _x; }
             set { _x = value; }
         }
@@ -88,8 +82,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The y-coordinate of this <see cref="RPoint" />.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public double Y
-        {
+        public double Y {
             get { return _y; }
             set { _y = value; }
         }
@@ -112,8 +105,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         cref="RPoint" />
         ///     .
         /// </param>
-        public static RPoint operator +(RPoint pt, RSize sz)
-        {
+        public static RPoint operator +(RPoint pt, RSize sz) {
             return Add(pt, sz);
         }
 
@@ -135,8 +127,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         name="pt" />
         ///     .
         /// </param>
-        public static RPoint operator -(RPoint pt, RSize sz)
-        {
+        public static RPoint operator -(RPoint pt, RSize sz) {
             return Subtract(pt, sz);
         }
 
@@ -190,8 +181,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     A <see cref="RPoint" /> to compare.
         /// </param>
         /// <filterpriority>3</filterpriority>
-        public static bool operator !=(RPoint left, RPoint right)
-        {
+        public static bool operator !=(RPoint left, RPoint right) {
             return !(left == right);
         }
 
@@ -213,8 +203,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         name="pt" />
         ///     .
         /// </param>
-        public static RPoint Add(RPoint pt, RSize sz)
-        {
+        public static RPoint Add(RPoint pt, RSize sz) {
             return new RPoint(pt.X + sz.Width, pt.Y + sz.Height);
         }
 
@@ -233,8 +222,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///         name="pt" />
         ///     .
         /// </param>
-        public static RPoint Subtract(RPoint pt, RSize sz)
-        {
+        public static RPoint Subtract(RPoint pt, RSize sz) {
             return new RPoint(pt.X - sz.Width, pt.Y - sz.Height);
         }
 
@@ -254,11 +242,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     The <see cref="T:System.Object" /> to test.
         /// </param>
         /// <filterpriority>1</filterpriority>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             if (!(obj is RPoint))
                 return false;
-            var pointF = (RPoint)obj;
+            var pointF = (RPoint) obj;
             if (pointF.X == X && pointF.Y == Y)
                 return pointF.GetType().Equals(GetType());
             return false;
@@ -271,8 +258,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     An integer value that specifies a hash value for this <see cref="RPoint" /> structure.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return base.GetHashCode();
         }
 
@@ -283,10 +269,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters.Entities
         ///     A string that represents this <see cref="RPoint" />.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public override string ToString()
-        {
-            return string.Format("{{X={0}, Y={1}}}", new object[]
-            {
+        public override string ToString() {
+            return string.Format("{{X={0}, Y={1}}}", new object[] {
                 _x,
                 _y
             });

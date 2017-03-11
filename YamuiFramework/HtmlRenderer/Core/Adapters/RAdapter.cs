@@ -26,8 +26,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Handlers;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Adapters
-{
+namespace YamuiFramework.HtmlRenderer.Core.Adapters {
     /// <summary>
     /// Platform adapter to bridge platform specific objects to HTML Renderer core library.<br/>
     /// Core uses abstract renderer objects (RAdapter/RControl/REtc...) to access platform specific functionality, the concrete platforms 
@@ -41,8 +40,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
     /// It is best to have a singleton instance of this class for concrete implementation!<br/>
     /// This is because it holds caches of default CssData, Images, Fonts and Brushes.
     /// </remarks>
-    public abstract class RAdapter
-    {
+    public abstract class RAdapter {
         #region Fields/Consts
 
         /// <summary>
@@ -77,20 +75,17 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
 
         #endregion
 
-
         /// <summary>
         /// Init.
         /// </summary>
-        protected RAdapter()
-        {
+        protected RAdapter() {
             _fontsHandler = new FontsHandler(this);
         }
 
         /// <summary>
         /// Get the default CSS stylesheet data.
         /// </summary>
-        public CssData DefaultCssData
-        {
+        public CssData DefaultCssData {
             get { return _defaultCssData ?? (_defaultCssData = CssData.Parse(this, CssDefaults.DefaultStyleSheet, false)); }
         }
 
@@ -99,8 +94,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="colorName">the color name</param>
         /// <returns>color value</returns>
-        public RColor GetColor(string colorName)
-        {
+        public RColor GetColor(string colorName) {
             ArgChecker.AssertArgNotNullOrEmpty(colorName, "colorName");
             return GetColorInt(colorName);
         }
@@ -110,11 +104,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="color">the color to get pen for</param>
         /// <returns>pen instance</returns>
-        public RPen GetPen(RColor color)
-        {
+        public RPen GetPen(RColor color) {
             RPen pen;
-            if (!_penCache.TryGetValue(color, out pen))
-            {
+            if (!_penCache.TryGetValue(color, out pen)) {
                 _penCache[color] = pen = CreatePen(color);
             }
             return pen;
@@ -125,11 +117,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="color">the color to get brush for</param>
         /// <returns>brush instance</returns>
-        public RBrush GetSolidBrush(RColor color)
-        {
+        public RBrush GetSolidBrush(RColor color) {
             RBrush brush;
-            if (!_brushesCache.TryGetValue(color, out brush))
-            {
+            if (!_brushesCache.TryGetValue(color, out brush)) {
                 _brushesCache[color] = brush = CreateSolidBrush(color);
             }
             return brush;
@@ -143,8 +133,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="color2">the end color of the gradient</param>
         /// <param name="angle">the angle to move the gradient from start color to end color in the rectangle</param>
         /// <returns>linear gradient color brush instance</returns>
-        public RBrush GetLinearGradientBrush(RRect rect, RColor color1, RColor color2, double angle)
-        {
+        public RBrush GetLinearGradientBrush(RRect rect, RColor color1, RColor color2, double angle) {
             return CreateLinearGradientBrush(rect, color1, color2, angle);
         }
 
@@ -153,8 +142,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="image">the image returned from load event</param>
         /// <returns>converted image or null</returns>
-        public RImage ConvertImage(object image)
-        {
+        public RImage ConvertImage(object image) {
             // TODO:a remove this by creating better API.
             return ConvertImageInt(image);
         }
@@ -164,8 +152,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="memoryStream">the stream to create image from</param>
         /// <returns>new image instance</returns>
-        public RImage ImageFromStream(Stream memoryStream)
-        {
+        public RImage ImageFromStream(Stream memoryStream) {
             return ImageFromStreamInt(memoryStream);
         }
 
@@ -174,8 +161,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="font">the font name to check</param>
         /// <returns>true - font exists by given family name, false - otherwise</returns>
-        public bool IsFontExists(string font)
-        {
+        public bool IsFontExists(string font) {
             return _fontsHandler.IsFontExists(font);
         }
 
@@ -183,8 +169,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Adds a font family to be used.
         /// </summary>
         /// <param name="fontFamily">The font family to add.</param>
-        public void AddFontFamily(RFontFamily fontFamily)
-        {
+        public void AddFontFamily(RFontFamily fontFamily) {
             _fontsHandler.AddFontFamily(fontFamily);
         }
 
@@ -195,8 +180,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="fromFamily">the font family to replace</param>
         /// <param name="toFamily">the font family to replace with</param>
-        public void AddFontFamilyMapping(string fromFamily, string toFamily)
-        {
+        public void AddFontFamilyMapping(string fromFamily, string toFamily) {
             _fontsHandler.AddFontFamilyMapping(fromFamily, toFamily);
         }
 
@@ -207,18 +191,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="size">font size</param>
         /// <param name="style">font style</param>
         /// <returns>font instance</returns>
-        public RFont GetFont(string family, double size, RFontStyle style)
-        {
+        public RFont GetFont(string family, double size, RFontStyle style) {
             return _fontsHandler.GetCachedFont(family, size, style);
         }
 
         /// <summary>
         /// Get image to be used while HTML image is loading.
         /// </summary>
-        public RImage GetLoadingImage()
-        {
-            if (_loadImage == null)
-            {
+        public RImage GetLoadingImage() {
+            if (_loadImage == null) {
                 var stream = typeof(HtmlRendererUtils).Assembly.GetManifestResourceStream("TheArtOfDev.HtmlRenderer.Core.Utils.ImageLoad.png");
                 if (stream != null)
                     _loadImage = ImageFromStream(stream);
@@ -229,10 +210,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <summary>
         /// Get image to be used if HTML image load failed.
         /// </summary>
-        public RImage GetLoadingFailedImage()
-        {
-            if (_errorImage == null)
-            {
+        public RImage GetLoadingFailedImage() {
+            if (_errorImage == null) {
                 var stream = typeof(HtmlRendererUtils).Assembly.GetManifestResourceStream("TheArtOfDev.HtmlRenderer.Core.Utils.ImageError.png");
                 if (stream != null)
                     _errorImage = ImageFromStream(stream);
@@ -248,8 +227,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="html">the html data</param>
         /// <param name="plainText">the plain text data</param>
         /// <returns>drag-drop data object</returns>
-        public object GetClipboardDataObject(string html, string plainText)
-        {
+        public object GetClipboardDataObject(string html, string plainText) {
             return GetClipboardDataObjectInt(html, plainText);
         }
 
@@ -258,8 +236,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Not relevant for platforms that don't render HTML on UI element.
         /// </summary>
         /// <param name="text">the text to set</param>
-        public void SetToClipboard(string text)
-        {
+        public void SetToClipboard(string text) {
             SetToClipboardInt(text);
         }
 
@@ -269,8 +246,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="html">the html data</param>
         /// <param name="plainText">the plain text data</param>
-        public void SetToClipboard(string html, string plainText)
-        {
+        public void SetToClipboard(string html, string plainText) {
             SetToClipboardInt(html, plainText);
         }
 
@@ -279,8 +255,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Not relevant for platforms that don't render HTML on UI element.
         /// </summary>
         /// <param name="image">the image object to set to clipboard</param>
-        public void SetToClipboard(RImage image)
-        {
+        public void SetToClipboard(RImage image) {
             SetToClipboardInt(image);
         }
 
@@ -289,8 +264,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Not relevant for platforms that don't render HTML on UI element.
         /// </summary>
         /// <returns>new context menu</returns>
-        public RContextMenu GetContextMenu()
-        {
+        public RContextMenu GetContextMenu() {
             return CreateContextMenuInt();
         }
 
@@ -302,8 +276,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="name">the name of the image for save dialog</param>
         /// <param name="extension">the extension of the image for save dialog</param>
         /// <param name="control">optional: the control to show the dialog on</param>
-        public void SaveToFile(RImage image, string name, string extension, RControl control = null)
-        {
+        public void SaveToFile(RImage image, string name, string extension, RControl control = null) {
             SaveToFileInt(image, name, extension, control);
         }
 
@@ -314,8 +287,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="size">font size</param>
         /// <param name="style">font style</param>
         /// <returns>font instance</returns>
-        internal RFont CreateFont(string family, double size, RFontStyle style)
-        {
+        internal RFont CreateFont(string family, double size, RFontStyle style) {
             return CreateFontInt(family, size, style);
         }
 
@@ -327,11 +299,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="size">font size</param>
         /// <param name="style">font style</param>
         /// <returns>font instance</returns>
-        internal RFont CreateFont(RFontFamily family, double size, RFontStyle style)
-        {
+        internal RFont CreateFont(RFontFamily family, double size, RFontStyle style) {
             return CreateFontInt(family, size, style);
         }
-
 
         #region Private/Protected methods
 
@@ -406,8 +376,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="html">the html data</param>
         /// <param name="plainText">the plain text data</param>
         /// <returns>drag-drop data object</returns>
-        protected virtual object GetClipboardDataObjectInt(string html, string plainText)
-        {
+        protected virtual object GetClipboardDataObjectInt(string html, string plainText) {
             throw new NotImplementedException();
         }
 
@@ -415,8 +384,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Set the given text to the clipboard
         /// </summary>
         /// <param name="text">the text to set</param>
-        protected virtual void SetToClipboardInt(string text)
-        {
+        protected virtual void SetToClipboardInt(string text) {
             throw new NotImplementedException();
         }
 
@@ -425,8 +393,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// </summary>
         /// <param name="html">the html data</param>
         /// <param name="plainText">the plain text data</param>
-        protected virtual void SetToClipboardInt(string html, string plainText)
-        {
+        protected virtual void SetToClipboardInt(string html, string plainText) {
             throw new NotImplementedException();
         }
 
@@ -434,8 +401,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Set the given image to clipboard.
         /// </summary>
         /// <param name="image"></param>
-        protected virtual void SetToClipboardInt(RImage image)
-        {
+        protected virtual void SetToClipboardInt(RImage image) {
             throw new NotImplementedException();
         }
 
@@ -443,8 +409,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// Create a context menu that can be used on the control
         /// </summary>
         /// <returns>new context menu</returns>
-        protected virtual RContextMenu CreateContextMenuInt()
-        {
+        protected virtual RContextMenu CreateContextMenuInt() {
             throw new NotImplementedException();
         }
 
@@ -455,8 +420,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Adapters
         /// <param name="name">the name of the image for save dialog</param>
         /// <param name="extension">the extension of the image for save dialog</param>
         /// <param name="control">optional: the control to show the dialog on</param>
-        protected virtual void SaveToFileInt(RImage image, string name, string extension, RControl control = null)
-        {
+        protected virtual void SaveToFileInt(RImage image, string name, string extension, RControl control = null) {
             throw new NotImplementedException();
         }
 

@@ -28,7 +28,6 @@ using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
     public class WebServiceJson {
-
         #region fields
 
         /// <summary>
@@ -157,12 +156,10 @@ namespace _3PA.Lib {
                         } else {
                             // start posting
                             if (PostRequest()) {
-
                                 // get the response
                                 GetResponse();
                             }
                         }
-
                     } else if (Method == WebRequestMethod.Get) {
                         // get the response
                         GetResponse();
@@ -170,7 +167,6 @@ namespace _3PA.Lib {
 
                     if (OnRequestEnded != null)
                         OnRequestEnded(this);
-
                 } catch (WebException e) {
                     ResponseException = e;
                     HandleWebException(e);
@@ -249,7 +245,7 @@ namespace _3PA.Lib {
                 StatusCodeResponse = HttpStatusCode.BadRequest;
             }
         }
-        
+
         private void HandleWebException(WebException wex) {
             HttpWebResponse hwr = wex.Response as HttpWebResponse;
             if (hwr != null) {
@@ -257,7 +253,7 @@ namespace _3PA.Lib {
                 StatusDescriptionResponse = hwr.StatusDescription;
             }
         }
-        
+
         #endregion
 
         #region WebRequestMethod
@@ -268,7 +264,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
-
 }

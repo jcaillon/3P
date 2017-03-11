@@ -22,9 +22,7 @@ using System.Diagnostics;
 using System.Text;
 
 namespace _3PA.Lib {
-
     public class ProcessIo {
-
         #region public fields
 
         public string Arguments { get; set; }
@@ -53,7 +51,6 @@ namespace _3PA.Lib {
         /// Constructor
         /// </summary>
         public ProcessIo(string executable) {
-
             StandardOutput = new StringBuilder();
             ErrorOutput = new StringBuilder();
 
@@ -61,7 +58,7 @@ namespace _3PA.Lib {
                 FileName = executable,
                 UseShellExecute = false,
                 RedirectStandardError = true,
-                RedirectStandardOutput = true,
+                RedirectStandardOutput = true
             };
         }
 
@@ -98,7 +95,6 @@ namespace _3PA.Lib {
         /// Start the process synchronously
         /// </summary>
         public bool DoWait(bool hidden = false) {
-
             if (hidden) {
                 StartInfo.CreateNoWindow = true;
                 StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -108,7 +104,7 @@ namespace _3PA.Lib {
                 StartInfo.Arguments = Arguments;
 
             if (_nbExecution > 0)
-                Kill(); 
+                Kill();
 
             _nbExecution++;
 
@@ -145,6 +141,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
 }

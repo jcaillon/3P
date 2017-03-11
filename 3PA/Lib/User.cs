@@ -24,9 +24,7 @@ using System.Net;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
-
     public static class User {
-
         #region Ping
 
         /// <summary>
@@ -57,7 +55,7 @@ namespace _3PA.Lib {
                     ErrorHandler.ShowErrors(e);
             }
         }
-        
+
         #endregion
 
         #region User info
@@ -68,12 +66,11 @@ namespace _3PA.Lib {
         public static string Name {
             get {
                 return Environment.UserName +
-                   (!string.IsNullOrEmpty(Config.Instance.UserName) ? " aka " + Config.Instance.UserName : string.Empty) +
-                   " (" + Environment.MachineName + ")";
+                       (!string.IsNullOrEmpty(Config.Instance.UserName) ? " aka " + Config.Instance.UserName : string.Empty) +
+                       " (" + Environment.MachineName + ")";
             }
-            
         }
-        
+
         /// <summary>
         /// Returns a unique identifier for the current user, this ID is exactly 36 char long
         /// </summary>
@@ -105,7 +102,6 @@ namespace _3PA.Lib {
         /// <param name="message"></param>
         /// <param name="url"></param>
         public static bool SendComment(string message, string url) {
-
             // https://api.github.com/repos/jcaillon/3p/issues/1/comments
 
             // handle spam (10s min between 2 posts)
@@ -117,8 +113,8 @@ namespace _3PA.Lib {
             // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
             wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config._3PUserCredentials);
             wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
-                message
+                                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
+                                message
                 );
             wb.Execute();
 
@@ -127,5 +123,4 @@ namespace _3PA.Lib {
 
         #endregion
     }
-
 }

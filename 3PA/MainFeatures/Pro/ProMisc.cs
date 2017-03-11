@@ -29,7 +29,6 @@ using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProMisc {
-
         #region Go to definition
 
         /// <summary>
@@ -38,7 +37,6 @@ namespace _3PA.MainFeatures.Pro {
         /// caret. At last, it tries to find a file in the propath
         /// </summary>
         public static void GoToDefinition(bool fromMouseClick) {
-
             // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
             if (InfoToolTip.InfoToolTip.IsVisible) {
                 if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
@@ -55,11 +53,9 @@ namespace _3PA.MainFeatures.Pro {
                 return;
             var curWord = Npp.GetAblWordAtPosition(position);
 
-
             // match a word in the autocompletion? go to definition
             var data = AutoCompletion.FindInCompletionData(curWord, position, true);
             if (data != null && data.Count > 0) {
-
                 var nbFound = data.Count(data2 => data2.FromParser);
 
                 // only one match, then go to the definition
@@ -67,16 +63,13 @@ namespace _3PA.MainFeatures.Pro {
                     var completionData = data.First(data1 => data1.FromParser);
                     Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
                     return;
-                } 
+                }
                 if (nbFound > 1) {
-
                     // otherwise, list the items and notify the user
                     var output = new StringBuilder(@"Found several matching items, please choose the correct one :<br>");
                     foreach (var cData in data.Where(data2 => data2.FromParser)) {
                         output.Append("<div>" + (cData.ParsedItem.FilePath + "|" + cData.ParsedItem.Line + "|" + cData.ParsedItem.Column).ToHtmlLink("In " + Path.GetFileName(cData.ParsedItem.FilePath) + " (line " + cData.ParsedItem.Line + ")"));
-                        cData.DoForEachFlag((s, flag) => {
-                            output.Append("<img style='padding-right: 0px; padding-left: 5px;' src='" + s + "' height='15px'>");
-                        });
+                        cData.DoForEachFlag((s, flag) => { output.Append("<img style='padding-right: 0px; padding-left: 5px;' src='" + s + "' height='15px'>"); });
                         output.Append("</div>");
                     }
                     UserCommunication.NotifyUnique("GoToDefinition", output.ToString(), MessageImg.MsgQuestion, "Question", "Go to the definition", args => {
@@ -116,7 +109,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public static void ForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
                 if (flag == 0) continue;
                 toApplyOnFlag(name, flag);
             }
@@ -134,7 +127,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Opens the lgrfeng.chm file if it can find it in the config
         /// </summary>
         public static void Open4GlHelp() {
-
             var helpPath = Config.Instance.GlobalHelpFilePath;
 
             // Try to find the help file from the prowin32.exe location
@@ -273,7 +265,6 @@ namespace _3PA.MainFeatures.Pro {
 
             // clear current errors (updates the current file info)
             FilesInfo.ClearAllErrors(Npp.CurrentFile.Path, true);
-
         }
 
         /// <summary>
@@ -302,7 +293,6 @@ namespace _3PA.MainFeatures.Pro {
                 var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
             }
@@ -373,14 +363,13 @@ namespace _3PA.MainFeatures.Pro {
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
                     UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProCompilation.FormatCompilationResult(treatedFile.InputPath, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }
         }
 
         #endregion
-        
+
         #region DeployCurrentFile
 
         /// <summary>
@@ -397,7 +386,6 @@ namespace _3PA.MainFeatures.Pro {
                     Npp.CurrentFile.Path,
                     ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
                     ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
-
                     // deploy the file for STEP 1
                     var deployedFiles = ProEnvironment.Current.Deployer.DeployFiles(ProEnvironment.Current.Deployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1));
                     if (deployedFiles == null || deployedFiles.Count == 0) {
@@ -409,7 +397,7 @@ namespace _3PA.MainFeatures.Pro {
                         var hasError = deployedFiles.Exists(deploy => !deploy.IsOk);
                         UserCommunication.NotifyUnique(Npp.CurrentFile.Path, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProCompilation.FormatCompilationResult(Npp.CurrentFile.Path, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
                     }
-                } else { 
+                } else {
                     UserCommunication.Notify("The current file didn't pass the deployment filters for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "Filtered by deployment rules", args => {
                         Deployer.EditRules();
                         args.Handled = true;
@@ -419,6 +407,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
     }
 }

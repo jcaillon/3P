@@ -24,12 +24,10 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButtonImage : YamuiButton {
-       
         #region Fields
 
         [DefaultValue(false)]
@@ -57,13 +55,13 @@ namespace YamuiFramework.Controls {
             if (!HideFocusedIndicator && IsFocused)
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
                     GraphicsPath path = new GraphicsPath();
-                    path.AddLines(new[] { new Point(0, 0), new Point(ClientRectangle.Width / 2, 0), new Point(0, ClientRectangle.Height / 2), new Point(0, 0), });
+                    path.AddLines(new[] {new Point(0, 0), new Point(ClientRectangle.Width/2, 0), new Point(0, ClientRectangle.Height/2), new Point(0, 0)});
                     e.Graphics.FillPath(b, path);
                 }
 
             // draw main image, in greyscale if not activated
             if (BackGrndImage != null) {
-                var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
+                var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width)/2, (ClientRectangle.Height - BackGrndImage.Height)/2), new Size(BackGrndImage.Width, BackGrndImage.Height));
                 e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
             }
 
@@ -80,6 +78,5 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
 }

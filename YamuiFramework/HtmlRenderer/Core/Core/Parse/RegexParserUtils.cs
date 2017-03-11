@@ -20,13 +20,11 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Parse {
     /// <summary>
     /// Collection of regular expressions used when parsing
     /// </summary>
-    internal static class RegexParserUtils
-    {
+    internal static class RegexParserUtils {
         #region Fields and Consts
 
         /// <summary>
@@ -98,36 +96,27 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
 
         #endregion
 
-
         /// <summary>
         /// Get CSS at rule from the given stylesheet.
         /// </summary>
         /// <param name="stylesheet">the stylesheet data to retrieve the rule from</param>
         /// <param name="startIdx">the index to start the search for the rule, on return will be the value of the end of the found rule</param>
         /// <returns>the found at rule or null if not exists</returns>
-        public static string GetCssAtRules(string stylesheet, ref int startIdx)
-        {
+        public static string GetCssAtRules(string stylesheet, ref int startIdx) {
             startIdx = stylesheet.IndexOf('@', startIdx);
-            if (startIdx > -1)
-            {
+            if (startIdx > -1) {
                 int count = 1;
                 int endIdx = stylesheet.IndexOf('{', startIdx);
-                if (endIdx > -1)
-                {
-                    while (count > 0 && endIdx < stylesheet.Length)
-                    {
+                if (endIdx > -1) {
+                    while (count > 0 && endIdx < stylesheet.Length) {
                         endIdx++;
-                        if (stylesheet[endIdx] == '{')
-                        {
+                        if (stylesheet[endIdx] == '{') {
                             count++;
-                        }
-                        else if (stylesheet[endIdx] == '}')
-                        {
+                        } else if (stylesheet[endIdx] == '}') {
                             count--;
                         }
                     }
-                    if (endIdx < stylesheet.Length)
-                    {
+                    if (endIdx < stylesheet.Length) {
                         var atrule = stylesheet.Substring(startIdx, endIdx - startIdx + 1);
                         startIdx = endIdx;
                         return atrule;
@@ -143,8 +132,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="regex">Regular expression to extract matches</param>
         /// <param name="source">Source to extract matches</param>
         /// <returns>Collection of matches</returns>
-        public static MatchCollection Match(string regex, string source)
-        {
+        public static MatchCollection Match(string regex, string source) {
             var r = GetRegex(regex);
             return r.Matches(source);
         }
@@ -155,8 +143,7 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="regex"></param>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static string Search(string regex, string source)
-        {
+        public static string Search(string regex, string source) {
             int position;
             return Search(regex, source, out position);
         }
@@ -168,12 +155,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// <param name="source"></param>
         /// <param name="position"> </param>
         /// <returns></returns>
-        public static string Search(string regex, string source, out int position)
-        {
+        public static string Search(string regex, string source, out int position) {
             MatchCollection matches = Match(regex, source);
 
-            if (matches.Count > 0)
-            {
+            if (matches.Count > 0) {
                 position = matches[0].Index;
                 return matches[0].Value;
             }
@@ -187,11 +172,9 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Parse
         /// </summary>
         /// <param name="regex">the regex string to use</param>
         /// <returns>the regex instance</returns>
-        private static Regex GetRegex(string regex)
-        {
+        private static Regex GetRegex(string regex) {
             Regex r;
-            if (!_regexes.TryGetValue(regex, out r))
-            {
+            if (!_regexes.TryGetValue(regex, out r)) {
                 r = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
                 _regexes[regex] = r;
             }

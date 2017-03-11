@@ -25,10 +25,8 @@ using System.Windows.Forms.Design;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiImageDesigner")]
     public class YamuiPictureBox : PictureBox {
-       
         #region Fields
 
         [Category("Yamui")]
@@ -52,10 +50,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-        
+
         #region Paint Methods
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
@@ -82,11 +80,11 @@ namespace YamuiFramework.Controls {
                 // ignored
             }
         }
+
         #endregion
-
     }
-    internal class YamuiImageDesigner : ControlDesigner {
 
+    internal class YamuiImageDesigner : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
             properties.Remove("Padding");

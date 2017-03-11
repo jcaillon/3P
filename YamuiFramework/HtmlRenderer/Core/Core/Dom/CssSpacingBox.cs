@@ -21,13 +21,11 @@ using System;
 using System.Collections.Generic;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
 
-namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
-{
+namespace YamuiFramework.HtmlRenderer.Core.Core.Dom {
     /// <summary>
     /// Used to make space on vertical cell combination
     /// </summary>
-    internal sealed class CssSpacingBox : CssBox
-    {
+    internal sealed class CssSpacingBox : CssBox {
         #region Fields and Consts
 
         private readonly CssBox _extendedBox;
@@ -44,10 +42,8 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
 
         #endregion
 
-
         public CssSpacingBox(CssBox tableBox, ref CssBox extendedBox, int startRow)
-            : base(tableBox, new HtmlTag("none", false, new Dictionary<string, string> { { "colspan", "1" } }))
-        {
+            : base(tableBox, new HtmlTag("none", false, new Dictionary<string, string> {{"colspan", "1"}})) {
             _extendedBox = extendedBox;
             Display = CssConstants.None;
 
@@ -55,24 +51,21 @@ namespace YamuiFramework.HtmlRenderer.Core.Core.Dom
             _endRow = startRow + Int32.Parse(extendedBox.GetAttribute("rowspan", "1")) - 1;
         }
 
-        public CssBox ExtendedBox
-        {
+        public CssBox ExtendedBox {
             get { return _extendedBox; }
         }
 
         /// <summary>
         /// Gets the index of the row where box starts
         /// </summary>
-        public int StartRow
-        {
+        public int StartRow {
             get { return _startRow; }
         }
 
         /// <summary>
         /// Gets the index of the row where box ends
         /// </summary>
-        public int EndRow
-        {
+        public int EndRow {
             get { return _endRow; }
         }
     }
