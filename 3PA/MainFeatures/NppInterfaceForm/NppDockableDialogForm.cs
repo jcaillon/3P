@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             }
 
             // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
+            Npp.RegisterToNpp(Handle);
 
             Plug.OnNppWindowsMove += RefreshPosAndLoc;
         }
@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         protected override void OnClosing(CancelEventArgs e) {
             // register to Npp
-            FormIntegration.UnRegisterToNpp(Handle);
+            Npp.UnRegisterToNpp(Handle);
             base.OnClosing(e);
         }
 

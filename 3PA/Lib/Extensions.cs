@@ -27,7 +27,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using _3PA.Lib.MarkDownSharp.MarkdownSharp;
+using _3PA.Lib.CommonMark;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -330,8 +330,7 @@ namespace _3PA.Lib {
         /// <param name="text"></param>
         /// <returns></returns>
         public static string MdToHtml(this string text) {
-            var md = new Markdown();
-            return md.Transform(text);
+            return CommonMarkConverter.Convert(text);
         }
 
         /// <summary>

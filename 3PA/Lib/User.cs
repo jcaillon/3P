@@ -113,7 +113,7 @@ namespace _3PA.Lib {
             // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
             wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config._3PUserCredentials);
             wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
+                                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.SoftwareVersion + " ####\r\n" +
                                 message
                 );
             wb.Execute();

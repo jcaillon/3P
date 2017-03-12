@@ -32,14 +32,4 @@ namespace _3PA.Interop {
 
         private IntPtr _hwnd;
     }
-
-    internal static class FormIntegration {
-        public static void RegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGADD, handle);
-        }
-
-        public static void UnRegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGREMOVE, handle);
-        }
-    }
 }

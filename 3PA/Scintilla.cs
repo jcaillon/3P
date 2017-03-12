@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 using _3PA.Lib;
 
@@ -40,6 +41,7 @@ namespace _3PA {
     /// faster execution than with SendMessage<br />
     /// </summary>
     internal static partial class Npp {
+
         #region fields
 
         public const int KeywordMaxLength = 60;
@@ -61,25 +63,12 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Returns the current instance of scintilla used
-        /// 0/1 corresponding to the main/seconday scintilla currently used
-        /// </summary>
-        public static int CurrentScintillaApi {
-            get {
-                long curScintilla;
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                return (int) curScintilla;
-            }
-        }
-
-        /// <summary>
         /// Gets the window handle to current Scintilla.
         /// </summary>
         public static IntPtr HandleScintilla {
             get {
-                if (_curScintilla != IntPtr.Zero)
-                    return _curScintilla;
-                UpdateScintilla();
+                if (_curScintilla == IntPtr.Zero)
+                    UpdateScintilla();
                 return _curScintilla;
             }
         }
@@ -121,7 +110,7 @@ namespace _3PA {
         /// Called when the user changes the current document
         /// </summary>
         public static void UpdateScintilla() {
-            _curScintillaNb = CurrentScintillaApi;
+            _curScintillaNb = CurrentScintillaId.ClampMax(1);
             _curScintilla = _curScintillaNb == 0 ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
             Sci.UpdateScintillaDirectMessage(_curScintilla);
         }
@@ -368,7 +357,7 @@ namespace _3PA {
         /// <returns>The width in pixels.</returns>
         public static unsafe int TextWidth(int style, string text) {
             style = Clamp(style, 0, 255);
-            var bytes = GetBytes(text ?? string.Empty, Encoding, true);
+            var bytes = GetBytes(text ?? String.Empty, Encoding, true);
             fixed (byte* bp = bytes)
                 return Sci.Send(SciMsg.SCI_TEXTWIDTH, new IntPtr(style), new IntPtr(bp)).ToInt32();
         }
@@ -454,12 +443,7 @@ namespace _3PA {
         /// and SCEN_CHANGE. For example, a container may decide to see only notifications about changes to text and not
         /// styling changes
         /// by calling SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
-        /// The possible notification types are the same as the modificationType bit flags used by SCN_MODIFIED:
-        /// SC_MOD_INSERTTEXT,
-        /// SC_MOD_DELETETEXT, SC_MOD_CHANGESTYLE, SC_MOD_CHANGEFOLD, SC_PERFORMED_USER, SC_PERFORMED_UNDO, SC_PERFORMED_REDO,
-        /// SC_MULTISTEPUNDOREDO, SC_LASTSTEPINUNDOREDO, SC_MOD_CHANGEMARKER, SC_MOD_BEFOREINSERT, SC_MOD_BEFOREDELETE,
-        /// SC_MULTILINEUNDOREDO,
-        /// and SC_MODEVENTMASKALL.
+        /// The possible notification types are of the type SciModificationMod
         /// </summary>
         public static int EventMask {
             get { return Sci.Send(SciMsg.SCI_GETMODEVENTMASK).ToInt32(); }
@@ -911,7 +895,7 @@ namespace _3PA {
                 var length = Sci.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32();
                 var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(0), new IntPtr(length));
                 if (ptr == IntPtr.Zero)
-                    return string.Empty;
+                    return String.Empty;
 
                 // Assumption is that moving the gap will always be equal to or less expensive
                 // than using one of the APIs which requires an intermediate buffer.
@@ -919,7 +903,7 @@ namespace _3PA {
                 return text;
             }
             set {
-                if (string.IsNullOrEmpty(value)) {
+                if (String.IsNullOrEmpty(value)) {
                     Sci.Send(SciMsg.SCI_CLEARALL);
                 } else {
                     fixed (byte* bp = GetBytes(value, Encoding, true))
@@ -944,7 +928,7 @@ namespace _3PA {
                 // NOTE: For some reason the length returned by this API includes the terminating NULL
                 var length = Sci.Send(SciMsg.SCI_GETSELTEXT).ToInt32() - 1;
                 if (length <= 0)
-                    return string.Empty;
+                    return String.Empty;
 
                 var bytes = new byte[length + 1];
                 fixed (byte* bp = bytes) {
@@ -964,7 +948,7 @@ namespace _3PA {
         /// Does nothing if string is null or empty?
         /// </remarks>
         public static unsafe void ReplaceSelection(string text) {
-            fixed (byte* bp = GetBytes(text ?? string.Empty, Encoding, true))
+            fixed (byte* bp = GetBytes(text ?? String.Empty, Encoding, true))
                 Sci.Send(SciMsg.SCI_REPLACESEL, IntPtr.Zero, new IntPtr(bp));
         }
 
@@ -992,7 +976,7 @@ namespace _3PA {
 
             var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
             if (ptr == IntPtr.Zero)
-                return string.Empty;
+                return String.Empty;
 
             return GetString(ptr, (byteEndPos - byteStartPos), Encoding);
         }
@@ -1027,7 +1011,7 @@ namespace _3PA {
             if (position > textLength)
                 position = textLength;
             position = Lines.CharToBytePosition(position);
-            fixed (byte* bp = GetBytes(text ?? string.Empty, Encoding, true))
+            fixed (byte* bp = GetBytes(text ?? String.Empty, Encoding, true))
                 Sci.Send(SciMsg.SCI_INSERTTEXT, new IntPtr(position), new IntPtr(bp));
         }
 
@@ -1043,7 +1027,7 @@ namespace _3PA {
         /// </remarks>
         public static unsafe int ReplaceTarget(string text) {
             if (text == null)
-                text = string.Empty;
+                text = String.Empty;
             var bytes = GetBytes(text, Encoding, false);
             fixed (byte* bp = bytes)
                 Sci.Send(SciMsg.SCI_REPLACETARGET, new IntPtr(bytes.Length), new IntPtr(bp));
@@ -1064,7 +1048,7 @@ namespace _3PA {
         /// The TargetStart and TargetEnd properties will be updated to the start and end positions of the replaced text.
         /// </remarks>
         public static unsafe int ReplaceTargetRe(string text) {
-            var bytes = GetBytes(text ?? string.Empty, Encoding, false);
+            var bytes = GetBytes(text ?? String.Empty, Encoding, false);
             fixed (byte* bp = bytes)
                 Sci.Send(SciMsg.SCI_REPLACETARGETRE, new IntPtr(bytes.Length), new IntPtr(bp));
 
@@ -1138,7 +1122,7 @@ namespace _3PA {
         public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
             var startPos = curPos - maxLenght;
             startPos = (startPos > 0) ? startPos : 0;
-            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : String.Empty;
         }
 
         /// <summary>
@@ -1151,7 +1135,7 @@ namespace _3PA {
             var endPos = curPos + maxLenght;
             var fullLength = TextLength;
             endPos = (endPos < fullLength) ? endPos : fullLength;
-            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
+            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : String.Empty;
         }
 
         /// <summary>
@@ -1180,7 +1164,7 @@ namespace _3PA {
                 case 2:
                     return wholeWord.Split('.')[1];
             }
-            return string.Empty;
+            return String.Empty;
         }
 
         /// <summary>
@@ -1290,7 +1274,7 @@ namespace _3PA {
             tagNumber = Clamp(tagNumber, 1, 9);
             var length = Sci.Send(SciMsg.SCI_GETTAG, new IntPtr(tagNumber), IntPtr.Zero).ToInt32();
             if (length <= 0)
-                return string.Empty;
+                return String.Empty;
 
             var bytes = new byte[length + 1];
             fixed (byte* bp = bytes) {
@@ -1314,7 +1298,7 @@ namespace _3PA {
         /// </remarks>
         public static unsafe int SearchInTarget(string text) {
             int bytePos;
-            var bytes = GetBytes(text ?? string.Empty, Encoding, false);
+            var bytes = GetBytes(text ?? String.Empty, Encoding, false);
             fixed (byte* bp = bytes)
                 bytePos = Sci.Send(SciMsg.SCI_SEARCHINTARGET, new IntPtr(bytes.Length), new IntPtr(bp)).ToInt32();
 
@@ -1709,7 +1693,7 @@ namespace _3PA {
             get {
                 var length = Sci.Send(SciMsg.SCI_GETLEXERLANGUAGE).ToInt32();
                 if (length == 0)
-                    return string.Empty;
+                    return String.Empty;
 
                 var bytes = new byte[length + 1];
                 fixed (byte* bp = bytes) {
@@ -1718,7 +1702,7 @@ namespace _3PA {
                 }
             }
             set {
-                if (string.IsNullOrEmpty(value)) {
+                if (String.IsNullOrEmpty(value)) {
                     Sci.Send(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, IntPtr.Zero);
                 } else {
                     var bytes = GetBytes(value, Encoding.ASCII, true);
@@ -2293,7 +2277,7 @@ namespace _3PA {
                 get {
                     var length = Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index)).ToInt32();
                     if (length == 0)
-                        return string.Empty;
+                        return String.Empty;
 
                     var bytes = new byte[length + 1];
                     fixed (byte* bp = bytes) {
@@ -2302,7 +2286,7 @@ namespace _3PA {
                     }
                 }
                 set {
-                    if (string.IsNullOrEmpty(value)) {
+                    if (String.IsNullOrEmpty(value)) {
                         Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, null);
                     } else {
                         var bytes = GetBytes(value, Encoding, true);
@@ -2486,7 +2470,7 @@ namespace _3PA {
                 get {
                     var length = Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index)).ToInt32();
                     if (length == 0)
-                        return string.Empty;
+                        return String.Empty;
 
                     var bytes = new byte[length + 1];
                     fixed (byte* bp = bytes) {
@@ -2495,7 +2479,7 @@ namespace _3PA {
                     }
                 }
                 set {
-                    if (string.IsNullOrEmpty(value)) {
+                    if (String.IsNullOrEmpty(value)) {
                         // Scintilla docs suggest that setting to NULL rather than an empty string will free memory
                         Sci.Send(SciMsg.SCI_MARGINSETTEXT, new IntPtr(Index), IntPtr.Zero);
                     } else {
@@ -2525,7 +2509,7 @@ namespace _3PA {
                     var length = Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Index));
                     var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, start, length);
                     if (ptr == IntPtr.Zero)
-                        return string.Empty;
+                        return String.Empty;
 
                     var text = new string((sbyte*) ptr, 0, length.ToInt32(), Encoding);
                     return text;
@@ -3500,7 +3484,7 @@ namespace _3PA {
                     return name;
                 }
                 set {
-                    if (string.IsNullOrEmpty(value))
+                    if (String.IsNullOrEmpty(value))
                         value = "Verdana";
 
                     // Scintilla expects UTF-8
@@ -3658,7 +3642,7 @@ namespace _3PA {
         /// <param name="zeroTerminated"></param>
         /// <returns></returns>
         public static unsafe byte[] GetBytes(string text, Encoding encoding, bool zeroTerminated) {
-            if (string.IsNullOrEmpty(text))
+            if (String.IsNullOrEmpty(text))
                 return new byte[0];
 
             var count = encoding.GetByteCount(text);
@@ -3762,7 +3746,7 @@ namespace _3PA {
         /// <returns></returns>
         public static unsafe string GetString(IntPtr bytes, int length, Encoding encoding) {
             if (length <= 0)
-                return string.Empty;
+                return String.Empty;
             var ptr = (sbyte*) bytes;
             var str = new string(ptr, 0, length, encoding);
             return str;
@@ -3869,4 +3853,5 @@ namespace _3PA {
     }
 
     #endregion
+
 }

@@ -80,7 +80,7 @@ namespace _3PA.MainFeatures {
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
-            Plug.DoNppDocumentSwitched();
+            Plug.ApplyOptionsForScintilla();
         }
 
         #endregion
@@ -119,7 +119,11 @@ namespace _3PA.MainFeatures {
                 if (onlyCheckInstall)
                     return false;
                 // if it doesn't exist in the file
-                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImg.MsgInfo, "Information", "Installing syntax highlighting");
+                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + "</b>", MessageImg.MsgInfo, "Information", "Installing syntax highlighting", 
+                    args => {
+                        args.Handled = true;
+                        Npp.Restart();
+                    });
             }
             if (fileContent.ContainsFast(@"<NotepadPlus />"))
                 fileContent = fileContent.Replace(@"<NotepadPlus />", "<NotepadPlus>\r\n" + DataResources.UDL + "\r\n</NotepadPlus>");

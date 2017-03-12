@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FootnoteReference.cs) is part of 3P.
+// This file (DocumentData.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,16 +17,17 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace _3PA.Lib.MarkdownDeep
-{
-	class FootnoteReference
-	{
-		public FootnoteReference(int index, string id)
-		{
-			this.index = index;
-			this.id = id;
-		}
-		public int index;
-		public string id;
-	}
+using System.Collections.Generic;
+
+namespace _3PA.Lib.CommonMark.Syntax {
+    /// <summary>
+    /// Contains additional data for document elements. Used in the <see cref="Block.Document"/> property.
+    /// </summary>
+    public class DocumentData {
+        /// <summary>
+        /// Gets or sets the dictionary containing resolved link references. Only set on the document node, <see langword="null"/>
+        /// and not used for all other elements.
+        /// </summary>
+        public Dictionary<string, Reference> ReferenceMap { get; set; }
+    }
 }

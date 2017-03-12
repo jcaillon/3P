@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
@@ -27,6 +26,7 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {
+
         #region private
 
         protected string _dialogDescription = "?";
@@ -84,12 +84,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                         hIconTab = (uint) Utils.GetIconFromImage(_iconImage).Handle,
                         pszModuleName = AssemblyInfo.AssemblyProduct
                     };
-                    IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
-                    Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-                    Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+                    Npp.RegisterDockableDialog(nppTbData);
                     InitForm();
                 } else {
-                    Win32Api.SendMessage(Npp.HandleNpp, !_fakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, _fakeForm.Handle);
+                    if (_fakeForm.Visible)
+                        Npp.HideDockableDialog(_fakeForm.Handle);
+                    else
+                        Npp.ShowDockableDialog(_fakeForm.Handle);
                 }
                 Form.RefreshPosAndLoc();
                 if (_fakeForm == null) return;
@@ -104,8 +105,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// (does it both on the menu and toolbar)
         /// </summary>
         public virtual void UpdateMenuItemChecked() {
-            if (_fakeForm == null) return;
-            Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
+            if (_fakeForm == null) 
+                return;
+            Npp.SetMenuItemCheck(UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
         }
 
         public void ForceClose() {

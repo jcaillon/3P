@@ -28,6 +28,7 @@ using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Pro;
 
@@ -36,6 +37,7 @@ namespace _3PA {
     /// This class contains very generic wrappers for basic Notepad++ functionality
     /// </summary>
     internal static partial class Npp {
+
         #region CurrentFile Info
 
         #region private
@@ -61,6 +63,7 @@ namespace _3PA {
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
         internal class NppFile {
+
             /// <summary>
             /// true if the current file is a progress file, false otherwise
             /// </summary>
@@ -77,7 +80,7 @@ namespace _3PA {
             public FileInfoObject FileInfoObject { get; set; }
 
             public void Update() {
-                CurrentFile.Path = PathFromApi;
+                CurrentFile.Path = GetFullPathApi;
                 CurrentFile.IsProgress = CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern);
             }
 
@@ -113,7 +116,7 @@ namespace _3PA {
             /// Gets the path of the current document
             /// </summary>
             /// <returns></returns>
-            public static string PathFromApi {
+            public static string GetFullPathApi {
                 get {
                     var path = new StringBuilder(Win32Api.MaxPath);
                     Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
@@ -124,8 +127,29 @@ namespace _3PA {
             /// <summary>
             /// Saves the current document
             /// </summary>
-            public static void Save() {
+            public void Save() {
                 Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
+            }
+
+            /// <summary>
+            /// Saves current document as...
+            /// </summary>
+            public void SaveAs(string path) {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 0, path);
+            }
+
+            /// <summary>
+            /// Saves a copy of the current document
+            /// </summary>
+            public void SaveAsCopy(string path) {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 1, path);
+            }
+
+            /// <summary>
+            /// Reload current file
+            /// </summary>
+            public void Reload(bool askConfirmation) {
+                Npp.Reload(Path, askConfirmation);
             }
 
             /// <summary>
@@ -138,9 +162,7 @@ namespace _3PA {
             /// <returns></returns>
             public Encoding BufferEncoding {
                 get {
-                    var curBufferId = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
-                    int nppEncoding = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
-                    return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
+                    return CurrentBufferEncoding < 1 ? Encoding.Default : Encoding.UTF8;
                     /*
                     // Logically, we should identify the correct encoding as follow, but in reality
                     // we only need to convert To/From UTF8/ANSI
@@ -179,33 +201,49 @@ namespace _3PA {
 
         #endregion
 
+        #region General
+
         /// <summary>
-        ///     Gets the Notepad++ main window handle.
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
         /// </summary>
-        /// <value>
-        ///     The Notepad++ main window handle.
-        /// </value>
+        public static int CurrentScintillaId {
+            get {
+                long curScintilla;
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+                return (int)curScintilla;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Notepad++ main window handle.
+        /// </summary>
         public static IntPtr HandleNpp {
             get { return UnmanagedExports.NppData._nppHandle; }
         }
 
+        /// <summary>
+        /// Is npp currently focused?
+        /// </summary>
         public static bool IsNppWindowFocused {
             get { return (Win32Api.GetForegroundWindow() == HandleNpp); }
         }
 
+        /// <summary>
+        /// Is scintilla currently focused?
+        /// </summary>
         public static bool IsScintillaFocused {
             get { return (Win32Api.GetForegroundWindow() == HandleScintilla); }
         }
 
         /// <summary>
-        /// Returns the screen on which npp is displayed
+        /// Returns the screen on which npp is displayed (uses the point on the center of the application)
         /// </summary>
-        /// <returns></returns>
         public static Screen NppScreen {
             get {
                 Rectangle nppRect = Win32Api.GetWindowRect(HandleScintilla);
                 var nppLoc = nppRect.Location;
-                nppLoc.Offset(nppRect.Width/2, nppRect.Height/2);
+                nppLoc.Offset(nppRect.Width / 2, nppRect.Height / 2);
                 return Screen.FromPoint(nppLoc);
             }
         }
@@ -219,12 +257,88 @@ namespace _3PA {
             get { return new WindowWrapper(HandleNpp); }
         }
 
+        /// <summary>
+        /// Get the number of instances of Notepad++ currently running
+        /// </summary>
+        /// <returns></returns>
+        public static int NumberOfNppStarted {
+            get {
+                try {
+                    return Process.GetProcesses().Count(clsProcess => clsProcess.ProcessName.Contains("notepad++"));
+                } catch {
+                    return 1;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Sessions
+
+        /// <summary>
+        /// Saves the current session into a file
+        /// </summary>
         public static void SaveCurrentSession(string file) {
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
         }
 
+        /// <summary>
+        /// Load a session from a file
+        /// </summary>
         public static void LoadCurrentSession(string file) {
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_LOADSESSION, 0, file);
+        }
+
+        /// <summary>
+        /// Gets the file path of each file in the session file, return
+        /// the files separated by a new line
+        /// </summary>
+        /// <param name="sessionFilePath"></param>
+        /// <returns></returns>
+        public static List<string> GetFilesListFromSessionFile(string sessionFilePath) {
+            var output = new List<string>();
+            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            if (nbFile > 0) {
+                using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                    if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
+                        output.AddRange(cStrArray.ManagedStringsUnicode);
+                }
+            }
+            return output;
+        }
+
+        #endregion
+
+        #region Open file and Go to
+
+        /// <summary>
+        /// Opens given file in notepad++
+        /// </summary>
+        public static bool OpenFile(string file) {
+            if (!File.Exists(file)) {
+                UserCommunication.Notify(@"Can't find/open the following file :<br>" + file, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
+                return false;
+            }
+            if (GetOpenedFiles.Contains(file)) {
+                SwitchToDocument(file);
+                return true;
+            }
+            return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file).ToInt64() > 0;
+        }
+
+        /// <summary>
+        /// displays the input text into a new document
+        /// </summary>
+        public static void OpenNewDocument(string text) {
+            RunCommand(NppMenuCmd.FileNew);
+            GrabFocus();
+        }
+
+        /// <summary>
+        /// Switch to given document
+        /// </summary>
+        public static void SwitchToDocument(string doc) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
         }
 
         /// <summary>
@@ -251,12 +365,14 @@ namespace _3PA {
             }
             if (saveHistoric && CurrentFile.IsProgress)
                 _goToHistory.Push(new Tuple<string, int, Point>(CurrentFile.Path, FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
-            if (!string.IsNullOrEmpty(document) && !document.Equals(CurrentFile.Path)) {
-                if (GetOpenedFiles().Contains(document))
+
+            if (!String.IsNullOrEmpty(document) && !document.Equals(CurrentFile.Path)) {
+                if (GetOpenedFiles.Contains(document))
                     SwitchToDocument(document);
                 else
                     OpenFile(document);
             }
+
             if (position >= 0) {
                 GoToLine(LineFromPosition(position));
                 SetSel(position);
@@ -267,6 +383,7 @@ namespace _3PA {
                 else
                     SetSel(GetLine(line).Position);
             }
+
             GrabFocus();
             Plug.OnUpdateSelection();
         }
@@ -293,13 +410,17 @@ namespace _3PA {
             }
         }
 
+        #endregion
+
+        #region Core npp methods
+
         /// <summary>
         /// Helper to add a clickable icon in the toolbar
         /// </summary>
         /// <param name="image"></param>
         /// <param name="pluginId"></param>
         public static void SetToolbarImage(Bitmap image, int pluginId) {
-            var tbIcons = new toolbarIcons {hToolbarBmp = image.GetHbitmap()};
+            var tbIcons = new toolbarIcons { hToolbarBmp = image.GetHbitmap() };
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
@@ -323,36 +444,96 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// For each created dialog in your plugin, you should register it (and unregister while destroy it) to Notepad++ by using this message. 
+        /// If this message is ignored, then your dialog won't react with the key stroke messages such as TAB key. 
+        /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
+        /// </summary>
+        public static void RegisterToNpp(IntPtr handle) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
+        }
+
+        /// <summary>
+        /// For each created dialog in your plugin, you should register it (and unregister while destroy it) to Notepad++ by using this message. 
+        /// If this message is ignored, then your dialog won't react with the key stroke messages such as TAB key. 
+        /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
+        /// </summary>
+        public static void UnRegisterToNpp(IntPtr handle) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
+        }
+
+        /// <summary>
+        /// This message passes the necessary data dockingData to Notepad++ in order to make your dialog dockable
+        /// </summary>
+        public static void RegisterDockableDialog(NppTbData nppTbData) {
+            IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
+            Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+        }
+
+        /// <summary>
+        /// This message is used for your plugin's dockable dialog. S
+        /// Send this message to update (redraw) the dialog. hDlg is the handle of your dialog to be updated
+        /// </summary>
+        public static void RedrawDialog(IntPtr handle) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, handle);
+        }
+
+        /// <summary>
+        /// Send this message to show the dialog. handle is the handle of your dialog to be shown
+        /// </summary>
+        public static void ShowDockableDialog(IntPtr handle) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMSHOW, 0, handle);
+        }
+
+        /// <summary>
+        /// Send this message to hide the dialog. handle is the handle of your dialog to be hidden.
+        /// </summary>
+        public static void HideDockableDialog(IntPtr handle) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMHIDE, 0, handle);
+        }
+
+        /// <summary>
+        /// Use this message to set/remove the check on menu item. cmdID is the command ID which corresponds to the menu item.
+        /// </summary>
+        public static void SetMenuItemCheck(int cmdId, bool @checked) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, cmdId, @checked);
+        }
+
+        #endregion
+
+        #region Opened files
+
+        /// <summary>
         /// Gets the file path of each file currently opened in the primary view
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetOpenedFilesPrimary() {
-            return GetOpenedFiles(NppMsg.PRIMARY_VIEW, NppMsg.NPPM_GETOPENFILENAMESPRIMARY);
+        public static List<string> OpenedFilesInPrimaryView {
+            get { return GetOpenedFilesIn(NppMsg.PRIMARY_VIEW, NppMsg.NPPM_GETOPENFILENAMESPRIMARY); }
         }
 
         /// <summary>
         /// Gets the file path of each file currently opened in the secondary view
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetOpenedFilesSecondary() {
-            return GetOpenedFiles(NppMsg.SECOND_VIEW, NppMsg.NPPM_GETOPENFILENAMESSECOND);
+        public static List<string> OpenedFilesInSecondaryView {
+            get { return GetOpenedFilesIn(NppMsg.SECOND_VIEW, NppMsg.NPPM_GETOPENFILENAMESSECOND); }
         }
 
         /// <summary>
         /// Gets the file path of each file currently opened
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetOpenedFiles() {
-            return GetOpenedFiles(NppMsg.ALL_OPEN_FILES, NppMsg.NPPM_GETOPENFILENAMES);
+        public static List<string> GetOpenedFiles {
+            get { return GetOpenedFilesIn(NppMsg.ALL_OPEN_FILES, NppMsg.NPPM_GETOPENFILENAMES); }
         }
 
         /// <summary>
         /// Gets the file path of each file currently opened in the secondary view
         /// </summary>
         /// <returns></returns>
-        private static List<string> GetOpenedFiles(NppMsg view, NppMsg mode) {
+        private static List<string> GetOpenedFilesIn(NppMsg view, NppMsg mode) {
             var output = new List<string>();
-            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) view);
+            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)view);
             using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
                 if (Win32Api.SendMessage(HandleNpp, mode, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
@@ -360,86 +541,195 @@ namespace _3PA {
             return output;
         }
 
+        #endregion
+
+        #region Doc index
+
         /// <summary>
-        /// Gets the file path of each file in the session file, return
-        /// the files separated by a new line
+        /// Sending this message to get the current index in the view that you indicates in iView : MAIN_VIEW or SUB_VIEW
+        /// Returned value is -1 if the view is invisible (hidden), otherwise is the current index
         /// </summary>
-        /// <param name="sessionFilePath"></param>
-        /// <returns></returns>
-        public static string GetSessionFiles(string sessionFilePath) {
-            var output = new StringBuilder();
-            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
-            if (nbFile > 0) {
-                using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
-                    if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
-                        foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
+        public static int CurrentDocIndexInView(int view) {
+            return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTDOCINDEX, 0, view).ToInt32();
+        }
+
+        #endregion
+
+        #region Buffers id
+
+        /// <summary>
+        /// Returns active document buffer ID
+        /// </summary>
+        public static int CurrentBufferId {
+            get { return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0).ToInt32(); }
+        }
+
+        /// <summary>
+        /// Get document's encoding from given buffer ID. 
+        /// Returns value : if error -1, otherwise encoding number. 
+        /// enum UniMode - uni8Bit 0, uniUTF8 1, uni16BE 2, uni16LE 3, uniCookie 4, uni7Bit 5, uni16BE_NoBOM 6, uni16LE_NoBOM 7
+        /// </summary>
+        public static int CurrentBufferEncoding {
+            get { return (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, CurrentBufferId, 0); }
+        }
+
+        #endregion
+
+        #region Current lang
+
+        /// <summary>
+        /// Returns the current lang id
+        /// </summary>
+        public static int CurrentLangId {
+            get {
+                long langId;
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTLANGTYPE, 0, out langId);
+                return (int)langId;
+            }
+        }
+
+        /// <summary>
+        /// Returns the current REAL lang name (as it can be found in the langs.xml or api xml files...)
+        /// </summary>
+        public static string CurrentInternalLangName {
+            get {
+                var langName = CurrentLangName.ToLower();
+                if (langName.StartsWith("udf - ")) {
+                    return langName.Substring(6);
                 }
+                if (InternalLangNameCorrespondance.ContainsKey(langName))
+                    return InternalLangNameCorrespondance[langName];
+                return "normal";
             }
-            return output.ToString();
         }
 
         /// <summary>
-        /// Opens given file in notepad++
+        /// This dictionary is extracted from \PowerEditor\src\ScitillaComponent\ScintillaEditView.cpp
+        /// It allows to get the REAL lang name from the lang name returned by npp message NPPM_GETLANGUAGENAME
         /// </summary>
-        /// <param name="file"></param>
+        private static readonly Dictionary<string, string> InternalLangNameCorrespondance = new Dictionary<string, string>() {
+            {"normal text", "normal"},
+            {"php", "php"},
+            {"c", "c"},
+            {"c++", "cpp"},
+            {"c#", "cs"},
+            {"objective-c", "objc"},
+            {"java", "java"},
+            {"rc", "rc"},
+            {"html", "html"},
+            {"xml", "xml"},
+            {"makefile", "makefile"},
+            {"pascal", "pascal"},
+            {"batch", "batch"},
+            {"ini", "ini"},
+            {"nfo", "nfo"},
+            {"udf", "udf"},
+            {"asp", "asp"},
+            {"sql", "sql"},
+            {"visual basic", "vb"},
+            {"css", "css"},
+            {"perl", "perl"},
+            {"python", "python"},
+            {"lua", "lua"},
+            {"tex", "tex"},
+            {"fortran free form", "fortran"},
+            {"shell", "bash"},
+            {"actionscript", "actionscript"},
+            {"nsis", "nsis"},
+            {"tcl", "tcl"},
+            {"lisp", "lisp"},
+            {"scheme", "scheme"},
+            {"assembly", "asm"},
+            {"diff", "diff"},
+            {"properties file", "props"},
+            {"postscript", "postscript"},
+            {"ruby", "ruby"},
+            {"smalltalk", "smalltalk"},
+            {"vhdl", "vhdl"},
+            {"kixtart", "kix"},
+            {"autoit", "autoit"},
+            {"caml", "caml"},
+            {"ada", "ada"},
+            {"verilog", "verilog"},
+            {"matlab", "matlab"},
+            {"haskell", "haskell"},
+            {"inno setup", "inno"},
+            {"internal search", "searchresult"},
+            {"cmake", "cmake"},
+            {"yaml", "yaml"},
+            {"cobol", "cobol"},
+            {"gui4cli", "gui4cli"},
+            {"d", "d"},
+            {"powershell", "powershell"},
+            {"r", "r"},
+            {"jsp", "jsp"},
+            {"coffeescript", "coffeescript"},
+            {"json", "json"},
+            {"javascript", "javascript.js"},
+            {"fortran fixed form", "fortran77"},
+            {"external", "ext"},
+        };
+
+        /// <summary>
+        /// Returns the current Lang name
+        /// </summary>
+        public static string CurrentLangName {
+            get {
+                var currentLangId = CurrentLangId;
+                var bufLenght = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, 0);
+                var buffer = new StringBuilder(bufLenght.ToInt32());
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, buffer);
+                return buffer.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Returns the current Lang description
+        /// </summary>
+        public static string CurrentLangDesc {
+            get {
+                var currentLangId = CurrentLangId;
+                var bufLenght = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, 0);
+                var buffer = new StringBuilder(bufLenght.ToInt32());
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, buffer);
+                return buffer.ToString();
+            }
+        }
+
+        #endregion
+
+        #region Npp properties
+
+        /// <summary>
+        /// full path of directory where located Notepad++ binary
+        /// </summary>
         /// <returns></returns>
-        public static bool OpenFile(string file) {
-            if (!File.Exists(file)) {
-                UserCommunication.Notify(@"Can't find/open the following file :<br>" + file, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
-                return false;
+        public static string SoftwareInstallDirectory {
+            get {
+                var buffer = new StringBuilder(Win32Api.MaxPath);
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, Win32Api.MaxPath, buffer);
+                return buffer.ToString();
             }
-            if (GetOpenedFiles().Contains(file)) {
-                SwitchToDocument(file);
-                return true;
-            }
-            return ((int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
-        }
-
-        /// <summary>
-        /// returns npp's folder path
-        /// </summary>
-        /// <returns></returns>
-        public static string GetNppDirectory() {
-            string pathNotepadFolder;
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
-            return pathNotepadFolder;
-        }
-
-        /// <summary>
-        /// displays the input text into a new document
-        /// </summary>
-        /// <param name="text"></param>
-        public static void NewDocument(string text) {
-            RunCommand(NppMenuCmd.FileNew);
-            GrabFocus();
-        }
-
-        /// <summary>
-        /// Switch to given document
-        /// </summary>
-        /// <param name="doc"></param>
-        public static void SwitchToDocument(string doc) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
         }
 
         /// <summary>
         /// returns npp.exe path
         /// </summary>
         /// <returns></returns>
-        public static string GetNppExePath {
-            get { return Path.Combine(GetNppDirectory(), "notepad++.exe"); }
+        public static string SoftwareExePath {
+            get { return Path.Combine(SoftwareInstallDirectory, "notepad++.exe"); }
         }
 
         /// <summary>
         /// Returns the current version of notepad++ (format vX.X.X)
         /// </summary>
         /// <returns></returns>
-        public static string GetNppVersion {
+        public static string SoftwareVersion {
             get {
-                if (string.IsNullOrEmpty(_nppVersion)) {
+                if (String.IsNullOrEmpty(_nppVersion)) {
                     var nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
                     var lowWord = (nppVersion & 0x0000FFFF).ToString();
-                    _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
+                    _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (String.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
                 return _nppVersion;
             }
@@ -448,16 +738,14 @@ namespace _3PA {
         private static string _nppVersion;
 
         /// <summary>
-        /// Get the number of instances of Notepad++ currently running
+        /// full path of directory where located Notepad++ binary
         /// </summary>
         /// <returns></returns>
-        public static int NumberOfNppStarted {
+        public static string SoftwarePluginConfigDirectory {
             get {
-                try {
-                    return Process.GetProcesses().Count(clsProcess => clsProcess.ProcessName.Contains("notepad++"));
-                } catch {
-                    return 1;
-                }
+                var buffer = new StringBuilder(Win32Api.MaxPath);
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
+                return buffer.ToString();
             }
         }
 
@@ -465,22 +753,34 @@ namespace _3PA {
         /// Returns the configuration directory path e.g. /plugins/config/{AssemblyProduct}
         /// </summary>
         /// <returns></returns>
-        public static string GetConfigDir() {
-            if (string.IsNullOrEmpty(_configDir)) {
-                var buffer = new StringBuilder(Win32Api.MaxPath);
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
-                _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.AssemblyProduct);
-                Utils.CreateDirectory(_configDir);
+        public static string ConfigDirectory {
+            get {
+                if (string.IsNullOrEmpty(_configDir)) {
+                    _configDir = Path.Combine(SoftwarePluginConfigDirectory, AssemblyInfo.AssemblyProduct);
+                    Utils.CreateDirectory(_configDir);
+                }
+                return _configDir;
             }
-            return _configDir;
         }
 
         private static string _configDir;
+
+        #endregion
+
+        #region Misc commands
 
         /// <summary>
         /// Leaves npp
         /// </summary>
         public static void Exit() {
+            RunCommand(NppMenuCmd.FileExit);
+        }
+
+        /// <summary>
+        /// Restart npp
+        /// </summary>
+        public static void Restart() {
+            _3PUpdater.Instance.ExecuteProgramAfterUpdate(SoftwareExePath);
             RunCommand(NppMenuCmd.FileExit);
         }
 
@@ -491,5 +791,15 @@ namespace _3PA {
         public static void RunCommand(NppMenuCmd cmd) {
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
         }
+
+        /// <summary>
+        /// Reload given document
+        /// </summary>
+        public static void Reload(string path, bool askConfirmation) {
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_RELOADFILE, askConfirmation ? 1 : 0, path);
+        }
+
+        #endregion
+
     }
 }

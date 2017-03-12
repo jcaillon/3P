@@ -27,6 +27,7 @@ using _3PA.Properties;
 
 namespace _3PA.Lib._3pUpdater {
     internal class _3PUpdater {
+
         #region private fields
 
         private static _3PUpdater _instance;
@@ -46,7 +47,31 @@ namespace _3PA.Lib._3pUpdater {
 
         #endregion
 
+        #region Life and death
+
+        public _3PUpdater() {
+            // make sure to reset the file
+            Utils.DeleteFile(Config.FileUpdaterLst);
+        }
+
+        #endregion
+
+
         #region methods
+
+        /// <summary>
+        /// Allows to execute a program after npp has been shutdown and the update is over
+        /// </summary>
+        public bool ExecuteProgramAfterUpdate(string pathToExe) {
+            if (string.IsNullOrEmpty(pathToExe))
+                return false;
+
+            File.AppendAllText(Config.FileUpdaterLst, string.Join("\t", @"Start", pathToExe) + "\r\n", Encoding.Default);
+
+            SubscribeToShutdownEvent(TypeOfExeNeeded.UserRights);
+
+            return true;
+        }
 
         /// <summary>
         /// Use to method to a file that needs to be moved AFTER npp is shutdown
@@ -58,14 +83,9 @@ namespace _3PA.Lib._3pUpdater {
             // configure the update
             File.AppendAllText(Config.FileUpdaterLst, string.Join("\t", from, to) + "\r\n", Encoding.Default);
 
-            // subscribe to the Npp shutdown event if it's not already done
-            if (_typeOfExeNeeded == TypeOfExeNeeded.None)
-                Plug.OnShutDown += ExecuteUpdateAsync;
-
             // test if the destination directory is writable
-            var typeOfExeNeeded = Utils.IsDirectoryWritable(Path.GetDirectoryName(to)) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights;
-            if (typeOfExeNeeded > _typeOfExeNeeded)
-                _typeOfExeNeeded = typeOfExeNeeded;
+            SubscribeToShutdownEvent(Utils.IsDirectoryWritable(Path.GetDirectoryName(to)) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights);
+
             return true;
         }
 
@@ -74,6 +94,15 @@ namespace _3PA.Lib._3pUpdater {
         /// </summary>
         public bool IsAdminRightsNeeded {
             get { return _typeOfExeNeeded == TypeOfExeNeeded.AdminRights; }
+        }
+
+        private void SubscribeToShutdownEvent(TypeOfExeNeeded typeOfExeNeeded) {
+            // subscribe to the Npp shutdown event if it's not already done
+            if (_typeOfExeNeeded == TypeOfExeNeeded.None)
+                Plug.OnShutDown += ExecuteUpdateAsync;
+
+            if (typeOfExeNeeded > _typeOfExeNeeded)
+                _typeOfExeNeeded = typeOfExeNeeded;
         }
 
         private void ExecuteUpdateAsync() {

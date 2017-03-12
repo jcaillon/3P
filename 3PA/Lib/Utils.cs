@@ -59,6 +59,7 @@ namespace _3PA.Lib {
     /// Class that exposes utility methods
     /// </summary>
     internal static class Utils {
+
         #region File manipulation wrappers
 
         /// <summary>
@@ -123,10 +124,16 @@ namespace _3PA.Lib {
         /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
         /// </summary>
         public static string ReadAllText(string path, Encoding encoding = null) {
-            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
-                return textReader.ReadToEnd();
+            try {
+                using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
+                        return textReader.ReadToEnd();
+                    }
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while the following file : " + path);
             }
+            return null;
         }
 
         /// <summary>

@@ -34,12 +34,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             InitializeComponent();
 
             // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
+            Npp.RegisterToNpp(Handle);
         }
 
         protected override void OnClosing(CancelEventArgs e) {
             // register to Npp
-            FormIntegration.UnRegisterToNpp(Handle);
+            Npp.UnRegisterToNpp(Handle);
             base.OnClosing(e);
         }
     }

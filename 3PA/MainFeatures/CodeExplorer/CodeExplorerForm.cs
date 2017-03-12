@@ -353,8 +353,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // change option and image
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-            // parse document
-            Plug.DoNppDocumentSwitched();
+            // Parse the document
+            ParserHandler.ParseCurrentDocument(true);
             Npp.GrabFocus();
         }
 

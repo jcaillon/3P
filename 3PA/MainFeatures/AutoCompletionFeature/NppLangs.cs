@@ -106,11 +106,16 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 var nameAttr = lang.GetAttribute(@"name");
                 var extAttr = lang.GetAttribute(@"ext");
                 if (nameAttr != null && extAttr != null) {
-                    if (!_langDescriptions.ContainsKey(nameAttr.Value)) {
-                        _langDescriptions.Add(nameAttr.Value, new LangDescription {LangName = nameAttr.Value, IsUserLang = fromUserDefinedLang});
+                    var langName = nameAttr.Value.ToLower();
+                    if (!_langDescriptions.ContainsKey(langName)) {
+                        _langDescriptions.Add(langName, new LangDescription {
+                            LangName = langName, 
+                            IsUserLang = fromUserDefinedLang
+                        });
                         foreach (var ext in extAttr.Value.Split(' ')) {
-                            if (!_langNames.ContainsKey("." + ext))
-                                _langNames.Add("." + ext, nameAttr.Value);
+                            var langExt = "." + ext.ToLower();
+                            if (!_langNames.ContainsKey(langExt))
+                                _langNames.Add(langExt, langName);
                         }
                     }
                 }
@@ -135,7 +140,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Returns a language name for the given extension (or null)
         /// </summary>
         public string GetLangName(string fileExtention) {
-            return _langNames.ContainsKey(fileExtention) ? _langNames[fileExtention] : string.Empty;
+            return _langNames.ContainsKey(fileExtention) ? _langNames[fileExtention] : "normal";
         }
 
         #endregion

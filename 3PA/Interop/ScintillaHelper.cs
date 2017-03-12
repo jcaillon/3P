@@ -1617,19 +1617,29 @@ namespace _3PA.Interop {
 
     [Flags]
     public enum SciModificationMod : uint {
-        // Modified notification types
-        SC_MOD_INSERTTEXT = 0x1,
-        SC_MOD_DELETETEXT = 0x2,
-        SC_MOD_BEFOREINSERT = 0x400,
-        SC_MOD_BEFOREDELETE = 0x800,
-        SC_MOD_CHANGEANNOTATION = 0x20000,
-        SC_MOD_INSERTCHECK = 0x100000,
-
-        // Modified flags
+        SC_MOD_INSERTTEXT = 0x01,
+        SC_MOD_DELETETEXT = 0x02,
+        SC_MOD_CHANGESTYLE = 0x04,
+        SC_MOD_CHANGEFOLD = 0x08,
         SC_PERFORMED_USER = 0x10,
         SC_PERFORMED_UNDO = 0x20,
         SC_PERFORMED_REDO = 0x40,
-        SC_LASTSTEPINUNDOREDO = 0x100
+        SC_MULTISTEPUNDOREDO = 0x80,
+        SC_LASTSTEPINUNDOREDO = 0x100,
+        SC_MOD_CHANGEMARKER = 0x200,
+        SC_MOD_BEFOREINSERT = 0x400,
+        SC_MOD_BEFOREDELETE = 0x800,
+        SC_MOD_CHANGEINDICATOR = 0x4000,
+        SC_MOD_CHANGELINESTATE = 0x8000,
+        SC_MOD_CHANGETABSTOPS = 0x200000,
+        SC_MOD_LEXERSTATE = 0x80000,
+        SC_MOD_CHANGEMARGIN = 0x10000,
+        SC_MOD_CHANGEANNOTATION = 0x20000,
+        SC_MOD_INSERTCHECK = 0x100000,
+        SC_MULTILINEUNDOREDO = 0x1000,
+        SC_STARTACTION = 0x2000,
+        SC_MOD_CONTAINER = 0x40000,
+        SC_MODEVENTMASKALL = 0x1FFFFF,
     }
 
     [Flags]

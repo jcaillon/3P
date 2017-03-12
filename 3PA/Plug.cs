@@ -172,9 +172,9 @@ namespace _3PA {
                 }
 
                 // check Npp version, 3P requires version 6.8 or higher
-                if (!String.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("7.2")) {
+                if (!String.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherVersionThan("7.2")) {
                     if (!Config.Instance.NppOutdatedVersion) {
-                        UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+                        UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.SoftwareVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
                         Config.Instance.NppOutdatedVersion = true;
                     }
                 } else
@@ -192,14 +192,14 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(Npp.NppFile.PathFromApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    CodeExplorer.Instance.Toggle(Npp.NppFile.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.CodeExplorerVisible) {
                     CodeExplorer.Instance.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(Npp.NppFile.PathFromApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    FileExplorer.Instance.Toggle(Npp.NppFile.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.FileExplorerVisible) {
                     FileExplorer.Instance.Toggle();
                 }
@@ -487,6 +487,9 @@ namespace _3PA {
             Npp.CurrentFile.Update();
             Npp.CurrentFile.FileInfoObject = FilesInfo.GetFileInfo(Npp.CurrentFile.Path);
 
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyOptionsForScintilla();
+
             // if the file has just been opened
             if (!_openedFileList.Contains(Npp.CurrentFile.Path)) {
                 _openedFileList.Add(Npp.CurrentFile.Path);
@@ -514,27 +517,23 @@ namespace _3PA {
         }
 
         public static void DoNppDocumentSwitched(bool initiating = false) {
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyOptionsForScintilla();
-
             // close popups..
             ClosePopups();
 
-            // Update info on the current file
-            FilesInfo.UpdateErrorsInScintilla();
-
-            if (!initiating) {
+            if (initiating) {
+                // make sure to use the ProEnvironment and colorize the error counter
+                FilesInfo.UpdateFileStatus();
+            } else {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
                 }
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
                     FileExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
                 }
-            } else {
-                // make sure to use the ProEnvironment and colorize the error counter
-                FilesInfo.UpdateFileStatus();
             }
 
+            // Update info on the current file
+            FilesInfo.UpdateErrorsInScintilla();
             ProEnvironment.Current.ReComputeProPath();
 
             // rebuild lines info (MANDATORY)
@@ -557,9 +556,6 @@ namespace _3PA {
         /// no matter if the document is a Progress file or not
         /// </summary>
         public static void DoNppDocumentSaved() {
-            // the user can open a .txt and save it as a .p
-            DoNppBufferActivated();
-
             // if it's a conf file, import it
             ShareExportConf.TryToImportFile(Npp.CurrentFile.Path);
         }
@@ -587,14 +583,6 @@ namespace _3PA {
         /// Called when the user enters any character in npp
         /// </summary>
         public static void OnSciCharTyped(char c) {
-            /*
-            // CTRL + S : char code 19
-            if (c == (char) 19) {
-                Npp.Undo();
-                Npp.SaveCurrentDocument();
-                return;
-            }
-            */
             // we are still entering a keyword
             if (Abl.IsCharAllowedInVariables(c)) {
                 ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordContinue(c); });
@@ -692,6 +680,7 @@ namespace _3PA {
                 ParserHandler.ParseCurrentDocument();
             }
 
+            // the user pressed UNDO or REDO
             if ((nc.modificationType & (int) SciModificationMod.SC_LASTSTEPINUNDOREDO) != 0) {
                 ClosePopups();
             }
@@ -727,7 +716,6 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnSciDwellStart() {
-            // only do extra stuff if we are in a progress file
             if (!Npp.CurrentFile.IsProgress)
                 return;
 
@@ -744,14 +732,15 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// called when the user changes its selection in npp (the carret moves)
+        /// called when the user changes its selection in npp (the caret moves)
         /// </summary>
         public static void OnUpdateSelection() {
-            Npp.UpdateScintilla();
-
             // close popup windows
             ClosePopups();
             Snippets.FinalizeCurrent();
+
+            if (!Npp.CurrentFile.IsProgress)
+                return;
 
             // update scope of code explorer (the selection img)
             CodeExplorer.Instance.UpdateCurrentScope();
@@ -832,13 +821,14 @@ namespace _3PA {
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         internal static void ApplyOptionsForScintilla() {
-            // need to do this stuff uniquely for both scintilla
+            // need to do this stuff only once for each scintilla
+
             var curScintilla = Npp.CurrentScintilla; // 0 or 1
             if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
-                Npp.EventMask = (int) (SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);
+                //Npp.EventMask = (int) (SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);                
                 _initiatedScintilla[curScintilla] = 1;
             }
 
@@ -855,8 +845,8 @@ namespace _3PA {
                 _indentWithTabs = Npp.UseTabs;
                 _whitespaceMode = Npp.ViewWhitespace;
                 AnnotationMode = Npp.AnnotationVisible;
+                _hasBeenInit = true;
             }
-            _hasBeenInit = true;
 
             Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
             Npp.UseTabs = false;

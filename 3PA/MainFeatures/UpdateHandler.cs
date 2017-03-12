@@ -35,6 +35,7 @@ namespace _3PA.MainFeatures {
     /// Handles the update of this software
     /// </summary>
     internal static class UpdateHandler {
+
         #region fields
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace _3PA.MainFeatures {
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
-                    new List<string> {"ok"},
+                    new List<string> { "ok" },
                     false);
 
                 // delete update related files/folders
@@ -103,7 +104,7 @@ namespace _3PA.MainFeatures {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(true);
-            }, 1000*60*120);
+            }, 1000 * 60 * 120);
         }
 
         /// <summary>
@@ -291,14 +292,22 @@ namespace _3PA.MainFeatures {
                     <br>
                     A new version of 3P has been downloaded!<br>
                     It will be automatically installed the next time you restart Notepad++<br>
-                    <br>
+                    <br>                   
                     Your version: <b>" + AssemblyInfo.Version + @"</b><br>
                     Distant version: <b>" + _latestReleaseInfo.tag_name + @"</b><br>
                     Release name: <b>" + _latestReleaseInfo.name + @"</b><br>
                     Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
-                                                                  "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
-                                                                  (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                                                                  (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
+                    "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
+                    (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
+                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") +
+                    "<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>", 
+                    MessageImg.MsgUpdate, "Update check", "An update is available", 
+                    args => {
+                        if (args.Link.Equals("Restart")) {
+                            args.Handled = true;
+                            Npp.Restart();
+                        }
+                    });
 
                 // stop checking for more updates :)
                 _checkEveryHourAction.Dispose();

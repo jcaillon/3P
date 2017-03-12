@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Themes;
 using _3PA.Lib;
 
 // ReSharper disable LocalizableElement
@@ -100,8 +101,15 @@ namespace _3PA.MainFeatures {
                 var info = GetExceptionInfo(e);
 
                 // make sure that this error actually concerns 3P!
-                if (!info.fullException.ContainsFast("YamuiFramework.") &&
-                    !info.fullException.ContainsFast("_3PA."))
+                var libNs = typeof(ErrorHandler).Namespace;
+                var frameworkNs = typeof(YamuiTheme).Namespace;
+                if (string.IsNullOrEmpty(libNs))
+                    libNs = "_3PA_.";
+                if (string.IsNullOrEmpty(frameworkNs))
+                    frameworkNs = "YamuiFramework.";
+
+                if (!info.fullException.ContainsFast(libNs.Substring(0, libNs.IndexOf(".", StringComparison.Ordinal) + 1)) &&
+                    !info.fullException.ContainsFast(frameworkNs.Substring(0, frameworkNs.IndexOf(".", StringComparison.Ordinal) + 1)))
                     return false;
 
                 // don't show the same error twice in a session

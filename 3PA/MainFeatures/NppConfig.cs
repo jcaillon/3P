@@ -127,7 +127,7 @@ namespace _3PA.MainFeatures {
             // replace default config by its copy on npp shutdown
             _3PUpdater.Instance.AddFileToMove(configCopyPath, Config.FileNppConfigXml);
 
-            Npp.Exit();
+            Npp.Restart();
         }
 
         #endregion

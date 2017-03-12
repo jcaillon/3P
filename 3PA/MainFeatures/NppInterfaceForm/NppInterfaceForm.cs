@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             Movable = true;
 
             // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
+            Npp.RegisterToNpp(Handle);
 
             CurrentForegroundWindow = Npp.HandleScintilla;
 
@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
-            FormIntegration.UnRegisterToNpp(Handle);
+            Npp.UnRegisterToNpp(Handle);
             Tag = true;
             Close();
         }

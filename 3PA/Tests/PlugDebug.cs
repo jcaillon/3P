@@ -49,7 +49,7 @@ namespace _3PA.Tests {
         #region debug
 
         public static void ParseReferenceFile() {
-            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "Parser_in.p")));
+            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.ConfigDirectory, "Tests", "Parser_in.p")));
         }
 
         public static void ParseCurrentFile() {
@@ -58,7 +58,7 @@ namespace _3PA.Tests {
 
         public static void ParseAllFiles() {
             // create unique temporary folder
-            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "ParseAllFiles_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+            var testDir = Path.Combine(Npp.ConfigDirectory, "Tests", "ParseAllFiles_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
             string outNotif = "";
             var outFile = Path.Combine(testDir, "out.txt");
             if (!Utils.CreateDirectory(testDir))
@@ -293,19 +293,21 @@ namespace _3PA.Tests {
                 MeasureIt(() => {
                     var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
                     UserCommunication.Notify(list.Count.ToString());
-                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
+                    File.WriteAllLines(Path.Combine(Npp.ConfigDirectory, "Tests", "out.txt"), list.OrderBy(s => s));
                 });
             });
             Task.Factory.StartNew(() => {
                 MeasureIt(() => {
                     var list = RecurseDirectory(ProEnvironment.Current.BaseLocalPath, -1);
                     UserCommunication.Notify(list.Count.ToString());
-                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
+                    File.WriteAllLines(Path.Combine(Npp.ConfigDirectory, "Tests", "out.txt"), list.OrderBy(s => s));
                 });
             });
         }
 
         public static void DebugTest3() {
+
+            UserCommunication.Notify( Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
 
             MeasureIt(() => {
                 var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
@@ -314,15 +316,14 @@ namespace _3PA.Tests {
             //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
 
             //RunParserTests(Npp.Text);
-
-            /*
+            
             UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
                     new List<string> { "ok", "cancel" },
                     true);
-             */
+             
         }
 
         public static void DisplayBugs() {
@@ -345,7 +346,7 @@ namespace _3PA.Tests {
 
         public static void RunParserTests(string content) {
             // create unique temporary folder
-            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", "RunParserTests_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+            var testDir = Path.Combine(Npp.ConfigDirectory, "Tests", "RunParserTests_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
 
             var perfFile = Path.Combine(testDir, "perfs.txt");
             if (!Utils.CreateDirectory(testDir))

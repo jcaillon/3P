@@ -92,6 +92,9 @@ namespace _3PA {
                         return;
 
                     case (uint) NppNotif.NPPN_FILESAVED:
+                        // the user can open a .txt and save it as a .p
+                        DoNppBufferActivated();
+
                         DoNppDocumentSaved();
                         return;
 
