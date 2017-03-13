@@ -365,7 +365,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="NppCore\UnmanagedExports.cs" />
-    <None Include="Resources\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">
@@ -707,7 +706,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set NPPFOLDERNAME=3P_notepad++
+    <PostBuildEvent>echo [INFO] End of build for 3P
+set NPPFOLDERNAME=3P_notepad++
 if "$(PlatformName)" == "x64" (
 	set NPPFOLDERNAME=3P_notepad++x64
 )
@@ -746,25 +746,8 @@ exit 0</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <PropertyGroup>
-    <PreBuildEvent>echo [INFO] Copying Yamuiframework dll to Lib\YamuiFolder\...
-copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll" "$(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll" &gt;nul
-if not "%25ERRORLEVEL%25" == "0" (
-	exit 1
-) 
-
-set NPPFOLDERNAME=3P_notepad++
-if "$(PlatformName)" == "x64" (
-	set NPPFOLDERNAME=3P_notepad++x64
-)
-
-if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( 
-	echo [INFO] Copying Yamuiframework pdb to %25NPPFOLDERNAME%25 folder...
-	if exist "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.pdb" (
-		copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.pdb" "$(SolutionDir)..\3P_notepad++\plugins\Config\3P\Libraries\YamuiFramework.pdb") &gt;nul
-	)
-)
-
-exit 0</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
