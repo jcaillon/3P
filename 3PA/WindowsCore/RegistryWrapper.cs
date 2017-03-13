@@ -17,7 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace _3PA.Lib {
+namespace _3PA.WindowsCore {
     public static class RegistryWrapper {
         /*
         /// <summary>

@@ -72,7 +72,8 @@ namespace _3PA.Lib.CommonMark.Syntax {
         /// <summary>
         /// Obsolete. Use <see cref="AtxHeading"/> instead.
         /// </summary>
-        [Obsolete("Use AtxHeading instead.")] AtxHeader = AtxHeading,
+        [Obsolete("Use AtxHeading instead.")]
+        AtxHeader = AtxHeading,
 
         /// <summary>
         /// A heading element that was parsed from a Setext style markup (<c>heading\n========</c>).
@@ -82,7 +83,8 @@ namespace _3PA.Lib.CommonMark.Syntax {
         /// <summary>
         /// Obsolete. Use <see cref="SetextHeading"/> instead.
         /// </summary>
-        [Obsolete("Use SetextHeading instead.")] SETextHeader = SetextHeading,
+        [Obsolete("Use SetextHeading instead.")]
+        SETextHeader = SetextHeading,
 
         /// <summary>
         /// A thematic break element.
@@ -92,7 +94,8 @@ namespace _3PA.Lib.CommonMark.Syntax {
         /// <summary>
         /// Obsolete. Use <see cref="ThematicBreak"/> instead.
         /// </summary>
-        [Obsolete("Use ThematicBreak instead.")] HorizontalRuler = ThematicBreak,
+        [Obsolete("Use ThematicBreak instead.")]
+        HorizontalRuler = ThematicBreak,
 
         /// <summary>
         /// A text block that contains only link reference definitions.

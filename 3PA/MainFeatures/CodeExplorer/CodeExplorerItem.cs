@@ -176,27 +176,68 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     internal enum CodeExplorerBranch {
-        [Description("Root")] Root,
-        [Description("Appbuilder blocks")] Block,
-        [Description("Program parameters")] ProgramParameter,
-        [Description("ON events")] OnEvent,
-        [Description("Main block")] MainBlock,
-        [Description("Includes")] Include,
-        [Description("External procedures")] ExternalProcedure,
-        [Description("Procedures")] Procedure,
-        [Description("Functions")] Function,
-        [Description("Subscribe")] Subscribe,
-        [Description("Publish")] Publish,
-        [Description("Unsubscribe")] Unsubscribe,
-        [Description("Defined temp-tables")] DefinedTempTable,
-        [Description("Run internal routine")] Run,
-        [Description("Run external procedure")] RunExternal,
-        [Description("Static function calls")] StaticFunctionCall,
-        [Description("Internal dynamic function calls")] DynamicFunctionCall,
-        [Description("External dynamic function calls")] DynamicFunctionCallExternal,
-        [Description("Browse definitions")] Browse,
-        [Description("Tables used")] TableUsed,
-        [Description("Temp-tables used")] TempTableUsed
+        [Description("Root")]
+        Root,
+
+        [Description("Appbuilder blocks")]
+        Block,
+
+        [Description("Program parameters")]
+        ProgramParameter,
+
+        [Description("ON events")]
+        OnEvent,
+
+        [Description("Main block")]
+        MainBlock,
+
+        [Description("Includes")]
+        Include,
+
+        [Description("External procedures")]
+        ExternalProcedure,
+
+        [Description("Procedures")]
+        Procedure,
+
+        [Description("Functions")]
+        Function,
+
+        [Description("Subscribe")]
+        Subscribe,
+
+        [Description("Publish")]
+        Publish,
+
+        [Description("Unsubscribe")]
+        Unsubscribe,
+
+        [Description("Defined temp-tables")]
+        DefinedTempTable,
+
+        [Description("Run internal routine")]
+        Run,
+
+        [Description("Run external procedure")]
+        RunExternal,
+
+        [Description("Static function calls")]
+        StaticFunctionCall,
+
+        [Description("Internal dynamic function calls")]
+        DynamicFunctionCall,
+
+        [Description("External dynamic function calls")]
+        DynamicFunctionCallExternal,
+
+        [Description("Browse definitions")]
+        Browse,
+
+        [Description("Tables used")]
+        TableUsed,
+
+        [Description("Temp-tables used")]
+        TempTableUsed
     }
 
     /// <summary>

@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using _3PA.Interop;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (GiveFocusBackToScintilla)
                 Npp.GrabFocus();
             else
-                Win32Api.SetForegroundWindow(CurrentForegroundWindow);
+                WinApi.SetForegroundWindow(CurrentForegroundWindow);
             IsActivated = !IsActivated;
             Opacity = UnfocusedOpacity;
         }

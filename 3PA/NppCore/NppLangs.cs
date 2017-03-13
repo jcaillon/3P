@@ -25,8 +25,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using _3PA.Lib;
+using _3PA.MainFeatures;
 
-namespace _3PA.MainFeatures.AutoCompletionFeature {
+namespace _3PA.NppCore {
     /// <summary>
     /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
     /// supported by npp; this file list the extensions for each lang as well as the keywords
@@ -109,7 +110,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     var langName = nameAttr.Value.ToLower();
                     if (!_langDescriptions.ContainsKey(langName)) {
                         _langDescriptions.Add(langName, new LangDescription {
-                            LangName = langName, 
+                            LangName = langName,
                             IsUserLang = fromUserDefinedLang
                         });
                         foreach (var ext in extAttr.Value.Split(' ')) {

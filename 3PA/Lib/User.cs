@@ -22,6 +22,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using _3PA.MainFeatures;
+using _3PA.NppCore;
 
 namespace _3PA.Lib {
     public static class User {
@@ -38,7 +39,7 @@ namespace _3PA.Lib {
                     lastPing = DateTime.MinValue;
                 }
                 // ping once every hour
-                if (DateTime.Now.Subtract(lastPing).TotalMinutes > 59) {
+                if (DateTime.Now.Subtract(lastPing).TotalMinutes > Config.Instance.TechnicalPingEveryXMin) {
                     var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
                     webServiceJson.AddToReq("UUID", UniqueId);
                     webServiceJson.AddToReq("userName", Name);
@@ -80,15 +81,15 @@ namespace _3PA.Lib {
                     string checkIdPath = Path.Combine(Path.GetTempPath(), "x" + Environment.Version + ".tmp");
                     if (File.Exists(checkIdPath)) {
                         var content = File.ReadAllText(checkIdPath);
-                        if (content.Length == 36 && !Config.Instance.MyUuid.Equals(content))
-                            Config.Instance.MyUuid = content;
+                        if (content.Length == 36 && !Config.Instance.TechnicalMyUuid.Equals(content))
+                            Config.Instance.TechnicalMyUuid = content;
                     } else
-                        Utils.FileWriteAllText(checkIdPath, Config.Instance.MyUuid);
+                        Utils.FileWriteAllText(checkIdPath, Config.Instance.TechnicalMyUuid);
                 } catch (Exception e) {
                     if (Config.IsDevelopper)
                         ErrorHandler.ShowErrors(e);
                 }
-                return Config.Instance.MyUuid;
+                return Config.Instance.TechnicalMyUuid;
             }
         }
 

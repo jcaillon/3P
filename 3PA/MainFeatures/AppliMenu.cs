@@ -25,12 +25,13 @@ using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Forms;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 using _3PA.Tests;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures {
     /// <summary>

@@ -34,6 +34,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal partial class FileExplorerForm : NppDockableDialogForm {

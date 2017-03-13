@@ -25,12 +25,12 @@ using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli.Pages.Actions;
 using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli {
     internal partial class AppliForm : YamuiMainAppli {

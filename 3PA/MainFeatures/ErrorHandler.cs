@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
@@ -71,20 +72,21 @@ namespace _3PA.MainFeatures {
         /// <param name="e"></param>
         /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message = null) {
-            if (LogError(e, message)) {
-                if (UserCommunication.Ready) {
+            if (!UserCommunication.Ready) {
+                // show an old school message
+                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a huge probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Plug.OnPlugReady += () => { ShowErrors(e, "Error on plugin loading..."); };
+            } else {
+                if (LogError(e, message)) {
                     // show it to the user
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
-                        MessageImg.MsgPoison, "An error has occured", message,
+                    UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                        MessageImg.MsgPoison, "An error has occurred", message,
                         args => {
                             if (args.Link.EndsWith(".log")) {
                                 Npp.Goto(args.Link);
                                 args.Handled = true;
                             }
                         });
-                } else {
-                    // show an old school message
-                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -143,7 +145,6 @@ namespace _3PA.MainFeatures {
 
                 // send the report
                 SendBugReport(info);
-
             } catch (Exception x) {
                 if (Config.IsDevelopper)
                     ShowErrors(x, message);

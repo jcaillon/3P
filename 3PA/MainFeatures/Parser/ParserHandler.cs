@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.NppCore;
 using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {

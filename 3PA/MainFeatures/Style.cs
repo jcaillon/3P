@@ -26,9 +26,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Data;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
     /// <summary>
@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures {
                 if (onlyCheckInstall)
                     return false;
                 // if it doesn't exist in the file
-                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + "</b>", MessageImg.MsgInfo, "Information", "Installing syntax highlighting", 
+                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + "</b>", MessageImg.MsgInfo, "Information", "Installing syntax highlighting",
                     args => {
                         args.Handled = true;
                         Npp.Restart();

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiSmokeScreen.cs) is part of YamuiFramework.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -89,7 +92,7 @@ namespace YamuiFramework.Forms {
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;
-                DwmApi.DwmSetWindowAttribute(owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                WinApi.DwmSetWindowAttribute(owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             base.Opacity = 0d;
@@ -121,7 +124,7 @@ namespace YamuiFramework.Forms {
                     Owner.VisibleChanged -= Cover_OnVisibleChanged;
                     if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                         int value = 0;
-                        DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                        WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
                     }
                 }
             } catch (Exception) {

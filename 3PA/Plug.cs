@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
@@ -36,10 +35,11 @@ using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
-
     /// <summary>
     /// The entry points for this plugin are the following :<br></br>
     /// - Main (through UnmanagedExports)<br></br>
@@ -47,8 +47,7 @@ namespace _3PA {
     /// - OnMouseMessage<br></br>
     /// - OnKeyDown<br></br>
     /// </summary>
-    internal static partial class Plug {
-
+    internal static class Plug {
         #region events
 
         /// <summary>
@@ -117,6 +116,8 @@ namespace _3PA {
 
         /// <summary>
         /// Called when the plugin menu of the plugin needs to be filled
+        /// We can call UnmanagedExports.NppFuncItems.RefreshItems(); later on if we had stuff
+        /// in the plugin menu via Npp.SetCommand
         /// </summary>
         internal static void DoFuncItemsNeeded() {
             var cmdIndex = 0;
@@ -238,7 +239,7 @@ namespace _3PA {
             DoNppBufferActivated(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
-            Win32Api.SetForegroundWindow(Npp.HandleNpp);
+            WinApi.SetForegroundWindow(Npp.HandleNpp);
         }
 
         #endregion
@@ -296,10 +297,10 @@ namespace _3PA {
 
         #region On mouse message
 
-        private static bool MouseMessageHandler(Win32Api.WindowsMessageMouse message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
+        public static bool MouseMessageHandler(WinApi.Messages message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
             switch (message) {
                 // middle click : go to definition
-                case Win32Api.WindowsMessageMouse.WM_MBUTTONDOWN:
+                case WinApi.Messages.WM_MBUTTONDOWN:
                     if (Npp.CurrentFile.IsProgress) {
                         if (KeyboardMonitor.GetModifiers.IsCtrl) {
                             Npp.GoBackFromDefinition();
@@ -310,7 +311,7 @@ namespace _3PA {
                     return true;
                 //break;
                 // (CTRL + ) Right click : show main menu
-                case Win32Api.WindowsMessageMouse.WM_RBUTTONUP:
+                case WinApi.Messages.WM_RBUTTONUP:
                     if (KeyboardMonitor.GetModifiers.IsCtrl) {
                         // we need the cursor to be in scintilla but not on the application or the auto-completion!
                         if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
@@ -326,19 +327,19 @@ namespace _3PA {
             // HACK: The following is to handle the MOVE/RESIZE event of npp's window. 
             // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
             switch (message) {
-                case Win32Api.WindowsMessageMouse.WM_NCLBUTTONDOWN:
-                    if (!Win32Api.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
-                        MouseMonitor.Instance.Add(Win32Api.WindowsMessageMouse.WM_MOUSEMOVE);
+                case WinApi.Messages.WM_NCLBUTTONDOWN:
+                    if (!WinApi.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
+                        MouseMonitor.Instance.Add(WinApi.Messages.WM_MOUSEMOVE);
                     }
                     break;
-                case Win32Api.WindowsMessageMouse.WM_LBUTTONUP:
-                case Win32Api.WindowsMessageMouse.WM_NCLBUTTONUP:
-                    if (MouseMonitor.Instance.Remove(Win32Api.WindowsMessageMouse.WM_MOUSEMOVE)) {
+                case WinApi.Messages.WM_LBUTTONUP:
+                case WinApi.Messages.WM_NCLBUTTONUP:
+                    if (MouseMonitor.Instance.Remove(WinApi.Messages.WM_MOUSEMOVE)) {
                         if (OnNppWindowsMove != null)
                             OnNppWindowsMove();
                     }
                     break;
-                case Win32Api.WindowsMessageMouse.WM_MOUSEMOVE:
+                case WinApi.Messages.WM_MOUSEMOVE:
                     if (OnNppWindowsMove != null)
                         OnNppWindowsMove();
                     break;
@@ -355,7 +356,7 @@ namespace _3PA {
         /// Called when the user presses a key
         /// </summary>
         // ReSharper disable once RedundantAssignment
-        private static bool KeyDownHandler(KeyEventArgs e) {
+        public static bool KeyDownHandler(KeyEventArgs e) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             bool handled = false;
 
@@ -399,7 +400,7 @@ namespace _3PA {
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
-                var curWindow = Control.FromHandle(Win32Api.GetForegroundWindow());
+                var curWindow = Control.FromHandle(WinApi.GetForegroundWindow());
                 if (curWindow != null) {
                     var invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] {(object) e});
                     if (invokeResponse != null && (bool) invokeResponse)
@@ -453,7 +454,7 @@ namespace _3PA {
         /// <summary>
         /// Called when a file is about to be closed in notepad++
         /// </summary>
-        private static void OnNppFileBeforeClose() {
+        public static void OnNppFileBeforeClose() {
             // remove the file from the opened files list
             if (_openedFileList.Contains(Npp.CurrentFile.Path)) {
                 _openedFileList.Remove(Npp.CurrentFile.Path);
@@ -467,7 +468,7 @@ namespace _3PA {
         /// <summary>
         /// Called when a new file is opened in notepad++
         /// </summary>
-        private static void OnNppFileOpened() {}
+        public static void OnNppFileOpened() {}
 
         #endregion
 
@@ -567,7 +568,7 @@ namespace _3PA {
         /// <summary>
         /// Called when a new file is being opened in notepad++
         /// </summary>
-        private static void DoNppFileBeforeLoad() {
+        public static void DoNppFileBeforeLoad() {
             // Reset the scintilla option for the indentation mode, as crazy as this is, it DESTROYS the performances
             // when opening big files in scintilla...
             Npp.AnnotationVisible = AnnotationMode;
@@ -719,7 +720,7 @@ namespace _3PA {
             if (!Npp.CurrentFile.IsProgress)
                 return;
 
-            if (Win32Api.GetForegroundWindow() == Npp.HandleNpp)
+            if (WinApi.GetForegroundWindow() == Npp.HandleNpp)
                 InfoToolTip.ShowToolTipFromDwell();
         }
 

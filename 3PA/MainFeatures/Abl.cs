@@ -18,8 +18,9 @@
 // ========================================================================
 #endregion
 using System;
+using _3PA.NppCore;
 
-namespace _3PA {
+namespace _3PA.MainFeatures {
     internal static class Abl {
         /// <summary>
         /// is the char allowed in a variable's name?

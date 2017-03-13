@@ -29,13 +29,13 @@ using System.Text;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
     /// <summary>
     /// Handles the update of this software
     /// </summary>
     internal static class UpdateHandler {
-
         #region fields
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures {
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok" },
+                    new List<string> {"ok"},
                     false);
 
                 // delete update related files/folders
@@ -96,15 +96,20 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
-        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately
+        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately if 
+        /// Config.Instance.TechnicalCheckUpdateEveryXMin condition is met
         /// </summary>
         public static void StartCheckingForUpdate() {
             // check for updates every now and then (2h)
+            DateTime lastCheck;
+            if (!DateTime.TryParseExact(Config.Instance.TechnicalLastCheckUpdate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastCheck)) {
+                lastCheck = DateTime.MinValue;
+            }
             _checkEveryHourAction = new ReccurentAction(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(true);
-            }, 1000 * 60 * 120);
+            }, 1000*60*120, 0, DateTime.Now.Subtract(lastCheck).TotalMinutes > Config.Instance.TechnicalCheckUpdateEveryXMin);
         }
 
         /// <summary>
@@ -151,7 +156,7 @@ namespace _3PA.MainFeatures {
         private static void WbOnOnRequestEnded(WebServiceJson webServiceJson) {
             try {
                 if (webServiceJson.StatusCodeResponse == HttpStatusCode.OK && webServiceJson.ResponseException == null) {
-                    Config.Instance.LastCheckUpdateOk = true;
+                    Config.Instance.TechnicalLastCheckUpdateOk = true;
 
                     // get the releases
                     var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
@@ -205,10 +210,10 @@ namespace _3PA.MainFeatures {
                     }
                 } else {
                     // failed to retrieve the list
-                    if (_displayResultNotif || Config.Instance.LastCheckUpdateOk)
+                    if (_displayResultNotif || Config.Instance.TechnicalLastCheckUpdateOk)
                         UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on GITHUB.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessful, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach GITHUB", "Connection failed", null);
 
-                    Config.Instance.LastCheckUpdateOk = false;
+                    Config.Instance.TechnicalLastCheckUpdateOk = false;
 
                     // check if there is an update available in the Shared config folder
                     if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
@@ -297,11 +302,11 @@ namespace _3PA.MainFeatures {
                     Distant version: <b>" + _latestReleaseInfo.tag_name + @"</b><br>
                     Release name: <b>" + _latestReleaseInfo.name + @"</b><br>
                     Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
-                    "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
-                    (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") +
-                    "<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>", 
-                    MessageImg.MsgUpdate, "Update check", "An update is available", 
+                                                                  "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
+                                                                  (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
+                                                                  (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") +
+                                                                  "<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>",
+                    MessageImg.MsgUpdate, "Update check", "An update is available",
                     args => {
                         if (args.Link.Equals("Restart")) {
                             args.Handled = true;

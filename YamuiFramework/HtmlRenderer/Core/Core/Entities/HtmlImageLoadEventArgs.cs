@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (HtmlImageLoadEventArgs.cs) is part of YamuiFramework.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;

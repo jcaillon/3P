@@ -25,8 +25,9 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// <summary>
@@ -144,7 +145,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Config.Instance.ShortCuts.Remove(_currentItemId);
 
             // take into account the changes
-            Plug.SetHooks();
+            NotificationsPublisher.SetHooks();
 
             ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
         }
@@ -173,7 +174,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Config.Instance.ShortCuts.Add(_currentItemId, "");
 
             // take into account the changes
-            Plug.SetHooks();
+            NotificationsPublisher.SetHooks();
 
             ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
         }
@@ -201,7 +202,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Config.Instance.ShortCuts.Add(_currentItemId, newSpec);
 
                 // take into account the changes
-                Plug.SetHooks();
+                NotificationsPublisher.SetHooks();
                 button.Text = Config.Instance.ShortCuts[_currentItemId];
             } else {
                 stopListening = false;

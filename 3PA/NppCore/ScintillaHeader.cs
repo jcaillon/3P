@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (ScintillaHelper.cs) is part of 3P.
+// This file (ScintillaHeader.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,20 +22,16 @@ using System.Runtime.InteropServices;
 
 // ReSharper disable InconsistentNaming
 
-namespace _3PA.Interop {
+namespace _3PA.NppCore {
+    /*
+     * Extracted from scintilla\include\Scintilla.iface
+     */
 
-    #region notifications
+    #region notifications and other structures
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Sci_NotifyHeader {
-        /* Compatible with Windows NMHDR.
-         * hwndFrom is really an environment specific window handle or pointer
-         * but most clients of Scintilla.h do not have this type visible. */
-        public IntPtr hwndFrom;
-        public IntPtr idFrom;
-        public uint code;
-    }
-
+    /// <summary>
+    /// Structure for notifications coming from scintilla as well as notepad++ 
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct SCNotification {
         public Sci_NotifyHeader nmhdr;
@@ -60,6 +56,16 @@ namespace _3PA.Interop {
         public int annotationLinesAdded; /* SC_MOD_CHANGEANNOTATION */
         public int updated; /* SCN_UPDATEUI */
         public int listCompletionMethod; /* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Sci_NotifyHeader {
+        /* Compatible with Windows NMHDR.
+         * hwndFrom is really an environment specific window handle or pointer
+         * but most clients of Scintilla.h do not have this type visible. */
+        public IntPtr hwndFrom;
+        public IntPtr idFrom;
+        public uint code;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -164,7 +170,7 @@ namespace _3PA.Interop {
 
     #endregion
 
-    #region Enum containing SciMsg
+    #region Sub enums using SciMsg
 
     /// <summary>
     /// Visibility and location of annotations in a Scintilla instance
@@ -1515,74 +1521,12 @@ namespace _3PA.Interop {
 
     #endregion
 
-    [Flags]
-    public enum SciMarkerStyle : uint {
-        SC_MARK_CIRCLE = 0,
-        SC_MARK_ROUNDRECT = 1,
-        SC_MARK_ARROW = 2,
-        SC_MARK_SMALLRECT = 3,
-        SC_MARK_SHORTARROW = 4,
-        SC_MARK_EMPTY = 5,
-        SC_MARK_ARROWDOWN = 6,
-        SC_MARK_MINUS = 7,
-        SC_MARK_PLUS = 8,
-        SC_MARK_VLINE = 9,
-        SC_MARK_LCORNER = 10,
-        SC_MARK_TCORNER = 11,
-        SC_MARK_BOXPLUS = 12,
-        SC_MARK_BOXPLUSCONNECTED = 13,
-        SC_MARK_BOXMINUS = 14,
-        SC_MARK_BOXMINUSCONNECTED = 15,
-        SC_MARK_LCORNERCURVE = 16,
-        SC_MARK_TCORNERCURVE = 17,
-        SC_MARK_CIRCLEPLUS = 18,
-        SC_MARK_CIRCLEPLUSCONNECTED = 19,
-        SC_MARK_CIRCLEMINUS = 20,
-        SC_MARK_CIRCLEMINUSCONNECTED = 21,
-        SC_MARK_BACKGROUND = 22,
-        SC_MARK_DOTDOTDOT = 23,
-        SC_MARK_ARROWS = 24,
-        SC_MARK_PIXMAP = 25,
-        SC_MARK_FULLRECT = 26,
-        SC_MARK_LEFTRECT = 27,
-        SC_MARK_AVAILABLE = 28,
-        SC_MARK_UNDERLINE = 29,
-        SC_MARK_RGBAIMAGE = 30,
-        SC_MARK_CHARACTER = 10000
-    }
-
-    [Flags]
-    public enum SciMarginType : uint {
-        SC_MARGIN_SYMBOL = 0,
-        SC_MARGIN_NUMBER = 1,
-        SC_MARGIN_BACK = 2,
-        SC_MARGIN_FORE = 3,
-        SC_MARGIN_TEXT = 4,
-        SC_MARGIN_RTEXT = 5
-    }
-
-    [Flags]
-    public enum SciIndicatorType : uint {
-        INDIC_PLAIN = 0,
-        INDIC_SQUIGGLE = 1,
-        INDIC_TT = 2,
-        INDIC_DIAGONAL = 3,
-        INDIC_STRIKE = 4,
-        INDIC_HIDDEN = 5,
-        INDIC_BOX = 6,
-        INDIC_ROUNDBOX = 7,
-        INDIC_STRAIGHTBOX = 8,
-        INDIC_DASH = 9,
-        INDIC_DOTS = 10,
-        INDIC_SQUIGGLELOW = 11,
-        INDIC_DOTBOX = 12,
-        INDIC_SQUIGGLEPIXMAP = 13,
-        INDIC_COMPOSITIONTHICK = 14,
-        INDIC_COMPOSITIONTHIN = 15,
-        INDIC_TEXTFORE = 17
-    }
+    #region SciNotif enum
 
     public enum SciNotif : uint {
+        SCN_NOTIF_BEGIN = SCN_STYLENEEDED - 1,
+        SCN_NOTIF_END = SCN_AUTOCCOMPLETED + 1,
+
         SCN_STYLENEEDED = SciMsg.SCN_STYLENEEDED,
         SCN_CHARADDED = SciMsg.SCN_CHARADDED,
         SCN_SAVEPOINTREACHED = SciMsg.SCN_SAVEPOINTREACHED,
@@ -1617,10 +1561,10 @@ namespace _3PA.Interop {
 
     [Flags]
     public enum SciModificationMod : uint {
-        SC_MOD_INSERTTEXT = 0x01,
-        SC_MOD_DELETETEXT = 0x02,
-        SC_MOD_CHANGESTYLE = 0x04,
-        SC_MOD_CHANGEFOLD = 0x08,
+        SC_MOD_INSERTTEXT = 0x1,
+        SC_MOD_DELETETEXT = 0x2,
+        SC_MOD_CHANGESTYLE = 0x4,
+        SC_MOD_CHANGEFOLD = 0x8,
         SC_PERFORMED_USER = 0x10,
         SC_PERFORMED_UNDO = 0x20,
         SC_PERFORMED_REDO = 0x40,
@@ -1629,18 +1573,22 @@ namespace _3PA.Interop {
         SC_MOD_CHANGEMARKER = 0x200,
         SC_MOD_BEFOREINSERT = 0x400,
         SC_MOD_BEFOREDELETE = 0x800,
-        SC_MOD_CHANGEINDICATOR = 0x4000,
-        SC_MOD_CHANGELINESTATE = 0x8000,
-        SC_MOD_CHANGETABSTOPS = 0x200000,
-        SC_MOD_LEXERSTATE = 0x80000,
-        SC_MOD_CHANGEMARGIN = 0x10000,
-        SC_MOD_CHANGEANNOTATION = 0x20000,
-        SC_MOD_INSERTCHECK = 0x100000,
         SC_MULTILINEUNDOREDO = 0x1000,
         SC_STARTACTION = 0x2000,
+        SC_MOD_CHANGEINDICATOR = 0x4000,
+        SC_MOD_CHANGELINESTATE = 0x8000,
+        SC_MOD_CHANGEMARGIN = 0x10000,
+        SC_MOD_CHANGEANNOTATION = 0x20000,
         SC_MOD_CONTAINER = 0x40000,
-        SC_MODEVENTMASKALL = 0x1FFFFF,
+        SC_MOD_LEXERSTATE = 0x80000,
+        SC_MOD_INSERTCHECK = 0x100000,
+        SC_MOD_CHANGETABSTOPS = 0x200000,
+        SC_MODEVENTMASKALL = 0x3FFFFF
     }
+
+    #endregion
+
+    #region SciMsg
 
     [Flags]
     public enum SciMsg : uint {
@@ -2657,22 +2605,6 @@ namespace _3PA.Interop {
         SCWS_VISIBLEALWAYS = 1,
         SCWS_VISIBLEAFTERINDENT = 2,
 
-        // Window messages
-        WM_CREATE = 0x0001,
-        WM_DESTROY = 0x0002,
-        WM_SETCURSOR = 0x0020,
-        WM_NOTIFY = 0x004E,
-        WM_LBUTTONDBLCLK = 0x0203,
-        WM_RBUTTONDBLCLK = 0x0206,
-        WM_MBUTTONDBLCLK = 0x0209,
-        WM_XBUTTONDBLCLK = 0x020D,
-        WM_USER = 0x0400,
-        WM_REFLECT = WM_USER + 0x1C00,
-
-        // Window styles
-        WS_BORDER = 0x00800000,
-        WS_EX_CLIENTEDGE = 0x00000200,
-
         // Lexers
         SCLEX_CONTAINER = 0,
         SCLEX_NULL = 1,
@@ -2792,8 +2724,15 @@ namespace _3PA.Interop {
         SCLEX_SREC = 117,
         SCLEX_IHEX = 118,
         SCLEX_TEHEX = 119,
-        SCLEX_AUTOMATIC = 1000,
+        SCLEX_AUTOMATIC = 1000
+    }
 
+    #endregion
+
+    #region SciLexicalStates
+
+    [Flags]
+    public enum SciLexicalStates : uint {
         // Ada
         SCE_ADA_DEFAULT = 0,
         SCE_ADA_WORD = 1,
@@ -3235,4 +3174,6 @@ namespace _3PA.Interop {
         SCE_V_INOUT = 23,
         SCE_V_PORT_CONNECT = 24
     }
+
+    #endregion
 }

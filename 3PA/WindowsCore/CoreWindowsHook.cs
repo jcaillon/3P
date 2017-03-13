@@ -21,7 +21,7 @@ using System;
 
 // ReSharper disable InconsistentNaming
 
-namespace _3PA.Interop {
+namespace _3PA.WindowsCore {
 
     #region WindowsHook wrapper
 

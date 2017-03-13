@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
-namespace _3PA.Lib {
+namespace _3PA.NppCore {
     /// <summary>
     /// Represents a strongly typed collection of objects that can be accessed by index. Insertions and 
     /// deletions to the collection near the same relative index are optimized.
@@ -43,7 +43,8 @@ namespace _3PA.Lib {
         private int _gapEnd;
         private int _version;
 
-        [NonSerialized] private object _syncRoot;
+        [NonSerialized]
+        private object _syncRoot;
 
         #endregion Fields
 

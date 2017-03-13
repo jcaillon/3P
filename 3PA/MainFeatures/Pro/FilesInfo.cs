@@ -25,9 +25,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     /// <summary>
@@ -538,14 +538,24 @@ namespace _3PA.MainFeatures.Pro {
     /// </summary>
     [Flags]
     internal enum CurrentOperation {
-        [CurrentOperationAttr(Name = "Editing")] Default = 0,
-        [CurrentOperationAttr(Name = "Appbuilder section!")] AppbuilderSection = 32,
+        [CurrentOperationAttr(Name = "Editing")]
+        Default = 0,
+
+        [CurrentOperationAttr(Name = "Appbuilder section!")]
+        AppbuilderSection = 32,
 
         // above linting, we start a prowin process to do it
-        [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")] Prolint = 64,
-        [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")] CheckSyntax = 128,
-        [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")] Compile = 216,
-        [CurrentOperationAttr(Name = "Executing", ActionText = "executing")] Run = 512
+        [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")]
+        Prolint = 64,
+
+        [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
+        CheckSyntax = 128,
+
+        [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")]
+        Compile = 216,
+
+        [CurrentOperationAttr(Name = "Executing", ActionText = "executing")]
+        Run = 512
     }
 
     /// <summary>
@@ -597,12 +607,23 @@ namespace _3PA.MainFeatures.Pro {
     /// and thus must start at 0
     /// </summary>
     internal enum ErrorLevel {
-        [Description("Error(s), good!")] NoErrors,
-        [Description("Info")] Information,
-        [Description("Warning(s)")] Warning,
-        [Description("Huge warning(s)")] StrongWarning,
-        [Description("Error(s)")] Error,
-        [Description("Critical error(s)!")] Critical
+        [Description("Error(s), good!")]
+        NoErrors,
+
+        [Description("Info")]
+        Information,
+
+        [Description("Warning(s)")]
+        Warning,
+
+        [Description("Huge warning(s)")]
+        StrongWarning,
+
+        [Description("Error(s)")]
+        Error,
+
+        [Description("Critical error(s)!")]
+        Critical
     }
 
     internal enum ErrorFontWeight {

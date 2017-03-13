@@ -22,7 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
-using _3PA.Interop;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;
-                Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
+                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             // register to Npp
@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
                 if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                     int value = 0;
-                    Win32Api.DwmSetWindowAttribute(Owner.Handle, Win32Api.DwmwaTransitionsForcedisabled, ref value, 4);
+                    WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
                 }
             } catch (Exception) {
                 // ignored
@@ -133,7 +133,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (Owner == null)
                 return;
 
-            var rect = Win32Api.GetWindowRect(_masterForm.Handle);
+            var rect = WinApi.GetWindowRect(_masterForm.Handle);
 
             // update location
             if (_masterRectangle.Location != rect.Location) {

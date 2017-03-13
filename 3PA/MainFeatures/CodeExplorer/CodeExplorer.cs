@@ -18,8 +18,8 @@
 // ========================================================================
 #endregion
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {

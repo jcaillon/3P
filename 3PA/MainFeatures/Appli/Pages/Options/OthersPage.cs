@@ -21,8 +21,8 @@ using System;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {

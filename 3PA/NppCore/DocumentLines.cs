@@ -21,10 +21,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using _3PA.Interop;
+using _3PA.Lib;
 using _3PA.MainFeatures;
 
-namespace _3PA.Lib {
+namespace _3PA.NppCore {
     /// <summary>
     /// For every scintilla message that involves a position, the expect position (expected by scintilla) is the
     /// BYTE position, not the CHAR position (as anyone would assume at first!)

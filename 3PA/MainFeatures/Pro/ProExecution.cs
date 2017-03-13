@@ -27,9 +27,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using YamuiFramework.Helper;
 using _3PA.Data;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
@@ -526,7 +526,7 @@ namespace _3PA.MainFeatures.Pro {
         public void BringProcessToFront() {
             HasBeenKilled = true;
             try {
-                Win32Api.SetForegroundWindow(Process.MainWindowHandle);
+                WinApi.SetForegroundWindow(Process.MainWindowHandle);
             } catch (Exception) {
                 // ignored
             }

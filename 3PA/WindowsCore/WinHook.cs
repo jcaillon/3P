@@ -22,9 +22,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using _3PA.Interop;
+using YamuiFramework.Helper;
+using _3PA.Lib;
 
-namespace _3PA.Lib {
+namespace _3PA.WindowsCore {
 
     #region Keyboard hook
 
@@ -142,15 +143,15 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event Func<Win32Api.WindowsMessageMouse, Win32Api.MOUSEHOOKSTRUCT, bool> GetMouseMessage;
+        public event Func<WinApi.Messages, Win32Api.MOUSEHOOKSTRUCT, bool> GetMouseMessage;
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public void Add(params Win32Api.WindowsMessageMouse[] messages) {
-            foreach (Win32Api.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint) key))) {
+        public void Add(params WinApi.Messages[] messages) {
+            foreach (WinApi.Messages key in messages.Where(key => !_messagesToIntercept.Contains((uint) key))) {
                 _messagesToIntercept.Add((uint) key);
             }
         }
@@ -158,9 +159,9 @@ namespace _3PA.Lib {
         /// <summary>
         /// Remove the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public bool Remove(params Win32Api.WindowsMessageMouse[] messages) {
+        public bool Remove(params WinApi.Messages[] messages) {
             bool iDidSomething = false;
-            foreach (Win32Api.WindowsMessageMouse key in messages.Where(key => _messagesToIntercept.Contains((uint) key))) {
+            foreach (WinApi.Messages key in messages.Where(key => _messagesToIntercept.Contains((uint) key))) {
                 _messagesToIntercept.Remove((uint) key);
                 iDidSomething = true;
             }
@@ -188,7 +189,7 @@ namespace _3PA.Lib {
             if (!_messagesToIntercept.Contains((uint) wParam))
                 return false;
             Win32Api.MOUSEHOOKSTRUCT ms = (Win32Api.MOUSEHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(Win32Api.MOUSEHOOKSTRUCT));
-            return GetMouseMessage((Win32Api.WindowsMessageMouse) wParam, ms);
+            return GetMouseMessage((WinApi.Messages) wParam, ms);
         }
 
         #endregion
@@ -213,8 +214,8 @@ namespace _3PA.Lib {
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public void Add(params Win32Api.WindowsMessage[] messages) {
-            foreach (Win32Api.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint) key)))
+        public void Add(params WinApi.Messages[] messages) {
+            foreach (WinApi.Messages key in messages.Where(key => !_messagesToIntercept.Contains((uint) key)))
                 _messagesToIntercept.Add((uint) key);
         }
 

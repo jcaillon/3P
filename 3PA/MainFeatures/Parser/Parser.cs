@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
     /// <summary>
@@ -508,14 +508,29 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     internal enum ParserErrorType {
-        [Description("Unexpected block start, this type of block should be created at root level")] UnexpectedBlockStart,
-        [Description("Unexpected block end, the start of this block has not been found")] UnexpectedBlockEnd,
-        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")] UnexpectedUibBlockStart,
-        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")] UnexpectedUibBlockEnd,
-        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")] NotAllowedUibBlockStart,
-        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")] NotAllowedUibBlockEnd,
-        [Description("&IF pre-processed statement missing an &ENDIF")] MismatchNumberOfIfEndIf,
-        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")] UnexpectedIfEndIfBlockEnd
+        [Description("Unexpected block start, this type of block should be created at root level")]
+        UnexpectedBlockStart,
+
+        [Description("Unexpected block end, the start of this block has not been found")]
+        UnexpectedBlockEnd,
+
+        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")]
+        UnexpectedUibBlockStart,
+
+        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")]
+        UnexpectedUibBlockEnd,
+
+        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")]
+        NotAllowedUibBlockStart,
+
+        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
+        NotAllowedUibBlockEnd,
+
+        [Description("&IF pre-processed statement missing an &ENDIF")]
+        MismatchNumberOfIfEndIf,
+
+        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
+        UnexpectedIfEndIfBlockEnd
     }
 
     #endregion

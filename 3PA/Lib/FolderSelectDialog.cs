@@ -20,7 +20,7 @@
 using System;
 using System.Reflection;
 using System.Windows.Forms;
-using _3PA.Interop;
+using _3PA.WindowsCore;
 
 namespace _3PA.Lib {
     /// <summary>

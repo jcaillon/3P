@@ -28,7 +28,7 @@ using System.Security;
 using System.Text;
 using System.Threading;
 
-namespace _3PA.Lib {
+namespace _3PA.WindowsCore {
     public static class DropToWindows {
         public static void DropToAppBuilder(string prowin32Path, string pfPath, string filename) {
             /*
@@ -136,8 +136,12 @@ namespace _3PA.Lib {
             public uint pFiles;
             public int x;
             public int y;
-            [MarshalAs(UnmanagedType.Bool)] public bool fNC;
-            [MarshalAs(UnmanagedType.Bool)] public bool fWide;
+
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool fNC;
+
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool fWide;
         }
 
         public static void DropFile(IntPtr hWnd, MmdDropFile file) {

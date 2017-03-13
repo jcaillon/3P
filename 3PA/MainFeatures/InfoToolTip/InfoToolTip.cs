@@ -25,11 +25,12 @@ using System.Text;
 using System.Threading;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     internal static class InfoToolTip {

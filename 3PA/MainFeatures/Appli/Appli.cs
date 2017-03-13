@@ -19,7 +19,8 @@
 #endregion
 using System;
 using YamuiFramework.Helper;
-using _3PA.Interop;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.Appli {
     /// <summary>
@@ -78,7 +79,7 @@ namespace _3PA.MainFeatures.Appli {
         /// True if the form is focused 
         /// </summary>
         public static bool IsFocused() {
-            return IsVisible && Win32Api.GetForegroundWindow().Equals(_form.Handle);
+            return IsVisible && WinApi.GetForegroundWindow().Equals(_form.Handle);
         }
 
         /// <summary>

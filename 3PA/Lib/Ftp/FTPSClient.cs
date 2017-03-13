@@ -60,20 +60,23 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// No SSL/TLS support. Used for standard FTP connections.
         /// </summary>
-        [Description("No SSL/TLS support. Used for standard FTP connections.")] ClearText = 0,
+        [Description("No SSL/TLS support. Used for standard FTP connections.")]
+        ClearText = 0,
 
         /// <summary>
         /// Requests a SSL/TLS connection during authentication. 
         /// Authentication is performed using <see cref="ClearText"/> if SSL/TLS is not supported by the server.
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection during authentication.")] CredentialsRequested = 1,
+        [Description("Requests a SSL/TLS connection during authentication.")]
+        CredentialsRequested = 1,
 
         /// <summary>
         /// Requires a SSL/TLS connection during authentication. 
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
-        [Description("Requires a SSL/TLS connection during authentication.")] CredentialsRequired = 2 | CredentialsRequested,
+        [Description("Requires a SSL/TLS connection during authentication.")]
+        CredentialsRequired = 2 | CredentialsRequested,
 
         /// <summary>
         /// Requests a SSL/TLS connection on the control channel. 
@@ -81,7 +84,8 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequested"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
-        [Description("Requests a SSL/TLS connection on the control channel.")] ControlChannelRequested = 4 | CredentialsRequested,
+        [Description("Requests a SSL/TLS connection on the control channel.")]
+        ControlChannelRequested = 4 | CredentialsRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on the control channel. 
@@ -89,34 +93,40 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequired"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
-        [Description("Requires a SSL/TLS connection on the control channel.")] ControlChannelRequired = CredentialsRequired | ControlChannelRequested,
+        [Description("Requires a SSL/TLS connection on the control channel.")]
+        ControlChannelRequired = CredentialsRequired | ControlChannelRequested,
 
         /// <summary>
         /// Requests a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequested"/>.
         /// Data transfers are not encrypted is not supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection on the data channel.")] DataChannelRequested = 8 | CredentialsRequested,
+        [Description("Requests a SSL/TLS connection on the data channel.")]
+        DataChannelRequested = 8 | CredentialsRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequired"/>.
         /// </summary>
-        [Description("Requires a SSL/TLS connection on the data channel.")] DataChannelRequired = 16 | DataChannelRequested | CredentialsRequired,
+        [Description("Requires a SSL/TLS connection on the data channel.")]
+        DataChannelRequired = 16 | DataChannelRequested | CredentialsRequired,
 
         /// <summary>
         /// Requests a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequested"/> and <see cref="DataChannelRequested"/>.
         /// Control channel commands and data transfers are not encrypted is not supported by the server.
         /// </summary>
-        [Description("Requests a SSL/TLS connection on both control and data channels.")] ControlAndDataChannelsRequested = ControlChannelRequested | DataChannelRequested,
+        [Description("Requests a SSL/TLS connection on both control and data channels.")]
+        ControlAndDataChannelsRequested = ControlChannelRequested | DataChannelRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequired"/> and <see cref="DataChannelRequired"/>.
         /// </summary>
-        [Description("Requires a SSL/TLS connection on both control and data channels.")] ControlAndDataChannelsRequired = ControlChannelRequired | DataChannelRequired,
+        [Description("Requires a SSL/TLS connection on both control and data channels.")]
+        ControlAndDataChannelsRequired = ControlChannelRequired | DataChannelRequired,
 
         /// <summary>
         /// Implicit SSL/TLS, not supported by RFC 4217. Both control channel and data channel are always encrypted.
         /// </summary>
-        [Description("Implicit SSL/TLS. Both control channel and data channel are always encrypted.")] Implicit = 32 | ControlAndDataChannelsRequired
+        [Description("Implicit SSL/TLS. Both control channel and data channel are always encrypted.")]
+        Implicit = 32 | ControlAndDataChannelsRequired
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiFormBaseShadow.cs) is part of YamuiFramework.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -48,7 +51,7 @@ namespace YamuiFramework.Forms {
                 // activate shadows
                 if (Environment.OSVersion.Version.Major >= 6) {
                     var enabled = 0;
-                    DwmApi.DwmIsCompositionEnabled(ref enabled);
+                    WinApi.DwmIsCompositionEnabled(ref enabled);
                     _mAeroEnabled = enabled == 1;
                 }
                 if (!_mAeroEnabled)
@@ -75,9 +78,9 @@ namespace YamuiFramework.Forms {
                     // Allow to display the shadows
                     if (_mAeroEnabled) {
                         var v = 2;
-                        DwmApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-                        var margins = new DwmApi.MARGINS(1, 1, 1, 1);
-                        DwmApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
+                        WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
+                        var margins = new WinApi.MARGINS(1, 1, 1, 1);
+                        WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
                     }
                     break;
             }

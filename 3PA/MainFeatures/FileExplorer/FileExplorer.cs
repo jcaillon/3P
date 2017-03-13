@@ -24,9 +24,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal class FileExplorer : NppDockableDialog<FileExplorerForm> {
@@ -106,6 +106,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Add each files/folders of a given path to the output List of FileObject,
         /// can be set to be recursive,
         /// can be set to not add the subfolders in the results
+        /// TODO: Parallelize for max speed
         /// </summary>
         public List<FileListItem> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
             if (firstCall)

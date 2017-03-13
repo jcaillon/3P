@@ -21,12 +21,11 @@ using System;
 using System.Drawing;
 using YamuiFramework.Helper;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {
-
         #region private
 
         protected string _dialogDescription = "?";
@@ -105,9 +104,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// (does it both on the menu and toolbar)
         /// </summary>
         public virtual void UpdateMenuItemChecked() {
-            if (_fakeForm == null) 
+            if (_fakeForm == null)
                 return;
-            Npp.SetMenuItemCheck(UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
+            Npp.SetMenuItemCheck(UnmanagedExports.NppFuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
         }
 
         public void ForceClose() {

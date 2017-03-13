@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProEnvironment {
@@ -61,7 +62,8 @@ namespace _3PA.MainFeatures.Pro {
             /// <summary>
             /// Deployment directory
             /// </summary>
-            [XmlElement(ElementName = "BaseCompilationPath")] public string BaseCompilationPath = "";
+            [XmlElement(ElementName = "BaseCompilationPath")]
+            public string BaseCompilationPath = "";
 
             public string ProwinPath = "";
             public string CmdLineParameters = "";

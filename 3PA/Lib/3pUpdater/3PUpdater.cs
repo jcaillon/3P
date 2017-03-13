@@ -27,7 +27,6 @@ using _3PA.Properties;
 
 namespace _3PA.Lib._3pUpdater {
     internal class _3PUpdater {
-
         #region private fields
 
         private static _3PUpdater _instance;
@@ -55,7 +54,6 @@ namespace _3PA.Lib._3pUpdater {
         }
 
         #endregion
-
 
         #region methods
 

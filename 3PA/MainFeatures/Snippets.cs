@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
     internal class SnippetContext {

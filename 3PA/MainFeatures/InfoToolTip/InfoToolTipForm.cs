@@ -23,6 +23,7 @@ using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     internal sealed class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {

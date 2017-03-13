@@ -23,6 +23,7 @@ using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {

@@ -28,6 +28,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
     internal static class ShareExportConf {

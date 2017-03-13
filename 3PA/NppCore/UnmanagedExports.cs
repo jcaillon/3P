@@ -21,18 +21,19 @@ using System;
 using System.Runtime.InteropServices;
 using RGiesecke.DllExport;
 using _3PA.Lib;
+using _3PA.WindowsCore;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
 // ReSharper disable RedundantAssignment
 // ReSharper disable UnusedParameter.Local
 
-namespace _3PA.Interop {
+namespace _3PA.NppCore {
     /// <summary>
     /// Main entry point for Npp,
     /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
     /// </summary>
-    internal static class UnmanagedExports {
+    public static class UnmanagedExports {
         #region fields
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace _3PA.Interop {
         /// <summary>
         /// Info on the functions of our plugin
         /// </summary>
-        public static FuncItems FuncItems = new FuncItems();
+        public static NppFuncItems NppFuncItems = new NppFuncItems();
 
         private static IntPtr _ptrPluginName = IntPtr.Zero;
 
@@ -56,7 +57,7 @@ namespace _3PA.Interop {
         /// </summary>
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static bool isUnicode() {
+        public static bool isUnicode() {
             return true;
         }
 
@@ -65,7 +66,7 @@ namespace _3PA.Interop {
         /// </summary>
         /// <param name="notepadPlusData"></param>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static void setInfo(NppData notepadPlusData) {
+        public static void setInfo(NppData notepadPlusData) {
             NppData = notepadPlusData;
             Plug.DoPlugLoad();
         }
@@ -76,10 +77,10 @@ namespace _3PA.Interop {
         /// <param name="nbF"></param>
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static IntPtr getFuncsArray(ref int nbF) {
+        public static IntPtr getFuncsArray(ref int nbF) {
             Plug.DoFuncItemsNeeded();
-            nbF = FuncItems.Items.Count;
-            return FuncItems.NativePointer;
+            nbF = NppFuncItems.Items.Count;
+            return NppFuncItems.NativePointer;
         }
 
         /// <summary>
@@ -90,7 +91,7 @@ namespace _3PA.Interop {
         /// <param name="lParam"></param>
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static uint messageProc(uint Message, IntPtr wParam, IntPtr lParam) {
+        public static uint messageProc(uint Message, IntPtr wParam, IntPtr lParam) {
             return 1;
         }
 
@@ -99,7 +100,7 @@ namespace _3PA.Interop {
         /// </summary>
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static IntPtr getName() {
+        public static IntPtr getName() {
             if (_ptrPluginName == IntPtr.Zero)
                 _ptrPluginName = Marshal.StringToHGlobalUni(AssemblyInfo.AssemblyProduct);
             return _ptrPluginName;
@@ -109,9 +110,9 @@ namespace _3PA.Interop {
         /// This procedure will be called by Notepad++ for a variety of reasons. The complete list of codes is to be found on the Messages And Notifications. It should handle these tasks using information passed in the notification header
         /// </summary>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        private static void beNotified(IntPtr notifyCode) {
+        public static void beNotified(IntPtr notifyCode) {
             SCNotification nc = (SCNotification) Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
-            Plug.OnNppNotification(nc);
+            NotificationsPublisher.OnNppNotification(nc);
         }
 
         #endregion

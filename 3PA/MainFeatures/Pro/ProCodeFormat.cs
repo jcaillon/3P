@@ -22,6 +22,7 @@ using System.IO;
 using System.Text;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProCodeFormat {

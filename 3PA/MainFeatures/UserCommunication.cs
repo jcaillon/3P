@@ -26,6 +26,7 @@ using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 

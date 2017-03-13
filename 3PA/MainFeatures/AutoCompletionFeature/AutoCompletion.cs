@@ -24,9 +24,10 @@ using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// <summary>

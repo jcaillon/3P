@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (Lexer.cs) is part of 3P.
+// This file (NppAutoCompParser.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,16 +23,14 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
     internal class NppAutoCompParser {
-
         #region private const
 
-        private const char Eof = (char)0;
+        private const char Eof = (char) 0;
 
         #endregion
 
@@ -114,7 +112,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Call this method to actually parse the string
         /// </summary>
         private void Parse() {
-            while (GetNextCompItem()) { }
+            while (GetNextCompItem()) {}
         }
 
         /// <summary>
@@ -159,7 +157,7 @@ namespace _3PA.MainFeatures.Parser {
             //_line++;
             //_column = ColumnStartAt;
         }
-        
+
         private void ReadWhiteSpace() {
             ReadChr();
             while (true) {
@@ -170,7 +168,7 @@ namespace _3PA.MainFeatures.Parser {
                     break;
             }
         }
-        
+
         /// <summary>
         /// Returns the current value of the token
         /// </summary>
@@ -184,7 +182,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         private bool GetNextCompItem() {
-
             //_startLine = _line;
             //_startCol = _column;
             _startPos = _pos;

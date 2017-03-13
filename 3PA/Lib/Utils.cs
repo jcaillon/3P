@@ -34,11 +34,12 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.FileExplorer;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.Lib {
     /*        
@@ -59,7 +60,6 @@ namespace _3PA.Lib {
     /// Class that exposes utility methods
     /// </summary>
     internal static class Utils {
-
         #region File manipulation wrappers
 
         /// <summary>

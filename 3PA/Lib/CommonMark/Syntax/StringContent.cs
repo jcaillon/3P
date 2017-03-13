@@ -31,7 +31,7 @@ namespace _3PA.Lib.CommonMark.Syntax {
         private int _partsLength = 2;
         private StringPart[] _parts = new StringPart[2];
 
-        internal global::_3PA.Lib.CommonMark.Parser.PositionTracker PositionTracker;
+        internal Parser.PositionTracker PositionTracker;
 
         /// <summary>
         /// Gets the total length of string data.
@@ -102,7 +102,7 @@ namespace _3PA.Lib.CommonMark.Syntax {
         /// Note that this method calls <see cref="TrimEnd"/> thus changing the source data as well.
         /// </summary>
         /// <param name="subj">The subject instance which will be reinitialized with the data from this instance.</param>
-        internal void FillSubject(global::_3PA.Lib.CommonMark.Parser.Subject subj) {
+        internal void FillSubject(Parser.Subject subj) {
             subj.LastInline = null;
             subj.LastPendingInline = null;
             subj.FirstPendingInline = null;
@@ -151,7 +151,7 @@ namespace _3PA.Lib.CommonMark.Syntax {
         /// <summary>
         /// Writes the data contained in this instance to the given html text writer.
         /// </summary>
-        internal void WriteTo(global::_3PA.Lib.CommonMark.Formatters.HtmlTextWriter writer) {
+        internal void WriteTo(Formatters.HtmlTextWriter writer) {
             var buffer = writer.Buffer;
             for (var i = 0; i < _partCounter; i++) {
                 if (buffer.Length < _parts[i].Length)

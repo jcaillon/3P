@@ -24,10 +24,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures;
+using _3PA.WindowsCore;
 
-namespace _3PA {
+namespace _3PA.NppCore {
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -41,7 +42,6 @@ namespace _3PA {
     /// faster execution than with SendMessage<br />
     /// </summary>
     internal static partial class Npp {
-
         #region fields
 
         public const int KeywordMaxLength = 60;
@@ -238,7 +238,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static Rectangle GetScintillaRectangle() {
-            return Win32Api.GetWindowRect(HandleScintilla);
+            return WinApi.GetWindowRect(HandleScintilla);
         }
 
         /// <summary>
@@ -3801,32 +3801,14 @@ namespace _3PA {
 
         /// <summary>
         /// Should be called each time the current scintilla changes to send the messages to the right instance of scintilla
-        /// Instanciates the direct message function
+        /// Instantiates the direct message function
         /// </summary>
         public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
             _scintillaHandle = scintillaHandle;
-
-            /*
-            // Get the native Scintilla direct function -- the only function the library exports
-            File.AppendAllText(Path.Combine(Npp.GetNppDirectory(), "derp.txt"), GetModuleHandle("scintilla.dll").ToString());
-            _directMessagePointer = GetProcAddress(GetModuleHandle("scintilla.dll"), "Scintilla_DirectFunction");
-            if (_directMessagePointer == IntPtr.Zero) {
-                var message = "The Scintilla module has no export for the 'Scintilla_DirectFunction' procedure.";
-                throw new Win32Exception(message, new Win32Exception()); // Calls GetLastError
-            }
-
-            // Create a managed callback
-            _directFunction = (WinApi.Scintilla_DirectFunction)Marshal.GetDelegateForFunctionPointer(
-                _directMessagePointer,
-                typeof(WinApi.Scintilla_DirectFunction));
-
-            _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
-            */
-
-            var directFunctionPointer = Win32Api.SendMessage(_scintillaHandle, (int) SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
+            var directFunctionPointer = Win32Api.SendMessage(_scintillaHandle, (uint) SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
             _directFunction = (Win32Api.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof(Win32Api.Scintilla_DirectFunction));
-            _directMessagePointer = Win32Api.SendMessage(_scintillaHandle, (int) SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            _directMessagePointer = Win32Api.SendMessage(_scintillaHandle, (uint) SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {
@@ -3853,5 +3835,4 @@ namespace _3PA {
     }
 
     #endregion
-
 }

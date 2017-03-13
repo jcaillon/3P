@@ -24,10 +24,13 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
+using _3PA.MainFeatures;
 
-namespace _3PA.MainFeatures {
+namespace _3PA.NppCore {
     /// <summary>
-    /// This class allows to get properties read from several config files of npp
+    /// This class allows to get properties read from several config files of npp :
+    /// config.xml
+    /// and stylers.xml (or whichever style .xml is used at the moment)
     /// </summary>
     internal class NppConfig {
         #region private
@@ -52,6 +55,13 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        /// <summary>
+        /// Allows to reload the npp configuration from the files
+        /// </summary>
+        public static void Reload() {
+            _instance = null;
+        }
+
         #endregion
 
         #region Properties
@@ -70,12 +80,7 @@ namespace _3PA.MainFeatures {
         /// Stylers class
         /// </summary>
         public NppStylers Stylers {
-            get {
-                if (_stylers == null || Utils.HasFileChanged(FileNppStylersPath)) {
-                    _stylers = new NppStylers(FileNppStylersPath);
-                }
-                return _stylers;
-            }
+            get { return _stylers ?? (_stylers = new NppStylers(FileNppStylersPath)); }
         }
 
         #endregion
@@ -98,6 +103,9 @@ namespace _3PA.MainFeatures {
 
             if (string.IsNullOrEmpty(FileNppStylersPath) || !File.Exists(FileNppStylersPath))
                 FileNppStylersPath = Config.FileNppStylersXml;
+
+            // update the styles accordingly
+            _stylers = null;
         }
 
         #endregion
@@ -111,7 +119,7 @@ namespace _3PA.MainFeatures {
             if (AutocompletionMode == 0 || Config.Instance.NeverAskToDisableDefaultAutoComp)
                 return;
 
-            var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default auto-completion</b> offered by Notepad++ by a much better version.<br><br>If the default auto-completion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default auto-completion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Auto-completion", "Deactivate default auto-completion now", new List<string> {"Yes, do it now", "No, never ask again", "I'll do it later myself"});
+            var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default auto-completion</b> offered by Notepad++ by a much better version.<br><br>If the default auto-completion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default auto-completion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Auto-completion", "Deactivate default auto-completion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
             if (answer == 1)
                 Config.Instance.NeverAskToDisableDefaultAutoComp = true;
             if (answer != 0)

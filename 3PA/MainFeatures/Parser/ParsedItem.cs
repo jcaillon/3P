@@ -578,23 +578,56 @@ namespace _3PA.MainFeatures.Parser {
     /// Enumeration of DEFINE types
     /// </summary>
     internal enum ParseDefineType {
-        [Description("PARAMETER")] Parameter,
-        [Description("DATA-SOURCE")] DataSource,
-        [Description("EVENT")] Event,
-        [Description("BUFFER")] Buffer,
-        [Description("VARIABLE")] Variable,
-        [Description("BROWSE")] Browse,
-        [Description("STREAM")] Stream,
-        [Description("BUTTON")] Button,
-        [Description("DATASET")] Dataset,
-        [Description("IMAGE")] Image,
-        [Description("MENU")] Menu,
-        [Description("FRAME")] Frame,
-        [Description("QUERY")] Query,
-        [Description("RECTANGLE")] Rectangle,
-        [Description("PROPERTY")] Property,
-        [Description("SUB-MENU")] SubMenu,
-        [Description("NONE")] None
+        [Description("PARAMETER")]
+        Parameter,
+
+        [Description("DATA-SOURCE")]
+        DataSource,
+
+        [Description("EVENT")]
+        Event,
+
+        [Description("BUFFER")]
+        Buffer,
+
+        [Description("VARIABLE")]
+        Variable,
+
+        [Description("BROWSE")]
+        Browse,
+
+        [Description("STREAM")]
+        Stream,
+
+        [Description("BUTTON")]
+        Button,
+
+        [Description("DATASET")]
+        Dataset,
+
+        [Description("IMAGE")]
+        Image,
+
+        [Description("MENU")]
+        Menu,
+
+        [Description("FRAME")]
+        Frame,
+
+        [Description("QUERY")]
+        Query,
+
+        [Description("RECTANGLE")]
+        Rectangle,
+
+        [Description("PROPERTY")]
+        Property,
+
+        [Description("SUB-MENU")]
+        SubMenu,
+
+        [Description("NONE")]
+        None
     }
 
     internal enum ParsedPrimitiveType {

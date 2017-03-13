@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -27,9 +24,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.CodeExplorer;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
@@ -417,10 +414,15 @@ namespace _3PA.MainFeatures {
 
             // last ping time
             public string TechnicalLastPing = "";
-            public string MyUuid = Guid.NewGuid().ToString();
+            public string TechnicalMyUuid = Guid.NewGuid().ToString();
+            public int TechnicalPingEveryXMin = 4*60;
+
+            // last update check
+            public string TechnicalLastCheckUpdate = "";
+            public int TechnicalCheckUpdateEveryXMin = 6*60;
 
             // did the last update check went ok?
-            public bool LastCheckUpdateOk = true;
+            public bool TechnicalLastCheckUpdateOk = true;
 
             // THEMES
             public int ThemeId = 0;

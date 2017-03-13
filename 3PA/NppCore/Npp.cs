@@ -26,18 +26,18 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using _3PA.Interop;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Pro;
+using _3PA.WindowsCore;
 
-namespace _3PA {
+namespace _3PA.NppCore {
     /// <summary>
     /// This class contains very generic wrappers for basic Notepad++ functionality
     /// </summary>
     internal static partial class Npp {
-
         #region CurrentFile Info
 
         #region private
@@ -63,7 +63,6 @@ namespace _3PA {
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
         internal class NppFile {
-
             /// <summary>
             /// true if the current file is a progress file, false otherwise
             /// </summary>
@@ -211,7 +210,7 @@ namespace _3PA {
             get {
                 long curScintilla;
                 Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                return (int)curScintilla;
+                return (int) curScintilla;
             }
         }
 
@@ -226,14 +225,14 @@ namespace _3PA {
         /// Is npp currently focused?
         /// </summary>
         public static bool IsNppWindowFocused {
-            get { return (Win32Api.GetForegroundWindow() == HandleNpp); }
+            get { return (WinApi.GetForegroundWindow() == HandleNpp); }
         }
 
         /// <summary>
         /// Is scintilla currently focused?
         /// </summary>
         public static bool IsScintillaFocused {
-            get { return (Win32Api.GetForegroundWindow() == HandleScintilla); }
+            get { return (WinApi.GetForegroundWindow() == HandleScintilla); }
         }
 
         /// <summary>
@@ -241,9 +240,9 @@ namespace _3PA {
         /// </summary>
         public static Screen NppScreen {
             get {
-                Rectangle nppRect = Win32Api.GetWindowRect(HandleScintilla);
+                Rectangle nppRect = WinApi.GetWindowRect(HandleScintilla);
                 var nppLoc = nppRect.Location;
-                nppLoc.Offset(nppRect.Width / 2, nppRect.Height / 2);
+                nppLoc.Offset(nppRect.Width/2, nppRect.Height/2);
                 return Screen.FromPoint(nppLoc);
             }
         }
@@ -297,9 +296,9 @@ namespace _3PA {
         /// <returns></returns>
         public static List<string> GetFilesListFromSessionFile(string sessionFilePath) {
             var output = new List<string>();
-            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
             if (nbFile > 0) {
-                using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+                using (Win32Api.UnmanagedStringArray cStrArray = new Win32Api.UnmanagedStringArray(nbFile, Win32Api.MaxPath)) {
                     if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
                         output.AddRange(cStrArray.ManagedStringsUnicode);
                 }
@@ -330,7 +329,7 @@ namespace _3PA {
         /// displays the input text into a new document
         /// </summary>
         public static void OpenNewDocument(string text) {
-            RunCommand(NppMenuCmd.FileNew);
+            RunCommand(NppMenuCmd.IDM_FILE_NEW);
             GrabFocus();
         }
 
@@ -420,10 +419,10 @@ namespace _3PA {
         /// <param name="image"></param>
         /// <param name="pluginId"></param>
         public static void SetToolbarImage(Bitmap image, int pluginId) {
-            var tbIcons = new toolbarIcons { hToolbarBmp = image.GetHbitmap() };
+            var tbIcons = new toolbarIcons {hToolbarBmp = image.GetHbitmap()};
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.NppFuncItems.Items[pluginId]._cmdID, pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
 
@@ -440,7 +439,7 @@ namespace _3PA {
             if (shortcut._key != 0)
                 funcItem._pShKey = shortcut;
             funcItem._init2Check = checkOnInit;
-            UnmanagedExports.FuncItems.Add(funcItem);
+            UnmanagedExports.NppFuncItems.Add(funcItem);
         }
 
         /// <summary>
@@ -449,7 +448,7 @@ namespace _3PA {
         /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
         /// </summary>
         public static void RegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGADD, handle);
         }
 
         /// <summary>
@@ -458,7 +457,7 @@ namespace _3PA {
         /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
         /// </summary>
         public static void UnRegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGREMOVE, handle);
         }
 
         /// <summary>
@@ -533,8 +532,8 @@ namespace _3PA {
         /// <returns></returns>
         private static List<string> GetOpenedFilesIn(NppMsg view, NppMsg mode) {
             var output = new List<string>();
-            int nbFile = (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)view);
-            using (Win32Api.ClikeStringArray cStrArray = new Win32Api.ClikeStringArray(nbFile, Win32Api.MaxPath)) {
+            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) view);
+            using (Win32Api.UnmanagedStringArray cStrArray = new Win32Api.UnmanagedStringArray(nbFile, Win32Api.MaxPath)) {
                 if (Win32Api.SendMessage(HandleNpp, mode, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
@@ -570,7 +569,7 @@ namespace _3PA {
         /// enum UniMode - uni8Bit 0, uniUTF8 1, uni16BE 2, uni16LE 3, uniCookie 4, uni7Bit 5, uni16BE_NoBOM 6, uni16LE_NoBOM 7
         /// </summary>
         public static int CurrentBufferEncoding {
-            get { return (int)Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, CurrentBufferId, 0); }
+            get { return (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, CurrentBufferId, 0); }
         }
 
         #endregion
@@ -584,7 +583,7 @@ namespace _3PA {
             get {
                 long langId;
                 Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTLANGTYPE, 0, out langId);
-                return (int)langId;
+                return (int) langId;
             }
         }
 
@@ -597,78 +596,11 @@ namespace _3PA {
                 if (langName.StartsWith("udf - ")) {
                     return langName.Substring(6);
                 }
-                if (InternalLangNameCorrespondance.ContainsKey(langName))
-                    return InternalLangNameCorrespondance[langName];
+                if (NppLangTypeInternal.Dictionary.ContainsKey(langName))
+                    return NppLangTypeInternal.Dictionary[langName];
                 return "normal";
             }
         }
-
-        /// <summary>
-        /// This dictionary is extracted from \PowerEditor\src\ScitillaComponent\ScintillaEditView.cpp
-        /// It allows to get the REAL lang name from the lang name returned by npp message NPPM_GETLANGUAGENAME
-        /// </summary>
-        private static readonly Dictionary<string, string> InternalLangNameCorrespondance = new Dictionary<string, string>() {
-            {"normal text", "normal"},
-            {"php", "php"},
-            {"c", "c"},
-            {"c++", "cpp"},
-            {"c#", "cs"},
-            {"objective-c", "objc"},
-            {"java", "java"},
-            {"rc", "rc"},
-            {"html", "html"},
-            {"xml", "xml"},
-            {"makefile", "makefile"},
-            {"pascal", "pascal"},
-            {"batch", "batch"},
-            {"ini", "ini"},
-            {"nfo", "nfo"},
-            {"udf", "udf"},
-            {"asp", "asp"},
-            {"sql", "sql"},
-            {"visual basic", "vb"},
-            {"css", "css"},
-            {"perl", "perl"},
-            {"python", "python"},
-            {"lua", "lua"},
-            {"tex", "tex"},
-            {"fortran free form", "fortran"},
-            {"shell", "bash"},
-            {"actionscript", "actionscript"},
-            {"nsis", "nsis"},
-            {"tcl", "tcl"},
-            {"lisp", "lisp"},
-            {"scheme", "scheme"},
-            {"assembly", "asm"},
-            {"diff", "diff"},
-            {"properties file", "props"},
-            {"postscript", "postscript"},
-            {"ruby", "ruby"},
-            {"smalltalk", "smalltalk"},
-            {"vhdl", "vhdl"},
-            {"kixtart", "kix"},
-            {"autoit", "autoit"},
-            {"caml", "caml"},
-            {"ada", "ada"},
-            {"verilog", "verilog"},
-            {"matlab", "matlab"},
-            {"haskell", "haskell"},
-            {"inno setup", "inno"},
-            {"internal search", "searchresult"},
-            {"cmake", "cmake"},
-            {"yaml", "yaml"},
-            {"cobol", "cobol"},
-            {"gui4cli", "gui4cli"},
-            {"d", "d"},
-            {"powershell", "powershell"},
-            {"r", "r"},
-            {"jsp", "jsp"},
-            {"coffeescript", "coffeescript"},
-            {"json", "json"},
-            {"javascript", "javascript.js"},
-            {"fortran fixed form", "fortran77"},
-            {"external", "ext"},
-        };
 
         /// <summary>
         /// Returns the current Lang name
@@ -773,7 +705,7 @@ namespace _3PA {
         /// Leaves npp
         /// </summary>
         public static void Exit() {
-            RunCommand(NppMenuCmd.FileExit);
+            RunCommand(NppMenuCmd.IDM_FILE_EXIT);
         }
 
         /// <summary>
@@ -781,7 +713,7 @@ namespace _3PA {
         /// </summary>
         public static void Restart() {
             _3PUpdater.Instance.ExecuteProgramAfterUpdate(SoftwareExePath);
-            RunCommand(NppMenuCmd.FileExit);
+            RunCommand(NppMenuCmd.IDM_FILE_EXIT);
         }
 
         /// <summary>
@@ -800,6 +732,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

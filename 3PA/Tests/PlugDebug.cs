@@ -24,21 +24,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
-using Microsoft.Win32.SafeHandles;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
@@ -109,130 +105,6 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
-        public const int MAX_PATH = 260;
-        public const int MAX_ALTERNATE = 14;
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct FILETIME {
-            public uint dwLowDateTime;
-            public uint dwHighDateTime;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct WIN32_FIND_DATA {
-            public FileAttributes dwFileAttributes;
-            public FILETIME ftCreationTime;
-            public FILETIME ftLastAccessTime;
-            public FILETIME ftLastWriteTime;
-            public uint nFileSizeHigh; //changed all to uint, otherwise you run into unexpected overflow
-            public uint nFileSizeLow; //|
-            public uint dwReserved0; //|
-            public uint dwReserved1; //v
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_PATH)] public string cFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_ALTERNATE)] public string cAlternate;
-        }
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern SafeFindHandle FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool FindClose(SafeHandle hFindFile);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern bool FindNextFile(SafeHandle hFindFile, out WIN32_FIND_DATA lpFindFileData);
-
-        internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid {
-            // Methods
-            [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-            internal SafeFindHandle()
-                : base(true) {}
-
-            public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
-                : base(ownsHandle) {
-                SetHandle(preExistingHandle);
-            }
-
-            protected override bool ReleaseHandle() {
-                if (!(IsInvalid || IsClosed)) {
-                    return FindClose(this);
-                }
-                return (IsInvalid || IsClosed);
-            }
-
-            protected override void Dispose(bool disposing) {
-                if (!(IsInvalid || IsClosed)) {
-                    FindClose(this);
-                }
-                base.Dispose(disposing);
-            }
-        }
-
-        private long RecurseDirectory(string directory, int level, out int files, out int folders) {
-            IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
-            long size = 0;
-            files = 0;
-            folders = 0;
-            WIN32_FIND_DATA findData;
-
-            // please note that the following line won't work if you try this on a network folder, like \\Machine\C$
-            // simply remove the \\?\ part in this case or use \\?\UNC\ prefix
-            using (SafeFindHandle findHandle = FindFirstFile(@"\\?\" + directory + @"\*", out findData)) {
-                if (!findHandle.IsInvalid) {
-                    do {
-                        if ((findData.dwFileAttributes & FileAttributes.Directory) != 0) {
-                            if (findData.cFileName != "." && findData.cFileName != "..") {
-                                folders++;
-
-                                int subfiles, subfolders;
-                                string subdirectory = directory + (directory.EndsWith(@"\") ? "" : @"\") +
-                                                      findData.cFileName;
-                                if (level != 0) // allows -1 to do complete search.
-                                {
-                                    size += RecurseDirectory(subdirectory, level - 1, out subfiles, out subfolders);
-
-                                    folders += subfolders;
-                                    files += subfiles;
-                                }
-                            }
-                        } else {
-                            // File
-                            files++;
-
-                            size += findData.nFileSizeLow + findData.nFileSizeHigh*4294967296;
-                        }
-                    } while (FindNextFile(findHandle, out findData));
-                }
-            }
-
-            return size;
-        }
-
-        public static List<string> RecurseDirectory(string directory, int level) {
-            var outList = new List<string>();
-            WIN32_FIND_DATA findData;
-
-            // please note that the following line won't work if you try this on a network folder, like \\Machine\C$
-            // simply remove the \\?\ part in this case or use \\?\UNC\ prefix
-            using (SafeFindHandle findHandle = FindFirstFile(@"\\?\" + directory + @"\*", out findData)) {
-                if (!findHandle.IsInvalid) {
-                    do {
-                        if ((findData.dwFileAttributes & FileAttributes.Directory) != 0) {
-                            if (findData.cFileName != "." && findData.cFileName != "..") {
-                                string subdirectory = directory + (directory.EndsWith(@"\") ? "" : @"\") + findData.cFileName;
-                                if (level != 0) {
-                                    outList.AddRange(RecurseDirectory(subdirectory, level - 1));
-                                }
-                            }
-                        } else {
-                            // File
-                            outList.Add(directory + (directory.EndsWith(@"\") ? "" : @"\") + findData.cFileName);
-                        }
-                    } while (FindNextFile(findHandle, out findData));
-                }
-            }
-            return outList;
-        }
-
         public static void DebugTest1() {
             /*
             var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
@@ -296,18 +168,10 @@ namespace _3PA.Tests {
                     File.WriteAllLines(Path.Combine(Npp.ConfigDirectory, "Tests", "out.txt"), list.OrderBy(s => s));
                 });
             });
-            Task.Factory.StartNew(() => {
-                MeasureIt(() => {
-                    var list = RecurseDirectory(ProEnvironment.Current.BaseLocalPath, -1);
-                    UserCommunication.Notify(list.Count.ToString());
-                    File.WriteAllLines(Path.Combine(Npp.ConfigDirectory, "Tests", "out.txt"), list.OrderBy(s => s));
-                });
-            });
         }
 
         public static void DebugTest3() {
-
-            UserCommunication.Notify( Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
+            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
 
             MeasureIt(() => {
                 var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
@@ -316,14 +180,13 @@ namespace _3PA.Tests {
             //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
 
             //RunParserTests(Npp.Text);
-            
+
             UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
-                    MessageImg.MsgUpdate,
-                    "A new version has been installed!",
-                    "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok", "cancel" },
-                    true);
-             
+                MessageImg.MsgUpdate,
+                "A new version has been installed!",
+                "Updated to version " + AssemblyInfo.Version,
+                new List<string> {"ok", "cancel"},
+                true);
         }
 
         public static void DisplayBugs() {

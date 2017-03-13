@@ -28,13 +28,9 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Data;
 using _3PA.Images;
-using _3PA.MainFeatures;
-using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
-using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.FileExplorer;
 
-namespace _3PA {
+namespace _3PA.MainFeatures {
     internal static class ThemeManager {
         #region Allows to initiate stuff 
 
@@ -70,12 +66,7 @@ namespace _3PA {
                     // we set the color for the YamuiTheme, but we also need to do it for the Theme...
                     _currentTheme.SetColorValues(typeof(Theme));
                 } catch (Exception e) {
-                    // either display the error immediatly or when the plugin is fully loaded...
-                    if (Plug.PluginIsReady)
-                        ErrorHandler.ShowErrors(e, "Loading a theme");
-                    else {
-                        Plug.OnPlugReady += () => { ErrorHandler.ShowErrors(e, "Loading a theme"); };
-                    }
+                    ErrorHandler.ShowErrors(e, "Loading a theme");
                 }
             }
         }
@@ -118,10 +109,10 @@ namespace _3PA {
 
             // force the autocomplete to redraw
             AutoCompletion.ForceClose();
-            CodeExplorer.Instance.ApplyColorSettings();
-            FileExplorer.Instance.ApplyColorSettings();
+            CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
+            FileExplorer.FileExplorer.Instance.ApplyColorSettings();
             Application.DoEvents();
-            Appli.Refresh();
+            Appli.Appli.Refresh();
         }
 
         /// <summary>

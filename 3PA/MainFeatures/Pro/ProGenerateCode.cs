@@ -25,10 +25,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Forms;
 using _3PA.Data;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
@@ -582,7 +582,8 @@ namespace _3PA.MainFeatures.Pro {
         #region Pro code class
 
         internal class ProCodeDelete {
-            [YamuiInput("Selection", AllowListedValuesOnly = true)] public string Value = "";
+            [YamuiInput("Selection", AllowListedValuesOnly = true)]
+            public string Value = "";
         }
 
         internal interface IProCode {
@@ -591,10 +592,17 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         internal enum ProInsertPosition {
-            [Description("Alphabetical order")] AlphabeticalOrder,
-            [Description("First")] First,
-            [Description("Last")] Last,
-            [Description("At caret position")] CaretPosition
+            [Description("Alphabetical order")]
+            AlphabeticalOrder,
+
+            [Description("First")]
+            First,
+
+            [Description("Last")]
+            Last,
+
+            [Description("At caret position")]
+            CaretPosition
         }
 
         internal class ProCodePrototype : IProCode {
@@ -617,7 +625,8 @@ namespace _3PA.MainFeatures.Pro {
             [YamuiInput("Name", Order = 0)]
             public string Name { get; set; }
 
-            [YamuiInput("Return type", Order = 1, AllowListedValuesOnly = true)] public string Type = "CHARACTER|HANDLE|INTEGER|LOGICAL|COM-HANDLE|DECIMAL|DATE|DATETIME|DATETIME-TZ|INT64|LONGCHAR|MEMPTR|RAW|RECID|ROWID|WIDGET-HANDLE|CLASS XXX";
+            [YamuiInput("Return type", Order = 1, AllowListedValuesOnly = true)]
+            public string Type = "CHARACTER|HANDLE|INTEGER|LOGICAL|COM-HANDLE|DECIMAL|DATE|DATETIME|DATETIME-TZ|INT64|LONGCHAR|MEMPTR|RAW|RECID|ROWID|WIDGET-HANDLE|CLASS XXX";
 
             [YamuiInput("Private function", Order = 2)]
             public bool IsPrivate { get; set; }

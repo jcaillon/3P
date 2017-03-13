@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiFormBase.cs) is part of YamuiFramework.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -114,7 +117,7 @@ namespace YamuiFramework.Forms {
                     var sc = m.WParam.ToInt64() & 0xFFF0;
                     switch (sc) {
                         // prevent the window from moving
-                        case (int) WinApi.Messages.SC_MOVE:
+                        case (int) WinApi.SysCommands.SC_MOVE:
                             if (!Movable)
                                 return;
                             break;

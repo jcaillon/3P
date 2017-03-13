@@ -18,8 +18,8 @@
 // ========================================================================
 #endregion
 using System;
-using System.Linq;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
     /// <summary>

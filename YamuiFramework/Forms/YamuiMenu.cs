@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiMenu.cs) is part of YamuiFramework.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,7 +34,6 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
     public class YamuiMenu : YamuiFormBaseShadow {
-
         #region Private
 
         private Action<YamuiMenuItem> _clickItemWrapper;
@@ -200,7 +202,7 @@ namespace YamuiFramework.Forms {
                             Image = _isExpanded ? Resources.Resources.Collapse : Resources.Resources.Expand,
                             OnClic = buttonExpandRetract_Click,
                             ToolTip = "Toggle <b>Expand/Collapse</b>"
-                        },
+                        }
                     };
                 }
                 yPos += 30;
@@ -377,7 +379,6 @@ namespace YamuiFramework.Forms {
         /// Draw the tree differently
         /// </summary>
         public class YamuiFilteredTypeTreeListForMenuPopup : YamuiFilteredTypeTreeList {
-
             /// <summary>
             /// True if none of the root items can be expanded
             /// </summary>
@@ -425,7 +426,6 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
     }
 
     #region YamuiMenuItem
