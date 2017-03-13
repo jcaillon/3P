@@ -1,7 +1,11 @@
 # 3P: Progress Programmers Pal #
 
-Master branch status [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv?svg=true)](https://ci.appveyor.com/project/jcaillon/3p)
-Beta branch status [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv/branch/beta?svg=true)](https://ci.appveyor.com/project/jcaillon/3p/branch/beta)
+
+| Branch | Build status |
+|--------|--------------|
+| master   | [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv?svg=true)](https://ci.appveyor.com/project/jcaillon/3p) |
+| beta | [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv/branch/beta?svg=true)](https://ci.appveyor.com/project/jcaillon/3p/branch/beta) |
+
 
 ![image](https://github.com/jcaillon/3P/blob/gh-pages/images/notepad_and_3P.png)
 
