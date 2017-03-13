@@ -379,9 +379,7 @@
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] Copying Yamuiframework dll to Lib\YamuiFolder\...
 
-echo test &gt; "$(SolutionDir)3PA\Lib\YamuiFolder\test.txt"
-type "$(SolutionDir)3PA\Lib\YamuiFolder\test.txt"
-
+md "$(SolutionDir)3PA\Lib\YamuiFolder\" &gt;nul 2&gt;nul
 copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll" "$(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll" &gt;nul
 if not "%25ERRORLEVEL%25" == "0" (
 	echo [ERROR] Couldn't copy $(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll TO $(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll
