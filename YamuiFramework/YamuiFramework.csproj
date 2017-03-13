@@ -379,6 +379,22 @@
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for YamuiFramework
 copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll" "$(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll" &gt;nul 2&gt;nul
+
+echo [TEST] $(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll
+if exist "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll" (
+	echo [OK]
+)
+
+echo [TEST] $(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll
+if exist "$(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll" (
+	echo [OK]
+)
+
+echo [TEST] C:\projects\3p\3PA\lib\yamuifolder\yamuiframework.dll
+if exist "C:\projects\3p\3PA\lib\yamuifolder\yamuiframework.dll" (
+	echo [OK]
+)
+
 echo [INFO] Copying Yamuiframework dll to Lib\YamuiFolder\...
 exit 0</PostBuildEvent>
   </PropertyGroup>
