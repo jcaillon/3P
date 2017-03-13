@@ -365,6 +365,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="NppCore\UnmanagedExports.cs" />
+    <None Include="Resources\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">
