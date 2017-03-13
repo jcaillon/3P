@@ -16,7 +16,10 @@
 - Create a new tag on either the beta or master branch (depending on release) : `git tag vX.X.X` (the last digit must be left empty for the tag name!)
 - Push the tag `git push --tags` : this will trigger the build with the deployment on the appveyor
 - Wait for the build to be done, edit the newly created https://github.com/jcaillon/3P/releases
-
+  - don't forget to check/uncheck the prerelease option
+  - Find a cool title
+  - verify the 2 .zip files
+  - Publish the release!
 
 **Done automatically by appveyor**
 

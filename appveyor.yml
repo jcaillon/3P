@@ -3,24 +3,22 @@ configuration: Debug
 platform:
 - x86
 - x64
-init:
-- cmd: >-
-    setlocal EnableDelayedExpansion
-
-    echo [INFO] Reading release notes from %APPVEYOR_BUILD_FOLDER%\newReleaseNotes.md...
-
-    set "releasenotescontent="
-
-    for /F "delims=" %%a in (%APPVEYOR_BUILD_FOLDER%\newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
-
-    set "releasenotescontent=!releasenotescontent:~2!"
 before_build:
 - ps: nuget restore
 build:
   project: 3P.sln
   verbosity: minimal
 after_build:
-- cmd: echo $(releasenotescontent)
+- cmd: >-
+    @echo off
+
+    setlocal EnableDelayedExpansion
+
+    set "releasenotescontent="
+
+    for /F "delims=" %%a in (newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
+
+    set "releasenotescontent=!releasenotescontent:~2!"
 artifacts:
 - path: Releases\3P.zip
   name: 3P.zip
@@ -36,9 +34,9 @@ deploy:
   artifact: Releases\3P.zip,Releases\3P_x64.zip
   draft: true
   prerelease: true
-  force_update: false
+  force_update: true
   on:
-    APPVEYOR_REPO_TAG: TRUE
+    APPVEYOR_REPO_TAG: true
 notifications:
 - provider: Email
   to:
