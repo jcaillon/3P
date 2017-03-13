@@ -377,7 +377,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo [INFO] Copying Yamuiframework dll to Lib\YamuiFolder\...
+    <PostBuildEvent>echo [INFO] End of build for YamuiFramework 
+echo [INFO] Copying Yamuiframework dll to Lib\YamuiFolder\...
 
 md "$(SolutionDir)3PA\Lib\YamuiFolder\" &gt;nul 2&gt;nul
 copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.dll" "$(SolutionDir)3PA\Lib\YamuiFolder\YamuiFramework.dll" &gt;nul
