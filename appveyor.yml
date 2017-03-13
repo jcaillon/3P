@@ -1,5 +1,4 @@
 version: '{branch}.{build}'
-skip_non_tags: true
 configuration: Debug
 platform:
 - x86
