@@ -21,6 +21,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 
@@ -33,6 +34,7 @@ namespace _3PA.NppCore {
     /// information allows us to quickly convert BYTE to CHAR position and vice-versa
     /// </summary>
     internal class DocumentLines {
+
         #region Fields
 
         /// <summary>
@@ -56,6 +58,8 @@ namespace _3PA.NppCore {
 
         private int _holeLenght;
 
+        private static ReaderWriterLockSlim _listLock = new ReaderWriterLockSlim();
+
         #endregion
 
         #region Constructors
@@ -64,12 +68,40 @@ namespace _3PA.NppCore {
         /// Initializes a new instance
         /// </summary>
         public DocumentLines() {
-            _linesList = new GapBuffer<int> {0, 0};
+            Init();
         }
 
         #endregion
 
         #region Register document modifications
+
+        /// <summary>
+        /// Reset the lines list
+        /// </summary>
+        private void Init() {
+            if (_listLock.TryEnterWriteLock(-1)) {
+                try {
+                    _linesList = new GapBuffer<int> { 0, 0 };
+                } finally {
+                    _listLock.ExitReadLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Simulates the insertion of the whole text, use this to reset the lines info 
+        /// (when switching document for instance)
+        /// </summary>
+        public void Reset() {
+            Init();
+            var scn = new SCNotification {
+                linesAdded = SciGetLineCount() - 1,
+                position = 0,
+                length = SciGetLength()
+            };
+            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            OnScnModified(scn, true);
+        }
 
         /// <summary>
         /// When receiving a modification notification by scintilla
@@ -82,26 +114,17 @@ namespace _3PA.NppCore {
             if (_oneByteCharEncoding)
                 return;
 
-            if (isInsertion) {
-                OnInsertedText(scn);
-            } else {
-                OnDeletedText(scn);
+            if (_listLock.TryEnterWriteLock(-1)) {
+                try {
+                    if (isInsertion) {
+                        OnInsertedText(scn);
+                    } else {
+                        OnDeletedText(scn);
+                    }
+                } finally {
+                    _listLock.ExitReadLock();
+                }
             }
-        }
-
-        /// <summary>
-        /// Simulates the insertion of the whole text, use this to reset the lines info 
-        /// (when switching document for instance)
-        /// </summary>
-        internal void Reset() {
-            _linesList = new GapBuffer<int> {0, 0};
-            var scn = new SCNotification {
-                linesAdded = SciGetLineCount() - 1,
-                position = 0,
-                length = SciGetLength()
-            };
-            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
-            OnScnModified(scn, true);
         }
 
         /// <summary>
@@ -200,21 +223,17 @@ namespace _3PA.NppCore {
         #region public
 
         /// <summary>
-        /// Gets the number of lines.
+        /// Gets the number of lines
         /// </summary>
         /// <returns>The number of lines</returns>
         public int Count {
             get {
-                // bypass the hard work for simple encoding
-                if (_oneByteCharEncoding)
-                    return SciGetLineCount();
-
-                return _linesList.Count - 1;
+                return SciGetLineCount();
             }
         }
 
         /// <summary>
-        /// Gets the number of CHAR in the document.
+        /// Gets the number of CHAR in the document
         /// </summary>
         internal int TextLength {
             get {
@@ -222,7 +241,7 @@ namespace _3PA.NppCore {
                 if (_oneByteCharEncoding)
                     return SciGetLength();
 
-                return CharPositionFromLine(_linesList.Count - 1);
+                return CharPositionFromLine(Count);
             }
         }
 
@@ -277,10 +296,17 @@ namespace _3PA.NppCore {
         /// this is THE method of this class (since it is the only info we keep on the lines!)
         /// </summary>
         private int PrivateCharPositionFromLine(int index) {
-            if (_holeLenght != 0 && index > _holeLine) {
-                return _linesList[index] + _holeLenght;
+            if (_listLock.TryEnterReadLock(-1)) {
+                try {
+                    if (_holeLenght != 0 && index > _holeLine) {
+                        return _linesList[index] + _holeLenght;
+                    }
+                    return _linesList[index];
+                } finally {
+                    _listLock.ExitReadLock();
+                }
             }
-            return _linesList[index];
+            return 0;
         }
 
         /// <summary>
@@ -429,7 +455,10 @@ namespace _3PA.NppCore {
         private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
             if (text == IntPtr.Zero || length == 0)
                 return 0;
-            var count = encoding.GetCharCount((byte*) text, length);
+            var bptr = (byte*) text;
+            if (bptr == null)
+                return 0;
+            var count = encoding.GetCharCount(bptr, length);
             return count;
         }
 

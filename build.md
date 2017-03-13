@@ -9,11 +9,10 @@
 
 **Manual chores**
 
-- Change the dll version of 3P in AssemblyInfo.cs : *the format should be vX.X.X.X with v(major).(minor).(revision).(lastdigit)* ; the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)
+- Change the dll version of 3P in AssemblyInfo.cs, the format should be vX.X.X.X with v(major).(minor).(revision).(lastdigit) ; *the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)*
 - Check the default Config
 - Recompile the updater if needed
-- When creating a stable release, target the master branch and don't forget to do a pull request from beta > master
-- Create a new tag on either the beta or master branch (depending on release) : `git tag vX.X.X` (the last digit must be left empty for the tag name!)
+- Create a new tag : `git tag vX.X.X` (the last digit must be left empty for the tag name!)
 - Push the tag `git push --tags` : this will trigger the build with the deployment on the appveyor
 - Wait for the build to be done, edit the newly created https://github.com/jcaillon/3P/releases
   - don't forget to check/uncheck the prerelease option
