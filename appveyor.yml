@@ -6,8 +6,11 @@ platform:
 init:
 - cmd: >-
     setlocal EnableDelayedExpansion
+
     set "releasenotescontent="
+
     for /F "delims=" %%a in (newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
+    
     set "releasenotescontent=!releasenotescontent:~2!"
 before_build:
 - ps: nuget restore
