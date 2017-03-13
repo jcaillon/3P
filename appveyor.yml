@@ -7,10 +7,12 @@ init:
 - cmd: >-
     setlocal EnableDelayedExpansion
 
+    echo [INFO] Reading release notes from %APPVEYOR_BUILD_FOLDER%\newReleaseNotes.md...
+
     set "releasenotescontent="
 
-    for /F "delims=" %%a in (newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
-    
+    for /F "delims=" %%a in (%APPVEYOR_BUILD_FOLDER%\newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
+
     set "releasenotescontent=!releasenotescontent:~2!"
 before_build:
 - ps: nuget restore
