@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DirectoryListParser.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -45,7 +45,11 @@ namespace _3PA.Lib.Ftp {
     /// Based on Adarsh's code: http://blogs.msdn.com/adarshk/archive/2004/09/15/230177.aspx
     /// </summary>
     class DirectoryListParser {
-        enum EDirectoryListingStyle { UnixStyle, WindowsStyle, Unknown }
+        enum EDirectoryListingStyle {
+            UnixStyle,
+            WindowsStyle,
+            Unknown
+        }
 
         const string UnixSymLinkPathSeparator = " -> ";
 
@@ -71,7 +75,8 @@ namespace _3PA.Lib.Ftp {
                         }
                     }
                 }
-                return myListArray; ;
+                return myListArray;
+                ;
             } catch (Exception ex) {
                 throw new FtpException("Unable to parse the directory list", ex);
             }
@@ -98,14 +103,14 @@ namespace _3PA.Lib.Ftp {
 
                 processstr = processstr.Substring(i + 1);
             }
-            f.Name = processstr;  //Rest is name   
+            f.Name = processstr; //Rest is name   
             return f;
         }
 
         private static EDirectoryListingStyle GuessDirectoryListingStyle(string[] recordList) {
             foreach (string s in recordList) {
                 if (s.Length > 10
-                 && Regex.IsMatch(s.Substring(0, 10), "(-|d)(-|r)(-|w)(-|x)(-|r)(-|w)(-|x)(-|r)(-|w)(-|x)")) {
+                    && Regex.IsMatch(s.Substring(0, 10), "(-|d)(-|r)(-|w)(-|x)(-|r)(-|w)(-|x)(-|r)(-|w)(-|x)")) {
                     return EDirectoryListingStyle.UnixStyle;
                 }
                 if (s.Length > 8
@@ -131,7 +136,7 @@ namespace _3PA.Lib.Ftp {
             // Note: there is no way to determine here if the symlink refers to a dir or a file
             f.IsSymLink = (f.Flags[0] == 'l');
             processstr = (processstr.Substring(11)).Trim();
-            CutSubstringFromStringWithTrim(ref processstr, " ", 0);   //skip one part
+            CutSubstringFromStringWithTrim(ref processstr, " ", 0); //skip one part
             f.Owner = CutSubstringFromStringWithTrim(ref processstr, " ", 0);
             f.Group = CutSubstringFromStringWithTrim(ref processstr, " ", 0);
             f.Size = ulong.Parse(CutSubstringFromStringWithTrim(ref processstr, " ", 0));
@@ -153,7 +158,7 @@ namespace _3PA.Lib.Ftp {
                 f.Name = CutSubstringFromStringWithTrim(ref processstr, UnixSymLinkPathSeparator, 0);
                 f.SymLinkTargetPath = processstr;
             } else
-                f.Name = processstr;   //Rest of the part is name
+                f.Name = processstr; //Rest of the part is name
             return f;
         }
 

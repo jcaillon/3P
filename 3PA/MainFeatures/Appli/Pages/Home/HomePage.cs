@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (HomePage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -19,17 +19,17 @@
 #endregion
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
+using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
     internal partial class HomePage : YamuiPage {
-
         #region fields
 
         #endregion
 
         #region constructor
+
         public HomePage() {
             InitializeComponent();
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)

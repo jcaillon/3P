@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiMenu.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,74 +17,117 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
+    public class YamuiMenu : YamuiFormBaseShadow {
+        #region Private
 
-    /// <summary>
-    /// A class to display a cool custom context menu
-    /// </summary>
-    public sealed class YamuiMenu : Form {
-
-        #region static fields
-
-        /// <summary>
-        /// We keep a list of the menu currently opened so we can know if a menu is still in focus
-        /// </summary>
-        public static List<IntPtr> ListOfOpenededMenuHandle { get; set; }
+        private Action<YamuiMenuItem> _clickItemWrapper;
+        private Size _formMinSize = new Size(0, 20);
+        private bool _isExpanded = true;
 
         #endregion
 
         #region public fields
 
-        public bool IamMain = true;
+        /// <summary>
+        /// When an item is clicked, it will be fed to this method that should, in term, be calling .OnClic of said item
+        /// Use this as a wrapper to handle errors for instance
+        /// </summary>
+        public Action<YamuiMenuItem> ClicItemWrapper {
+            get {
+                return _clickItemWrapper ?? (item => {
+                    if (item.OnClic != null) {
+                        item.OnClic(item);
+                    }
+                });
+            }
+            set { _clickItemWrapper = value; }
+        }
 
-        public int SubTextOpacity = 100;
+        /// <summary>
+        /// Location from where the menu will be generated
+        /// </summary>
+        public Point SpawnLocation { get; set; }
+
+        /// <summary>
+        /// If != 0, positions this menu not as a classic menu but as an autocompletion for a given text,
+        /// set this value to the line height of said text
+        /// </summary>
+        public int AutocompletionLineHeight { get; set; }
+
+        /// <summary>
+        /// List of the item to display in the menu
+        /// </summary>
+        public List<YamuiMenuItem> MenuList { get; set; }
+
+        /// <summary>
+        /// Title of the menu (or null)
+        /// </summary>
+        public string HtmlTitle { get; set; }
+
+        /// <summary>
+        /// Should we display a filter box?
+        /// </summary>
+        public bool DisplayFilterBox { get; set; }
+
+        public bool DisplayNbItems { get; set; }
+
+        /// <summary>
+        /// Set a minimum size for this menu
+        /// </summary>
+        public Size FormMinSize {
+            get { return _formMinSize; }
+            set { _formMinSize = value; }
+        }
+
+        /// <summary>
+        /// Set a maximum size for this menu
+        /// </summary>
+        public Size FormMaxSize { get; set; }
+
+        /// <summary>
+        /// Accessor to the list
+        /// </summary>
+        public YamuiFilteredTypeTreeListForMenuPopup YamuiList { get; private set; }
+
+        /// <summary>
+        /// Accessor to the filter box
+        /// </summary>
+        public YamuiFilterBox FilterBox { get; private set; }
+
+        /// <summary>
+        /// Initial filter string used (only if DisplayFilterBox is true)                                                                                                                        
+        /// </summary>
+        public string InitialFilterString { get; set; }
 
         #endregion
 
-        #region private fields
+        #region Don't show in ATL+TAB + topmost
 
-        private YamuiMenu _parentMenu;
-        private YamuiMenu _childMenu;
-
-        private bool _closing;
-
-        private const int LineHeight = 22;
-        private const int SeparatorLineHeight = 8;
-
-        private bool _reverseX;
-        private bool _reverseY;
-
-        private List<YamuiMenuItem> _content = new List<YamuiMenuItem>();
-
-        private List<int> _yPosOfSeparators = new List<int>(); 
-
-        private int _selectedIndex;
-
-        private const int BorderWidth = 2;
-
-        #endregion
-
-        #region Don't show in ATL+TAB
-
+        /// <summary>
+        /// The form should also set ShowInTaskbar = false; for this to work
+        /// </summary>
         protected override CreateParams CreateParams {
             get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= 0x80;
-                return Params;
+                var createParams = base.CreateParams;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOPMOST;
+                return createParams;
             }
         }
 
@@ -91,44 +135,53 @@ namespace YamuiFramework.Forms {
 
         #region Life and death
 
-        public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null, int minSize = 150) {
-            if (content == null || content.Count == 0)
-                content = new List<YamuiMenuItem> { new YamuiMenuItem { ItemName = "Empty", IsDisabled = true } };
+        public YamuiMenu() {
+            YamuiList = new YamuiFilteredTypeTreeListForMenuPopup();
+            FilterBox = new YamuiFilterBox();
+        }
 
+        protected override void Dispose(bool disposing) {
+            if (YamuiList != null) {
+                YamuiList.MouseDown -= YamuiListOnMouseDown;
+                YamuiList.EnterPressed -= YamuiListOnEnterPressed;
+                YamuiList.RowClicked -= YamuiListOnRowClicked;
+            }
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
+        #region DrawContent
+
+        private void DrawContent() {
             // init menu form
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            ShowIcon = false;
             ShowInTaskbar = false;
-            SizeGripStyle = SizeGripStyle.Hide;
             StartPosition = FormStartPosition.Manual;
 
-            var useImageIcon = content.Exists(item => item.ItemImage != null);
-            var noChildren = !content.Exists(item => item.Children != null);
-            var maxWidth = content.Select(item => TextRenderer.MeasureText(item.SubText, FontManager.GetFont(FontFunction.Small)).Width).Concat(new[] { 0 }).Max();
-            maxWidth += maxWidth == 0 ? 0 : 15;
-            maxWidth += content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
-            maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
-            maxWidth = Math.Max(minSize, maxWidth);
+            Controls.Clear();
+
+            // evaluates the width needed to draw the control
+            var maxWidth = MenuList.Select(item => item.Level*8 + TextRenderer.MeasureText(item.SubText ?? "", FontManager.GetFont(FontFunction.Small)).Width + TextRenderer.MeasureText(item.DisplayText ?? "", FontManager.GetStandardFont()).Width).Concat(new[] {0}).Max();
+            maxWidth += MenuList.Exists(item => item.SubText != null) ? 10 : 0;
+            maxWidth += (MenuList.Exists(item => item.ItemImage != null) ? 35 : 8) + 30;
+            if (FormMaxSize.Width > 0)
+                maxWidth = maxWidth.ClampMax(FormMaxSize.Width);
+            if (FormMinSize.Width > 0)
+                maxWidth = maxWidth.ClampMin(FormMinSize.Width);
+            Width = maxWidth;
 
             int yPos = BorderWidth;
 
             // title
             HtmlLabel title = null;
-            if (htmlTitle != null) {
+            if (HtmlTitle != null) {
                 title = new HtmlLabel {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                    Location = new Point(BorderWidth, yPos),
                     AutoSizeHeightOnly = true,
+                    Width = Width - BorderWidth*2,
                     BackColor = Color.Transparent,
-                    Width = maxWidth - BorderWidth * 2,
-                    Text = htmlTitle,
-                    Location = new Point(BorderWidth, BorderWidth),
+                    Text = HtmlTitle,
                     IsSelectionEnabled = false,
                     IsContextMenuEnabled = false,
                     Enabled = false
@@ -136,337 +189,252 @@ namespace YamuiFramework.Forms {
                 yPos += title.Height;
             }
 
-            // insert buttons
-            int index = 0;
-            bool lastButtonWasDisabled = true;
-            Controls.Clear();
-            foreach (var item in content) {
-                if (item.IsSeparator) {
-                    _yPosOfSeparators.Add(yPos);
-                    yPos += SeparatorLineHeight;
-                } else {
-                    var button = new YamuiMenuButton {
-                        Text = item.ItemName,
-                        NoChildren = item.Children == null || !item.Children.Any(),
-                        Location = new Point(BorderWidth, yPos),
-                        Size = new Size(maxWidth - BorderWidth * 2, LineHeight),
-                        NoIconImage = !useImageIcon,
-                        BackGrndImage = item.ItemImage,
-                        SubText = item.SubText,
-                        Tag = index,
-                        SubTextOpacity = SubTextOpacity,
-                        Enabled = !item.IsDisabled
+            // display filter box?
+            if (DisplayFilterBox) {
+                FilterBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+                FilterBox.Location = new Point(BorderWidth, yPos + 5);
+                FilterBox.Size = new Size(Width - BorderWidth*2, 20);
+                FilterBox.Padding = new Padding(5, 0, 5, 0);
+                if (MenuList.Exists(item => item.CanExpand)) {
+                    _isExpanded = MenuList.Exists(item => item.IsExpanded);
+                    FilterBox.ExtraButtons = new List<YamuiFilterBox.YamuiFilterBoxButton> {
+                        new YamuiFilterBox.YamuiFilterBoxButton {
+                            Image = _isExpanded ? Resources.Resources.Collapse : Resources.Resources.Expand,
+                            OnClic = buttonExpandRetract_Click,
+                            ToolTip = "Toggle <b>Expand/Collapse</b>"
+                        }
                     };
-                    button.Click += ButtonOnButtonPressed;
-                    button.PreviewKeyDown += OnPreviewKeyDown;
-                    Controls.Add(button);
-                    _content.Add(item);
-                    yPos += LineHeight;
-                    
-                    // allows to select the correct button at start up
-                    if (item.IsSelectedByDefault || lastButtonWasDisabled)
-                        _selectedIndex = index;
-                    if (lastButtonWasDisabled)
-                        lastButtonWasDisabled = item.IsDisabled;
-                    index++;
                 }
+                yPos += 30;
             }
 
-            // add title if needed
-            if (title != null) {
-                Controls.Add(title);
+            // list
+            Padding = new Padding(BorderWidth, yPos, BorderWidth, BorderWidth);
+            YamuiList.NoCanExpandItem = !MenuList.Exists(item => item.CanExpand);
+            YamuiList.Dock = DockStyle.Fill;
+            if (!DisplayNbItems)
+                YamuiList.BottomHeight = 0;
+            YamuiList.SetItems(MenuList.Cast<ListItem>().ToList());
+            YamuiList.MouseDown += YamuiListOnMouseDown;
+            YamuiList.EnterPressed += YamuiListOnEnterPressed;
+            YamuiList.RowClicked += YamuiListOnRowClicked;
+            yPos += YamuiList.Items.Count.ClampMin(1)*YamuiList.RowHeight;
+
+            if (YamuiList.Items.Count > 0) {
+                var selectedIdx = YamuiList.Items.Cast<YamuiMenuItem>().ToList().FindIndex(item => item.IsSelectedByDefault);
+                if (selectedIdx > 0)
+                    YamuiList.SelectedItemIndex = selectedIdx;
             }
+
+            // add controls
+            if (title != null)
+                Controls.Add(title);
+            if (DisplayFilterBox) {
+                FilterBox.Initialize(YamuiList);
+                Controls.Add(FilterBox);
+            }
+            Controls.Add(YamuiList);
 
             // Size the form
-            Size = new Size(maxWidth, yPos + BorderWidth);
+            var height = yPos + BorderWidth + (DisplayNbItems ? YamuiList.BottomHeight : 0);
+            if (FormMaxSize.Height > 0)
+                height = height.ClampMax(FormMaxSize.Height);
+            if (FormMinSize.Height > 0)
+                height = height.ClampMin(FormMinSize.Height);
+            Size = new Size(maxWidth, height);
+
+            // position / size
+            Location = AutocompletionLineHeight != 0 ? GetBestAutocompPosition(SpawnLocation, AutocompletionLineHeight) : GetBestMenuPosition(SpawnLocation);
+            ResizeFormToFitScreen();
             MinimumSize = Size;
-            MaximumSize = Size;
 
-            // menu position
-            var screen = Screen.FromPoint(location);
-            if (location.X > screen.WorkingArea.X + screen.WorkingArea.Width/2) {
-                location.X = location.X - Width;
-                _reverseX = true;
-            }
-            if (location.Y > screen.WorkingArea.Y + screen.WorkingArea.Height/2) {
-                location.Y = location.Y - Height;
-                _reverseY = true;
-            }
-            Location = location;
+            // default focus
+            if (DisplayFilterBox)
+                FilterBox.ClearAndFocusFilter();
+            else
+                ActiveControl = YamuiList;
 
-            // events
-            Deactivate += OnDeactivate;
-            Activated += OnActivated;
-            Closing += OnClosing;
+            // Filter?
+            if (!string.IsNullOrEmpty(InitialFilterString) && DisplayFilterBox)
+                FilterBox.Text = InitialFilterString;
 
-            // keydown
+            // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
-            PreviewKeyDown += OnPreviewKeyDown;
-
-            // set focused item
-            ActiveControl = Controls[_selectedIndex];
-
-            // register to the opened menu list
-            if (ListOfOpenededMenuHandle == null) {
-                ListOfOpenededMenuHandle = new List<IntPtr>();
-            }
-            ListOfOpenededMenuHandle.Add(Handle);
         }
 
-        #endregion
-
-        #region Paint Methods
-
-        protected override void OnPaint(PaintEventArgs e) {
-
-            var backColor = YamuiThemeManager.Current.FormBack;
-            var borderColor = YamuiThemeManager.Current.FormBorder;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, BorderWidth) { Alignment = PenAlignment.Inset };
-            e.Graphics.DrawRectangle(pen, rect);
-
-            // draw separators
-            foreach (var yPosOfSeparator in _yPosOfSeparators) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormAltBack)) {
-                    var width = (int) (Width*0.35);
-                    e.Graphics.FillRectangle(b, new Rectangle(width, yPosOfSeparator + SeparatorLineHeight / 2 - 1, Width - width * 2, 2));
+        private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
+            var item = yamuiScrollList.SelectedItem as YamuiMenuItem;
+            if (item != null) {
+                if (item.CanExpand) {
+                    ClicItemWrapper(item);
+                } else {
+                    Visible = false;
+                    ClicItemWrapper(item);
+                    Close();
+                    Dispose();
                 }
             }
+        }
+
+        private void YamuiListOnEnterPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
+            var item = yamuiScrollList.SelectedItem as YamuiMenuItem;
+            if (item != null) {
+                if (item.CanExpand) {
+                    ClicItemWrapper(item);
+                } else {
+                    Visible = false;
+                    ClicItemWrapper(item);
+                    Close();
+                    Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Allows the user to move the window from the bottom status of the YamuiList (showing x items)
+        /// </summary>
+        private void YamuiListOnMouseDown(object sender, MouseEventArgs e) {
+            var list = sender as YamuiFilteredTypeList;
+            if (list != null && Movable && e.Button == MouseButtons.Left && (new Rectangle(0, list.Height - list.BottomHeight, list.Width, list.BottomHeight)).Contains(e.Location)) {
+                // do as if the cursor was on the title bar
+                WinApi.ReleaseCapture();
+                WinApi.SendMessage(Handle, (uint) WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int) WinApi.HitTest.HTCAPTION), new IntPtr(0));
+            }
+        }
+
+        private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
+            if (_isExpanded)
+                YamuiList.ForceAllToCollapse();
+            else
+                YamuiList.ForceAllToExpand();
+            _isExpanded = !_isExpanded;
+            FilterBox.ExtraButtonsList[0].BackGrndImage = _isExpanded ? Resources.Resources.Collapse : Resources.Resources.Expand;
         }
 
         #endregion
 
         #region Events
 
-        private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
-            OnKeyDown(previewKeyDownEventArgs.KeyCode);
-            previewKeyDownEventArgs.IsInputKey = true;
-        }
-
-
-        private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            var button = (YamuiMenuButton)sender;
-            if (button != null) {
-                _selectedIndex = (int)button.Tag;
-                OnItemPressed();
+        protected override void OnKeyDown(KeyEventArgs e) {
+            if (e.KeyCode == Keys.Escape) {
+                Close();
+                Dispose();
+                e.Handled = true;
             }
-        }
 
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            _closing = true;
-            ListOfOpenededMenuHandle.Remove(Handle);
-
-            Deactivate -= OnDeactivate;
-            Activated -= OnActivated;
-            Closing -= OnClosing;
-            PreviewKeyDown -= OnPreviewKeyDown;
-        }
-
-        /// <summary>
-        /// an item has been pressed
-        /// </summary>
-        private void OnItemPressed() {
-            var item = _content[_selectedIndex];
-            // item has children, open a new menu
-            if (item.Children != null && item.Children.Any()) {
-                _childMenu = new YamuiMenu(Location, item.Children) {
-                    IamMain = false,
-                    _parentMenu = this
-                };
-                _childMenu.SetPosition(new Rectangle(Location.X + Width, Location.Y + Controls[_selectedIndex].Top, Width, Height), _reverseX, _reverseY);
-                _childMenu.Show();
-            } else {
-                // exec action and close the menu
-                item.Do();
-                CloseAll();
-            }
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
         /// <summary>
         /// Close the menu when the user clicked elsewhere
         /// </summary>
-        private void OnDeactivate(object sender, EventArgs eventArgs) {
-            // close if the new active windows isn't a menu
+        protected override void OnDeactivate(EventArgs e) {
             // ReSharper disable once ObjectCreationAsStatement
             new DelayedAction(30, () => {
-                if (!ListOfOpenededMenuHandle.Contains(WinApi.GetForegroundWindow()) && !_closing) {
-                    BeginInvoke((Action) CloseAll);
+                try {
+                    this.SafeInvoke(popup => {
+                        popup.Close();
+                        popup.Dispose();
+                    });
+                } catch (Exception) {
+                    //ok
                 }
             });
+            base.OnDeactivate(e);
         }
 
         /// <summary>
-        /// Close all children when a menu is activated
+        /// Redirect mouse wheel to the list
         /// </summary>
-        private void OnActivated(object sender, EventArgs eventArgs) {
-            CloseChildren();
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            YamuiList.DoScroll(e.Delta);
+            base.OnMouseWheel(e);
         }
 
         #endregion
 
-        #region methods
+        #region Show
 
         /// <summary>
-        /// A key has been pressed on the menu
+        /// Call this method to show the notification
         /// </summary>
-        public void OnKeyDown(Keys pressedKey) {
-            var initialIndex = _selectedIndex;
-            do {
-                switch (pressedKey) {
-                    case Keys.Left:
-                    case Keys.Escape:
-                        if (_parentMenu != null) {
-                            WinApi.SetForegroundWindow(_parentMenu.Handle);
-                        }
-                        Close();
-                        break;
-                    case Keys.Right:
-                    case Keys.Space:
-                    case Keys.Enter:
-                        OnItemPressed();
-                        break;
-                    case Keys.Up:
-                        _selectedIndex--;
-                        break;
-                    case Keys.Down:
-                        _selectedIndex++;
-                        break;
-                    case Keys.PageDown:
-                        _selectedIndex = _content.Count - 1;
-                        break;
-                    case Keys.PageUp:
-                        _selectedIndex = 0;
-                        break;
-                }
-                if (_selectedIndex > _content.Count - 1)
-                    _selectedIndex = 0;
-                if (_selectedIndex < 0)
-                    _selectedIndex = _content.Count - 1;
-                if (Controls.Count > 0)
-                    ActiveControl = Controls[_selectedIndex];
-            }
-            // do this while the current button is disabled and we didn't already try every button
-            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
-
+        public new void Show() {
+            DrawContent();
+            base.Show();
+            Activate();
         }
 
-        /// <summary>
-        /// Position the menu relativly to a parent menu
-        /// </summary>
-        private void SetPosition(Rectangle rect, bool reverseX, bool reverseY) {
-            Location = new Point(reverseX ? (rect.X - rect.Width - Width) : rect.X, reverseY ? (rect.Y - (Height - 2) + LineHeight) : rect.Y);
-        }
-
-        private void CloseChildren() {
-            if (_childMenu != null) {
-                _childMenu.CloseChildren();
-                _childMenu.Close();
-                _childMenu.Dispose();
-            }
-        }
-
-        private void CloseParents() {
-            if (_parentMenu != null) {
-                _parentMenu.CloseParents();
-                _parentMenu.Close();
-                _parentMenu.Dispose();
-            }
-        }
-
-        public void CloseAll() {
-            CloseChildren();
-            CloseParents();
-            Close();
-            Dispose();
+        public new void Show(IWin32Window owner) {
+            DrawContent();
+            base.Show(owner);
+            Activate();
         }
 
         #endregion
 
-        #region YamuiMenuButton
+        #region YamuiFilteredTypeTreeListForMenuPopup
 
-        private class YamuiMenuButton : YamuiButton {
+        /// <summary>
+        /// Draw the tree differently
+        /// </summary>
+        public class YamuiFilteredTypeTreeListForMenuPopup : YamuiFilteredTypeTreeList {
+            /// <summary>
+            /// True if none of the root items can be expanded
+            /// </summary>
+            public bool NoCanExpandItem { get; set; }
 
-            public bool NoIconImage { private get; set; }
-            public bool NoChildren { private get; set; }
-            public string SubText { get; set; }
-            public int SubTextOpacity { get; set; }
+            protected new int _nodeExpandClickMargin = 28;
 
-            protected override void OnPaint(PaintEventArgs e) {
-
-                var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered, Enabled);
-                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered, Enabled);
-
+            /// <summary>
+            /// Called by default to paint the row if no OnRowPaint is defined
+            /// </summary>
+            protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
                 // background
+                var backColor = item.IsSeparator ?
+                    YamuiThemeManager.Current.MenuBg(false, false, !item.IsDisabled) :
+                    YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
                 e.Graphics.Clear(backColor);
 
                 // foreground
                 // left line
-                if (IsFocused && Enabled) {
+                if (row.IsSelected && !item.IsDisabled) {
                     using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
                         e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, ClientRectangle.Height));
                     }
                 }
 
-                // Image icon
-                if (BackGrndImage != null) {
-                    var recImg = new Rectangle(new Point(8, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
-                    e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
-                }
+                var curItem = item as FilteredTypeTreeListItem;
+                if (curItem != null) {
+                    var drawRect = row.ClientRectangle;
+                    drawRect.X += 8;
+                    drawRect.Width -= 8;
+                    drawRect.Height = RowHeight;
+                    var shiftedDrawRect = drawRect;
 
-                // sub text 
-                if (!string.IsNullOrEmpty(SubText)) {
-                    var textFont = FontManager.GetFont(FontStyle.Bold, 10);
-                    var textSize = TextRenderer.MeasureText(SubText, textFont);
-                    var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
+                    // draw the tree structure
+                    if (!_isSearching && !NoCanExpandItem)
+                        shiftedDrawRect = RowPaintTree(e.Graphics, curItem, drawRect, row);
 
-                    var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
-                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb(SubTextOpacity, subColor)), drawPoint);
-
-                    using (var pen = new Pen(Color.FromArgb((int) (SubTextOpacity*0.8), subColor), 1) {Alignment = PenAlignment.Left}) {
-                        e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
-                    }
-                }
-
-                // text
-                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(NoIconImage ? 8 : 35, 0, ClientRectangle.Width - (NoIconImage ? 8 : 35), ClientRectangle.Height), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
-
-                // arrow
-                if (!NoChildren) {
-                    TextRenderer.DrawText(e.Graphics, ((char)52).ToString(), FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.50)), new Rectangle(ClientRectangle.Width - 12, 0, 12, ClientRectangle.Height), IsFocused ? YamuiThemeManager.Current.AccentColor : foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    // case of a separator
+                    if (item.IsSeparator) {
+                        RowPaintSeparator(e.Graphics, curItem.Level == 0 ? drawRect : shiftedDrawRect);
+                    } else
+                        DrawFilteredTypeRow(e.Graphics, curItem, NoCanExpandItem ? drawRect : shiftedDrawRect, row);
                 }
             }
         }
 
         #endregion
-
     }
 
     #region YamuiMenuItem
 
-    public class YamuiMenuItem {
-        /// <summary>
-        /// Image to associate with the menu
-        /// </summary>
-        public Image ItemImage { get; set; }
-
-        /// <summary>
-        /// displayed main text
-        /// </summary>
-        public string ItemName { get; set; }
-
+    public class YamuiMenuItem : FilteredTypeTreeListItem {
         /// <summary>
         /// Action to execute on clic
         /// </summary>
-        public Action OnClic { get; set; }
-
-        /// <summary>
-        /// true if the item is a separator
-        /// </summary>
-        public bool IsSeparator { get; set; }
+        public Action<YamuiMenuItem> OnClic { get; set; }
 
         /// <summary>
         /// True if the item should be selected by default in the menu 
@@ -474,44 +442,10 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public bool IsSelectedByDefault { get; set; }
 
-        /// <summary>
-        /// List of child items for the current item
-        /// </summary>
-        public List<YamuiMenuItem> Children { get; set; }
-
-        /// <summary>
-        /// Small text displayed on the right side of the item
-        /// </summary>
-        public string SubText { get; set; }
-
-        /// <summary>
-        /// You can use this field to store any piece of info on this menu item
-        /// </summary>
-        public object Data { get; set; }
-
-        /// <summary>
-        /// true if the item is disabled
-        /// </summary>
-        public bool IsDisabled { get; set; }
-
-        private Action _do;
-
-        /// <summary>
-        /// The OnClic action is executed through this when the using clic an item,
-        /// You probably want to set OnClic instead!
-        /// </summary>
-        public Action Do { 
-            get { 
-                return _do ?? (() => {
-                    if (OnClic != null) {
-                        OnClic();
-                    }
-                }) ; 
-            }
-            set { _do = value; }
+        public override int ItemType {
+            get { return -1; }
         }
     }
 
     #endregion
-
 }

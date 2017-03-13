@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -24,20 +24,18 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.CodeExplorer;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
-
     /// <summary>
     /// Holds the configuration of the application, this class is a singleton and
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
-
         #region config Object
 
         /// <summary>
@@ -47,7 +45,6 @@ namespace _3PA.MainFeatures {
         /// Set AutoGenerateField to refresh certain options that need special treatment to appear changed (see option page)
         /// </summary>
         internal class ConfigObject {
-
             //[StringLength(15)]
             //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
 
@@ -56,24 +53,23 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// GENERAL
             /// </summary>
-
             [Display(Name = "User name",
                 Description = "Used for modification tags",
                 GroupName = "General",
                 AutoGenerateField = false)]
             public string UserName = GetTrigramFromPa();
 
-            [Display(Name = "Progress 4GL files extension list",
-                Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
+            [Display(Name = "Progress 4GL file patterns",
+                Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string KnownProgressExtension = ".p,.i,.w,.t,.d,.lst,.df,.cls";
+            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.cls,*.lst,*.df";
 
-            [Display(Name = "Npp openable extension",
-                Description = "A comma separated list of file extensions, describes the type of files that should be opened with notepad++ from the file explorer<br>If a file is associated to npp in the shell, it will also be opened with npp, no worries!",
+            [Display(Name = "Npp files patterns",
+                Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string GlobalNppOpenableExtension = ".txt,.boi,.sh,.cmd";
+            public string NppFilesPattern = "*.txt,*.boi,*.sh,*.cmd";
 
             [Display(Name = "Path to the help file",
                 Description = "Should point to the progress documentation file (lgrfeng.chm)",
@@ -99,38 +95,32 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileAlwaysShowNotification = true;
 
-
-            [Display(Name = "Use alternate back color for lists",
-                Description = "Use alternate back color for the autocompletion, the code explorer, the file explorer and so on...",
-                GroupName = "General",
-                AutoGenerateField = true)]
-            public bool GlobalUseAlternateBackColorOnGrid = false;
-
-            [Display(Name = "Application unfocused opacity",
-                Description = "Set the opacity that the main application window will have when it doenst' have the focus",
-                GroupName = "General",
-                AutoGenerateField = false)]
-            [Range(0.1, 1)]
-            public double AppliOpacityUnfocused = 1;
-
             [Display(Name = "Allow tab animation",
                 Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
                 GroupName = "General",
                 AutoGenerateField = true)]
             public bool AppliAllowTabAnimation = true;
 
+            [Display(Name = "Show tree branches",
+                Description = "Whether or not you want to draw the branches of the trees displayed in 3P (for the file and code explorer)",
+                GroupName = "General",
+                AutoGenerateField = true)]
+            public bool ShowTreeBranches = false;
+
             public bool GlobalShowDetailedHelpForErrors = true;
+
             public bool UserFirstUse = true;
+            public bool NppOutdatedVersion = false;
 
             #endregion
 
             #region COMPILATION
 
-            [Display(Name = "Compilable files extension list",
-                Description = "A comma separated list of progress file extensions that can be compiled : <br>It is used to check if you can compile / check syntax / execute the current file",
+            [Display(Name = "Compilable file patterns",
+                Description = "A comma separated list of patterns that identify a compilable Progress file<br>It is used to check if you can compile / check syntax / execute the current file<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-            public string CompileKnownExtension = ".p,.w,.t,.cls";
+            public string CompilableFilesPattern = "*.p,*.w,*.t,*.cls";
 
             [Display(Name = "Always use a temp directory to compile",
                 Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
@@ -171,7 +161,6 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// AUTOCOMPLETION
             /// </summary>
-
             [Display(Name = "Show autocompletion on key input",
                 Description = "Automatically show the autocompletion list when you start entering characters",
                 GroupName = "Auto-completion",
@@ -207,14 +196,7 @@ namespace _3PA.MainFeatures {
                 Description = "Whether or not to allow the ENTER key to accept the suggestion",
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
-            public bool AutoCompleteUseEnterToAccept = false;
-
-            [Display(Name = "Number of suggestions",
-                Description = "The number of suggestions shown in the list",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            [Range(3, 20)]
-            public int AutoCompleteShowListOfXSuggestions = 12;
+            public bool AutoCompleteUseEnterToAccept = true;
 
             [Display(Name = "Insert current suggestion on word end",
                 Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
@@ -227,12 +209,6 @@ namespace _3PA.MainFeatures {
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnlyShowDefinedVar = true;
-
-            [Display(Name = "Hide list scroll bar",
-                Description = "Check to remove the scrollbar, you can still move up/down with arrow keys<br>and next/previous pages, this is only to have a prettier list in dark themes",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteHideScrollBar = false;
 
             [Display(Name = "Unfocused opacity",
                 Description = "The opacity of the list when unfocused",
@@ -248,7 +224,41 @@ namespace _3PA.MainFeatures {
             [Range(0.1, 1)]
             public double AutoCompleteFocusedOpacity = 0.92;
 
-            public string AutoCompletePriorityList = "2,4,5,12,7,8,11,3,6,15,9,14,10,13,0,1";
+            public string AutoCompletionItemPriorityList = "";
+
+            // Height of the autocompletion form
+            public int AutoCompleteShowListOfXSuggestions = 12;
+
+            // Width of the autocompletion form
+            public int AutoCompleteWidth = 310;
+
+            [Display(Name = "Keywords auto-case mode",
+                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 4)]
+            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
+
+            [Display(Name = "Database info auto-case mode",
+                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 4)]
+            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
+
+            [Display(Name = "Auto replace abbreviations",
+                Description = "Automatically replaces abbreviations by their full lenght counterparts",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool CodeReplaceAbbreviations = true;
+
+            [Display(Name = "Auto replace semicolon",
+                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool CodeReplaceSemicolon = true;
+
+            public bool NeverAskToDisableDefaultAutoComp = false;
 
             #endregion
 
@@ -257,39 +267,6 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// CODE EDITION
             /// </summary>
-
-            [Display(Name = "Disable all auto-case mode",
-                Description = "Toggle on if you wish to completly disable the auto-case ability of 3P<br><br>By default, 3P will at least correct the case for variables (using their definition)<br>it also can convert the case of keywords / database info (tables, fields...) : see the options below",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool DisableAutoCaseCompletly = false;
-
-            [Display(Name = "Keywords auto-case mode",
-                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            [Range(0, 4)]
-            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Database info auto-case mode",
-                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            [Range(0, 4)]
-            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Auto replace abbreviations",
-                Description = "Automatically replaces abbreviations by their full lenght counterparts",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool CodeReplaceAbbreviations = true;
-
-            [Display(Name = "Auto replace semicolon",
-                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public bool CodeReplaceSemicolon = true;
-
             [Display(Name = "Max number of characters in a block",
                 Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This value allows to show a warning when you overpass the limit in notepad++",
                 GroupName = "Code edition",
@@ -344,6 +321,9 @@ namespace _3PA.MainFeatures {
             [Range(1000, 30000)]
             public int FileExplorerListFilesTimeOutInMs = 3000;
 
+            // Current folder mode for the file explorer : local/compilation/propath/everywhere
+            public int FileExplorerDirectoriesToExplore = 0;
+
             #endregion
 
             #region CODE EXPLORER
@@ -351,9 +331,9 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// CODE EXPLORER
             /// </summary>
-
             public bool CodeExplorerVisible = true;
-            public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11,13";
+
+            public string CodeExplorerItemPriorityList = "";
             public bool CodeExplorerDisplayExternalItems = false;
 
             [Display(Name = "Auto-hide/show for progress documents",
@@ -362,7 +342,7 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CodeExplorerAutoHideOnNonProgressFile = false;
 
-            public CodeExplorerForm.SortingType CodeExplorerSortingType;
+            public SortingType CodeExplorerSortingType;
 
             #endregion
 
@@ -371,7 +351,6 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// TOOLTIPS
             /// </summary>
-
             [Display(Name = "Deactivate all tooltips",
                 Description = "Don't do that, it would be a shame to not use them!",
                 GroupName = "Tooltip",
@@ -402,10 +381,6 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
-
-            // Current folder mode for the file explorer : local/compilation/propath/everywhere
-            public int FileExplorerViewMode = 3;
-
             // Shared configuration last folder selected
             public string SharedConfFolder = "";
             // a list of Label corresponding to confLine(s) that are auto-updated
@@ -414,14 +389,17 @@ namespace _3PA.MainFeatures {
             public string SharedConfHistoric = "";
 
             // Values for the Tags
-            public string TagModifOpener = 
+            public string TagModifOpener =
                 "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";
-            public string TagModifCloser = 
+
+            public string TagModifCloser =
                 "/* --- Fin modif #{&n} --- */";
-            public string TagTitleBlock1 = 
+
+            public string TagTitleBlock1 =
                 "/* |      |            |           |                                                                | */\n" +
                 "/* | {&n }| {&da     } | CS-SOPRA  | {&w } - {&b                                                  } | */\n" +
                 "/* |      | {&v      } | {&u     } |                                                                | */";
+
             public string TagTitleBlock2 =
                 "/* |      |            |           | {&de                                                         } | */";
 
@@ -436,10 +414,15 @@ namespace _3PA.MainFeatures {
 
             // last ping time
             public string TechnicalLastPing = "";
-            public string MyUuid = Guid.NewGuid().ToString();
+            public string TechnicalMyUuid = Guid.NewGuid().ToString();
+            public int TechnicalPingEveryXMin = 4*60;
+
+            // last update check
+            public string TechnicalLastCheckUpdate = "";
+            public int TechnicalCheckUpdateEveryXMin = 6*60;
 
             // did the last update check went ok?
-            public bool LastCheckUpdateOk = true;
+            public bool TechnicalLastCheckUpdateOk = true;
 
             // THEMES
             public int ThemeId = 0;
@@ -475,7 +458,7 @@ namespace _3PA.MainFeatures {
             /// <param name="propertyName"></param>
             /// <returns></returns>
             public object GetValueOf(string propertyName) {
-                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
                     return null;
                 }
@@ -489,7 +472,7 @@ namespace _3PA.MainFeatures {
             /// <param name="value"></param>
             /// <returns></returns>
             public bool SetValueOf(string propertyName, object value) {
-                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
                     return false;
                 }
@@ -505,13 +488,13 @@ namespace _3PA.MainFeatures {
             /// <param name="propertyName"></param>
             /// <returns></returns>
             public T GetAttributeOf<T>(string propertyName) {
-                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
-                    return (T) Convert.ChangeType(null, typeof (T));
+                    return (T) Convert.ChangeType(null, typeof(T));
                 }
-                var listCustomAttr = property.GetCustomAttributes(typeof (T), false);
+                var listCustomAttr = property.GetCustomAttributes(typeof(T), false);
                 if (!listCustomAttr.Any()) {
-                    return (T) Convert.ChangeType(null, typeof (T));
+                    return (T) Convert.ChangeType(null, typeof(T));
                 }
                 var displayAttr = (T) listCustomAttr.FirstOrDefault();
                 return displayAttr;
@@ -525,7 +508,6 @@ namespace _3PA.MainFeatures {
             }
 
             #endregion
-
         }
 
         #endregion
@@ -539,89 +521,239 @@ namespace _3PA.MainFeatures {
             get { return _instance ?? (_instance = Init()); }
         }
 
-        public static string GetUserAgent { get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; } }
+        public static string GetUserAgent {
+            get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; }
+        }
 
         /// <summary>
         /// Url for the github webservices
         /// </summary>
-        public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
-        public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
+        public static string ReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
+        }
+
+        public static string IssueUrl {
+            get { return @"https://github.com/jcaillon/3P/issues"; }
+        }
+
         // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
-        public static string _3PUserCredentials { get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; } }
+        public static string _3PUserCredentials {
+            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
+        }
 
         // HELP URL
-        public static string UrlWebSite { get { return @"http://jcaillon.github.io/3P/"; } }
-        public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set-environment"; } }
-        public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
-        public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
-        public static string UrlHelpDeploy { get { return @"http://jcaillon.github.io/3P/#/deployment"; } }
-        public static string UrlHelpDeployRules { get { return @"http://jcaillon.github.io/3P/#/deployment-rules"; } }
-        
+        public static string UrlWebSite {
+            get { return @"http://jcaillon.github.io/3P/"; }
+        }
+
+        public static string UrlHelpSetEnv {
+            get { return @"http://jcaillon.github.io/3P/#/set-environment"; }
+        }
+
+        public static string UrlHelpCustomThemes {
+            get { return @"http://jcaillon.github.io/3P/#/custom-themes"; }
+        }
+
+        public static string UrlCheckReleases {
+            get { return @"https://github.com/jcaillon/3P/releases"; }
+        }
+
+        public static string UrlHelpDeploy {
+            get { return @"http://jcaillon.github.io/3P/#/deployment"; }
+        }
+
+        public static string UrlHelpDeployRules {
+            get { return @"http://jcaillon.github.io/3P/#/deployment-rules"; }
+        }
 
         /// <summary>
         /// Url for the webservices
         /// </summary>
-        public static string PingPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=ping&softName=3p"; } }
-        public static string BugsPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=bugs&softName=3p"; } }
-        public static string PingGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; } }
-        public static string BugsGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; } }
+        public static string PingPostWebWervice {
+            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=ping&softName=3p"; }
+        }
+
+        public static string BugsPostWebWervice {
+            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=bugs&softName=3p"; }
+        }
+
+        public static string PingGetWebWervice {
+            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; }
+        }
+
+        public static string BugsGetWebWervice {
+            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; }
+        }
 
         /// <summary>
         /// Is developper = the file debug exists
         /// </summary>
-        public static bool IsDevelopper { get { return File.Exists(FileDebug); } }
-        public static string FileDebug { get { return Path.Combine(Npp.GetConfigDir(), "debug"); } }
+        public static bool IsDevelopper {
+            get { return File.Exists(FileDebug); }
+        }
+
+        public static string FileDebug {
+            get { return Path.Combine(Npp.ConfigDirectory, "debug"); }
+        }
 
         /// <summary>
         /// Path to important files / folders
         /// </summary>
-        public static string FolderLog { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Log")); } }
-        public static string FolderTechnical { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Technical")); } }
-        public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
-        public static string FolderLibrary { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Libraries")); } }
-        public static string FolderUpdate { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Update")); } }
-        public static string FolderTemplates { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Templates")); } }
-        public static string FolderThemes { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Themes")); } }
-        public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
-        public static string FolderDataDigger { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DataDigger")); } }
+        public static string FolderLog {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Log")); }
+        }
+
+        public static string FolderTechnical {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Technical")); }
+        }
+
+        public static string FolderDatabase {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DatabaseInfo")); }
+        }
+
+        public static string FolderLibrary {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries")); }
+        }
+
+        public static string FolderUpdate {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
+        }
+
+        public static string FolderTemplates {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Templates")); }
+        }
+
+        public static string FolderThemes {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Themes")); }
+        }
+
+        public static string FolderTemp {
+            get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); }
+        }
+
+        public static string FolderDataDigger {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
+        }
 
         // themes
-        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); } }
-        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ThemesForApplication.conf"); } }
+        public static string FileSyntaxThemes {
+            get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); }
+        }
+
+        public static string FileApplicationThemes {
+            get { return Path.Combine(FolderThemes, "_ThemesForApplication.conf"); }
+        }
 
         // errors
-        public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }
-        public static string FileErrorToSend { get { return Path.Combine(FolderLog, "error_.log"); } }
+        public static string FileErrorLog {
+            get { return Path.Combine(FolderLog, "error.log"); }
+        }
+
+        public static string FileErrorToSend {
+            get { return Path.Combine(FolderLog, "error_.log"); }
+        }
 
         // dumps
-        public static string FileFilesInfo { get { return Path.Combine(FolderTechnical, "filesInfo.dump"); } }
-        public static string FileKeywordsRank { get { return Path.Combine(FolderTechnical, "keywordsRank.dump"); } }
+        public static string FileFilesInfo {
+            get { return Path.Combine(FolderTechnical, "filesInfo.dump"); }
+        }
+
+        public static string FileKeywordsRank {
+            get { return Path.Combine(FolderTechnical, "keywordsRank.dump"); }
+        }
 
         // general config
-        public static string FileKeywordsList { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsList.conf"); } }
-        public static string FileKeywordsHelp { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsHelp.conf"); } }
-        public static string FileAbbrev { get { return Path.Combine(Npp.GetConfigDir(), "_Abbreviations.conf"); } }
-        public static string FileDeploymentRules { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentRules.conf"); } }
-        public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
-        public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
-        public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
-        public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
-        public static string FileDeploymentHook { get { return Path.Combine(Npp.GetConfigDir(), "DeploymentHookProc.p"); } }
-        public static string FileDeployProfiles { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentProfiles.conf"); } }
+        public static string FileKeywordsList {
+            get { return Path.Combine(Npp.ConfigDirectory, "_KeywordsList.conf"); }
+        }
+
+        public static string FileKeywordsHelp {
+            get { return Path.Combine(Npp.ConfigDirectory, "_KeywordsHelp.conf"); }
+        }
+
+        public static string FileAbbrev {
+            get { return Path.Combine(Npp.ConfigDirectory, "_Abbreviations.conf"); }
+        }
+
+        public static string FileDeploymentRules {
+            get { return Path.Combine(Npp.ConfigDirectory, "_DeploymentRules.conf"); }
+        }
+
+        public static string FileProEnv {
+            get { return Path.Combine(Npp.ConfigDirectory, "_ProgressEnvironnement.xml"); }
+        }
+
+        public static string FileSnippets {
+            get { return Path.Combine(Npp.ConfigDirectory, "_SnippetList.conf"); }
+        }
+
+        public static string FileSettings {
+            get { return Path.Combine(Npp.ConfigDirectory, "settings.xml"); }
+        }
+
+        public static string FileStartProlint {
+            get { return Path.Combine(Npp.ConfigDirectory, "StartProlint.p"); }
+        }
+
+        public static string FileDeploymentHook {
+            get { return Path.Combine(Npp.ConfigDirectory, "DeploymentHookProc.p"); }
+        }
+
+        public static string FileDeployProfiles {
+            get { return Path.Combine(Npp.ConfigDirectory, "_DeploymentProfiles.conf"); }
+        }
 
         // Npp files
-        public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
-        public static string FileNppConfigXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\config.xml")); } }
-        public static string FileNppStylersXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\stylers.xml")); } }
+        public static string FileNppUserDefinedLang {
+            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\userDefineLang.xml")); }
+        }
+
+        public static string FileNppConfigXml {
+            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\config.xml")); }
+        }
+
+        public static string FileNppStylersXml {
+            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\stylers.xml")); }
+        }
+
+        // This is always taken in the notepad++ installation directory!
+        public static string FolderNppAutocompApis {
+            get { return Path.GetFullPath(Path.Combine(Npp.SoftwareInstallDirectory, @"plugins\APIs")); }
+        }
+
+        public static string FileNppLangsXml {
+            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\langs.xml")); }
+        }
 
         // updates related
-        public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
-        public static string FileDownloadedPlugin { get { return Path.Combine(FolderUpdate, "3P.dll"); } }
-        public static string FileDownloadedPdb { get { return Path.Combine(FolderUpdate, "3P.pdb"); } }
-        public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
-        public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
-        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
-        public const string FileGitHubAssetName = @"3P.zip"; // name of the zip file containing the release in the assets of the release
+        public static string FileVersionLog {
+            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+        }
+
+        public static string FileDownloadedPlugin {
+            get { return Path.Combine(FolderUpdate, "3P.dll"); }
+        }
+
+        public static string FileDownloadedPdb {
+            get { return Path.Combine(FolderUpdate, "3P.pdb"); }
+        }
+
+        public static string FileUpdaterExe {
+            get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); }
+        }
+
+        public static string FileUpdaterLst {
+            get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); }
+        }
+
+        public static string FileLatestReleaseZip {
+            get { return Path.Combine(FolderUpdate, "3P_latestRelease" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"); }
+        }
+
+        // name of the zip file containing the release in the assets of the release
+        public static string FileGitHubAssetName {
+            get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
+        }
 
         #endregion
 
@@ -634,14 +766,17 @@ namespace _3PA.MainFeatures {
         /// <param name="configPropertyName"></param>
         /// <returns></returns>
         public static List<int> GetPriorityList(Type enumerationType, string configPropertyName) {
-            var value = (string)Instance.GetValueOf(configPropertyName);
+            var value = (string) Instance.GetValueOf(configPropertyName);
             if (Enum.GetNames(enumerationType).Length != value.Split(',').Length) {
-                var defaultConf = new ConfigObject();
-                value = (string)defaultConf.GetValueOf(configPropertyName);
+                value = "";
+                for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++) {
+                    value += i + ",";
+                }
+                value = value.TrimEnd(',');
                 Instance.SetValueOf(configPropertyName, value);
             }
             var output = new List<int>();
-            var temp = value.Split(',').Select(Int32.Parse).ToList();
+            var temp = value.Split(',').Select(int.Parse).ToList();
             for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++)
                 output.Add(temp.IndexOf(i));
             return output;

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Appli.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -18,16 +18,15 @@
 // ========================================================================
 #endregion
 using System;
-using System.Windows.Forms;
-using _3PA.Interop;
+using YamuiFramework.Helper;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.Appli {
-
     /// <summary>
     /// Handles the application main window
     /// </summary>
     internal static class Appli {
-
         public static AppliForm Form {
             get { return _form; }
         }
@@ -43,21 +42,18 @@ namespace _3PA.MainFeatures.Appli {
                 if (_form == null) {
                     Init();
                 }
-
                 if (_form != null) {
                     // create the form
                     if (!_hasBeenShownOnce) {
                         _hasBeenShownOnce = true;
                         _form.Show(Npp.Win32WindowNpp);
-                        _form.DoShow();
-                        return;
+                    } else {
+                        // toggle visibility
+                        if (_form.Visible && !_form.HasModalOpened)
+                            _form.Cloack();
+                        else
+                            _form.UnCloack();
                     }
-
-                    // toggle visibility
-                    if (_form.Visible && !_form.HasModalOpened)
-                        _form.Cloack();
-                    else
-                        _form.UnCloack();
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading the main window");
@@ -83,11 +79,7 @@ namespace _3PA.MainFeatures.Appli {
         /// True if the form is focused 
         /// </summary>
         public static bool IsFocused() {
-            return _form != null && _form.Visible && (WinApi.GetForegroundWindow().Equals(_form.Handle));
-        }
-
-        public static Control ActiveControl {
-            get { return !IsFocused() ? null : _form.FindFocusedControl(); }
+            return IsVisible && WinApi.GetForegroundWindow().Equals(_form.Handle);
         }
 
         /// <summary>
@@ -95,7 +87,7 @@ namespace _3PA.MainFeatures.Appli {
         /// it must be called pretty soon in the plugin initialization
         /// </summary>
         public static void Init() {
-            if (_form != null) ForceClose();
+            ForceClose();
             _form = new AppliForm {
                 CurrentForegroundWindow = Npp.HandleNpp
             };
@@ -123,15 +115,14 @@ namespace _3PA.MainFeatures.Appli {
         /// Returns true if the cursor is within the form window
         /// </summary>
         public static bool IsMouseIn() {
-            return WinApi.IsCursorIn(_form.Handle);
+            return Win32Api.IsCursorIn(_form.Handle);
         }
 
         /// <summary>
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return _form != null && _form.Visible; }
+            get { return !(_form == null || !(bool) _form.SafeSyncInvoke(form => form.Visible)); }
         }
-
     }
 }

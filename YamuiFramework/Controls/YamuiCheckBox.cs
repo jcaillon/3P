@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiCheckBox.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -30,10 +33,9 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiCheckBoxDesigner")]
     [ToolboxBitmap(typeof(CheckBox))]
-
     public class YamuiCheckBox : CheckBox {
-
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
@@ -51,12 +53,13 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiCheckBox() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
+            SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
         }
 
         #endregion
@@ -81,15 +84,14 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
-
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
             Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
             Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
 
-            var backRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+            var backRect = new Rectangle(0, Height/2 - 6, 12, 12);
             Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
 
             PaintTransparentBackground(e.Graphics, DisplayRectangle);
@@ -109,15 +111,14 @@ namespace YamuiFramework.Controls {
                 if (CheckState != CheckState.Indeterminate) {
                     var checkRect = ClientRectangle;
                     checkRect.Width = 15;
-                    checkRect.Offset(0, Height / 2 - 11);
-                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.9)), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    checkRect.Offset(0, Height/2 - 11);
+                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float) (Height*0.9)), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
                     using (SolidBrush b = new SolidBrush(foreColor)) {
-                        Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
+                        Rectangle boxRect = new Rectangle(4, Height/2 - 2, 5, 5);
                         e.Graphics.FillRectangle(b, boxRect);
                     }
                 }
-
             }
 
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, YamuiThemeManager.Current.FormFore, FontManager.GetTextFormatFlags(TextAlign));
@@ -128,20 +129,6 @@ namespace YamuiFramework.Controls {
         #region Managing isHovered, isPressed, isFocused
 
         #region Focus Methods
-
-        protected override void OnGotFocus(EventArgs e) {
-            _isFocused = true;
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
 
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
@@ -234,6 +221,18 @@ namespace YamuiFramework.Controls {
             }
 
             return preferredSize;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
         }
 
         #endregion

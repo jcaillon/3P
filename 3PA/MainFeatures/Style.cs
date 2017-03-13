@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Style.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -26,18 +26,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Data;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
-using Utils = _3PA.Lib.Utils;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
-
     /// <summary>
     /// This class handles the Styles of scintilla
     /// </summary>
     internal static class Style {
-
         #region Current theme
 
         private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();
@@ -54,7 +51,7 @@ namespace _3PA.MainFeatures {
             }
             set {
                 _currentTheme = value;
-                try { 
+                try {
                     _currentTheme.SetColorValues(typeof(StyleTheme));
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Loading a theme");
@@ -83,7 +80,7 @@ namespace _3PA.MainFeatures {
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
-            Plug.DoNppDocumentSwitched();
+            Plug.ApplyOptionsForScintilla();
         }
 
         #endregion
@@ -94,6 +91,7 @@ namespace _3PA.MainFeatures {
         /// for the Errors we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
         public const int ErrorAnnotStandardStyleOffset = 240;
+
         public const int ErrorAnnotBoldStyleOffset = 230;
         public const int ErrorAnnotItalicStyleOffset = 220;
 
@@ -108,8 +106,8 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUdlXml);
-            var fileContent = File.Exists(Config.FileNppUdlXml) ? Utils.ReadAllText(Config.FileNppUdlXml, encoding) : @"<NotepadPlus />";
+            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUserDefinedLang);
+            var fileContent = File.Exists(Config.FileNppUserDefinedLang) ? Utils.ReadAllText(Config.FileNppUserDefinedLang, encoding) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -121,22 +119,19 @@ namespace _3PA.MainFeatures {
                 if (onlyCheckInstall)
                     return false;
                 // if it doesn't exist in the file
-                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImg.MsgInfo, "Information", "Installing syntax highlighting");
+                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + "</b>", MessageImg.MsgInfo, "Information", "Installing syntax highlighting",
+                    args => {
+                        args.Handled = true;
+                        Npp.Restart();
+                    });
             }
             if (fileContent.ContainsFast(@"<NotepadPlus />"))
                 fileContent = fileContent.Replace(@"<NotepadPlus />", "<NotepadPlus>\r\n" + DataResources.UDL + "\r\n</NotepadPlus>");
             else
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
-            try {
-                Utils.FileWriteAllText(Config.FileNppUdlXml, fileContent, encoding);
-            } catch (Exception e) {
-                if (e is UnauthorizedAccessException)
-                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
-                else
-                    ErrorHandler.ShowErrors(e, "Error while accessing userDefineLang.xml");
-                return false;
-            }
+            if (!Utils.FileWriteAllText(Config.FileNppUserDefinedLang, fileContent, encoding))
+                UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUserDefinedLang + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
             return true;
         }
 
@@ -149,11 +144,9 @@ namespace _3PA.MainFeatures {
         /// styles defined in the SyntaxHighlighting file
         /// </summary>
         public static void SetSyntaxStyles() {
-
             var curTheme = Current;
 
             if (Config.Instance.UseSyntaxHighlightTheme) {
-                
                 // Default
                 SetFontStyle((byte) SciMsg.STYLE_DEFAULT, curTheme.Default);
                 // Npp.StyleClearAll(); // to apply the default style to all styles
@@ -190,19 +183,19 @@ namespace _3PA.MainFeatures {
                 SetFontStyle(80, curTheme.SimpleQuote);
 
                 // brace highlighting
-                SetFontStyle((byte)SciMsg.STYLE_BRACELIGHT, curTheme.BraceHighLight);
-                SetFontStyle((byte)SciMsg.STYLE_BRACEBAD, curTheme.BadBraceHighLight);
+                SetFontStyle((byte) SciMsg.STYLE_BRACELIGHT, curTheme.BraceHighLight);
+                SetFontStyle((byte) SciMsg.STYLE_BRACEBAD, curTheme.BadBraceHighLight);
 
                 // smart highlighting in npp
                 Npp.GetIndicator(29).ForeColor = curTheme.SmartHighLighting.ForeColor;
             }
 
             // Setting styles for errors 
-            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
+            SetErrorStyles((byte) ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
+            SetErrorStyles((byte) ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
+            SetErrorStyles((byte) ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
+            SetErrorStyles((byte) ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
+            SetErrorStyles((byte) ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
         }
 
         public static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
@@ -232,22 +225,22 @@ namespace _3PA.MainFeatures {
         private static void SetErrorStyles(byte errorLevel, Color bgColor, Color fgColor) {
             int curFontSize = Npp.GetStyle(0).Size;
 
-            var normalStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Normal));
+            var normalStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Normal));
             normalStyle.Font = "Segoe ui";
-            normalStyle.Size = (int)(curFontSize * 0.9);
+            normalStyle.Size = (int) (curFontSize*0.9);
             normalStyle.ForeColor = fgColor;
             normalStyle.BackColor = bgColor;
 
-            var boldStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Bold));
+            var boldStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Bold));
             boldStyle.Font = "Segoe ui";
-            boldStyle.Size = (int)(curFontSize * 0.9);
+            boldStyle.Size = (int) (curFontSize*0.9);
             boldStyle.Bold = true;
             boldStyle.ForeColor = fgColor;
             boldStyle.BackColor = bgColor;
 
-            var italicStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Italic));
+            var italicStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Italic));
             italicStyle.Font = "Segoe ui";
-            italicStyle.Size = (int)(curFontSize * 0.9);
+            italicStyle.Size = (int) (curFontSize*0.9);
             italicStyle.Italic = true;
             italicStyle.ForeColor = fgColor;
             italicStyle.BackColor = bgColor;
@@ -334,7 +327,6 @@ namespace _3PA.MainFeatures {
     #region StyleTheme class
 
     public class StyleTheme : GenericThemeHolder {
-
         public StyleThemeItem Default = new StyleThemeItem();
         public StyleThemeItem Comment = new StyleThemeItem();
         public StyleThemeItem NestedComment = new StyleThemeItem();
@@ -436,7 +428,7 @@ namespace _3PA.MainFeatures {
                 case 5:
                     return Error4;
             }
-            return new StyleThemeItem { BackColor = Color.Beige, ForeColor = Color.Black };
+            return new StyleThemeItem {BackColor = Color.Beige, ForeColor = Color.Black};
         }
 
         public Color GetErrorBg(int errorLevel) {
@@ -446,7 +438,6 @@ namespace _3PA.MainFeatures {
         public Color GetErrorFg(int errorLevel) {
             return GetErrorItem(errorLevel).ForeColor;
         }
-
     }
 
     public class StyleThemeItem {
@@ -457,5 +448,4 @@ namespace _3PA.MainFeatures {
     }
 
     #endregion
-
 }

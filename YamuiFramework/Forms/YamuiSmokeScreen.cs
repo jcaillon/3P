@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiSmokeScreen.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -24,9 +27,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-
     public class YamuiSmokeScreen : Form {
-
         #region fields
 
         private Rectangle _pageRectangle;
@@ -39,7 +40,7 @@ namespace YamuiFramework.Forms {
             get { return base.Opacity; }
             set {
                 if (Owner != null)
-                    base.Opacity = value * Owner.Opacity;
+                    base.Opacity = value*Owner.Opacity;
             }
         }
 
@@ -69,10 +70,12 @@ namespace YamuiFramework.Forms {
         #region Constructor
 
         public YamuiSmokeScreen(Form owner, Rectangle pageRectangle) {
-            SetStyle(ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint |
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
-                ControlStyles.OptimizedDoubleBuffer, true);
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             _pageRectangle = pageRectangle;
             FormBorderStyle = FormBorderStyle.None;
@@ -89,7 +92,7 @@ namespace YamuiFramework.Forms {
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;
-                DwmApi.DwmSetWindowAttribute(owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                WinApi.DwmSetWindowAttribute(owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             base.Opacity = 0d;
@@ -121,7 +124,7 @@ namespace YamuiFramework.Forms {
                     Owner.VisibleChanged -= Cover_OnVisibleChanged;
                     if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                         int value = 0;
-                        DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                        WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
                     }
                 }
             } catch (Exception) {

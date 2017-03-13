@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTheme.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,12 +27,10 @@ using System.Linq;
 using YamuiFramework.Helper;
 
 namespace YamuiFramework.Themes {
-
     /// <summary>
     /// Holds a theme configuration for the YamuiFramework
     /// </summary>
     public class YamuiTheme : GenericThemeHolder {
-
         #region Stored in the config file
 
         public string PageBackGroundImage = "";
@@ -97,6 +98,9 @@ namespace YamuiFramework.Themes {
         public Color MenuFocusedFore = Color.FromArgb(0, 0, 0);
         public Color MenuDisabledBack = Color.FromArgb(230, 230, 230);
         public Color MenuDisabledFore = Color.FromArgb(100, 100, 100);
+
+        public Color AutoCompletionHighlightBack = Color.FromArgb(254, 228, 101);
+        public Color AutoCompletionHighlightBorder = Color.FromArgb(255, 171, 0);
 
         #endregion
 
@@ -182,7 +186,7 @@ namespace YamuiFramework.Themes {
         public Color LabelsBg(Color controlBackColor, bool useCustomBackColor) {
             return !useCustomBackColor ? Color.Transparent : controlBackColor;
         }
-        
+
         /// <summary>
         ///     This class is used for tab controls (back color is also used for tab pages)
         /// </summary>
@@ -312,6 +316,5 @@ namespace YamuiFramework.Themes {
         }
 
         #endregion
-        
     }
 }

@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (TransitionElement.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,24 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
-namespace YamuiFramework.Animations.Transitions
-{
-    public enum InterpolationMethod
-    {
+
+namespace YamuiFramework.Animations.Transitions {
+    public enum InterpolationMethod {
         Linear,
         Accleration,
         Deceleration,
         EaseInEaseOut
     }
 
-    public class TransitionElement
-    {
+    public class TransitionElement {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public TransitionElement(double endTime, double endValue, InterpolationMethod interpolationMethod)
-        {
+        public TransitionElement(double endTime, double endValue, InterpolationMethod interpolationMethod) {
             EndTime = endTime;
             EndValue = endValue;
             InterpolationMethod = interpolationMethod;

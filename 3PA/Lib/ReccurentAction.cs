@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ReccurentAction.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@ namespace _3PA.Lib {
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
     public class ReccurentAction : IDisposable {
-
         #region private fields
 
         private Timer _timer;
@@ -138,7 +137,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
-
     }
 }

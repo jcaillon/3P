@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiLabel.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -28,6 +31,7 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     #region Enums
 
     public enum LabelMode {
@@ -40,8 +44,8 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiLabelDesigner")]
     [ToolboxBitmap(typeof(Label))]
     public class YamuiLabel : Label {
-
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
@@ -51,6 +55,7 @@ namespace YamuiFramework.Controls {
         public bool UseCustomForeColor { get; set; }
 
         private FontFunction _function = FontFunction.Normal;
+
         [DefaultValue(FontFunction.Normal)]
         [Category("Yamui")]
         public FontFunction Function {
@@ -67,15 +72,22 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool FakeDisabled {
             get { return _fakeDisabled; }
-            set { _fakeDisabled = value; Invalidate(); }
+            set {
+                _fakeDisabled = value;
+                Invalidate();
+            }
         }
 
         private bool _wrapToLine;
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool WrapToLine {
             get { return _wrapToLine; }
-            set { _wrapToLine = value; Refresh(); }
+            set {
+                _wrapToLine = value;
+                Refresh();
+            }
         }
 
         protected override Padding DefaultPadding {
@@ -87,11 +99,13 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiLabel() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
+            SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.Selectable |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
             TabStop = false;
         }
 
@@ -117,7 +131,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
@@ -138,6 +152,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Overridden Methods
+
         public override Size GetPreferredSize(Size proposedSize) {
             Size preferredSize;
             base.GetPreferredSize(proposedSize);
@@ -154,13 +169,13 @@ namespace YamuiFramework.Controls {
             base.OnEnabledChanged(e);
             Invalidate();
         }
+
         #endregion
     }
 
     #region designer
 
     internal class YamuiLabelDesigner : ControlDesigner {
-
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
             properties.Remove("FlatAppearance");
@@ -186,5 +201,4 @@ namespace YamuiFramework.Controls {
     }
 
     #endregion
-
 }

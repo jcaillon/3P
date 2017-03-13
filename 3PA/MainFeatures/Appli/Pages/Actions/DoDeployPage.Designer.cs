@@ -322,7 +322,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // cbName
             // 
-            this.cbName.ItemHeight = 15;
             this.cbName.Location = new System.Drawing.Point(268, 29);
             this.cbName.Name = "cbName";
             this.cbName.Size = new System.Drawing.Size(253, 21);
@@ -417,12 +416,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.fl_directory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_directory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_directory.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_directory.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_directory.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_directory.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_directory.Location = new System.Drawing.Point(268, 62);
             this.fl_directory.Name = "fl_directory";
             this.fl_directory.Size = new System.Drawing.Size(580, 20);
@@ -533,12 +526,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // fl_nbProcess
             // 
-            this.fl_nbProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_nbProcess.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_nbProcess.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_nbProcess.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_nbProcess.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_nbProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_nbProcess.Location = new System.Drawing.Point(268, 202);
             this.fl_nbProcess.Name = "fl_nbProcess";
             this.fl_nbProcess.Size = new System.Drawing.Size(34, 20);

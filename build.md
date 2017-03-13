@@ -7,9 +7,23 @@
 
 ## When releasing (Note to myself) : ##
 
-- be sure to match the dll version with the tag name of the release in GitHub (btw the format should be vX.X.X where v(major).(minor).(revision), last digit must be left empty on GitHub tag name, see below)
-- the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)
+**Manual chores**
+
+- Change the dll version of 3P in AssemblyInfo.cs : *the format should be vX.X.X.X with v(major).(minor).(revision).(lastdigit)* ; the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)
 - Check the default Config
-- Recompile the updater if needed!!
-- Make sure to leave at least 1 empty line above bullet lists in the GitHub release description!
-- Compile in release mode, not debug
+- Recompile the updater if needed
+- When creating a stable release, target the master branch and don't forget to do a pull request from beta > master
+- Create a new tag on either the beta or master branch (depending on release) : `git tag vX.X.X` (the last digit must be left empty for the tag name!)
+- Push the tag `git push --tags` : this will trigger the build with the deployment on the appveyor
+- Wait for the build to be done, edit the newly created https://github.com/jcaillon/3P/releases
+  - don't forget to check/uncheck the prerelease option
+  - Find a cool title
+  - verify the 2 .zip files
+  - Publish the release!
+
+**Done automatically by appveyor**
+
+- Clean/Rebuild in release mode, not debug for both x86 and x64 versions
+- Create 2 .zip in the release on github :
+  - "3P.zip" containing the 3P.dll (32 bits) and eventually the .pdb file
+  - "3P_x64.zip" containg the 3P.dll (64 bits!) and eventually the .pdb file

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SyntaxHighlight.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 #endregion
 namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlight {
-
         #region real colorization todo
+
         /*
         /// <summary>
         /// Called on STYLENEEDED notification
@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             derp++;
         }
         */
-        #endregion
 
+        #endregion
     }
 }

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (IniReader.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -23,13 +23,11 @@ using System.IO;
 using System.Linq;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This classes reads a .ini file
     /// TODO: make it able to write the .ini as well?
     /// </summary>
     public class IniReader {
-
         /// <summary>
         /// Dictonnary of sections, each containing a dictionnary of key/value
         /// </summary>

@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiColorRadioButton.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -31,6 +34,7 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(RadioButton))]
     public class YamuiColorRadioButton : RadioButton {
         #region Fields
+
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseBorder { get; set; }
@@ -38,20 +42,25 @@ namespace YamuiFramework.Controls {
         private bool _isHovered;
         //private bool _isPressed;
         //private bool _isFocused;
+
         #endregion
 
         #region Constructor
+
         public YamuiColorRadioButton() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
+            SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
         }
+
         #endregion
 
         #region Paint Methods
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -70,7 +79,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
@@ -90,7 +99,6 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-
             if (!Checked && _isHovered)
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonHoverBack))
                     e.Graphics.FillRectangle(b, new Rectangle(0, 0, Width, Height));
@@ -107,6 +115,7 @@ namespace YamuiFramework.Controls {
             using (SolidBrush b = new SolidBrush(BackColor))
                 e.Graphics.FillRectangle(b, boxRect);
         }
+
         #endregion
 
         #region Managing isHovered, isPressed, isFocused
@@ -144,6 +153,18 @@ namespace YamuiFramework.Controls {
         public override Size GetPreferredSize(Size proposedSize) {
             AutoSize = false;
             return new Size(50, 50);
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
         }
 
         #endregion

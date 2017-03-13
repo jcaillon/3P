@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Transition.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,8 +28,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace YamuiFramework.Animations.Transitions
-{
+namespace YamuiFramework.Animations.Transitions {
     /// <summary>
     /// Lets you perform animated transitions of properties on arbitrary objects. These 
     /// will often be transitions of UI properties, for example an animated fade-in of 
@@ -55,9 +57,8 @@ namespace YamuiFramework.Animations.Transitions
     /// need different parameters.
     /// 
     /// </summary>
-    public class Transition
-	{
-		#region Registration
+    public class Transition {
+        #region Registration
 
         /// <summary>
         /// Are we currently running a transition?
@@ -67,14 +68,13 @@ namespace YamuiFramework.Animations.Transitions
             return TransitionManager.IsTransitionRunning();
         }
 
-		/// <summary>
+        /// <summary>
         /// You should register all managed-types here.
         /// </summary>
-        static Transition()
-        {
+        static Transition() {
             registerType(new ManagedType_Int());
             registerType(new ManagedType_Float());
-			registerType(new ManagedType_Double());
+            registerType(new ManagedType_Double());
             registerType(new ManagedType_Color());
             registerType(new ManagedType_String());
             registerType(new ManagedType_Bool());
@@ -87,9 +87,7 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Args passed with the TransitionCompletedEvent.
         /// </summary>
-        public class Args : EventArgs
-        {
-        }
+        public class Args : EventArgs {}
 
         /// <summary>
         /// Event raised when the transition hass completed.
@@ -108,13 +106,12 @@ namespace YamuiFramework.Animations.Transitions
             while (IsTransitionRunning()) {
                 Thread.Sleep(20);
             }
-        } 
+        }
 
         /// <summary>
         /// Creates and immediately runs a transition on the property passed in.
         /// </summary>
-        public static void run(object target, string strPropertyName, object destinationValue, ITransitionType transitionMethod)
-        {
+        public static void run(object target, string strPropertyName, object destinationValue, ITransitionType transitionMethod) {
             Transition t = new Transition(transitionMethod);
             t.add(target, strPropertyName, destinationValue);
             t.run();
@@ -124,8 +121,7 @@ namespace YamuiFramework.Animations.Transitions
         /// Sets the property passed in to the initial value passed in, then creates and 
         /// immediately runs a transition on it.
         /// </summary>
-        public static void run(object target, string strPropertyName, object initialValue, object destinationValue, ITransitionType transitionMethod)
-        {
+        public static void run(object target, string strPropertyName, object initialValue, object destinationValue, ITransitionType transitionMethod) {
             Utility.setValue(target, strPropertyName, initialValue);
             run(target, strPropertyName, destinationValue, transitionMethod);
         }
@@ -145,8 +141,7 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Creates a TransitionChain and runs it.
         /// </summary>
-        public static void runChain(params Transition[] transitions)
-        {
+        public static void runChain(params Transition[] transitions) {
             TransitionChain chain = new TransitionChain(transitions);
         }
 
@@ -158,74 +153,66 @@ namespace YamuiFramework.Animations.Transitions
         /// Constructor. You pass in the object that holds the properties 
         /// that you are performing transitions on.
         /// </summary>
-        public Transition(ITransitionType transitionMethod)
-        {
-			m_TransitionMethod = transitionMethod;
+        public Transition(ITransitionType transitionMethod) {
+            m_TransitionMethod = transitionMethod;
         }
 
-		/// <summary>
-		/// Adds a property that should be animated as part of this transition.
-		/// </summary>
-		public void add(object target, string strPropertyName, object destinationValue)
-		{
-			// We get the property info...
-			Type targetType = target.GetType();
-			PropertyInfo propertyInfo = targetType.GetProperty(strPropertyName);
-			if (propertyInfo == null)
-			{
-				throw new Exception("Object: " + target + " does not have the property: " + strPropertyName);
-			}
+        /// <summary>
+        /// Adds a property that should be animated as part of this transition.
+        /// </summary>
+        public void add(object target, string strPropertyName, object destinationValue) {
+            // We get the property info...
+            Type targetType = target.GetType();
+            PropertyInfo propertyInfo = targetType.GetProperty(strPropertyName);
+            if (propertyInfo == null) {
+                throw new Exception("Object: " + target + " does not have the property: " + strPropertyName);
+            }
 
-			// We check that we support the property type...
-			Type propertyType = propertyInfo.PropertyType;
-			if (m_mapManagedTypes.ContainsKey(propertyType) == false)
-			{
-				throw new Exception("Transition does not handle properties of type: " + propertyType);
-			}
+            // We check that we support the property type...
+            Type propertyType = propertyInfo.PropertyType;
+            if (m_mapManagedTypes.ContainsKey(propertyType) == false) {
+                throw new Exception("Transition does not handle properties of type: " + propertyType);
+            }
 
             // We can only transition properties that are both getable and setable...
-            if (propertyInfo.CanRead == false || propertyInfo.CanWrite == false)
-            {
+            if (propertyInfo.CanRead == false || propertyInfo.CanWrite == false) {
                 throw new Exception("Property is not both getable and setable: " + strPropertyName);
             }
 
             IManagedType managedType = m_mapManagedTypes[propertyType];
-            
-            // We can manage this type, so we store the information for the
-			// transition of this property...
-			TransitionedPropertyInfo info = new TransitionedPropertyInfo();
-			info.endValue = destinationValue;
-			info.target = target;
-			info.propertyInfo = propertyInfo;
-			info.managedType = managedType;
 
-            lock (m_Lock)
-            {
+            // We can manage this type, so we store the information for the
+            // transition of this property...
+            TransitionedPropertyInfo info = new TransitionedPropertyInfo();
+            info.endValue = destinationValue;
+            info.target = target;
+            info.propertyInfo = propertyInfo;
+            info.managedType = managedType;
+
+            lock (m_Lock) {
                 m_listTransitionedProperties.Add(info);
             }
-		}
+        }
 
         /// <summary>
         /// Starts the transition.
         /// </summary>
-        public void run()
-        {
+        public void run() {
             // We find the current start values for the properties we 
             // are animating...
-            foreach (TransitionedPropertyInfo info in m_listTransitionedProperties)
-            {
+            foreach (TransitionedPropertyInfo info in m_listTransitionedProperties) {
                 object value = info.propertyInfo.GetValue(info.target, null);
                 info.startValue = info.managedType.copy(value);
             }
 
-			// We start the stopwatch. We use this when the timer ticks to measure 
-			// how long the transition has been runnning for...
-			m_Stopwatch.Reset();
-			m_Stopwatch.Start();
+            // We start the stopwatch. We use this when the timer ticks to measure 
+            // how long the transition has been runnning for...
+            m_Stopwatch.Reset();
+            m_Stopwatch.Start();
 
             // We register this transition with the transition manager...
             TransitionManager.getInstance().register(this);
-		}
+        }
 
         #endregion
 
@@ -235,18 +222,15 @@ namespace YamuiFramework.Animations.Transitions
         /// Property that returns a list of information about each property managed
         /// by this transition.
         /// </summary>
-        internal IList<TransitionedPropertyInfo> TransitionedProperties
-        {
+        internal IList<TransitionedPropertyInfo> TransitionedProperties {
             get { return m_listTransitionedProperties; }
         }
 
         /// <summary>
         /// We remove the property with the info passed in from the transition.
         /// </summary>
-        internal void removeProperty(TransitionedPropertyInfo info)
-        {
-            lock (m_Lock)
-            {
+        internal void removeProperty(TransitionedPropertyInfo info) {
+            lock (m_Lock) {
                 m_listTransitionedProperties.Remove(info);
             }
         }
@@ -254,15 +238,14 @@ namespace YamuiFramework.Animations.Transitions
         /// <summary>
         /// Called when the transition timer ticks.
         /// </summary>
-        internal void onTimer()
-        {
+        internal void onTimer() {
             // When the timer ticks we:
             // a. Find the elapsed time since the transition started.
             // b. Work out the percentage movement for the properties we're managing.
             // c. Find the actual values of each property, and set them.
 
             // a.
-            int iElapsedTime = (int)m_Stopwatch.ElapsedMilliseconds;
+            int iElapsedTime = (int) m_Stopwatch.ElapsedMilliseconds;
 
             // b.
             double dPercentage;
@@ -272,18 +255,15 @@ namespace YamuiFramework.Animations.Transitions
             // We take a copy of the list of properties we are transitioning, as
             // they can be changed by another thread while this method is running...
             IList<TransitionedPropertyInfo> listTransitionedProperties = new List<TransitionedPropertyInfo>();
-            lock (m_Lock)
-            {
-                foreach (TransitionedPropertyInfo info in m_listTransitionedProperties)
-                {
+            lock (m_Lock) {
+                foreach (TransitionedPropertyInfo info in m_listTransitionedProperties) {
                     listTransitionedProperties.Add(info.copy());
                 }
             }
 
             // c. 
             bool propLeft = false;
-            foreach (TransitionedPropertyInfo info in listTransitionedProperties)
-            {
+            foreach (TransitionedPropertyInfo info in listTransitionedProperties) {
                 // We get the current value for this property...
                 object value = info.managedType.getIntermediateValue(info.startValue, info.endValue, dPercentage);
 
@@ -296,8 +276,7 @@ namespace YamuiFramework.Animations.Transitions
             bCompleted = bCompleted && propLeft;
 
             // Has the transition completed?
-            if (bCompleted)
-            {
+            if (bCompleted) {
                 // We stop the stopwatch and the timer...
                 m_Stopwatch.Stop();
 
@@ -310,26 +289,22 @@ namespace YamuiFramework.Animations.Transitions
 
         #region Private functions
 
-		/// <summary>
-		/// Sets a property on the object passed in to the value passed in. This method
-		/// invokes itself on the GUI thread if the property is being invoked on a GUI 
-		/// object.
-		/// </summary>
-		private void setProperty(object sender, PropertyUpdateArgs args)
-		{
-            try
-            {
+        /// <summary>
+        /// Sets a property on the object passed in to the value passed in. This method
+        /// invokes itself on the GUI thread if the property is being invoked on a GUI 
+        /// object.
+        /// </summary>
+        private void setProperty(object sender, PropertyUpdateArgs args) {
+            try {
                 // If the target is a control that has been disposed then we don't 
                 // try to update its proeprties. This can happen if the control is
                 // on a form that has been closed while the transition is running...
-                if (isDisposed(args.target))
-                {
+                if (isDisposed(args.target)) {
                     return;
                 }
 
                 ISynchronizeInvoke invokeTarget = args.target as ISynchronizeInvoke;
-                if (invokeTarget != null && invokeTarget.InvokeRequired)
-                {
+                if (invokeTarget != null && invokeTarget.InvokeRequired) {
                     // There is some history behind the next two lines, which is worth
                     // going through to understand why they are the way they are.
 
@@ -350,91 +325,81 @@ namespace YamuiFramework.Animations.Transitions
                     // disposed - for example, it is on a form that is being closed. See
                     // here for details: 
                     // http://social.msdn.microsoft.com/Forums/en-US/winforms/thread/7d2c941a-0016-431a-abba-67c5d5dac6a5
-                    
+
                     // To solve this, we use a combination of the two earlier approaches. 
                     // We use BeginInvoke as this does not block and lock up, even if the
                     // underlying object is being disposed. But we do want to wait to give
                     // the UI a chance to process the update. So what we do is to do the
                     // asynchronous BeginInvoke, but then wait (with a short timeout) for
                     // it to complete.
-                    IAsyncResult asyncResult = invokeTarget.BeginInvoke(new EventHandler<PropertyUpdateArgs>(setProperty), new[] { sender, args });
+                    IAsyncResult asyncResult = invokeTarget.BeginInvoke(new EventHandler<PropertyUpdateArgs>(setProperty), new[] {sender, args});
                     asyncResult.AsyncWaitHandle.WaitOne(50);
-                }
-                else
-                {
+                } else {
                     // We are on the correct thread, so we update the property...
                     args.propertyInfo.SetValue(args.target, args.value, null);
                 }
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 // We silently catch any exceptions. These could be things like 
                 // bounds exceptions when setting properties.
             }
-		}
+        }
 
         /// <summary>
         /// Returns true if the object passed in is a Control and is disposed
         /// or in the process of disposing. (If this is the case, we don't want
         /// to make any changes to its properties.)
         /// </summary>
-        private bool isDisposed(object target)
-        {
+        private bool isDisposed(object target) {
             // Is the object passed in a Control?
             Control controlTarget = target as Control;
-            if (controlTarget == null)
-            {
+            if (controlTarget == null) {
                 return false;
             }
 
             // Is it disposed or disposing?
-            if (controlTarget.IsDisposed || controlTarget.Disposing)
-            {
+            if (controlTarget.IsDisposed || controlTarget.Disposing) {
                 return true;
             }
             return false;
         }
 
-		#endregion
+        #endregion
 
-		#region Private static functions
+        #region Private static functions
 
-		/// <summary>
-		/// Registers a transition-type. We hold them in a map.
-		/// </summary>
-		private static void registerType(IManagedType transitionType)
-		{
-			Type type = transitionType.getManagedType();
-			m_mapManagedTypes[type] = transitionType;
-		}
+        /// <summary>
+        /// Registers a transition-type. We hold them in a map.
+        /// </summary>
+        private static void registerType(IManagedType transitionType) {
+            Type type = transitionType.getManagedType();
+            m_mapManagedTypes[type] = transitionType;
+        }
 
-		#endregion
-		
-		#region Private static data
+        #endregion
 
-		// A map of Type info to IManagedType objects. These are all the types that we
+        #region Private static data
+
+        // A map of Type info to IManagedType objects. These are all the types that we
         // know how to perform transactions on...
         private static IDictionary<Type, IManagedType> m_mapManagedTypes = new Dictionary<Type, IManagedType>();
 
         #endregion
 
-		#region Private data
+        #region Private data
 
-		// The transition method used by this transition...
-		private ITransitionType m_TransitionMethod;
+        // The transition method used by this transition...
+        private ITransitionType m_TransitionMethod;
 
-		// Holds information about one property on one taregt object that we are performing
-		// a transition on...
-		internal class TransitionedPropertyInfo
-		{
-			public object startValue;
-			public object endValue;
-			public object target;
-			public PropertyInfo propertyInfo;
-			public IManagedType managedType;
+        // Holds information about one property on one taregt object that we are performing
+        // a transition on...
+        internal class TransitionedPropertyInfo {
+            public object startValue;
+            public object endValue;
+            public object target;
+            public PropertyInfo propertyInfo;
+            public IManagedType managedType;
 
-            public TransitionedPropertyInfo copy()
-            {
+            public TransitionedPropertyInfo copy() {
                 TransitionedPropertyInfo info = new TransitionedPropertyInfo();
                 info.startValue = startValue;
                 info.endValue = endValue;
@@ -443,32 +408,31 @@ namespace YamuiFramework.Animations.Transitions
                 info.managedType = managedType;
                 return info;
             }
-		}
+        }
 
-		// The collection of properties that the current transition is animating...
-		private IList<TransitionedPropertyInfo> m_listTransitionedProperties = new List<TransitionedPropertyInfo>();
+        // The collection of properties that the current transition is animating...
+        private IList<TransitionedPropertyInfo> m_listTransitionedProperties = new List<TransitionedPropertyInfo>();
 
-		// Helps us find the time interval from the time the transition starts to each timer tick...
-		private Stopwatch m_Stopwatch = new Stopwatch();
+        // Helps us find the time interval from the time the transition starts to each timer tick...
+        private Stopwatch m_Stopwatch = new Stopwatch();
 
         // Event args used for the event we raise when updating a property...
-		private class PropertyUpdateArgs : EventArgs
-		{
-			public PropertyUpdateArgs(object t, PropertyInfo pi, object v)
-			{
-				target = t;
-				propertyInfo = pi;
-				value = v;
-			}
-			public object target;
-			public PropertyInfo propertyInfo;
-			public object value;
-		}
+        private class PropertyUpdateArgs : EventArgs {
+            public PropertyUpdateArgs(object t, PropertyInfo pi, object v) {
+                target = t;
+                propertyInfo = pi;
+                value = v;
+            }
+
+            public object target;
+            public PropertyInfo propertyInfo;
+            public object value;
+        }
 
         // An object used to lock the list of transitioned properties, as it can be 
         // accessed by multiple threads...
         private object m_Lock = new object();
 
-		#endregion
-	}
+        #endregion
+    }
 }

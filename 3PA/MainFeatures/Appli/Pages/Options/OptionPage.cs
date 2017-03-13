@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (OptionPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -32,15 +32,14 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
-
     /// <summary>
     /// This page is built programatically
     /// </summary>
     internal partial class OptionPage : YamuiPage {
-
         #region fields
 
         private List<string> _allowedGroups;
@@ -50,6 +49,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         #region constructor
+
         public OptionPage(List<string> allowedGroups) {
             InitializeComponent();
 
@@ -57,6 +57,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             GeneratePage();
         }
+
         #endregion
 
         #region private methods
@@ -96,13 +97,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 scrollPanel.ContentPanel.Controls.Add(label);
 
                 var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
-                var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute)listRangeAttr.FirstOrDefault() : null;
+                var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute) listRangeAttr.FirstOrDefault() : null;
 
                 if (valObj is string) {
                     // string
                     var strControl = new YamuiTextBox {
                         Location = new Point(240, yPos),
-                        Text = (string)property.GetValue(configInstance),
+                        Text = (string) property.GetValue(configInstance),
                         Size = new Size(300, 20),
                         Tag = property.Name
                     };
@@ -132,12 +133,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
 
                     tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
-
-                } if (valObj is int || valObj is double) {
+                }
+                if (valObj is int || valObj is double) {
                     // number
                     var numControl = new YamuiTextBox {
                         Location = new Point(240, yPos),
-                        Text = ((valObj is int) ? ((int)property.GetValue(configInstance)).ToString() : ((double)property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
+                        Text = ((valObj is int) ? ((int) property.GetValue(configInstance)).ToString() : ((double) property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
                         Size = new Size(300, 20),
                         Tag = property.Name
                     };
@@ -167,14 +168,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
 
                     tooltip.SetToolTip(numControl, attribute.Description + "<br>" + (rangeAttr != null ? "<br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br>" : "") + "<div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
-
                 } else if (valObj is bool) {
                     // bool
                     var toggleControl = new YamuiButtonToggle {
                         Location = new Point(240, yPos),
                         Size = new Size(40, 16),
                         Text = null,
-                        Checked = (bool)valObj,
+                        Checked = (bool) valObj,
                         Tag = property.Name
                     };
                     toggleControl.ButtonPressed += ToggleControlOnCheckedChanged;
@@ -218,7 +218,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 updateButton.ButtonPressed += (sender, args) => UpdateHandler.CheckForUpdate();
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
-                scrollPanel.ContentPanel.Controls.Add(updateButton); 
+                scrollPanel.ContentPanel.Controls.Add(updateButton);
             }
 
             scrollPanel.ContentPanel.Height = yPos + 50;
@@ -229,8 +229,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void SaveAllButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             // refresh stuff on screen
             foreach (var control in scrollPanel.ContentPanel.Controls) {
-                var ctrl = (Control)control;
-                if (ctrl is YamuiButtonImage && ((YamuiButtonImage)ctrl).Text.Equals(@"save")) {
+                var ctrl = (Control) control;
+                if (ctrl is YamuiButtonImage && ((YamuiButtonImage) ctrl).Text.Equals(@"save")) {
                     SaveButtonOnButtonPressed(ctrl, new EventArgs());
                 }
             }
@@ -314,17 +314,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // refresh stuff on screen
             foreach (var control in scrollPanel.ContentPanel.Controls) {
-                var ctrl = (Control)control;
+                var ctrl = (Control) control;
                 if (ctrl.Tag != null && ctrl.Tag is string) {
                     var propertyName = (string) ctrl.Tag;
                     var value = new Config.ConfigObject().GetValueOf(propertyName);
                     if (ctrl is YamuiButtonToggle) {
                         Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
-                        ((YamuiButtonToggle)ctrl).Checked = (bool) value;
+                        ((YamuiButtonToggle) ctrl).Checked = (bool) value;
                     } else if (ctrl is YamuiTextBox) {
                         Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
-                        ((YamuiTextBox)ctrl).Text = value.ToString();
-                    } 
+                        ((YamuiTextBox) ctrl).Text = value.ToString();
+                    }
                 }
             }
             ApplySettings();
@@ -338,13 +338,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void ApplySettings() {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            CodeExplorer.CodeExplorer.ApplyColorSettings();
-            FileExplorer.FileExplorer.ApplyColorSettings();
-            AutoComplete.ForceClose();
+            CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
+            FileExplorer.FileExplorer.Instance.ApplyColorSettings();
+            AutoCompletion.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyOptionsForScintilla();
-
             Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
+            AutoCompletion.RefreshStaticItems(); // when changing case
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "BackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
 
         /// <summary>
@@ -362,14 +362,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         /// <param name="action"></param>
         private void ForEachConfigPropertyWithDisplayAttribute(Action<FieldInfo, DisplayAttribute> action) {
-            var properties = typeof (Config.ConfigObject).GetFields();
+            var properties = typeof(Config.ConfigObject).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) {
                     continue;
                 }
-                var listCustomAttr = property.GetCustomAttributes(typeof (DisplayAttribute), false);
+                var listCustomAttr = property.GetCustomAttributes(typeof(DisplayAttribute), false);
                 if (!listCustomAttr.Any()) {
                     continue;
                 }

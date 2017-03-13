@@ -191,12 +191,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_directory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_directory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_directory.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_directory.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_directory.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_directory.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_directory.Location = new System.Drawing.Point(240, 153);
             this.fl_directory.Name = "fl_directory";
             this.fl_directory.Size = new System.Drawing.Size(566, 20);

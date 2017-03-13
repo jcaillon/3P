@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FontManager.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -25,7 +28,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Fonts {
-
     public enum FontFunction {
         AppliTitle,
         Small,
@@ -38,11 +40,11 @@ namespace YamuiFramework.Fonts {
         AutoCompletion,
         MenuMain,
         MenuSecondary,
-        WaterMark
+        WaterMark,
+        TextBox
     }
 
     public static class FontManager {
-
         public static Font GetStandardFont() {
             return GetFont(FontFunction.Normal);
         }
@@ -71,6 +73,8 @@ namespace YamuiFramework.Fonts {
                     return GetFont(FontStyle.Bold, 11f);
                 case FontFunction.WaterMark:
                     return GetFont(FontStyle.Italic, 12f);
+                case FontFunction.TextBox:
+                    return GetOtherFont("Consolas", FontStyle.Regular, 11f);
                 default:
                     return GetFont(FontStyle.Regular, 12f);
             }
@@ -149,15 +153,12 @@ namespace YamuiFramework.Fonts {
         }
 
         internal class FontResolver : IFontResolver {
-
             private Dictionary<Tuple<string, float, FontStyle>, Font> _savedFonts = new Dictionary<Tuple<string, float, FontStyle>, Font>();
 
             public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
-
                 // we didn't already created the font?
                 var key = new Tuple<string, float, FontStyle>(familyName, emSize, fontStyle);
                 if (!_savedFonts.ContainsKey(key)) {
-
                     // create it
                     Font fontTester = new Font(familyName, emSize, fontStyle, unit);
                     if (fontTester.Name != familyName) {
@@ -170,7 +171,8 @@ namespace YamuiFramework.Fonts {
                     _savedFonts.Add(key, fontTester);
                 }
 
-                return _savedFonts[key]; ;
+                return _savedFonts[key];
+                ;
             }
 
             private PrivateFontCollection _pfc = new PrivateFontCollection();
@@ -183,6 +185,7 @@ namespace YamuiFramework.Fonts {
                     byte[] fontdata;
                     switch (familyName) {
                         case @"REDCIRCL":
+                            // .ttf file in embedded resource
                             fontdata = ResourceFont.REDCIRCL;
                             break;
                         default:
@@ -206,8 +209,5 @@ namespace YamuiFramework.Fonts {
         }
 
         #endregion
-
     }
-
-
 }

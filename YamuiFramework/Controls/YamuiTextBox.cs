@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTextBox.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -28,9 +31,14 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
-    [Designer("YamuiFramework.Controls.YamuiTextBox2Designer")]
+    [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
     public sealed class YamuiTextBox : TextBox {
+        #region private
+
+        private bool _selectAllTextOnActivate = true;
+        private bool _appliedPadding;
+
+        #endregion
 
         #region Fields
 
@@ -48,8 +56,12 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public Color CustomBackColor {
             get { return _customBackColor; }
-            set { _customBackColor = value; Invalidate(); }
+            set {
+                _customBackColor = value;
+                Invalidate();
+            }
         }
+
         private Color _customBackColor;
 
         /// <summary>
@@ -66,8 +78,12 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public Color CustomForeColor {
             get { return _customForeColor; }
-            set { _customForeColor = value; Invalidate(); }
+            set {
+                _customForeColor = value;
+                Invalidate();
+            }
         }
+
         private Color _customForeColor;
 
         [Browsable(true)]
@@ -84,14 +100,26 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool MultiLines {
-            get { return _multiLines; }
+        [Browsable(true)]
+        public new bool Multiline {
+            get { return _multiline; }
             set {
-                _multiLines = value;
-                WordWrap = MultiLines;
+                _multiline = value;
+                WordWrap = Multiline;
+                AcceptsReturn = Multiline;
             }
         }
-        private bool _multiLines;
+
+        private bool _multiline;
+
+        /// <summary>
+        /// If true, when the textbox is activated, the whole text is selected
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SelectAllTextOnActivate {
+            get { return _selectAllTextOnActivate; }
+            set { _selectAllTextOnActivate = value; }
+        }
 
         #endregion
 
@@ -102,21 +130,9 @@ namespace YamuiFramework.Controls {
             Font = FontManager.GetStandardFont();
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
-            Multiline = true;
             WordWrap = false;
+            base.Multiline = true;
             MinimumSize = new Size(20, 20);
-        }
-
-        #endregion
-
-        #region Handle MultiLines
-
-        protected override void OnTextChanged(EventArgs e) {
-            if (!MultiLines && Text.Contains("\n")) {
-                Text = Text.Replace("\n", "").Replace("\r", "");
-                SelectionStart = TextLength;
-            }
-            base.OnTextChanged(e);
         }
 
         #endregion
@@ -124,16 +140,13 @@ namespace YamuiFramework.Controls {
         #region Custom paint
 
         private const int OcmCommand = 0x2111;
-        private const int WmPaint = 15;
-        private bool _appliedPadding;
 
         protected override void WndProc(ref Message m) {
-
             // Send WM_MOUSEWHEEL messages to the parent
-            if (!MultiLines && m.Msg == 0x20a) WinApi.SendMessage(Parent.Handle, m.Msg, m.WParam, m.LParam);
+            if (!Multiline && m.Msg == (int) WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
             else base.WndProc(ref m);
 
-            if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {
+            if ((m.Msg == (int) WinApi.Messages.WM_PAINT) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
                     ApplyInternalPadding();
@@ -152,7 +165,6 @@ namespace YamuiFramework.Controls {
         }
 
         private void CustomPaint(Graphics g) {
-
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
@@ -188,24 +200,10 @@ namespace YamuiFramework.Controls {
 
         #region Focus Methods
 
-        protected override void OnGotFocus(EventArgs e) {
-            _isFocused = true;
-            SelectAll();
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
-
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
-            SelectAll();
+            if (SelectAllTextOnActivate)
+                SelectAll();
             Invalidate();
 
             base.OnEnter(e);
@@ -234,21 +232,35 @@ namespace YamuiFramework.Controls {
             base.OnMouseLeave(e);
         }
 
-        protected override void OnClick(EventArgs e) {
-            if (!_isFocused) {
-                SelectAll();
-            }
-            base.OnClick(e);
-        }
+        #endregion
 
         #endregion
+
+        #region PerformKeyDown
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            if (!e.Handled && e.KeyCode == Keys.Return) {
+                if (Multiline) {
+                    var initialPos = SelectionStart;
+                    Text = Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < TextLength ? Text.Substring(initialPos, TextLength - initialPos) : "");
+                    SelectionStart = initialPos + 2;
+                    SelectionLength = 0;
+                    ScrollToCaret();
+                    return true;
+                }
+            }
+            return e.Handled;
+        }
 
         #endregion
     }
 
-    internal class YamuiTextBox2Designer : ControlDesigner {
+    internal class YamuiRegularTextBox2Designer : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("Multiline");
             properties.Remove("WordWrap");
             properties.Remove("MinimumSize");
             base.PreFilterProperties(properties);

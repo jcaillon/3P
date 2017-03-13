@@ -1,6 +1,6 @@
 #region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Utils.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -34,14 +34,14 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.FileExplorer;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.Lib {
-
     /*        
        #region Events
 
@@ -60,7 +60,6 @@ namespace _3PA.Lib {
     /// Class that exposes utility methods
     /// </summary>
     internal static class Utils {
-
         #region File manipulation wrappers
 
         /// <summary>
@@ -125,10 +124,16 @@ namespace _3PA.Lib {
         /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
         /// </summary>
         public static string ReadAllText(string path, Encoding encoding = null) {
-            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
-                return textReader.ReadToEnd();
+            try {
+                using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
+                        return textReader.ReadToEnd();
+                    }
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while the following file : " + path);
             }
+            return null;
         }
 
         /// <summary>
@@ -137,7 +142,6 @@ namespace _3PA.Lib {
         /// <param name="path"></param>
         /// <returns></returns>
         public static bool HideDirectory(string path) {
-
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                 return false;
 
@@ -293,10 +297,10 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string ShowFileSelection(string initialFile, string filter) {
             using (OpenFileDialog dialog = new OpenFileDialog {
-                    Multiselect = false,
-                    Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
-                    Title = @"Select a file"
-                }) {
+                Multiselect = false,
+                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
+                Title = @"Select a file"
+            }) {
                 var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
                 if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                     dialog.InitialDirectory = initialFolder;
@@ -317,10 +321,10 @@ namespace _3PA.Lib {
                 fsd.InitialDirectory = initialFolder;
             if (Appli.IsVisible) {
                 try {
-                    WinApi.EnableWindow(Npp.HandleNpp, false);
+                    Win32Api.EnableWindow(Npp.HandleNpp, false);
                     fsd.ShowDialog(Appli.Form.Handle);
                 } finally {
-                    WinApi.EnableWindow(Npp.HandleNpp, true);
+                    Win32Api.EnableWindow(Npp.HandleNpp, true);
                 }
             } else
                 fsd.ShowDialog(Npp.HandleNpp);
@@ -365,15 +369,8 @@ namespace _3PA.Lib {
         public static bool OpenAnyLink(string link) {
             if (string.IsNullOrEmpty(link)) return false;
             try {
-
                 // open the file if it has a progress extension or Known extension
-                string ext;
-                try {
-                    ext = Path.GetExtension(link);
-                } catch (Exception) {
-                    ext = null;
-                }
-                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.KnownProgressExtension.Contains(ext)) && File.Exists(link)) {
+                if ((link.TestAgainstListOfPatterns(Config.Instance.NppFilesPattern) || link.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) && File.Exists(link)) {
                     Npp.Goto(link);
                     return true;
                 }
@@ -392,12 +389,10 @@ namespace _3PA.Lib {
                         return true;
                 }
 
-
                 var process = new ProcessStartInfo(link) {
                     UseShellExecute = true
                 };
                 Process.Start(process);
-
             } catch (Exception e) {
                 if (!(e is Win32Exception))
                     ErrorHandler.LogError(e);
@@ -415,9 +410,9 @@ namespace _3PA.Lib {
             if (htmlLinkClickedEventArgs.Link.Contains("|")) {
                 var splitted = htmlLinkClickedEventArgs.Link.Split('|');
                 if (splitted.Length == 2)
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                    Npp.Goto(splitted[0], int.Parse(splitted[1]));
                 else
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]), Int32.Parse(splitted[2]));
+                    Npp.Goto(splitted[0], int.Parse(splitted[1]), int.Parse(splitted[2]));
                 htmlLinkClickedEventArgs.Handled = true;
             } else {
                 htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
@@ -456,7 +451,6 @@ namespace _3PA.Lib {
         /// <param name="size"></param>
         /// <returns></returns>
         public static Image ResizeImage(Image imgToResize, Size size) {
-
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
 
@@ -486,7 +480,6 @@ namespace _3PA.Lib {
         /// Allows to know how many files of each file type there is
         /// </summary>
         public static Dictionary<FileType, int> GetNbFilesPerType(List<string> files) {
-
             Dictionary<FileType, int> output = new Dictionary<FileType, int>();
 
             foreach (var file in files) {
@@ -566,6 +559,31 @@ namespace _3PA.Lib {
             return false;
         }
 
+        private static Dictionary<string, DateTime> _watchedFiles = new Dictionary<string, DateTime>();
+
+        /// <summary>
+        /// Allows to quickly check if a file has been modified since the last we called this method
+        /// It returns false the first time we call it, then it compares the LastWriteTime for the following
+        /// calls
+        /// </summary>
+        public static bool HasFileChanged(string filePath) {
+            // first watch, no problem
+            if (!_watchedFiles.ContainsKey(filePath)) {
+                if (File.Exists(filePath))
+                    _watchedFiles.Add(filePath, File.GetLastWriteTime(filePath));
+                return false;
+            }
+            // then check the last write date didn't change
+            if (File.Exists(filePath)) {
+                if (_watchedFiles[filePath].Equals(File.GetLastWriteTime(filePath)))
+                    return false;
+                _watchedFiles[filePath] = File.GetLastWriteTime(filePath);
+            } else {
+                _watchedFiles.Remove(filePath);
+            }
+            return true;
+        }
+
         /// <summary>
         /// Returns the list of control of given typ
         /// </summary>
@@ -606,7 +624,7 @@ namespace _3PA.Lib {
             try {
                 FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(path);
                 return myFileVersionInfo.FileVersion;
-            } catch(Exception) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -641,7 +659,6 @@ namespace _3PA.Lib {
         /// <param name="filePath"></param>
         /// <param name="targetDir"></param>
         public static bool ExtractAll(string filePath, string targetDir) {
-
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                 return false;
             if (!CreateDirectory(targetDir))
@@ -652,7 +669,6 @@ namespace _3PA.Lib {
             try {
                 // Opens existing zip file
                 using (ZipStorer zip = ZipStorer.Open(filePath, FileAccess.Read)) {
-
                     // Extract all files in target directory
                     foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
                         var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
@@ -667,13 +683,12 @@ namespace _3PA.Lib {
             }
 
             return result;
-        } 
+        }
 
         /// <summary>
         /// This methods pushes a file into a new/existing zip file
         /// </summary>
         public static bool ZipFile(string zipPath, string filePath, string filePathInZip, ZipStorer.Compression compressionMethod) {
-
             if (string.IsNullOrEmpty(zipPath))
                 return false;
 
@@ -704,7 +719,6 @@ namespace _3PA.Lib {
         /// Zip the given folder
         /// </summary>
         public static bool ZipFolder(string zipPath, string folderPath, ZipStorer.Compression compressionMethod) {
-
             if (string.IsNullOrEmpty(zipPath) || string.IsNullOrEmpty(folderPath))
                 return false;
 
@@ -746,7 +760,6 @@ namespace _3PA.Lib {
         /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
         /// </summary>
         public static bool SendFileToFtp(string localFilePath, string ftpUri) {
-
             if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
                 return false;
 
@@ -779,7 +792,7 @@ namespace _3PA.Lib {
                 if (!_ftpClients.ContainsKey(serverUri))
                     _ftpClients.Add(serverUri, new FtpsClient());
                 ftp = _ftpClients[serverUri];
-                
+
                 // try to connect!
                 if (!ftp.Connected) {
                     if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
@@ -808,7 +821,6 @@ namespace _3PA.Lib {
                             ErrorHandler.ShowErrors(e, "Error sending a file! " + e.Message);
                     }
                 }
-            
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error sending a file to FTP");
             }
@@ -852,9 +864,7 @@ namespace _3PA.Lib {
             }
             _ftpClients.Clear();
         }
-        
+
         #endregion
-
-
     }
 }

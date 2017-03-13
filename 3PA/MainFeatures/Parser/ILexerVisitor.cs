@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ILexerVisitor.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
-
     internal interface ILexerVisitor {
         void Visit(TokenComment tok);
         void Visit(TokenEol tok);
         void Visit(TokenEos tok);
         void Visit(TokenInclude tok);
+        void Visit(TokenPreProcVariable tok);
         void Visit(TokenNumber tok);
         void Visit(TokenString tok);
         void Visit(TokenStringDescriptor tok);
@@ -32,6 +32,6 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(TokenWord tok);
         void Visit(TokenEof tok);
         void Visit(TokenUnknown tok);
-        void Visit(TokenPreProcStatement tok);
+        void Visit(TokenPreProcDirective tok);
     }
 }

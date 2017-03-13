@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Utilities.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,11 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -30,11 +34,21 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>
     /// This class provides various utilies to use in YamuiFramework and outside
     /// </summary>
     public static class Utilities {
+        #region Paint
+
+        /// <summary>
+        /// Return a GraphicPath that is a round cornered rectangle
+        /// </summary>
+        /// <returns>A round cornered rectagle path</returns>   
+        public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
+            return new RectangleF(x, y, width, height).GetRoundedRect(diameter);
+        }
+
+        #endregion
 
         #region Html utilities
 
@@ -42,16 +56,14 @@ namespace YamuiFramework.Helper {
         /// Returns a fair width in which an html can be displayed
         /// </summary>
         public static int MeasureHtmlPrefWidth(string htmlContent, int minWidth, int maxWidth) {
-
             // find max height taken by the html
             // Measure the size of the html
             using (var gImg = new Bitmap(1, 1))
             using (var g = Graphics.FromImage(gImg)) {
-
                 string content = YamuiThemeManager.WrapLabelText(htmlContent);
 
                 // this should retrieve the best width, however it will not be the case if there are some width='100%' for instance
-                var calcWidth = (int)HtmlRender.Measure(g, content, 99999, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args)).Width;
+                var calcWidth = (int) HtmlRender.Measure(g, content, 99999, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args)).Width;
 
                 if (calcWidth >= 9999) {
                     // get the minimum size required to display everything
@@ -64,7 +76,7 @@ namespace YamuiFramework.Helper {
 
                     // now we got the final height, resize width until height changes
                     int j = 0;
-                    int detla = maxWidth / 2;
+                    int detla = maxWidth/2;
                     calcWidth = maxWidth;
                     do {
                         calcWidth -= detla;
@@ -93,19 +105,19 @@ namespace YamuiFramework.Helper {
         #region Validation and data type conversions
 
         public static readonly Dictionary<Type, char[]> KeyPressValidChars = new Dictionary<Type, char[]> {
-            {typeof (byte), GetCultureChars(true, false, true)},
-            {typeof (sbyte), GetCultureChars(true, true, true)},
-            {typeof (short), GetCultureChars(true, true, true)},
-            {typeof (ushort), GetCultureChars(true, false, true)},
-            {typeof (int), GetCultureChars(true, true, true)},
-            {typeof (uint), GetCultureChars(true, false, true)},
-            {typeof (long), GetCultureChars(true, true, true)},
-            {typeof (ulong), GetCultureChars(true, false, true)},
-            {typeof (double), GetCultureChars(true, true, true, true, true, true)},
-            {typeof (float), GetCultureChars(true, true, true, true, true, true)},
-            {typeof (decimal), GetCultureChars(true, true, true, true, true)},
-            {typeof (TimeSpan), GetCultureChars(true, true, false, new[] {'-'})},
-            {typeof (Guid), GetCultureChars(true, false, false, "-{}()".ToCharArray())}
+            {typeof(byte), GetCultureChars(true, false, true)},
+            {typeof(sbyte), GetCultureChars(true, true, true)},
+            {typeof(short), GetCultureChars(true, true, true)},
+            {typeof(ushort), GetCultureChars(true, false, true)},
+            {typeof(int), GetCultureChars(true, true, true)},
+            {typeof(uint), GetCultureChars(true, false, true)},
+            {typeof(long), GetCultureChars(true, true, true)},
+            {typeof(ulong), GetCultureChars(true, false, true)},
+            {typeof(double), GetCultureChars(true, true, true, true, true, true)},
+            {typeof(float), GetCultureChars(true, true, true, true, true, true)},
+            {typeof(decimal), GetCultureChars(true, true, true, true, true)},
+            {typeof(TimeSpan), GetCultureChars(true, true, false, new[] {'-'})},
+            {typeof(Guid), GetCultureChars(true, false, false, "-{}()".ToCharArray())}
         };
 
         public static char[] GetCultureChars(bool digits, bool neg, bool pos, bool dec = false, bool grp = false, bool e = false) {
@@ -145,77 +157,77 @@ namespace YamuiFramework.Helper {
 
         public static readonly Dictionary<Type, Predicate<string>> Validations = new Dictionary<Type, Predicate<string>> {
             {
-                typeof (byte), s => {
+                typeof(byte), s => {
                     byte n;
-                    return byte.TryParse(s, out n);
+                    return Byte.TryParse(s, out n);
                 }
             }, {
-                typeof (sbyte), s => {
+                typeof(sbyte), s => {
                     sbyte n;
-                    return sbyte.TryParse(s, out n);
+                    return SByte.TryParse(s, out n);
                 }
             }, {
-                typeof (short), s => {
+                typeof(short), s => {
                     short n;
-                    return short.TryParse(s, out n);
+                    return Int16.TryParse(s, out n);
                 }
             }, {
-                typeof (ushort), s => {
+                typeof(ushort), s => {
                     ushort n;
-                    return ushort.TryParse(s, out n);
+                    return UInt16.TryParse(s, out n);
                 }
             }, {
-                typeof (int), s => {
+                typeof(int), s => {
                     int n;
-                    return int.TryParse(s, out n);
+                    return Int32.TryParse(s, out n);
                 }
             }, {
-                typeof (uint), s => {
+                typeof(uint), s => {
                     uint n;
-                    return uint.TryParse(s, out n);
+                    return UInt32.TryParse(s, out n);
                 }
             }, {
-                typeof (long), s => {
+                typeof(long), s => {
                     long n;
-                    return long.TryParse(s, out n);
+                    return Int64.TryParse(s, out n);
                 }
             }, {
-                typeof (ulong), s => {
+                typeof(ulong), s => {
                     ulong n;
-                    return ulong.TryParse(s, out n);
+                    return UInt64.TryParse(s, out n);
                 }
             }, {
-                typeof (char), s => {
+                typeof(char), s => {
                     char n;
-                    return char.TryParse(s, out n);
+                    return Char.TryParse(s, out n);
                 }
             }, {
-                typeof (double), s => {
+                typeof(double), s => {
                     double n;
-                    return double.TryParse(s, out n);
+                    return Double.TryParse(s, out n);
                 }
             }, {
-                typeof (float), s => {
+                typeof(float), s => {
                     float n;
-                    return float.TryParse(s, out n);
+                    return Single.TryParse(s, out n);
                 }
             }, {
-                typeof (decimal), s => {
+                typeof(decimal), s => {
                     decimal n;
-                    return decimal.TryParse(s, out n);
+                    return Decimal.TryParse(s, out n);
                 }
             }, {
-                typeof (DateTime), s => {
+                typeof(DateTime), s => {
                     DateTime n;
                     return DateTime.TryParse(s, out n);
                 }
             }, {
-                typeof (TimeSpan), s => {
+                typeof(TimeSpan), s => {
                     TimeSpan n;
                     return TimeSpan.TryParse(s, out n);
                 }
             }, {
-                typeof (Guid), s => {
+                typeof(Guid), s => {
                     try {
                         // ReSharper disable once ObjectCreationAsStatement
                         new Guid(s);
@@ -228,26 +240,26 @@ namespace YamuiFramework.Helper {
         };
 
         public static bool IsSupportedType(Type type) {
-            if (typeof (IConvertible).IsAssignableFrom(type))
+            if (typeof(IConvertible).IsAssignableFrom(type))
                 return true;
             var cvtr = TypeDescriptor.GetConverter(type);
-            if (cvtr.CanConvertFrom(typeof (string)) && cvtr.CanConvertTo(typeof (string)))
+            if (cvtr.CanConvertFrom(typeof(string)) && cvtr.CanConvertTo(typeof(string)))
                 return true;
             return false;
         }
 
         public static bool IsSimpleType(this Type type) {
             return type.IsPrimitive || type.IsEnum || Array.Exists(SimpleTypes, t => t == type) || Convert.GetTypeCode(type) != TypeCode.Object ||
-                   (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
+                   (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
         }
 
         public static readonly Type[] SimpleTypes = {
-            typeof (Enum), typeof (Decimal), typeof (DateTime),
-            typeof (DateTimeOffset), typeof (String), typeof (TimeSpan), typeof (Guid)
+            typeof(Enum), typeof(Decimal), typeof(DateTime),
+            typeof(DateTimeOffset), typeof(String), typeof(TimeSpan), typeof(Guid)
         };
 
         public static bool IsInvalidKey(char keyChar, Type itemType) {
-            if (char.IsControl(keyChar))
+            if (Char.IsControl(keyChar))
                 return false;
             char[] chars;
             KeyPressValidChars.TryGetValue(itemType, out chars);
@@ -285,7 +297,6 @@ namespace YamuiFramework.Helper {
         }
 
         private static void SubForEachLine(string filePath, byte[] dataResources, Action<int, string> toApplyOnEachLine, Encoding encoding) {
-
             string line;
             // to apply on each line
             Action<TextReader> action = reader => {
@@ -298,7 +309,7 @@ namespace YamuiFramework.Helper {
             };
 
             // either read from the file or from the byte array
-            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
+            if (!String.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                     using (var reader = new StreamReader(fileStream, encoding)) {
                         action(reader);
@@ -348,6 +359,5 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
     }
 }

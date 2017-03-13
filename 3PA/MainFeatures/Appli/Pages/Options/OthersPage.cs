@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (OthersPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -21,12 +21,11 @@ using System;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {
-
         #region constructor
 
         public OthersPage() {
@@ -49,8 +48,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             btSave.BackGrndImage = ImageResources.Save;
             btSave.ButtonPressed += BtSaveOnButtonPressed;
 
-            cbEncoding.DataSource = Enum.GetNames(typeof (NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
-            
+            cbEncoding.DataSource = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
+
             UpdateView();
 
             // dynamically reorder the controls for a correct tab order on notepad++
@@ -69,9 +68,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void UpdateView() {
             fl_tagopen.Text = Config.Instance.TagModifOpener;
             fl_tagclose.Text = Config.Instance.TagModifCloser;
-            fl_tagtitle1.Lines = Config.Instance.TagTitleBlock1.Split('\n');
-            fl_tagtitle2.Lines = Config.Instance.TagTitleBlock2.Split('\n');
-            fl_tagtitle3.Lines = Config.Instance.TagTitleBlock3.Split('\n');
+            fl_tagtitle1.Text = Config.Instance.TagTitleBlock1;
+            fl_tagtitle2.Text = Config.Instance.TagTitleBlock2;
+            fl_tagtitle3.Text = Config.Instance.TagTitleBlock3;
             fl_encodingfilter.Text = Config.Instance.AutoSwitchEncodingForFilePatterns;
             cbEncoding.SelectedIndex = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).IndexOf(Config.Instance.AutoSwitchEncodingTo.ToString());
         }

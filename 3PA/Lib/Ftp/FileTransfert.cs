@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileTransfert.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -20,9 +20,7 @@
 using System.Collections.Generic;
 
 namespace _3PA.Lib.Ftp {
-
     internal class FileTransfert {
-
         public int NbSimultaneousFiles { get; set; }
 
         public List<FileToTransfert> ListOfFileToTransfert { get; set; }
@@ -31,12 +29,9 @@ namespace _3PA.Lib.Ftp {
             get { return 0; }
         }
 
-        public void StartTransfert() { }
+        public void StartTransfert() {}
 
-        public void StopTransfert() {
-
-        }
-
+        public void StopTransfert() {}
     }
 
     internal class FileToTransfert {

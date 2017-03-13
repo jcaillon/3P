@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (JsonParser.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -23,12 +23,11 @@ using System.Linq;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// TODO: This class is too spcific and must be refactored later... for now it will do
     /// </summary>
     internal class JsonParser {
-        private const char Eof = (char)0;
+        private const char Eof = (char) 0;
         private string _data;
         private int _pos;
         private int _startPos;
@@ -47,7 +46,7 @@ namespace _3PA.Lib {
             _data = data;
             _pos = 0;
             _tokenPos = 0;
-            _symbolChars = new[] { '[', ']', '{', '}', ',', ':' };
+            _symbolChars = new[] {'[', ']', '{', '}', ',', ':'};
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace _3PA.Lib {
         /// </summary>
         /// <returns></returns>
         public List<List<Tuple<string, string>>> GetList() {
-            var releaseJsonontent = new List<List<Tuple<string, string>>> { new List<Tuple<string, string>>() };
+            var releaseJsonontent = new List<List<Tuple<string, string>>> {new List<Tuple<string, string>>()};
             var outerI = 0;
             var bracketCount = 0;
             Token token;
@@ -85,7 +84,6 @@ namespace _3PA.Lib {
                     }
                 }
                 if (token is TokenWord) {
-
                     if (PeekAtToken(1).Value.Equals(":")) {
                         var nextWordPos = -1;
                         if (PeekAtToken(2) is TokenWhiteSpace && PeekAtToken(3) is TokenWord)
@@ -204,7 +202,6 @@ namespace _3PA.Lib {
             return new TokenWhiteSpace(GetTokenValue(), 0, 0, _startPos, _pos);
         }
 
-
         /// <summary>
         /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
         /// </summary>
@@ -251,5 +248,4 @@ namespace _3PA.Lib {
             }
         }
     }
-
 }

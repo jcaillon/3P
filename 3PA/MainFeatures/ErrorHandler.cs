@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ErrorHandler.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -28,14 +28,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Themes;
 using _3PA.Lib;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
-
     internal static class ErrorHandler {
-
         /// <summary>
         /// Allows to keep track of the messages already displayed to the user
         /// </summary>
@@ -48,7 +48,6 @@ namespace _3PA.MainFeatures {
         /// renames said file with the suffix "_errors"
         /// </summary>
         public static void ShowErrors(Exception e, string message, string fileName) {
-
             if (UserCommunication.Ready) {
                 UserCommunication.Notify("An error has occurred while loading the following file :<div>" + (fileName + "_errors").ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.",
                     MessageImg.MsgPoison, "File load error", message,
@@ -73,29 +72,28 @@ namespace _3PA.MainFeatures {
         /// <param name="e"></param>
         /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message = null) {
-
-            if (LogError(e, message)) {
-                if (UserCommunication.Ready) {
+            if (!UserCommunication.Ready) {
+                // show an old school message
+                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a huge probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Plug.OnPlugReady += () => { ShowErrors(e, "Error on plugin loading..."); };
+            } else {
+                if (LogError(e, message)) {
                     // show it to the user
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
-                        MessageImg.MsgPoison, "An error has occured", message,
+                    UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                        MessageImg.MsgPoison, "An error has occurred", message,
                         args => {
                             if (args.Link.EndsWith(".log")) {
                                 Npp.Goto(args.Link);
                                 args.Handled = true;
                             }
                         });
-
-                } else {
-                    // show an old school message
-                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         /// <summary>
         /// Log a piece of information
-        /// returns false if the error already occured during the session, true otherwise
+        /// returns false if the error already occurred during the session, true otherwise
         /// </summary>
         public static bool LogError(Exception e, string message = null) {
             if (e == null)
@@ -103,6 +101,18 @@ namespace _3PA.MainFeatures {
 
             try {
                 var info = GetExceptionInfo(e);
+
+                // make sure that this error actually concerns 3P!
+                var libNs = typeof(ErrorHandler).Namespace;
+                var frameworkNs = typeof(YamuiTheme).Namespace;
+                if (string.IsNullOrEmpty(libNs))
+                    libNs = "_3PA_.";
+                if (string.IsNullOrEmpty(frameworkNs))
+                    frameworkNs = "YamuiFramework.";
+
+                if (!info.fullException.ContainsFast(libNs.Substring(0, libNs.IndexOf(".", StringComparison.Ordinal) + 1)) &&
+                    !info.fullException.ContainsFast(frameworkNs.Substring(0, frameworkNs.IndexOf(".", StringComparison.Ordinal) + 1)))
+                    return false;
 
                 // don't show the same error twice in a session
                 var excepUniqueId = info.originMethod + info.originLine;
@@ -135,7 +145,6 @@ namespace _3PA.MainFeatures {
 
                 // send the report
                 SendBugReport(info);
-
             } catch (Exception x) {
                 if (Config.IsDevelopper)
                     ShowErrors(x, message);
@@ -148,7 +157,6 @@ namespace _3PA.MainFeatures {
         /// Sends the given report to the web service of 3P
         /// </summary>
         private static void SendBugReport(ExceptionInfo bugReport) {
-
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.BugsPostWebWervice);
             wb.Serialize(bugReport);
 
@@ -191,11 +199,13 @@ namespace _3PA.MainFeatures {
                 };
             return output;
         }
-        
+
         #region global error handler callbacks
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs e) {
-            ShowErrors((Exception)e.ExceptionObject, "Unhandled error");
+            var ex = e.ExceptionObject as Exception;
+            if (ex != null)
+                ShowErrors(ex, "Error not handled");
         }
 
         public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {
@@ -207,7 +217,6 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 
     #region ExceptionInfo
@@ -228,5 +237,4 @@ namespace _3PA.MainFeatures {
     }
 
     #endregion
-
 }

@@ -1,24 +1,109 @@
-﻿using System;
+﻿#region header
+
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (YamuiExtensions.cs) is part of YamuiFramework.
+// 
+// YamuiFramework is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// YamuiFramework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
     public static class YamuiExtensions {
+        #region ui thread safe invoke
 
         /// <summary>
-        /// Returns a collection of all the values of a given Enum
+        /// Executes a function on the thread of the given object
         /// </summary>
-        public static IEnumerable<T> GetEnumValues<T>(this Enum value) {
-            return Enum.GetValues(typeof(T)).Cast<T>();
+        public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) {
+                IAsyncResult result = isi.BeginInvoke(call, new object[] {isi});
+                object endResult = isi.EndInvoke(result);
+                return (TResult) endResult;
+            }
+            return call(isi);
         }
 
-        #region Math lol
+        /// <summary>
+        /// Executes an action on the thread of the given object
+        /// </summary>
+        public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] {isi});
+            else
+                call(isi);
+        }
+
+        /// <summary>
+        /// Executes a function on the thread of the given object
+        /// </summary>
+        public static object SafeSyncInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) {
+                return isi.Invoke(call, new object[] {isi});
+            }
+            return call(isi);
+        }
+
+        /// <summary>
+        /// Executes an action on the thread of the given object
+        /// </summary>
+        public static void SafeSyncInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) isi.Invoke(call, new object[] {isi});
+            else
+                call(isi);
+        }
+
+        /// <summary>
+        /// Executes the specified delegate on the thread that owns the control's underlying window handle.
+        /// </summary>
+        /// <param name="control">The control whose window handle the delegate should be invoked on.</param>
+        /// <param name="method">A delegate that contains a method to be called in the control's thread context.</param>
+        public static void SafeSyncInvoke(this Control control, Action method) {
+            if (control.InvokeRequired) {
+                control.Invoke(method);
+            } else {
+                method();
+            }
+        }
+
+        /// <summary>
+        /// Executes the specified delegate on the thread that owns the control's underlying window handle, returning a
+        /// value.
+        /// </summary>
+        /// <param name="control">The control whose window handle the delegate should be invoked on.</param>
+        /// <param name="method">A delegate that contains a method to be called in the control's thread context and
+        /// that returns a value.</param>
+        /// <returns>The return value from the delegate being invoked.</returns>
+        public static TResult SafeSyncInvoke<TResult>(this Control control, Func<TResult> method) {
+            if (control.InvokeRequired) {
+                return (TResult) control.Invoke(method);
+            }
+            return method();
+        }
+
+        #endregion
+
+        #region Simple math
 
         /// <summary>
         /// Forces a value between a minimum and a maximum
@@ -82,14 +167,6 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Return a GraphicPath that is a round cornered rectangle
         /// </summary>
-        /// <returns>A round cornered rectagle path</returns>   
-        public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
-            return new RectangleF(x, y, width, height).GetRoundedRect(diameter);
-        }
-
-        /// <summary>
-        /// Return a GraphicPath that is a round cornered rectangle
-        /// </summary>
         /// <param name="rect">The rectangle</param>
         /// <param name="diameter">The diameter of the corners</param>
         /// <returns>A round cornered rectagle path</returns>
@@ -120,9 +197,6 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Replace all the occurences of @alias thx to the aliasDictionnary
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="aliasDictionnary"></param>
-        /// <returns></returns>
         public static string ReplaceAliases(this string value, Dictionary<string, string> aliasDictionnary) {
             while (true) {
                 if (value.Contains("@")) {
@@ -144,8 +218,6 @@ namespace YamuiFramework.Helper {
         /// lighten(#000000, 35%)
         /// darken(#FFFFFF, 35%)
         /// </summary>
-        /// <param name="htmlColor"></param>
-        /// <returns></returns>
         public static string ApplyColorFunctions(this string htmlColor) {
             if (htmlColor.Contains("(")) {
                 var functionName = htmlColor.Substring(0, htmlColor.IndexOf("(", StringComparison.CurrentCultureIgnoreCase));
@@ -158,9 +230,9 @@ namespace YamuiFramework.Helper {
                 var baseColor = splitValues[0].Trim().ApplyColorFunctions();
 
                 if (functionName.StartsWith("dark"))
-                    return baseColor.ModifyColorLuminosity(-1 * ratio / 100);
+                    return baseColor.ModifyColorLuminosity(-1*ratio/100);
                 if (functionName.StartsWith("light"))
-                    return baseColor.ModifyColorLuminosity(ratio / 100);
+                    return baseColor.ModifyColorLuminosity(ratio/100);
 
                 return baseColor;
             }
@@ -199,7 +271,6 @@ namespace YamuiFramework.Helper {
         /// Returns the image in grey scale...
         /// </summary>
         public static Image MakeGreyscale3(this Image original) {
-
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);
 

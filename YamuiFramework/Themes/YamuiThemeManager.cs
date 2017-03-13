@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiThemeManager.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,9 +30,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Themes {
-
     public static class YamuiThemeManager {
-
         #region public fields/events
 
         /// <summary>
@@ -188,7 +189,5 @@ namespace YamuiFramework.Themes {
         }
 
         #endregion
-
     }
-
 }

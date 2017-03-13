@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (CompilePage.cs) is part of 3P.
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (DoDeployPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,14 +34,13 @@ using _3PA.Data;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Actions {
-
     /// <summary>
     /// This page is built programatically
     /// </summary>
     internal partial class DoDeployPage : YamuiPage {
-
         #region fields
 
         // Timer that ticks every seconds to update the progress bar
@@ -76,8 +75,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
 
         #region constructor
-        public DoDeployPage() {
 
+        public DoDeployPage() {
             InitializeComponent();
 
             // browse
@@ -96,7 +95,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btHistoric, "Click to <b>browse</b> the previous folders");
             if (string.IsNullOrEmpty(Config.Instance.CompileDirectoriesHistoric))
                 btHistoric.Visible = false;
-            
+
             tooltip.SetToolTip(toggleRecurs, "Toggle this option on to explore recursively the selected folder<br>Toggle off and you will only compile/deploy the files directly under the selected folder");
             tooltip.SetToolTip(toggleAutoUpdateSourceDir, "Automatically update the above directory when you switch environment<br>(it then takes the source directory of the environment)");
             tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling during the deployment<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
@@ -148,9 +147,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 
             // switch link
-            lblCurEnv.LinkClicked += (sender, args) => {
-                AppliMenu.ShowEnvMenuAtCursor();
-            };
+            lblCurEnv.LinkClicked += (sender, args) => { AppliMenu.ShowEnvMenuAtCursor(); };
 
             // save
             tooltip.SetToolTip(btSave, "Save the settings for the currently selected profile");
@@ -166,7 +163,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btSaveAs, "Save the settings in a new profile that you will name");
             btSaveAs.BackGrndImage = ImageResources.Save;
             btSaveAs.ButtonPressed += (sender, args) => {
-                var _cur = DeployProfile.Current;
+                var cur = DeployProfile.Current;
                 DeployProfile.List.Add(new DeployProfile());
                 DeployProfile.Current = DeployProfile.List.Last();
                 if (ChooseName()) {
@@ -174,7 +171,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     SaveProfilesList();
                 } else {
                     DeployProfile.List.RemoveAt(DeployProfile.List.Count - 1);
-                    DeployProfile.Current = _cur;
+                    DeployProfile.Current = cur;
                 }
                 btDelete.Visible = DeployProfile.List.Count > 1;
             };
@@ -195,7 +192,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // cb
             tooltip.SetToolTip(cbName, "Browse and select the available profiles, each profile hold deployment settings");
-            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
+            cbName.SelectedIndexChangedByUser += CbNameOnSelectedIndexChanged;
 
             // modify rules
             tooltip.SetToolTip(btRules, "Click to modify the rules");
@@ -205,9 +202,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // view rules
             tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
-            btSeeRules.ButtonPressed += (sender, args) => {
-                UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment");
-            };
+            btSeeRules.ButtonPressed += (sender, args) => { UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment"); };
 
             DeployProfile.OnDeployProfilesUpdate += () => {
                 UpdateCombo();
@@ -219,7 +214,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             ProEnvironment.OnEnvironmentChange += OnShow;
             Deployer.OnDeployConfigurationUpdate += () => ProEnvironment.Current.Deployer.DeployRules = null;
             Deployer.OnDeployConfigurationUpdate += OnShow;
-            
+
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
@@ -229,7 +224,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #region on show
 
         public override void OnShow() {
-            
             // update combo and fields
             if (!_shownOnce) {
                 UpdateCombo();
@@ -246,25 +240,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // update the rules for the current env
             lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 2), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step >= 3));
-            
+
             if (DeployProfile.Current.AutoUpdateSourceDir)
                 fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
-
         }
 
         #endregion
-        
+
         #region Build the report
 
         private void BuildReport() {
-
             StringBuilder currentReport = new StringBuilder();
 
             currentReport.Append(@"<h2 style='margin-top: 8px; margin-bottom: 8px;'>Results :</h2>");
 
             // the execution ended successfully
             if (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk) {
-
                 var listLinesByStep = new Dictionary<int, List<Tuple<int, string>>> {
                     {0, new List<Tuple<int, string>>()}
                 };
@@ -278,7 +269,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 // compiled files
                 foreach (var fileToCompile in _currentCompil.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
-
                     var toCompile = fileToCompile;
                     var errorsOfTheFile = _currentCompil.ErrorsList.Where(error => error.CompiledFilePath.Equals(toCompile.InputPath)).ToList();
                     bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
@@ -303,17 +293,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 // for each deploy step
                 foreach (var kpv in _filesToDeployPerStep) {
-
                     // group by transfer type
                     foreach (var groupType in kpv.Value.GroupBy(deploy => deploy.DeployType).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().DeployType)) {
-
                         // group either by directory name or by archive name
-                        var groupDirectory = groupType.First().DeployType <= DeployType.Zip ? 
-                            groupType.GroupBy(deploy => deploy.ArchivePath).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().ArchivePath) : 
+                        var groupDirectory = groupType.First().DeployType <= DeployType.Zip ?
+                            groupType.GroupBy(deploy => deploy.ArchivePath).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().ArchivePath) :
                             groupType.GroupBy(deploy => Path.GetDirectoryName(deploy.To)).Select(deploys => deploys.ToList()).ToList().OrderBy(list => Path.GetDirectoryName(list.First().To));
 
                         foreach (var group in groupDirectory) {
-
                             var deployFailed = group.Exists(deploy => !deploy.IsOk);
                             var first = group.First();
 
@@ -324,7 +311,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                             if (first.DeployType < DeployType.Archive) {
                                 groupBase = first.ArchivePath;
                                 var dirPath = Path.GetDirectoryName(first.TargetDir);
-                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + groupBase.ToHtmlLink(Path.GetFileName(groupBase)) + "</b> in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", dirPath, dirPath) + "</div>");
+                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl" : "Zip", true) + "' height='15px'><b>" + groupBase.ToHtmlLink(Path.GetFileName(groupBase)) + "</b> in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", dirPath, dirPath) + "</div>");
                             } else {
                                 groupBase = Path.GetDirectoryName(first.To);
                                 line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Ftp ? "Ftp" : "Folder", true) + "' height='15px'><b>" + groupBase.ToHtmlLink() + "</div>");
@@ -354,7 +341,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 nbDeploymentError += group.Count(deploy => !deploy.IsOk);
                             else
                                 totalDeployedFiles += group.Count;
-
                         }
                     }
                 }
@@ -409,9 +395,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         boolAlternate2 = !boolAlternate2;
                     }
                 }
-
             } else {
-
                 if (_currentCompil.HasBeenCancelled) {
                     // the process has been cancelled
                     currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>The compilation has been cancelled by the user</div>");
@@ -437,7 +421,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// Start the deployment!
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
-
             SetDataFromFields();
             SaveProfilesList();
 
@@ -459,7 +442,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // start the deployment
             Task.Factory.StartNew(() => {
-
                 _proEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
                 _currentProfile = new DeployProfile(DeployProfile.Current);
 
@@ -473,8 +455,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 };
                 _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
-                var filesToCompile = _proEnv.Deployer.GetFilesList(new List<string> { _currentProfile.SourceDirectory }, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 0);
-                
+                var filesToCompile = _proEnv.Deployer.GetFilesList(new List<string> {_currentProfile.SourceDirectory}, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 0);
+
                 _deploymentPercentage = 0;
                 _currentStep = 0;
                 _totalSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
@@ -482,7 +464,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 _hookProcedureErrors.Clear();
 
                 if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
-
                     UpdateReport("");
                     UpdateProgressBar();
 
@@ -495,10 +476,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         _progressTimer.Tick += (o, args) => UpdateProgressBar();
                         _progressTimer.Start();
                     });
-
                 } else {
                     if (filesToCompile.Count == 0) {
-                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompileKnownExtension, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
+                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompilableFilesPattern, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
                     }
 
                     // nothing started
@@ -510,12 +490,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // called when the compilation ended
         private void OnCompilationEnd() {
             Task.Factory.StartNew(() => {
-
                 _filesToDeployPerStep.Add(0, _currentCompil.TransferedFiles);
 
                 // if it went ok, move on to deploying files
                 if (_currentCompil.DeploymentDone) {
-
                     // hook
                     ExecuteDeploymentHook();
 
@@ -526,9 +504,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     // transfer rules found for this step?
                     while (_proEnv.Deployer.DeployTransferRules.Exists(rule => rule.Step == _currentStep)) {
-
                         _filesToDeployPerStep.Add(_currentStep,
-                            _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> { _currentStep == 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath }, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
+                            _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> {_currentStep == 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath}, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
 
                         // hook
                         ExecuteDeploymentHook();
@@ -538,7 +515,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 }
 
                 this.SafeInvoke(page => {
-
                     // Update the progress bar
                     progressBar.Progress = 100;
                     progressBar.Text = @"Generating the report, please wait...";
@@ -566,7 +542,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 });
             });
         }
-        
+
         /// <summary>
         /// Cancel the current compilation
         /// </summary>
@@ -586,9 +562,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             foreach (var path in Config.Instance.CompileDirectoriesHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
                     itemList.Add(new YamuiMenuItem {
-                        ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
+                        ItemImage = ImageResources.FolderType, DisplayText = path, OnClic = item => {
                             if (IsHandleCreated) {
-                                BeginInvoke((Action)delegate {
+                                BeginInvoke((Action) delegate {
                                     fl_directory.Text = path;
                                     SaveHistoric();
                                 });
@@ -598,7 +574,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 }
             }
             if (itemList.Count > 0) {
-                var menu = new YamuiMenu(Cursor.Position, itemList);
+                var menu = new YamuiWaterfallMenu(Cursor.Position, itemList);
                 menu.Show();
             }
         }
@@ -623,7 +599,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void BtReportOnButtonPressed(object sender, EventArgs eventArgs) {
-
             // report already generated
             if (!string.IsNullOrEmpty(_reportExportPath)) {
                 Utils.OpenAnyLink(_reportExportPath);
@@ -642,7 +617,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (match.Groups.Count >= 2) {
                     var imgFile = Path.Combine(reportDir, match.Groups[1].Value);
                     if (!File.Exists(imgFile)) {
-                        var tryImg = (Image)ImageResources.ResourceManager.GetObject(match.Groups[1].Value);
+                        var tryImg = (Image) ImageResources.ResourceManager.GetObject(match.Groups[1].Value);
                         if (tryImg != null) {
                             tryImg.Save(imgFile);
                         }
@@ -657,10 +632,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // open it
             Utils.OpenAnyLink(_reportExportPath);
-
         }
 
-        private void CbNameOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
+        private void CbNameOnSelectedIndexChanged(YamuiComboBox sender) {
             DeployProfile.Current = DeployProfile.List[cbName.SelectedIndex];
             Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
             SetFieldsFromData();
@@ -673,7 +647,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void ExecuteDeploymentHook() {
             // launch the compile process for the current file
             if (File.Exists(Config.FileDeploymentHook)) {
-
                 _executingHook = true;
 
                 try {
@@ -694,27 +667,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                             _hookProcedureErrors.Append("The execution for step " + _currentStep + " returned the following errors :" + Utils.ReadAndFormatLogToHtml(hookExec.LogPath));
                         }
                     }
-
                 } finally {
                     _executingHook = false;
                 }
-
-
             }
         }
 
         // allows to update the progression bar
         private void UpdateProgressBar() {
             this.SafeInvoke(page => {
-
                 var elapsedTime = @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
 
                 if (_executingHook) {
                     progressBar.Progress = 100;
                     progressBar.Text = @"Executing deployment hook procedure for step " + _currentStep + @"..." + elapsedTime;
-
                 } else if (_currentStep == 0) {
-
                     var progression = _currentCompil.GetOverallProgression();
 
                     // we represent the progression of the files being moved to the compilation folder in reverse
@@ -728,9 +695,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     progressBar.Text = @"Step 0 / " + _totalSteps + @" ~ " + (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + elapsedTime;
                     progressBar.Progress = progression;
-
-                } else { 
-
+                } else {
                     var neededStyle = _currentStep%2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
 
                     if (progressBar.Style != neededStyle) {
@@ -739,9 +704,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + (_deploymentPercentage > 0.01 ? @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" : "Enumerating files to deploy...") + elapsedTime;
                     progressBar.Progress = _deploymentPercentage;
-                    
                 }
-
             });
         }
 
@@ -809,9 +772,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private bool ChooseName() {
             object name = string.Empty;
             if (UserCommunication.Input(ref name, "", MessageImg.MsgQuestion, "Save profile as...", "Enter a name for this profile") == 1 ||
-                string.IsNullOrEmpty((string)name))
+                string.IsNullOrEmpty((string) name))
                 return false;
-            DeployProfile.Current.Name = (string)name;
+            DeployProfile.Current.Name = (string) name;
             return true;
         }
 
@@ -846,13 +809,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void UpdateCombo() {
-            cbName.SelectedIndexChanged -= CbNameOnSelectedIndexChanged;
             cbName.DataSource = DeployProfile.List.Select(profile => profile.Name).ToList();
             if (DeployProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
-                cbName.SelectedItem = Config.Instance.CurrentDeployProfile;
+                cbName.SelectedText = Config.Instance.CurrentDeployProfile;
             else
                 cbName.SelectedIndex = 0;
-            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
         }
 
         private void ResetFields() {
@@ -871,5 +832,4 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         #endregion
     }
-
 }

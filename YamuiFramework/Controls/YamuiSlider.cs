@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiSlider.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -27,11 +30,11 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(TrackBar))]
     [DefaultEvent("Scroll")]
-    public class YamuiSlider : Control {
-
+    public class YamuiSlider : UserControl {
         #region Fields
 
         private int _trackerValue = 50;
+
         [DefaultValue(50)]
         [Category("Yamui")]
         public int Value {
@@ -46,6 +49,7 @@ namespace YamuiFramework.Controls {
         }
 
         private int _barMinimum;
+
         [DefaultValue(0)]
         [Category("Yamui")]
         public int Minimum {
@@ -62,8 +66,8 @@ namespace YamuiFramework.Controls {
             }
         }
 
-
         private int _barMaximum = 100;
+
         [DefaultValue(100)]
         [Category("Yamui")]
         public int Maximum {
@@ -81,6 +85,7 @@ namespace YamuiFramework.Controls {
         }
 
         private int _smallChange = 1;
+
         [DefaultValue(1)]
         [Category("Yamui")]
         public int SmallChange {
@@ -89,6 +94,7 @@ namespace YamuiFramework.Controls {
         }
 
         private int _largeChange = 5;
+
         [DefaultValue(5)]
         [Category("Yamui")]
         public int LargeChange {
@@ -97,6 +103,7 @@ namespace YamuiFramework.Controls {
         }
 
         private int _mouseWheelBarPartitions = 10;
+
         [DefaultValue(10)]
         [Category("Yamui")]
         public int MouseWheelBarPartitions {
@@ -117,38 +124,44 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiSlider(int min, int max, int value) {
-            SetStyle(ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.Selectable |
-                     ControlStyles.SupportsTransparentBackColor |
-                     ControlStyles.UserMouse |
-                     ControlStyles.UserPaint, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.Selectable |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserMouse |
+                ControlStyles.Opaque, true);
 
             Minimum = min;
             Maximum = max;
             Value = value;
         }
 
-        public YamuiSlider() : this(0, 100, 50) { }
+        public YamuiSlider() : this(0, 100, 50) {}
 
         #endregion
 
         #region Events
+
         public event EventHandler ValueChanged;
+
         private void OnValueChanged() {
             if (ValueChanged != null)
                 ValueChanged(this, EventArgs.Empty);
         }
 
-        public event ScrollEventHandler Scroll;
+        public new event ScrollEventHandler Scroll;
+
         private void OnScroll(ScrollEventType scrollType, int newValue) {
             if (Scroll != null)
                 Scroll(this, new ScrollEventArgs(scrollType, newValue));
         }
+
         #endregion
 
         #region Paint Methods
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -167,7 +180,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
@@ -193,18 +206,18 @@ namespace YamuiFramework.Controls {
         }
 
         private void DrawTrackBar(Graphics g, Color thumbColor, Color barColor) {
-            int trackX = (((_trackerValue - _barMinimum) * (Width - 6)) / (_barMaximum - _barMinimum));
+            int trackX = (((_trackerValue - _barMinimum)*(Width - 6))/(_barMaximum - _barMinimum));
 
             using (SolidBrush b = new SolidBrush(thumbColor)) {
-                Rectangle barRect = new Rectangle(0, Height / 2 - 2, trackX, 4);
+                Rectangle barRect = new Rectangle(0, Height/2 - 2, trackX, 4);
                 g.FillRectangle(b, barRect);
 
-                Rectangle thumbRect = new Rectangle(trackX, Height / 2 - 8, 6, 16);
+                Rectangle thumbRect = new Rectangle(trackX, Height/2 - 8, 6, 16);
                 g.FillRectangle(b, thumbRect);
             }
 
             using (SolidBrush b = new SolidBrush(barColor)) {
-                Rectangle barRect = new Rectangle(trackX + 7, Height / 2 - 2, Width - trackX + 7, 4);
+                Rectangle barRect = new Rectangle(trackX + 7, Height/2 - 2, Width - trackX + 7, 4);
                 g.FillRectangle(b, barRect);
             }
         }
@@ -214,20 +227,6 @@ namespace YamuiFramework.Controls {
         #region Managing isHovered, isPressed, isFocused
 
         #region Focus Methods
-
-        protected override void OnGotFocus(EventArgs e) {
-            _isFocused = true;
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
 
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
@@ -362,8 +361,8 @@ namespace YamuiFramework.Controls {
                 Point pt = e.Location;
                 int p = pt.X;
 
-                float coef = (_barMaximum - _barMinimum) / (float)(ClientSize.Width - 3);
-                _trackerValue = (int)(p * coef + _barMinimum);
+                float coef = (_barMaximum - _barMinimum)/(float) (ClientSize.Width - 3);
+                _trackerValue = (int) (p*coef + _barMinimum);
 
                 if (_trackerValue <= _barMinimum) {
                     _trackerValue = _barMinimum;
@@ -382,7 +381,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnMouseWheel(MouseEventArgs e) {
             base.OnMouseWheel(e);
-            int v = e.Delta / 120 * (_barMaximum - _barMinimum) / _mouseWheelBarPartitions;
+            int v = e.Delta/120*(_barMaximum - _barMinimum)/_mouseWheelBarPartitions;
             SetProperValue(Value + v);
         }
 

@@ -3,6 +3,7 @@
 
 html {
     color: @FormFore;
+    Font: 12px "Segoe UI";
 }
 
 hr {
@@ -17,10 +18,16 @@ a:link {
     text-decoration: underline;
 }
 
+pre {
+    background-color: @FormAltBack;
+    Font: 12px "Consolas";
+}
+
 code {
     background-color: @FormAltBack;
     padding-left: 5px;
     padding-right: 5px;
+    Font: 11px "Consolas";
 }
 
 /*This is the class of the HtmlToolTip*/
@@ -68,7 +75,7 @@ code {
 .InfoToolTip {
     background-color: @FormBack;
     color: @FormFore;
-    Font: 12px "Segoe UI";
+    font-size: 12px;
     border: none;
 }
 .ToolTipName {

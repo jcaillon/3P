@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (LibLoader.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -22,12 +22,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using _3PA.MainFeatures;
+using _3PA.NppCore;
 using _3PA.Properties;
 
 namespace _3PA.Lib {
-
     internal static class LibLoader {
-
         /// <summary>
         /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
         /// to the program
@@ -41,12 +40,11 @@ namespace _3PA.Lib {
 
                 // new library request!
                 if (!requestedAssembly.Name.Contains(".")) {
-
                     var pathToLib = Path.Combine(Config.FolderLibrary, requestedAssembly.Name + ".dll");
 
                     // replace the library if outdated or if it doesn't exist
                     if (string.IsNullOrEmpty(pathToLib) || !File.Exists(pathToLib) || requestedAssembly.Version.ToString().IsHigherVersionThan(GetAssemblyVersionFromPath(pathToLib))) {
-                        var lib = (byte[])Resources.ResourceManager.GetObject(requestedAssembly.Name);
+                        var lib = (byte[]) Resources.ResourceManager.GetObject(requestedAssembly.Name);
                         if (lib != null) {
                             if (Npp.NumberOfNppStarted <= 1)
                                 Utils.FileWriteAllBytes(pathToLib, lib);
@@ -77,6 +75,5 @@ namespace _3PA.Lib {
         private static string GetAssemblyVersionFromPath(string path) {
             return FileVersionInfo.GetVersionInfo(path).FileVersion;
         }
-
     }
 }

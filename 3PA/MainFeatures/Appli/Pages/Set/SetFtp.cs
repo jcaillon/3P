@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SetFtp.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFtp : YamuiPage {
-
         #region fields
 
         #endregion
@@ -60,8 +59,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region private data management
 
-
         #endregion
     }
-
 }

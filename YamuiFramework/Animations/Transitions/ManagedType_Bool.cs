@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ManagedType_Bool.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,37 +17,34 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 
-namespace YamuiFramework.Animations.Transitions
-{
-    internal class ManagedType_Bool : IManagedType
-    {
+namespace YamuiFramework.Animations.Transitions {
+    internal class ManagedType_Bool : IManagedType {
         #region IManagedType Members
 
         /// <summary>
         /// Returns the type we're managing.
         /// </summary>
-        public Type getManagedType()
-        {
+        public Type getManagedType() {
             return typeof(bool);
         }
 
         /// <summary>
         /// Returns a copy of the float passed in.
         /// </summary>
-        public object copy(object o)
-        {
-            bool value = (bool)o;
+        public object copy(object o) {
+            bool value = (bool) o;
             return value;
         }
 
         /// <summary>
         /// Returns the interpolated value for the percentage passed in.
         /// </summary>
-        public object getIntermediateValue(object start, object end, double dPercentage)
-        {
+        public object getIntermediateValue(object start, object end, double dPercentage) {
             return (dPercentage > 0.5);
         }
 

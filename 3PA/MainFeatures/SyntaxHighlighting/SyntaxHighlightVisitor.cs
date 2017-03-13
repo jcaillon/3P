@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SyntaxHighlightVisitor.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -49,6 +49,11 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
+        public void Visit(TokenPreProcVariable tok) {
+            if (tok.Line < FromLine || tok.Line > ToLine) return;
+            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+        }
+
         public void Visit(TokenNumber tok) {
             if (tok.Line < FromLine || tok.Line > ToLine) return;
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
@@ -88,8 +93,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
-        public void Visit(TokenPreProcStatement tok) {
-            
-        }
+        public void Visit(TokenPreProcDirective tok) {}
     }
 }

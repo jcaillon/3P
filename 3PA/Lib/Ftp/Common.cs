@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Common.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -39,9 +39,15 @@ namespace _3PA.Lib.Ftp {
      *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
      */
 
-    public enum ETransferMode { Ascii, Binary }
+    public enum ETransferMode {
+        Ascii,
+        Binary
+    }
 
-    public enum ETextEncoding { Ascii, Utf8 }
+    public enum ETextEncoding {
+        Ascii,
+        Utf8
+    }
 
     public class FtpReply {
         private int _code;

@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DelayedAction.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,19 +27,17 @@ using System.Threading.Tasks;
 using System.Timers;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>
     /// Simple class to delay an action
     /// </summary>
     public class DelayedAction : IDisposable {
-
         #region private fields
 
         private Timer _timer;
 
         private Action _toDo;
 
-        private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>(); 
+        private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>();
 
         #endregion
 
@@ -46,6 +47,7 @@ namespace YamuiFramework.Helper {
         /// Use this class to do an action after a given delay
         /// </summary>
         public DelayedAction(int msDelay, Action toDo) {
+            _savedDelayedActions.Add(this);
             _toDo = toDo;
             _timer = new Timer {AutoReset = false, Interval = msDelay};
             _timer.Elapsed += TimerOnElapsed;
@@ -95,6 +97,5 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
     }
 }

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FolderSelectDialog.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 using System;
 using System.Reflection;
 using System.Windows.Forms;
-using _3PA.Interop;
+using _3PA.WindowsCore;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -97,28 +97,27 @@ namespace _3PA.Lib {
                 object dialog = r.Call(_ofd, "CreateVistaDialog");
                 r.Call(_ofd, "OnBeforeVistaDialog", dialog);
 
-                uint options = (uint)r.CallAs(typeof(FileDialog), _ofd, "GetOptions");
-                options |= (uint)r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
+                uint options = (uint) r.CallAs(typeof(FileDialog), _ofd, "GetOptions");
+                options |= (uint) r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
                 r.CallAs(typeIFileDialog, dialog, "SetOptions", options);
 
                 object pfde = r.New("FileDialog.VistaDialogEvents", _ofd);
-                object[] parameters = { pfde, num };
+                object[] parameters = {pfde, num};
                 r.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
-                num = (uint)parameters[1];
+                num = (uint) parameters[1];
                 try {
-                    int num2 = (int)r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
+                    int num2 = (int) r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
                     flag = 0 == num2;
                 } finally {
                     r.CallAs(typeIFileDialog, dialog, "Unadvise", num);
                     GC.KeepAlive(pfde);
                 }
-
             } else {
                 using (var fbd = new FolderBrowserDialog {
-                        Description = Title,
-                        SelectedPath = InitialDirectory,
-                        ShowNewFolderButton = false
-                    }) {
+                    Description = Title,
+                    SelectedPath = InitialDirectory,
+                    ShowNewFolderButton = false
+                }) {
                     if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
                     _ofd.FileName = fbd.SelectedPath;
                 }
@@ -154,7 +153,7 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="ns">The namespace containing types to be used</param>
         public Reflector(string ns)
-            : this(ns, ns) { }
+            : this(ns, ns) {}
 
         /// <summary>
         /// Constructor
@@ -298,7 +297,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
-
 }

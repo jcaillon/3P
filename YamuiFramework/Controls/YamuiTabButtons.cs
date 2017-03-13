@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTabButtons.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -25,14 +28,12 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     /// <summary>
     /// This class displays items on a list o strings, next to each other
     /// each item is clickable and triggers the TabPressed event that provides
     /// the clicked index
     /// </summary>
     public class YamuiTabButtons : Button {
-
         #region Fields
 
         /// <summary>
@@ -56,6 +57,7 @@ namespace YamuiFramework.Controls {
             add { OnTabPressed += value; }
             remove { OnTabPressed -= value; }
         }
+
         private event EventHandler<TabPressedEventArgs> OnTabPressed;
 
         private bool _isHovered;
@@ -93,7 +95,7 @@ namespace YamuiFramework.Controls {
 
         #region Paint Methods
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             // background
@@ -133,8 +135,8 @@ namespace YamuiFramework.Controls {
                 // draw a | separator?
                 if (DrawSeparator && i != (_listOfButtons.Count - 1)) {
                     using (var pen = new Pen(YamuiThemeManager.Current.TabNormalFore, 1)) {
-                        var xPos = thisTabRekt.X + (WriteFromRight ? SpaceBetweenText / 2 : thisTabRekt.Width - SpaceBetweenText / 2);
-                        e.Graphics.DrawLine(pen, new Point(xPos, (int)(Height * 0.8)), new Point(xPos, Height - (int)(Height * 0.7)));
+                        var xPos = thisTabRekt.X + (WriteFromRight ? SpaceBetweenText/2 : thisTabRekt.Width - SpaceBetweenText/2);
+                        e.Graphics.DrawLine(pen, new Point(xPos, (int) (Height*0.8)), new Point(xPos, Height - (int) (Height*0.7)));
                     }
                 }
 
@@ -200,20 +202,6 @@ namespace YamuiFramework.Controls {
         }
 
         #region Focus Methods
-
-        protected override void OnGotFocus(EventArgs e) {
-            _isFocused = true;
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
 
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
@@ -300,10 +288,23 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
+        }
+
+        #endregion
     }
 
     public sealed class TabPressedEventArgs : EventArgs {
         public int SelectedIndex;
+
         public TabPressedEventArgs(int selectedIndex) {
             SelectedIndex = selectedIndex;
         }

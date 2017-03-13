@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiButtonToggle.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -26,12 +29,10 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButtonToggle : YamuiButton {
-
         #region public field
 
         private bool _checked;
@@ -56,11 +57,11 @@ namespace YamuiFramework.Controls {
 
         public YamuiButtonToggle() {
             SetStyle(ControlStyles.SupportsTransparentBackColor |
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint, true);
+                     ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.ResizeRedraw |
+                     ControlStyles.UserPaint |
+                     ControlStyles.Selectable |
+                     ControlStyles.AllPaintingInWmPaint, true);
             ButtonPressed += OnButtonPressed;
         }
 
@@ -93,12 +94,12 @@ namespace YamuiFramework.Controls {
                     else
                         PaintTransparentBackground(e.Graphics, DisplayRectangle);
                 }
-                
+
                 // draw the back
                 e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
 
                 using (SolidBrush b = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(Height / 2, 0, backRect.Width - Height - 1, Height - 1));
+                    e.Graphics.FillRectangle(b, new Rectangle(Height/2, 0, backRect.Width - Height - 1, Height - 1));
                     e.Graphics.FillEllipse(b, new Rectangle(0, 0, Height - 1, Height - 1));
                     e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height - 1, 0, Height - 1, Height - 1));
                 }
@@ -115,18 +116,18 @@ namespace YamuiFramework.Controls {
                 if (Checked) {
                     var fuRect = ClientRectangle;
                     fuRect.Width = 15;
-                    fuRect.Offset(5, Height / 2 - 11);
-                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.9)), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    fuRect.Offset(5, Height/2 - 11);
+                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float) (Height*0.9)), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
 
                 // draw border
                 if (borderColor != Color.Transparent)
                     using (Pen b = new Pen(borderColor, 1)) {
                         var path = new GraphicsPath();
-                        path.AddLine(Height / 2, 0, backRect.Width - Height - 1, 0);
+                        path.AddLine(Height/2, 0, backRect.Width - Height - 1, 0);
                         path.AddArc(backRect.Width - Height - 1, 0, Height - 1, Height - 1, -90, 180);
-                    
-                        path.AddLine(backRect.Width - Height - 1, Height - 1, Height / 2, Height - 1);
+
+                        path.AddLine(backRect.Width - Height - 1, Height - 1, Height/2, Height - 1);
                         path.AddArc(0, 0, Height - 1, Height - 1, 90, 180);
                         e.Graphics.DrawPath(b, path);
                     }
@@ -140,6 +141,7 @@ namespace YamuiFramework.Controls {
                 // ignored
             }
         }
+
         #endregion
 
         #region private method
@@ -149,7 +151,5 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
     }
-
 }

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ShortCutsPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -25,16 +25,15 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.NppCore;
+using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
-
     /// <summary>
     /// This page is built programatically
     /// </summary>
     internal partial class ShortCutsPage : YamuiPage {
-
         #region fields
 
         private string _currentItemId;
@@ -44,11 +43,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         #region constructor
+
         public ShortCutsPage() {
             InitializeComponent();
-
-            // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -56,7 +53,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region on show
 
         public override void OnShow() {
-
             foreach (Control control in scrollPanel.ContentPanel.Controls) {
                 if (!control.Name.StartsWith("static"))
                     control.Dispose();
@@ -64,8 +60,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // build the interface
             var yPos = static_name.Location.Y + 35;
-            foreach (var item in AppliMenu.Instance.ShortcutableItemList.OrderBy(item => item.ItemName)) {
-
+            foreach (var item in AppliMenu.Instance.ShortcutableItemList.OrderBy(item => item.DisplayText)) {
                 // icon
                 var imgButton = new YamuiPictureBox {
                     BackGrndImage = item.ItemImage,
@@ -83,7 +78,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Location = new Point(static_name.Location.X, yPos + 2),
                     Size = new Size(340, 10),
                     IsSelectionEnabled = false,
-                    Text = item.ItemName
+                    Text = item.DisplayText
                 };
                 scrollPanel.ContentPanel.Controls.Add(label);
 
@@ -96,11 +91,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = item.ItemSpec ?? "",
                     Name = "bt" + item.ItemId,
                     TabStop = true,
-                    BackGrndImage = item.ItemImage,
+                    BackGrndImage = item.ItemImage
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;
-                tooltip.SetToolTip(button, "<b>" + item.ItemName + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
+                tooltip.SetToolTip(button, "<b>" + item.DisplayText + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
                 button = new YamuiButtonImage {
@@ -109,20 +104,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width + 10, yPos),
                     Tag = item.ItemId,
-                    TabStop = false,
+                    TabStop = false
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.ButtonPressed += UndoButtonOnButtonPressed;
                 tooltip.SetToolTip(button, "Click this button to reset the shortcut to its default value");
 
-                // reset
+                // delete
                 button = new YamuiButtonImage {
                     Anchor = AnchorStyles.Right | AnchorStyles.Top,
                     BackGrndImage = ImageResources.Delete,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width, yPos),
                     Tag = item.ItemId,
-                    TabStop = false,
+                    TabStop = false
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.ButtonPressed += ButtonDeleteOnButtonPressed;
@@ -134,6 +129,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // Activate scrollbars
             scrollPanel.ContentPanel.Height = yPos + 20;
             Height = yPos;
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -141,19 +139,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region events
 
         private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            _currentItemId = (string)((YamuiButtonImage)sender).Tag;
+            _currentItemId = (string) ((YamuiButtonImage) sender).Tag;
 
             if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
                 Config.Instance.ShortCuts.Remove(_currentItemId);
 
             // take into account the changes
-            Plug.SetHooks();
+            NotificationsPublisher.SetHooks();
 
-            ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
+            ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
         }
 
         private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            _currentItemId = (string)((YamuiButton)sender).Tag;
+            _currentItemId = (string) ((YamuiButton) sender).Tag;
 
             if (_waitingInput)
                 return;
@@ -161,40 +159,39 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             _waitingInput = true;
             KeyboardMonitor.Instance.KeyDownByPass += OnNewShortcutPressed;
 
-            var button = ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]);
+            var button = ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]);
 
             button.Text = @"Enter a new shortcut (or press ESCAPE)";
             button.UseCustomBackColor = true;
             button.BackColor = ThemeManager.Current.AccentColor;
         }
 
-
         private void ButtonDeleteOnButtonPressed(object sender, EventArgs eventArgs) {
-            _currentItemId = (string)((YamuiButtonImage)sender).Tag;
+            _currentItemId = (string) ((YamuiButtonImage) sender).Tag;
             if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
                 Config.Instance.ShortCuts[_currentItemId] = "";
             else
                 Config.Instance.ShortCuts.Add(_currentItemId, "");
 
             // take into account the changes
-            Plug.SetHooks();
+            NotificationsPublisher.SetHooks();
 
-            ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
+            ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
         }
 
-        private bool OnNewShortcutPressed(Keys key, KeyModifiers modifiers) {
+        private bool OnNewShortcutPressed(KeyEventArgs e) {
             bool stopListening = true;
-            var button = (YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
+            var button = (YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
 
             // the user presses escape to cancel the current shortcut modification
-            if (key == Keys.Escape) {
+            if (e.KeyCode == Keys.Escape) {
                 button.Text = Config.Instance.ShortCuts[_currentItemId];
-            } else if (key != Keys.ControlKey && key != Keys.ShiftKey && key != Keys.Menu) {
-                var newSpec = (new ShortcutKey(modifiers.IsCtrl, modifiers.IsAlt, modifiers.IsShift, key)).ToString();
+            } else if (e.KeyCode != Keys.ControlKey && e.KeyCode != Keys.ShiftKey && e.KeyCode != Keys.Menu) {
+                var newSpec = (new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode)).ToString();
 
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
-                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
+                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).DisplayText, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
                     return true;
                 }
 
@@ -205,7 +202,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Config.Instance.ShortCuts.Add(_currentItemId, newSpec);
 
                 // take into account the changes
-                Plug.SetHooks();
+                NotificationsPublisher.SetHooks();
                 button.Text = Config.Instance.ShortCuts[_currentItemId];
             } else {
                 stopListening = false;
@@ -234,8 +231,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         #endregion
-
     }
-
-
 }

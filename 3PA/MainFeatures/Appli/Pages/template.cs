@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Template.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -22,19 +22,19 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages {
     internal partial class Template : YamuiPage {
-
         #region fields
 
         #endregion
 
         #region constructor
+
         public Template() {
             InitializeComponent();
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
-        #endregion
 
+        #endregion
     }
 }

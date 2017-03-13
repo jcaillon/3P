@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SetFileInfo.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -24,10 +24,10 @@ using YamuiFramework.Controls;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFileInfo : YamuiPage {
-
         #region fields
 
         private FileTagObject _locFileTagObject;
@@ -41,7 +41,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // add event handlers
-            cb_info.SelectedIndexChanged += SelectedIndexChanged;
+            cb_info.SelectedIndexChangedByUser += SelectedIndexChanged;
             bt_ok.ButtonPressed += BtOkOnButtonPressed;
             bt_ok.BackGrndImage = ImageResources.Save;
             bt_cancel.ButtonPressed += BtCancelOnButtonPressed;
@@ -77,7 +77,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         public override void OnShow() {
-
             // update the info displayed on the screen
             if (!DesignMode)
                 UpdateInfo();
@@ -91,7 +90,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// Call this method to update the content of the form according to the current document
         /// </summary>
         public void UpdateInfo() {
-            _filename = Npp.GetCurrentFileName();
+            _filename = Npp.CurrentFile.FileName;
 
             // populate combobox
             var list = new List<ItemCombo> {
@@ -109,7 +108,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 var i = 2;
                 var lastItemPos = 0;
                 foreach (var fileTag in currentList.OrderByDescending(o => o.CorrectionNumber).ToList()) {
-                    list.Add(new ItemCombo { DisplayText = _filename + " # " + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber });
+                    list.Add(new ItemCombo {DisplayText = _filename + " # " + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber});
                     if (fileTag.CorrectionNumber.Equals(_locFileTagObject.CorrectionNumber))
                         lastItemPos = i;
                     i++;
@@ -117,7 +116,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                 cb_info.DataSource = list;
                 cb_info.SelectedIndex = lastItemPos;
-
             } else {
                 _locFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
 
@@ -168,7 +166,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <summary>
         /// called when the user changes the value of the combo box
         /// </summary>
-        private void SelectedIndexChanged(object sender, EventArgs e) {
+        private void SelectedIndexChanged(YamuiComboBox sender) {
             var val = cb_info.SelectedValue.ToString();
             if (val.Equals(FileTag.LastTag) || val.Equals(FileTag.DefaultTag))
                 _locFileTagObject = FileTag.GetFileTags(val, "");
@@ -212,10 +210,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_workPackage.Text = _locFileTagObject.WorkPackage;
             fl_bugId.Text = _locFileTagObject.BugId;
             fl_correctionNb.Text = _locFileTagObject.CorrectionNumber;
-            fl_correctionDesc.Lines = (_locFileTagObject.CorrectionDecription ?? "").Split('\n');
+            fl_correctionDesc.Text = (_locFileTagObject.CorrectionDecription ?? "");
             fl_correctionDate.Text = _locFileTagObject.CorrectionDate;
 
-            lb_FileName.Text = @"<b>" + Npp.GetCurrentFileName() + @"</b>";
+            lb_FileName.Text = @"<b>" + Npp.CurrentFile.FileName + @"</b>";
             var val = cb_info.SelectedValue.ToString();
             if (!val.Equals(FileTag.LastTag) && !val.Equals(FileTag.DefaultTag)) {
                 lb_SaveState.Text = @"<b>Info saved</b>";

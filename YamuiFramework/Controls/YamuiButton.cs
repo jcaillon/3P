@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiButton.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -30,11 +33,10 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
-    [ToolboxBitmap(typeof (Button))]
+    [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButton : Button {
-
-        #region Fields
+        #region Properties
 
         /// <summary>
         /// Set to true if you wish to use the BackColor property
@@ -58,11 +60,11 @@ namespace YamuiFramework.Controls {
         public bool Highlight { get; set; }
 
         /// <summary>
-        /// Allows the ButtonPressed event to also be activated by a right click on the button
+        /// Allows the ButtonPressed event to also be activated by a right/middle click on the button
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool AcceptsRightClick { get; set; }
+        public virtual bool AcceptsAnyClick { get; set; }
 
         /// <summary>
         /// Set the image to use for this button
@@ -71,10 +73,11 @@ namespace YamuiFramework.Controls {
         public Image BackGrndImage {
             get { return _backGrndImage; }
             set {
-                _backGrndImage = value; 
+                _backGrndImage = value;
                 Invalidate();
             }
         }
+
         private Image _backGrndImage;
 
         /// <summary>
@@ -98,17 +101,19 @@ namespace YamuiFramework.Controls {
         }
 
         /// <summary>
-        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// Returns a grey scale version of the image
         /// </summary>
-        [Category("Yamui")]
-        public event EventHandler<EventArgs> ButtonPressed;
+        public Image GreyScaleBackGrndImage {
+            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = (BackGrndImage != null ? BackGrndImage.MakeGreyscale3() : null)); }
+            set { _greyScaleBackGrndImage = value; }
+        }
 
         /// <summary>
         /// This public prop is only defined so we can set it from the transitions (animation component)
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool DoPressed {
+        public bool VisuallyPressButton {
             get { return IsPressed; }
             set {
                 IsPressed = value;
@@ -116,18 +121,40 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        public bool IsHovered;
-        public bool IsPressed;
-        public bool IsFocused;
-        private bool _useGreyScale;
-        private Image _greyScaleBackGrndImage;
+        /// <summary>
+        /// The control has focus?
+        /// </summary>
+        public bool IsFocused { get; set; }
 
         /// <summary>
-        /// Returns a grey scale version of the image
+        /// The control is hovered by the cursor?
         /// </summary>
-        public Image GreyScaleBackGrndImage {
-            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
-        }
+        public bool IsHovered { get; set; }
+
+        /// <summary>
+        /// The control is pressed?
+        /// </summary>
+        public bool IsPressed { get; set; }
+
+        #endregion
+
+        #region Public events
+
+        /// <summary>
+        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// The EventArgs can be casted to KeyEventArgs or MouseEventArgs depending on how this was triggered
+        /// You can analyse the MouseEventArgs.Clicks number to know if it's a simple or double click
+        /// </summary>
+        [Category("Yamui")]
+        public event EventHandler<EventArgs> ButtonPressed;
+
+        #endregion
+
+        #region private fields
+
+        private bool _useGreyScale;
+
+        private Image _greyScaleBackGrndImage;
 
         #endregion
 
@@ -136,7 +163,6 @@ namespace YamuiFramework.Controls {
         public YamuiButton() {
             // why those styles? check here: https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
             SetStyle(
-                ControlStyles.SupportsTransparentBackColor |
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
@@ -147,19 +173,24 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region methods
+        #region Methods
 
-        /// <summary>
-        /// Call this method to activate the OnPressedButton event manually
-        /// </summary>
-        public void HandlePressedButton() {
-            OnClick(new EventArgs());
+        protected virtual void OnButtonPressed(EventArgs eventArgs) {
+            // we could do something here, like preventing the user to click the button when the OnClick is being ran
+            if (ButtonPressed != null) {
+                ButtonPressed(this, eventArgs);
+                var e = eventArgs as KeyEventArgs;
+                if (e != null)
+                    e.Handled = true;
+            }
         }
 
-        private void OnButtonPressed(EventArgs eventArgs) {
-            // we could do something here, like preventing the user to click the button when the OnClick is being ran
-            if (ButtonPressed != null) 
-                ButtonPressed(this, eventArgs);
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
         }
 
         #endregion
@@ -169,6 +200,14 @@ namespace YamuiFramework.Controls {
         protected override void OnEnabledChanged(EventArgs e) {
             base.OnEnabledChanged(e);
             Invalidate();
+        }
+
+        /// <summary>
+        /// hides the default method
+        /// </summary>
+        public new void PerformClick() {
+            OnButtonPressed(new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
+            base.PerformClick();
         }
 
         #endregion
@@ -193,10 +232,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
-
         protected override void OnPaint(PaintEventArgs e) {
-
             var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
             var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
             var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
@@ -224,10 +260,9 @@ namespace YamuiFramework.Controls {
 
             // text + image
             if (BackGrndImage != null || !SetImgSize.IsEmpty) {
-
                 // ReSharper disable once PossibleNullReferenceException
                 Size imgSize = !SetImgSize.IsEmpty ? SetImgSize : BackGrndImage.Size;
-                float gap = ((float) ClientRectangle.Height - imgSize.Height) / 2;
+                float gap = ((float) ClientRectangle.Height - imgSize.Height)/2;
                 var rectImg = new RectangleF(gap, gap, imgSize.Width, imgSize.Height);
 
                 if (DesignMode || BackGrndImage == null) {
@@ -242,8 +277,7 @@ namespace YamuiFramework.Controls {
 
                 // text
                 int xPos = (int) (gap*2 + 0.5) + imgSize.Width;
-                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos - (int)(gap + 0.5), ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
-
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos - (int) (gap + 0.5), ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
             } else {
                 // text only
                 TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
@@ -256,31 +290,15 @@ namespace YamuiFramework.Controls {
 
         #region Focus Methods
 
-        protected override void OnGotFocus(EventArgs e) {
-            IsFocused = true;
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            IsFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
-
         protected override void OnEnter(EventArgs e) {
             IsFocused = true;
             Invalidate();
-
             base.OnEnter(e);
         }
 
         protected override void OnLeave(EventArgs e) {
             IsFocused = false;
             Invalidate();
-
             base.OnLeave(e);
         }
 
@@ -290,7 +308,8 @@ namespace YamuiFramework.Controls {
 
         // This is mandatory to be able to handle the ENTER key in key events!!
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            if (e.KeyCode == Keys.Enter) e.IsInputKey = true;
+            if (e.KeyCode == Keys.Enter)
+                e.IsInputKey = true;
             base.OnPreviewKeyDown(e);
         }
 
@@ -298,7 +317,6 @@ namespace YamuiFramework.Controls {
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
                 IsPressed = true;
                 Invalidate();
-                e.Handled = true;
             }
             base.OnKeyDown(e);
         }
@@ -306,7 +324,6 @@ namespace YamuiFramework.Controls {
         protected override void OnKeyUp(KeyEventArgs e) {
             if (IsPressed) {
                 OnButtonPressed(e);
-                e.Handled = true;
             }
             IsPressed = false;
             Invalidate();
@@ -324,7 +341,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
+            if (e.Button == MouseButtons.Left || AcceptsAnyClick) {
                 IsPressed = true;
                 Invalidate();
             }

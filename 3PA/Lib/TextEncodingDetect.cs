@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (TextEncodingDetect.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -22,18 +22,16 @@ using System.IO;
 using System.Text;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This class offers a simple detection of a text file encoding
     /// </summary>
     /// <remarks>Credits go to: https://github.com/AutoIt/text-encoding-detect</remarks>
     public class TextEncodingDetect {
-
         #region Fields
 
-        private readonly byte[] _utf16Lebom = { 0xFF, 0xFE };
-        private readonly byte[] _utf16Bebom = { 0xFE, 0xFF };
-        private readonly byte[] _utf8Bom = { 0xEF, 0xBB, 0xBF };
+        private readonly byte[] _utf16Lebom = {0xFF, 0xFE};
+        private readonly byte[] _utf16Bebom = {0xFE, 0xFF};
+        private readonly byte[] _utf8Bom = {0xEF, 0xBB, 0xBF};
 
         private bool _nullSuggestsBinary = true;
         private double _utf16ExpectedNullPercent = 70;
@@ -44,15 +42,15 @@ namespace _3PA.Lib {
         #region Enums
 
         public enum EncodingEnum {
-            None,               // Unknown or binary
-            Ansi,               // 0-255
-            Ascii,              // 0-127
-            Utf8Bom,           // UTF8 with BOM
-            Utf8Nobom,         // UTF8 without BOM
-            Utf16LeBom,       // UTF16 LE with BOM
-            Utf16LeNobom,     // UTF16 LE without BOM
-            Utf16BeBom,       // UTF16-BE with BOM
-            Utf16BeNobom      // UTF16-BE without BOM
+            None, // Unknown or binary
+            Ansi, // 0-255
+            Ascii, // 0-127
+            Utf8Bom, // UTF8 with BOM
+            Utf8Nobom, // UTF8 without BOM
+            Utf16LeBom, // UTF16 LE with BOM
+            Utf16LeNobom, // UTF16 LE without BOM
+            Utf16BeBom, // UTF16-BE with BOM
+            Utf16BeNobom // UTF16-BE without BOM
         }
 
         #endregion
@@ -60,9 +58,7 @@ namespace _3PA.Lib {
         #region Properties
 
         public bool NullSuggestsBinary {
-            set {
-                _nullSuggestsBinary = value;
-            }
+            set { _nullSuggestsBinary = value; }
         }
 
         public double Utf16ExpectedNullPercent {
@@ -247,16 +243,16 @@ namespace _3PA.Lib {
                     // 4 Byte
                     moreChars = 3;
                 } else {
-                    return EncodingEnum.None;               // Not utf8
+                    return EncodingEnum.None; // Not utf8
                 }
 
                 // Check secondary chars are in range if we are expecting any
                 while (moreChars > 0 && pos < size) {
-                    onlySawAsciiRange = false;       // Seen non-ascii chars now
+                    onlySawAsciiRange = false; // Seen non-ascii chars now
 
                     ch = buffer[pos++];
                     if (ch < 128 || ch > 191) {
-                        return EncodingEnum.None;           // Not utf8
+                        return EncodingEnum.None; // Not utf8
                     }
 
                     --moreChars;
@@ -356,10 +352,10 @@ namespace _3PA.Lib {
                 pos += 2;
             }
 
-            double evenNullThreshold = (numEvenNulls * 2.0) / size;
-            double oddNullThreshold = (numOddNulls * 2.0) / size;
-            double expectedNullThreshold = _utf16ExpectedNullPercent / 100.0;
-            double unexpectedNullThreshold = _utf16UnexpectedNullPercent / 100.0;
+            double evenNullThreshold = (numEvenNulls*2.0)/size;
+            double oddNullThreshold = (numOddNulls*2.0)/size;
+            double expectedNullThreshold = _utf16ExpectedNullPercent/100.0;
+            double unexpectedNullThreshold = _utf16UnexpectedNullPercent/100.0;
 
             // Lots of odd nulls, low number of even nulls
             if (evenNullThreshold < unexpectedNullThreshold && oddNullThreshold > expectedNullThreshold) {

@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (TabOrderManager.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,14 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
-
     /// <summary>
     /// Dynamically determine and set a tab order for a container and children according to a given strategy.
     /// http://www.codeproject.com/Articles/8406/Automatic-Runtime-Tab-Order-Management-for-Windows
@@ -162,7 +164,7 @@ namespace YamuiFramework.Helper {
                         // Control has children -- recurse.
                         TabScheme childScheme = scheme;
                         if (_schemeOverrides.Contains(c)) {
-                            childScheme = (TabScheme)_schemeOverrides[c];
+                            childScheme = (TabScheme) _schemeOverrides[c];
                         }
                         _curTabIndex = (new TabOrderManager(c, _curTabIndex, _schemeOverrides)).SetTabOrder(childScheme);
                     }

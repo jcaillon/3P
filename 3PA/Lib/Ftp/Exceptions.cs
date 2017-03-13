@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Exceptions.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -42,16 +42,13 @@ namespace _3PA.Lib.Ftp {
     /// Base FTP exception class.
     /// </summary>
     public class FtpException : Exception {
-        protected FtpException() {
-        }
+        protected FtpException() {}
 
         public FtpException(string message)
-            : base(message) {
-        }
+            : base(message) {}
 
         public FtpException(string message, Exception innerException)
-            : base(message, innerException) {
-        }
+            : base(message, innerException) {}
     }
 
     public class FtpReplyParseException : FtpException {
@@ -85,8 +82,7 @@ namespace _3PA.Lib.Ftp {
     /// </summary>
     public class FtpOperationCancelledException : FtpException {
         public FtpOperationCancelledException(string message)
-            : base(message) {
-        }
+            : base(message) {}
     }
 
     /// <summary>
@@ -100,12 +96,10 @@ namespace _3PA.Lib.Ftp {
         }
 
         public FtpCommandException(string message)
-            : base(message) {
-        }
+            : base(message) {}
 
         public FtpCommandException(string message, Exception innerException)
-            : base(message, innerException) {
-        }
+            : base(message, innerException) {}
 
         public FtpCommandException(FtpReply reply)
             : base(reply.Message) {
@@ -118,11 +112,9 @@ namespace _3PA.Lib.Ftp {
     /// </summary>
     public class FtpSslException : FtpException {
         public FtpSslException(string message)
-            : base(message) {
-        }
+            : base(message) {}
 
         public FtpSslException(string message, Exception innerException)
-            : base(message, innerException) {
-        }
+            : base(message, innerException) {}
     }
 }

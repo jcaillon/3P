@@ -1,6 +1,7 @@
 ﻿#region header
+
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiSimplePanel.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -24,10 +27,8 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [ToolboxBitmap(typeof(Panel))]
     public class YamuiSimplePanel : Panel {
-
         #region Fields
 
         [DefaultValue(false)]
@@ -43,10 +44,12 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiSimplePanel() {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
         }
 
         #endregion
@@ -71,19 +74,17 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
             if (!UseCustomBackColor && !DontUseTransparentBackGround)
                 PaintTransparentBackground(e.Graphics, DisplayRectangle);
+            else if (!UseCustomBackColor)
+                e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             else
-                if (!UseCustomBackColor)
-                    e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
-                else
-                    e.Graphics.Clear(BackColor);
+                e.Graphics.Clear(BackColor);
         }
 
         #endregion
-
     }
 }

@@ -137,6 +137,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_delete
             // 
             this.bt_delete.BackGrndImage = null;
+            this.bt_delete.GreyScaleBackGrndImage = null;
+            this.bt_delete.IsFocused = false;
+            this.bt_delete.IsHovered = false;
+            this.bt_delete.IsPressed = false;
             this.bt_delete.Location = new System.Drawing.Point(463, 483);
             this.bt_delete.Name = "bt_delete";
             this.bt_delete.SetImgSize = new System.Drawing.Size(20, 20);
@@ -308,7 +312,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cb_info
             // 
-            this.cb_info.ItemHeight = 15;
             this.cb_info.Location = new System.Drawing.Point(193, 114);
             this.cb_info.Name = "cb_info";
             this.cb_info.Size = new System.Drawing.Size(394, 21);
@@ -316,99 +319,64 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // fl_appliName
             // 
-            this.fl_appliName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_appliName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_appliName.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_appliName.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_appliName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_appliName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_appliName.Location = new System.Drawing.Point(193, 229);
             this.fl_appliName.Name = "fl_appliName";
+            this.fl_appliName.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_appliName.Size = new System.Drawing.Size(266, 20);
             this.fl_appliName.TabIndex = 49;
             this.fl_appliName.WaterMark = "E.g. : BOI";
             // 
             // fl_appliVersion
             // 
-            this.fl_appliVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_appliVersion.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_appliVersion.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_appliVersion.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_appliVersion.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_appliVersion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_appliVersion.Location = new System.Drawing.Point(193, 265);
             this.fl_appliVersion.Name = "fl_appliVersion";
+            this.fl_appliVersion.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_appliVersion.Size = new System.Drawing.Size(266, 20);
             this.fl_appliVersion.TabIndex = 48;
             this.fl_appliVersion.WaterMark = "E.g. : 65.000";
             // 
             // fl_workPackage
             // 
-            this.fl_workPackage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_workPackage.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_workPackage.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_workPackage.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_workPackage.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_workPackage.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_workPackage.Location = new System.Drawing.Point(193, 291);
             this.fl_workPackage.Name = "fl_workPackage";
+            this.fl_workPackage.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_workPackage.Size = new System.Drawing.Size(266, 20);
             this.fl_workPackage.TabIndex = 47;
             this.fl_workPackage.WaterMark = "E.g. : 101-33";
             // 
             // fl_bugId
             // 
-            this.fl_bugId.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_bugId.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_bugId.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_bugId.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_bugId.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_bugId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_bugId.Location = new System.Drawing.Point(193, 317);
             this.fl_bugId.Name = "fl_bugId";
+            this.fl_bugId.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_bugId.Size = new System.Drawing.Size(266, 20);
             this.fl_bugId.TabIndex = 46;
             this.fl_bugId.WaterMark = "E.g. : INC0999999";
             // 
             // fl_correctionNb
             // 
-            this.fl_correctionNb.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_correctionNb.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_correctionNb.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_correctionNb.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_correctionNb.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_correctionNb.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_correctionNb.Location = new System.Drawing.Point(193, 343);
             this.fl_correctionNb.Name = "fl_correctionNb";
+            this.fl_correctionNb.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_correctionNb.Size = new System.Drawing.Size(266, 20);
             this.fl_correctionNb.TabIndex = 45;
             this.fl_correctionNb.WaterMark = "E.g. : 9";
             // 
             // fl_correctionDate
             // 
-            this.fl_correctionDate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_correctionDate.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_correctionDate.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_correctionDate.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_correctionDate.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_correctionDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_correctionDate.Location = new System.Drawing.Point(266, 369);
             this.fl_correctionDate.Name = "fl_correctionDate";
+            this.fl_correctionDate.Padding = new System.Windows.Forms.Padding(1, 3, 1, 1);
             this.fl_correctionDate.Size = new System.Drawing.Size(103, 20);
             this.fl_correctionDate.TabIndex = 44;
             this.fl_correctionDate.WaterMark = null;
             // 
             // fl_correctionDesc
             // 
-            this.fl_correctionDesc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_correctionDesc.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_correctionDesc.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_correctionDesc.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_correctionDesc.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_correctionDesc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_correctionDesc.Location = new System.Drawing.Point(193, 395);
-            this.fl_correctionDesc.MultiLines = true;
+            this.fl_correctionDesc.Multiline = true;
             this.fl_correctionDesc.Name = "fl_correctionDesc";
+            this.fl_correctionDesc.Padding = new System.Windows.Forms.Padding(1);
             this.fl_correctionDesc.Size = new System.Drawing.Size(519, 82);
             this.fl_correctionDesc.TabIndex = 43;
             this.fl_correctionDesc.WaterMark = "E.g. : Fixing a small bug";
@@ -416,6 +384,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_ok
             // 
             this.bt_ok.BackGrndImage = null;
+            this.bt_ok.GreyScaleBackGrndImage = null;
+            this.bt_ok.IsFocused = false;
+            this.bt_ok.IsHovered = false;
+            this.bt_ok.IsPressed = false;
             this.bt_ok.Location = new System.Drawing.Point(193, 483);
             this.bt_ok.Name = "bt_ok";
             this.bt_ok.SetImgSize = new System.Drawing.Size(20, 20);
@@ -426,6 +398,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_cancel
             // 
             this.bt_cancel.BackGrndImage = null;
+            this.bt_cancel.GreyScaleBackGrndImage = null;
+            this.bt_cancel.IsFocused = false;
+            this.bt_cancel.IsHovered = false;
+            this.bt_cancel.IsPressed = false;
             this.bt_cancel.Location = new System.Drawing.Point(312, 483);
             this.bt_cancel.Name = "bt_cancel";
             this.bt_cancel.SetImgSize = new System.Drawing.Size(20, 20);
@@ -436,6 +412,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_today
             // 
             this.bt_today.BackGrndImage = null;
+            this.bt_today.GreyScaleBackGrndImage = null;
+            this.bt_today.IsFocused = false;
+            this.bt_today.IsHovered = false;
+            this.bt_today.IsPressed = false;
             this.bt_today.Location = new System.Drawing.Point(193, 369);
             this.bt_today.Name = "bt_today";
             this.bt_today.SetImgSize = new System.Drawing.Size(20, 20);
@@ -447,6 +427,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_default
             // 
             this.bt_default.BackGrndImage = null;
+            this.bt_default.GreyScaleBackGrndImage = null;
+            this.bt_default.IsFocused = false;
+            this.bt_default.IsHovered = false;
+            this.bt_default.IsPressed = false;
             this.bt_default.Location = new System.Drawing.Point(607, 483);
             this.bt_default.Name = "bt_default";
             this.bt_default.SetImgSize = new System.Drawing.Size(20, 20);
@@ -458,6 +442,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_clear
             // 
             this.bt_clear.BackGrndImage = null;
+            this.bt_clear.GreyScaleBackGrndImage = null;
+            this.bt_clear.IsFocused = false;
+            this.bt_clear.IsHovered = false;
+            this.bt_clear.IsPressed = false;
             this.bt_clear.Location = new System.Drawing.Point(536, 483);
             this.bt_clear.Name = "bt_clear";
             this.bt_clear.SetImgSize = new System.Drawing.Size(20, 20);

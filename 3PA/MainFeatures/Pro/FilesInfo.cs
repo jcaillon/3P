@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FilesInfo.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,23 +25,23 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
-
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
     /// </summary>
     internal static class FilesInfo {
-
         #region event
 
         public delegate void UpdatedOperation(UpdatedOperationEventArgs args);
+
         public static event UpdatedOperation OnUpdatedOperation;
 
         public delegate void UpdatedErrors(UpdatedErrorsEventArgs args);
+
         public static event UpdatedErrors OnUpdatedErrors;
 
         #endregion
@@ -76,7 +75,6 @@ namespace _3PA.MainFeatures.Pro {
         /// <param name="fullPath"></param>
         /// <param name="errorsList"></param>
         public static void UpdateFileErrors(string fullPath, List<FileError> errorsList) {
-
             AddIfNew(fullPath);
 
             if (_sessionInfo[fullPath].FileErrors != null)
@@ -89,7 +87,7 @@ namespace _3PA.MainFeatures.Pro {
             _sessionInfo[fullPath].HasErrorsNotDisplayed = true;
 
             // Update info on the current file
-            if (fullPath.EqualsCi(Plug.CurrentFilePath))
+            if (fullPath.EqualsCi(Npp.CurrentFile.Path))
                 UpdateErrorsInScintilla();
         }
 
@@ -112,11 +110,11 @@ namespace _3PA.MainFeatures.Pro {
         public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight) {
             switch (fontWeight) {
                 case ErrorFontWeight.Bold:
-                    return (byte)(errorLevel + Style.ErrorAnnotBoldStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotBoldStyleOffset);
                 case ErrorFontWeight.Italic:
-                    return (byte)(errorLevel + Style.ErrorAnnotItalicStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotItalicStyleOffset);
                 default:
-                    return (byte)(errorLevel + Style.ErrorAnnotStandardStyleOffset);
+                    return (byte) (errorLevel + Style.ErrorAnnotStandardStyleOffset);
             }
         }
 
@@ -124,7 +122,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Updates the number of errors in the FileExplorer form and the file status
         /// </summary>
         public static void UpdateFileStatus() {
-            var currentFilePath = Plug.CurrentFilePath;
+            var currentFilePath = Npp.CurrentFile.Path;
 
             // UpdatedOperation event
             if (OnUpdatedOperation != null) {
@@ -153,11 +151,10 @@ namespace _3PA.MainFeatures.Pro {
         /// display an annotation with the message below the line + display a marker in the margin
         /// </summary>
         public static void UpdateErrorsInScintilla() {
-
             // Updates the number of errors in the FileExplorer form and the file status
             UpdateFileStatus();
 
-            var currentFilePath = Plug.CurrentFilePath;
+            var currentFilePath = Npp.CurrentFile.Path;
             var marginError = Npp.GetMargin(ErrorMarginNumber);
 
             // need to clear scintilla for this file?
@@ -167,7 +164,7 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // check if current file is a progress and if we got info on it 
-            if (!Plug.IsCurrentFileProgress || !_sessionInfo.ContainsKey(currentFilePath) || _sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0) {
+            if (!Npp.CurrentFile.IsProgress || !_sessionInfo.ContainsKey(currentFilePath) || _sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0) {
                 if (marginError.Width > 0) {
                     marginError.Width = 1;
                     marginError.Width = 0;
@@ -190,14 +187,12 @@ namespace _3PA.MainFeatures.Pro {
 
             // only show the new errors
             if (_sessionInfo[currentFilePath].HasErrorsNotDisplayed) {
-
                 _sessionInfo[currentFilePath].HasErrorsNotDisplayed = false;
 
                 StylerHelper stylerHelper = new StylerHelper();
                 int lastLine = -2;
                 StringBuilder lastMessage = new StringBuilder();
                 foreach (var fileError in _sessionInfo[currentFilePath].FileErrors) {
-
                     // new line
                     if (lastLine != fileError.Line) {
                         stylerHelper.Clear();
@@ -252,7 +247,6 @@ namespace _3PA.MainFeatures.Pro {
         /// because of the compilation of the given file...
         /// </summary>
         public static bool ClearAllErrors(string filePath, bool clearForCompil = false) {
-
             if (string.IsNullOrEmpty(filePath))
                 return false;
 
@@ -262,7 +256,7 @@ namespace _3PA.MainFeatures.Pro {
                 _sessionInfo[filePath].FileErrors.Clear();
                 jobDone = true;
 
-                if (filePath.Equals(Plug.CurrentFilePath)) {
+                if (filePath.Equals(Npp.CurrentFile.Path)) {
                     ClearAnnotationsAndMarkers();
                     UpdateFileStatus();
                 } else
@@ -275,7 +269,7 @@ namespace _3PA.MainFeatures.Pro {
                     kpv.Value.FileErrors.Clear();
                     jobDone = true;
 
-                    if (kpv.Key.Equals(Plug.CurrentFilePath)) {
+                    if (kpv.Key.Equals(Npp.CurrentFile.Path)) {
                         ClearAnnotationsAndMarkers();
                         UpdateFileStatus();
                     } else
@@ -295,12 +289,12 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <param name="line"></param>
         public static bool ClearLineErrors(int line) {
-            if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath))
+            if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path))
                 return false;
 
             bool jobDone = false;
-            if (_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == line)) {
-                _sessionInfo[Plug.CurrentFilePath].FileErrors.RemoveAll(error => error.Line == line);
+            if (_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == line)) {
+                _sessionInfo[Npp.CurrentFile.Path].FileErrors.RemoveAll(error => error.Line == line);
                 jobDone = true;
             }
 
@@ -311,8 +305,8 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 // we didn't manage to clear the error, (only visually, not in our records), 
                 // so clear everything, the user will have to compile again
-                _sessionInfo[Plug.CurrentFilePath].FileErrors.Clear();
-                _sessionInfo[Plug.CurrentFilePath].NeedToCleanScintilla = true;
+                _sessionInfo[Npp.CurrentFile.Path].FileErrors.Clear();
+                _sessionInfo[Npp.CurrentFile.Path].NeedToCleanScintilla = true;
             }
             return jobDone;
         }
@@ -326,8 +320,8 @@ namespace _3PA.MainFeatures.Pro {
 
             lineObj.AnnotationText = null;
             foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
-                if (((int)lineObj.MarkerGet()).IsBitSet((int)errorLevelMarker))
-                    lineObj.MarkerDelete((int)errorLevelMarker);
+                if (((int) lineObj.MarkerGet()).IsBitSet((int) errorLevelMarker))
+                    lineObj.MarkerDelete((int) errorLevelMarker);
         }
 
         /// <summary>
@@ -335,18 +329,18 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static void ClearAnnotationsAndMarkers() {
             if (Npp.GetLine(0).MarkerGet() != 0) {
-                if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath) ||
-                    _sessionInfo[Plug.CurrentFilePath].FileErrors == null ||
-                    !_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == 0)) {
+                if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
+                    _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
+                    !_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == 0)) {
                     // The line 0 has an error marker when it shouldn't
                     ClearLine(0);
                 }
             }
             int nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
             while (nextLine > -1) {
-                if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath) ||
-                    _sessionInfo[Plug.CurrentFilePath].FileErrors == null ||
-                    !_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == nextLine)) {
+                if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
+                    _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
+                    !_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == nextLine)) {
                     // The line 0 has an error marker when it shouldn't
                     ClearLine(nextLine);
                 }
@@ -364,7 +358,7 @@ namespace _3PA.MainFeatures.Pro {
         /// When the user click the error margin but no error is cleaned, it goes to the next line with error instead
         /// </summary>
         public static void GoToNextError(int line) {
-            var currentFilePath = Plug.CurrentFilePath;
+            var currentFilePath = Npp.CurrentFile.Path;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
             int nextLine = Npp.GetLine(line).MarkerNext(EveryMarkersMask);
@@ -385,7 +379,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Go to the previous error
         /// </summary>
         public static void GoToPrevError(int line) {
-            var currentFilePath = Plug.CurrentFilePath;
+            var currentFilePath = Npp.CurrentFile.Path;
             var nbLines = Npp.Line.Count;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
@@ -417,20 +411,18 @@ namespace _3PA.MainFeatures.Pro {
             if (!File.Exists(fullPath))
                 return output;
 
-            var lastLineNbCouple = new[] { -10, -10 };
+            var lastLineNbCouple = new[] {-10, -10};
 
             Utils.ForEachLine(fullPath, null, (i, line) => {
-
                 var fields = line.Split('\t').ToList();
                 if (fields.Count == 8) {
-
                     // new file
                     // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
                     var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
                     var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
                     if (!output.ContainsKey(filePath)) {
                         output.Add(filePath, new List<FileError>());
-                        lastLineNbCouple = new[] { -10, -10 };
+                        lastLineNbCouple = new[] {-10, -10};
                     }
 
                     ErrorLevel errorLevel;
@@ -438,7 +430,7 @@ namespace _3PA.MainFeatures.Pro {
                         errorLevel = ErrorLevel.Error;
 
                     // we store the line/error number couple because we don't want two identical messages to appear
-                    var thisLineNbCouple = new[] { (int)fields[3].ConvertFromStr(typeof(int)), (int)fields[5].ConvertFromStr(typeof(int)) };
+                    var thisLineNbCouple = new[] {(int) fields[3].ConvertFromStr(typeof(int)), (int) fields[5].ConvertFromStr(typeof(int))};
 
                     if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
                         // same line/error number as previously
@@ -458,7 +450,7 @@ namespace _3PA.MainFeatures.Pro {
                         SourcePath = filePath,
                         Level = errorLevel,
                         Line = Math.Max(0, lastLineNbCouple[0] - 1),
-                        Column = Math.Max(0, (int)fields[4].ConvertFromStr(typeof(int)) - 1),
+                        Column = Math.Max(0, (int) fields[4].ConvertFromStr(typeof(int)) - 1),
                         ErrorNumber = lastLineNbCouple[1],
                         Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
                         Help = fields[7].Replace("<br>", "\n").Trim(),
@@ -493,10 +485,10 @@ namespace _3PA.MainFeatures.Pro {
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     internal class FileInfoObject {
-
         private CurrentOperation _currentOperation;
 
         private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
         public CurrentOperation CurrentOperation {
             get {
                 CurrentOperation output = 0;
@@ -548,16 +540,20 @@ namespace _3PA.MainFeatures.Pro {
     internal enum CurrentOperation {
         [CurrentOperationAttr(Name = "Editing")]
         Default = 0,
+
         [CurrentOperationAttr(Name = "Appbuilder section!")]
         AppbuilderSection = 32,
 
         // above linting, we start a prowin process to do it
         [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")]
         Prolint = 64,
+
         [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
         CheckSyntax = 128,
+
         [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")]
         Compile = 216,
+
         [CurrentOperationAttr(Name = "Executing", ActionText = "executing")]
         Run = 512
     }
@@ -574,10 +570,12 @@ namespace _3PA.MainFeatures.Pro {
         public string Message { get; set; }
         public string Help { get; set; }
         public bool FromProlint { get; set; }
+
         /// <summary>
         /// indicates if the error appears several times
         /// </summary>
         public int Times { get; set; }
+
         // the path to the file that was compiled to generate this error
         public string CompiledFilePath { get; set; }
     }
@@ -611,14 +609,19 @@ namespace _3PA.MainFeatures.Pro {
     internal enum ErrorLevel {
         [Description("Error(s), good!")]
         NoErrors,
+
         [Description("Info")]
         Information,
+
         [Description("Warning(s)")]
         Warning,
+
         [Description("Huge warning(s)")]
         StrongWarning,
+
         [Description("Error(s)")]
         Error,
+
         [Description("Critical error(s)!")]
         Critical
     }
@@ -635,6 +638,7 @@ namespace _3PA.MainFeatures.Pro {
 
     internal class UpdatedOperationEventArgs : EventArgs {
         public CurrentOperation CurrentOperation { get; private set; }
+
         public UpdatedOperationEventArgs(CurrentOperation currentOperation) {
             CurrentOperation = currentOperation;
         }
@@ -643,6 +647,7 @@ namespace _3PA.MainFeatures.Pro {
     internal class UpdatedErrorsEventArgs : EventArgs {
         public ErrorLevel ErrorLevel { get; private set; }
         public int NbErrors { get; private set; }
+
         public UpdatedErrorsEventArgs(ErrorLevel errorLevel, int nbErrors) {
             ErrorLevel = errorLevel;
             NbErrors = nbErrors;
@@ -650,5 +655,4 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     #endregion
-
 }

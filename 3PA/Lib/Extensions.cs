@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Extensions.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -27,15 +27,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using MarkdownDeep;
+using _3PA.Lib.CommonMark;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This class regroups all the extension methods
     /// </summary>
     public static class Extensions {
-
         #region object
 
         /// <summary>
@@ -48,7 +46,42 @@ namespace _3PA.Lib {
         public static T GetAttributeFrom<T>(this object instance, string propertyName) where T : Attribute {
             var attrType = typeof(T);
             var property = instance.GetType().GetProperty(propertyName);
-            return (T)property.GetCustomAttributes(attrType, false).First();
+            return (T) property.GetCustomAttributes(attrType, false).First();
+        }
+
+        /// <summary>
+        /// Returns true of the given object has the given method
+        /// </summary>
+        /// <param name="objectToCheck"></param>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
+        public static bool HasMethod(this object objectToCheck, string methodName) {
+            try {
+                var type = objectToCheck.GetType();
+                return type.GetMethod(methodName) != null;
+            } catch (AmbiguousMatchException) {
+                // ambiguous means there is more than one result,
+                // which means: a method with that name does exist
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Invoke the given method with the given parameters on the given object and returns its value
+        /// Returns null if it failes
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="methodName"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public static object InvokeMethod(this object obj, string methodName, object[] parameters) {
+            try {
+                //Get the method information using the method info class
+                MethodInfo mi = obj.GetType().GetMethod(methodName);
+                return mi != null ? mi.Invoke(obj, parameters) : null;
+            } catch (Exception) {
+                return null;
+            }
         }
 
         #endregion
@@ -105,6 +138,13 @@ namespace _3PA.Lib {
             return (b & (1 << pos)) != 0;
         }
 
+        /// <summary>
+        /// Returns true if the bit at the given position is set to true
+        /// </summary>
+        public static bool IsBitSet(this long b, int pos) {
+            return (b & (1 << pos)) != 0;
+        }
+
         #endregion
 
         #region Colors
@@ -114,31 +154,6 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool IsColorDark(this Color color) {
             return color.GetBrightness() < 0.5;
-        }
-
-        #endregion
-
-        #region ui thread safe invoke
-
-        /// <summary>
-        /// Executes a function on the thread of the given object
-        /// </summary>
-        public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) {
-                IAsyncResult result = isi.BeginInvoke(call, new object[] { isi });
-                object endResult = isi.EndInvoke(result);
-                return (TResult)endResult;
-            }
-            return call(isi);
-        }
-
-        /// <summary>
-        /// Executes an action on the thread of the given object
-        /// </summary>
-        public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] { isi });
-            else
-                call(isi);
         }
 
         #endregion
@@ -155,7 +170,7 @@ namespace _3PA.Lib {
             if (name != null) {
                 FieldInfo field = type.GetField(name);
                 if (field != null) {
-                    var attributeArray = (T[])Attribute.GetCustomAttributes(field, typeof(T), true);
+                    var attributeArray = (T[]) Attribute.GetCustomAttributes(field, typeof(T), true);
                     return attributeArray;
                 }
             }
@@ -186,7 +201,7 @@ namespace _3PA.Lib {
         /// currentOperation.GetAttribute!EnumAttribute>().Value 
         /// </summary>
         [AttributeUsage(AttributeTargets.Field)]
-        public class EnumAttribute : Attribute { }
+        public class EnumAttribute : Attribute {}
 
         /// <summary>
         /// Decorate enum values with [Description("Description for Foo")] and get their description with x.Foo.GetDescription()
@@ -244,7 +259,7 @@ namespace _3PA.Lib {
         /// Ex : "file.xml".TestAgainstListOfPatterns("*.xls,*.com,*.xml") return true
         /// </summary>
         public static bool TestAgainstListOfPatterns(this string source, string listOfPattern) {
-            return listOfPattern.Split(',').ToList().Exists(s => source.RegexMatch(s.WildCardToRegex()));
+            return listOfPattern.Split(',').Where(s => !string.IsNullOrEmpty(s)).ToList().Exists(s => source.RegexMatch(s.WildCardToRegex()));
         }
 
         /// <summary>
@@ -314,8 +329,7 @@ namespace _3PA.Lib {
         /// <param name="text"></param>
         /// <returns></returns>
         public static string MdToHtml(this string text) {
-            var md = new Markdown();
-            return md.ConvertToHtml(text);
+            return CommonMarkConverter.Convert(text);
         }
 
         /// <summary>
@@ -346,8 +360,8 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string BreakText(this string text, int lineLength, string eolString = "\n") {
             var charCount = 0;
-            var lines = text.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
-                .GroupBy(w => (charCount += w.Length + 1) / lineLength)
+            var lines = text.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries)
+                .GroupBy(w => (charCount += w.Length + 1)/lineLength)
                 .Select(g => String.Join(" ", g));
             return String.Join(eolString, lines.ToArray());
         }
@@ -365,9 +379,9 @@ namespace _3PA.Lib {
             try {
                 var i = 0;
                 while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
-                    if (Int32.Parse(splitLocal[i]) > Int32.Parse(splitDistant[i]))
+                    if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
                         return true;
-                    if (Int32.Parse(splitLocal[i]) < Int32.Parse(splitDistant[i]))
+                    if (int.Parse(splitLocal[i]) < int.Parse(splitDistant[i]))
                         return false;
                     i++;
                 }
@@ -383,6 +397,8 @@ namespace _3PA.Lib {
         /// <param name="word"></param>
         /// <returns></returns>
         public static bool ContainsAtLeastOneLetter(this string word) {
+            if (string.IsNullOrEmpty(word))
+                return false;
             var max = word.Length - 1;
             int count = 0;
             while (count <= max) {
@@ -418,7 +434,7 @@ namespace _3PA.Lib {
         /// <param name="needle"></param>
         /// <returns></returns>
         public static int CountOccurences(this string haystack, string needle) {
-            return (haystack.Length - haystack.Replace(needle, "").Length) / needle.Length;
+            return (haystack.Length - haystack.Replace(needle, "").Length)/needle.Length;
         }
 
         /// <summary>
@@ -431,7 +447,6 @@ namespace _3PA.Lib {
             //string.Equals(a, b, StringComparison.CurrentCultureIgnoreCase);
             return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase);
         }
-
 
         /// <summary>
         /// convert the word to Title Case
@@ -450,6 +465,34 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static bool ContainsFast(this string source, string toCheck) {
             return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// Returns the string given only with acceptable characters for a variable name
+        /// </summary>
+        public static string MakeValidVariableName(this string source) {
+            var outStr = "";
+            foreach (char c in source) {
+                if (char.IsLetterOrDigit(c) || c == '_' || c == '-')
+                    outStr += c;
+                else if (c == ' ')
+                    outStr += '_';
+            }
+            return outStr;
+        }
+
+        /// <summary>
+        /// Does the char array contains a given char
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="toFind"></param>
+        /// <returns></returns>
+        public static bool Contains(this char[] array, char toFind) {
+            foreach (var chr in array) {
+                if (chr == toFind)
+                    return true;
+            }
+            return false;
         }
 
         #endregion

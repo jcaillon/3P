@@ -1,0 +1,46 @@
+version: '{branch}.{build}'
+configuration: Debug
+platform:
+- x86
+- x64
+before_build:
+- ps: nuget restore
+build:
+  project: 3P.sln
+  verbosity: minimal
+after_build:
+- cmd: >-
+    @echo off
+
+    setlocal EnableDelayedExpansion
+
+    set "releasenotescontent="
+
+    for /F "delims=" %%a in (newReleaseNotes.md) do set "releasenotescontent=!releasenotescontent!\n%%a"
+
+    set "releasenotescontent=!releasenotescontent:~2!"
+artifacts:
+- path: Releases\3P.zip
+  name: 3P.zip
+- path: Releases\3P_x64.zip
+  name: 3P_x64.zip
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  release: $(APPVEYOR_REPO_TAG_NAME)
+  description: $(releasenotescontent)
+  auth_token:
+    secure: xE+f8rczPCfechI3U6gncyX2HWWVXN96l6RQ+XlVrWo+0YKf32phrXSzQ6WYEGEs
+  artifact: Releases\3P.zip,Releases\3P_x64.zip
+  draft: true
+  prerelease: true
+  force_update: true
+  on:
+    APPVEYOR_REPO_TAG: true
+notifications:
+- provider: Email
+  to:
+  - greenzest@gmail.com
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false

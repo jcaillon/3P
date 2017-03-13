@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SettingAppearance.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -23,10 +23,10 @@ using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
-
         #region private fields
 
         private static YamuiColorRadioButton _checkButton;
@@ -118,6 +118,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (_checkButton != null)
                 _checkButton.Checked = false;
             ThemeManager.RefreshApplicationWithTheme(theme);
+            cbApplication.Refresh();
         }
 
         /// <summary>
@@ -138,12 +139,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
             Style.Current = Style.GetThemesList[cbSyntax.SelectedIndex];
             Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-            if (Plug.IsCurrentFileProgress) {
+            if (Npp.CurrentFile.IsProgress) {
                 Style.SetSyntaxStyles();
                 Plug.ApplyOptionsForScintilla();
                 FilesInfo.UpdateFileStatus();
             }
         }
-
     }
 }

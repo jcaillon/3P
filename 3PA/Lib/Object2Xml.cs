@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Object2Xml.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@ namespace _3PA.Lib {
     /// TODO: save more than a simple string, string dico
     /// </summary>
     public static class Object2Xml<T> {
-
         #region Fields
 
         private const string RootString = "Root";
@@ -92,19 +91,19 @@ namespace _3PA.Lib {
         /// <param name="valueInAttribute"></param>
         /// <returns></returns>
         public static XElement SaveToXElement(T item, bool valueInAttribute = false) {
-            XElement itemElement = new XElement(typeof (T).Name);
-            var properties = typeof (T).GetFields();
+            XElement itemElement = new XElement(typeof(T).Name);
+            var properties = typeof(T).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) continue;
 
                 XElement fieldElement = new XElement(property.Name);
-                if (property.FieldType == typeof (Dictionary<string, string>)) {
+                if (property.FieldType == typeof(Dictionary<string, string>)) {
                     itemElement.Add(DictToXml((Dictionary<string, string>) property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
                 } else {
                     string strValue;
-                    if (property.FieldType == typeof (Color))
+                    if (property.FieldType == typeof(Color))
                         strValue = ColorTranslator.ToHtml((Color) property.GetValue(item));
                     else if (property.FieldType.IsEnum)
                         strValue = Convert.ChangeType(property.GetValue(item), typeof(long)).ToString();
@@ -145,7 +144,7 @@ namespace _3PA.Lib {
         public static void LoadFromFile(T instance, string filename, bool valueInAttribute = false) {
             var root = XDocument.Load(filename).Root;
             if (root != null)
-                LoadFromXElement(instance, root.Descendants(typeof (T).Name).First(), valueInAttribute);
+                LoadFromXElement(instance, root.Descendants(typeof(T).Name).First(), valueInAttribute);
         }
 
         /// <summary>
@@ -171,8 +170,8 @@ namespace _3PA.Lib {
             if (rootElement == null) return;
 
             /* loop through InstanceListItemString elements */
-            foreach (XElement itemElement in rootElement.Descendants(typeof (T).Name)) {
-                T item = (T) Activator.CreateInstance(typeof (T), new object[] {});
+            foreach (XElement itemElement in rootElement.Descendants(typeof(T).Name)) {
+                T item = (T) Activator.CreateInstance(typeof(T), new object[] {});
                 LoadFromXElement(item, itemElement, valueInAttribute);
                 instance.Add(item);
             }
@@ -186,14 +185,14 @@ namespace _3PA.Lib {
         /// <param name="itemElement"></param>
         /// <param name="valueInAttribute"></param>
         private static void LoadFromXElement(T item, XElement itemElement, bool valueInAttribute = false) {
-            var properties = typeof (T).GetFields();
+            var properties = typeof(T).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) continue;
 
                 /* dico */
-                if (property.FieldType == typeof (Dictionary<string, string>)) {
+                if (property.FieldType == typeof(Dictionary<string, string>)) {
                     XElement elm = itemElement.Element(PrefixToParentOfDico + property.Name);
                     if (elm == null) continue;
 
@@ -201,7 +200,11 @@ namespace _3PA.Lib {
                 } else {
                     XElement elm = itemElement.Element(property.Name);
                     if (elm != null) {
-                        property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFromInvariantString(valueInAttribute ? elm.Attribute(ValueString).Value : elm.Value));
+                        var val = TypeDescriptor.GetConverter(property.FieldType).ConvertFromInvariantString(valueInAttribute ? elm.Attribute(ValueString).Value : elm.Value);
+                        if (val is string)
+                            property.SetValue(item, ((string) val).Replace("\r", "").Replace("\n", "\r\n"));
+                        else
+                            property.SetValue(item, val);
                     }
                 }
             }
@@ -252,7 +255,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
-    
 }

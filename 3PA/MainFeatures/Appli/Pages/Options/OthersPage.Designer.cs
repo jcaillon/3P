@@ -95,12 +95,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_encodingfilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_encodingfilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_encodingfilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_encodingfilter.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_encodingfilter.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_encodingfilter.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_encodingfilter.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_encodingfilter.Location = new System.Drawing.Point(179, 363);
             this.fl_encodingfilter.Name = "fl_encodingfilter";
             this.fl_encodingfilter.Size = new System.Drawing.Size(713, 20);
@@ -151,7 +145,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbEncoding
             // 
-            this.cbEncoding.ItemHeight = 15;
             this.cbEncoding.Location = new System.Drawing.Point(179, 335);
             this.cbEncoding.Name = "cbEncoding";
             this.cbEncoding.Size = new System.Drawing.Size(375, 21);
@@ -229,14 +222,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_tagtitle3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_tagtitle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_tagtitle3.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_tagtitle3.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle3.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle3.Font = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_tagtitle3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagtitle3.Location = new System.Drawing.Point(179, 218);
-            this.fl_tagtitle3.MultiLines = true;
+            this.fl_tagtitle3.Multiline = true;
             this.fl_tagtitle3.Name = "fl_tagtitle3";
             this.fl_tagtitle3.Size = new System.Drawing.Size(713, 50);
             this.fl_tagtitle3.TabIndex = 69;
@@ -246,12 +233,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_tagtitle2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_tagtitle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_tagtitle2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_tagtitle2.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle2.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle2.Font = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_tagtitle2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagtitle2.Location = new System.Drawing.Point(179, 182);
             this.fl_tagtitle2.Name = "fl_tagtitle2";
             this.fl_tagtitle2.Size = new System.Drawing.Size(713, 20);
@@ -315,12 +296,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_tagopen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_tagopen.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_tagopen.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_tagopen.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_tagopen.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_tagopen.Font = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_tagopen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagopen.Location = new System.Drawing.Point(179, 46);
             this.fl_tagopen.Name = "fl_tagopen";
             this.fl_tagopen.Size = new System.Drawing.Size(713, 20);
@@ -331,12 +306,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_tagclose.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_tagclose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_tagclose.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_tagclose.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_tagclose.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_tagclose.Font = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_tagclose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagclose.Location = new System.Drawing.Point(179, 72);
             this.fl_tagclose.Name = "fl_tagclose";
             this.fl_tagclose.Size = new System.Drawing.Size(713, 20);
@@ -347,14 +316,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.fl_tagtitle1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.fl_tagtitle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.fl_tagtitle1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.fl_tagtitle1.CustomBackColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle1.CustomForeColor = System.Drawing.Color.Empty;
-            this.fl_tagtitle1.Font = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.fl_tagtitle1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagtitle1.Location = new System.Drawing.Point(179, 126);
-            this.fl_tagtitle1.MultiLines = true;
+            this.fl_tagtitle1.Multiline = true;
             this.fl_tagtitle1.Name = "fl_tagtitle1";
             this.fl_tagtitle1.Size = new System.Drawing.Size(713, 50);
             this.fl_tagtitle1.TabIndex = 63;

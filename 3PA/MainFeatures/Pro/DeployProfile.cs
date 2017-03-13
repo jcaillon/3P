@@ -1,13 +1,30 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (DeployProfile.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
-
     internal class DeployProfile {
-
         #region public static event
 
         /// <summary>
@@ -18,11 +35,12 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Fields
+
         /// <summary>
         /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
         /// </summary>
-
         public string Name = "";
+
         public string SourceDirectory = "";
         public bool ExploreRecursively = true;
         public bool AutoUpdateSourceDir = true;
@@ -51,7 +69,6 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-
         #region private static fields
 
         private static List<DeployProfile> _list;
@@ -59,7 +76,7 @@ namespace _3PA.MainFeatures.Pro {
         private static DeployProfile _current;
 
         #endregion
-        
+
         #region Public static methods
 
         /// <summary>
@@ -111,8 +128,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-
     }
-
 }

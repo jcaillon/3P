@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SetTabOrder.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// This little class allows to remove and immedialty add all the direct children of a given scrollPanel.ContentPanel
     /// Allowing to set the correct tab order for them
@@ -31,7 +30,6 @@ namespace _3PA.Lib {
     /// control were added to their parent, hence this class...
     /// </summary>
     internal static class SetTabOrder {
-
         public static void RemoveAndAddForTabOrder(YamuiScrollPanel scrollPanel) {
             ArrayList controlArraySorted = new ArrayList();
             controlArraySorted.AddRange(scrollPanel.ContentPanel.Controls);

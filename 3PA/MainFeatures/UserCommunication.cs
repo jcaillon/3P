@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UserCommunication.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -26,16 +26,15 @@ using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.NppCore;
 
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
-
     internal static class UserCommunication {
-
         #region private fields
 
-        private static EmptyForm _anchorForm;
+        private static NppDockableDialogEmptyForm _anchorForm;
 
         private static List<YamuiInput> _openedMessage = new List<YamuiInput>();
 
@@ -53,7 +52,7 @@ namespace _3PA.MainFeatures {
         /// from a back groundthread, use : BeginInvoke()
         /// </summary>
         public static void Init() {
-            _anchorForm = new EmptyForm {
+            _anchorForm = new NppDockableDialogEmptyForm {
                 Location = new Point(-10000, -10000),
                 Visible = false
             };
@@ -116,19 +115,18 @@ namespace _3PA.MainFeatures {
         /// <param name="title"></param>
         public static void NotifyUnique(string id, string htmlContent, MessageImg imageType, string title, string subTitle, Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
             Task.Factory.StartNew(() => {
-
                 try {
                     if (Ready) {
-                        _anchorForm.BeginInvoke((Action)delegate {
+                        _anchorForm.BeginInvoke((Action) delegate {
                             var nppScreen = Npp.NppScreen;
                             var toastNotification = new YamuiNotification(
                                 ThemeManager.FormatTitle(imageType, title, subTitle),
                                 ThemeManager.FormatContent(htmlContent),
                                 duration,
                                 nppScreen,
-                                Math.Min(width, nppScreen.WorkingArea.Width / 3),
-                                nppScreen.WorkingArea.Width / 3,
-                                nppScreen.WorkingArea.Height / 3,
+                                Math.Min(width, nppScreen.WorkingArea.Width/3),
+                                nppScreen.WorkingArea.Width/3,
+                                nppScreen.WorkingArea.Height/3,
                                 (sender, args) => {
                                     if (clickHandler != null) clickHandler(args);
                                     else Utils.OpenPathClickHandler(sender, args);
@@ -144,7 +142,6 @@ namespace _3PA.MainFeatures {
                             toastNotification.Show();
                         });
                     }
-
                 } catch (Exception e) {
                     ErrorHandler.LogError(e);
 
@@ -186,7 +183,7 @@ namespace _3PA.MainFeatures {
             var clickedButton = -1;
 
             if (buttonsList == null)
-                buttonsList = new List<string> { "Ok", "Cancel" };
+                buttonsList = new List<string> {"Ok", "Cancel"};
 
             if (waitResponse) {
                 clickedButton = YamuiInput.ShowDialog(
@@ -196,8 +193,8 @@ namespace _3PA.MainFeatures {
                     ThemeManager.FormatContent(htmlContent),
                     buttonsList,
                     ref data,
-                    Npp.NppScreen.WorkingArea.Width * 3 / 5,
-                    Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                    Npp.NppScreen.WorkingArea.Width*3/5,
+                    Npp.NppScreen.WorkingArea.Height*9/10,
                     minWidth,
                     (sender, args) => {
                         if (clickHandler != null) clickHandler(args);
@@ -205,7 +202,7 @@ namespace _3PA.MainFeatures {
                     });
             } else {
                 if (_anchorForm != null && _anchorForm.IsHandleCreated) {
-                    _anchorForm.BeginInvoke((Action)delegate {
+                    _anchorForm.BeginInvoke((Action) delegate {
                         YamuiInput form;
                         object nullObject = null;
                         clickedButton = YamuiInput.Show(
@@ -216,8 +213,8 @@ namespace _3PA.MainFeatures {
                             buttonsList,
                             ref nullObject,
                             out form,
-                            Npp.NppScreen.WorkingArea.Width * 3 / 5,
-                            Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                            Npp.NppScreen.WorkingArea.Width*3/5,
+                            Npp.NppScreen.WorkingArea.Height*9/10,
                             minWidth,
                             (sender, args) => {
                                 if (clickHandler != null) clickHandler(args);
@@ -244,6 +241,5 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 }

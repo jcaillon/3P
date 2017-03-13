@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (TortoiseWrapper.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,12 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using Microsoft.Win32;
-
 namespace _3PA.Lib {
     public class TortoiseWrapper {
-
         #region Singleton
 
         private static TortoiseWrapper _gitInstance;
@@ -86,6 +82,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
 }

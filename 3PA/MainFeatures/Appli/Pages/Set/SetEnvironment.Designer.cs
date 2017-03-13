@@ -294,12 +294,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flSuffix
             // 
-            this.flSuffix.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flSuffix.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flSuffix.CustomBackColor = System.Drawing.Color.Empty;
-            this.flSuffix.CustomForeColor = System.Drawing.Color.Empty;
-            this.flSuffix.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flSuffix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flSuffix.Location = new System.Drawing.Point(173, 48);
             this.flSuffix.Name = "flSuffix";
             this.flSuffix.Size = new System.Drawing.Size(133, 21);
@@ -310,12 +304,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.flLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flLabel.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flLabel.CustomBackColor = System.Drawing.Color.Empty;
-            this.flLabel.CustomForeColor = System.Drawing.Color.Empty;
-            this.flLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flLabel.Location = new System.Drawing.Point(312, 48);
             this.flLabel.Name = "flLabel";
             this.flLabel.Size = new System.Drawing.Size(566, 21);
@@ -362,12 +350,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flDatabase
             // 
-            this.flDatabase.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flDatabase.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flDatabase.CustomBackColor = System.Drawing.Color.Empty;
-            this.flDatabase.CustomForeColor = System.Drawing.Color.Empty;
-            this.flDatabase.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flDatabase.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flDatabase.Location = new System.Drawing.Point(193, 113);
             this.flDatabase.Name = "flDatabase";
             this.flDatabase.Size = new System.Drawing.Size(273, 21);
@@ -376,7 +358,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbDatabase
             // 
-            this.cbDatabase.ItemHeight = 15;
             this.cbDatabase.Location = new System.Drawing.Point(193, 113);
             this.cbDatabase.Name = "cbDatabase";
             this.cbDatabase.Size = new System.Drawing.Size(273, 21);
@@ -399,12 +380,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox1.Location = new System.Drawing.Point(193, 136);
             this.textbox1.Name = "textbox1";
             this.textbox1.Size = new System.Drawing.Size(678, 20);
@@ -458,15 +433,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flExtraPf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.flExtraPf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flExtraPf.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flExtraPf.CustomBackColor = System.Drawing.Color.Empty;
-            this.flExtraPf.CustomForeColor = System.Drawing.Color.Empty;
-            this.flExtraPf.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flExtraPf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flExtraPf.Location = new System.Drawing.Point(193, 187);
             this.flExtraPf.Margin = new System.Windows.Forms.Padding(1);
-            this.flExtraPf.MultiLines = true;
+            this.flExtraPf.Multiline = true;
             this.flExtraPf.Name = "flExtraPf";
             this.flExtraPf.Size = new System.Drawing.Size(678, 60);
             this.flExtraPf.TabIndex = 131;
@@ -518,12 +487,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox2.Location = new System.Drawing.Point(193, 253);
             this.textbox2.Name = "textbox2";
             this.textbox2.Size = new System.Drawing.Size(678, 20);
@@ -535,14 +498,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flExtraProPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.flExtraProPath.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flExtraProPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flExtraProPath.CustomBackColor = System.Drawing.Color.Empty;
-            this.flExtraProPath.CustomForeColor = System.Drawing.Color.Empty;
-            this.flExtraProPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flExtraProPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flExtraProPath.Location = new System.Drawing.Point(193, 279);
-            this.flExtraProPath.MultiLines = true;
+            this.flExtraProPath.Multiline = true;
             this.flExtraProPath.Name = "flExtraProPath";
             this.flExtraProPath.Size = new System.Drawing.Size(678, 50);
             this.flExtraProPath.TabIndex = 129;
@@ -579,12 +536,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox3.Location = new System.Drawing.Point(193, 335);
             this.textbox3.Name = "textbox3";
             this.textbox3.Size = new System.Drawing.Size(678, 20);
@@ -638,12 +589,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox4.Location = new System.Drawing.Point(193, 387);
             this.textbox4.Name = "textbox4";
             this.textbox4.Size = new System.Drawing.Size(678, 20);
@@ -741,12 +686,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox5.Location = new System.Drawing.Point(193, 413);
             this.textbox5.Name = "textbox5";
             this.textbox5.Size = new System.Drawing.Size(678, 20);
@@ -786,12 +725,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flCmdLine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.flCmdLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flCmdLine.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flCmdLine.CustomBackColor = System.Drawing.Color.Empty;
-            this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
-            this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flCmdLine.Location = new System.Drawing.Point(193, 439);
             this.flCmdLine.Name = "flCmdLine";
             this.flCmdLine.Size = new System.Drawing.Size(678, 20);
@@ -829,12 +762,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox6.Location = new System.Drawing.Point(193, 465);
             this.textbox6.Name = "textbox6";
             this.textbox6.Size = new System.Drawing.Size(678, 20);
@@ -870,12 +797,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flName
             // 
-            this.flName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.flName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.flName.CustomBackColor = System.Drawing.Color.Empty;
-            this.flName.CustomForeColor = System.Drawing.Color.Empty;
-            this.flName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.flName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flName.Location = new System.Drawing.Point(30, 48);
             this.flName.Name = "flName";
             this.flName.Size = new System.Drawing.Size(137, 21);
@@ -1010,7 +931,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbSuffix
             // 
-            this.cbSuffix.ItemHeight = 15;
             this.cbSuffix.Location = new System.Drawing.Point(173, 48);
             this.cbSuffix.Name = "cbSuffix";
             this.cbSuffix.Size = new System.Drawing.Size(133, 21);
@@ -1018,7 +938,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbName
             // 
-            this.cbName.ItemHeight = 15;
             this.cbName.Location = new System.Drawing.Point(30, 48);
             this.cbName.Name = "cbName";
             this.cbName.Size = new System.Drawing.Size(137, 21);

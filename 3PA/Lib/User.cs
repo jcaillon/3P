@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (User.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -22,11 +22,10 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using _3PA.MainFeatures;
+using _3PA.NppCore;
 
 namespace _3PA.Lib {
-
     public static class User {
-
         #region Ping
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace _3PA.Lib {
                     lastPing = DateTime.MinValue;
                 }
                 // ping once every hour
-                if (DateTime.Now.Subtract(lastPing).TotalMinutes > 59) {
+                if (DateTime.Now.Subtract(lastPing).TotalMinutes > Config.Instance.TechnicalPingEveryXMin) {
                     var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
                     webServiceJson.AddToReq("UUID", UniqueId);
                     webServiceJson.AddToReq("userName", Name);
@@ -57,7 +56,7 @@ namespace _3PA.Lib {
                     ErrorHandler.ShowErrors(e);
             }
         }
-        
+
         #endregion
 
         #region User info
@@ -68,12 +67,11 @@ namespace _3PA.Lib {
         public static string Name {
             get {
                 return Environment.UserName +
-                   (!string.IsNullOrEmpty(Config.Instance.UserName) ? " aka " + Config.Instance.UserName : string.Empty) +
-                   " (" + Environment.MachineName + ")";
+                       (!string.IsNullOrEmpty(Config.Instance.UserName) ? " aka " + Config.Instance.UserName : string.Empty) +
+                       " (" + Environment.MachineName + ")";
             }
-            
         }
-        
+
         /// <summary>
         /// Returns a unique identifier for the current user, this ID is exactly 36 char long
         /// </summary>
@@ -83,15 +81,15 @@ namespace _3PA.Lib {
                     string checkIdPath = Path.Combine(Path.GetTempPath(), "x" + Environment.Version + ".tmp");
                     if (File.Exists(checkIdPath)) {
                         var content = File.ReadAllText(checkIdPath);
-                        if (content.Length == 36 && !Config.Instance.MyUuid.Equals(content))
-                            Config.Instance.MyUuid = content;
+                        if (content.Length == 36 && !Config.Instance.TechnicalMyUuid.Equals(content))
+                            Config.Instance.TechnicalMyUuid = content;
                     } else
-                        Utils.FileWriteAllText(checkIdPath, Config.Instance.MyUuid);
+                        Utils.FileWriteAllText(checkIdPath, Config.Instance.TechnicalMyUuid);
                 } catch (Exception e) {
                     if (Config.IsDevelopper)
                         ErrorHandler.ShowErrors(e);
                 }
-                return Config.Instance.MyUuid;
+                return Config.Instance.TechnicalMyUuid;
             }
         }
 
@@ -105,7 +103,6 @@ namespace _3PA.Lib {
         /// <param name="message"></param>
         /// <param name="url"></param>
         public static bool SendComment(string message, string url) {
-
             // https://api.github.com/repos/jcaillon/3p/issues/1/comments
 
             // handle spam (10s min between 2 posts)
@@ -117,8 +114,8 @@ namespace _3PA.Lib {
             // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
             wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config._3PUserCredentials);
             wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
-                message
+                                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.SoftwareVersion + " ####\r\n" +
+                                message
                 );
             wb.Execute();
 
@@ -127,5 +124,4 @@ namespace _3PA.Lib {
 
         #endregion
     }
-
 }

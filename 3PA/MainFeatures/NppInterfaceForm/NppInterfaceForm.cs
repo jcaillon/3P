@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppInterfaceForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -20,18 +20,32 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using _3PA.Interop;
+using YamuiFramework.Forms;
+using YamuiFramework.Helper;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
-    internal class NppInterfaceForm : Form {
+    internal class NppInterfaceForm : YamuiFormBase {
+        #region constant
+
+        private static readonly Point CloakedPosition = new Point(-10000, -10000);
+
+        #endregion
+
+        #region Private
+
+        private bool _allowInitialdisplay;
+
+        private Point _lastPosition = CloakedPosition;
+
+        #endregion
 
         #region fields
+
         /// <summary>
         /// Should be set when you create the new form
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
@@ -54,43 +68,52 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public double FocusedOpacity;
 
-        private bool _allowInitialdisplay;
-        private bool _focusAllowed;
-
         /// <summary>
         /// Use this to know if the form is currently activated
         /// </summary>
         public bool IsActivated;
+
+        public bool IsShown { get; set; }
+
+        #endregion
+
+        #region ShowWithoutActivation & Don't show in ATL+TAB
+
+        /// <summary>
+        /// This indicates that the form should not take focus when shown
+        /// specify it through the CreateParams
+        /// </summary>
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
+
+        protected override CreateParams CreateParams {
+            get {
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return createParams;
+            }
+        }
+
         #endregion
 
         #region constructor
+
         /// <summary>
         /// Create a new npp interface form, please set CurrentForegroundWindow
         /// </summary>
         public NppInterfaceForm() {
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
-
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            ShowIcon = false;
             ShowInTaskbar = false;
-            SizeGripStyle = SizeGripStyle.Hide;
+            Movable = true;
 
             // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
+            Npp.RegisterToNpp(Handle);
 
             CurrentForegroundWindow = Npp.HandleScintilla;
 
             Opacity = 0;
             Visible = false;
             Tag = false;
-            Closing += OnClosing;
 
             Plug.OnNppWindowsMove += PlugOnOnNppWindowsMove;
         }
@@ -108,28 +131,32 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            GiveFocusBack();
+            _lastPosition = Location;
             Visible = false;
             // move this to an invisible part of the screen, otherwise we can see this window
             // if another window with Opacity <1 is in front Oo
-            Location = new Point(-10000, 0);
+            Location = new Point(-10000, -10000);
+            GiveFocusBack();
+            IsShown = false;
         }
 
         /// <summary>
         /// show the form
         /// </summary>
         public void UnCloack() {
+            if (Location == CloakedPosition)
+                Location = _lastPosition;
             _allowInitialdisplay = true;
             Opacity = UnfocusedOpacity;
             Visible = true;
-            GiveFocusBack();
+            IsShown = true;
         }
 
         /// <summary>
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
-            FormIntegration.UnRegisterToNpp(Handle);
+            Npp.UnRegisterToNpp(Handle);
             Tag = true;
             Close();
         }
@@ -137,7 +164,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <summary>
         /// Gives focus back to the owner window
         /// </summary>
-        public void GiveFocusBack() {
+        protected void GiveFocusBack() {
             if (GiveFocusBackToScintilla)
                 Npp.GrabFocus();
             else
@@ -153,36 +180,22 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <summary>
         /// instead of closing, cloak this form (invisible)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="cancelEventArgs"></param>
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            if ((bool) Tag) return;
-            cancelEventArgs.Cancel = true;
+        protected override void OnClosing(CancelEventArgs e) {
+            if ((bool) Tag)
+                return;
+            e.Cancel = true;
             Cloack();
+            base.OnClosing(e);
         }
 
-
         protected override void OnActivated(EventArgs e) {
-            // Activate the window that previously had focus
-            if (!_focusAllowed)
-                if (GiveFocusBackToScintilla)
-                    Npp.GrabFocus();
-                else
-                    WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            else {
-                IsActivated = true;
-                Opacity = FocusedOpacity;
-            }
+            IsActivated = true;
+            Opacity = FocusedOpacity;
             base.OnActivated(e);
         }
 
         private void PlugOnOnNppWindowsMove() {
-            Close();
-        }
-
-        protected override void OnShown(EventArgs e) {
-            _focusAllowed = true;
-            base.OnShown(e);
+            Cloack();
         }
 
         /// <summary>
@@ -191,71 +204,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <param name="value"></param>
         protected override void SetVisibleCore(bool value) {
             base.SetVisibleCore(_allowInitialdisplay ? value : _allowInitialdisplay);
-        }
-
-        #endregion
-
-        #region Paint Methods
-
-        protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormBack;
-            var borderColor = ThemeManager.Current.FormBorder;
-            var borderWidth = 2;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, borderWidth) { Alignment = PenAlignment.Inset };
-            e.Graphics.DrawRectangle(pen, rect);
-        }
-
-        #endregion
-
-        #region Shadows
-
-        private bool _mAeroEnabled; // variables for box shadow
-        private const int CsDropshadow = 0x00020000;
-        private const int WmNcpaint = 0x0085;
-
-        private const int WmNchittest = 0x84; // variables for dragging the form
-        private const int Htclient = 0x1;
-        private const int Htcaption = 0x2;
-
-        protected override CreateParams CreateParams {
-            get {
-                _mAeroEnabled = CheckAeroEnabled();
-
-                var cp = base.CreateParams;
-                if (!_mAeroEnabled)
-                    cp.ClassStyle |= CsDropshadow;
-
-                return cp;
-            }
-        }
-
-        private bool CheckAeroEnabled() {
-            if (Environment.OSVersion.Version.Major >= 6) {
-                var enabled = 0;
-                WinApi.DwmIsCompositionEnabled(ref enabled);
-                return (enabled == 1);
-            }
-            return false;
-        }
-
-        protected override void WndProc(ref Message m) {
-
-            if (m.Msg == WmNcpaint && _mAeroEnabled) {
-                var v = 2;
-                WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-                var margins = new WinApi.MARGINS(1, 1, 1, 1);
-                WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
-            }
-
-            base.WndProc(ref m);
-
-            if (m.Msg == WmNchittest && (int)m.Result == Htclient) // drag the form
-                m.Result = (IntPtr)Htcaption;
         }
 
         #endregion

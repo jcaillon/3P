@@ -32,40 +32,21 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <PlatformTarget>x86</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <DebugType>pdbonly</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>
     </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\LiberKey\Apps\Notepad++\App\Notepad++\plugins\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -74,6 +55,27 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -94,7 +96,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abl.cs" />
+    <Compile Include="MainFeatures\Abl.cs" />
     <Compile Include="Data\DataResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -105,25 +107,54 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HtmlResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Html\MarkdownDeep\Abbreviation.cs" />
-    <Compile Include="Html\MarkdownDeep\Block.cs" />
-    <Compile Include="Html\MarkdownDeep\BlockProcessor.cs" />
-    <Compile Include="Html\MarkdownDeep\FootnoteReference.cs" />
-    <Compile Include="Html\MarkdownDeep\HtmlTag.cs" />
-    <Compile Include="Html\MarkdownDeep\LinkDefinition.cs" />
-    <Compile Include="Html\MarkdownDeep\LinkInfo.cs" />
-    <Compile Include="Html\MarkdownDeep\MardownDeep.cs" />
-    <Compile Include="Html\MarkdownDeep\SpanFormatter.cs" />
-    <Compile Include="Html\MarkdownDeep\StringScanner.cs" />
-    <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
-    <Compile Include="Html\MarkdownDeep\Token.cs" />
-    <Compile Include="Html\MarkdownDeep\Utils.cs" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Lib\3pUpdater\3PUpdater.cs" />
+    <Compile Include="Lib\CommonMark\CommonMarkAdditionalFeatures.cs" />
+    <Compile Include="Lib\CommonMark\CommonMarkConverter.cs" />
+    <Compile Include="Lib\CommonMark\CommonMarkException.cs" />
+    <Compile Include="Lib\CommonMark\CommonMarkSettings.cs" />
+    <Compile Include="Lib\CommonMark\Formatters\HtmlFormatter.cs" />
+    <Compile Include="Lib\CommonMark\Formatters\HtmlFormatterSlim.cs" />
+    <Compile Include="Lib\CommonMark\Formatters\HtmlTextWriter.cs" />
+    <Compile Include="Lib\CommonMark\Formatters\Printer.cs" />
+    <Compile Include="Lib\CommonMark\Func.cs" />
+    <Compile Include="Lib\CommonMark\Lazy.cs" />
+    <Compile Include="Lib\CommonMark\OutputFormat.cs" />
+    <Compile Include="Lib\CommonMark\Parser\BlockMethods.cs" />
+    <Compile Include="Lib\CommonMark\Parser\EntityDecoder.cs" />
+    <Compile Include="Lib\CommonMark\Parser\InlineMethods.cs" />
+    <Compile Include="Lib\CommonMark\Parser\InlineStack.cs" />
+    <Compile Include="Lib\CommonMark\Parser\LineInfo.cs" />
+    <Compile Include="Lib\CommonMark\Parser\PositionOffset.cs" />
+    <Compile Include="Lib\CommonMark\Parser\PositionTracker.cs" />
+    <Compile Include="Lib\CommonMark\Parser\Scanner.cs" />
+    <Compile Include="Lib\CommonMark\Parser\ScannerCharacterMatcher.cs" />
+    <Compile Include="Lib\CommonMark\Parser\ScannerHtmlTag.cs" />
+    <Compile Include="Lib\CommonMark\Parser\Subject.cs" />
+    <Compile Include="Lib\CommonMark\Parser\TabTextReader.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\Block.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\BlockTag.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\DocumentData.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\EmphasisData.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\Enumerable.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\EnumeratorEntry.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\FencedCodeData.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\HeadingData.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\HtmlBlockType.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\Inline.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\InlineContentLinkable.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\InlineTag.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\ListData.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\ListDelimiter.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\ListType.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\Reference.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\StringContent.cs" />
+    <Compile Include="Lib\CommonMark\Syntax\StringContentPart.cs" />
+    <Compile Include="Lib\CommonMark\Utilities.cs" />
     <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
@@ -132,9 +163,10 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\NanoXmlParser.cs" />
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
-    <Compile Include="Lib\RegistryWrapper.cs" />
+    <Compile Include="WindowsCore\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
     <Compile Include="Lib\WebServiceJson.cs" />
@@ -181,42 +213,49 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.Designer.cs">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionFilterClass.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionSortingClass.cs" />
+    <Compile Include="NppCore\NppLangs.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FilteredItem.cs" />
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTreeRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTree.cs" />
-    <Compile Include="MainFeatures\FilteredLists\OlvStyler.cs" />
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerSortingClass.cs" />
+    <Compile Include="MainFeatures\FileExplorer\FileListItem.cs" />
+    <Compile Include="MainFeatures\FileExplorer\FileSortingClass.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\AppliMenu.cs" />
-    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
+    <Compile Include="NppCore\NppConfig.cs" />
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\Parser\NppAutoCompParser.cs" />
+    <Compile Include="MainFeatures\Parser\Parser2.cs" />
     <Compile Include="MainFeatures\Pro\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
     <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
-    <Compile Include="NotificationsPublisher.cs" />
+    <Compile Include="WindowsCore\NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
-    <Compile Include="ThemeManager.cs" />
+    <Compile Include="MainFeatures\ThemeManager.cs" />
     <Content Include="Html\Pages\disclaimer.html" />
-    <Compile Include="Interop\CoreWindowsHook.cs" />
-    <Compile Include="Lib\DocumentLines.cs" />
-    <Compile Include="Interop\NotepadHelper.cs" />
-    <Compile Include="Lib\GapBuffer.cs" />
-    <Compile Include="Lib\HtmlHelpInterop.cs" />
+    <Compile Include="WindowsCore\CoreWindowsHook.cs" />
+    <Compile Include="NppCore\DocumentLines.cs" />
+    <Compile Include="NppCore\NotepadHeader.cs" />
+    <Compile Include="NppCore\GapBuffer.cs" />
+    <Compile Include="WindowsCore\HtmlHelpApi.cs" />
     <Compile Include="Lib\JsonParser.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="Lib\User.cs" />
@@ -239,11 +278,11 @@
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Pro\ProCodeFormat.cs" />
-    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
-      <DependentUpon>EmptyForm.cs</DependentUpon>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.Designer.cs">
+      <DependentUpon>NppDockableDialogEmptyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Pro\FilesInfo.cs" />
     <Compile Include="MainFeatures\Pro\ProExecution.cs" />
@@ -256,12 +295,9 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FastObjectListViewWoScrolls.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\CompletionItem.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
@@ -297,12 +333,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.Designer.cs">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Interop\ScintillaHelper.cs" />
-    <Compile Include="Interop\WinApi.cs" />
-    <Compile Include="Interop\WindowWrapper.cs" />
-    <Compile Include="Lib\WinHook.cs" />
+    <Compile Include="NppCore\ScintillaHeader.cs" />
+    <Compile Include="WindowsCore\Win32Api.cs" />
+    <Compile Include="WindowsCore\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />
-    <Compile Include="Lib\DropToWindows.cs" />
+    <Compile Include="WindowsCore\DropToWindows.cs" />
     <Compile Include="MainFeatures\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
     <Compile Include="MainFeatures\Appli\Appli.cs" />
@@ -313,24 +348,15 @@
     <Compile Include="Lib\LibLoader.cs" />
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\AutoComplete.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.Designer.cs">
-      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainFeatures\FilteredLists\FilteredItemTextRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletion.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\Keywords.cs" />
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
-    <Compile Include="Npp.cs" />
-    <Compile Include="Scintilla.cs" />
+    <Compile Include="NppCore\Npp.cs" />
+    <Compile Include="NppCore\Scintilla.cs" />
     <Compile Include="Plug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -338,7 +364,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Interop\UnmanagedExports.cs" />
+    <Compile Include="NppCore\UnmanagedExports.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">
@@ -399,16 +425,12 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetEnvironment.resx">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
-      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
-      <DependentUpon>EmptyForm.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppDockableDialogEmptyForm.resx">
+      <DependentUpon>NppDockableDialogEmptyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
@@ -477,52 +499,45 @@
     <Content Include="Images\Appli\Update.png" />
     <Content Include="Images\Appli\ViewFile.png" />
     <Content Include="Images\Appli\Warning30x30.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Extent.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\External.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\ExternalProc.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\FileScope.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Index.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\LocalScope.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Mandatory.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Private.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Reserved.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Shared.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Database.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Error.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Field.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\FieldPk.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Function.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Keyword.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\KeywordObject.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Label.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Preprocessed.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Procedure.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Sequence.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Snippet.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Table.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\TempTable.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
+    <Content Include="Images\Appli\More.png" />
     <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="Images\Backgrounds\bg_oss.png" />
-    <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
-    <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
-    <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
-    <Content Include="Images\FileExplorer\BringToFront.png" />
-    <Content Include="Images\FileExplorer\FtpType.png" />
-    <Content Include="Images\FileExplorer\PlType.png" />
-    <Content Include="Images\FileExplorer\Stop.png" />
-    <Content Include="Images\FileExplorer\XmlType.png" />
-    <Content Include="Images\FileExplorer\XrefType.png" />
-    <Content Include="Images\FileExplorer\ZipType.png" />
+    <Content Include="Images\Appli\Alphabetical_sorting.png" />
+    <Content Include="Images\Appli\Refreshing.png" />
+    <Content Include="Images\FileTypes\TType.png" />
+    <Content Include="Images\ParserItem\Flags\Abstract.png" />
+    <Content Include="Images\ParserItem\Flags\Final.png" />
+    <Content Include="Images\ParserItem\Flags\FromInclude.png" />
+    <Content Include="Images\ParserItem\Flags\Global.png" />
+    <Content Include="Images\ParserItem\Flags\Input.png" />
+    <Content Include="Images\ParserItem\Flags\InputOutput.png" />
+    <Content Include="Images\ParserItem\Flags\Output.png" />
+    <Content Include="Images\ParserItem\Flags\Override.png" />
+    <Content Include="Images\ParserItem\Flags\Primary.png" />
+    <Content Include="Images\ParserItem\Flags\Protected.png" />
+    <Content Include="Images\ParserItem\Flags\Return.png" />
+    <Content Include="Images\ParserItem\Flags\Serializable.png" />
+    <Content Include="Images\ParserItem\Flags\Static.png" />
+    <Content Include="Images\ToolBar\CodeExplorerLogo.png" />
+    <Content Include="Images\ParserItem\Type\DefinedTempTable.png" />
+    <Content Include="Images\ParserItem\Type\DynamicFunctionCall.png" />
+    <Content Include="Images\ParserItem\Type\DynamicFunctionCallExternal.png" />
+    <Content Include="Images\ParserItem\Type\ExternalProcedure.png" />
+    <Content Include="Images\ParserItem\Type\NotApplicable.png" />
+    <Content Include="Images\ParserItem\Type\Publish.png" />
+    <Content Include="Images\ParserItem\Type\StaticFunctionCall.png" />
+    <Content Include="Images\ParserItem\Type\Subscribe.png" />
+    <Content Include="Images\ParserItem\Type\Unsubscribe.png" />
+    <Content Include="Images\Appli\BringToFront.png" />
+    <Content Include="Images\FileTypes\FtpType.png" />
+    <Content Include="Images\FileTypes\PlType.png" />
+    <Content Include="Images\Appli\Stop.png" />
+    <Content Include="Images\FileTypes\XmlType.png" />
+    <Content Include="Images\FileTypes\XrefType.png" />
+    <Content Include="Images\FileTypes\ZipType.png" />
+    <Content Include="Images\logo\logo150x150.png" />
     <Content Include="Images\Menu\EditCode.png" />
     <Content Include="Images\Menu\DataAdmin.png" />
     <Content Include="Images\Menu\DatabaseTools.png" />
@@ -533,72 +548,98 @@
     <Content Include="Images\Menu\Miscellaneous.png" />
     <Content Include="Images\Menu\ProDesktop.png" />
     <Content Include="Images\Menu\Synchronize.png" />
+    <Content Include="Images\ParserItem\Flags\Abbreviation.png" />
+    <Content Include="Images\ParserItem\Flags\Buffer.png" />
+    <Content Include="Images\ParserItem\Flags\Dynamic.png" />
+    <Content Include="Images\ParserItem\Flags\Extent.png" />
+    <Content Include="Images\ParserItem\Flags\External.png" />
+    <Content Include="Images\ParserItem\Flags\FileScope.png" />
+    <Content Include="Images\ParserItem\Flags\Index.png" />
+    <Content Include="Images\ParserItem\Flags\LocalScope.png" />
+    <Content Include="Images\ParserItem\Flags\Mandatory.png" />
+    <Content Include="Images\ParserItem\Flags\New.png" />
+    <Content Include="Images\ParserItem\Flags\Parameter.png" />
+    <Content Include="Images\ParserItem\Flags\Private.png" />
+    <Content Include="Images\ParserItem\Flags\Reserved.png" />
+    <Content Include="Images\ParserItem\Flags\Shared.png" />
+    <Content Include="Images\ParserItem\Type\Class.png" />
+    <Content Include="Images\ParserItem\Type\Constructor.png" />
+    <Content Include="Images\ParserItem\Type\Database.png" />
+    <Content Include="Images\ParserItem\Type\Error.png" />
+    <Content Include="Images\ParserItem\Type\Field.png" />
+    <Content Include="Images\ParserItem\Type\FieldPk.png" />
+    <Content Include="Images\ParserItem\Type\Function.png" />
+    <Content Include="Images\ParserItem\Type\Keyword.png" />
+    <Content Include="Images\ParserItem\Type\KeywordObject.png" />
+    <Content Include="Images\ParserItem\Type\Label.png" />
+    <Content Include="Images\ParserItem\Type\Method.png" />
+    <Content Include="Images\ParserItem\Type\Preprocessed.png" />
+    <Content Include="Images\ParserItem\Type\Procedure.png" />
+    <Content Include="Images\ParserItem\Type\Sequence.png" />
+    <Content Include="Images\ParserItem\Type\Snippet.png" />
+    <Content Include="Images\ParserItem\Type\Table.png" />
+    <Content Include="Images\ParserItem\Type\TempTable.png" />
+    <Content Include="Images\ParserItem\Type\VariableComplex.png" />
+    <Content Include="Images\ParserItem\Type\VariablePrimitive.png" />
+    <Content Include="Images\ParserItem\Type\Widget.png" />
     <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
-    <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
-    <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
-    <Content Include="Images\DockableExplorer\Flag\LoadPersistent.png" />
-    <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
-    <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
-    <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
-    <Content Include="Images\DockableExplorer\Type\Block.png" />
-    <Content Include="Images\DockableExplorer\Type\DefinitionBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\DynamicFunctionCall.png" />
-    <Content Include="Images\DockableExplorer\Type\FunctionCallExternal.png" />
-    <Content Include="Images\DockableExplorer\Type\FunctionCallInternal.png" />
-    <Content Include="Images\DockableExplorer\Type\Include.png" />
-    <Content Include="Images\DockableExplorer\Type\PreprocessorBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\ProgramParameter.png" />
-    <Content Include="Images\DockableExplorer\Type\Prototype.png" />
-    <Content Include="Images\DockableExplorer\Type\RunExternal.png" />
-    <Content Include="Images\DockableExplorer\Type\RunInternal.png" />
-    <Content Include="Images\DockableExplorer\Type\RuntimeBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\SettingsBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\CreateWindowBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\TableUsed.png" />
-    <Content Include="Images\DockableExplorer\Type\TempTableUsed.png" />
-    <Content Include="Images\DockableExplorer\Type\XtfrBlock.png" />
-    <Content Include="Images\DockableExplorer\Type\Browse.png" />
-    <Content Include="Images\DockableExplorer\buttons\clear_filters.png" />
-    <Content Include="Images\DockableExplorer\Type\EverythingInCodeOrder.png" />
-    <Content Include="Images\DockableExplorer\buttons\collapse.png" />
-    <Content Include="Images\DockableExplorer\Type\OnEvent.png" />
-    <Content Include="Images\DockableExplorer\buttons\eraser.png" />
-    <Content Include="Images\DockableExplorer\buttons\expand.png" />
-    <Content Include="Images\DockableExplorer\Type\MainBlock.png" />
-    <Content Include="Images\DockableExplorer\buttons\numerical_sorting.png" />
-    <Content Include="Images\DockableExplorer\buttons\refresh.png" />
-    <Content Include="Images\DockableExplorer\Type\Root.png" />
-    <Content Include="Images\DockableExplorer\Type\Run.png" />
-    <Content Include="Images\FileExplorer\ClearAll.png" />
-    <Content Include="Images\FileExplorer\ClsType.png" />
-    <Content Include="Images\FileExplorer\DfType.png" />
-    <Content Include="Images\FileExplorer\DType.png" />
-    <Content Include="Images\FileExplorer\ExplorerDir0.png" />
-    <Content Include="Images\FileExplorer\ExplorerDir1.png" />
-    <Content Include="Images\FileExplorer\ExplorerDir2.png" />
-    <Content Include="Images\FileExplorer\ExplorerDir3.png" />
+    <Content Include="Images\ParserItem\Flags\NotFound.png" />
+    <Content Include="Images\ParserItem\Flags\Persistent.png" />
+    <Content Include="Images\ParserItem\Flags\IsTooLong.png" />
+    <Content Include="Images\ParserItem\Flags\MissingDbName.png" />
+    <Content Include="Images\ParserItem\Flags\Uncertain.png" />
+    <Content Include="Images\ParserItem\Type\Block.png" />
+    <Content Include="Images\ParserItem\Type\DefinitionBlock.png" />
+    <Content Include="Images\ParserItem\Type\Include.png" />
+    <Content Include="Images\ParserItem\Type\PreprocessorBlock.png" />
+    <Content Include="Images\ParserItem\Type\ProgramParameter.png" />
+    <Content Include="Images\ParserItem\Type\Prototype.png" />
+    <Content Include="Images\ParserItem\Type\RunExternal.png" />
+    <Content Include="Images\ParserItem\Type\RuntimeBlock.png" />
+    <Content Include="Images\ParserItem\Type\SettingsBlock.png" />
+    <Content Include="Images\ParserItem\Type\CreateWindowBlock.png" />
+    <Content Include="Images\ParserItem\Type\TableUsed.png" />
+    <Content Include="Images\ParserItem\Type\TempTableUsed.png" />
+    <Content Include="Images\ParserItem\Type\XtfrBlock.png" />
+    <Content Include="Images\ParserItem\Type\Browse.png" />
+    <Content Include="Images\Appli\Clear_filters.png" />
+    <Content Include="Images\Appli\Collapse.png" />
+    <Content Include="Images\ParserItem\Type\OnEvent.png" />
+    <Content Include="Images\Appli\Eraser.png" />
+    <Content Include="Images\Appli\Expand.png" />
+    <Content Include="Images\ParserItem\Type\MainBlock.png" />
+    <Content Include="Images\Appli\Numerical_sorting.png" />
+    <Content Include="Images\Appli\Refresh.png" />
+    <Content Include="Images\ParserItem\Type\Root.png" />
+    <Content Include="Images\ParserItem\Type\Run.png" />
+    <Content Include="Images\Appli\ClearAll.png" />
+    <Content Include="Images\FileTypes\ClsType.png" />
+    <Content Include="Images\FileTypes\DfType.png" />
+    <Content Include="Images\FileTypes\DType.png" />
+    <Content Include="Images\Appli\ExplorerDir0.png" />
+    <Content Include="Images\Appli\ExplorerDir1.png" />
+    <Content Include="Images\Appli\ExplorerDir2.png" />
+    <Content Include="Images\Appli\ExplorerDir3.png" />
     <Content Include="Images\ToolBar\FileExplorer16x16.png" />
-    <Content Include="Images\FileExplorer\FileExplorerLogo.png" />
-    <Content Include="Images\FileExplorer\FolderType.png" />
-    <Content Include="Images\FileExplorer\GetHelp.png" />
-    <Content Include="Images\FileExplorer\IType.png" />
-    <Content Include="Images\FileExplorer\Favourite.png" />
-    <Content Include="Images\FileExplorer\Next.png" />
-    <Content Include="Images\FileExplorer\Previous.png" />
-    <Content Include="Images\FileExplorer\ReadOnly.png" />
-    <Content Include="Images\FileExplorer\LstType.png" />
-    <Content Include="Images\FileExplorer\PType.png" />
-    <Content Include="Images\FileExplorer\RType.png" />
-    <Content Include="Images\FileExplorer\TType.png" />
-    <Content Include="Images\FileExplorer\UnknowType.png" />
-    <Content Include="Images\FileExplorer\WType.png" />
-    <Content Include="Images\FileExplorer\ZoomIn.png" />
+    <Content Include="Images\ToolBar\FileExplorerLogo.png" />
+    <Content Include="Images\FileTypes\FolderType.png" />
+    <Content Include="Images\Appli\GetHelp.png" />
+    <Content Include="Images\FileTypes\IType.png" />
+    <Content Include="Images\Appli\Favourite.png" />
+    <Content Include="Images\Appli\Next.png" />
+    <Content Include="Images\Appli\Previous.png" />
+    <Content Include="Images\Appli\ReadOnly.png" />
+    <Content Include="Images\FileTypes\LstType.png" />
+    <Content Include="Images\FileTypes\PType.png" />
+    <Content Include="Images\FileTypes\RType.png" />
+    <Content Include="Images\FileTypes\UnknowType.png" />
+    <Content Include="Images\FileTypes\WType.png" />
+    <Content Include="Images\Appli\ZoomIn.png" />
     <Content Include="Images\Html\getting-started-0.png" />
     <Content Include="Images\Html\getting-started-1.png" />
     <Content Include="Images\Html\getting-started-2.png" />
     <Content Include="Images\Html\getting-started-3.png" />
     <Content Include="Images\logo\icon\3p_icon.ico" />
-    <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo20x20.png" />
     <Content Include="Images\logo\logo30x30.png" />
     <Content Include="Html\Pages\getting_started.txt" />
@@ -639,12 +680,8 @@
     <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
     <Content Include="Images\NotifAndMessages\MsgWarning.png" />
     <Content Include="Images\ToolBar\logo16x16.png" />
-    <Content Include="Images\tooltips\Output.png" />
-    <Content Include="Images\tooltips\InputOutput.png" />
-    <Content Include="Images\tooltips\Input.png" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
     <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
-    <Content Include="Lib\ObjectListView\ObjectListView.dll" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -660,26 +697,58 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
-      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
-      <Name>ObjectListView2012</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>YamuiFramework</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\FunctionsIcons\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"
-if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName).pdb"</PostBuildEvent>
+    <PostBuildEvent>echo [INFO] End of build for 3P
+set NPPFOLDERNAME=3P_notepad++
+if "$(PlatformName)" == "x64" (
+	set NPPFOLDERNAME=3P_notepad++x64
+)
+
+if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( 
+	echo [INFO] Copying output files to %25NPPFOLDERNAME%25 folder...
+	if exist "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" (
+		copy /Y "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName)$(TargetExt)" &gt;nul
+	)
+	if exist "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" (
+		copy /Y "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
+	)
+)
+
+WHERE 7z &gt;nul 2&gt;nul
+IF not "%25ERRORLEVEL%25" == "0" (
+	echo 7z.exe not found in the path, can't create the .zip releases
+	goto :label_end
+) 
+
+set RELEASENAME=3P.zip
+if "$(PlatformName)" == "x64" (
+	set RELEASENAME=3P_x64.zip
+)
+
+echo [INFO] Zipping files into a release named %25RELEASENAME%25...
+
+md "$(SolutionDir)\Releases" &gt;nul 2&gt;nul
+del /Q "$(SolutionDir)\Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
+7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" &gt;nul
+7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" &gt;nul
+
+
+:label_end
+exit 0</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

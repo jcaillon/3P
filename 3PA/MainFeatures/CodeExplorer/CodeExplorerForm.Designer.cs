@@ -27,75 +27,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.buttonSort = new YamuiFramework.Controls.YamuiButtonImage();
-            this.buttonRefresh = new YamuiFramework.Controls.YamuiButtonImage();
-            this.buttonCleanText = new YamuiFramework.Controls.YamuiButtonImage();
-            this.buttonExpandRetract = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiButtonImage();
+            this.filterbox = new YamuiFramework.Controls.YamuiList.YamuiFilterBox();
+            this.yamuiList = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
+            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
+            this.lbCurrentScope = new YamuiFramework.Controls.YamuiLabel();
+            this.pbCurrentScope = new YamuiFramework.Controls.YamuiPictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pbCurrentScope)).BeginInit();
             this.SuspendLayout();
-            // 
-            // buttonSort
-            // 
-            this.buttonSort.BackGrndImage = null;
-            this.buttonSort.Location = new System.Drawing.Point(45, 4);
-            this.buttonSort.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonSort.Name = "buttonSort";
-            this.buttonSort.Size = new System.Drawing.Size(20, 20);
-            this.buttonSort.TabIndex = 19;
-            this.buttonSort.TabStop = false;
-            this.buttonSort.Text = "yamuiImageButton2";
-            // 
-            // buttonRefresh
-            // 
-            this.buttonRefresh.BackGrndImage = null;
-            this.buttonRefresh.Location = new System.Drawing.Point(5, 4);
-            this.buttonRefresh.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonRefresh.Name = "buttonRefresh";
-            this.buttonRefresh.Size = new System.Drawing.Size(20, 20);
-            this.buttonRefresh.TabIndex = 18;
-            this.buttonRefresh.TabStop = false;
-            this.buttonRefresh.Text = "yamuiImageButton2";
-            // 
-            // buttonCleanText
-            // 
-            this.buttonCleanText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCleanText.BackGrndImage = null;
-            this.buttonCleanText.Location = new System.Drawing.Point(296, 4);
-            this.buttonCleanText.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonCleanText.Name = "buttonCleanText";
-            this.buttonCleanText.Size = new System.Drawing.Size(20, 20);
-            this.buttonCleanText.TabIndex = 17;
-            this.buttonCleanText.TabStop = false;
-            this.buttonCleanText.Text = "yamuiImageButton2";
-            // 
-            // buttonExpandRetract
-            // 
-            this.buttonExpandRetract.BackGrndImage = null;
-            this.buttonExpandRetract.Location = new System.Drawing.Point(25, 4);
-            this.buttonExpandRetract.Name = "buttonExpandRetract";
-            this.buttonExpandRetract.Size = new System.Drawing.Size(20, 20);
-            this.buttonExpandRetract.TabIndex = 16;
-            this.buttonExpandRetract.TabStop = false;
-            this.buttonExpandRetract.Text = "yamuiImageButton1";
-            // 
-            // textBoxFilter
-            // 
-            this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxFilter.Lines = new string[0];
-            this.textBoxFilter.Location = new System.Drawing.Point(90, 4);
-            this.textBoxFilter.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.textBoxFilter.MaxLength = 32767;
-            this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.PasswordChar = '\0';
-            this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textBoxFilter.SelectedText = "";
-            this.textBoxFilter.Size = new System.Drawing.Size(201, 20);
-            this.textBoxFilter.TabIndex = 14;
-            this.textBoxFilter.TabStop = false;
-            this.textBoxFilter.WaterMark = "Filter here!";
             // 
             // toolTipHtml
             // 
@@ -108,46 +47,88 @@ namespace _3PA.MainFeatures.CodeExplorer {
             this.toolTipHtml.ReshowDelay = 100;
             this.toolTipHtml.ShowAlways = true;
             // 
-            // buttonIncludeExternal
+            // filterbox
             // 
-            this.buttonIncludeExternal.BackGrndImage = null;
-            this.buttonIncludeExternal.Location = new System.Drawing.Point(65, 4);
-            this.buttonIncludeExternal.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonIncludeExternal.Name = "buttonIncludeExternal";
-            this.buttonIncludeExternal.Size = new System.Drawing.Size(20, 20);
-            this.buttonIncludeExternal.TabIndex = 20;
-            this.buttonIncludeExternal.TabStop = false;
-            this.buttonIncludeExternal.Text = "yamuiImageButton2";
+            this.filterbox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.filterbox.Location = new System.Drawing.Point(4, 23);
+            this.filterbox.Name = "filterbox";
+            this.filterbox.Size = new System.Drawing.Size(343, 20);
+            this.filterbox.TabIndex = 0;
+            // 
+            // yamuiList
+            // 
+            this.yamuiList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.yamuiList.EmptyListString = "Empty list!";
+            this.yamuiList.Location = new System.Drawing.Point(4, 49);
+            this.yamuiList.Name = "yamuiList";
+            this.yamuiList.ScrollWidth = 10;
+            this.yamuiList.Size = new System.Drawing.Size(343, 519);
+            this.yamuiList.SortingClass = null;
+            this.yamuiList.TabIndex = 1;
+            this.yamuiList.UseCustomBackColor = false;
+            // 
+            // yamuiLabel2
+            // 
+            this.yamuiLabel2.AutoSize = true;
+            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Location = new System.Drawing.Point(2, 1);
+            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
+            this.yamuiLabel2.Name = "yamuiLabel2";
+            this.yamuiLabel2.Size = new System.Drawing.Size(118, 19);
+            this.yamuiLabel2.TabIndex = 38;
+            this.yamuiLabel2.Text = "CODE EXPLORER";
+            // 
+            // lbCurrentScope
+            // 
+            this.lbCurrentScope.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbCurrentScope.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbCurrentScope.Location = new System.Drawing.Point(128, 1);
+            this.lbCurrentScope.Margin = new System.Windows.Forms.Padding(3);
+            this.lbCurrentScope.Name = "lbCurrentScope";
+            this.lbCurrentScope.Size = new System.Drawing.Size(193, 20);
+            this.lbCurrentScope.TabIndex = 39;
+            this.lbCurrentScope.Text = "Not applicable";
+            this.lbCurrentScope.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // pbCurrentScope
+            // 
+            this.pbCurrentScope.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbCurrentScope.BackGrndImage = null;
+            this.pbCurrentScope.Location = new System.Drawing.Point(327, 1);
+            this.pbCurrentScope.Name = "pbCurrentScope";
+            this.pbCurrentScope.Size = new System.Drawing.Size(20, 20);
+            this.pbCurrentScope.TabIndex = 40;
+            this.pbCurrentScope.TabStop = false;
             // 
             // CodeExplorerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(320, 330);
-            this.Controls.Add(this.buttonSort);
-            this.Controls.Add(this.buttonRefresh);
-            this.Controls.Add(this.buttonCleanText);
-            this.Controls.Add(this.buttonExpandRetract);
-            this.Controls.Add(this.textBoxFilter);
-            this.Controls.Add(this.buttonIncludeExternal);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.ClientSize = new System.Drawing.Size(350, 571);
+            this.Controls.Add(this.pbCurrentScope);
+            this.Controls.Add(this.lbCurrentScope);
+            this.Controls.Add(this.yamuiLabel2);
+            this.Controls.Add(this.yamuiList);
+            this.Controls.Add(this.filterbox);
             this.Name = "CodeExplorerForm";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.Text = "DockableExplorerForm";
+            this.Text = "CodeExplorerForm";
+            ((System.ComponentModel.ISupportInitialize)(this.pbCurrentScope)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private YamuiButtonImage buttonSort;
-        private YamuiButtonImage buttonRefresh;
-        private YamuiButtonImage buttonCleanText;
-        private YamuiButtonImage buttonExpandRetract;
-        private YamuiTextBox textBoxFilter;
         private HtmlToolTip toolTipHtml;
-        private YamuiButtonImage buttonIncludeExternal;
-
+        private YamuiFramework.Controls.YamuiList.YamuiFilterBox filterbox;
+        private YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList yamuiList;
+        private YamuiLabel yamuiLabel2;
+        private YamuiLabel lbCurrentScope;
+        private YamuiPictureBox pbCurrentScope;
     }
 }
