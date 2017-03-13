@@ -377,8 +377,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)3PA\Lib\YamuiFolder\" (copy /Y "$(TargetPath)" "$(SolutionDir)3PA\Lib\YamuiFolder\$(TargetFileName)")
-if exist "$(SolutionDir)..\3P_notepad++\plugins\Config\3P\Libraries\" (copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\Config\3P\Libraries\$(TargetName).pdb")</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
