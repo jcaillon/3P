@@ -229,7 +229,7 @@ namespace _3PA {
             AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
 
             Keywords.Import();
-            Snippets.Init();
+            //Snippets.Init();
             FileTag.Import();
 
             // initialize the list of objects of the autocompletion form
@@ -677,7 +677,6 @@ namespace _3PA {
             if (deletedText || (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
                 // observe modifications to lines (MANDATORY)
                 Npp.UpdateLinesInfo(nc, !deletedText);
-
                 // parse
                 ParserHandler.ParseCurrentDocument();
             }
@@ -739,7 +738,7 @@ namespace _3PA {
         public static void OnUpdateSelection() {
             // close popup windows
             ClosePopups();
-            Snippets.FinalizeCurrent();
+            //Snippets.FinalizeCurrent();
 
             if (!Npp.CurrentFile.IsProgress)
                 return;

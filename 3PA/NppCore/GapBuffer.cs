@@ -34,6 +34,7 @@ namespace _3PA.NppCore {
     [Serializable]
     [DebuggerDisplay("Count = {Count}")]
     public class GapBuffer<T> : IList<T>, IList {
+
         #region Fields
 
         private const int MinCapacity = 4;
@@ -86,7 +87,7 @@ namespace _3PA.NppCore {
                     // Allocate a new buffer
                     T[] newBuffer = new T[value];
                     int newGapEnd = newBuffer.Length - (_buffer.Length - _gapEnd);
-
+                    
                     // Copy the spans into the front and back of the new buffer
                     Array.Copy(_buffer, 0, newBuffer, 0, _gapStart);
                     Array.Copy(_buffer, _gapEnd, newBuffer, newGapEnd, newBuffer.Length - newGapEnd);
@@ -561,11 +562,12 @@ namespace _3PA.NppCore {
             // Is the available space in the gap?
             if (required > (_gapEnd - _gapStart)) {
                 // Calculate a new size (double the size necessary)
-                int newCapacity = (Count + required)*2;
-                if (newCapacity < MinCapacity)
-                    newCapacity = MinCapacity;
-
-                Capacity = newCapacity;
+                long newLgCapacity = (Count + required)*2;
+                if (newLgCapacity < MinCapacity)
+                    newLgCapacity = MinCapacity;
+                if (newLgCapacity > int.MaxValue)
+                    newLgCapacity = int.MaxValue;
+                Capacity = (int) newLgCapacity;
             }
         }
 

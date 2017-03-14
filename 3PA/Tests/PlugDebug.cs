@@ -171,6 +171,7 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest3() {
+
             UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
 
             MeasureIt(() => {

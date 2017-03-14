@@ -29,6 +29,7 @@ using _3PA.MainFeatures;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -42,6 +43,7 @@ namespace _3PA.NppCore {
     /// faster execution than with SendMessage<br />
     /// </summary>
     internal static partial class Npp {
+
         #region fields
 
         public const int KeywordMaxLength = 60;
@@ -99,10 +101,6 @@ namespace _3PA.NppCore {
         /// </summary>
         public static void UpdateLinesInfo(SCNotification scn, bool isInsertion) {
             Lines.OnScnModified(scn, isInsertion);
-        }
-
-        public static bool IsLinesInfoUpdated {
-            get { return Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() == Lines.Count; }
         }
 
         /// <summary>
@@ -2059,7 +2057,8 @@ namespace _3PA.NppCore {
         #region Line Class
 
         /// <summary>
-        /// Represents a line of text in a Scintilla control.
+        /// Represents a line of text in a Scintilla control
+        /// the first line has the index 0
         /// </summary>
         public class Line {
             #region Methods
@@ -2586,6 +2585,7 @@ namespace _3PA.NppCore {
 
             /// <summary>
             /// Get the total number of lines
+            /// An empty document has 1 line, a document with only one \n has 2 lines
             /// </summary>
             public static int Count {
                 get { return Lines.Count; }

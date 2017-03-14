@@ -19,10 +19,8 @@
 #endregion
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
-using System.Threading;
-using _3PA.Lib;
+using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore {
@@ -55,14 +53,11 @@ namespace _3PA.NppCore {
         /// and its length, so we can compute everything accordingly
         /// </summary>
         private int _holeLine;
-
         private int _holeLenght;
-
-        private static ReaderWriterLockSlim _listLock = new ReaderWriterLockSlim();
 
         #endregion
 
-        #region Constructors
+        #region Life and death
 
         /// <summary>
         /// Initializes a new instance
@@ -71,22 +66,19 @@ namespace _3PA.NppCore {
             Init();
         }
 
-        #endregion
-
-        #region Register document modifications
-
         /// <summary>
         /// Reset the lines list
         /// </summary>
         private void Init() {
-            if (_listLock.TryEnterWriteLock(-1)) {
-                try {
-                    _linesList = new GapBuffer<int> { 0, 0 };
-                } finally {
-                    _listLock.ExitReadLock();
-                }
-            }
+            _linesList = new GapBuffer<int> { 0, 0 };
+            _holeLine = 0;
+            _holeLenght = 0;
+            _oneByteCharEncoding = false;
         }
+
+        #endregion
+
+        #region Register document modifications
 
         /// <summary>
         /// Simulates the insertion of the whole text, use this to reset the lines info 
@@ -114,16 +106,10 @@ namespace _3PA.NppCore {
             if (_oneByteCharEncoding)
                 return;
 
-            if (_listLock.TryEnterWriteLock(-1)) {
-                try {
-                    if (isInsertion) {
-                        OnInsertedText(scn);
-                    } else {
-                        OnDeletedText(scn);
-                    }
-                } finally {
-                    _listLock.ExitReadLock();
-                }
+            if (isInsertion) {
+                OnInsertedText(scn);
+            } else {
+                OnDeletedText(scn);
             }
         }
 
@@ -184,7 +170,7 @@ namespace _3PA.NppCore {
                 // so in that case, we need to refresh the info when the text is actually inserted, that is after updateui
                 // Clarification : the notification sent is correct (nb lines > 0 and length is ok as well), but calling SciLineLength
                 // will always return 0 at this moment!
-                if (TextLength == 0)
+                if (!_oneByteCharEncoding && scn.linesAdded > 0 && TextLength == 0)
                     Plug.ActionsAfterUpdateUi.Enqueue(Reset);
             }
         }
@@ -228,7 +214,11 @@ namespace _3PA.NppCore {
         /// <returns>The number of lines</returns>
         public int Count {
             get {
-                return SciGetLineCount();
+                // bypass the hard work for simple encoding
+                if (_oneByteCharEncoding)
+                    return SciGetLineCount();
+
+                return _linesList.Count - 1;
             }
         }
 
@@ -241,7 +231,8 @@ namespace _3PA.NppCore {
                 if (_oneByteCharEncoding)
                     return SciGetLength();
 
-                return CharPositionFromLine(Count);
+                // text lenght is the start pos of the last "phantom" line
+                return CharPositionFromLine(_linesList.Count - 1);
             }
         }
 
@@ -261,52 +252,32 @@ namespace _3PA.NppCore {
                 return PrivateCharPositionFromLine(index);
             } catch (Exception) {
                 try {
+                    index = index.Clamp(0, _linesList.Count - 1);
                     Reset();
                     if (_oneByteCharEncoding)
                         return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
-                    if (Config.IsDevelopper) {
-                        var outText = new StringBuilder();
-                        var sciTotalLines = SciGetLineCount();
-                        var calcTotalLines = _linesList.Count;
-                        var sciCurPos = 0;
-                        for (int i = 0; i < sciTotalLines; i++) {
-                            outText.Append(sciCurPos);
-                            sciCurPos += SciLineLength(i);
-                            outText.Append("\t");
-                            outText.Append(i < calcTotalLines ? PrivateCharPositionFromLine(i).ToString() : "?");
-                            outText.AppendLine();
-                        }
-                        outText.AppendLine();
-                        outText.Append("FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress + ", nbLines = " + sciTotalLines);
-                        var path = Path.Combine(Config.FolderLog, "doclines_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss_") + ".log");
-                        Utils.FileWriteAllText(path, outText.ToString());
-                        UserCommunication.Notify(path.ToHtmlLink());
+                    ErrorHandler.LogError(x,
+                        "FAILED TO RESET DocumentLines for " +
+                        "\r\n_holeLenght = " + _holeLenght +
+                        "\r\n_holeLine = " + _holeLine +
+                        "\r\n_linesList.Count = " + _linesList.Count +
+                        "\r\nSciGetLineCount = " + SciGetLineCount() +
+                        "\r\nSciGetLength = " + SciGetLength() +
+                        "\r\nTextLength = " + TextLength + "<br>" +
+                        "\r\nSciLineFromPosition(SciGetLength()) = " + SciLineFromPosition(SciGetLength()) +
+                        "\r\nLineFromCharPosition(TextLength) = " + LineFromCharPosition(TextLength) +
+                        "\r\nCurrentPosition = " + Npp.CurrentPosition +
+                        "\r\nSCI_GETCURRENTPOS = " + Npp.Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32() +
+                        "\r\nSciPositionFromLine(SciGetLineCount()) = " + SciPositionFromLine(SciGetLineCount()) +
+                        "\r\nCharPositionFromLine(SciGetLineCount()) = " + CharPositionFromLine(SciGetLineCount())
+                    );
+                    if (Config.IsDevelopper)
                         Debug.Assert(false);
-                    }
-                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Npp.CurrentFile.IsProgress + ", realNbLines = " + SciGetLineCount());
                 }
                 return SciPositionFromLine(index);
             }
-        }
-
-        /// <summary>
-        /// Returns the CHAR position where the line begins,
-        /// this is THE method of this class (since it is the only info we keep on the lines!)
-        /// </summary>
-        private int PrivateCharPositionFromLine(int index) {
-            if (_listLock.TryEnterReadLock(-1)) {
-                try {
-                    if (_holeLenght != 0 && index > _holeLine) {
-                        return _linesList[index] + _holeLenght;
-                    }
-                    return _linesList[index];
-                } finally {
-                    _listLock.ExitReadLock();
-                }
-            }
-            return 0;
         }
 
         /// <summary>
@@ -389,6 +360,18 @@ namespace _3PA.NppCore {
         #region private methods
 
         /// <summary>
+        /// Returns the CHAR position where the line begins,
+        /// this is THE SINGLE MOST IMPORTANT method of this class 
+        /// (since it is the only info we keep on the lines!)
+        /// </summary>
+        private int PrivateCharPositionFromLine(int index) {
+            if (_holeLenght != 0 && index > _holeLine) {
+                return _linesList[index] + _holeLenght;
+            }
+            return _linesList[index];
+        }
+
+        /// <summary>
         /// Returns the document lenght in BYTES
         /// </summary>
         /// <returns></returns>
@@ -407,6 +390,7 @@ namespace _3PA.NppCore {
 
         /// <summary>
         /// returns the number of lines in the document
+        /// An empty document has 1 line, a document with only one \n has 2 lines
         /// </summary>
         /// <returns></returns>
         private int SciGetLineCount() {
@@ -453,15 +437,20 @@ namespace _3PA.NppCore {
         /// Gets the number of CHAR in a BYTE range
         /// </summary>
         private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
-            if (text == IntPtr.Zero || length == 0)
+            if (text == IntPtr.Zero || length == 0) {
                 return 0;
+            }
             var bptr = (byte*) text;
-            if (bptr == null)
+            if (bptr == null) {
+                if (Config.IsDevelopper)
+                    Debug.Assert(false);
                 return 0;
+            }
             var count = encoding.GetCharCount(bptr, length);
             return count;
         }
 
         #endregion
+
     }
 }

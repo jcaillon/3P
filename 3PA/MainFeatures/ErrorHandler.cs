@@ -144,7 +144,8 @@ namespace _3PA.MainFeatures {
                 Utils.FileAppendAllText(Config.FileErrorLog, toAppend.ToString());
 
                 // send the report
-                SendBugReport(info);
+                if (!Config.IsDevelopper)
+                    SendBugReport(info);
             } catch (Exception x) {
                 if (Config.IsDevelopper)
                     ShowErrors(x, message);

@@ -31,3 +31,5 @@ See the example below for a better understanding
 - Fixed an issue with the type buttons of the file explorer that would the tooltips of the autocompetion type buttons
 - Replaced the old mechanism to hide the progress splashscreen during a prowin execution, now uses `-nosplash`!
 - 3P no longers catches errors from other .net plugins (like CSScriptNpp)
+- Correction of various bugs related to document encoding
+
