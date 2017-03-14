@@ -44,99 +44,31 @@ namespace _3PA.NppCore {
     /// </summary>
     internal static class Sci {
 
-        #region fields
+        #region const
 
         public const int KeywordMaxLength = 60;
-        private static int _curScintillaNb;
-        private static IntPtr _curScintilla;
-        private static DocumentLines _lines;
-        private static ScintillaApi _scintillaApi;
 
         #endregion
 
         #region Critical Core
-
-        /// <summary>
-        /// Returns the current instance of scintilla used
-        /// 0/1 corresponding to the main/seconday scintilla currently used
-        /// </summary>
-        public static int CurrentScintillaId
-        {
-            get
-            {
-                long curScintilla;
-                Win32Api.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                return (int)curScintilla;
-            }
-        }
-        /// <summary>
-        /// Is scintilla currently focused?
-        /// </summary>
-        public static bool IsScintillaFocused
-        {
-            get { return WinApi.GetForegroundWindow() == HandleScintilla; }
-        }
-
-        /// <summary>
-        /// Returns the current instance of scintilla used
-        /// 0/1 corresponding to the main/seconday scintilla currently used
-        /// </summary>
-        public static int CurrentScintilla {
-            get { return _curScintillaNb; }
-        }
-
-        /// <summary>
-        /// Gets the window handle to current Scintilla.
-        /// </summary>
-        public static IntPtr HandleScintilla {
-            get {
-                if (_curScintilla == IntPtr.Zero)
-                    UpdateScintilla();
-                return _curScintilla;
-            }
-        }
-
+        
         /// <summary>
         /// Instance of scintilla, the class that allows communication with the current scintilla
         /// </summary>
-        public static ScintillaApi Api {
-            get { return _scintillaApi ?? (_scintillaApi = new ScintillaApi(HandleScintilla)); }
-        }
-
-        /// <summary>
-        /// This is critical for a correct behavior when using any scintilla function that involves a position
-        /// </summary>
-        private static DocumentLines Lines {
-            get { return _lines ?? (_lines = new DocumentLines()); }
-        }
-
-        /// <summary>
-        /// Call this to rebuild the lines information from scratch
-        /// </summary>
-        public static void RebuildLinesInfo() {
-            Lines.Reset();
-        }
-
-        /// <summary>
-        /// Call this on SCN_MODIFIED event from scintilla to update the info on lines
-        /// </summary>
-        public static void UpdateLinesInfo(SCNotification scn, bool isInsertion) {
-            Lines.OnScnModified(scn, isInsertion);
-        }
-
-        /// <summary>
-        /// Updates the current scintilla handle for Npp's functions
-        /// Called when the user changes the current document
-        /// </summary>
-        public static void UpdateScintilla() {
-            _curScintillaNb = CurrentScintillaId.ClampMax(1);
-            _curScintilla = _curScintillaNb == 0 ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
-            Api.UpdateScintillaDirectMessage(_curScintilla);
+        private static SciApi Api {
+            get { return Npp.CurrentSci; }
         }
 
         #endregion
 
         #region Class accessors
+        
+        /// <summary>
+        /// Is scintilla currently focused?
+        /// </summary>
+        public static bool IsScintillaFocused {
+            get { return WinApi.GetForegroundWindow() == Api.Handle; }
+        }
 
         /// <summary>
         /// Returns a Line object representing the given line
@@ -249,7 +181,7 @@ namespace _3PA.NppCore {
         /// <param name="chars">A String of the characters that will cancel autocompletion. The default is empty.</param>
         /// <remarks>Characters specified should be limited to printable ASCII characters.</remarks>
         public static void AutoCStops(string chars) {
-            Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
+            Win32Api.SendMessage(Api.Handle, SciMsg.SCI_AUTOCSTOPS, 0, chars);
         }
 
         /// <summary>
@@ -257,7 +189,7 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <returns></returns>
         public static Rectangle GetScintillaRectangle() {
-            return WinApi.GetWindowRect(HandleScintilla);
+            return WinApi.GetWindowRect(Api.Handle);
         }
 
         /// <summary>
@@ -345,8 +277,8 @@ namespace _3PA.NppCore {
             end = Clamp(end, 0, textLength);
 
             // Convert to byte positions
-            start = Lines.CharToBytePosition(start);
-            end = Lines.CharToBytePosition(end);
+            start = Api.Lines.CharToBytePosition(start);
+            end = Api.Lines.CharToBytePosition(end);
 
             Api.Send(SciMsg.SCI_COPYRANGE, new IntPtr(start), new IntPtr(end));
         }
@@ -364,7 +296,7 @@ namespace _3PA.NppCore {
         /// <param name="displayLine">The zero-based display line index.</param>
         /// <returns>The zero-based document line index.</returns>
         public static int DocLineFromVisible(int displayLine) {
-            displayLine = Clamp(displayLine, 0, Lines.Count);
+            displayLine = Clamp(displayLine, 0, Api.Lines.Count);
             return Api.Send(SciMsg.SCI_DOCLINEFROMVISIBLE, new IntPtr(displayLine)).ToInt32();
         }
 
@@ -594,7 +526,7 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Gets or sets the indented size in pixels of wrapped sublines.
+        /// Gets or sets the indented size in pixels of wrapped subApi.Lines.
         /// </summary>
         /// <returns>The indented size of wrapped sublines measured in pixels. The default is 0.</returns>
         /// <remarks>
@@ -671,8 +603,8 @@ namespace _3PA.NppCore {
         /// <param name="lineStart">The zero-based index of the line range to start hiding.</param>
         /// <param name="lineEnd">The zero-based index of the line range to end hiding.</param>
         public static void HideLines(int lineStart, int lineEnd) {
-            lineStart = Clamp(lineStart, 0, Lines.Count);
-            lineEnd = Clamp(lineEnd, lineStart, Lines.Count);
+            lineStart = Clamp(lineStart, 0, Api.Lines.Count);
+            lineEnd = Clamp(lineEnd, lineStart, Api.Lines.Count);
 
             Api.Send(SciMsg.SCI_HIDELINES, new IntPtr(lineStart), new IntPtr(lineEnd));
         }
@@ -704,8 +636,8 @@ namespace _3PA.NppCore {
         /// <param name="lineStart">The zero-based index of the line range to start showing.</param>
         /// <param name="lineEnd">The zero-based index of the line range to end showing.</param>
         public static void ShowLines(int lineStart, int lineEnd) {
-            lineStart = Clamp(lineStart, 0, Lines.Count);
-            lineEnd = Clamp(lineEnd, lineStart, Lines.Count);
+            lineStart = Clamp(lineStart, 0, Api.Lines.Count);
+            lineEnd = Clamp(lineEnd, lineStart, Api.Lines.Count);
 
             Api.Send(SciMsg.SCI_SHOWLINES, new IntPtr(lineStart), new IntPtr(lineEnd));
         }
@@ -720,7 +652,7 @@ namespace _3PA.NppCore {
         /// <returns>true to use tab characters; otherwise, false. The default is true.</returns>
         public static bool UseTabs {
             get { return Api.Send(SciMsg.SCI_GETUSETABS).IsTrue(); }
-            set { Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0); }
+            set { Win32Api.SendMessage(Api.Handle, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0); }
         }
 
         /// <summary>
@@ -731,7 +663,7 @@ namespace _3PA.NppCore {
             get { return Api.Send(SciMsg.SCI_GETTABWIDTH).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETTABWIDTH, value, 0);
+                Win32Api.SendMessage(Api.Handle, SciMsg.SCI_SETTABWIDTH, value, 0);
             }
         }
 
@@ -744,7 +676,7 @@ namespace _3PA.NppCore {
             get { return Api.Send(SciMsg.SCI_GETINDENT).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETINDENT, value, 0);
+                Win32Api.SendMessage(Api.Handle, SciMsg.SCI_SETINDENT, value, 0);
             }
         }
 
@@ -770,7 +702,7 @@ namespace _3PA.NppCore {
         public static void BraceBadLight(int position) {
             position = Clamp(position, -1, TextLength);
             if (position > 0)
-                position = Lines.CharToBytePosition(position);
+                position = Api.Lines.CharToBytePosition(position);
 
             Api.Send(SciMsg.SCI_BRACEBADLIGHT, new IntPtr(position));
         }
@@ -789,11 +721,11 @@ namespace _3PA.NppCore {
 
             position1 = Clamp(position1, -1, textLength);
             if (position1 > 0)
-                position1 = Lines.CharToBytePosition(position1);
+                position1 = Api.Lines.CharToBytePosition(position1);
 
             position2 = Clamp(position2, -1, textLength);
             if (position2 > 0)
-                position2 = Lines.CharToBytePosition(position2);
+                position2 = Api.Lines.CharToBytePosition(position2);
 
             Api.Send(SciMsg.SCI_BRACEHIGHLIGHT, new IntPtr(position1), new IntPtr(position2));
         }
@@ -816,11 +748,11 @@ namespace _3PA.NppCore {
         /// </remarks>
         public static int BraceMatch(int position) {
             position = Clamp(position, 0, TextLength);
-            position = Lines.CharToBytePosition(position);
+            position = Api.Lines.CharToBytePosition(position);
 
             var match = Api.Send(SciMsg.SCI_BRACEMATCH, new IntPtr(position), IntPtr.Zero).ToInt32();
             if (match > 0)
-                match = Lines.ByteToCharPosition(match);
+                match = Api.Lines.ByteToCharPosition(match);
 
             return match;
         }
@@ -835,7 +767,7 @@ namespace _3PA.NppCore {
         /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
         public static Point GetCaretScreenLocation() {
             var point = GetPointXyFromPosition(CurrentPosition);
-            Win32Api.ClientToScreen(HandleScintilla, ref point);
+            Win32Api.ClientToScreen(Api.Handle, ref point);
             return point;
         }
 
@@ -845,7 +777,7 @@ namespace _3PA.NppCore {
         /// <param name="position"></param>
         /// <returns></returns>
         public static Point GetPointXyFromPosition(int position) {
-            var pos = Lines.CharToBytePosition(position);
+            var pos = Api.Lines.CharToBytePosition(position);
             var x = (int) Api.Send(SciMsg.SCI_POINTXFROMPOSITION, IntPtr.Zero, new IntPtr(pos));
             var y = (int) Api.Send(SciMsg.SCI_POINTYFROMPOSITION, IntPtr.Zero, new IntPtr(pos));
             return new Point(x, y);
@@ -864,7 +796,7 @@ namespace _3PA.NppCore {
         public static int CharPositionFromPointClose(int x, int y) {
             var pos = Api.Send(SciMsg.SCI_CHARPOSITIONFROMPOINTCLOSE, new IntPtr(x), new IntPtr(y)).ToInt32();
             if (pos > -1)
-                pos = Lines.ByteToCharPosition(pos);
+                pos = Api.Lines.ByteToCharPosition(pos);
             return pos;
         }
 
@@ -874,7 +806,7 @@ namespace _3PA.NppCore {
         /// <returns></returns>
         public static int GetPositionFromMouseLocation() {
             var point = Cursor.Position;
-            Win32Api.ScreenToClient(HandleScintilla, ref point);
+            Win32Api.ScreenToClient(Api.Handle, ref point);
             return CharPositionFromPointClose(point.X, point.Y);
         }
 
@@ -885,7 +817,7 @@ namespace _3PA.NppCore {
         /// <returns>The x-coordinate of the specified <paramref name="pos" /> within the client rectangle of the control.</returns>
         public static int PointXFromPosition(int pos) {
             pos = Clamp(pos, 0, TextLength);
-            pos = Lines.CharToBytePosition(pos);
+            pos = Api.Lines.CharToBytePosition(pos);
             return Api.Send(SciMsg.SCI_POINTXFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
         }
 
@@ -896,7 +828,7 @@ namespace _3PA.NppCore {
         /// <returns>The y-coordinate of the specified <paramref name="pos" /> within the client rectangle of the control.</returns>
         public static int PointYFromPosition(int pos) {
             pos = Clamp(pos, 0, TextLength);
-            pos = Lines.CharToBytePosition(pos);
+            pos = Api.Lines.CharToBytePosition(pos);
             return Api.Send(SciMsg.SCI_POINTYFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
         }
 
@@ -990,8 +922,8 @@ namespace _3PA.NppCore {
             length = Clamp(length, 0, textLength - position);
 
             // Convert to byte position/length
-            var byteStartPos = Lines.CharToBytePosition(position);
-            var byteEndPos = Lines.CharToBytePosition(position + length);
+            var byteStartPos = Api.Lines.CharToBytePosition(position);
+            var byteEndPos = Api.Lines.CharToBytePosition(position + length);
 
             var ptr = Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
             if (ptr == IntPtr.Zero)
@@ -1029,7 +961,7 @@ namespace _3PA.NppCore {
             var textLength = TextLength;
             if (position > textLength)
                 position = textLength;
-            position = Lines.CharToBytePosition(position);
+            position = Api.Lines.CharToBytePosition(position);
             fixed (byte* bp = GetBytes(text ?? String.Empty, Encoding, true))
                 Api.Send(SciMsg.SCI_INSERTTEXT, new IntPtr(position), new IntPtr(bp));
         }
@@ -1203,7 +1135,7 @@ namespace _3PA.NppCore {
         /// Get document lenght (number of character!!)
         /// </summary>
         public static int TextLength {
-            get { return Lines.TextLength; }
+            get { return Api.Lines.TextLength; }
         }
 
         #endregion
@@ -1219,8 +1151,8 @@ namespace _3PA.NppCore {
             var textLength = TextLength;
             start = Clamp(start, 0, textLength);
             end = Clamp(end, 0, textLength);
-            start = Lines.CharToBytePosition(start);
-            end = Lines.CharToBytePosition(end);
+            start = Api.Lines.CharToBytePosition(start);
+            end = Api.Lines.CharToBytePosition(end);
             Api.Send(SciMsg.SCI_SETTARGETRANGE, new IntPtr(start), new IntPtr(end));
         }
 
@@ -1232,11 +1164,11 @@ namespace _3PA.NppCore {
             get {
                 // The position can become stale and point to a place outside of the document so we must clamp it
                 var bytePos = Clamp(Api.Send(SciMsg.SCI_GETTARGETEND).ToInt32(), 0, Api.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
-                return Lines.ByteToCharPosition(bytePos);
+                return Api.Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
+                value = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETTARGETEND, new IntPtr(value));
             }
         }
@@ -1249,11 +1181,11 @@ namespace _3PA.NppCore {
             get {
                 // The position can become stale and point to a place outside of the document so we must clamp it
                 var bytePos = Clamp(Api.Send(SciMsg.SCI_GETTARGETSTART).ToInt32(), 0, Api.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
-                return Lines.ByteToCharPosition(bytePos);
+                return Api.Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
+                value = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETTARGETSTART, new IntPtr(value));
             }
         }
@@ -1324,7 +1256,7 @@ namespace _3PA.NppCore {
             if (bytePos == -1)
                 return bytePos;
 
-            return Lines.ByteToCharPosition(bytePos);
+            return Api.Lines.ByteToCharPosition(bytePos);
         }
 
         #endregion
@@ -1342,11 +1274,11 @@ namespace _3PA.NppCore {
         public static int CurrentPosition {
             get {
                 var bytePos = Api.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32();
-                return Lines.ByteToCharPosition(bytePos);
+                return Api.Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                var bytePos = Lines.CharToBytePosition(value);
+                var bytePos = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETCURRENTPOS, new IntPtr(bytePos));
             }
         }
@@ -1372,11 +1304,11 @@ namespace _3PA.NppCore {
         public static int AnchorPosition {
             get {
                 var bytePos = Api.Send(SciMsg.SCI_GETANCHOR).ToInt32();
-                return Lines.ByteToCharPosition(bytePos);
+                return Api.Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                var bytePos = Lines.CharToBytePosition(value);
+                var bytePos = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETANCHOR, new IntPtr(bytePos));
             }
         }
@@ -1388,7 +1320,7 @@ namespace _3PA.NppCore {
         /// <returns>The number of columns from the start of the line to the specified document <paramref name="position" />.</returns>
         public static int GetColumn(int position) {
             position = Clamp(position, 0, TextLength);
-            position = Lines.CharToBytePosition(position);
+            position = Api.Lines.CharToBytePosition(position);
             return Api.Send(SciMsg.SCI_GETCOLUMN, new IntPtr(position)).ToInt32();
         }
 
@@ -1399,7 +1331,7 @@ namespace _3PA.NppCore {
         /// <returns>The zero-based document line index containing the character <paramref name="position" />.</returns>
         public static int LineFromPosition(int position) {
             position = Clamp(position, 0, TextLength);
-            return Lines.LineFromCharPosition(position);
+            return Api.Lines.LineFromCharPosition(position);
         }
 
         /// <summary>
@@ -1410,7 +1342,7 @@ namespace _3PA.NppCore {
         /// <param name="column"></param>
         /// <returns></returns>
         public static int GetPosFromLineColumn(int line, int column) {
-            return Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_FINDCOLUMN, new IntPtr(line), new IntPtr(column)).ToInt32());
+            return Api.Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_FINDCOLUMN, new IntPtr(line), new IntPtr(column)).ToInt32());
         }
 
         /// <summary>
@@ -1445,7 +1377,7 @@ namespace _3PA.NppCore {
         /// <remarks>Any selection is discarded.</remarks>
         public static void GotoPosition(int position) {
             position = Clamp(position, 0, TextLength);
-            position = Lines.CharToBytePosition(position);
+            position = Api.Lines.CharToBytePosition(position);
             Api.Send(SciMsg.SCI_GOTOPOS, new IntPtr(position));
         }
 
@@ -1471,8 +1403,8 @@ namespace _3PA.NppCore {
             end = Clamp(end, 0, textLength);
 
             // Convert to byte positions
-            start = Lines.CharToBytePosition(start);
-            end = Lines.CharToBytePosition(end);
+            start = Api.Lines.CharToBytePosition(start);
+            end = Api.Lines.CharToBytePosition(end);
 
             Api.Send(SciMsg.SCI_SCROLLRANGE, new IntPtr(end), new IntPtr(start));
         }
@@ -1507,11 +1439,11 @@ namespace _3PA.NppCore {
         public static int SelectionStart {
             get {
                 var pos = Api.Send(SciMsg.SCI_GETSELECTIONSTART).ToInt32();
-                return Lines.ByteToCharPosition(pos);
+                return Api.Lines.ByteToCharPosition(pos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
+                value = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETSELECTIONSTART, new IntPtr(value));
             }
         }
@@ -1529,11 +1461,11 @@ namespace _3PA.NppCore {
         public static int SelectionEnd {
             get {
                 var pos = Api.Send(SciMsg.SCI_GETSELECTIONEND).ToInt32();
-                return Lines.ByteToCharPosition(pos);
+                return Api.Lines.ByteToCharPosition(pos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
+                value = Api.Lines.CharToBytePosition(value);
                 Api.Send(SciMsg.SCI_SETSELECTIONEND, new IntPtr(value));
             }
         }
@@ -1554,12 +1486,12 @@ namespace _3PA.NppCore {
 
             if (anchorPos >= 0) {
                 anchorPos = Clamp(anchorPos, 0, textLength);
-                anchorPos = Lines.CharToBytePosition(anchorPos);
+                anchorPos = Api.Lines.CharToBytePosition(anchorPos);
             }
 
             if (currentPos >= 0) {
                 currentPos = Clamp(currentPos, 0, textLength);
-                currentPos = Lines.CharToBytePosition(currentPos);
+                currentPos = Api.Lines.CharToBytePosition(currentPos);
             }
 
             Api.Send(SciMsg.SCI_SETSEL, new IntPtr(anchorPos), new IntPtr(currentPos));
@@ -1584,8 +1516,8 @@ namespace _3PA.NppCore {
             caret = Clamp(caret, 0, textLength);
             anchor = Clamp(anchor, 0, textLength);
 
-            caret = Lines.CharToBytePosition(caret);
-            anchor = Lines.CharToBytePosition(anchor);
+            caret = Api.Lines.CharToBytePosition(caret);
+            anchor = Api.Lines.CharToBytePosition(anchor);
 
             Api.Send(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(anchor));
         }
@@ -1597,7 +1529,7 @@ namespace _3PA.NppCore {
         public static void SetSelection(int caret) {
             var textLength = TextLength;
             caret = Clamp(caret, 0, textLength);
-            caret = Lines.CharToBytePosition(caret);
+            caret = Api.Lines.CharToBytePosition(caret);
             Api.Send(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(caret));
         }
 
@@ -1658,7 +1590,7 @@ namespace _3PA.NppCore {
         /// <remarks>The caret is not scrolled into view.</remarks>
         public static void SetEmptySelection(int pos) {
             pos = Clamp(pos, 0, TextLength);
-            pos = Lines.CharToBytePosition(pos);
+            pos = Api.Lines.CharToBytePosition(pos);
             Api.Send(SciMsg.SCI_SETEMPTYSELECTION, new IntPtr(pos));
         }
 
@@ -1679,8 +1611,8 @@ namespace _3PA.NppCore {
             var textLength = TextLength;
             caret = Clamp(caret, 0, textLength);
             anchor = Clamp(anchor, 0, textLength);
-            caret = Lines.CharToBytePosition(caret);
-            anchor = Lines.CharToBytePosition(anchor);
+            caret = Api.Lines.CharToBytePosition(caret);
+            anchor = Api.Lines.CharToBytePosition(anchor);
             Api.Send(SciMsg.SCI_ADDSELECTION, new IntPtr(caret), new IntPtr(anchor));
         }
 
@@ -1751,8 +1683,8 @@ namespace _3PA.NppCore {
             var textLength = TextLength;
             startPos = Clamp(startPos, 0, textLength);
             endPos = Clamp(endPos, 0, textLength);
-            startPos = Lines.CharToBytePosition(startPos);
-            endPos = Lines.CharToBytePosition(endPos);
+            startPos = Api.Lines.CharToBytePosition(startPos);
+            endPos = Api.Lines.CharToBytePosition(endPos);
             Api.Send(SciMsg.SCI_COLOURISE, new IntPtr(startPos), new IntPtr(endPos));
         }
 
@@ -1773,7 +1705,7 @@ namespace _3PA.NppCore {
         /// </remarks>
         public static void SetStyling(int length, int style) {
             var endPos = _stylingPosition + length;
-            var endBytePos = Lines.CharToBytePosition(endPos);
+            var endBytePos = Api.Lines.CharToBytePosition(endPos);
             Api.Send(SciMsg.SCI_SETSTYLING, new IntPtr(endBytePos - _stylingBytePosition), new IntPtr(style));
 
             // Track this for the next call
@@ -1791,7 +1723,7 @@ namespace _3PA.NppCore {
         /// </remarks>
         public static void StartStyling(int position) {
             position = Clamp(position, 0, TextLength);
-            var pos = Lines.CharToBytePosition(position);
+            var pos = Api.Lines.CharToBytePosition(position);
             Api.Send(SciMsg.SCI_STARTSTYLING, new IntPtr(pos));
 
             // Track this so we can validate calls to SetStyling
@@ -1805,7 +1737,7 @@ namespace _3PA.NppCore {
         /// <returns>The zero-based document position of the last styled character.</returns>
         public static int GetEndStyled() {
             var pos = Api.Send(SciMsg.SCI_GETENDSTYLED).ToInt32();
-            return Lines.ByteToCharPosition(pos);
+            return Api.Lines.ByteToCharPosition(pos);
         }
 
         /// <summary>
@@ -1815,7 +1747,7 @@ namespace _3PA.NppCore {
         /// <returns>The zero-based Style index used at the specified <paramref name="position" />.</returns>
         public static int GetStyleAt(int position) {
             position = Clamp(position, 0, TextLength);
-            position = Lines.CharToBytePosition(position);
+            position = Api.Lines.CharToBytePosition(position);
             return Api.Send(SciMsg.SCI_GETSTYLEAT, new IntPtr(position)).ToInt32();
         }
 
@@ -2013,7 +1945,7 @@ namespace _3PA.NppCore {
         /// Clear all annotations in one go
         /// </summary>
         public static void AnnotationClearAll() {
-            Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
+            Win32Api.SendMessage(Api.Handle, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
         }
 
         /// <summary>
@@ -2106,7 +2038,7 @@ namespace _3PA.NppCore {
             //}
 
             /// <summary>
-            /// Performs the specified fold action on the current line and all child lines.
+            /// Performs the specified fold action on the current line and all child Api.Lines.
             /// </summary>
             /// <param name="action">One of the FoldAction enumeration values.</param>
             public void FoldChildren(FoldAction action) {
@@ -2222,7 +2154,7 @@ namespace _3PA.NppCore {
             }
 
             /// <summary>
-            /// Toggles the folding state of the line; expanding or contracting all child lines.
+            /// Toggles the folding state of the line; expanding or contracting all child Api.Lines.
             /// </summary>
             /// <remarks>The line must be set as a FoldLevelFlags.Header.</remarks>
             public void ToggleFold() {
@@ -2236,7 +2168,7 @@ namespace _3PA.NppCore {
             /// <summary>
             /// Gets the number of annotation lines of text.
             /// </summary>
-            /// <returns>The number of annotation lines.</returns>
+            /// <returns>The number of annotation Api.Lines.</returns>
             public int AnnotationLines {
                 get { return Api.Send(SciMsg.SCI_ANNOTATIONGETLINES, new IntPtr(Index)).ToInt32(); }
             }
@@ -2317,7 +2249,7 @@ namespace _3PA.NppCore {
                 }
                 set {
                     if (String.IsNullOrEmpty(value)) {
-                        Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, null);
+                        Win32Api.SendMessage(Api.Handle, SciMsg.SCI_ANNOTATIONSETTEXT, Index, null);
                     } else {
                         var bytes = GetBytes(value, Encoding, true);
                         fixed (byte* bp = bytes)
@@ -2337,7 +2269,7 @@ namespace _3PA.NppCore {
 
             /// <summary>
             /// Gets the zero-based index of the line as displayed in a Scintilla control
-            /// taking into consideration folded (hidden) lines.
+            /// taking into consideration folded (hidden) Api.Lines.
             /// </summary>
             /// <returns>The zero-based display line index.</returns>
             public int DisplayIndex {
@@ -2349,7 +2281,7 @@ namespace _3PA.NppCore {
             /// </summary>
             /// <returns>The equivalent of Position + Length.</returns>
             public int EndPosition {
-                get { return Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_GETLINEENDPOSITION, new IntPtr(Index)).ToInt32()); }
+                get { return Api.Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_GETLINEENDPOSITION, new IntPtr(Index)).ToInt32()); }
             }
 
             /// <summary>
@@ -2430,7 +2362,7 @@ namespace _3PA.NppCore {
             /// </summary>
             /// <returns>The number of characters in the line including any end of line characters.</returns>
             public int Length {
-                get { return Lines.LineCharLength(Index); }
+                get { return Api.Lines.LineCharLength(Index); }
             }
 
             /// <summary>
@@ -2525,7 +2457,7 @@ namespace _3PA.NppCore {
             /// </summary>
             /// <returns>The document position of the first character in the line.</returns>
             public int Position {
-                get { return Lines.CharPositionFromLine(Index); }
+                get { return Api.Lines.CharPositionFromLine(Index); }
             }
 
             /// <summary>
@@ -2559,7 +2491,7 @@ namespace _3PA.NppCore {
             /// This returns the position at the end of indentation of a line
             /// </summary>
             public int IndentationPosition {
-                get { return Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_GETLINEINDENTPOSITION, new IntPtr(Index)).ToInt32()); }
+                get { return Api.Lines.ByteToCharPosition(Api.Send(SciMsg.SCI_GETLINEINDENTPOSITION, new IntPtr(Index)).ToInt32()); }
             }
 
             /// <summary>
@@ -2619,7 +2551,7 @@ namespace _3PA.NppCore {
             /// An empty document has 1 line, a document with only one \n has 2 lines
             /// </summary>
             public static int Count {
-                get { return Lines.Count; }
+                get { return Api.Lines.Count; }
             }
 
             #endregion
@@ -2652,11 +2584,11 @@ namespace _3PA.NppCore {
                     if (pos <= 0)
                         return pos;
 
-                    return Lines.ByteToCharPosition(pos);
+                    return Api.Lines.ByteToCharPosition(pos);
                 }
                 set {
                     value = Clamp(value, 0, TextLength);
-                    value = Lines.CharToBytePosition(value);
+                    value = Api.Lines.CharToBytePosition(value);
                     Api.Send(SciMsg.SCI_SETSELECTIONNANCHOR, new IntPtr(Index), new IntPtr(value));
                 }
             }
@@ -2683,11 +2615,11 @@ namespace _3PA.NppCore {
                     if (pos <= 0)
                         return pos;
 
-                    return Lines.ByteToCharPosition(pos);
+                    return Api.Lines.ByteToCharPosition(pos);
                 }
                 set {
                     value = Clamp(value, 0, TextLength);
-                    value = Lines.CharToBytePosition(value);
+                    value = Api.Lines.CharToBytePosition(value);
                     Api.Send(SciMsg.SCI_SETSELECTIONNCARET, new IntPtr(Index), new IntPtr(value));
                 }
             }
@@ -2935,9 +2867,9 @@ namespace _3PA.NppCore {
             #region static
 
             /// <summary>
-            /// Removes the specified marker from all lines.
+            /// Removes the specified marker from all Api.Lines.
             /// </summary>
-            /// <param name="marker">The zero-based Marker index to remove from all lines, or -1 to remove all markers from all lines.</param>
+            /// <param name="marker">The zero-based Marker index to remove from all lines, or -1 to remove all markers from all Api.Lines.</param>
             public static void MarkerDeleteAll(int marker) {
                 Api.Send(SciMsg.SCI_MARKERDELETEALL, new IntPtr(marker));
             }
@@ -3011,7 +2943,7 @@ namespace _3PA.NppCore {
                 get { return Api.Send(SciMsg.SCI_GETMARGINWIDTHN, new IntPtr(Index)).ToInt32(); }
                 set {
                     value = ClampMin(value, 0);
-                    Win32Api.SendMessage(HandleScintilla, SciMsg.SCI_SETMARGINWIDTHN, Index, value);
+                    Win32Api.SendMessage(Api.Handle, SciMsg.SCI_SETMARGINWIDTHN, Index, value);
                 }
             }
 
@@ -3082,9 +3014,9 @@ namespace _3PA.NppCore {
             /// </remarks>
             public int End(int position) {
                 position = Clamp(position, 0, TextLength);
-                position = Lines.CharToBytePosition(position);
+                position = Api.Lines.CharToBytePosition(position);
                 position = Api.Send(SciMsg.SCI_INDICATOREND, new IntPtr(Index), new IntPtr(position)).ToInt32();
-                return Lines.ByteToCharPosition(position);
+                return Api.Lines.ByteToCharPosition(position);
             }
 
             /// <summary>
@@ -3100,9 +3032,9 @@ namespace _3PA.NppCore {
             /// </remarks>
             public int Start(int position) {
                 position = Clamp(position, 0, TextLength);
-                position = Lines.CharToBytePosition(position);
+                position = Api.Lines.CharToBytePosition(position);
                 position = Api.Send(SciMsg.SCI_INDICATORSTART, new IntPtr(Index), new IntPtr(position)).ToInt32();
-                return Lines.ByteToCharPosition(position);
+                return Api.Lines.ByteToCharPosition(position);
             }
 
             /// <summary>
@@ -3112,7 +3044,7 @@ namespace _3PA.NppCore {
             /// <returns>The user-defined value at the specified <paramref name="position" />.</returns>
             public int ValueAt(int position) {
                 position = Clamp(position, 0, TextLength);
-                position = Lines.CharToBytePosition(position);
+                position = Api.Lines.CharToBytePosition(position);
                 return Api.Send(SciMsg.SCI_INDICATORVALUEAT, new IntPtr(Index), new IntPtr(position)).ToInt32();
             }
 
@@ -3342,7 +3274,7 @@ namespace _3PA.NppCore {
             /// <returns>A bitmap indicating which of the 32 indicators are in use at the specified <paramref name="position" />.</returns>
             public static uint IndicatorAllOnFor(int position) {
                 position = Clamp(position, 0, TextLength);
-                position = Lines.CharToBytePosition(position);
+                position = Api.Lines.CharToBytePosition(position);
 
                 var bitmap = Api.Send(SciMsg.SCI_INDICATORALLONFOR, new IntPtr(position)).ToInt32();
                 return unchecked((uint) bitmap);
@@ -3358,8 +3290,8 @@ namespace _3PA.NppCore {
                 position = Clamp(position, 0, textLength);
                 length = Clamp(length, 0, textLength - position);
 
-                var startPos = Lines.CharToBytePosition(position);
-                var endPos = Lines.CharToBytePosition(position + length);
+                var startPos = Api.Lines.CharToBytePosition(position);
+                var endPos = Api.Lines.CharToBytePosition(position + length);
 
                 Api.Send(SciMsg.SCI_INDICATORCLEARRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
             }
@@ -3374,8 +3306,8 @@ namespace _3PA.NppCore {
                 position = Clamp(position, 0, textLength);
                 length = Clamp(length, 0, textLength - position);
 
-                var startPos = Lines.CharToBytePosition(position);
-                var endPos = Lines.CharToBytePosition(position + length);
+                var startPos = Api.Lines.CharToBytePosition(position);
+                var endPos = Api.Lines.CharToBytePosition(position + length);
 
                 Api.Send(SciMsg.SCI_INDICATORFILLRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
             }

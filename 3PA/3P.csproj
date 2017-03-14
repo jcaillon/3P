@@ -166,7 +166,7 @@
     <Compile Include="Lib\NanoXmlParser.cs" />
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
-    <Compile Include="NppCore\ScintillaApi.cs" />
+    <Compile Include="NppCore\SciApi.cs" />
     <Compile Include="WindowsCore\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
@@ -253,7 +253,7 @@
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="WindowsCore\CoreWindowsHook.cs" />
     <Compile Include="NppCore\DocumentLines.cs" />
-    <Compile Include="NppCore\NotepadHeader.cs" />
+    <Compile Include="NppCore\NppHeader.cs" />
     <Compile Include="NppCore\GapBuffer.cs" />
     <Compile Include="WindowsCore\HtmlHelpApi.cs" />
     <Compile Include="Lib\JsonParser.cs" />
@@ -333,7 +333,7 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.Designer.cs">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
-    <Compile Include="NppCore\ScintillaHeader.cs" />
+    <Compile Include="NppCore\SciHeader.cs" />
     <Compile Include="WindowsCore\Win32Api.cs" />
     <Compile Include="WindowsCore\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />

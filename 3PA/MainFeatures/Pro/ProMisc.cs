@@ -219,7 +219,7 @@ namespace _3PA.MainFeatures.Pro {
                 currentOperation = CurrentOperation.Run;
 
             // process already running?
-            if (Npp.CurrentFile.FileInfoObject.CurrentOperation >= CurrentOperation.Prolint) {
+            if (FilesInfo.CurrentFileInfoObject.CurrentOperation >= CurrentOperation.Prolint) {
                 UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
                     KillCurrentProcess();
                     StartProgressExec(executionType);
@@ -251,18 +251,18 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // launch the compile process for the current file
-            Npp.CurrentFile.FileInfoObject.ProgressExecution = new ProExecution {
+            FilesInfo.CurrentFileInfoObject.ProgressExecution = new ProExecution {
                 ListToCompile = new List<FileToCompile> {
                     new FileToCompile(Npp.CurrentFile.Path)
                 },
                 OnExecutionEnd = OnSingleExecutionEnd,
                 OnExecutionOk = OnSingleExecutionOk
             };
-            if (!Npp.CurrentFile.FileInfoObject.ProgressExecution.Do(executionType))
+            if (!FilesInfo.CurrentFileInfoObject.ProgressExecution.Do(executionType))
                 return;
 
             // change file object current operation, set flag
-            Npp.CurrentFile.FileInfoObject.CurrentOperation |= currentOperation;
+            FilesInfo.CurrentFileInfoObject.CurrentOperation |= currentOperation;
             FilesInfo.UpdateFileStatus();
 
             // clear current errors (updates the current file info)
@@ -273,10 +273,10 @@ namespace _3PA.MainFeatures.Pro {
         /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
         /// </summary>
         public static void KillCurrentProcess() {
-            if (Npp.CurrentFile.FileInfoObject.ProgressExecution != null) {
-                Npp.CurrentFile.FileInfoObject.ProgressExecution.KillProcess();
+            if (FilesInfo.CurrentFileInfoObject.ProgressExecution != null) {
+                FilesInfo.CurrentFileInfoObject.ProgressExecution.KillProcess();
                 UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                OnSingleExecutionEnd(Npp.CurrentFile.FileInfoObject.ProgressExecution);
+                OnSingleExecutionEnd(FilesInfo.CurrentFileInfoObject.ProgressExecution);
             }
         }
 

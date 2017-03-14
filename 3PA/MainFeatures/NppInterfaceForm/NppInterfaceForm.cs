@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // register to Npp
             Npp.RegisterToNpp(Handle);
 
-            CurrentForegroundWindow = Sci.HandleScintilla;
+            CurrentForegroundWindow = Npp.CurrentSci.Handle;
 
             Opacity = 0;
             Visible = false;

@@ -28,6 +28,7 @@ namespace _3PA.WindowsCore {
     /// This class calls the appropriate methods depending on the notifications received from both notepad++ and scintilla
     /// </summary>
     internal static class NotificationsPublisher {
+
         #region Members
 
         /// <summary>
@@ -60,7 +61,9 @@ namespace _3PA.WindowsCore {
                             // call OnNppReady then OnPlugReady if it all went ok
                             PluginIsReady = Plug.DoNppReady();
                             if (PluginIsReady) {
+                                Npp.UpdateCurrentSci(); // update current scintilla
                                 Plug.DoPlugStart();
+                                NppBufferActivated();
 
                                 // set hooks on mouse/keyboard
                                 SetHooks();
@@ -85,6 +88,15 @@ namespace _3PA.WindowsCore {
                                 return;
 
                             case (uint) SciNotif.SCN_MODIFIED:
+                                // This notification is sent when the text or styling of the document changes or is about to change
+                                bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
+                                bool insertedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0;
+                                if (deletedText || insertedText) {
+                                    // if the text has changed
+                                    Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText); // register line modifications
+                                    Plug.OnTextModified(nc, insertedText, deletedText);
+                                }
+
                                 Plug.OnSciModified(nc);
                                 return;
 
@@ -126,17 +138,19 @@ namespace _3PA.WindowsCore {
 
                             // the user changed the current document
                             case (uint) NppNotif.NPPN_BUFFERACTIVATED:
-                                Plug.DoNppBufferActivated();
+                                Npp.UpdateCurrentSci(); // update current scintilla
+                                Npp.CurrentSci.Lines.Reset(); // register new lines
+                                NppBufferActivated();
                                 return;
 
                             case (uint) NppNotif.NPPN_FILERENAMED:
                                 // the user can open a .txt and rename it as a .p
-                                Plug.DoNppBufferActivated();
+                                NppBufferActivated();
                                 return;
 
                             case (uint) NppNotif.NPPN_FILESAVED:
                                 // the user can open a .txt and save it as a .p
-                                Plug.DoNppBufferActivated();
+                                NppBufferActivated();
 
                                 Plug.DoNppDocumentSaved();
                                 return;
@@ -164,6 +178,7 @@ namespace _3PA.WindowsCore {
 
                             case (uint) NppNotif.NPPN_LANGCHANGED:
                                 // on lang type changed
+                                NppBufferActivated();
                                 UserCommunication.Notify("lang changed " + Npp.CurrentInternalLangName);
                                 return;
 
@@ -180,6 +195,12 @@ namespace _3PA.WindowsCore {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
             }
+        }
+
+        private static void NppBufferActivated() {
+            Npp.CurrentFile.Update(); // get info on the current file
+            Plug.DoNppBufferActivated();
+            Npp.PreviousFile.Path = Npp.CurrentFile.Path; // save info on the "previous" file for the next buffer activated event
         }
 
         #endregion

@@ -327,7 +327,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Refreshing)
                 return;
             ParserHandler.ParserVisitor.ClearSavedParserVisitors();
-            Plug.DoNppDocumentSwitched();
+            ParserHandler.ParseCurrentDocument(true);
+            Npp.CurrentSci.Lines.Reset();
             Sci.GrabFocus();
         }
 

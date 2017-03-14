@@ -70,6 +70,13 @@ namespace _3PA.MainFeatures.Pro {
         #region public methods
 
         /// <summary>
+        /// Information on the current file
+        /// </summary>
+        public static FileInfoObject CurrentFileInfoObject {
+            get { return GetFileInfo(Npp.CurrentFile.Path); }
+        }
+
+        /// <summary>
         /// update errors list for a file
         /// </summary>
         /// <param name="fullPath"></param>

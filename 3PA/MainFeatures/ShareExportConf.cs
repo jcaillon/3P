@@ -153,7 +153,7 @@ namespace _3PA.MainFeatures {
         /// Returns true if the file is a configuration file listed here
         /// </summary>
         public static bool IsFileExportedConf(string filePath) {
-            return List.Exists(line => line.HandledItem.Equals(filePath));
+            return filePath != null && List.Exists(line => line.HandledItem.Equals(filePath));
         }
 
         /// <summary>

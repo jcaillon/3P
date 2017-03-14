@@ -77,15 +77,6 @@ namespace _3PA {
 
         #region Fields
 
-        private static Npp.NppFile _previousFile;
-
-        /// <summary>
-        /// PreviousFile
-        /// </summary>
-        public static Npp.NppFile PreviousFile {
-            get { return _previousFile ?? (_previousFile = new Npp.NppFile()); }
-        }
-
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
@@ -194,14 +185,14 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(Npp.NppFile.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    CodeExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.CodeExplorerVisible) {
                     CodeExplorer.Instance.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(Npp.NppFile.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    FileExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
                 } else if (Config.Instance.FileExplorerVisible) {
                     FileExplorer.Instance.Toggle();
                 }
@@ -234,10 +225,6 @@ namespace _3PA {
 
             // initialize the list of objects of the autocompletion form
             AutoCompletion.RefreshStaticItems();
-
-            // Simulates a OnDocumentSwitched when we start this dll
-            Npp.CurrentFile.Update(); // to correctly init isPreviousProgress
-            DoNppBufferActivated(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
             WinApi.SetForegroundWindow(Npp.HandleNpp);
@@ -329,7 +316,7 @@ namespace _3PA {
             // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
             switch (message) {
                 case WinApi.Messages.WM_NCLBUTTONDOWN:
-                    if (!WinApi.GetWindowRect(Sci.HandleScintilla).Contains(Cursor.Position)) {
+                    if (!WinApi.GetWindowRect(Npp.CurrentSci.Handle).Contains(Cursor.Position)) {
                         MouseMonitor.Instance.Add(WinApi.Messages.WM_MOUSEMOVE);
                     }
                     break;
@@ -480,14 +467,6 @@ namespace _3PA {
         /// no matter if the document is a Progress file or not
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
-            // update current scintilla
-            Sci.UpdateScintilla();
-
-            // update current file
-            PreviousFile.Path = Npp.CurrentFile.Path;
-            PreviousFile.IsProgress = Npp.CurrentFile.IsProgress;
-            Npp.CurrentFile.Update();
-            Npp.CurrentFile.FileInfoObject = FilesInfo.GetFileInfo(Npp.CurrentFile.Path);
 
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyOptionsForScintilla();
@@ -506,19 +485,13 @@ namespace _3PA {
                 }
             }
 
-            // deactivate show space for conf files
-            if (ShareExportConf.IsFileExportedConf(PreviousFile.Path))
+            // activate show space for conf files / deactivate if coming from a conf file
+            if (ShareExportConf.IsFileExportedConf(Npp.PreviousFile.Path))
                 if (Sci.ViewWhitespace != WhitespaceMode.Invisible && !Sci.ViewEol)
                     Sci.ViewWhitespace = _whitespaceMode;
-
-            DoNppDocumentSwitched(initiating);
-
-            // activate show space for conf files
             if (ShareExportConf.IsFileExportedConf(Npp.CurrentFile.Path))
                 Sci.ViewWhitespace = WhitespaceMode.VisibleAlways;
-        }
 
-        public static void DoNppDocumentSwitched(bool initiating = false) {
             // close popups..
             ClosePopups();
 
@@ -537,9 +510,6 @@ namespace _3PA {
             // Update info on the current file
             FilesInfo.UpdateErrorsInScintilla();
             ProEnvironment.Current.ReComputeProPath();
-
-            // rebuild lines info (MANDATORY)
-            Sci.RebuildLinesInfo();
 
             // Parse the document
             ParserHandler.ParseCurrentDocument(true);
@@ -670,21 +640,21 @@ namespace _3PA {
 
         #region OnSciModified
 
+        /// <summary>
+        /// This notification is sent when the text or styling of the document changes or is about to change
+        /// </summary>
         public static void OnSciModified(SCNotification nc) {
-            bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
-
-            // if the text has changed
-            if (deletedText || (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
-                // observe modifications to lines (MANDATORY)
-                Sci.UpdateLinesInfo(nc, !deletedText);
-                // parse
-                ParserHandler.ParseCurrentDocument();
-            }
-
             // the user pressed UNDO or REDO
             if ((nc.modificationType & (int) SciModificationMod.SC_LASTSTEPINUNDOREDO) != 0) {
                 ClosePopups();
             }
+        }
+
+        /// <summary>
+        /// Called when the text in scintilla is modified by the user
+        /// </summary>
+        public static void OnTextModified(SCNotification nc, bool insertedText, bool deletedText) {
+            ParserHandler.ParseCurrentDocument();
 
             // did the user supress 1 char? (or one line)
             if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
@@ -762,7 +732,7 @@ namespace _3PA {
                 return;
 
             // check for block that are too long and display a warning
-            if (Abl.IsCurrentFileFromAppBuilder && !Npp.CurrentFile.FileInfoObject.WarnedTooLong) {
+            if (Abl.IsCurrentFileFromAppBuilder && !FilesInfo.CurrentFileInfoObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
                 var explorerItemsList = ParserHandler.ParserVisitor.ParsedExplorerItemsList;
 
@@ -777,7 +747,7 @@ namespace _3PA {
                             Npp.Goto(curPath, int.Parse(args.Link));
                             UserCommunication.CloseUniqueNotif("AppBuilderLimit");
                         }, 20);
-                        Npp.CurrentFile.FileInfoObject.WarnedTooLong = true;
+                        FilesInfo.CurrentFileInfoObject.WarnedTooLong = true;
                     }
                 }
             }
@@ -824,7 +794,7 @@ namespace _3PA {
         internal static void ApplyOptionsForScintilla() {
             // need to do this stuff only once for each scintilla
 
-            var curScintilla = Sci.CurrentScintilla; // 0 or 1
+            var curScintilla = Npp.CurrentSciId; // 0 or 1
             if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
                 Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
@@ -840,7 +810,7 @@ namespace _3PA {
         }
 
         internal static void ApplyPluginOptionsForScintilla() {
-            if (!_hasBeenInit || !PreviousFile.IsProgress) {
+            if (!_hasBeenInit || !Npp.PreviousFile.IsProgress) {
                 // read default options
                 _tabWidth = Sci.TabWidth;
                 _indentWithTabs = Sci.UseTabs;
@@ -868,7 +838,7 @@ namespace _3PA {
 
         internal static void ApplyDefaultOptionsForScintilla() {
             // nothing has been done yet, no need to reset anything! same if we already were on a non progress file
-            if (!_hasBeenInit || !PreviousFile.IsProgress)
+            if (!_hasBeenInit || !Npp.PreviousFile.IsProgress)
                 return;
 
             // apply default options
@@ -902,5 +872,6 @@ namespace _3PA {
         }
 
         #endregion
+
     }
 }

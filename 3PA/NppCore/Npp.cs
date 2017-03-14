@@ -41,7 +41,45 @@ using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
 
-    internal static partial class Npp {
+    internal static class Npp {
+
+        #region CurrentScintilla (scintilla instance)
+
+        private static SciApi _primarySci;
+        private static SciApi _secondarySci;
+        private static int _curSciId;
+
+        /// <summary>
+        /// Returns the current scintilla instance, you can then use this object to send
+        /// direct messages to scintilla
+        /// </summary>
+        public static SciApi CurrentSci { get; private set; }
+
+        /// <summary>
+        /// Updates the current scintilla handle for Npp's functions
+        /// Called when the user changes the current document
+        /// </summary>
+        public static void UpdateCurrentSci() {
+            if (_primarySci == null) {
+                _primarySci = new SciApi(UnmanagedExports.NppData._scintillaMainHandle);
+                _secondarySci = new SciApi(UnmanagedExports.NppData._scintillaSecondHandle);
+            }
+
+            long curScintilla;
+            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+            _curSciId = ((int)curScintilla).ClampMax(1);
+            CurrentSci = _curSciId == 0 ? _primarySci : _secondarySci;
+        }
+
+        /// <summary>
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
+        /// </summary>
+        public static int CurrentSciId {
+            get { return _curSciId; }
+        }
+
+        #endregion
 
         #region Static
 
@@ -563,39 +601,41 @@ namespace _3PA.NppCore {
 
         #endregion
         
-        #region CurrentFile
+        #region CurrentFile (and previous file)
 
-        private static NppFile _currentFile;
+        private static NppFileInfo _currentFile;
 
         /// <summary>
-        /// CurrentFile
+        /// Get info and do stuff on the current file
         /// </summary>
-        public static NppFile CurrentFile {
-            get { return _currentFile ?? (_currentFile = new NppFile()); }
+        public static NppFileInfo CurrentFile {
+            get { return _currentFile ?? (_currentFile = new NppFileInfo()); }
         }
 
         /// <summary>
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
-        internal class NppFile {
-            /// <summary>
-            /// true if the current file is a progress file, false otherwise
-            /// </summary>
-            public bool IsProgress { get; set; }
+        internal class NppFileInfo {
+            private string _path;
 
             /// <summary>
-            /// Stores the current file path when switching document
+            /// Stores the file path when switching document
             /// </summary>
-            public string Path { get; set; }
+            public string Path {
+                get { return _path; }
+                set {
+                    _path = value;
+                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || CurrentInternalLangName.Equals("openedgeabl");
+                }
+            }
 
             /// <summary>
-            /// Information on the current file
+            /// true if the file is a progress file, false otherwise
             /// </summary>
-            public FileInfoObject FileInfoObject { get; set; }
-
+            public bool IsProgress { get; private set; }
+            
             public void Update() {
                 CurrentFile.Path = GetFullPathApi;
-                CurrentFile.IsProgress = CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern);
             }
 
             /// <summary>
@@ -709,6 +749,15 @@ namespace _3PA.NppCore {
                     */
                 }
             }
+        }
+
+        private static NppFileInfo _previousFile;
+
+        /// <summary>
+        /// Info on the previous file
+        /// </summary>
+        public static NppFileInfo PreviousFile {
+            get { return _previousFile ?? (_previousFile = new NppFileInfo()); }
         }
 
         #endregion

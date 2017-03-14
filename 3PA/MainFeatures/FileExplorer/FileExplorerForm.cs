@@ -470,8 +470,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (Npp.CurrentFile.FileInfoObject.ProgressExecution != null)
-                Npp.CurrentFile.FileInfoObject.ProgressExecution.BringProcessToFront();
+            if (FilesInfo.CurrentFileInfoObject.ProgressExecution != null)
+                FilesInfo.CurrentFileInfoObject.ProgressExecution.BringProcessToFront();
         }
 
         #endregion
