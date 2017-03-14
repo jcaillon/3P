@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // if there is at least 1 thing to do
             if (nbToDo > 0) {
-                Npp.BeginUndoAction();
+                Sci.BeginUndoAction();
 
                 // Add proto
                 if (listOfSoloImplementation.Count > 0) {
@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.Pro {
                     outputMessage.Append("<br><br>");
                 }
 
-                Npp.EndUndoAction();
+                Sci.EndUndoAction();
             }
 
             if (nbThingsDone == 0) {
@@ -171,11 +171,11 @@ namespace _3PA.MainFeatures.Pro {
         /// and correct them if needed
         /// </summary>
         private static bool UpdatePrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
-            var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
+            var protoStr = Sci.GetTextByRange(function.Position, function.EndPosition);
 
             // replace the end ":" or "." by a " FOWARD."
             protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
-            Npp.SetTextByRange(function.PrototypePosition, function.PrototypeEndPosition, protoStr);
+            Sci.SetTextByRange(function.PrototypePosition, function.PrototypeEndPosition, protoStr);
 
             outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + (function.PrototypePosition) + "'>" + function.Name + "</a>");
 
@@ -183,7 +183,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         private static bool AddPrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
-            var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
+            var protoStr = Sci.GetTextByRange(function.Position, function.EndPosition);
 
             // ensure that the file was correctly parsed
             if (ParserHandler.AblParser.ParserErrors.Count == 0) {
@@ -196,7 +196,7 @@ namespace _3PA.MainFeatures.Pro {
                     // replace the end ":" or "." by a " FOWARD."
                     protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
 
-                    Npp.SetTextByRange(insertPos, insertPos, protoStr);
+                    Sci.SetTextByRange(insertPos, insertPos, protoStr);
 
                     //outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + insertPos + "'>" + function.Name + "</a>");
                     outputMessage.Append("<br> - " + function.Name);
@@ -264,7 +264,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Surround the text to insert with the appbuilder directives if needed
         /// </summary>
         private static string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
-            var eol = Npp.GetEolString;
+            var eol = Sci.GetEolString;
             if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
                 insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
                 insertText += eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME";
@@ -323,15 +323,15 @@ namespace _3PA.MainFeatures.Pro {
 
             // we also want to delete the trailing new lines
             int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : toDelete.EndBlockPosition);
-            while (Npp.GetTextByRange(endPosition, endPosition + 2).Equals(Npp.GetEolString)) {
+            while (Sci.GetTextByRange(endPosition, endPosition + 2).Equals(Sci.GetEolString)) {
                 endPosition += 2;
             }
 
             if (protoPreProcBlock != null) {
-                Npp.DeleteTextByRange(protoPreProcBlock.Position, endPosition);
+                Sci.DeleteTextByRange(protoPreProcBlock.Position, endPosition);
             } else {
                 // if not found, we just delete the proto statement
-                Npp.DeleteTextByRange(toDelete.Position, endPosition);
+                Sci.DeleteTextByRange(toDelete.Position, endPosition);
             }
 
             // in the case of a new function, create the prototype if needed
@@ -402,17 +402,17 @@ namespace _3PA.MainFeatures.Pro {
             // reposition caret and insert
             bool insertBefore;
             int insertPos = GetCaretPositionForInsertion<T>(codeCode.Name, codeCode.InsertPosition, out insertBefore);
-            if (insertPos < 0) insertPos = Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
+            if (insertPos < 0) insertPos = Sci.GetPosFromLineColumn(Sci.Line.CurrentLine, 0);
 
             insertText = FormatInsertion(insertText, blockDescription, insertBefore);
             int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
             insertText = insertText.Replace("|||", "");
 
-            Npp.SetSelection(insertPos);
-            Npp.ModifyTextAroundCaret(0, 0, insertText);
+            Sci.SetSelection(insertPos);
+            Sci.ModifyTextAroundCaret(0, 0, insertText);
 
-            Npp.GoToLine(Npp.LineFromPosition(insertPos));
-            Npp.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
+            Sci.GoToLine(Sci.LineFromPosition(insertPos));
+            Sci.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
 
             // in the case of a new function, create the prototype if needed
             if (typeof(ParsedImplementation) == typeof(T)) {
@@ -428,7 +428,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // at caret position
             if (insertPos == ProInsertPosition.CaretPosition)
-                return Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
+                return Sci.GetPosFromLineColumn(Sci.Line.CurrentLine, 0);
 
             T refItem = null;
 
@@ -528,18 +528,18 @@ namespace _3PA.MainFeatures.Pro {
 
             // can we find a comment indicating where the proc should be inserted?
             if (typeComment != null) {
-                Npp.TargetWholeDocument();
-                var previousFlags = Npp.SearchFlags;
-                Npp.SearchFlags = SearchFlags.Regex;
+                Sci.TargetWholeDocument();
+                var previousFlags = Sci.SearchFlags;
+                Sci.SearchFlags = SearchFlags.Regex;
                 var streg = @"\/\*\s+[\*]+\s+" + typeComment + @"\s+[\*]+";
-                var foundPos = Npp.SearchInTarget(streg);
-                Npp.SearchFlags = previousFlags;
+                var foundPos = Sci.SearchInTarget(streg);
+                Sci.SearchFlags = previousFlags;
                 if (foundPos == -1) {
-                    foundPos = new Regex(@"\/\*\s+[\*]+\s+" + typeComment + @"\s+[\*]+").Match(Npp.Text).Index;
+                    foundPos = new Regex(@"\/\*\s+[\*]+\s+" + typeComment + @"\s+[\*]+").Match(Sci.Text).Index;
                     if (foundPos == 0) foundPos = -1;
                 }
                 if (foundPos > -1) {
-                    return Npp.GetPosFromLineColumn(Npp.LineFromPosition(foundPos) + 1, 0);
+                    return Sci.GetPosFromLineColumn(Sci.LineFromPosition(foundPos) + 1, 0);
                 }
             }
 
@@ -547,7 +547,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (typeof(ParsedImplementation) == typeof(T)) {
                 // function implementation goes all the way bottom
-                return Npp.TextLength;
+                return Sci.TextLength;
             }
             if (typeof(ParsedPrototype) == typeof(T)) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
@@ -571,7 +571,7 @@ namespace _3PA.MainFeatures.Pro {
                     return firstFunc.Position;
                 }
                 // otherwise it goes at the end
-                return Npp.TextLength;
+                return Sci.TextLength;
             }
 
             return -1;
@@ -646,23 +646,23 @@ namespace _3PA.MainFeatures.Pro {
             CommonTagAction(fileInfo => {
                 var output = new StringBuilder();
 
-                Npp.TargetFromSelection();
-                var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
+                Sci.TargetFromSelection();
+                var indent = new String(' ', Sci.GetLine(Sci.LineFromPosition(Sci.TargetStart)).Indentation);
 
                 var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
-                var eol = Npp.GetEolString;
+                var eol = Sci.GetEolString;
                 output.Append(opener);
                 output.Append(eol);
                 output.Append(indent);
-                output.Append(Npp.SelectedText);
+                output.Append(Sci.SelectedText);
                 output.Append(eol);
                 output.Append(indent);
                 output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
 
-                Npp.TargetFromSelection();
-                Npp.ReplaceTarget(output.ToString());
+                Sci.TargetFromSelection();
+                Sci.ReplaceTarget(output.ToString());
 
-                Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
+                Sci.SetSel(Sci.TargetStart + opener.Length + eol.Length);
             });
         }
 
@@ -672,7 +672,7 @@ namespace _3PA.MainFeatures.Pro {
         public static void AddTitleBlockAtCaret() {
             CommonTagAction(fileInfo => {
                 var output = new StringBuilder();
-                var eol = Npp.GetEolString;
+                var eol = Sci.GetEolString;
                 output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
                 output.Append(eol);
 
@@ -690,8 +690,8 @@ namespace _3PA.MainFeatures.Pro {
                 output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
                 output.Append(eol);
 
-                Npp.SetTextByRange(Npp.CurrentPosition, Npp.CurrentPosition, output.ToString());
-                Npp.SetSel(Npp.CurrentPosition + output.Length);
+                Sci.SetTextByRange(Sci.CurrentPosition, Sci.CurrentPosition, output.ToString());
+                Sci.SetSel(Sci.CurrentPosition + output.Length);
             });
         }
 
@@ -699,9 +699,9 @@ namespace _3PA.MainFeatures.Pro {
             var filename = Npp.CurrentFile.FileName;
             if (FileTag.Contains(filename)) {
                 var fileInfo = FileTag.GetLastFileTag(filename);
-                Npp.BeginUndoAction();
+                Sci.BeginUndoAction();
                 performAction(fileInfo);
-                Npp.EndUndoAction();
+                Sci.EndUndoAction();
             } else {
                 UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
                 Appli.Appli.GoToPage(PageNames.FileInfo);
@@ -717,18 +717,18 @@ namespace _3PA.MainFeatures.Pro {
         /// If selection, comment the selection as a block
         /// </summary>
         public static void ToggleComment() {
-            Npp.BeginUndoAction();
+            Sci.BeginUndoAction();
 
             // for each selection (limit selection number)
-            for (var i = 0; i < Npp.Selection.Count; i++) {
-                var selection = Npp.GetSelection(i);
+            for (var i = 0; i < Sci.Selection.Count; i++) {
+                var selection = Sci.GetSelection(i);
 
                 int startPos;
                 int endPos;
                 bool singleLineComm = false;
                 if (selection.Caret == selection.Anchor) {
                     // comment line
-                    var thisLine = new Npp.Line(Npp.LineFromPosition(selection.Caret));
+                    var thisLine = new Sci.Line(Sci.LineFromPosition(selection.Caret));
                     startPos = thisLine.IndentationPosition;
                     endPos = thisLine.EndPosition;
                     singleLineComm = true;
@@ -747,7 +747,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
             }
 
-            Npp.EndUndoAction();
+            Sci.EndUndoAction();
         }
 
         /// <summary>
@@ -760,25 +760,25 @@ namespace _3PA.MainFeatures.Pro {
         private static int ToggleCommentOnRange(int startPos, int endPos) {
             // the line is essentially empty
             if ((endPos - startPos) == 0) {
-                Npp.SetTextByRange(startPos, startPos, "/*  */");
+                Sci.SetTextByRange(startPos, startPos, "/*  */");
                 return 3;
             }
 
             // line is surrounded by /* */
-            if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
-                if (Npp.GetTextByRange(startPos, endPos).Equals("/*  */")) {
+            if (Sci.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Sci.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
+                if (Sci.GetTextByRange(startPos, endPos).Equals("/*  */")) {
                     // delete an empty comment
-                    Npp.SetTextByRange(startPos, endPos, String.Empty);
+                    Sci.SetTextByRange(startPos, endPos, String.Empty);
                 } else {
                     // delete /* */
-                    Npp.SetTextByRange(endPos - 2, endPos, String.Empty);
-                    Npp.SetTextByRange(startPos, startPos + 2, String.Empty);
+                    Sci.SetTextByRange(endPos - 2, endPos, String.Empty);
+                    Sci.SetTextByRange(startPos, startPos + 2, String.Empty);
                 }
                 return 1;
             }
 
-            Npp.SetTextByRange(endPos, endPos, "*/");
-            Npp.SetTextByRange(startPos, startPos, "/*");
+            Sci.SetTextByRange(endPos, endPos, "*/");
+            Sci.SetTextByRange(startPos, startPos, "/*");
             return 2;
         }
 

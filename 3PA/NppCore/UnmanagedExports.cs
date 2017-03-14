@@ -34,6 +34,7 @@ namespace _3PA.NppCore {
     /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
     /// </summary>
     public static class UnmanagedExports {
+
         #region fields
 
         /// <summary>

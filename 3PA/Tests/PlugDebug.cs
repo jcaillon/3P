@@ -49,7 +49,7 @@ namespace _3PA.Tests {
         }
 
         public static void ParseCurrentFile() {
-            RunParserTests(Npp.Text);
+            RunParserTests(Sci.Text);
         }
 
         public static void ParseAllFiles() {
@@ -165,14 +165,13 @@ namespace _3PA.Tests {
                 MeasureIt(() => {
                     var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
                     UserCommunication.Notify(list.Count.ToString());
-                    File.WriteAllLines(Path.Combine(Npp.ConfigDirectory, "Tests", "out.txt"), list.OrderBy(s => s));
                 });
             });
         }
 
         public static void DebugTest3() {
 
-            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
+            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + Npp.NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
 
             MeasureIt(() => {
                 var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));

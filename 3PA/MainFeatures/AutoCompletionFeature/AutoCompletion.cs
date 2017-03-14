@@ -187,8 +187,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void OnShowCompleteSuggestionList() {
             ParserHandler.ParseCurrentDocument();
             _openedFromShortCut = true;
-            _shownLine = Npp.Line.CurrentLine;
-            _shownPosition = Npp.CurrentPosition;
+            _shownLine = Sci.Line.CurrentLine;
+            _shownPosition = Sci.CurrentPosition;
             UpdateAutocompletion(true);
         }
 
@@ -209,14 +209,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         public static List<CompletionItem> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
-            var filteredList = GetSortedFilteredSavedList(Npp.LineFromPosition(position), dontCheckLine);
+            var filteredList = GetSortedFilteredSavedList(Sci.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)
                 return found;
 
             // search in tables fields
-            var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(position));
+            var tableFound = ParserHandler.FindAnyTableOrBufferByName(Sci.GetFirstWordRightAfterPoint(position));
             if (tableFound == null) return null;
 
             var listOfFields = DataBase.GetFieldsList(tableFound).ToList();
@@ -319,8 +319,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                 return;
 
-            var nppCurrentPosition = Npp.CurrentPosition;
-            var nppCurrentLine = Npp.Line.CurrentLine;
+            var nppCurrentPosition = Sci.CurrentPosition;
+            var nppCurrentLine = Sci.Line.CurrentLine;
             var isAutocompVisible = IsVisible;
 
             // dont show in string/comments..?
@@ -336,7 +336,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // get current word, current previous word (table or database name)
             int nbPoints;
             string previousWord = "";
-            var strOnLeft = Npp.GetTextOnLeftOfPos(nppCurrentPosition);
+            var strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition);
             var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
             var splitted = keyword.Split('.');
             string lastCharBeforeWord = "";
@@ -439,7 +439,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
                 _form.Show(Npp.Win32WindowNpp);
-                Npp.GrabFocus();
+                Sci.GrabFocus();
             }
 
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than
@@ -481,7 +481,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // the filter uses the current caret line to know which item should be filtered, set it here
-            var nppCurrentLine = Npp.Line.CurrentLine;
+            var nppCurrentLine = Sci.Line.CurrentLine;
             CompletionFilterClass.Instance.UpdateConditions(nppCurrentLine, false);
 
             // filter with keyword (keyword can be empty)
@@ -498,11 +498,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return;
 
             _shownLine = nppCurrentLine;
-            _shownPosition = Npp.CurrentPosition;
+            _shownPosition = Sci.CurrentPosition;
 
             // update position
-            var point = Npp.GetCaretScreenLocation();
-            var lineHeight = Npp.TextHeight(nppCurrentLine);
+            var point = Sci.GetCaretScreenLocation();
+            var lineHeight = Sci.TextHeight(nppCurrentLine);
             point.Y += lineHeight;
 
             form.SetPosition(point, lineHeight + 2);
@@ -533,7 +533,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     replacementText = fullKeyword ?? data.DisplayText;
                 }
 
-                Npp.ReplaceKeywordWrapped(replacementText, offset);
+                Sci.ReplaceKeywordWrapped(replacementText, offset);
 
                 // Remember this item to show it higher in the list later
                 RememberUseOf(data);

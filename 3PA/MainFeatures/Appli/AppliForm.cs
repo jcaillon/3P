@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public void GiveFocusBack() {
             //WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            Npp.GrabFocus();
+            Sci.GrabFocus();
         }
 
         protected override void OnClosing(CancelEventArgs e) {

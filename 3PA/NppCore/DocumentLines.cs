@@ -91,7 +91,7 @@ namespace _3PA.NppCore {
                 position = 0,
                 length = SciGetLength()
             };
-            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            scn.text = Sci.Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
             OnScnModified(scn, true);
         }
 
@@ -99,7 +99,7 @@ namespace _3PA.NppCore {
         /// When receiving a modification notification by scintilla
         /// </summary>
         public void OnScnModified(SCNotification scn, bool isInsertion) {
-            _lastEncoding = Npp.Encoding;
+            _lastEncoding = Sci.Encoding;
             _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default) && !Config.IsDevelopper;
 
             // bypass the hard work for simple encoding
@@ -268,8 +268,8 @@ namespace _3PA.NppCore {
                         "\r\nTextLength = " + TextLength + "<br>" +
                         "\r\nSciLineFromPosition(SciGetLength()) = " + SciLineFromPosition(SciGetLength()) +
                         "\r\nLineFromCharPosition(TextLength) = " + LineFromCharPosition(TextLength) +
-                        "\r\nCurrentPosition = " + Npp.CurrentPosition +
-                        "\r\nSCI_GETCURRENTPOS = " + Npp.Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32() +
+                        "\r\nCurrentPosition = " + Sci.CurrentPosition +
+                        "\r\nSCI_GETCURRENTPOS = " + Sci.Api.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32() +
                         "\r\nSciPositionFromLine(SciGetLineCount()) = " + SciPositionFromLine(SciGetLineCount()) +
                         "\r\nCharPositionFromLine(SciGetLineCount()) = " + CharPositionFromLine(SciGetLineCount())
                     );
@@ -376,7 +376,7 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <returns></returns>
         private int SciGetLength() {
-            return Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32();
+            return Sci.Api.Send(SciMsg.SCI_GETLENGTH).ToInt32();
         }
 
         /// <summary>
@@ -385,7 +385,7 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <returns></returns>
         private int SciPositionRelative(int position, int nb) {
-            return Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(position), new IntPtr(nb)).ToInt32();
+            return Sci.Api.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(position), new IntPtr(nb)).ToInt32();
         }
 
         /// <summary>
@@ -394,7 +394,7 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <returns></returns>
         private int SciGetLineCount() {
-            return Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32();
+            return Sci.Api.Send(SciMsg.SCI_GETLINECOUNT).ToInt32();
         }
 
         /// <summary>
@@ -403,7 +403,7 @@ namespace _3PA.NppCore {
         /// <param name="line"></param>
         /// <returns></returns>
         private int SciLineLength(int line) {
-            return Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
+            return Sci.Api.Send(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
         }
 
         /// <summary>
@@ -412,7 +412,7 @@ namespace _3PA.NppCore {
         /// <param name="pos"></param>
         /// <returns></returns>
         private int SciLineFromPosition(int pos) {
-            return pos == 0 ? 0 : Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
+            return pos == 0 ? 0 : Sci.Api.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
         }
 
         /// <summary>
@@ -421,7 +421,7 @@ namespace _3PA.NppCore {
         /// <param name="line"></param>
         /// <returns></returns>
         private int SciPositionFromLine(int line) {
-            return line == 0 ? 0 : Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+            return line == 0 ? 0 : Sci.Api.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace _3PA.NppCore {
         /// </summary>
         private int GetCharCount(int pos, int length) {
             // don't use SCI_COUNTCHAR, it counts CRLF as 1 char
-            var ptr = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
+            var ptr = Sci.Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
             return GetCharCount(ptr, length, _lastEncoding);
         }
 

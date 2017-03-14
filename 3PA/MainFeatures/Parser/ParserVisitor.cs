@@ -948,7 +948,7 @@ namespace _3PA.MainFeatures.Parser {
         /// returns the number of chars between two lines in the current document
         /// </summary>
         private static int NbExtraCharBetweenLines(int startLine, int endLine) {
-            return (Npp.StartBytePosOfLine(endLine) - Npp.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
+            return (Sci.StartBytePosOfLine(endLine) - Sci.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
         }
 
         #endregion

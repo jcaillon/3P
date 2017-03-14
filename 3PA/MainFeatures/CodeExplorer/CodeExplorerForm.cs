@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public void UpdateCurrentScope() {
             if (Npp.CurrentFile.IsProgress) {
-                var currentScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
+                var currentScope = ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine);
                 if (currentScope != null) {
                     pbCurrentScope.BackGrndImage = Utils.GetImageFromStr(currentScope.ScopeType.ToString());
                     pbCurrentScope.Invalidate();
@@ -320,7 +320,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private void YamuiListOnRowClicked(YamuiScrollList yamuiScrollList, MouseEventArgs mouseEventArgs) {
             if (OnActivateItem())
-                Npp.GrabFocus();
+                Sci.GrabFocus();
         }
 
         private void buttonRefresh_Click(YamuiButtonImage sender, EventArgs e) {
@@ -328,7 +328,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 return;
             ParserHandler.ParserVisitor.ClearSavedParserVisitors();
             Plug.DoNppDocumentSwitched();
-            Npp.GrabFocus();
+            Sci.GrabFocus();
         }
 
         private void buttonSort_Click(YamuiButtonImage sender, EventArgs e) {
@@ -337,7 +337,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             UpdateTreeData();
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
-            Npp.GrabFocus();
+            Sci.GrabFocus();
         }
 
         private void buttonExpandRetract_Click(YamuiButtonImage sender, EventArgs e) {
@@ -347,7 +347,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 yamuiList.ForceAllToExpand();
             _isExpanded = !_isExpanded;
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
-            Npp.GrabFocus();
+            Sci.GrabFocus();
         }
 
         private void ButtonFromIncludeOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
@@ -356,7 +356,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             // Parse the document
             ParserHandler.ParseCurrentDocument(true);
-            Npp.GrabFocus();
+            Sci.GrabFocus();
         }
 
         #endregion

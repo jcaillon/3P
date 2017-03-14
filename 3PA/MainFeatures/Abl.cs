@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures {
         /// <returns></returns>
         public static bool IsCurrentFileFromAppBuilder {
             get {
-                if (!Npp.GetLine(0).Text.Trim().StartsWith("&ANALYZE-SUSPEND _VERSION-NUMBER", StringComparison.CurrentCultureIgnoreCase))
+                if (!Sci.GetLine(0).Text.Trim().StartsWith("&ANALYZE-SUSPEND _VERSION-NUMBER", StringComparison.CurrentCultureIgnoreCase))
                     return false;
                 return true;
             }

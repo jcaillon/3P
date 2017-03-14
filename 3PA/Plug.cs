@@ -156,7 +156,7 @@ namespace _3PA {
                 Utils.DeleteDirectory(Config.FolderTemp, true);
 
                 // ask to disable the default autocompletion
-                NppConfig.Instance.AskToDisableAutocompletion();
+                Npp.ConfXml.AskToDisableAutocompletion();
 
                 // if the UDL is not installed
                 if (!Style.InstallUdl(true)) {
@@ -329,7 +329,7 @@ namespace _3PA {
             // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
             switch (message) {
                 case WinApi.Messages.WM_NCLBUTTONDOWN:
-                    if (!WinApi.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
+                    if (!WinApi.GetWindowRect(Sci.HandleScintilla).Contains(Cursor.Position)) {
                         MouseMonitor.Instance.Add(WinApi.Messages.WM_MOUSEMOVE);
                     }
                     break;
@@ -481,7 +481,7 @@ namespace _3PA {
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
             // update current scintilla
-            Npp.UpdateScintilla();
+            Sci.UpdateScintilla();
 
             // update current file
             PreviousFile.Path = Npp.CurrentFile.Path;
@@ -508,14 +508,14 @@ namespace _3PA {
 
             // deactivate show space for conf files
             if (ShareExportConf.IsFileExportedConf(PreviousFile.Path))
-                if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
-                    Npp.ViewWhitespace = _whitespaceMode;
+                if (Sci.ViewWhitespace != WhitespaceMode.Invisible && !Sci.ViewEol)
+                    Sci.ViewWhitespace = _whitespaceMode;
 
             DoNppDocumentSwitched(initiating);
 
             // activate show space for conf files
             if (ShareExportConf.IsFileExportedConf(Npp.CurrentFile.Path))
-                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                Sci.ViewWhitespace = WhitespaceMode.VisibleAlways;
         }
 
         public static void DoNppDocumentSwitched(bool initiating = false) {
@@ -539,7 +539,7 @@ namespace _3PA {
             ProEnvironment.Current.ReComputeProPath();
 
             // rebuild lines info (MANDATORY)
-            Npp.RebuildLinesInfo();
+            Sci.RebuildLinesInfo();
 
             // Parse the document
             ParserHandler.ParseCurrentDocument(true);
@@ -572,7 +572,7 @@ namespace _3PA {
         public static void DoNppFileBeforeLoad() {
             // Reset the scintilla option for the indentation mode, as crazy as this is, it DESTROYS the performances
             // when opening big files in scintilla...
-            Npp.AnnotationVisible = AnnotationMode;
+            Sci.AnnotationVisible = AnnotationMode;
         }
 
         #endregion
@@ -615,11 +615,11 @@ namespace _3PA {
         public static void OnCharAddedWordEnd(char c) {
             try {
                 // we finished entering a keyword
-                var curPos = Npp.CurrentPosition;
+                var curPos = Sci.CurrentPosition;
                 int offset;
                 if (c == '\n' || c == '\r') {
-                    offset = curPos - Npp.GetLine().Position;
-                    offset += Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n") ? 2 : 1;
+                    offset = curPos - Sci.GetLine().Position;
+                    offset += Sci.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n") ? 2 : 1;
                 } else
                     offset = 1;
 
@@ -627,7 +627,7 @@ namespace _3PA {
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
                 if (AutoCompletion.IsVisible && isNormalContext) {
-                    var keyword = Npp.GetKeyword(searchWordAt);
+                    var keyword = Sci.GetKeyword(searchWordAt);
 
                     // automatically insert selected keyword of the completion list?
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
@@ -637,7 +637,7 @@ namespace _3PA {
 
                 // replace semicolon by a point
                 if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && Npp.CurrentFile.IsProgress)
-                    Npp.ModifyTextAroundCaret(-1, 0, ".");
+                    Sci.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
                 AutoCompletion.UpdateAutocompletion(true);
@@ -676,7 +676,7 @@ namespace _3PA {
             // if the text has changed
             if (deletedText || (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0) {
                 // observe modifications to lines (MANDATORY)
-                Npp.UpdateLinesInfo(nc, !deletedText);
+                Sci.UpdateLinesInfo(nc, !deletedText);
                 // parse
                 ParserHandler.ParseCurrentDocument();
             }
@@ -706,9 +706,9 @@ namespace _3PA {
             // click on the error margin
             if (nc.margin == FilesInfo.ErrorMarginNumber) {
                 // if it's an error symbol that has been clicked, the error on the line will be cleared
-                if (!FilesInfo.ClearLineErrors(Npp.LineFromPosition(nc.position))) {
+                if (!FilesInfo.ClearLineErrors(Sci.LineFromPosition(nc.position))) {
                     // if nothing has been cleared, we go to the next error position
-                    FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
+                    FilesInfo.GoToNextError(Sci.LineFromPosition(nc.position));
                 }
             }
         }
@@ -801,7 +801,7 @@ namespace _3PA {
             set {
                 // we want to set to our value
                 if (value == Annotation.Indented) {
-                    Npp.AnnotationVisible = Annotation.Indented;
+                    Sci.AnnotationVisible = Annotation.Indented;
                 } else {
                     _annotationMode = value;
                 }
@@ -824,11 +824,11 @@ namespace _3PA {
         internal static void ApplyOptionsForScintilla() {
             // need to do this stuff only once for each scintilla
 
-            var curScintilla = Npp.CurrentScintilla; // 0 or 1
+            var curScintilla = Sci.CurrentScintilla; // 0 or 1
             if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
-                Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
-                Npp.EndAtLastLine = false;
+                Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
+                Sci.EndAtLastLine = false;
                 //Npp.EventMask = (int) (SciModificationMod.SC_MOD_INSERTTEXT | SciModificationMod.SC_MOD_DELETETEXT | SciModificationMod.SC_PERFORMED_USER | SciModificationMod.SC_PERFORMED_UNDO | SciModificationMod.SC_PERFORMED_REDO);                
                 _initiatedScintilla[curScintilla] = 1;
             }
@@ -842,28 +842,28 @@ namespace _3PA {
         internal static void ApplyPluginOptionsForScintilla() {
             if (!_hasBeenInit || !PreviousFile.IsProgress) {
                 // read default options
-                _tabWidth = Npp.TabWidth;
-                _indentWithTabs = Npp.UseTabs;
-                _whitespaceMode = Npp.ViewWhitespace;
-                AnnotationMode = Npp.AnnotationVisible;
+                _tabWidth = Sci.TabWidth;
+                _indentWithTabs = Sci.UseTabs;
+                _whitespaceMode = Sci.ViewWhitespace;
+                AnnotationMode = Sci.AnnotationVisible;
                 _hasBeenInit = true;
             }
 
-            Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
-            Npp.UseTabs = false;
+            Sci.TabWidth = Config.Instance.CodeTabSpaceNb;
+            Sci.UseTabs = false;
             if (Config.Instance.CodeShowSpaces)
-                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                Sci.ViewWhitespace = WhitespaceMode.VisibleAlways;
 
             // apply style
             Style.SetSyntaxStyles();
             var currentStyle = Style.Current;
-            Npp.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
-            Npp.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
-            Npp.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
-            Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
-            Npp.CaretColor = currentStyle.CaretColor.ForeColor;
-            Npp.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
-            Npp.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
+            Sci.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Sci.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
+            Sci.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
+            Sci.CaretLineBackColor = currentStyle.CaretLine.BackColor;
+            Sci.CaretColor = currentStyle.CaretColor.ForeColor;
+            Sci.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
+            Sci.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -872,21 +872,21 @@ namespace _3PA {
                 return;
 
             // apply default options
-            Npp.TabWidth = _tabWidth;
-            Npp.UseTabs = _indentWithTabs;
-            Npp.AnnotationVisible = AnnotationMode;
+            Sci.TabWidth = _tabWidth;
+            Sci.UseTabs = _indentWithTabs;
+            Sci.AnnotationVisible = AnnotationMode;
 
-            if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
-                Npp.ViewWhitespace = _whitespaceMode;
+            if (Sci.ViewWhitespace != WhitespaceMode.Invisible && !Sci.ViewEol)
+                Sci.ViewWhitespace = _whitespaceMode;
 
             // read npp's stylers.xml file
-            Npp.SetIndentGuideColor(NppConfig.Instance.Stylers.IndentGuideLineBg, NppConfig.Instance.Stylers.IndentGuideLineFg);
-            Npp.SetWhiteSpaceColor(true, Color.Transparent, NppConfig.Instance.Stylers.WhiteSpaceFg);
-            Npp.SetSelectionColor(true, NppConfig.Instance.Stylers.SelectionBg, Color.Transparent);
-            Npp.CaretLineBackColor = NppConfig.Instance.Stylers.CaretLineBg;
-            Npp.CaretColor = NppConfig.Instance.Stylers.CaretFg;
-            Npp.SetFoldMarginColors(true, NppConfig.Instance.Stylers.FoldMarginBg, NppConfig.Instance.Stylers.FoldMarginFg);
-            Npp.SetFoldMarginMarkersColor(NppConfig.Instance.Stylers.FoldMarginMarkerFg, NppConfig.Instance.Stylers.FoldMarginMarkerBg, NppConfig.Instance.Stylers.FoldMarginMarkerActiveFg);
+            Sci.SetIndentGuideColor(Npp.StylersXml.IndentGuideLineBg, Npp.StylersXml.IndentGuideLineFg);
+            Sci.SetWhiteSpaceColor(true, Color.Transparent, Npp.StylersXml.WhiteSpaceFg);
+            Sci.SetSelectionColor(true, Npp.StylersXml.SelectionBg, Color.Transparent);
+            Sci.CaretLineBackColor = Npp.StylersXml.CaretLineBg;
+            Sci.CaretColor = Npp.StylersXml.CaretFg;
+            Sci.SetFoldMarginColors(true, Npp.StylersXml.FoldMarginBg, Npp.StylersXml.FoldMarginFg);
+            Sci.SetFoldMarginMarkersColor(Npp.StylersXml.FoldMarginMarkerFg, Npp.StylersXml.FoldMarginMarkerBg, Npp.StylersXml.FoldMarginMarkerActiveFg);
         }
 
         #endregion

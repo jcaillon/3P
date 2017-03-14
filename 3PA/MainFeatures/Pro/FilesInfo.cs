@@ -155,7 +155,7 @@ namespace _3PA.MainFeatures.Pro {
             UpdateFileStatus();
 
             var currentFilePath = Npp.CurrentFile.Path;
-            var marginError = Npp.GetMargin(ErrorMarginNumber);
+            var marginError = Sci.GetMargin(ErrorMarginNumber);
 
             // need to clear scintilla for this file?
             if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].NeedToCleanScintilla) {
@@ -170,7 +170,7 @@ namespace _3PA.MainFeatures.Pro {
                     marginError.Width = 0;
                 }
                 // reset annotation to default
-                Npp.AnnotationVisible = Plug.AnnotationMode;
+                Sci.AnnotationVisible = Plug.AnnotationMode;
                 return;
             }
 
@@ -198,8 +198,8 @@ namespace _3PA.MainFeatures.Pro {
                         stylerHelper.Clear();
                         lastMessage.Clear();
                         // set marker style now (the first error encountered for a given line is the highest anyway)
-                        if (!((int) Npp.GetLine(fileError.Line).MarkerGet()).IsBitSet((int) fileError.Level))
-                            Npp.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
+                        if (!((int) Sci.GetLine(fileError.Line).MarkerGet()).IsBitSet((int) fileError.Level))
+                            Sci.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
                     } else {
                         // append to existing annotation
                         stylerHelper.Style("\n", (byte) fileError.Level);
@@ -230,8 +230,8 @@ namespace _3PA.MainFeatures.Pro {
                     }
 
                     // set annotation
-                    Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
-                    Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
+                    Sci.GetLine(lastLine).AnnotationText = lastMessage.ToString();
+                    Sci.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
                 }
             }
 
@@ -316,7 +316,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <param name="line"></param>
         public static void ClearLine(int line) {
-            var lineObj = Npp.GetLine(line);
+            var lineObj = Sci.GetLine(line);
 
             lineObj.AnnotationText = null;
             foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
@@ -328,7 +328,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Clears all the annotations and the markers from scintilla
         /// </summary>
         public static void ClearAnnotationsAndMarkers() {
-            if (Npp.GetLine(0).MarkerGet() != 0) {
+            if (Sci.GetLine(0).MarkerGet() != 0) {
                 if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
                     _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
                     !_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == 0)) {
@@ -336,7 +336,7 @@ namespace _3PA.MainFeatures.Pro {
                     ClearLine(0);
                 }
             }
-            int nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
+            int nextLine = Sci.GetLine(0).MarkerNext(EveryMarkersMask);
             while (nextLine > -1) {
                 if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
                     _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
@@ -344,7 +344,7 @@ namespace _3PA.MainFeatures.Pro {
                     // The line 0 has an error marker when it shouldn't
                     ClearLine(nextLine);
                 }
-                nextLine = Npp.GetLine(nextLine + 1).MarkerNext(EveryMarkersMask);
+                nextLine = Sci.GetLine(nextLine + 1).MarkerNext(EveryMarkersMask);
             }
             // We should be able to use the lines below, but the experience proves that they sometimes crash...
             /*
@@ -361,11 +361,11 @@ namespace _3PA.MainFeatures.Pro {
             var currentFilePath = Npp.CurrentFile.Path;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
-            int nextLine = Npp.GetLine(line).MarkerNext(EveryMarkersMask);
+            int nextLine = Sci.GetLine(line).MarkerNext(EveryMarkersMask);
             if (nextLine == -1 && _sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == 0))
                 nextLine = 0;
             if (nextLine == -1)
-                nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
+                nextLine = Sci.GetLine(0).MarkerNext(EveryMarkersMask);
             if (nextLine != -1) {
                 var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == nextLine);
                 if (errInfo != null)
@@ -380,14 +380,14 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static void GoToPrevError(int line) {
             var currentFilePath = Npp.CurrentFile.Path;
-            var nbLines = Npp.Line.Count;
+            var nbLines = Sci.Line.Count;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
-            int prevLine = Npp.GetLine(line).MarkerPrevious(EveryMarkersMask);
+            int prevLine = Sci.GetLine(line).MarkerPrevious(EveryMarkersMask);
             if (prevLine == -1 && _sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == nbLines))
                 prevLine = nbLines;
             if (prevLine == -1)
-                prevLine = Npp.GetLine(nbLines).MarkerPrevious(EveryMarkersMask);
+                prevLine = Sci.GetLine(nbLines).MarkerPrevious(EveryMarkersMask);
             if (prevLine != -1) {
                 var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == prevLine);
                 if (errInfo != null)

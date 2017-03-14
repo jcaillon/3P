@@ -270,10 +270,10 @@ namespace _3PA.MainFeatures.Pro {
 
                 // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
                 if (fileToCompile.InputPath.Equals(Npp.CurrentFile.Path) &&
-                    (Npp.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) &&
+                    (Sci.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) &&
                     !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
                     fileToCompile.CompInputPath = Path.Combine(LocalTempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff_") + count + Path.GetExtension(fileToCompile.InputPath));
-                    Utils.FileWriteAllText(fileToCompile.CompInputPath, Npp.Text, Encoding.Default);
+                    Utils.FileWriteAllText(fileToCompile.CompInputPath, Sci.Text, Encoding.Default);
                 } else {
                     fileToCompile.CompInputPath = fileToCompile.InputPath;
                 }

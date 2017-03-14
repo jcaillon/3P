@@ -51,6 +51,7 @@ namespace _3PA.WindowsCore {
                     switch (code) {
                         case (uint) NppNotif.NPPN_TBMODIFICATION:
                             // this is the event that we want to respond to, it sets the toolbar icons
+                            UnmanagedExports.NppFuncItems.RefreshItems();
                             Plug.DoNppNeedToolbarImages();
                             return;
 
@@ -168,7 +169,7 @@ namespace _3PA.WindowsCore {
 
                             case (uint) NppNotif.NPPN_WORDSTYLESUPDATED:
                                 // The styles have been modified
-                                NppConfig.Reload();
+                                Npp.StylersXml.Reload();
                                 // unfortunatly, if the user changed of styler.xml file (he selected another theme) then we 
                                 // will incorrectly read the styles since we have to wait for the config.xml to be updated
                                 // and it only updates on npp shutdown

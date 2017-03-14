@@ -1234,7 +1234,7 @@ namespace _3PA.NppCore {
 
         /// <summary>
         /// A rectangle around the text. The rectangle outline and fill transparencies can be adjusted using
-        /// Npp.Indicator.Alpha and <see cref="Npp.Indicator.OutlineAlpha"/>.
+        /// Npp.Indicator.Alpha and <see cref="Sci.Indicator.OutlineAlpha"/>.
         /// </summary>
         StraightBox = SciMsg.INDIC_STRAIGHTBOX,
 
@@ -1273,7 +1273,7 @@ namespace _3PA.NppCore {
 
         /// <summary>
         /// A rectangle around the entire character area. The rectangle outline and fill transparencies can be adjusted using
-        /// Npp.Indicator.Alpha and <see cref="Npp.Indicator.OutlineAlpha"/>.
+        /// Npp.Indicator.Alpha and <see cref="Sci.Indicator.OutlineAlpha"/>.
         /// </summary>
         FullBox = SciMsg.INDIC_FULLBOX,
 

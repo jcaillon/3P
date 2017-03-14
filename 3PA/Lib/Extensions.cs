@@ -531,5 +531,18 @@ namespace _3PA.Lib {
         }
 
         #endregion
+
+        #region Pointers
+
+        public static bool IsTrue(this IntPtr ptr) {
+            return ptr != IntPtr.Zero;
+        }
+
+        public static IntPtr ToPointer(this bool myBool) {
+            return myBool ? new IntPtr(1) : IntPtr.Zero;
+        }
+
+        #endregion
+
     }
 }

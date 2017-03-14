@@ -26,6 +26,7 @@ using System.Security;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
+using _3PA.Lib;
 using _3PA.NppCore;
 
 namespace _3PA.WindowsCore {
