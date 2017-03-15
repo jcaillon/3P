@@ -26,10 +26,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using YamuiFramework.Helper;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 // ReSharper disable LocalizableElement
 

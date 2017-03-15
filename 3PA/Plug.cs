@@ -25,7 +25,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
@@ -37,6 +36,7 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
+using _3PA._Resource;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
@@ -97,7 +97,7 @@ namespace _3PA {
         /// Called by notepad++ when the plugin is loaded
         /// </summary>
         internal static void DoPlugLoad() {
-            // This allows to correctly feed the dll with its dependencies
+            // Triggered when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
             AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
 
             // catch unhandled errors to log them
@@ -125,7 +125,7 @@ namespace _3PA {
         /// Called when the plugin can set new shorcuts to the toolbar in notepad++
         /// </summary>
         internal static void DoNppNeedToolbarImages() {
-            Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.MainMenuCommandIndex);
+            Npp.SetToolbarImage(ImageResources.Logo16x16, AppliMenu.MainMenuCommandIndex);
             Npp.SetToolbarImage(ImageResources.FileExplorer16x16, FileExplorer.Instance.DockableCommandIndex);
             Npp.SetToolbarImage(ImageResources.CodeExplorer16x16, CodeExplorer.Instance.DockableCommandIndex);
         }

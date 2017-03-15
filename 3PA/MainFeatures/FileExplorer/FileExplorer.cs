@@ -23,10 +23,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YamuiFramework.Controls.YamuiList;
-using _3PA.Images;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal class FileExplorer : NppDockableDialog<FileExplorerForm> {

@@ -29,12 +29,12 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal partial class FileExplorerForm : NppDockableDialogForm {

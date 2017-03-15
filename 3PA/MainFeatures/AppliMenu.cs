@@ -24,7 +24,7 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Forms;
-using _3PA.Images;
+using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
@@ -32,6 +32,7 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 using _3PA.Tests;
 using _3PA.WindowsCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures {
     /// <summary>
@@ -79,10 +80,13 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Show a given menu
         /// </summary>
-        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16", int minWidth = 250) {
+        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = null, int minWidth = 250) {
             try {
                 // Close any already opened menu
                 ForceCloseMenu();
+
+                if (menuLogo == null)
+                    menuLogo = Utils.GetNameOf(() => ImageResources.Logo16x16);
 
                 // open requested menu
                 _popup = new YamuiMenu {
@@ -103,7 +107,7 @@ namespace _3PA.MainFeatures {
                         }
                     }
                 };
-                _popup.Show(new WindowWrapper(Npp.HandleNpp));
+                _popup.Show(Npp.Win32Handle);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
             }
@@ -190,7 +194,7 @@ namespace _3PA.MainFeatures {
             // List of item that can be assigned to a shortcut
             ShortcutableItemList = new List<MenuItem> {
                 // add the main menu here, so it can appear in the list of shortcut to set
-                new MenuItem(null, "Open main menu", ImageResources.logo20x20, item => ShowMainMenuAtCursor(), "Show_main_menu_", "Alt+C") {
+                new MenuItem(null, "Open main menu", ImageResources.Logo20x20, item => ShowMainMenuAtCursor(), "Show_main_menu_", "Alt+C") {
                     Generic = true
                 }
             };

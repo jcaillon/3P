@@ -118,52 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="UDL" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>udl.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="disclaimer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>html\pages\disclaimer.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="ProgressRun" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progress\progressrun.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="getting_started" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>html\pages\getting_started.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="DumpDatabase" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progress\dumpdatabase.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Abbreviations" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>abbreviations;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="KeywordsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywordshelp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>snippets;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="KeywordsList" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywordslist;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="StartProlint" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progress\startprolint.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ApplicationThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>applicationthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="SyntaxThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>syntaxthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="home" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>html\pages\home.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="StyleSheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\html\stylesheet.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="FunctionImplementation" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progresstemplates\functionimplementation.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="InternalProcedure" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progresstemplates\internalprocedure.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="DataDigger" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>datadigger\datadigger.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="DeploymentRules" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>deploymentrules;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="DeploymentHook" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progress\deploymenthook.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>html\stylesheet.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

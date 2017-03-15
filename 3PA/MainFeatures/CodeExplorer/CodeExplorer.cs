@@ -17,9 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using _3PA.Images;
+
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {

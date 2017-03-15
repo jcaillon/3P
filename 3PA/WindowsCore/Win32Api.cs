@@ -346,8 +346,8 @@ namespace _3PA.WindowsCore {
 
     #region WindowWrapper
 
-    internal class WindowWrapper : IWin32Window {
-        public WindowWrapper(IntPtr handle) {
+    internal class Win32Handle : IWin32Window {
+        public Win32Handle(IntPtr handle) {
             _hwnd = handle;
         }
 
@@ -359,4 +359,5 @@ namespace _3PA.WindowsCore {
     }
 
     #endregion
+
 }

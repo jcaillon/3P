@@ -21,9 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// <summary>

@@ -25,10 +25,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures {
     /// <summary>

@@ -34,6 +34,7 @@ namespace _3PA.Lib {
     /// This class regroups all the extension methods
     /// </summary>
     public static class Extensions {
+
         #region object
 
         /// <summary>
@@ -237,7 +238,7 @@ namespace _3PA.Lib {
         //flags &= ~flag; // ClearFlag 
 
         #endregion
-
+        
         #region string extensions
 
         /// <summary>

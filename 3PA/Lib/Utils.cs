@@ -26,6 +26,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,13 +34,13 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Images;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
+using _3PA._Resource;
 
 namespace _3PA.Lib {
     /*        
@@ -647,6 +648,18 @@ namespace _3PA.Lib {
         public static Image GetImageFromStr(string typeStr) {
             Image tryImg = (Image) ImageResources.ResourceManager.GetObject(typeStr);
             return tryImg ?? ImageResources.Error;
+        }
+
+        #endregion
+
+        #region Reflection
+
+        /// <summary>
+        /// Usage : var s = GetNameOf(() => Properties.Resources.Lily);
+        /// </summary>
+        public static string GetNameOf<T>(Expression<Func<T>> property) {
+            var me = property.Body as MemberExpression;
+            return me == null ? string.Empty : me.Member.Name;
         }
 
         #endregion

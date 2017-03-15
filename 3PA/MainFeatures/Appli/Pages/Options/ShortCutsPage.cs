@@ -24,10 +24,10 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// <summary>

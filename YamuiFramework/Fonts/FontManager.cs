@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Fonts {
@@ -172,7 +171,6 @@ namespace YamuiFramework.Fonts {
                 }
 
                 return _savedFonts[key];
-                ;
             }
 
             private PrivateFontCollection _pfc = new PrivateFontCollection();
@@ -182,6 +180,8 @@ namespace YamuiFramework.Fonts {
                     foreach (FontFamily fontFamily in _pfc.Families)
                         if (fontFamily.Name == familyName) return fontFamily;
 
+                    return null;
+                    /*
                     byte[] fontdata;
                     switch (familyName) {
                         case @"REDCIRCL":
@@ -204,6 +204,7 @@ namespace YamuiFramework.Fonts {
                     Marshal.FreeCoTaskMem(data);
 
                     return _pfc.Families[0];
+                    */
                 }
             }
         }

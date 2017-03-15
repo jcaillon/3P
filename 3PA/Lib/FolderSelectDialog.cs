@@ -118,7 +118,7 @@ namespace _3PA.Lib {
                     SelectedPath = InitialDirectory,
                     ShowNewFolderButton = false
                 }) {
-                    if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
+                    if (fbd.ShowDialog(new Win32Handle(hWndOwner)) != DialogResult.OK) return false;
                     _ofd.FileName = fbd.SelectedPath;
                 }
                 flag = true;

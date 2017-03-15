@@ -26,9 +26,9 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
-using _3PA.Data;
-using _3PA.Images;
+using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures {
     internal static class ThemeManager {
@@ -148,7 +148,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <returns></returns>
         public static string GetLogo {
-            get { return "logo30x30"; }
+            get { return Utils.GetNameOf(() => ImageResources.Logo30x30); }
         }
 
         #endregion
@@ -174,7 +174,7 @@ namespace _3PA.MainFeatures {
         /// Called when the yamuiframework needs a css sheet
         /// </summary>
         private static string OnCssNeeded() {
-            return Current.ReplaceAliasesByColor(DataResources.StyleSheet);
+            return Current.ReplaceAliasesByColor(HtmlResources.StyleSheet);
         }
 
         #endregion

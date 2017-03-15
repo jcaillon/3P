@@ -24,11 +24,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Forms;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {

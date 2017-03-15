@@ -20,9 +20,9 @@
 using System;
 using System.Drawing;
 using YamuiFramework.Helper;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {

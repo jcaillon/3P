@@ -24,9 +24,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class Deployer {

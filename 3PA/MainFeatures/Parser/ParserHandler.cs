@@ -29,6 +29,7 @@ using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
     internal static class ParserHandler {
+
         #region event
 
         /// <summary>
@@ -232,5 +233,6 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         #endregion
+
     }
 }

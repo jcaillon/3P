@@ -438,7 +438,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 _form.YamuiList.SetItems(CurrentItems.Cast<ListItem>().ToList());
                 _needToSetItems = false;
-                _form.Show(Npp.Win32WindowNpp);
+                _form.Show(Npp.Win32Handle);
                 Sci.GrabFocus();
             }
 

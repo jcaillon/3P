@@ -127,7 +127,7 @@ namespace _3PA.Tests {
                 MenuList = list.Cast<YamuiMenuItem>().ToList(),
                 DisplayNbItems = true
             };
-            popup.Show(new WindowWrapper(Npp.HandleNpp));
+            popup.Show(Npp.Win32Handle);
             /*
 
             object fuck = (int)0;

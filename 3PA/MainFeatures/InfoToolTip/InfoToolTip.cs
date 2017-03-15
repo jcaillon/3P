@@ -557,7 +557,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     UnfocusedOpacity = Config.Instance.ToolTipOpacity,
                     FocusedOpacity = Config.Instance.ToolTipOpacity
                 };
-                _form.Show(Npp.Win32WindowNpp);
+                _form.Show(Npp.Win32Handle);
                 _form.SetLinkClickedEvent(ClickHandler);
             }
         }

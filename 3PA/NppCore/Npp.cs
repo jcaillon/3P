@@ -117,8 +117,8 @@ namespace _3PA.NppCore {
         /// Must be used as an input for forms.Show() in order to link the create form to the Npp window
         /// if the user switches applications, the dialog hides with Notepad++
         /// </summary>
-        public static IWin32Window Win32WindowNpp {
-            get { return new WindowWrapper(HandleNpp); }
+        public static IWin32Window Win32Handle {
+            get { return new Win32Handle(HandleNpp); }
         }
 
         /// <summary>
@@ -704,50 +704,6 @@ namespace _3PA.NppCore {
             /// </summary>
             public void Reload(bool askConfirmation) {
                 Npp.Reload(Path, askConfirmation);
-            }
-
-            /// <summary>
-            /// Returns the encoding used by Npp for the current document, it should be used to 
-            /// encode the string coming from and to Scintilla
-            /// </summary>
-            /// <remarks>This is very weird but we only need to encode/decode strings from/to scintilla
-            /// when the current Encoding is UTF-8, in all other case, we can read/write the strings
-            /// as they are (</remarks>
-            /// <returns></returns>
-            public Encoding BufferEncoding {
-                get {
-                    return CurrentBufferEncoding < 1 ? Encoding.Default : Encoding.UTF8;
-                    /*
-                    // Logically, we should identify the correct encoding as follow, but in reality
-                    // we only need to convert To/From UTF8/ANSI
-                    Encoding encoding = Encoding.Default;
-                    switch(nppEncoding) {
-                        case 1:
-                        case 4:
-                            // UTF-8
-                            encoding = Encoding.UTF8;
-                            break;
-                        case 2:
-                        case 6:
-                            // UTF-16 Big Endian
-                            encoding = Encoding.BigEndianUnicode;
-                            break;
-                        case 3:
-                        case 7:
-                            // UTF-16 Little Endian
-                            encoding = Encoding.Unicode;
-                            break;
-                        case 5:
-                            // not sure about that (uni7Bit?)
-                            encoding = Encoding.UTF7;
-                            break;
-                        default:
-                            // ANSI (chars in the range 0-255 range)
-                            encoding = Encoding.GetEncoding(1252);
-                            break;
-                    }
-                    */
-                }
             }
         }
 

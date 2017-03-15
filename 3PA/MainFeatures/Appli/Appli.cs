@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures.Appli {
                     // create the form
                     if (!_hasBeenShownOnce) {
                         _hasBeenShownOnce = true;
-                        _form.Show(Npp.Win32WindowNpp);
+                        _form.Show(Npp.Win32Handle);
                     } else {
                         // toggle visibility
                         if (_form.Visible && !_form.HasModalOpened)

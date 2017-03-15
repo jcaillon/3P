@@ -21,30 +21,34 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using YamuiFramework.Themes;
 using _3PA.MainFeatures;
-using _3PA.NppCore;
-using _3PA.Properties;
+using _3PA._Resource;
 
 namespace _3PA.Lib {
+
     internal static class LibLoader {
+
         /// <summary>
         /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
         /// to the program
+        /// Subscribe to the following event on start :
+        /// AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
         /// <returns></returns>
         public static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
             try {
-                var requestedAssembly = new AssemblyName(args.Name);
-
+                /*
                 // new library request!
-                if (!requestedAssembly.Name.Contains(".")) {
+                if (Config.IsDevelopper && !requestedAssembly.Name.Contains(".")) {
+
                     var pathToLib = Path.Combine(Config.FolderLibrary, requestedAssembly.Name + ".dll");
 
                     // replace the library if outdated or if it doesn't exist
                     if (string.IsNullOrEmpty(pathToLib) || !File.Exists(pathToLib) || requestedAssembly.Version.ToString().IsHigherVersionThan(GetAssemblyVersionFromPath(pathToLib))) {
-                        var lib = (byte[]) Resources.ResourceManager.GetObject(requestedAssembly.Name);
+                        var lib = (byte[])DependenciesResources.ResourceManager.GetObject(requestedAssembly.Name);
                         if (lib != null) {
                             if (Npp.NumberOfNppStarted <= 1)
                                 Utils.FileWriteAllBytes(pathToLib, lib);
@@ -53,9 +57,18 @@ namespace _3PA.Lib {
                             return null;
                         }
                     }
-
                     return Assembly.LoadFrom(pathToLib);
                 }
+                */
+
+                var assName = args.Name.Substring(0, args.Name.IndexOf(",", StringComparison.CurrentCultureIgnoreCase));
+                switch (assName) {
+                    case "YamuiFramework":
+                        return Assembly.Load(DependenciesResources.YamuiFramework);
+                    default:
+                        return null;
+                }
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in LibLoader");
             }
@@ -72,8 +85,15 @@ namespace _3PA.Lib {
             return (!string.IsNullOrEmpty(path) && File.Exists(path)) ? GetAssemblyVersionFromPath(path) : string.Empty;
         }
 
+        public static string GetYamuiAssemblyVersion() {
+            var yamuiAssembly = Assembly.GetAssembly(typeof(YamuiTheme));
+            var v = yamuiAssembly.GetName().Version.ToString();
+            return "v" + v;
+        }
+
         private static string GetAssemblyVersionFromPath(string path) {
             return FileVersionInfo.GetVersionInfo(path).FileVersion;
         }
+
     }
 }

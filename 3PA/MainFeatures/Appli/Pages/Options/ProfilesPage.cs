@@ -24,10 +24,10 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class ProfilesPage : YamuiPage {
@@ -165,11 +165,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         public override Image ItemTypeImage {
-            get { return (Image) ImageResources.ResourceManager.GetObject(ItemType == 0 ? "Block" : "Abbreviation"); }
+            get { return ItemType == 0 ? ImageResources.Block : ImageResources.Abbreviation; }
         }
 
         public override Image ItemImage {
-            get { return (Image) ImageResources.ResourceManager.GetObject(Level == 0 ? "Block" : "Abbreviation"); }
+            get { return Level == 0 ? ImageResources.Block : ImageResources.Abbreviation; }
         }
 
         public override bool IsRowHighlighted {

@@ -30,10 +30,10 @@ using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// <summary>

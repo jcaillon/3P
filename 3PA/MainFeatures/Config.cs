@@ -589,9 +589,14 @@ namespace _3PA.MainFeatures {
         /// Is developper = the file debug exists
         /// </summary>
         public static bool IsDevelopper {
-            get { return File.Exists(FileDebug); }
+            get {
+                if (_isDevelopper == null)
+                    _isDevelopper = File.Exists(FileDebug);
+                return (bool) _isDevelopper;
+            }
         }
-
+        private static bool? _isDevelopper;
+        
         public static string FileDebug {
             get { return Path.Combine(Npp.ConfigDirectory, "debug"); }
         }

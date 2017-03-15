@@ -20,9 +20,9 @@
 using System;
 using System.Linq;
 using YamuiFramework.Controls;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {

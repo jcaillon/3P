@@ -87,6 +87,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Web.Extensions" />
@@ -97,21 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainFeatures\Abl.cs" />
-    <Compile Include="Data\DataResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DataResources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Html\HtmlResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>HtmlResources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Images\ImageResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ImageResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Lib\3pUpdater\3PUpdater.cs" />
     <Compile Include="Lib\CommonMark\CommonMarkAdditionalFeatures.cs" />
     <Compile Include="Lib\CommonMark\CommonMarkConverter.cs" />
@@ -250,7 +236,247 @@
     <Compile Include="WindowsCore\NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
     <Compile Include="MainFeatures\ThemeManager.cs" />
-    <Content Include="Html\Pages\disclaimer.html" />
+    <Compile Include="_Resource\DataResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DataResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="_Resource\HtmlResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HtmlResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="_Resource\ImageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ImageResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="_Resource\DependenciesResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DependenciesResources.resx</DependentUpon>
+    </Compile>
+    <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
+    <Content Include="_Resource\Images\Appli\Add.png" />
+    <Content Include="_Resource\Images\Appli\Alphabetical_sorting.png" />
+    <Content Include="_Resource\Images\Appli\BringToFront.png" />
+    <Content Include="_Resource\Images\Appli\Calendar.png" />
+    <Content Include="_Resource\Images\Appli\Cancel.png" />
+    <Content Include="_Resource\Images\Appli\ClearAll.png" />
+    <Content Include="_Resource\Images\Appli\Clear_filters.png" />
+    <Content Include="_Resource\Images\Appli\Collapse.png" />
+    <Content Include="_Resource\Images\Appli\Configuration.png" />
+    <Content Include="_Resource\Images\Appli\Copy.png" />
+    <Content Include="_Resource\Images\Appli\Default.png" />
+    <Content Include="_Resource\Images\Appli\Del.png" />
+    <Content Include="_Resource\Images\Appli\Delete.png" />
+    <Content Include="_Resource\Images\Appli\Deploy.png" />
+    <Content Include="_Resource\Images\Appli\DownloadAll.png" />
+    <Content Include="_Resource\Images\Appli\DownloadDbNok.png" />
+    <Content Include="_Resource\Images\Appli\DownloadDbOk.png" />
+    <Content Include="_Resource\Images\Appli\Edit.png" />
+    <Content Include="_Resource\Images\Appli\eraser.png" />
+    <Content Include="_Resource\Images\Appli\Error30x30.png" />
+    <Content Include="_Resource\Images\Appli\Expand.png" />
+    <Content Include="_Resource\Images\Appli\ExplorerDir0.png" />
+    <Content Include="_Resource\Images\Appli\ExplorerDir1.png" />
+    <Content Include="_Resource\Images\Appli\ExplorerDir2.png" />
+    <Content Include="_Resource\Images\Appli\ExplorerDir3.png" />
+    <Content Include="_Resource\Images\Appli\Export.png" />
+    <Content Include="_Resource\Images\Appli\Favourite.png" />
+    <Content Include="_Resource\Images\Appli\Fetch.png" />
+    <Content Include="_Resource\Images\Appli\GetHelp.png" />
+    <Content Include="_Resource\Images\Appli\Help.png" />
+    <Content Include="_Resource\Images\Appli\Historic.png" />
+    <Content Include="_Resource\Images\Appli\Import.png" />
+    <Content Include="_Resource\Images\Appli\More.png" />
+    <Content Include="_Resource\Images\Appli\Next.png" />
+    <Content Include="_Resource\Images\Appli\NotSaved.png" />
+    <Content Include="_Resource\Images\Appli\Numerical_sorting.png" />
+    <Content Include="_Resource\Images\Appli\Ok.png" />
+    <Content Include="_Resource\Images\Appli\Ok30x30.png" />
+    <Content Include="_Resource\Images\Appli\OpenInExplorer.png" />
+    <Content Include="_Resource\Images\Appli\OutDated.png" />
+    <Content Include="_Resource\Images\Appli\Previous.png" />
+    <Content Include="_Resource\Images\Appli\Push.png" />
+    <Content Include="_Resource\Images\Appli\ReadOnly.png" />
+    <Content Include="_Resource\Images\Appli\Recycle_sign.png" />
+    <Content Include="_Resource\Images\Appli\Refresh.png" />
+    <Content Include="_Resource\Images\Appli\Refreshing.png" />
+    <Content Include="_Resource\Images\Appli\Report.png" />
+    <Content Include="_Resource\Images\Appli\Report_64x64.png" />
+    <Content Include="_Resource\Images\Appli\Rules.png" />
+    <Content Include="_Resource\Images\Appli\Save.png" />
+    <Content Include="_Resource\Images\Appli\Save2.png" />
+    <Content Include="_Resource\Images\Appli\SelectFile.png" />
+    <Content Include="_Resource\Images\Appli\Stop.png" />
+    <Content Include="_Resource\Images\Appli\Time.png" />
+    <Content Include="_Resource\Images\Appli\UndoUserAction.png" />
+    <Content Include="_Resource\Images\Appli\Update.png" />
+    <Content Include="_Resource\Images\Appli\ViewFile.png" />
+    <Content Include="_Resource\Images\Appli\Warning30x30.png" />
+    <Content Include="_Resource\Images\Appli\ZoomIn.png" />
+    <Content Include="_Resource\Images\Backgrounds\bg_darkmaul.jpg" />
+    <Content Include="_Resource\Images\Backgrounds\bg_hellokitty.jpg" />
+    <Content Include="_Resource\Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
+    <Content Include="_Resource\Images\Backgrounds\bg_oss.png" />
+    <Content Include="_Resource\Images\FileTypes\ClsType.png" />
+    <Content Include="_Resource\Images\FileTypes\DfType.png" />
+    <Content Include="_Resource\Images\FileTypes\DType.png" />
+    <Content Include="_Resource\Images\FileTypes\FolderType.png" />
+    <Content Include="_Resource\Images\FileTypes\FtpType.png" />
+    <Content Include="_Resource\Images\FileTypes\IType.png" />
+    <Content Include="_Resource\Images\FileTypes\LstType.png" />
+    <Content Include="_Resource\Images\FileTypes\PlType.png" />
+    <Content Include="_Resource\Images\FileTypes\PType.png" />
+    <Content Include="_Resource\Images\FileTypes\RType.png" />
+    <Content Include="_Resource\Images\FileTypes\TType.png" />
+    <Content Include="_Resource\Images\FileTypes\UnknowType.png" />
+    <Content Include="_Resource\Images\FileTypes\WType.png" />
+    <Content Include="_Resource\Images\FileTypes\XmlType.png" />
+    <Content Include="_Resource\Images\FileTypes\XrefType.png" />
+    <Content Include="_Resource\Images\FileTypes\ZipType.png" />
+    <Content Include="_Resource\Images\Html\getting-started-0.png" />
+    <Content Include="_Resource\Images\Html\getting-started-1.png" />
+    <Content Include="_Resource\Images\Html\getting-started-2.png" />
+    <Content Include="_Resource\Images\Html\getting-started-3.png" />
+    <Content Include="_Resource\Images\logo\icon\3p_icon.ico" />
+    <Content Include="_Resource\Images\logo\Logo150x150.png" />
+    <Content Include="_Resource\Images\logo\Logo20x20.png" />
+    <Content Include="_Resource\Images\logo\Logo30x30.png" />
+    <Content Include="_Resource\Images\Menu\Autocompletion.png" />
+    <Content Include="_Resource\Images\Menu\CheckCode.png" />
+    <Content Include="_Resource\Images\Menu\CompileCode.png" />
+    <Content Include="_Resource\Images\Menu\DataAdmin.png" />
+    <Content Include="_Resource\Images\Menu\DatabaseTools.png" />
+    <Content Include="_Resource\Images\Menu\DataDigger.png" />
+    <Content Include="_Resource\Images\Menu\DataReader.png" />
+    <Content Include="_Resource\Images\Menu\DeleteFunction.png" />
+    <Content Include="_Resource\Images\Menu\DeleteProcedure.png" />
+    <Content Include="_Resource\Images\Menu\Dictionary.png" />
+    <Content Include="_Resource\Images\Menu\EditCode.png" />
+    <Content Include="_Resource\Images\Menu\Env.png" />
+    <Content Include="_Resource\Images\Menu\EnvName.png" />
+    <Content Include="_Resource\Images\Menu\EnvSuffix.png" />
+    <Content Include="_Resource\Images\Menu\FileInfo.png" />
+    <Content Include="_Resource\Images\Menu\FormatCode.png" />
+    <Content Include="_Resource\Images\Menu\GenerateCode.png" />
+    <Content Include="_Resource\Images\Menu\Git.png" />
+    <Content Include="_Resource\Images\Menu\GoBackward.png" />
+    <Content Include="_Resource\Images\Menu\GoToDefinition.png" />
+    <Content Include="_Resource\Images\Menu\InsertMark.png" />
+    <Content Include="_Resource\Images\Menu\MainWindow.png" />
+    <Content Include="_Resource\Images\Menu\Miscellaneous.png" />
+    <Content Include="_Resource\Images\Menu\ModificationTag.png" />
+    <Content Include="_Resource\Images\Menu\ProDesktop.png" />
+    <Content Include="_Resource\Images\Menu\ProgressHelp.png" />
+    <Content Include="_Resource\Images\Menu\ProlintCode.png" />
+    <Content Include="_Resource\Images\Menu\RunCode.png" />
+    <Content Include="_Resource\Images\Menu\Search.png" />
+    <Content Include="_Resource\Images\Menu\SendToAppbuilder.png" />
+    <Content Include="_Resource\Images\Menu\ShowOptions.png" />
+    <Content Include="_Resource\Images\Menu\Synchronize.png" />
+    <Content Include="_Resource\Images\Menu\Tests.png" />
+    <Content Include="_Resource\Images\Menu\TestTube.png" />
+    <Content Include="_Resource\Images\Menu\TitleBlock.png" />
+    <Content Include="_Resource\Images\Menu\ToggleComment.png" />
+    <Content Include="_Resource\Images\Menu\Turtle.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgDebug.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgError.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgHighImportance.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgInfo.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgOk.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgPoison.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgQuestion.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgRip.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgToolTip.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgUpdate.png" />
+    <Content Include="_Resource\Images\NotifAndMessages\MsgWarning.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Abbreviation.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Abstract.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Buffer.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Dynamic.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Extent.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\External.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\FileScope.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Final.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\FromInclude.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Global.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Index.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Input.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\InputOutput.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\IsTooLong.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\LocalScope.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Mandatory.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\MissingDbName.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\New.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\NotFound.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Output.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Override.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Parameter.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Persistent.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Primary.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Private.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Protected.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Reserved.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Return.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Serializable.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Shared.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Static.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Uncertain.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Block.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Browse.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Class.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Constructor.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\CreateWindowBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Database.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\DefinedTempTable.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\DefinitionBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\DynamicFunctionCall.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\DynamicFunctionCallExternal.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Error.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\ExternalProcedure.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Field.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\FieldPk.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Function.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Include.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Keyword.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\KeywordObject.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Label.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\MainBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Method.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\NotApplicable.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Preprocessed.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\PreprocessorBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Procedure.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\ProgramParameter.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Prototype.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Publish.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Root.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Run.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\RunExternal.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\RuntimeBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Sequence.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\SettingsBlock.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Snippet.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\StaticFunctionCall.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Subscribe.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Table.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\TableUsed.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\TempTable.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\TempTableUsed.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Unsubscribe.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\VariableComplex.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\VariablePrimitive.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Widget.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\XtfrBlock.png" />
+    <Content Include="_Resource\Images\ToolBar\CodeExplorer16x16.png" />
+    <Content Include="_Resource\Images\ToolBar\CodeExplorerLogo.png" />
+    <Content Include="_Resource\Images\ToolBar\FileExplorer16x16.png" />
+    <Content Include="_Resource\Images\ToolBar\FileExplorerLogo.png" />
+    <Content Include="_Resource\Images\ToolBar\Logo16x16.png" />
+    <Content Include="_Resource\Html\Pages\disclaimer.html" />
     <Compile Include="WindowsCore\CoreWindowsHook.cs" />
     <Compile Include="NppCore\DocumentLines.cs" />
     <Compile Include="NppCore\NppHeader.cs" />
@@ -358,15 +584,10 @@
     <Compile Include="NppCore\Sci.cs" />
     <Compile Include="Plug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="NppCore\UnmanagedExports.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Html\HtmlResources.resx">
+    <EmbeddedResource Include="_Resource\HtmlResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>HtmlResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -411,12 +632,12 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\SettingAppearance.resx">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Data\DataResources.resx">
+    <EmbeddedResource Include="_Resource\DataResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>DataResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Images\ImageResources.resx">
+    <EmbeddedResource Include="_Resource\ImageResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>ImageResources.Designer.cs</LastGenOutput>
@@ -434,254 +655,37 @@
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Include="_Resource\DependenciesResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
+      <LastGenOutput>DependenciesResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\Abbreviations" />
-    <None Include="Data\DeploymentRules" />
-    <None Include="Data\DataDigger\DataDigger.zip" />
-    <None Include="Data\KeywordsList" />
-    <None Include="Data\KeywordsHelp" />
-    <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
-    <None Include="Data\ProgressTemplates\InternalProcedure.p" />
-    <None Include="Data\Progress\DeploymentHook.p" />
-    <None Include="Data\Progress\DumpDatabase.p" />
-    <None Include="Data\Progress\ProgressRun.p" />
-    <None Include="Data\Progress\StartProlint.p" />
-    <None Include="Data\Snippets" />
-    <None Include="Data\SyntaxThemes" />
-    <None Include="Data\ApplicationThemes" />
+    <None Include="_Resource\Data\Abbreviations" />
+    <None Include="_Resource\Data\DeploymentRules" />
+    <None Include="_Resource\Data\DataDigger\DataDigger.zip" />
+    <None Include="_Resource\Data\KeywordsList" />
+    <None Include="_Resource\Data\KeywordsHelp" />
+    <None Include="_Resource\Data\ProgressTemplates\FunctionImplementation.p" />
+    <None Include="_Resource\Data\ProgressTemplates\InternalProcedure.p" />
+    <None Include="_Resource\Data\Progress\DeploymentHook.p" />
+    <None Include="_Resource\Data\Progress\DumpDatabase.p" />
+    <None Include="_Resource\Data\Progress\ProgressRun.p" />
+    <None Include="_Resource\Data\Progress\StartProlint.p" />
+    <None Include="_Resource\Data\Snippets" />
+    <None Include="_Resource\Data\SyntaxThemes" />
+    <None Include="_Resource\Data\ApplicationThemes" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\UDL.xml">
+    <Content Include="_Resource\Data\UDL.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Html\Pages\home.html" />
-    <Content Include="Html\StyleSheet.css" />
-    <Content Include="Images\Appli\Add.png" />
-    <Content Include="Images\Appli\Calendar.png" />
-    <Content Include="Images\Appli\Cancel.png" />
-    <Content Include="Images\Appli\Configuration.png" />
-    <Content Include="Images\Appli\Copy.png" />
-    <Content Include="Images\Appli\Default.png" />
-    <Content Include="Images\Appli\Del.png" />
-    <Content Include="Images\Appli\Delete.png" />
-    <Content Include="Images\Appli\Deploy.png" />
-    <Content Include="Images\Appli\DownloadAll.png" />
-    <Content Include="Images\Appli\DownloadDbNok.png" />
-    <Content Include="Images\Appli\DownloadDbOk.png" />
-    <Content Include="Images\Appli\Edit.png" />
-    <Content Include="Images\Appli\Error30x30.png" />
-    <Content Include="Images\Appli\Export.png" />
-    <Content Include="Images\Appli\Fetch.png" />
-    <Content Include="Images\Appli\Help.png" />
-    <Content Include="Images\Appli\Historic.png" />
-    <Content Include="Images\Appli\Import.png" />
-    <Content Include="Images\Appli\NotSaved.png" />
-    <Content Include="Images\Appli\Ok.png" />
-    <Content Include="Images\Appli\Ok30x30.png" />
-    <Content Include="Images\Appli\OpenInExplorer.png" />
-    <Content Include="Images\Appli\OutDated.png" />
-    <Content Include="Images\Appli\Push.png" />
-    <Content Include="Images\Appli\Report.png" />
-    <Content Include="Images\Appli\Report_64x64.png" />
-    <Content Include="Images\Appli\Rules.png" />
-    <Content Include="Images\Appli\Save.png" />
-    <Content Include="Images\Appli\SelectFile.png" />
-    <Content Include="Images\Appli\Time.png" />
-    <Content Include="Images\Appli\UndoUserAction.png" />
-    <Content Include="Images\Appli\Update.png" />
-    <Content Include="Images\Appli\ViewFile.png" />
-    <Content Include="Images\Appli\Warning30x30.png" />
-    <Content Include="Images\Appli\More.png" />
-    <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
-    <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
-    <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
-    <Content Include="Images\Backgrounds\bg_oss.png" />
-    <Content Include="Images\Appli\Alphabetical_sorting.png" />
-    <Content Include="Images\Appli\Refreshing.png" />
-    <Content Include="Images\FileTypes\TType.png" />
-    <Content Include="Images\ParserItem\Flags\Abstract.png" />
-    <Content Include="Images\ParserItem\Flags\Final.png" />
-    <Content Include="Images\ParserItem\Flags\FromInclude.png" />
-    <Content Include="Images\ParserItem\Flags\Global.png" />
-    <Content Include="Images\ParserItem\Flags\Input.png" />
-    <Content Include="Images\ParserItem\Flags\InputOutput.png" />
-    <Content Include="Images\ParserItem\Flags\Output.png" />
-    <Content Include="Images\ParserItem\Flags\Override.png" />
-    <Content Include="Images\ParserItem\Flags\Primary.png" />
-    <Content Include="Images\ParserItem\Flags\Protected.png" />
-    <Content Include="Images\ParserItem\Flags\Return.png" />
-    <Content Include="Images\ParserItem\Flags\Serializable.png" />
-    <Content Include="Images\ParserItem\Flags\Static.png" />
-    <Content Include="Images\ToolBar\CodeExplorerLogo.png" />
-    <Content Include="Images\ParserItem\Type\DefinedTempTable.png" />
-    <Content Include="Images\ParserItem\Type\DynamicFunctionCall.png" />
-    <Content Include="Images\ParserItem\Type\DynamicFunctionCallExternal.png" />
-    <Content Include="Images\ParserItem\Type\ExternalProcedure.png" />
-    <Content Include="Images\ParserItem\Type\NotApplicable.png" />
-    <Content Include="Images\ParserItem\Type\Publish.png" />
-    <Content Include="Images\ParserItem\Type\StaticFunctionCall.png" />
-    <Content Include="Images\ParserItem\Type\Subscribe.png" />
-    <Content Include="Images\ParserItem\Type\Unsubscribe.png" />
-    <Content Include="Images\Appli\BringToFront.png" />
-    <Content Include="Images\FileTypes\FtpType.png" />
-    <Content Include="Images\FileTypes\PlType.png" />
-    <Content Include="Images\Appli\Stop.png" />
-    <Content Include="Images\FileTypes\XmlType.png" />
-    <Content Include="Images\FileTypes\XrefType.png" />
-    <Content Include="Images\FileTypes\ZipType.png" />
-    <Content Include="Images\logo\logo150x150.png" />
-    <Content Include="Images\Menu\EditCode.png" />
-    <Content Include="Images\Menu\DataAdmin.png" />
-    <Content Include="Images\Menu\DatabaseTools.png" />
-    <Content Include="Images\Menu\DataDigger.png" />
-    <Content Include="Images\Menu\DataReader.png" />
-    <Content Include="Images\Menu\DeleteFunction.png" />
-    <Content Include="Images\Menu\DeleteProcedure.png" />
-    <Content Include="Images\Menu\Miscellaneous.png" />
-    <Content Include="Images\Menu\ProDesktop.png" />
-    <Content Include="Images\Menu\Synchronize.png" />
-    <Content Include="Images\ParserItem\Flags\Abbreviation.png" />
-    <Content Include="Images\ParserItem\Flags\Buffer.png" />
-    <Content Include="Images\ParserItem\Flags\Dynamic.png" />
-    <Content Include="Images\ParserItem\Flags\Extent.png" />
-    <Content Include="Images\ParserItem\Flags\External.png" />
-    <Content Include="Images\ParserItem\Flags\FileScope.png" />
-    <Content Include="Images\ParserItem\Flags\Index.png" />
-    <Content Include="Images\ParserItem\Flags\LocalScope.png" />
-    <Content Include="Images\ParserItem\Flags\Mandatory.png" />
-    <Content Include="Images\ParserItem\Flags\New.png" />
-    <Content Include="Images\ParserItem\Flags\Parameter.png" />
-    <Content Include="Images\ParserItem\Flags\Private.png" />
-    <Content Include="Images\ParserItem\Flags\Reserved.png" />
-    <Content Include="Images\ParserItem\Flags\Shared.png" />
-    <Content Include="Images\ParserItem\Type\Class.png" />
-    <Content Include="Images\ParserItem\Type\Constructor.png" />
-    <Content Include="Images\ParserItem\Type\Database.png" />
-    <Content Include="Images\ParserItem\Type\Error.png" />
-    <Content Include="Images\ParserItem\Type\Field.png" />
-    <Content Include="Images\ParserItem\Type\FieldPk.png" />
-    <Content Include="Images\ParserItem\Type\Function.png" />
-    <Content Include="Images\ParserItem\Type\Keyword.png" />
-    <Content Include="Images\ParserItem\Type\KeywordObject.png" />
-    <Content Include="Images\ParserItem\Type\Label.png" />
-    <Content Include="Images\ParserItem\Type\Method.png" />
-    <Content Include="Images\ParserItem\Type\Preprocessed.png" />
-    <Content Include="Images\ParserItem\Type\Procedure.png" />
-    <Content Include="Images\ParserItem\Type\Sequence.png" />
-    <Content Include="Images\ParserItem\Type\Snippet.png" />
-    <Content Include="Images\ParserItem\Type\Table.png" />
-    <Content Include="Images\ParserItem\Type\TempTable.png" />
-    <Content Include="Images\ParserItem\Type\VariableComplex.png" />
-    <Content Include="Images\ParserItem\Type\VariablePrimitive.png" />
-    <Content Include="Images\ParserItem\Type\Widget.png" />
-    <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
-    <Content Include="Images\ParserItem\Flags\NotFound.png" />
-    <Content Include="Images\ParserItem\Flags\Persistent.png" />
-    <Content Include="Images\ParserItem\Flags\IsTooLong.png" />
-    <Content Include="Images\ParserItem\Flags\MissingDbName.png" />
-    <Content Include="Images\ParserItem\Flags\Uncertain.png" />
-    <Content Include="Images\ParserItem\Type\Block.png" />
-    <Content Include="Images\ParserItem\Type\DefinitionBlock.png" />
-    <Content Include="Images\ParserItem\Type\Include.png" />
-    <Content Include="Images\ParserItem\Type\PreprocessorBlock.png" />
-    <Content Include="Images\ParserItem\Type\ProgramParameter.png" />
-    <Content Include="Images\ParserItem\Type\Prototype.png" />
-    <Content Include="Images\ParserItem\Type\RunExternal.png" />
-    <Content Include="Images\ParserItem\Type\RuntimeBlock.png" />
-    <Content Include="Images\ParserItem\Type\SettingsBlock.png" />
-    <Content Include="Images\ParserItem\Type\CreateWindowBlock.png" />
-    <Content Include="Images\ParserItem\Type\TableUsed.png" />
-    <Content Include="Images\ParserItem\Type\TempTableUsed.png" />
-    <Content Include="Images\ParserItem\Type\XtfrBlock.png" />
-    <Content Include="Images\ParserItem\Type\Browse.png" />
-    <Content Include="Images\Appli\Clear_filters.png" />
-    <Content Include="Images\Appli\Collapse.png" />
-    <Content Include="Images\ParserItem\Type\OnEvent.png" />
-    <Content Include="Images\Appli\Eraser.png" />
-    <Content Include="Images\Appli\Expand.png" />
-    <Content Include="Images\ParserItem\Type\MainBlock.png" />
-    <Content Include="Images\Appli\Numerical_sorting.png" />
-    <Content Include="Images\Appli\Refresh.png" />
-    <Content Include="Images\ParserItem\Type\Root.png" />
-    <Content Include="Images\ParserItem\Type\Run.png" />
-    <Content Include="Images\Appli\ClearAll.png" />
-    <Content Include="Images\FileTypes\ClsType.png" />
-    <Content Include="Images\FileTypes\DfType.png" />
-    <Content Include="Images\FileTypes\DType.png" />
-    <Content Include="Images\Appli\ExplorerDir0.png" />
-    <Content Include="Images\Appli\ExplorerDir1.png" />
-    <Content Include="Images\Appli\ExplorerDir2.png" />
-    <Content Include="Images\Appli\ExplorerDir3.png" />
-    <Content Include="Images\ToolBar\FileExplorer16x16.png" />
-    <Content Include="Images\ToolBar\FileExplorerLogo.png" />
-    <Content Include="Images\FileTypes\FolderType.png" />
-    <Content Include="Images\Appli\GetHelp.png" />
-    <Content Include="Images\FileTypes\IType.png" />
-    <Content Include="Images\Appli\Favourite.png" />
-    <Content Include="Images\Appli\Next.png" />
-    <Content Include="Images\Appli\Previous.png" />
-    <Content Include="Images\Appli\ReadOnly.png" />
-    <Content Include="Images\FileTypes\LstType.png" />
-    <Content Include="Images\FileTypes\PType.png" />
-    <Content Include="Images\FileTypes\RType.png" />
-    <Content Include="Images\FileTypes\UnknowType.png" />
-    <Content Include="Images\FileTypes\WType.png" />
-    <Content Include="Images\Appli\ZoomIn.png" />
-    <Content Include="Images\Html\getting-started-0.png" />
-    <Content Include="Images\Html\getting-started-1.png" />
-    <Content Include="Images\Html\getting-started-2.png" />
-    <Content Include="Images\Html\getting-started-3.png" />
-    <Content Include="Images\logo\icon\3p_icon.ico" />
-    <Content Include="Images\logo\logo20x20.png" />
-    <Content Include="Images\logo\logo30x30.png" />
-    <Content Include="Html\Pages\getting_started.txt" />
-    <None Include="Images\Menu\FileInfo.png" />
-    <None Include="Images\Menu\FormatCode.png" />
-    <None Include="Images\Menu\GenerateCode.png" />
-    <None Include="Images\Menu\GoBackward.png" />
-    <None Include="Images\Menu\GoToDefinition.png" />
-    <None Include="Images\Menu\InsertMark.png" />
-    <None Include="Images\Menu\MainWindow.png" />
-    <None Include="Images\Menu\ModificationTag.png" />
-    <None Include="Images\Menu\ProgressHelp.png" />
-    <None Include="Images\Menu\ProlintCode.png" />
-    <None Include="Images\Menu\RunCode.png" />
-    <None Include="Images\Menu\Search.png" />
-    <None Include="Images\Menu\SendToAppbuilder.png" />
-    <None Include="Images\Menu\Tests.png" />
-    <None Include="Images\Menu\TestTube.png" />
-    <None Include="Images\Menu\TitleBlock.png" />
-    <None Include="Images\Menu\ToggleComment.png" />
-    <None Include="Images\Menu\Autocompletion.png" />
-    <None Include="Images\Menu\CheckCode.png" />
-    <None Include="Images\Menu\CompileCode.png" />
-    <Content Include="Images\Menu\Dictionary.png" />
-    <Content Include="Images\Menu\Env.png" />
-    <Content Include="Images\Menu\EnvName.png" />
-    <Content Include="Images\Menu\EnvSuffix.png" />
-    <Content Include="Images\Menu\ShowOptions.png" />
-    <Content Include="Images\NotifAndMessages\MsgDebug.png" />
-    <Content Include="Images\NotifAndMessages\MsgError.png" />
-    <Content Include="Images\NotifAndMessages\MsgHighImportance.png" />
-    <Content Include="Images\NotifAndMessages\MsgInfo.png" />
-    <Content Include="Images\NotifAndMessages\MsgOk.png" />
-    <Content Include="Images\NotifAndMessages\MsgPoison.png" />
-    <Content Include="Images\NotifAndMessages\MsgQuestion.png" />
-    <Content Include="Images\NotifAndMessages\MsgRip.png" />
-    <Content Include="Images\NotifAndMessages\MsgToolTip.png" />
-    <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
-    <Content Include="Images\NotifAndMessages\MsgWarning.png" />
-    <Content Include="Images\ToolBar\logo16x16.png" />
+    <Content Include="_Resource\Html\Pages\home.html" />
+    <Content Include="_Resource\Html\StyleSheet.css" />
+    <Content Include="_Resource\Html\Pages\getting_started.txt" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
     <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
-    <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -699,10 +703,8 @@
     <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>YamuiFramework</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for 3P

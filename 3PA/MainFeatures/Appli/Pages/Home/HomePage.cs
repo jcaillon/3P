@@ -19,8 +19,8 @@
 #endregion
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Html;
 using _3PA.Lib;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
     internal partial class HomePage : YamuiPage {
@@ -34,7 +34,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             InitializeComponent();
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
                 .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
-                .Replace("%YamuiFrameworkVersion%", LibLoader.GetAssemblyVersion(@"YamuiFramework"))
+                .Replace("%YamuiFrameworkVersion%", LibLoader.GetYamuiAssemblyVersion())
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
             html.LinkClicked += HtmlOnLinkClicked;
