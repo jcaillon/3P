@@ -157,8 +157,6 @@ namespace YamuiFramework.Helper {
                 controlArraySorted.Sort(new TabSchemeComparer(scheme));
 
                 foreach (Control c in controlArraySorted) {
-                    Debug.WriteLine("TabOrderManager:  Changing tab index for " + c.Name);
-
                     c.TabIndex = _curTabIndex++;
                     if (c.Controls.Count > 0) {
                         // Control has children -- recurse.

@@ -616,7 +616,26 @@ namespace _3PA.NppCore {
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
         internal class NppFileInfo {
+
+            #region Update
+
+            public void Update() {
+                CurrentFile.Path = GetFullPathApi;
+            }
+
+            public void Update(NppFileInfo toCopy) {
+                Path = toCopy.Path;
+            }
+
+            #endregion
+
+            #region Private fields
+
             private string _path;
+
+            #endregion
+
+            #region Public
 
             /// <summary>
             /// Stores the file path when switching document
@@ -633,10 +652,6 @@ namespace _3PA.NppCore {
             /// true if the file is a progress file, false otherwise
             /// </summary>
             public bool IsProgress { get; private set; }
-            
-            public void Update() {
-                CurrentFile.Path = GetFullPathApi;
-            }
 
             /// <summary>
             /// Is the file a progress + compilable file?
@@ -705,6 +720,9 @@ namespace _3PA.NppCore {
             public void Reload(bool askConfirmation) {
                 Npp.Reload(Path, askConfirmation);
             }
+
+            #endregion
+
         }
 
         private static NppFileInfo _previousFile;

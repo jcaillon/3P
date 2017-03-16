@@ -36,6 +36,11 @@ namespace _3PA.WindowsCore {
         /// </summary>
         public static bool PluginIsReady { get; private set; }
 
+        /// <summary>
+        /// If true, the notification SCN_MODIFIED is disabled
+        /// </summary>
+        private static bool ScnModifiedDisabled { get; set; }
+
         #endregion
 
         #region Npp notifications
@@ -69,6 +74,16 @@ namespace _3PA.WindowsCore {
                                 SetHooks();
                             }
                             return;
+                            
+                        case (uint)NppNotif.NPPN_SHUTDOWN:
+                            // uninstall hooks on mouse/keyboard
+                            UninstallHooks();
+                            Plug.DoNppShutDown();
+                            return;
+
+                        case (uint)NppNotif.NPPN_CANCELSHUTDOWN:
+                            PluginIsReady = true;
+                            return;
                     }
                 } else {
                     // the plugin is fully loaded and ready to do stuff
@@ -89,9 +104,11 @@ namespace _3PA.WindowsCore {
 
                             case (uint) SciNotif.SCN_MODIFIED:
                                 // This notification is sent when the text or styling of the document changes or is about to change
+                                // (note : this notif isn't sent when the user SWITCHES to tab file (already opened in another tab) !
+                                // But it is sent when the user opens a NEW file)
                                 bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
                                 bool insertedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0;
-                                if (deletedText || insertedText) {
+                                if ((insertedText || deletedText) && !ScnModifiedDisabled) {
                                     // if the text has changed
                                     Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText); // register line modifications
                                     Plug.OnTextModified(nc, insertedText, deletedText);
@@ -129,15 +146,9 @@ namespace _3PA.WindowsCore {
                         // Npp message
                         // --------------------------------------------------------
                         switch (code) {
-                            case (uint) NppNotif.NPPN_SHUTDOWN:
-                                // uninstall hooks on mouse/keyboard
-                                UninstallHooks();
-                                PluginIsReady = false;
-                                Plug.DoNppShutDown();
-                                return;
-
-                            // the user changed the current document
                             case (uint) NppNotif.NPPN_BUFFERACTIVATED:
+                                // the user changes the current document (this event is called when the current document is switched (via the tabs)
+                                // and also when a new file is opened in npp
                                 Npp.UpdateCurrentSci(); // update current scintilla
                                 Npp.CurrentSci.Lines.Reset(); // register new lines
                                 NppBufferActivated();
@@ -156,9 +167,16 @@ namespace _3PA.WindowsCore {
                                 return;
 
                             case (uint) NppNotif.NPPN_FILEBEFORELOAD:
-                                // fire when a file is opened (the event NPPN_FILEBEFOREOPEN is fired after SciNotif.SCN_MODIFIED
-                                // and just before NppNotif.NPPN_BUFFERACTIVATED so it's not very useful...)
+                                // fire when a file is opened
+                                // When loading a new file into NPP, the events fired are (in order) :
+                                // NPPN_FILEBEFORELOAD > SCN_MODIFIED > NPPN_FILEBEFOREOPEN > NPPN_FILEOPENED > NPPN_BUFFERACTIVATED
+                                // we deactivate the SCN_MODIFIED between NPPN_FILEBEFORELOAD and NPPN_FILEBEFOREOPEN
+                                ScnModifiedDisabled = true;
                                 Plug.DoNppFileBeforeLoad();
+                                return;
+
+                            case (uint)NppNotif.NPPN_FILEBEFOREOPEN:
+                                ScnModifiedDisabled = false;
                                 return;
 
                             case (uint) NppNotif.NPPN_FILEOPENED:
@@ -189,6 +207,12 @@ namespace _3PA.WindowsCore {
                                 // will incorrectly read the styles since we have to wait for the config.xml to be updated
                                 // and it only updates on npp shutdown
                                 return;
+
+                            case (uint)NppNotif.NPPN_BEFORESHUTDOWN:
+                                // prevent the plugin from handling a lot of events when npp is about to shutdown
+                                PluginIsReady = false;
+                                return;
+
                         }
                     }
                 }
@@ -200,7 +224,7 @@ namespace _3PA.WindowsCore {
         private static void NppBufferActivated() {
             Npp.CurrentFile.Update(); // get info on the current file
             Plug.DoNppBufferActivated();
-            Npp.PreviousFile.Path = Npp.CurrentFile.Path; // save info on the "previous" file for the next buffer activated event
+            Npp.PreviousFile.Update(Npp.CurrentFile); // save info on the "previous" file for the next buffer activated event
         }
 
         #endregion

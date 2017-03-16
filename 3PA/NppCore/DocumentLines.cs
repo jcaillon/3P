@@ -24,6 +24,7 @@ using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// For every scintilla message that involves a position, the expect position (expected by scintilla) is the
     /// BYTE position, not the CHAR position (as anyone would assume at first!)
@@ -31,6 +32,13 @@ namespace _3PA.NppCore {
     /// it keeps tracks of inserted/deleted lines and register each line's start position, this
     /// information allows us to quickly convert BYTE to CHAR position and vice-versa
     /// </summary>
+    /// <remarks>
+    /// For OnInsertedText/OnDeletedText it would make sense to directly use scn.text instead of getting a range
+    /// pointer from scintilla (in GetCharCount(int, int)); but this would imply two things: we would need to 
+    /// split the scn.text byte[] into a byte[] for each line since we need the length of each line + we would
+    /// need to also store the starting BYTE position of each line... So i didn't do that; 500ms to reset the lines
+    /// on a 200Mo document sounds good enough to me...
+    /// </remarks>
     internal class DocumentLines {
 
         #region Fields
@@ -146,7 +154,7 @@ namespace _3PA.NppCore {
         private void OnDeletedText(SCNotification scn) {
             var startLine = SciLineFromPosition(scn.position);
             if (scn.linesAdded == 0) {
-                var delCharLenght = GetCharCount(scn.text, scn.length, _lastEncoding);
+                var delCharLenght = GetCharCount(scn.text, scn.length);
                 SetHoleInLine(startLine, -delCharLenght);
             } else {
                 var lineByteStart = SciPositionFromLine(startLine);
@@ -169,7 +177,7 @@ namespace _3PA.NppCore {
         private void OnInsertedText(SCNotification scn) {
             var startLine = SciLineFromPosition(scn.position);
             if (scn.linesAdded == 0) {
-                var insCharLenght = GetCharCount(scn.position, scn.length);
+                var insCharLenght = GetCharCount(scn.text, scn.length);
                 SetHoleInLine(startLine, insCharLenght);
             } else {
                 var startCharPos = CharPositionFromLine(startLine);
@@ -194,9 +202,9 @@ namespace _3PA.NppCore {
                 // when a file is modified outside npp, npp suggests to reload it, a modified notification is sent
                 // but is it sent BEFORE the text is actually put into scintilla! So what we do here doesn't work at all
                 // so in that case, we need to refresh the info when the text is actually inserted, that is after updateui
-                // Clarification : the notification sent is correct (nb lines > 0 and length is ok as well), but calling SciLineLength
+                // Clarification : the notification sent is correct (nb lines > 0, length, text are ok), but calling SciLineLength
                 // will always return 0 at this moment!
-                if (!_oneByteCharEncoding && scn.linesAdded > 0 && TextLength == 0)
+                if (scn.length > 0 && TextLength == 0)
                     Plug.ActionsAfterUpdateUi.Enqueue(Reset);
             }
         }
@@ -445,29 +453,16 @@ namespace _3PA.NppCore {
         private int GetCharCount(int pos, int length) {
             // don't use SCI_COUNTCHAR, it counts CRLF as 1 char
             var ptr = Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
-            return GetCharCount(ptr, length, _lastEncoding);
-        }
-
-        private unsafe int GetCharCount(IntPtr text, int pos, int lenght) {
-            var bytes = (byte*) text;
-            int lgth = lenght - pos;
-            byte[] arrbyte = new byte[lgth];
-            int index;
-            for (index = 0; index < lgth; index++)
-                arrbyte[index] = bytes[index + pos];
-            return _lastEncoding.GetCharCount(arrbyte, 0, lgth);
+            return GetCharCount(ptr, length);
         }
 
         /// <summary>
         /// Gets the number of CHAR in a BYTE range
         /// </summary>
-        private unsafe int GetCharCount(IntPtr text, int length, Encoding encoding = null) {
-            if (text == IntPtr.Zero || length == 0) {
+        private unsafe int GetCharCount(IntPtr text, int length) {
+            if (text == IntPtr.Zero || length == 0)
                 return 0;
-            }
-            if (encoding == null)
-                encoding = _lastEncoding;
-            return encoding.GetCharCount((byte*)text, length);
+            return _lastEncoding.GetCharCount((byte*)text, length);
         }
 
         private string GetDebugString() {
@@ -486,6 +481,56 @@ namespace _3PA.NppCore {
         }
 
         #endregion
+        
+        #region To use the scn.text directly?
+        /*
+        private unsafe int GetCharCount(IntPtr text, int pos, int lenght) {
+            var bytes = (byte*) text;
+            int lgth = lenght - pos;
+            byte[] arrbyte = new byte[lgth];
+            int index;
+            for (index = 0; index < lgth; index++)
+                arrbyte[index] = bytes[index + pos];
+            return _lastEncoding.GetCharCount(arrbyte, 0, lgth);
+        }
 
+        public unsafe byte[][] Separate(IntPtr text, int lenght) {
+            var bytes = (byte*) text;
+            int lgth = lenght;
+            byte[] arrbyte = new byte[lgth];
+            int index;
+            for (index = 0; index < lgth; index++)
+                arrbyte[index] = bytes[index];
+            return Separate(arrbyte, _lastEncoding.GetBytes(new[] {'\n'}));
+        }
+
+        public byte[][] Separate(byte[] source, byte[] separator) {
+            var Parts = new List<byte[]>();
+            var Index = 0;
+            byte[] Part;
+            for (var I = 0; I < source.Length; ++I) {
+                if (Equals(source, separator, I)) {
+                    Part = new byte[I - Index];
+                    Array.Copy(source, Index, Part, 0, Part.Length);
+                    Parts.Add(Part);
+                    Index = I + separator.Length;
+                    I += separator.Length - 1;
+                }
+            }
+            Part = new byte[source.Length - Index];
+            Array.Copy(source, Index, Part, 0, Part.Length);
+            Parts.Add(Part);
+            return Parts.ToArray();
+        }
+
+        bool Equals(byte[] source, byte[] separator, int index) {
+            for (int i = 0; i < separator.Length; ++i)
+                if (index + i >= source.Length || source[index + i] != separator[i])
+                    return false;
+            return true;
+        }
+        */
+        #endregion
+        
     }
 }

@@ -463,8 +463,8 @@ namespace _3PA {
         #region On document switch
 
         /// <summary>
-        /// Called when the user switches tab document, 
-        /// no matter if the document is a Progress file or not
+        /// Called when the user switches tab document
+        /// You can use Npp.CurrentFile and Npp.PreviousFile in this method
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
 

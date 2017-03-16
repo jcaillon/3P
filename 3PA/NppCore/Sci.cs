@@ -1949,7 +1949,8 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Gets or sets the display of annotations.
+        /// Gets or sets the display of annotations
+        /// BE CAREFULE : any else than HIDDEN slows down the opening of files by a TON
         /// </summary>
         /// <returns>One of the <see cref="Annotation" /> enumeration values. The default is <see cref="Annotation.Hidden" />.</returns>
         public static Annotation AnnotationVisible {
