@@ -56,6 +56,12 @@ namespace _3PA.NppCore {
         public int annotationLinesAdded; /* SC_MOD_CHANGEANNOTATION */
         public int updated; /* SCN_UPDATEUI */
         public int listCompletionMethod; /* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
+
+        public SCNotification(uint code) : this() {
+            nmhdr = new Sci_NotifyHeader {
+                code = code
+            };
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

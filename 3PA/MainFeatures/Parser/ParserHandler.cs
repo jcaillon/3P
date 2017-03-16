@@ -207,7 +207,7 @@ namespace _3PA.MainFeatures.Parser {
                             _lastParsedFilePath = Npp.CurrentFile.Path;
 
                             // Parse the document
-                            _ablParser = new Parser(Npp.CurrentFile.IsProgress ? Sci.Text : string.Empty, _lastParsedFilePath, null, true);
+                            _ablParser = new Parser(!Npp.CurrentFile.IsProgress ? string.Empty : Sci.Text, _lastParsedFilePath, null, true);
 
                             // visitor
                             _parserVisitor = new ParserVisitor(true);
@@ -224,7 +224,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (OnParseEnded != null)
                     OnParseEnded();
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick " + _lastParsedFilePath);
             } finally {
                 _parsing = false;
                 if (_parseRequestedWhenBusy)

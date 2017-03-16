@@ -185,13 +185,14 @@ namespace _3PA.MainFeatures.Parser {
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
+
             // the first of this list represents the file currently being parsed
             _parsedIncludes.Add(
                 new ParsedIncludeFile(
                     "root",
                     new TokenEos(null, 0, 0, 0, 0),
                     // the preprocessed variable {0} equals to the filename...
-                    new Dictionary<string, List<Token>> {
+                    new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase){
                         {"0", new List<Token> {new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0)}}
                     },
                     _filePathBeingParsed,
@@ -219,7 +220,11 @@ namespace _3PA.MainFeatures.Parser {
             ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
             ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
             while (MoveNext()) {
-                Analyze();
+                try {
+                    Analyze();
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e, "Error while parsing the following file : " + filePathBeingParsed);
+                }
             }
 
             // add missing values to the line dictionary

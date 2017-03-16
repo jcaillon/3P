@@ -474,7 +474,7 @@ namespace YamuiFramework.Controls.YamuiList {
             // handles node expansion
             if (!_isSearching) {
                 var curItem = SelectedItem as FilteredTypeTreeListItem;
-                if (curItem != null) {
+                if (curItem != null && curItem.CanExpand) {
                     var widthOfArrow = TreeWidth + NodeExpandClickMargin;
                     for (int i = 0; i <= curItem.Level; i++) {
                         widthOfArrow += TreeWidth;

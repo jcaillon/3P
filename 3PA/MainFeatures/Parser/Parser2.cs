@@ -1852,8 +1852,7 @@ namespace _3PA.MainFeatures.Parser {
                     // add this include to the references and modify each token
                     _parsedIncludes.Add(newInclude);
                     var includeNumber = (ushort) (_parsedIncludes.Count - 1);
-                    lexer.GetTokensList.RemoveAt(lexer.GetTokensList.Count - 1);
-                    var tokens = lexer.GetTokensList.ToList();
+                    var tokens = lexer.GetTokensList.ToList().GetRange(0, lexer.GetTokensList.Count - 1);
                     tokens.ForEach(token => token.OwnerNumber = includeNumber);
 
                     // replace the tokens

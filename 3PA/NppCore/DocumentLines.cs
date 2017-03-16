@@ -89,7 +89,7 @@ namespace _3PA.NppCore {
 
         #endregion
 
-        #region Register document modifications
+        #region Public utils
 
         /// <summary>
         /// Simulates the insertion of the whole text, use this to reset the lines info 
@@ -107,11 +107,26 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
+        /// makes sure that the nb of lines from the API and calculed in the this class are the same
+        /// </summary>
+        public void CheckLines() {
+            if (_linesList.Count - 1 != SciGetLineCount()) {
+                ErrorHandler.LogError(new Exception("DocumentLines, nb lines failed"), (_linesList.Count - 1) + " vs " + SciGetLineCount());
+                Reset();
+            }
+        }
+
+        #endregion
+
+        #region Register document modifications
+
+        /// <summary>
         /// When receiving a modification notification by scintilla
         /// </summary>
         public void OnScnModified(SCNotification scn, bool isInsertion) {
             _lastEncoding = Sci.Encoding;
-            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default) && !Config.IsDevelopper;
+            //_oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
+            _oneByteCharEncoding = false; // for 1.7.4
 
             // bypass the hard work for simple encoding
             if (_oneByteCharEncoding)
@@ -261,29 +276,18 @@ namespace _3PA.NppCore {
 
             try {
                 return PrivateCharPositionFromLine(index);
-            } catch (Exception) {
+            } catch (Exception e) {
                 try {
-                    index = index.Clamp(0, _linesList.Count - 1);
+                    if (index < 0 || index >= _linesList.Count) {
+                        ErrorHandler.LogError(e, "INDEX ERROR : " + index + GetDebugString());
+                        index = index.Clamp(0, _linesList.Count - 1);
+                    }
                     Reset();
                     if (_oneByteCharEncoding)
                         return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
-                    ErrorHandler.LogError(x,
-                        "FAILED TO RESET DocumentLines for " +
-                        "\r\n_holeLenght = " + _holeLenght +
-                        "\r\n_holeLine = " + _holeLine +
-                        "\r\n_linesList.Count = " + _linesList.Count +
-                        "\r\nSciGetLineCount = " + SciGetLineCount() +
-                        "\r\nSciGetLength = " + SciGetLength() +
-                        "\r\nTextLength = " + TextLength + "<br>" +
-                        "\r\nSciLineFromPosition(SciGetLength()) = " + SciLineFromPosition(SciGetLength()) +
-                        "\r\nLineFromCharPosition(TextLength) = " + LineFromCharPosition(TextLength) +
-                        "\r\nCurrentPosition = " + Sci.CurrentPosition +
-                        "\r\nSCI_GETCURRENTPOS = " + Api.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32() +
-                        "\r\nSciPositionFromLine(SciGetLineCount()) = " + SciPositionFromLine(SciGetLineCount()) +
-                        "\r\nCharPositionFromLine(SciGetLineCount()) = " + CharPositionFromLine(SciGetLineCount())
-                    );
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for " + GetDebugString());
                     if (Config.IsDevelopper)
                         Debug.Assert(false);
                 }
@@ -444,21 +448,41 @@ namespace _3PA.NppCore {
             return GetCharCount(ptr, length, _lastEncoding);
         }
 
+        private unsafe int GetCharCount(IntPtr text, int pos, int lenght) {
+            var bytes = (byte*) text;
+            int lgth = lenght - pos;
+            byte[] arrbyte = new byte[lgth];
+            int index;
+            for (index = 0; index < lgth; index++)
+                arrbyte[index] = bytes[index + pos];
+            return _lastEncoding.GetCharCount(arrbyte, 0, lgth);
+        }
+
         /// <summary>
         /// Gets the number of CHAR in a BYTE range
         /// </summary>
-        private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
+        private unsafe int GetCharCount(IntPtr text, int length, Encoding encoding = null) {
             if (text == IntPtr.Zero || length == 0) {
                 return 0;
             }
-            var bptr = (byte*) text;
-            if (bptr == null) {
-                if (Config.IsDevelopper)
-                    Debug.Assert(false);
-                return 0;
-            }
-            var count = encoding.GetCharCount(bptr, length);
-            return count;
+            if (encoding == null)
+                encoding = _lastEncoding;
+            return encoding.GetCharCount((byte*)text, length);
+        }
+
+        private string GetDebugString() {
+            return "\r\n_holeLenght = " + _holeLenght +
+                   "\r\n_holeLine = " + _holeLine +
+                   "\r\n_linesList.Count = " + _linesList.Count +
+                   "\r\nSciGetLineCount = " + SciGetLineCount() +
+                   "\r\nSciGetLength = " + SciGetLength() +
+                   "\r\nTextLength = " + TextLength + "<br>" +
+                   "\r\nSciLineFromPosition(SciGetLength()) = " + SciLineFromPosition(SciGetLength()) +
+                   "\r\nLineFromCharPosition(TextLength) = " + LineFromCharPosition(TextLength) +
+                   "\r\nCurrentPosition = " + Sci.CurrentPosition +
+                   "\r\nSCI_GETCURRENTPOS = " + Api.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32() +
+                   "\r\nSciPositionFromLine(SciGetLineCount()) = " + SciPositionFromLine(SciGetLineCount()) +
+                   "\r\nCharPositionFromLine(SciGetLineCount()) = " + CharPositionFromLine(SciGetLineCount());
         }
 
         #endregion

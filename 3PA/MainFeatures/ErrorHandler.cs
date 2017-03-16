@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures {
                 MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a huge probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Plug.OnPlugReady += () => { ShowErrors(e, "Error on plugin loading..."); };
             } else {
-                if (LogError(e, message)) {
+                if (LogError(e, message, false)) {
                     // show it to the user
                     UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
                         MessageImg.MsgPoison, "An error has occurred", message,
@@ -95,9 +95,13 @@ namespace _3PA.MainFeatures {
         /// Log a piece of information
         /// returns false if the error already occurred during the session, true otherwise
         /// </summary>
-        public static bool LogError(Exception e, string message = null) {
+        public static bool LogError(Exception e, string message = null, bool showIfDev = true) {
             if (e == null)
                 return false;
+            if (showIfDev && Config.IsDevelopper) {
+                ShowErrors(e, message);
+                return true;
+            }
 
             try {
                 var info = GetExceptionInfo(e);
@@ -106,12 +110,16 @@ namespace _3PA.MainFeatures {
                 var libNs = typeof(ErrorHandler).Namespace;
                 var frameworkNs = typeof(YamuiTheme).Namespace;
                 if (string.IsNullOrEmpty(libNs))
-                    libNs = "_3PA_.";
+                    libNs = "_3PA.";
+                else
+                    libNs = libNs.Substring(0, libNs.IndexOf(".", StringComparison.Ordinal) + 1);
                 if (string.IsNullOrEmpty(frameworkNs))
                     frameworkNs = "YamuiFramework.";
+                else
+                    frameworkNs = frameworkNs.Substring(0, frameworkNs.IndexOf(".", StringComparison.Ordinal) + 1);
 
-                if (!info.fullException.ContainsFast(libNs.Substring(0, libNs.IndexOf(".", StringComparison.Ordinal) + 1)) &&
-                    !info.fullException.ContainsFast(frameworkNs.Substring(0, frameworkNs.IndexOf(".", StringComparison.Ordinal) + 1)))
+                if (!info.fullException.ContainsFast(libNs) &&
+                    !info.fullException.ContainsFast(frameworkNs))
                     return false;
 
                 // don't show the same error twice in a session
@@ -120,11 +128,6 @@ namespace _3PA.MainFeatures {
                     _catchedErrors.Add(excepUniqueId);
                 else
                     return false;
-
-                // in debug mode, show it
-                if (Config.IsDevelopper) {
-                    ShowErrors(e, message);
-                }
 
                 if (message != null)
                     info.message = message + " : " + info.message;

@@ -4,6 +4,7 @@ Config.IsDevelopper in DocumentLines!
 
 **Improvements :**
 
+- Improvements to the parser, this should be its final form; it now parses include files exactly like the progress compiler, replacing the include call by the content of the file
 - Replaced the old option "Npp openable extension" by "NppFilesPattern" to be in line with the other options of that type (it allows you to describe the files that should be opened with Npp from the file explorer)
 - Improvements to the tree view
   - new option to display (or not) the branches of the tree for the file/code explorer

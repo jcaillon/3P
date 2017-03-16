@@ -377,19 +377,6 @@ if not "%25ERRORLEVEL%25" == "0" (
 	exit 1
 )
 
-set NPPFOLDERNAME=3P_notepad++
-if "$(PlatformName)" == "x64" (
-	set NPPFOLDERNAME=3P_notepad++x64
-)
-
-if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( 
-	echo [INFO] Copying Yamuiframework pdb to %25NPPFOLDERNAME%25 folder...
-	if exist "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.pdb" (
-		md "$(SolutionDir)..\3P_notepad++\plugins\config\3P\Libraries\" &gt;nul 2&gt;nul
-		copy /Y "$(SolutionDir)YamuiFramework\bin\$(PlatformName)\Debug\YamuiFramework.pdb" "$(SolutionDir)..\3P_notepad++\plugins\config\3P\Libraries\YamuiFramework.pdb") &gt;nul
-	)
-)
-
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -161,12 +161,9 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest2() {
-            Task.Factory.StartNew(() => {
-                MeasureIt(() => {
-                    var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
-                    UserCommunication.Notify(list.Count.ToString());
-                });
-            });
+            MeasureIt(() => {
+                Npp.CurrentSci.Lines.Reset();
+            }, "Reset lines");
         }
 
         public static void DebugTest3() {

@@ -61,9 +61,9 @@ namespace _3PA.WindowsCore {
                             // call OnNppReady then OnPlugReady if it all went ok
                             PluginIsReady = Plug.DoNppReady();
                             if (PluginIsReady) {
-                                Npp.UpdateCurrentSci(); // update current scintilla
+                                Npp.UpdateCurrentSci(); // init current scintilla
                                 Plug.DoPlugStart();
-                                NppBufferActivated();
+                                OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
 
                                 // set hooks on mouse/keyboard
                                 SetHooks();
