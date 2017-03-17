@@ -233,7 +233,7 @@
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
     <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
-    <Compile Include="WindowsCore\NotificationsPublisher.cs" />
+    <Compile Include="NppCore\NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
     <Compile Include="MainFeatures\ThemeManager.cs" />
     <Compile Include="_Resource\DataResources.Designer.cs">

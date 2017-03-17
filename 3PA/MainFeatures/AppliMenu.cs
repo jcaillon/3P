@@ -208,7 +208,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, item => ProGenerateCode.DeleteCode<ParsedProcedure>(), "Delete_procedure", ""),
                 new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, item => ProGenerateCode.DeleteCode<ParsedImplementation>(), "Delete_function", ""),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, item => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
+                new MenuItem(this, "Synchronize function prototypes", ImageResources.Synchronize, item => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
             };
 
             #endregion

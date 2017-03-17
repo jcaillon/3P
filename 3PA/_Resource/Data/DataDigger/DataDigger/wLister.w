@@ -25,14 +25,17 @@
 /* ***************************  Definitions  ************************** */
 
 /* Parameters Definitions ---                                           */
-define input parameter pcDatabase as character no-undo.
-define input parameter pcField    as character no-undo.
-define input-output parameter pcList as character no-undo. 
+DEFINE INPUT PARAMETER pcDatabase AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER pcField    AS CHARACTER NO-UNDO.
+DEFINE INPUT-OUTPUT PARAMETER pcList AS CHARACTER NO-UNDO. 
 
 /* Local Variable Definitions ---                                       */
 { DataDigger.i }
 
-define variable glEditMode as logical no-undo.
+DEFINE VARIABLE glEditMode AS LOGICAL NO-UNDO.
+
+DEFINE TEMP-TABLE ttSort NO-UNDO
+  FIELD cItem AS CHARACTER.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -49,9 +52,9 @@ define variable glEditMode as logical no-undo.
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-1 fiNewItem rsDelimiter btnUp ~
-fcDelimiter btnDelete sList fiDelimiter btnDown Btn_Cancel Btn_OK 
-&Scoped-Define DISPLAYED-OBJECTS fiNewItem rsDelimiter fcDelimiter sList ~
+&Scoped-Define ENABLED-OBJECTS sList fiNewItem btnUp btnDelete btnDown ~
+btnSort rsDelimiter fcDelimiter fiDelimiter Btn_OK Btn_Cancel RECT-1 
+&Scoped-Define DISPLAYED-OBJECTS sList fiNewItem rsDelimiter fcDelimiter ~
 fiDelimiter 
 
 /* Custom List Definitions                                              */
@@ -78,6 +81,10 @@ DEFINE BUTTON btnDelete
 DEFINE BUTTON btnDown 
      LABEL "dn" 
      SIZE-PIXELS 25 BY 25 TOOLTIP "move the selected item down".
+
+DEFINE BUTTON btnSort 
+     LABEL "srt" 
+     SIZE-PIXELS 25 BY 25 TOOLTIP "sort items".
 
 DEFINE BUTTON btnUp 
      LABEL "up" 
@@ -131,23 +138,24 @@ DEFINE VARIABLE sList AS CHARACTER
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     btnAdd AT Y 308 X 250 WIDGET-ID 6
-     fiNewItem AT Y 310 X 5 NO-LABEL WIDGET-ID 4
-     rsDelimiter AT Y 60 X 295 NO-LABEL WIDGET-ID 14
-     btnUp AT Y 85 X 250 WIDGET-ID 8
-     fcDelimiter AT Y 195 X 350 COLON-ALIGNED NO-LABEL WIDGET-ID 30
-     btnDelete AT Y 110 X 250 WIDGET-ID 10
      sList AT Y 5 X 5 NO-LABEL WIDGET-ID 2
-     fiDelimiter AT Y 195 X 367 COLON-ALIGNED NO-LABEL WIDGET-ID 22
+     fiNewItem AT Y 310 X 5 NO-LABEL WIDGET-ID 4
+     btnAdd AT Y 308 X 250 WIDGET-ID 6
+     btnUp AT Y 85 X 250 WIDGET-ID 8
+     btnDelete AT Y 110 X 250 WIDGET-ID 10
      btnDown AT Y 135 X 250 WIDGET-ID 12
-     Btn_Cancel AT Y 308 X 335
+     btnSort AT Y 185 X 250 WIDGET-ID 32
+     rsDelimiter AT Y 60 X 295 NO-LABEL WIDGET-ID 14
+     fcDelimiter AT Y 195 X 350 COLON-ALIGNED NO-LABEL WIDGET-ID 30
+     fiDelimiter AT Y 195 X 367 COLON-ALIGNED NO-LABEL WIDGET-ID 22
      Btn_OK AT Y 280 X 335
+     Btn_Cancel AT Y 308 X 335
      "Delimiter:" VIEW-AS TEXT
           SIZE-PIXELS 50 BY 13 AT Y 40 X 315 WIDGET-ID 26
      RECT-1 AT Y 46 X 290 WIDGET-ID 28
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         SIZE-PIXELS 429 BY 365
+         SIZE-PIXELS 429 BY 366
          TITLE "List Editor"
          DEFAULT-BUTTON Btn_OK WIDGET-ID 100.
 
@@ -168,7 +176,7 @@ DEFINE FRAME Dialog-Frame
 
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
 /* SETTINGS FOR DIALOG-BOX Dialog-Frame
-   FRAME-NAME                                                           */
+   FRAME-NAME Custom                                                    */
 ASSIGN 
        FRAME Dialog-Frame:SCROLLABLE       = FALSE
        FRAME Dialog-Frame:HIDDEN           = TRUE.
@@ -216,44 +224,44 @@ END.
 &Scoped-define SELF-NAME btnAdd
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnAdd Dialog-Frame
 ON CHOOSE OF btnAdd IN FRAME Dialog-Frame /* + */
-or 'RETURN' of fiNewItem
+OR 'RETURN' OF fiNewItem
 DO:
 
-  define variable iThis  as integer   no-undo. 
-  define variable cThis  as character no-undo. 
-  define variable cList  as character no-undo. 
-  define variable cSep   as character no-undo. 
+  DEFINE VARIABLE iThis  AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE cThis  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cList  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cSep   AS CHARACTER NO-UNDO. 
   
   cList = sList:list-items.
 
   cSep  = sList:delimiter. 
   cThis  = sList:screen-value.
-  if cThis = ? then cThis = "".
-  iThis  = lookup(cThis, cList, cSep).
+  IF cThis = ? THEN cThis = "".
+  iThis  = LOOKUP(cThis, cList, cSep).
 
-  if fiNewItem:screen-value <> "" then
-  do:
-    if glEditMode then
-    do:
-      entry(iThis,cList,cSep) = fiNewItem:screen-value.
+  IF fiNewItem:screen-value <> "" THEN
+  DO:
+    IF glEditMode THEN
+    DO:
+      ENTRY(iThis,cList,cSep) = fiNewItem:screen-value.
       sList:list-items = cList.
-    end.
-    else
-    do:
-      if cList = ? then 
+    END.
+    ELSE
+    DO:
+      IF cList = ? THEN 
         sList:list-items = fiNewItem:screen-value.
-      else
+      ELSE
         sList:insert(fiNewItem:screen-value, iThis + 1).
-    end.
+    END.
 
     sList:screen-value = fiNewItem:screen-value.
     fiNewItem:screen-value = "".
-    apply "VALUE-CHANGED" to fiNewItem.
+    APPLY "VALUE-CHANGED" TO fiNewItem.
     
-    if glEditMode then apply 'ENTRY' to sList. 
-    glEditMode = false.
-    return no-apply.
-  end.
+    IF glEditMode THEN APPLY 'ENTRY' TO sList. 
+    glEditMode = FALSE.
+    RETURN NO-APPLY.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -263,31 +271,31 @@ END.
 &Scoped-define SELF-NAME btnDelete
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDelete Dialog-Frame
 ON CHOOSE OF btnDelete IN FRAME Dialog-Frame /* del */
-or 'DELETE-CHARACTER' of sList
-do:
+OR 'DELETE-CHARACTER' OF sList
+DO:
 
-  define variable iThis  as integer   no-undo. 
-  define variable iOther as integer   no-undo. 
-  define variable cThis  as character no-undo. 
-  define variable cOther as character no-undo. 
-  define variable cList  as character no-undo. 
-  define variable cSep   as character no-undo. 
+  DEFINE VARIABLE iThis  AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE iOther AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE cThis  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cOther AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cList  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cSep   AS CHARACTER NO-UNDO. 
   
   cList = sList:list-items.
   cSep  = sList:delimiter. 
   cThis  = sList:screen-value.
-  if cThis = ? then return.
+  IF cThis = ? THEN RETURN.
 
-  iThis  = lookup(cThis, cList, cSep).
-  entry(iThis, cList, cSep) = "".
-  cList = trim(replace(cList, cSep + cSep, cSep), cSep).
+  iThis  = LOOKUP(cThis, cList, cSep).
+  ENTRY(iThis, cList, cSep) = "".
+  cList = TRIM(REPLACE(cList, cSep + cSep, cSep), cSep).
 
   sList:list-items = cList.
-  if cList > "" then
-    sList:screen-value = entry( minimum(iThis,num-entries(cList,cSep)),cList,cSep).
+  IF cList > "" THEN
+    sList:screen-value = ENTRY( MINIMUM(iThis,NUM-ENTRIES(cList,cSep)),cList,cSep).
 
 
-end.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -296,9 +304,21 @@ end.
 &Scoped-define SELF-NAME btnDown
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDown Dialog-Frame
 ON CHOOSE OF btnDown IN FRAME Dialog-Frame /* dn */
-or 'CTRL-CURSOR-DOWN' of sList
+OR 'CTRL-CURSOR-DOWN' OF sList
 DO:
-  run moveItem(+1).
+  RUN moveItem(+1).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnSort
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSort Dialog-Frame
+ON CHOOSE OF btnSort IN FRAME Dialog-Frame /* srt */
+OR 'CTRL-S' OF sList
+DO:
+  RUN sortList.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -308,9 +328,9 @@ END.
 &Scoped-define SELF-NAME btnUp
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnUp Dialog-Frame
 ON CHOOSE OF btnUp IN FRAME Dialog-Frame /* up */
-or 'CTRL-CURSOR-UP' of sList
+OR 'CTRL-CURSOR-UP' OF sList
 DO:
-  run moveItem(-1).
+  RUN moveItem(-1).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -321,12 +341,12 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fcDelimiter Dialog-Frame
 ON VALUE-CHANGED OF fcDelimiter IN FRAME Dialog-Frame
 DO:
-  if self:screen-value > "" then
-  do:
-    fiDelimiter:screen-value = string(asc(self:screen-value)).
-  end.
+  IF SELF:screen-value > "" THEN
+  DO:
+    fiDelimiter:screen-value = STRING(ASC(SELF:screen-value)).
+  END.
 
-  apply "VALUE-CHANGED" to fiDelimiter.
+  APPLY "VALUE-CHANGED" TO fiDelimiter.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -338,10 +358,10 @@ END.
 ON END-ERROR OF fiNewItem IN FRAME Dialog-Frame
 DO:
   fiNewItem:screen-value = "".
-  glEditMode = false. 
-  apply "VALUE-CHANGED" to fiNewItem. 
-  apply "ENTRY" to sList.
-  return no-apply.
+  glEditMode = FALSE. 
+  APPLY "VALUE-CHANGED" TO fiNewItem. 
+  APPLY "ENTRY" TO sList.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -351,7 +371,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiNewItem Dialog-Frame
 ON VALUE-CHANGED OF fiNewItem IN FRAME Dialog-Frame
 DO:
-  btnAdd:sensitive = (self:screen-value <> "").
+  btnAdd:sensitive = (SELF:screen-value <> "").
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -361,11 +381,11 @@ END.
 &Scoped-define SELF-NAME rsDelimiter
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL rsDelimiter Dialog-Frame
 ON VALUE-CHANGED OF rsDelimiter IN FRAME Dialog-Frame
-or "ENTER" of fiDelimiter
-or "ENTER" of fcDelimiter
+OR "ENTER" OF fiDelimiter
+OR "ENTER" OF fcDelimiter
 DO:
-  define variable cSep  as character no-undo. 
-  define variable cList as character no-undo. 
+  DEFINE VARIABLE cSep  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cList AS CHARACTER NO-UNDO. 
 
   fiDelimiter:sensitive = (rsDelimiter:screen-value = "0").
   fiDelimiter:visible   = (rsDelimiter:screen-value = "0").
@@ -373,47 +393,47 @@ DO:
   fcDelimiter:visible   = (rsDelimiter:screen-value = "0").
 
   /* If we set the radioset to "other" set focus to fill in */
-  if self:name = "rsDelimiter" 
-    and rsDelimiter:screen-value = "0" then 
-  do:
-    apply 'ENTRY' to fcDelimiter.
-    if fcDelimiter:screen-value = ? then
-      return no-apply.
-  end.
+  IF SELF:name = "rsDelimiter" 
+    AND rsDelimiter:screen-value = "0" THEN 
+  DO:
+    APPLY 'ENTRY' TO fcDelimiter.
+    IF fcDelimiter:screen-value = ? THEN
+      RETURN NO-APPLY.
+  END.
 
   /* Otherwise reflect the changes in the list */
   cList = sList:list-items.
 
-  if rsDelimiter:screen-value = "0" then
-    cSep = chr(integer(fiDelimiter:screen-value)) no-error.
-  else
-    cSep = chr(integer(rsDelimiter:screen-value)) no-error.
+  IF rsDelimiter:screen-value = "0" THEN
+    cSep = CHR(INTEGER(fiDelimiter:screen-value)) NO-ERROR.
+  ELSE
+    cSep = CHR(INTEGER(rsDelimiter:screen-value)) NO-ERROR.
 
-  if not error-status:error and cSep > "" then 
-  do:
+  IF NOT ERROR-STATUS:ERROR AND cSep > "" THEN 
+  DO:
     sList:delimiter = cSep.
     sList:list-items = cList.
-    if cList > ""  then sList:screen-value = entry(1,cList,cSep).
+    IF cList > ""  THEN sList:screen-value = ENTRY(1,cList,cSep).
 
-    fiDelimiter:screen-value = string(asc(cSep)).
+    fiDelimiter:screen-value = STRING(ASC(cSep)).
     fcDelimiter:screen-value = cSep.
 
     /* Save this separator in the settings */
-    setRegistry( substitute('DB:&1',pcDatabase)
-               , substitute('&1:delimiter', pcField) 
+    setRegistry( SUBSTITUTE('DB:&1',pcDatabase)
+               , SUBSTITUTE('&1:delimiter', pcField) 
                , fiDelimiter:screen-value
                ).
-  end.
+  END.
 
   /* Don't set focus to list when we are typing a number in 
    * fiDelimiter. Otherwise typing is weird.
    */
-  do:
-    apply 'ENTRY' to sList.
-    return no-apply.
-  end.
+  DO:
+    APPLY 'ENTRY' TO sList.
+    RETURN NO-APPLY.
+  END.
 
-end.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -423,14 +443,14 @@ end.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL sList Dialog-Frame
 ON ANY-PRINTABLE OF sList IN FRAME Dialog-Frame
 DO:
-  define variable iPos as integer no-undo. 
+  DEFINE VARIABLE iPos AS INTEGER NO-UNDO. 
 
-  iPos = lookup(string(lastkey), rsDelimiter:radio-buttons).
-  if iPos > 0 and iPos modulo 2  = 0 then 
-  do:
-    rsDelimiter:screen-value = entry(iPos, rsDelimiter:radio-buttons).
-    apply 'value-changed' to rsDelimiter.
-  end.
+  iPos = LOOKUP(STRING(LASTKEY), rsDelimiter:radio-buttons).
+  IF iPos > 0 AND iPos MODULO 2  = 0 THEN 
+  DO:
+    rsDelimiter:screen-value = ENTRY(iPos, rsDelimiter:radio-buttons).
+    APPLY 'value-changed' TO rsDelimiter.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -439,13 +459,13 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL sList Dialog-Frame
 ON DEFAULT-ACTION OF sList IN FRAME Dialog-Frame
-or "RETURN" of sList
+OR "RETURN" OF sList
 DO:
-  glEditMode = true.
+  glEditMode = TRUE.
   fiNewItem:screen-value = sList:screen-value.
 
-  apply "VALUE-CHANGED" to fiNewItem. 
-  apply "entry" to fiNewItem.
+  APPLY "VALUE-CHANGED" TO fiNewItem. 
+  APPLY "entry" TO fiNewItem.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -455,9 +475,9 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL sList Dialog-Frame
 ON INSERT-MODE OF sList IN FRAME Dialog-Frame
 DO:
-  apply 'ENTRY' to fiNewItem.
+  APPLY 'ENTRY' TO fiNewItem.
 
-  apply "VALUE-CHANGED" to fiNewItem. 
+  APPLY "VALUE-CHANGED" TO fiNewItem. 
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -472,7 +492,7 @@ END.
 /* ***************************  Main Block  *************************** */
 
 /* Parent the dialog-box to the ACTIVE-WINDOW, if there is no parent.   */
-IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT eq ?
+IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT EQ ?
 THEN FRAME {&FRAME-NAME}:PARENT = ACTIVE-WINDOW.
 
 
@@ -483,11 +503,11 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK :
 
   /* Get fonts */
-  frame {&frame-name}:font = getFont('Default').
-  run enable_UI.
-  run initializeObject.
-  apply "value-changed" to rsDelimiter.
-  if sList:list-items <> "" then sList:screen-value = entry(1,sList:list-items,sList:delimiter).
+  FRAME {&frame-name}:font = getFont('Default').
+  RUN enable_UI.
+  RUN initializeObject.
+  APPLY "value-changed" TO rsDelimiter.
+  IF sList:list-items <> "" THEN sList:screen-value = ENTRY(1,sList:list-items,sList:delimiter).
 
   WAIT-FOR GO OF FRAME {&FRAME-NAME}.
 END.
@@ -527,10 +547,10 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY fiNewItem rsDelimiter fcDelimiter sList fiDelimiter 
+  DISPLAY sList fiNewItem rsDelimiter fcDelimiter fiDelimiter 
       WITH FRAME Dialog-Frame.
-  ENABLE RECT-1 fiNewItem rsDelimiter btnUp fcDelimiter btnDelete sList 
-         fiDelimiter btnDown Btn_Cancel Btn_OK 
+  ENABLE sList fiNewItem btnUp btnDelete btnDown btnSort rsDelimiter 
+         fcDelimiter fiDelimiter Btn_OK Btn_Cancel RECT-1 
       WITH FRAME Dialog-Frame.
   VIEW FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}
@@ -546,60 +566,61 @@ PROCEDURE initializeObject :
   Desc : Prepare frame etc etc
 ------------------------------------------------------------------------------*/
   
-  define variable iPos as integer no-undo. 
-  define variable cSep as character no-undo. 
-  define variable iSep as integer no-undo. 
+  DEFINE VARIABLE iPos AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE cSep AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE iSep AS INTEGER NO-UNDO. 
 
-  do with frame {&frame-name}:
+  DO WITH FRAME {&FRAME-NAME}:
 
-    btnAdd   :load-image(getImagePath('Add.gif')).
-    btnUp    :load-image(getImagePath('Up.gif')).
-    btnDown  :load-image(getImagePath('Down.gif')).
-    btnDelete:load-image(getImagePath('Clear.gif')).
+    btnAdd   :LOAD-IMAGE(getImagePath('Add.gif')).
+    btnUp    :LOAD-IMAGE(getImagePath('Up.gif')).
+    btnDown  :LOAD-IMAGE(getImagePath('Down.gif')).
+    btnDelete:LOAD-IMAGE(getImagePath('Clear.gif')).
+    btnSort  :LOAD-IMAGE(getImagePath('Sort.gif')).
 
     /* Populate list */
     sList:list-items = pcList. 
 
     /* Is a separator defined in the settings? */
     /* Else try to find the separator in the field value */
-    cSep = getRegistry( substitute('DB:&1',pcDatabase)
-                      , substitute('&1:delimiter', pcField) 
+    cSep = getRegistry( SUBSTITUTE('DB:&1',pcDatabase)
+                      , SUBSTITUTE('&1:delimiter', pcField) 
                       ).
 
     /* avoid strange errors in INI file */
-    iSep = integer(cSep) no-error. 
-    if iSep = 0 then cSep = ?.
+    iSep = INTEGER(cSep) NO-ERROR. 
+    IF iSep = 0 THEN cSep = ?.
 
-    if cSep <> ? then 
-    do:
+    IF cSep <> ? THEN 
+    DO:
       /* Is it a value in the radioset? */
-      iPos = lookup(cSep, rsDelimiter:radio-buttons).
-      if iPos > 0 and iPos modulo 2 = 0 then
-        rsDelimiter:screen-value = entry(iPos, rsDelimiter:radio-buttons).
-      else 
-      do:
-        rsDelimiter:screen-value = "0".
-        fiDelimiter:screen-value = cSep.
-        fcDelimiter:screen-value = chr(integer(cSep)).
+      iPos = LOOKUP(cSep, rsDelimiter:radio-buttons).
+      IF iPos > 0 AND iPos MODULO 2 = 0 THEN
+        rsDelimiter:screen-value = ENTRY(iPos, rsDelimiter:radio-buttons).
+      ELSE 
+      DO:
+        rsDelimiter:SCREEN-VALUE = "0".
+        fiDelimiter:SCREEN-VALUE = cSep.
+        fcDelimiter:SCREEN-VALUE = CHR(INTEGER(cSep)).
 
-      end.
-      apply 'value-changed' to rsDelimiter.
-    end.
+      END.
+      APPLY 'value-changed' TO rsDelimiter.
+    END.
 
-    else
+    ELSE
     findSep:
-    do iPos = 2 to num-entries(rsDelimiter:radio-buttons) by 2:
-      cSep = chr(integer(entry(iPos, rsDelimiter:radio-buttons))).
-      if num-entries(pcList,cSep) > 1 then
-      do:
-        rsDelimiter:screen-value = entry(iPos, rsDelimiter:radio-buttons).
-        apply 'value-changed' to rsDelimiter.
-        leave findSep.
-      end.
-    end.
-  end.
+    DO iPos = 2 TO NUM-ENTRIES(rsDelimiter:radio-buttons) BY 2:
+      cSep = CHR(INTEGER(ENTRY(iPos, rsDelimiter:radio-buttons))).
+      IF NUM-ENTRIES(pcList,cSep) > 1 THEN
+      DO:
+        rsDelimiter:screen-value = ENTRY(iPos, rsDelimiter:radio-buttons).
+        APPLY 'value-changed' TO rsDelimiter.
+        LEAVE findSep.
+      END.
+    END.
+  END.
 
-end procedure. /* initializeObject */
+END PROCEDURE. /* initializeObject */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -610,34 +631,85 @@ PROCEDURE moveItem :
   Name : moveItem
   Desc : Move an item up or down in the list
 ------------------------------------------------------------------------------*/
-  define input parameter piDirection as integer no-undo. 
+  DEFINE INPUT PARAMETER piDirection AS INTEGER NO-UNDO. 
 
-  define variable iThis  as integer   no-undo. 
-  define variable iOther as integer   no-undo. 
-  define variable cThis  as character no-undo. 
-  define variable cOther as character no-undo. 
-  define variable cList  as character no-undo. 
-  define variable cSep   as character no-undo. 
+  DEFINE VARIABLE iThis  AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE iOther AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE cThis  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cOther AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cList  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cSep   AS CHARACTER NO-UNDO. 
   
-  do with frame {&frame-name}:
-    cList = sList:list-items.
-    cSep  = sList:delimiter. 
-    cThis  = sList:screen-value.
-    if cThis = ? then return.
+  DO WITH FRAME {&FRAME-NAME}:
+    cList = sList:LIST-ITEMS.
+    cSep  = sList:DELIMITER. 
+    cThis  = sList:SCREEN-VALUE.
+    IF cThis = ? THEN RETURN.
   
-    iThis  = lookup(cThis, cList, cSep).
+    iThis  = LOOKUP(cThis, cList, cSep).
     iOther = iThis + piDirection.
-    if iOther = 0 or iOther > num-entries(cList, cSep) then return. 
+    IF iOther = 0 OR iOther > NUM-ENTRIES(cList, cSep) THEN RETURN. 
   
-    cOther = entry(iOther, cList, cSep).
+    cOther = ENTRY(iOther, cList, cSep).
     
-    entry(iThis, cList, cSep) = cOther.
-    entry(iOther, cList, cSep) = cThis.
-    sList:list-items = cList.
-    sList:screen-value = cThis.
-  end.
+    ENTRY(iThis, cList, cSep) = cOther.
+    ENTRY(iOther, cList, cSep) = cThis.
+    sList:LIST-ITEMS = cList.
+    sList:SCREEN-VALUE = cThis.
+  END.
 
-end procedure. /* moveItem */
+END PROCEDURE. /* moveItem */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sortList Dialog-Frame 
+PROCEDURE sortList :
+/*------------------------------------------------------------------------------
+  Name : sortList
+  Desc : Sort the complete list
+------------------------------------------------------------------------------*/
+
+  DEFINE VARIABLE cList     AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cSep      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cListDesc AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cListAsc  AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iElement  AS INTEGER   NO-UNDO.
+  
+  DO WITH FRAME {&FRAME-NAME}:
+    cList = sList:LIST-ITEMS.
+    cSep  = sList:DELIMITER. 
+
+    /* Save them to tt */
+    EMPTY TEMP-TABLE ttSort.
+    DO iElement = 1 TO NUM-ENTRIES(cList,cSep):
+      CREATE ttSort.
+      ASSIGN ttSort.cItem = ENTRY(iElement,cList,cSep).
+    END.
+    
+    /* Get ascending list */
+    FOR EACH ttSort BY ttSort.cItem: 
+      cListAsc = cListAsc + cSep + ttSort.cItem.
+    END.
+    cListAsc = SUBSTRING(cListAsc,2).
+  
+    /* Get ascending list */
+    FOR EACH ttSort BY ttSort.cItem DESCENDING: 
+      cListDesc = cListDesc + cSep + ttSort.cItem.
+    END.
+    cListDesc = SUBSTRING(cListDesc,2).
+
+    EMPTY TEMP-TABLE ttSort.
+  
+    /* Find out if the list is currently asc / desc */
+    IF sList:LIST-ITEMS = cListAsc THEN
+      sList:LIST-ITEMS = cListDesc.
+    ELSE 
+      sList:LIST-ITEMS = cListAsc.
+
+  END.
+                               
+END PROCEDURE. /* sortList */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

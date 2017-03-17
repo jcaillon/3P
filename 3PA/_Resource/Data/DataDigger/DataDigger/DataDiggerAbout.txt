@@ -50,6 +50,7 @@ Special thanks to the members of the DataDigger test team
 
 Version names:
 
+DataDigger build 20 - 30 sep 2016 (Coffee Version)
 DataDigger build 19 - 30 jun 2014 (Straight A's)
 DataDigger build 18 - 31 may 2013 (Never grow up)
 DataDigger build 17 -  6 sep 2012 (Haiku)

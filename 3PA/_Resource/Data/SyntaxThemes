@@ -246,7 +246,7 @@ BraceHighLight	#333	#5EFF00	0
 BadBraceHighLight	#FFFFFF	#FF42FF	0
 
 
-> Developper studio
+> Developer studio
 Default	#000000	#FFF	0
 Comment	#3F7F5F	@Default	0
 NestedComment	@Comment	@Default	0

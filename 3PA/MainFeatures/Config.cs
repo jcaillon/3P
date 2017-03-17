@@ -36,6 +36,7 @@ namespace _3PA.MainFeatures {
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
+
         #region config Object
 
         /// <summary>
@@ -430,9 +431,11 @@ namespace _3PA.MainFeatures {
             public int SyntaxHighlightThemeId = 0;
             public bool UseSyntaxHighlightTheme = true;
 
+            public string InstalledDataDiggerVersion = "";
+
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
-
+            
             #region methods
 
             /// <summary>
@@ -514,6 +517,12 @@ namespace _3PA.MainFeatures {
 
         #region public fields
 
+        public static string EmbeddedDataDiggerVersion { get { return @"v22"; } }
+
+        public static string DataDiggerVersionUrl {
+            get { return @"https://datadigger.wordpress.com/2017/02/20/20170220/"; }
+        }
+
         /// <summary>
         /// Singleton instance of ConfigObject
         /// </summary>
@@ -534,7 +543,7 @@ namespace _3PA.MainFeatures {
 
         public static string IssueUrl {
             get { return @"https://github.com/jcaillon/3P/issues"; }
-        }
+        }        
 
         // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
         public static string _3PUserCredentials {
@@ -706,28 +715,6 @@ namespace _3PA.MainFeatures {
 
         public static string FileDeployProfiles {
             get { return Path.Combine(Npp.ConfigDirectory, "_DeploymentProfiles.conf"); }
-        }
-
-        // Npp files
-        public static string FileNppUserDefinedLang {
-            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\userDefineLang.xml")); }
-        }
-
-        public static string FileNppConfigXml {
-            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\config.xml")); }
-        }
-
-        public static string FileNppStylersXml {
-            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\stylers.xml")); }
-        }
-
-        // This is always taken in the notepad++ installation directory!
-        public static string FolderNppAutocompApis {
-            get { return Path.GetFullPath(Path.Combine(Npp.SoftwareInstallDirectory, @"plugins\APIs")); }
-        }
-
-        public static string FileNppLangsXml {
-            get { return Path.GetFullPath(Path.Combine(Npp.ConfigDirectory, @"..\..\..\langs.xml")); }
         }
 
         // updates related

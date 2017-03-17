@@ -371,9 +371,6 @@ namespace _3PA.Lib {
         /// Compares two version string "1.0.0.0".IsHigherVersionThan("0.9") returns true
         /// Must be STRICTLY superior
         /// </summary>
-        /// <param name="localVersion"></param>
-        /// <param name="distantVersion"></param>
-        /// <returns></returns>
         public static bool IsHigherVersionThan(this string localVersion, string distantVersion) {
             var splitLocal = (localVersion.StartsWith("v") ? localVersion.Remove(0, 1) : localVersion).Split('.');
             var splitDistant = (distantVersion.StartsWith("v") ? distantVersion.Remove(0, 1) : distantVersion).Split('.');

@@ -29,44 +29,43 @@
      that this procedure's triggers and internal procedures 
      will execute in this procedure's storage, and that proper
      cleanup will occur on deletion of the procedure. */
-
+     
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
 
 { DataDigger.i }
-/* { windows.i } */
 
 /* Parameters Definitions ---                                           */
-define {&invar} picMode           as character  no-undo.
-define {&invar} pihBrowse         as handle     no-undo.
-define {&invar} picDatabase       as character  no-undo.
-define {&invar} picTableName      as character  no-undo.
+DEFINE {&invar} plReadOnlyDigger  AS LOGICAL    NO-UNDO.
+DEFINE {&invar} picMode           AS CHARACTER  NO-UNDO.
+DEFINE {&invar} pihBrowse         AS HANDLE     NO-UNDO.
+DEFINE {&invar} picDatabase       AS CHARACTER  NO-UNDO.
+DEFINE {&invar} picTableName      AS CHARACTER  NO-UNDO.
 
-&if defined(UIB_is_Running) = 0 &then
-define {&invar} table for ttField.
-define {&invar} table for ttColumn.
-&endif
+&IF DEFINED(UIB_is_Running) = 0 &THEN
+DEFINE {&invar} TABLE FOR ttField.
+DEFINE {&invar} TABLE FOR ttColumn.
+&ENDIF
 
-define {&outvar} polSuccess        as logical    no-undo initial ?.
-define {&outvar} porRepositionId   as rowid      no-undo.
+DEFINE {&outvar} polSuccess        AS LOGICAL   NO-UNDO INITIAL ?.
+DEFINE {&outvar} porRepositionId   AS ROWID     NO-UNDO.
 
 /* Local Variable Definitions ---                                       */
-define variable gcUniqueFields as character no-undo. 
-define variable glInEditMode   as logical   no-undo. 
+DEFINE VARIABLE gcUniqueFields AS CHARACTER NO-UNDO. 
+DEFINE VARIABLE glInEditMode   AS LOGICAL   NO-UNDO. 
 
 /* This table holds the actual values of the selected records */
-define temp-table ttData no-undo rcode-information
-  field cFieldName    as character
-  field cValue        as character format 'x(80)'
-  index iPrim is primary cFieldName /* cValue */.
+DEFINE TEMP-TABLE ttData NO-UNDO RCODE-INFORMATION
+  FIELD cFieldName AS CHARACTER
+  FIELD cValue     AS CHARACTER FORMAT 'x(80)'
+  INDEX iPrim IS PRIMARY cFieldName /* cValue */.
 
-
-&global-define field-lShow     1
-&global-define field-iOrder    2
-&global-define field-cFullName 3
-&global-define field-cLabel    4
-&global-define field-cNewValue 5
+&GLOBAL-DEFINE field-lShow     1
+&GLOBAL-DEFINE field-iOrder    2
+&GLOBAL-DEFINE field-cFullName 3
+&GLOBAL-DEFINE field-cLabel    4
+&GLOBAL-DEFINE field-cNewValue 5
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -80,7 +79,7 @@ define temp-table ttData no-undo rcode-information
 &Scoped-define DB-AWARE no
 
 /* Name of designated FRAME-NAME and/or first browse and/or first query */
-&Scoped-define FRAME-NAME frEdit
+&Scoped-define FRAME-NAME frMain
 &Scoped-define BROWSE-NAME brRecord
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
@@ -98,11 +97,12 @@ define temp-table ttData no-undo rcode-information
 &Scoped-define FIRST-TABLE-IN-QUERY-brRecord ttColumn
 
 
-/* Definitions for FRAME frEdit                                         */
+/* Definitions for FRAME frMain                                         */
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS brRecord btnEncode fiNumRecords btnOk ~
-btnClose tgWriteTrigger btnListEdit 
+&Scoped-Define ENABLED-OBJECTS brRecord fiNumRecords btnOk btnDecrease ~
+btnClose tgWriteTrigger btnIncrease btnDatePicker btnEditor btnEncode ~
+btnListEdit btnLowerCase btnUpperCase btnWordCase 
 &Scoped-Define DISPLAYED-OBJECTS fiNumRecords tgWriteTrigger 
 
 /* Custom List Definitions                                              */
@@ -111,6 +111,16 @@ btnClose tgWriteTrigger btnListEdit
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
 
+
+/* ************************  Function Prototypes ********************** */
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD increaseCharValue wEdit 
+FUNCTION increaseCharValue RETURNS CHARACTER
+  ( pcCharValue AS CHARACTER 
+  , piDelta     AS INTEGER) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
 
 
 /* ***********************  Control Definitions  ********************** */
@@ -123,17 +133,45 @@ DEFINE BUTTON btnClose AUTO-END-KEY
      LABEL "&Close" 
      SIZE-PIXELS 74 BY 24.
 
+DEFINE BUTTON btnDatePicker  NO-FOCUS FLAT-BUTTON
+     LABEL "Date" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "pick a date".
+
+DEFINE BUTTON btnDecrease  NO-FOCUS FLAT-BUTTON
+     LABEL "--" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "decrease value (CTRL-CURSOR-DOWN)".
+
+DEFINE BUTTON btnEditor  NO-FOCUS FLAT-BUTTON
+     LABEL "Edit" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "view-as editor (F3)".
+
 DEFINE BUTTON btnEncode  NO-FOCUS FLAT-BUTTON
-     LABEL "Encode" 
-     SIZE-PIXELS 20 BY 14 TOOLTIP "encode the current value (F11)".
+     LABEL "Enc" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "encode the current value (F11)".
+
+DEFINE BUTTON btnIncrease  NO-FOCUS FLAT-BUTTON
+     LABEL "++" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "increase value (CTRL-CURSOR-UP)".
 
 DEFINE BUTTON btnListEdit  NO-FOCUS FLAT-BUTTON
-     LABEL "List Editor" 
-     SIZE-PIXELS 20 BY 14 TOOLTIP "edit as list (F12)".
+     LABEL "List" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "edit as list (F12)".
+
+DEFINE BUTTON btnLowerCase  NO-FOCUS FLAT-BUTTON
+     LABEL "abc" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "convert to all lower case (SHIFT-DOWN)".
 
 DEFINE BUTTON btnOk 
      LABEL "&Ok" 
-     SIZE-PIXELS 74 BY 24 TOOLTIP "start the dump".
+     SIZE-PIXELS 74 BY 24 TOOLTIP "confirm changes".
+
+DEFINE BUTTON btnUpperCase  NO-FOCUS FLAT-BUTTON
+     LABEL "ABC" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "convert to all upper case (SHIFT-UP)".
+
+DEFINE BUTTON btnWordCase  NO-FOCUS FLAT-BUTTON
+     LABEL "Abc" 
+     SIZE-PIXELS 30 BY 23 TOOLTIP "each word begins with a capital".
 
 DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U 
      LABEL "Records Selected" 
@@ -141,9 +179,9 @@ DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U
      SIZE-PIXELS 50 BY 21 NO-UNDO.
 
 DEFINE VARIABLE tgWriteTrigger AS LOGICAL INITIAL yes 
-     LABEL "Write trigger" 
+     LABEL "Use &write trigger" 
      VIEW-AS TOGGLE-BOX
-     SIZE 18 BY .81 TOOLTIP "Enable write triggers or not" NO-UNDO.
+     SIZE-PIXELS 120 BY 17 TOOLTIP "Enable write triggers or not" NO-UNDO.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -166,20 +204,27 @@ DEFINE BROWSE brRecord
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS
-          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 133 BY 21
-          &ELSE SIZE-PIXELS 665 BY 450 &ENDIF FIT-LAST-COLUMN TOOLTIP "fields to edit".
+          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 132 BY 19
+          &ELSE SIZE-PIXELS 660 BY 390 &ENDIF FIT-LAST-COLUMN TOOLTIP "fields to edit".
 
 
 /* ************************  Frame Definitions  *********************** */
 
-DEFINE FRAME frEdit
-     brRecord AT Y 5 X 0 WIDGET-ID 200
-     btnEncode AT Y 465 X 250 WIDGET-ID 12
-     fiNumRecords AT Y 465 X 90 COLON-ALIGNED WIDGET-ID 10
-     btnOk AT Y 465 X 505 WIDGET-ID 6
-     btnClose AT Y 465 X 585 WIDGET-ID 4
-     tgWriteTrigger AT ROW 23.24 COL 32 WIDGET-ID 16
-     btnListEdit AT Y 465 X 275 WIDGET-ID 14
+DEFINE FRAME frMain
+     brRecord AT Y 25 X 0 WIDGET-ID 200
+     fiNumRecords AT Y 425 X 95 COLON-ALIGNED WIDGET-ID 10
+     btnOk AT Y 425 X 505 WIDGET-ID 6
+     btnDecrease AT Y 0 X 210 WIDGET-ID 26
+     btnClose AT Y 425 X 585 WIDGET-ID 4
+     tgWriteTrigger AT Y 427 X 159 WIDGET-ID 16
+     btnIncrease AT Y 0 X 180 WIDGET-ID 24
+     btnDatePicker AT Y 0 X 240 WIDGET-ID 34
+     btnEditor AT Y 0 X 0 WIDGET-ID 36
+     btnEncode AT Y 0 X 60 WIDGET-ID 12
+     btnListEdit AT Y 0 X 30 WIDGET-ID 14
+     btnLowerCase AT Y 0 X 120 WIDGET-ID 20
+     btnUpperCase AT Y 0 X 90 WIDGET-ID 18
+     btnWordCase AT Y 0 X 150 WIDGET-ID 22
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1 SCROLLABLE 
@@ -203,8 +248,8 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW wEdit ASSIGN
          HIDDEN             = YES
          TITLE              = "Edit records"
-         HEIGHT-P           = 491
-         WIDTH-P            = 665
+         HEIGHT-P           = 455
+         WIDTH-P            = 668
          MAX-HEIGHT-P       = 2079
          MAX-WIDTH-P        = 1600
          VIRTUAL-HEIGHT-P   = 2079
@@ -229,24 +274,27 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
 /* SETTINGS FOR WINDOW wEdit
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
-/* SETTINGS FOR FRAME frEdit
+/* SETTINGS FOR FRAME frMain
    NOT-VISIBLE FRAME-NAME Size-to-Fit                                   */
-/* BROWSE-TAB brRecord 1 frEdit */
+/* BROWSE-TAB brRecord 1 frMain */
 ASSIGN 
-       FRAME frEdit:SCROLLABLE       = FALSE
-       FRAME frEdit:RESIZABLE        = TRUE.
+       FRAME frMain:SCROLLABLE       = FALSE
+       FRAME frMain:RESIZABLE        = TRUE.
 
 ASSIGN 
-       brRecord:COLUMN-RESIZABLE IN FRAME frEdit       = TRUE.
+       brRecord:COLUMN-RESIZABLE IN FRAME frMain       = TRUE.
 
 ASSIGN 
-       btnEncode:HIDDEN IN FRAME frEdit           = TRUE.
+       btnEditor:HIDDEN IN FRAME frMain           = TRUE.
 
 ASSIGN 
-       btnListEdit:HIDDEN IN FRAME frEdit           = TRUE.
+       btnEncode:HIDDEN IN FRAME frMain           = TRUE.
 
 ASSIGN 
-       fiNumRecords:READ-ONLY IN FRAME frEdit        = TRUE.
+       btnListEdit:HIDDEN IN FRAME frMain           = TRUE.
+
+ASSIGN 
+       fiNumRecords:READ-ONLY IN FRAME frMain        = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(wEdit)
 THEN wEdit:HIDDEN = yes.
@@ -288,7 +336,7 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL wEdit wEdit
 ON WINDOW-CLOSE OF wEdit /* Edit records */
-or "LEAVE" of wEdit
+OR "LEAVE" of wEdit
 DO:
   /* This event will close the window and terminate the procedure.  */
   APPLY "CLOSE":U TO THIS-PROCEDURE.
@@ -302,44 +350,44 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL wEdit wEdit
 ON WINDOW-RESIZED OF wEdit /* Edit records */
 DO:
-  if focus:name = 'cNewValue' then apply 'leave' to focus.
+  IF FOCUS:NAME = 'cNewValue' THEN APPLY 'leave' TO FOCUS.
 
-  run LockWindow (input wEdit:handle, input yes).
+  RUN LockWindow (INPUT wEdit:HANDLE, INPUT YES).
 
-  do with frame frEdit:
+  DO WITH FRAME frMain:
 
     /* Make 'em small so we don't get errors on resizing the window */
-    btnOk:x    = 1.
-    btnOk:y    = 1.
-    btnClose:x = 1.
-    btnClose:y = 1.
+    btnOk:X    = 1.
+    btnOk:Y    = 1.
+    btnClose:X = 1.
+    btnClose:Y = 1.
   
     /* Set frame width */
-    frame frEdit:width-pixels  = wEdit:width-pixels no-error.
-    frame frEdit:height-pixels = wEdit:height-pixels no-error.
+    FRAME frMain:WIDTH-PIXELS  = wEdit:WIDTH-PIXELS NO-ERROR.
+    FRAME frMain:HEIGHT-PIXELS = wEdit:HEIGHT-PIXELS NO-ERROR.
   
     /* Adjust the browse */
-    brRecord:width-pixels  = frame frEdit:width-pixels - 3.
-    brRecord:height-pixels = frame frEdit:height-pixels - 40.
+    brRecord:WIDTH-PIXELS  = FRAME frMain:WIDTH-PIXELS - 3.
+    brRecord:HEIGHT-PIXELS = FRAME frMain:HEIGHT-PIXELS - brRecord:Y - 35.
     
-    btnOk:x        = brRecord:width-pixels  - 160.
-    btnOk:y        = frame frEdit:height-pixels - 30.
-    btnClose:x     = brRecord:width-pixels - 80.
-    btnClose:y     = frame frEdit:height-pixels - 30.
-    fiNumRecords:y = frame frEdit:height-pixels - 30.
-    fiNumRecords:side-label-handle:y = fiNumRecords:y.
-    tgWriteTrigger:y = fiNumRecords:y + 2.
-    tgWriteTrigger:x = fiNumRecords:x + fiNumRecords:width-pixels + 10.
+    btnClose:X     = brRecord:X + brRecord:WIDTH-PIXELS - btnClose:WIDTH-PIXELS.
+    btnClose:Y     = FRAME frMain:HEIGHT-PIXELS - 27.
+    btnOk:X        = btnClose:X - btnOk:WIDTH-PIXELS - 10.
+    btnOk:Y        = btnClose:Y.
+    fiNumRecords:Y = btnClose:Y.
+    fiNumRecords:SIDE-LABEL-HANDLE:Y = fiNumRecords:y.
+    tgWriteTrigger:y = fiNumRecords:Y + 2.
+    tgWriteTrigger:X = fiNumRecords:X + fiNumRecords:WIDTH-PIXELS + 10.
   
     /* Save settings */
-    setRegistry("DataDigger:Edit", "Window:x", string(wEdit:x) ).                             
-    setRegistry("DataDigger:Edit", "Window:y", string(wEdit:y) ).                             
-    setRegistry("DataDigger:Edit", "Window:height", string(wEdit:height-pixels) ).                             
-    setRegistry("DataDigger:Edit", "Window:width", string(wEdit:width-pixels) ).                             
-  end.
+    setRegistry("DataDigger:Edit", "Window:x", STRING(wEdit:X) ).                             
+    setRegistry("DataDigger:Edit", "Window:y", STRING(wEdit:Y) ).                             
+    setRegistry("DataDigger:Edit", "Window:height", STRING(wEdit:HEIGHT-PIXELS) ).                             
+    setRegistry("DataDigger:Edit", "Window:width", STRING(wEdit:WIDTH-PIXELS) ).                             
+  END.
 
-  run showScrollBars(frame frEdit:handle, no, no).
-  run LockWindow (input wEdit:handle, input no).
+  RUN showScrollBars(FRAME frMain:HANDLE, NO, NO).
+  RUN LockWindow (INPUT wEdit:HANDLE, INPUT NO).
 
 END.
 
@@ -347,13 +395,13 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME frEdit
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL frEdit wEdit
-ON GO OF FRAME frEdit
+&Scoped-define SELF-NAME frMain
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL frMain wEdit
+ON GO OF FRAME frMain
 DO:
-  run btnGoChoose(output polSuccess).
-  if not polSuccess then return no-apply.
-  else apply 'close' to this-procedure.
+  RUN btnGoChoose(OUTPUT polSuccess).
+  IF NOT polSuccess THEN RETURN NO-APPLY.
+  ELSE APPLY 'close' TO THIS-PROCEDURE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -363,7 +411,7 @@ END.
 &Scoped-define BROWSE-NAME brRecord
 &Scoped-define SELF-NAME brRecord
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brRecord wEdit
-ON RETURN OF brRecord IN FRAME frEdit
+ON RETURN OF brRecord IN FRAME frMain
 DO:
   apply 'entry' to ttColumn.cNewValue in browse brRecord.
 END.
@@ -373,7 +421,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brRecord wEdit
-ON ROW-DISPLAY OF brRecord IN FRAME frEdit
+ON ROW-DISPLAY OF brRecord IN FRAME frMain
 DO:
 
   /* Get field definition */
@@ -412,11 +460,12 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brRecord wEdit
-ON SCROLL-NOTIFY OF brRecord IN FRAME frEdit
+ON SCROLL-NOTIFY OF brRecord IN FRAME frMain
 DO:
-  if focus:name = 'cNewValue' then apply 'leave' to focus.
-  btnEncode:hidden = yes.
-  btnListEdit:hidden = yes.
+  IF FOCUS:NAME = 'cNewValue' THEN APPLY 'leave' TO FOCUS.
+
+  RUN enableToolbar("").
+
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -424,7 +473,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brRecord wEdit
-ON START-SEARCH OF brRecord IN FRAME frEdit
+ON START-SEARCH OF brRecord IN FRAME frMain
 DO:
   apply 'leave' to ttColumn.cNewValue in browse brRecord.
   run reopenFieldBrowse(brRecord:current-column:name,?).
@@ -437,7 +486,7 @@ END.
 
 &Scoped-define SELF-NAME btnClose
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClose wEdit
-ON CHOOSE OF btnClose IN FRAME frEdit /* Close */
+ON CHOOSE OF btnClose IN FRAME frMain /* Close */
 DO:
   define variable hToggle as handle no-undo.
   define buffer ttColumn for ttColumn. 
@@ -473,16 +522,103 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME btnDatePicker
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDatePicker wEdit
+ON CHOOSE OF btnDatePicker IN FRAME frMain /* Date */
+OR "F10" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  DEFINE VARIABLE dDate AS DATE NO-UNDO.
+
+  /* Check if allowed to run */
+  IF NOT btnDatePicker:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  DO WITH FRAME frMain:
+    dDate = DATE(FOCUS:SCREEN-VALUE).
+    RUN VALUE(getProgramDir() + 'datepicker.w') (INPUT-OUTPUT dDate).
+    IF dDate <> ? THEN FOCUS:SCREEN-VALUE = STRING(dDate).
+  END.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnDecrease
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDecrease wEdit
+ON CHOOSE OF btnDecrease IN FRAME frMain /* -- */
+OR "CTRL-CURSOR-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* Check if allowed to run */
+  IF NOT btnDecrease:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  RUN increaseValue(-1).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnEditor
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnEditor wEdit
+ON CHOOSE OF btnEditor IN FRAME frMain /* Edit */
+OR "F3" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* View-as editor */
+  DEFINE VARIABLE cValue AS CHARACTER no-undo. 
+
+  /* Check if allowed to run */
+  IF NOT btnEditor:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  DO WITH FRAME frMain:
+    /* Make sure we are looking at the right field. */
+    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
+    cValue = ttColumn.cNewValue:SCREEN-VALUE IN BROWSE brRecord.
+
+    RUN VALUE(getProgramDir() + 'wViewAsEditor.w')
+     ( INPUT-OUTPUT cValue).
+
+    ttColumn.cNewValue:SCREEN-VALUE IN BROWSE brRecord = cValue.
+    APPLY 'value-changed' to ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME btnEncode
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnEncode wEdit
-ON CHOOSE OF btnEncode IN FRAME frEdit /* Encode */
-OR "F11" of ttColumn.cNewValue in browse brRecord
+ON CHOOSE OF btnEncode IN FRAME frMain /* Enc */
+OR "F11" of ttColumn.cNewValue IN BROWSE brRecord
 DO:
-  if focus:name = 'cNewValue' then
-  do:
-    brRecord:get-browse-column( {&field-cNewValue} ):screen-value = encode(brRecord:get-browse-column( {&field-cNewValue} ):screen-value).
-    apply 'value-changed' to ttColumn.cNewValue in browse brRecord.
-  end.
+  /* Check if allowed to run */
+  IF NOT btnEncode:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  DO WITH FRAME frMain:
+    brRecord:GET-BROWSE-COLUMN( {&field-cNewValue} ):SCREEN-VALUE = ENCODE(brRecord:GET-BROWSE-COLUMN( {&field-cNewValue} ):SCREEN-VALUE).
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnIncrease
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnIncrease wEdit
+ON CHOOSE OF btnIncrease IN FRAME frMain /* ++ */
+OR "CTRL-CURSOR-UP" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* Check if allowed to run */
+  IF NOT btnIncrease:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  RUN increaseValue(+1).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -491,27 +627,50 @@ END.
 
 &Scoped-define SELF-NAME btnListEdit
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnListEdit wEdit
-ON CHOOSE OF btnListEdit IN FRAME frEdit /* List Editor */
-or "F12" of ttColumn.cNewValue in browse brRecord
+ON CHOOSE OF btnListEdit IN FRAME frMain /* List */
+OR "F12" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
-
   /* List editor */
-  define variable cValue as character no-undo. 
+  DEFINE VARIABLE cValue AS CHARACTER no-undo. 
 
-  do with frame {&frame-name}:
+  /* Check if allowed to run */
+  IF NOT btnListEdit:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  DO WITH FRAME frMain:
     /* Make sure we are looking at the right field. */
-    find ttColumn where ttColumn.cFullName = brRecord:get-browse-column( {&field-cFullName} ):screen-value.
-    cValue = ttColumn.cNewValue:screen-value in browse brRecord.
+    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
+    cValue = ttColumn.cNewValue:SCREEN-VALUE IN BROWSE brRecord.
 
-    run value( getProgramDir() + 'wLister.w') 
-      ( input picDatabase 
-      , input substitute("&1.&2", picTableName, ttColumn.cFullName)
-      , input-output cValue
+    RUN VALUE( getProgramDir() + 'wLister.w') 
+      ( INPUT picDatabase 
+      , INPUT SUBSTITUTE("&1.&2", picTableName, ttColumn.cFullName)
+      , INPUT-OUTPUT cValue
       ).
-    ttColumn.cNewValue:screen-value in browse brRecord = cValue.
-    apply 'value-changed' to ttColumn.cNewValue in browse brRecord.
-  end.
+    ttColumn.cNewValue:SCREEN-VALUE IN BROWSE brRecord = cValue.
+    APPLY 'value-changed' to ttColumn.cNewValue IN BROWSE brRecord.
+  END.
 
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnLowerCase
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnLowerCase wEdit
+ON CHOOSE OF btnLowerCase IN FRAME frMain /* abc */
+OR "SHIFT-CURSOR-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* Check if allowed to run */
+  IF NOT btnLowerCase:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  /* Make the string LOWER case */
+  DO WITH FRAME frMain:
+    brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE = LOWER(brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE).
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -520,12 +679,62 @@ END.
 
 &Scoped-define SELF-NAME btnOk
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnOk wEdit
-ON CHOOSE OF btnOk IN FRAME frEdit /* Ok */
-do:
-  run btnGoChoose(output polSuccess).
-  if not polSuccess then return no-apply.
-  else apply 'close' to this-procedure.
-end.
+ON CHOOSE OF btnOk IN FRAME frMain /* Ok */
+DO:
+  RUN btnGoChoose(OUTPUT polSuccess).
+  IF NOT polSuccess THEN RETURN NO-APPLY.
+  ELSE APPLY 'close' TO THIS-PROCEDURE.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnUpperCase
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnUpperCase wEdit
+ON CHOOSE OF btnUpperCase IN FRAME frMain /* ABC */
+OR "SHIFT-CURSOR-UP" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* Check if allowed to run */
+  IF NOT btnUpperCase:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  RUN btnUpperCaseChoose.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME btnWordCase
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnWordCase wEdit
+ON CHOOSE OF btnWordCase IN FRAME frMain /* Abc */
+OR "ALT-SHIFT-CURSOR-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
+OR "ALT-SHIFT-CURSOR-UP" OF ttColumn.cNewValue IN BROWSE brRecord
+DO:
+  /* Let each word begin with a capital and let it continue in lower */
+  DEFINE VARIABLE iWord AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cText AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cWord AS CHARACTER   NO-UNDO.
+
+  /* Check if allowed to run */
+  IF NOT btnWordCase:SENSITIVE 
+    OR FOCUS:NAME <> 'cNewValue' THEN RETURN.
+
+  DO WITH FRAME frMain:
+    cText = brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE.
+     
+    DO iWord = 1 TO NUM-ENTRIES(cText," "):
+      cWord = ENTRY(iWord,cText," ").
+      cWord = CAPS(SUBSTRING(cWord,1,1)) + LOWER(SUBSTRING(cWord,2)).
+      ENTRY(iWord,cText," ") = cWord.
+    END.
+
+    brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE = cText.
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -533,9 +742,9 @@ end.
 
 &Scoped-define SELF-NAME tgWriteTrigger
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgWriteTrigger wEdit
-ON VALUE-CHANGED OF tgWriteTrigger IN FRAME frEdit /* Write trigger */
+ON VALUE-CHANGED OF tgWriteTrigger IN FRAME frMain /* Use write trigger */
 DO:
-  setRegistry("DataDigger","EnableWriteTriggers", string(self:checked) ).
+  setRegistry("DataDigger","EnableWriteTriggers", STRING(SELF:CHECKED) ).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -601,7 +810,7 @@ ON "PAGE-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
   DEFINE BUFFER bData FOR ttData.
 
-  DO WITH FRAME frEdit:
+  DO WITH FRAME frMain:
     findNext:
     FOR EACH bData
       WHERE bData.cFieldName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE
@@ -621,7 +830,7 @@ ON "PAGE-UP" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
   DEFINE BUFFER bData FOR ttData.
 
-  DO WITH FRAME frEdit:
+  DO WITH FRAME frMain:
     findPrev:
     FOR EACH bData
       WHERE bData.cFieldName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE
@@ -649,16 +858,6 @@ END.
 ON "entry" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
   DO WITH FRAME {&FRAME-NAME}:
-    btnEncode:X = brRecord:X + brRecord:WIDTH-PIXELS - btnEncode:WIDTH-PIXELS - 18.
-    btnEncode:Y = brRecord:Y + SELF:Y + 1.
-    btnEncode:HIDDEN = NO.
-    btnEncode:MOVE-TO-TOP().
-
-    btnListEdit:X = btnEncode:X - btnEncode:WIDTH-PIXELS.
-    btnListEdit:Y = btnEncode:Y.
-    btnListEdit:HIDDEN = NO.
-    btnListEdit:MOVE-TO-TOP().
-
     brRecord:TOOLTIP = "use CTRL-PGUP / CTRL-PGDN to~nbrowse through existing values".
 
     /* Make sure we are looking at the right field. It might have changed due to a sort */
@@ -670,6 +869,8 @@ DO:
       SELF:FORMAT       = ttField.cFormat.  
       SELF:SCREEN-VALUE = ttColumn.cNewValue. 
     END.
+
+    RUN enableToolbar(ttField.cDataType).
   END.
 END.
 
@@ -677,14 +878,8 @@ ON "leave" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
   DO WITH FRAME {&FRAME-NAME}:
     brRecord:TOOLTIP = "fields to edit".
-
-    btnEncode:X = 1.
-    btnEncode:Y = 1.
-    btnEncode:HIDDEN = TRUE.
-
-    btnListEdit:X = 1.
-    btnListEdit:Y = 1.
-    btnListEdit:HIDDEN = TRUE.
+    ttColumn.cNewValue = ttColumn.cOldValue.
+    RUN enableToolbar("").
   END.
 END.
 
@@ -716,70 +911,22 @@ DO:
   END. 
 END. 
 
-/* Increase field or set to all caps */
-ON "SHIFT-CURSOR-UP" OF ttColumn.cNewValue IN BROWSE brRecord
+
+/* Set date to today */
+ON "HOME" OF ttColumn.cNewValue IN BROWSE brRecord
 DO:
+  DEFINE VARIABLE dValue AS DATE NO-UNDO.
+
   DO WITH FRAME {&FRAME-NAME}:
   
     /* Make sure we are looking at the right field. */
     FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
     FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
 
-    CASE ttField.cDataType:
-      WHEN "date"      THEN SELF:SCREEN-VALUE = STRING( DATE(SELF:SCREEN-VALUE) + 1 ) NO-ERROR.
-      WHEN "integer"   THEN SELF:SCREEN-VALUE = STRING( INTEGER(SELF:SCREEN-VALUE) + 1 ) NO-ERROR.
-      WHEN "decimal"   THEN SELF:SCREEN-VALUE = STRING( DECIMAL(SELF:SCREEN-VALUE) + 1 ) NO-ERROR.
-      WHEN "character" THEN SELF:SCREEN-VALUE = CAPS(SELF:SCREEN-VALUE) NO-ERROR.
-      WHEN "logical"   THEN SELF:SCREEN-VALUE = STRING( NOT LOGICAL(SELF:SCREEN-VALUE) ) NO-ERROR.
-    END CASE. 
-  END.
-END.
-
-/* Decrease field or set to all lower */
-ON "SHIFT-CURSOR-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
-DO:
-  DO WITH FRAME {&FRAME-NAME}:
-  
-    /* Make sure we are looking at the right field. */
-    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
-    FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
-
-    CASE ttField.cDataType:
-      WHEN "date"      THEN SELF:SCREEN-VALUE = STRING( DATE(SELF:SCREEN-VALUE) - 1 ) NO-ERROR.
-      WHEN "integer"   THEN SELF:SCREEN-VALUE = STRING( INTEGER(SELF:SCREEN-VALUE) - 1 ) NO-ERROR.
-      WHEN "decimal"   THEN SELF:SCREEN-VALUE = STRING( DECIMAL(SELF:SCREEN-VALUE) - 1 ) NO-ERROR.
-      WHEN "character" THEN SELF:SCREEN-VALUE = LOWER(SELF:SCREEN-VALUE) NO-ERROR.
-      WHEN "logical"   THEN SELF:SCREEN-VALUE = STRING( NOT LOGICAL(SELF:SCREEN-VALUE) ) NO-ERROR.
-    END CASE. 
-  END.
-END.
-
-/* Increase date with 1 month */
-ON "SHIFT-PAGE-UP" OF ttColumn.cNewValue IN BROWSE brRecord
-DO:
-  DO WITH FRAME {&FRAME-NAME}:
-  
-    /* Make sure we are looking at the right field. */
-    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
-    FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
-
-    CASE ttField.cDataType:
-      WHEN "date" THEN SELF:SCREEN-VALUE = STRING( ADD-INTERVAL( DATE(SELF:SCREEN-VALUE), 1, "MONTH" )) NO-ERROR.
-    END CASE. 
-  END.
-END.
-
-/* Decrease date with 1 month */
-ON "SHIFT-PAGE-DOWN" OF ttColumn.cNewValue IN BROWSE brRecord
-DO:
-  DO WITH FRAME {&FRAME-NAME}:
-    /* Make sure we are looking at the right field. */
-    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN( {&field-cFullName} ):SCREEN-VALUE.
-    FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
-
-    CASE ttField.cDataType:
-      WHEN "date" THEN SELF:SCREEN-VALUE = STRING( ADD-INTERVAL( DATE(SELF:SCREEN-VALUE), -1, "MONTH" )) NO-ERROR.
-    END CASE. 
+    /* If it is a date or looks like a date, treat it like a date */
+    dValue = DATE(SELF:SCREEN-VALUE) NO-ERROR.
+    IF dValue <> ? OR ttField.cDataType = "date"
+      THEN SELF:SCREEN-VALUE = STRING(TODAY) NO-ERROR.
   END.
 END.
 
@@ -826,7 +973,7 @@ PROCEDURE btnGoChoose :
   DEFINE BUFFER bColumn FOR ttColumn. 
 
   /* In read-only mode, return */
-  IF ReadOnlyDigger THEN 
+  IF plReadOnlyDigger THEN 
   DO:
     polSuccess = TRUE.
     RETURN. 
@@ -848,7 +995,7 @@ PROCEDURE btnGoChoose :
 
   /* Show that we're busy */
   iStartTime = ETIME. 
-  fiNumRecords:LABEL IN FRAME frEdit = "Left to save".
+  fiNumRecords:LABEL IN FRAME frMain = "Left to save".
   PROCESS EVENTS.
   SESSION:SET-WAIT-STATE("general").
 
@@ -916,10 +1063,14 @@ PROCEDURE btnGoChoose :
       /* Set values of all fields */
       FOR EACH bColumn WHERE bColumn.lShow = TRUE
         ON ERROR UNDO commitLoop, LEAVE commitLoop:
-
-        hBuffer:BUFFER-FIELD(bColumn.cFieldName):BUFFER-VALUE(bColumn.iExtent) = bColumn.cNewValue.
+        /* 2016-08-08 richardk large decimal values are not correctly casted from string, 
+         * last two digits of a 23 digit decimal are always zero */
+        CASE hBuffer:BUFFER-FIELD(bColumn.cFieldName):DATA-TYPE: 
+          WHEN "decimal" THEN hBuffer:BUFFER-FIELD(bColumn.cFieldName):BUFFER-VALUE(bColumn.iExtent) = DECIMAL(bColumn.cNewValue).
+          OTHERWISE hBuffer:BUFFER-FIELD(bColumn.cFieldName):BUFFER-VALUE(bColumn.iExtent) = bColumn.cNewValue.
+        END CASE.
       END. /* f/e bColumn */
-
+      
       IF CAN-DO("Add,Clone", picMode) THEN 
       DO:
         /* Dump the newly created record as a backup */
@@ -934,7 +1085,7 @@ PROCEDURE btnGoChoose :
       /* Set nr of processed records in field "Num records" */
       IF ETIME - iStartTime > 500 THEN
       DO:
-        fiNumRecords:SCREEN-VALUE IN FRAME frEdit = STRING(iNumRecs - iRow).
+        fiNumRecords:SCREEN-VALUE IN FRAME frMain = STRING(iNumRecs - iRow).
         PROCESS EVENTS.
         iStartTime = ETIME. 
       END.
@@ -948,6 +1099,42 @@ PROCEDURE btnGoChoose :
   SESSION:SET-WAIT-STATE("").
   
 END PROCEDURE. /* btnGoChoose */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnLowerCaseChoose wEdit 
+PROCEDURE btnLowerCaseChoose :
+/*------------------------------------------------------------------------
+  Name         : btnLowerCaseChoose
+  Description  : Make the string LOWER case
+  ----------------------------------------------------------------------*/
+
+  IF FOCUS:NAME = 'cNewValue' THEN
+  DO WITH FRAME frMain:
+    brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE = LOWER(brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE).
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+
+END PROCEDURE. /* btnLowerCaseChoose */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnUpperCaseChoose wEdit 
+PROCEDURE btnUpperCaseChoose :
+/*------------------------------------------------------------------------
+  Name         : btnUpperCaseChoose
+  Description  : Make the string UPPER case
+  ----------------------------------------------------------------------*/
+
+  IF FOCUS:NAME = 'cNewValue' THEN
+  DO WITH FRAME frMain:
+    brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE = UPPER(brRecord:GET-BROWSE-COLUMN({&field-cNewValue}):SCREEN-VALUE).
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+
+END PROCEDURE. /* btnUpperCaseChoose */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -971,6 +1158,31 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enableToolbar wEdit 
+PROCEDURE enableToolbar :
+/*------------------------------------------------------------------------
+  Name         : enableToolbar
+  Description  : Enable/disable buttons on the toolbar
+  ----------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER pcDataType AS CHARACTER NO-UNDO.
+
+  DO WITH FRAME frMain:
+    btnEditor    :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnEncode    :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnListEdit  :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnUpperCase :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnLowerCase :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnWordCase  :SENSITIVE = CAN-DO("CHARACTER",pcDataType).
+    btnIncrease  :SENSITIVE = CAN-DO("CHARACTER,INTEGER,DECIMAL,INT64,DATE*",pcDataType).
+    btnDecrease  :SENSITIVE = CAN-DO("CHARACTER,INTEGER,DECIMAL,INT64,DATE*",pcDataType).
+    btnDatePicker:SENSITIVE = CAN-DO("DATE",pcDataType).
+  END.
+
+END PROCEDURE. /* enableToolbar */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enable_UI wEdit  _DEFAULT-ENABLE
 PROCEDURE enable_UI :
 /*------------------------------------------------------------------------------
@@ -983,11 +1195,12 @@ PROCEDURE enable_UI :
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
   DISPLAY fiNumRecords tgWriteTrigger 
-      WITH FRAME frEdit IN WINDOW wEdit.
-  ENABLE brRecord btnEncode fiNumRecords btnOk btnClose tgWriteTrigger 
-         btnListEdit 
-      WITH FRAME frEdit IN WINDOW wEdit.
-  {&OPEN-BROWSERS-IN-QUERY-frEdit}
+      WITH FRAME frMain IN WINDOW wEdit.
+  ENABLE brRecord fiNumRecords btnOk btnDecrease btnClose tgWriteTrigger 
+         btnIncrease btnDatePicker btnEditor btnEncode btnListEdit btnLowerCase 
+         btnUpperCase btnWordCase 
+      WITH FRAME frMain IN WINDOW wEdit.
+  {&OPEN-BROWSERS-IN-QUERY-frMain}
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1035,6 +1248,62 @@ END PROCEDURE. /* getDataValues */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE increaseValue wEdit 
+PROCEDURE increaseValue :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER piDelta AS INTEGER NO-UNDO.
+
+  DEFINE VARIABLE cScreenValue AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iValue  AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE daValue AS DATE        NO-UNDO.
+  DEFINE VARIABLE deValue AS DECIMAL     NO-UNDO.
+  DEFINE VARIABLE lValue  AS LOGICAL     NO-UNDO.
+
+  IF FOCUS:NAME = 'cNewValue' THEN
+  DO WITH FRAME frMain:
+
+    /* Make sure we are looking at the right field. It might have changed due to a sort */
+    FIND ttColumn WHERE ttColumn.cFullName = brRecord:GET-BROWSE-COLUMN({&field-cFullName}):SCREEN-VALUE.
+    FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
+  
+    /* Get current value on the screen */
+    cScreenValue = ttColumn.cNewValue:SCREEN-VALUE IN BROWSE brRecord.
+
+    CASE ttField.cDataType:
+      WHEN "INTEGER" OR WHEN "INT64" THEN iValue  = INTEGER(cScreenValue) NO-ERROR.
+      WHEN "DATE"                    THEN daValue = DATE(cScreenValue)    NO-ERROR.
+      WHEN "DECIMAL"                 THEN deValue = DECIMAL(cScreenValue) NO-ERROR.
+      WHEN "LOGICAL"                 THEN lValue  = LOGICAL(cScreenValue) NO-ERROR.
+      WHEN "CHARACTER"               THEN cScreenValue = increaseCharValue(cScreenValue,piDelta) NO-ERROR.
+    END CASE. 
+
+    /* Use default value if date fails */
+    IF daValue = ? THEN daValue = TODAY - piDelta. 
+
+    IF NOT ERROR-STATUS:ERROR THEN
+    DO:
+      CASE ttField.cDataType:
+        WHEN "INTEGER" OR WHEN "INT64" THEN cScreenValue = STRING(iValue  + piDelta).
+        WHEN "DATE"                    THEN cScreenValue = STRING(daValue + piDelta).
+        WHEN "DECIMAL"                 THEN cScreenValue = STRING(deValue + piDelta).
+        WHEN "LOGICAL"                 THEN cScreenValue = STRING(NOT lValue) NO-ERROR.
+      END CASE. 
+
+      ttColumn.cNewValue:SCREEN-VALUE = cScreenValue.
+    END.
+
+    APPLY 'value-changed' TO ttColumn.cNewValue IN BROWSE brRecord.
+  END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObject wEdit 
 PROCEDURE initializeObject :
 /*------------------------------------------------------------------------
@@ -1050,12 +1319,15 @@ PROCEDURE initializeObject :
   DEFINE VARIABLE iMaxFieldLength AS INTEGER     NO-UNDO.
   DEFINE VARIABLE iValue          AS INTEGER     NO-UNDO.
   DEFINE VARIABLE lNewRecord      AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE iDefaultFont    AS INTEGER     NO-UNDO.
 
   DEFINE BUFFER bColumn FOR ttColumn. 
 
   /* Get fonts */
-  FRAME {&FRAME-NAME}:FONT = getFont('Default').
-  BROWSE brRecord:FONT = getFont('Default').
+  iDefaultFont = getFont('Default').
+  FRAME {&FRAME-NAME}:FONT = iDefaultFont.
+  BROWSE brRecord:FONT = iDefaultFont.
+  BROWSE brRecord:ROW-HEIGHT-PIXELS = font-table:GET-TEXT-HEIGHT-PIXELS(iDefaultFont).
 
   /* This program is called for both ADD and EDIT */
   lNewRecord = picMode = 'add'.
@@ -1127,8 +1399,7 @@ PROCEDURE initializeObject :
   DO WITH FRAME {&FRAME-NAME}:
 
     /* Hide encode-button */
-    btnEncode:HIDDEN   = YES.
-    btnListEdit:HIDDEN = YES.
+    RUN enableToolbar("").
 
     /* Use triggers? */
     cSetting = getRegistry("DataDigger","EnableWriteTriggers").
@@ -1173,8 +1444,12 @@ PROCEDURE initializeObject :
     IF iValue = ? OR iValue = 0 THEN iValue = INTEGER(getRegistry('DataDigger', 'Window:width' )) - 100.
     ASSIGN wEdit:WIDTH-PIXELS = iValue NO-ERROR.
 
-    btnEncode:LOAD-IMAGE(getImagePath('Encode.gif')).
-    btnListEdit:LOAD-IMAGE(getImagePath('List.gif')).
+    DO WITH FRAME frMain:
+      btnEditor:LOAD-IMAGE(getImagePath('Editor.gif')).
+      btnEncode:LOAD-IMAGE(getImagePath('Encode.gif')).
+      btnListEdit:LOAD-IMAGE(getImagePath('List.gif')).
+      btnDatePicker:LOAD-IMAGE(getImagePath('DatePicker.gif')).
+    END. 
   END. 
 
   /* Force a redraw */
@@ -1193,7 +1468,7 @@ PROCEDURE initializeObject :
 
   RUN reopenFieldBrowse(?,?).
 
-  IF ReadOnlyDigger THEN btnOk:SENSITIVE = FALSE.
+  IF plReadOnlyDigger THEN btnOk:SENSITIVE = FALSE.
 
 END PROCEDURE. /* initializeObject */
 
@@ -1284,6 +1559,72 @@ PROCEDURE reopenFieldBrowse :
   END.
 
 END PROCEDURE. /* reopenFieldBrowse */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+/* ************************  Function Implementations ***************** */
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION increaseCharValue wEdit 
+FUNCTION increaseCharValue RETURNS CHARACTER
+  ( pcCharValue AS CHARACTER 
+  , piDelta     AS INTEGER):
+
+  DEFINE VARIABLE cChar   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iChar   AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cNumber AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLeft   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cRight  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iNumber AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE dValue  AS DATE        NO-UNDO.
+  
+  /* If the complete value looks like a date, 
+   * then treat it like a date 
+   */
+  IF pcCharValue MATCHES "*/*/*" THEN
+  DO:
+    dValue = DATE(pcCharValue) NO-ERROR.
+    IF dValue <> ? THEN
+    DO:
+      dValue = dValue + piDelta.
+      RETURN STRING(dValue).
+    END.
+  END.
+
+  /* Otherwise look for the first number in the string. 
+   * Extract it and remember what is at the left and 
+   * at the right of the number 
+   */
+  DO iChar = 1 TO LENGTH(pcCharValue):
+    cChar = SUBSTRING(pcCharValue,iChar,1).
+    IF LOOKUP(cChar,"0,1,2,3,4,5,6,7,8,9") > 0 THEN
+      cNumber = cNumber + cChar.
+    ELSE 
+    DO:
+      IF cNumber <> "" THEN 
+      DO:
+        cRight = SUBSTRING(pcCharValue,iChar).
+        LEAVE.
+      END.
+  
+      /* Collect all that is left of the nr */
+      cLeft = cLeft + cChar.
+    END.
+  END.
+
+  /* If we have found a number, increase it */
+  IF cNumber <> "" THEN
+  DO:
+    iNumber = INTEGER(cNumber) NO-ERROR.
+    IF NOT ERROR-STATUS:ERROR 
+      AND (iNumber + piDelta) >= 0 THEN cNumber = STRING(iNumber + piDelta).
+  END.
+
+  /* Now return the left part + new number + right part */
+  pcCharValue = SUBSTITUTE("&1&2&3",cLeft,cNumber,cRight).
+  RETURN pcCharValue. /* Function return value. */
+
+END FUNCTION. /* increaseCharValue */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

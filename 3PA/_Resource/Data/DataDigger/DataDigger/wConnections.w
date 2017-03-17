@@ -203,8 +203,8 @@ ttConnection.lConnected
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS
-          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 60 BY 17
-          &ELSE SIZE-PIXELS 300 BY 350 &ENDIF FIT-LAST-COLUMN.
+          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 60 BY 15
+          &ELSE SIZE-PIXELS 299 BY 324 &ENDIF FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
@@ -212,7 +212,7 @@ ttConnection.lConnected
 DEFINE FRAME Dialog-Frame
      btnBrowse AT Y 90 X 760 WIDGET-ID 56
      btnDelete AT Y 5 X 565 WIDGET-ID 14
-     btnTest AT Y 326 X 725 WIDGET-ID 42
+     btnTest AT Y 325 X 725 WIDGET-ID 42
      btnConnect AT Y 5 X 315 WIDGET-ID 48
      fiLogicalName AT Y 40 X 375 COLON-ALIGNED WIDGET-ID 4
      btnDisconnect AT Y 5 X 340 WIDGET-ID 52
@@ -220,7 +220,7 @@ DEFINE FRAME Dialog-Frame
      btnAdd AT Y 5 X 390 WIDGET-ID 2
      fiDescription AT Y 65 X 375 COLON-ALIGNED WIDGET-ID 38
      fiDatabaseName AT Y 92 X 375 COLON-ALIGNED WIDGET-ID 6
-     brConnections AT Y 0 X 0 WIDGET-ID 200
+     brConnections AT Y 1 X 1 WIDGET-ID 200
      btnClone AT Y 5 X 415 WIDGET-ID 46
      edParameters AT Y 145 X 315 NO-LABEL WIDGET-ID 10
      btnEdit AT Y 5 X 440 WIDGET-ID 12
@@ -617,7 +617,7 @@ PROCEDURE addConnections :
           ttConnection.cParameters = "-1".
         else 
         do:
-          copy-lob from file cFile to cContents.
+          copy-lob from file cFile to cContents NO-CONVERT.
           ttConnection.cParameters = string(cContents).
         end.
 

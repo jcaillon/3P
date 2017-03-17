@@ -34,6 +34,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// This class handles the AutoCompletionForm
     /// </summary>
     internal static class AutoCompletion {
+
         #region Events
 
         /// <summary>

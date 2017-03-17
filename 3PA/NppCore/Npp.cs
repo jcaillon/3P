@@ -36,13 +36,10 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.Pro;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
-
     internal static class Npp {
-
         #region CurrentScintilla (scintilla instance)
 
         private static SciApi _primarySci;
@@ -67,7 +64,7 @@ namespace _3PA.NppCore {
 
             long curScintilla;
             Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-            _curSciId = ((int)curScintilla).ClampMax(1);
+            _curSciId = ((int) curScintilla).ClampMax(1);
             CurrentSci = _curSciId == 0 ? _primarySci : _secondarySci;
         }
 
@@ -77,6 +74,139 @@ namespace _3PA.NppCore {
         /// </summary>
         public static int CurrentSciId {
             get { return _curSciId; }
+        }
+
+        #endregion
+
+        #region CurrentFile (and previous file)
+
+        private static NppFileInfo _currentFile;
+
+        /// <summary>
+        /// Get info and do stuff on the current file
+        /// </summary>
+        public static NppFileInfo CurrentFile {
+            get { return _currentFile ?? (_currentFile = new NppFileInfo()); }
+        }
+
+        /// <summary>
+        /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
+        /// </summary>
+        internal class NppFileInfo {
+            #region Update
+
+            public void Update() {
+                CurrentFile.Path = GetFullPathApi;
+            }
+
+            public void Update(NppFileInfo toCopy) {
+                Path = toCopy.Path;
+            }
+
+            #endregion
+
+            #region Private fields
+
+            private string _path;
+
+            #endregion
+
+            #region Public
+
+            /// <summary>
+            /// Stores the file path when switching document
+            /// </summary>
+            public string Path {
+                get { return _path; }
+                set {
+                    _path = value;
+                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || CurrentInternalLangName.Equals("openedgeabl");
+                }
+            }
+
+            /// <summary>
+            /// true if the file is a progress file, false otherwise
+            /// </summary>
+            public bool IsProgress { get; private set; }
+
+            /// <summary>
+            /// Is the file a progress + compilable file?
+            /// </summary>
+            public bool IsCompilable {
+                get { return Path.TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern); }
+            }
+
+            /// <summary>
+            /// file name
+            /// </summary>
+            public string FileName {
+                get { return System.IO.Path.GetFileName(Path); }
+            }
+
+            /// <summary>
+            /// Directory of file
+            /// </summary>
+            public string DirectoryName {
+                get { return System.IO.Path.GetDirectoryName(Path); }
+            }
+
+            /// <summary>
+            /// Extension of file
+            /// </summary>
+            public string Extension {
+                get { return System.IO.Path.GetExtension(Path); }
+            }
+
+            /// <summary>
+            /// Gets the path of the current document
+            /// </summary>
+            /// <returns></returns>
+            public static string GetFullPathApi {
+                get {
+                    var path = new StringBuilder(Win32Api.MaxPath);
+                    Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+                    return path.ToString();
+                }
+            }
+
+            /// <summary>
+            /// Saves the current document
+            /// </summary>
+            public void Save() {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
+            }
+
+            /// <summary>
+            /// Saves current document as...
+            /// </summary>
+            public void SaveAs(string path) {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 0, path);
+            }
+
+            /// <summary>
+            /// Saves a copy of the current document
+            /// </summary>
+            public void SaveAsCopy(string path) {
+                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 1, path);
+            }
+
+            /// <summary>
+            /// Reload current file
+            /// </summary>
+            public void Reload(bool askConfirmation) {
+                Npp.Reload(Path, askConfirmation);
+            }
+
+            #endregion
+        }
+
+        private static NppFileInfo _previousFile;
+
+        /// <summary>
+        /// Info on the previous file
+        /// </summary>
+        public static NppFileInfo PreviousFile {
+            get { return _previousFile ?? (_previousFile = new NppFileInfo()); }
         }
 
         #endregion
@@ -98,7 +228,6 @@ namespace _3PA.NppCore {
         public static bool IsNppWindowFocused {
             get { return WinApi.GetForegroundWindow() == HandleNpp; }
         }
-
 
         /// <summary>
         /// Returns the screen on which npp is displayed (uses the point on the center of the application)
@@ -600,142 +729,7 @@ namespace _3PA.NppCore {
         #endregion
 
         #endregion
-        
-        #region CurrentFile (and previous file)
 
-        private static NppFileInfo _currentFile;
-
-        /// <summary>
-        /// Get info and do stuff on the current file
-        /// </summary>
-        public static NppFileInfo CurrentFile {
-            get { return _currentFile ?? (_currentFile = new NppFileInfo()); }
-        }
-
-        /// <summary>
-        /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
-        /// </summary>
-        internal class NppFileInfo {
-
-            #region Update
-
-            public void Update() {
-                CurrentFile.Path = GetFullPathApi;
-            }
-
-            public void Update(NppFileInfo toCopy) {
-                Path = toCopy.Path;
-            }
-
-            #endregion
-
-            #region Private fields
-
-            private string _path;
-
-            #endregion
-
-            #region Public
-
-            /// <summary>
-            /// Stores the file path when switching document
-            /// </summary>
-            public string Path {
-                get { return _path; }
-                set {
-                    _path = value;
-                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || CurrentInternalLangName.Equals("openedgeabl");
-                }
-            }
-
-            /// <summary>
-            /// true if the file is a progress file, false otherwise
-            /// </summary>
-            public bool IsProgress { get; private set; }
-
-            /// <summary>
-            /// Is the file a progress + compilable file?
-            /// </summary>
-            public bool IsCompilable {
-                get { return Path.TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern); }
-            }
-
-            /// <summary>
-            /// file name
-            /// </summary>
-            public string FileName {
-                get { return System.IO.Path.GetFileName(Path); }
-            }
-
-            /// <summary>
-            /// Directory of file
-            /// </summary>
-            public string DirectoryName {
-                get { return System.IO.Path.GetDirectoryName(Path); }
-            }
-
-            /// <summary>
-            /// Extension of file
-            /// </summary>
-            public string Extension {
-                get { return System.IO.Path.GetExtension(Path); }
-            }
-
-            /// <summary>
-            /// Gets the path of the current document
-            /// </summary>
-            /// <returns></returns>
-            public static string GetFullPathApi {
-                get {
-                    var path = new StringBuilder(Win32Api.MaxPath);
-                    Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
-                    return path.ToString();
-                }
-            }
-
-            /// <summary>
-            /// Saves the current document
-            /// </summary>
-            public void Save() {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
-            }
-
-            /// <summary>
-            /// Saves current document as...
-            /// </summary>
-            public void SaveAs(string path) {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 0, path);
-            }
-
-            /// <summary>
-            /// Saves a copy of the current document
-            /// </summary>
-            public void SaveAsCopy(string path) {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 1, path);
-            }
-
-            /// <summary>
-            /// Reload current file
-            /// </summary>
-            public void Reload(bool askConfirmation) {
-                Npp.Reload(Path, askConfirmation);
-            }
-
-            #endregion
-
-        }
-
-        private static NppFileInfo _previousFile;
-
-        /// <summary>
-        /// Info on the previous file
-        /// </summary>
-        public static NppFileInfo PreviousFile {
-            get { return _previousFile ?? (_previousFile = new NppFileInfo()); }
-        }
-
-        #endregion
-        
         #region Langs
 
         /// <summary>
@@ -746,7 +740,6 @@ namespace _3PA.NppCore {
         /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
         /// </summary>
         internal class NppLangs {
-
             #region Singleton
 
             private static NppLangs _instance;
@@ -755,7 +748,7 @@ namespace _3PA.NppCore {
                 get {
                     if (_instance == null
                         //|| Utils.HasFileChanged(Config.FileNppLangsXml) 
-                        || Utils.HasFileChanged(Config.FileNppUserDefinedLang)
+                        || Utils.HasFileChanged(ConfXml.FileNppUserDefinedLang)
                         //|| Utils.HasFileChanged(Npp.Config.FileNppStylersPath)
                         ) {
                         _instance = new NppLangs();
@@ -790,23 +783,23 @@ namespace _3PA.NppCore {
 
                 // from userDefinedLang.xml
                 try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Config.FileNppUserDefinedLang)).RootNode.SubNodes, true);
+                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, true);
                 } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + Config.FileNppUserDefinedLang);
+                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppUserDefinedLang);
                 }
 
                 // from langs.xml
                 try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Config.FileNppLangsXml)).RootNode["Languages"].SubNodes);
+                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppLangsXml)).RootNode["Languages"].SubNodes);
                 } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + Config.FileNppLangsXml);
+                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppLangsXml);
                 }
 
                 // from stylers.xml
                 try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppStylersPath)).RootNode["LexerStyles"].SubNodes);
+                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppStylersXml)).RootNode["LexerStyles"].SubNodes);
                 } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppStylersPath);
+                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppStylersXml);
                 }
             }
 
@@ -895,10 +888,10 @@ namespace _3PA.NppCore {
                 /// Returns this after checking if we need to read the Api xml file for this language
                 /// </summary>
                 public LangDescription ReadApiFileIfNeeded() {
-                    var apiFilePath = Path.Combine(Config.FolderNppAutocompApis, LangName + ".xml");
+                    var apiFilePath = Path.Combine(FolderNppAutocompApis, LangName + ".xml");
                     if (_keywords != null
                         && !Utils.HasFileChanged(apiFilePath)
-                        && (!IsUserLang || !Utils.HasFileChanged(Config.FileNppUserDefinedLang)))
+                        && (!IsUserLang || !Utils.HasFileChanged(ConfXml.FileNppUserDefinedLang)))
                         return this;
 
                     _keywords = new List<NppKeyword>();
@@ -971,7 +964,7 @@ namespace _3PA.NppCore {
 
                     if (IsUserLang) {
                         try {
-                            var langElement = new NanoXmlDocument(Utils.ReadAllText(Config.FileNppUserDefinedLang)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
+                            var langElement = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
                             if (langElement != null) {
                                 // get the list of keywords from userDefinedLang.xml
                                 foreach (var descendant in langElement["KeywordLists"].SubNodes) {
@@ -990,11 +983,11 @@ namespace _3PA.NppCore {
                                 }
                             }
                         } catch (Exception e) {
-                            ErrorHandler.LogError(e, "Error parsing " + Config.FileNppUserDefinedLang);
+                            ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppUserDefinedLang);
                         }
                     } else {
                         try {
-                            var langElement = new NanoXmlDocument(Utils.ReadAllText(Config.FileNppLangsXml)).RootNode["Languages"].SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
+                            var langElement = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppLangsXml)).RootNode["Languages"].SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
                             if (langElement != null) {
                                 // get the list of keywords from langs.xml
                                 foreach (var descendant in langElement.SubNodes) {
@@ -1013,7 +1006,7 @@ namespace _3PA.NppCore {
                                 LoadFromAttributes(this, langElement);
                             }
                         } catch (Exception e) {
-                            ErrorHandler.LogError(e, "Error parsing " + Config.FileNppLangsXml);
+                            ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppLangsXml);
                         }
                     }
 
@@ -1062,11 +1055,10 @@ namespace _3PA.NppCore {
             }
 
             #endregion
-
         }
 
         #endregion
-        
+
         #region Stylers
 
         private static NppStylers _nppStylers;
@@ -1076,7 +1068,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public static NppStylers StylersXml {
             get {
-                if (_nppStylers == null || Utils.HasFileChanged(Config.FileNppConfigXml)) {
+                if (_nppStylers == null || Utils.HasFileChanged(ConfXml.FileNppConfigXml)) {
                     _nppStylers = new NppStylers();
                 }
                 return _nppStylers;
@@ -1087,13 +1079,12 @@ namespace _3PA.NppCore {
         /// Class that holds some properties extracted from the stylers.xml file
         /// </summary>
         internal class NppStylers {
-
             #region Fields
 
             private static bool _warnedAboutFailStylers;
 
             #endregion
-            
+
             #region Properties
 
             public Color WhiteSpaceFg { get; set; }
@@ -1117,13 +1108,13 @@ namespace _3PA.NppCore {
             }
 
             #endregion
-            
+
             #region Public
 
             public void Reload() {
                 // read npp's stylers.xml file
                 try {
-                    var widgetStyle = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppStylersPath)).RootNode["GlobalStyles"].SubNodes;
+                    var widgetStyle = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppStylersXml)).RootNode["GlobalStyles"].SubNodes;
                     WhiteSpaceFg = GetColorInStylers(widgetStyle, "White space symbol", "fgColor");
                     IndentGuideLineBg = GetColorInStylers(widgetStyle, "Indent guideline style", "bgColor");
                     IndentGuideLineFg = GetColorInStylers(widgetStyle, "Indent guideline style", "fgColor");
@@ -1136,16 +1127,16 @@ namespace _3PA.NppCore {
                     FoldMarginMarkerBg = GetColorInStylers(widgetStyle, "Fold", "bgColor");
                     FoldMarginMarkerActiveFg = GetColorInStylers(widgetStyle, "Fold active", "fgColor");
                 } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppStylersPath);
+                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppStylersXml);
                     if (!_warnedAboutFailStylers) {
                         _warnedAboutFailStylers = true;
-                        UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + Config.FileNppStylersXml.ToHtmlLink() + "</div><br>The xml isn't correctly formatted, Npp manages to read anyway but you should correct it.", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");
+                        UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + ConfXml.FileNppStylersXml.ToHtmlLink() + "</div><br>The xml isn't correctly formatted, Npp manages to read anyway but you should correct it.", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");
                     }
                 }
             }
 
             #endregion
-            
+
             #region Private
 
             private static Color GetColorInStylers(List<NanoXmlNode> widgetStyle, string attributeName, string attributeToGet) {
@@ -1157,8 +1148,8 @@ namespace _3PA.NppCore {
             }
 
             #endregion
-            
         }
+
         #endregion
 
         #region Config
@@ -1170,7 +1161,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public static NppConfig ConfXml {
             get {
-                if (_nppconfig == null || Utils.HasFileChanged(Config.FileNppConfigXml)) {
+                if (_nppconfig == null || Utils.HasFileChanged(_nppconfig.FileNppConfigXml)) {
                     _nppconfig = new NppConfig();
                 }
                 return _nppconfig;
@@ -1183,18 +1174,44 @@ namespace _3PA.NppCore {
         /// and stylers.xml (or whichever style .xml is used at the moment)
         /// </summary>
         internal class NppConfig {
+            private string _fileNppStylersXml;
 
             #region Properties
-
-            /// <summary>
-            /// Path to the stylers.xml file currently used
-            /// </summary>
-            public string FileNppStylersPath { get; set; }
 
             /// <summary>
             /// Should be 0 to deactivate
             /// </summary>
             public int AutocompletionMode { get; set; }
+
+            /// <summary>
+            /// location of all the basic configuration files, they can either be...
+            /// in the installation folder if doLocalConf.xml is here
+            /// in %appdata% otherwise
+            /// or in the folder described in cloud/choice
+            /// </summary>
+            private string FolderBaseConf { get; set; }
+
+            public string FileNppUserDefinedLang
+            {
+                get { return Path.Combine(FolderBaseConf, @"userDefineLang.xml"); }
+            }
+
+            public string FileNppConfigXml
+            {
+                get { return Path.Combine(FolderBaseConf, @"config.xml"); }
+            }
+
+            public string FileNppStylersXml {
+                get {
+                    return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml"); ;
+                }
+                set { _fileNppStylersXml = value; }
+            }
+
+            public string FileNppLangsXml
+            {
+                get { return Path.Combine(FolderBaseConf, @"langs.xml"); }
+            }
 
             #endregion
 
@@ -1215,18 +1232,27 @@ namespace _3PA.NppCore {
             /// Allows to reload the npp configuration from the files
             /// </summary>
             public void Reload() {
-                // Get info from the config.xml
-                try {
-                    var configs = new NanoXmlDocument(Utils.ReadAllText(Config.FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
-                    FileNppStylersPath = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
-                    AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
-                } catch (Exception e) {
-                    FileNppStylersPath = null;
-                    ErrorHandler.LogError(e, "Error parsing " + Config.FileNppConfigXml);
+                // get the base folder
+                FolderBaseConf = FolderNppDefaultBaseConf;
+                if (File.Exists(FileNppCloudChoice)) {
+                    var cloudpath = Utils.ReadAllText(FileNppCloudChoice, Encoding.Default);
+                    if (Directory.Exists(cloudpath)) {
+                        FolderBaseConf = cloudpath;
+                    }
                 }
 
-                if (string.IsNullOrEmpty(FileNppStylersPath) || !File.Exists(FileNppStylersPath))
-                    FileNppStylersPath = Config.FileNppConfigXml;
+                // Get info from the config.xml
+                FileNppStylersXml = null;
+                try {
+                    var configs = new NanoXmlDocument(Utils.ReadAllText(FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
+                    FileNppStylersXml = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
+                    AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e, "Error parsing " + FileNppConfigXml);
+                }
+
+                if (!string.IsNullOrEmpty(FileNppStylersXml) && !File.Exists(FileNppStylersXml))
+                    FileNppStylersXml = null;
             }
 
             /// <summary>
@@ -1242,20 +1268,47 @@ namespace _3PA.NppCore {
                 if (answer != 0)
                     return;
 
-                var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppConfigXml);
-                var fileContent = Utils.ReadAllText(Config.FileNppConfigXml, encoding);
+                var encoding = TextEncodingDetect.GetFileEncoding(FileNppConfigXml);
+                var fileContent = Utils.ReadAllText(FileNppConfigXml, encoding);
                 fileContent = fileContent.Replace("autoCAction=\"3\"", "autoCAction=\"0\"");
                 var configCopyPath = Path.Combine(Config.FolderUpdate, "config.xml");
                 if (!Utils.FileWriteAllText(configCopyPath, fileContent, encoding))
                     return;
 
                 // replace default config by its copy on npp shutdown
-                _3PUpdater.Instance.AddFileToMove(configCopyPath, Config.FileNppConfigXml);
+                _3PUpdater.Instance.AddFileToMove(configCopyPath, FileNppConfigXml);
 
                 Restart();
             }
 
             #endregion
+
+        }
+
+        #endregion
+
+        #region Default file path
+
+        /// <summary>
+        /// The path to the choice file, containing the path to the cloud directory
+        /// </summary>
+        public static string FileNppCloudChoice {
+            get { return Path.GetFullPath(Path.Combine(FolderNppDefaultBaseConf, @"cloud\choice")); }
+        }
+
+        /// <summary>
+        /// default location of all the basic configuration files
+        /// </summary>
+        public static string FolderNppDefaultBaseConf {
+            get { return Path.GetFullPath(Path.Combine(ConfigDirectory, @"..\..\..\")); }
+        }
+
+        /// <summary>
+        /// Folder to plugins\Apis
+        /// This is always taken in the notepad++ installation directory!
+        /// </summary>
+        public static string FolderNppAutocompApis {
+            get { return Path.GetFullPath(Path.Combine(SoftwareInstallDirectory, @"plugins\APIs")); }
         }
 
         #endregion

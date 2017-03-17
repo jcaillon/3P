@@ -414,11 +414,17 @@ namespace _3PA.MainFeatures.Pro {
                 Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileDeploymentHook, encoding).Replace(@"/*<inserted_3P_values>*/", hookProc.ToString()), encoding);
             } else if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader) {
                 // need to init datadigger?
-                if (!File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
+                bool needUpdate = !Config.Instance.InstalledDataDiggerVersion.Equals(Config.EmbeddedDataDiggerVersion);
+                if (needUpdate || !File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
                     if (!Utils.FileWriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger))
                         return false;
                     if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
                         return false;
+                    if (needUpdate) {
+                        if (string.IsNullOrEmpty(Config.Instance.InstalledDataDiggerVersion))
+                            UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
+                        Config.Instance.InstalledDataDiggerVersion = Config.EmbeddedDataDiggerVersion;
+                    }
                 }
                 // add the datadigger folder to the propath
                 propathToUse = Config.FolderDataDigger + "," + propathToUse;
@@ -459,10 +465,10 @@ namespace _3PA.MainFeatures.Pro {
             StringBuilder Params = new StringBuilder();
 
             if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader)
-                Params.Append(" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8");
+                Params.Append(" -basekey \"INI\" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8 ");
             if (executionType != ExecutionType.Run)
                 Params.Append(" -T " + LocalTempDir.Trim('\\').ProQuoter());
-            if (!string.IsNullOrEmpty(baseIniPath))
+            if (!string.IsNullOrEmpty(baseIniPath) && !(executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader))
                 Params.Append(" -ini " + baseIniPath.ProQuoter());
             if (batchMode)
                 Params.Append(" -b");

@@ -4,14 +4,18 @@
 */
 &Scoped-define WINDOW-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
-/*------------------------------------------------------------------------
-  Name         : wDataDigger.w
-  Description  : Main program for DataDigger
-  ---------------------------------------------------------------------- 
-  15-10-2009 pti Created
-  ----------------------------------------------------------------------*/
+/*
+ * Main program for DataDigger
+ */
 
-create widget-pool.
+/* Parameter tells if we are in read-only mode */
+&IF "{&uib_is_running}" = "" &THEN
+  DEFINE INPUT PARAMETER plReadOnlyDigger AS LOGICAL NO-UNDO.
+&ELSE
+  DEFINE VARIABLE plReadOnlyDigger AS LOGICAL INITIAL FALSE NO-UNDO.
+&ENDIF
+
+CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
 
@@ -19,12 +23,10 @@ create widget-pool.
 { DataDigger.i }
 { resizable_dict.i } /* thanks to Sebastien Lacroix */
 
-/* Constants for the query counter */
-&GLOBAL-DEFINE numDigits   6
-&GLOBAL-DEFINE digitWidth  6
-&GLOBAL-DEFINE digitHeight 15
-&GLOBAL-DEFINE marginHor   3
-&GLOBAL-DEFINE marginVer   3
+&GLOBAL-DEFINE PAGE-TABLES     1
+&GLOBAL-DEFINE PAGE-FAVOURITES 2
+&GLOBAL-DEFINE PAGE-FIELDS     3
+&GLOBAL-DEFINE PAGE-INDEXES    4
 
 /* TT for the generic timer OCX */
 DEFINE TEMP-TABLE ttTimer NO-UNDO RCODE-INFORMATION
@@ -36,21 +38,21 @@ DEFINE TEMP-TABLE ttTimer NO-UNDO RCODE-INFORMATION
 
 /* TT for showing record in a new window */
 DEFINE TEMP-TABLE ttView NO-UNDO RCODE-INFORMATION
-  field iHor   as integer  
-  field iVer   as integer  
-  field cValue as character format 'x(20)'
+  FIELD iHor   AS INTEGER  
+  FIELD iVer   AS INTEGER  
+  FIELD cValue AS CHARACTER FORMAT 'x(20)'
   .
-
+ 
 /* TT to save widths of columns for ttView */
 DEFINE TEMP-TABLE ttColumnWidth NO-UNDO RCODE-INFORMATION
-  field iHor   as integer
-  field iWidth as integer
+  FIELD iHor   AS INTEGER
+  FIELD iWidth AS INTEGER
   . 
 
 /* TT for fonts, used in checkFonts */
 DEFINE TEMP-TABLE ttFont NO-UNDO RCODE-INFORMATION
-  field iFontNr   as integer
-  field cFontName as character
+  FIELD iFontNr   AS INTEGER
+  FIELD cFontName AS CHARACTER
   .
 
 /* TT for sorting combo box */
@@ -92,18 +94,17 @@ DEFINE VARIABLE glHintCancelled            AS LOGICAL     NO-UNDO. /* When user 
 DEFINE VARIABLE giMaxQueryTime             AS INTEGER     NO-UNDO.
 DEFINE VARIABLE ghOverlayField             AS HANDLE      NO-UNDO EXTENT 500.
 DEFINE VARIABLE gcRecordMode               AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE giDataOddRowColor          AS INTEGER NO-UNDO EXTENT 2.
-DEFINE VARIABLE giDataEvenRowColor         AS INTEGER NO-UNDO EXTENT 2.
+DEFINE VARIABLE giDataOddRowColor          AS INTEGER     NO-UNDO EXTENT 2.
+DEFINE VARIABLE giDataEvenRowColor         AS INTEGER     NO-UNDO EXTENT 2.
 DEFINE VARIABLE giDefaultFont              AS INTEGER     NO-UNDO. 
 DEFINE VARIABLE giFixedFont                AS INTEGER     NO-UNDO. 
 DEFINE VARIABLE giMaxColumns               AS INTEGER     NO-UNDO. 
 DEFINE VARIABLE giMaxExtent                AS INTEGER     NO-UNDO. 
 DEFINE VARIABLE giMaxFilterHistory         AS INTEGER     NO-UNDO. 
-DEFINE VARIABLE ghNewDigit                 AS HANDLE      NO-UNDO EXTENT {&numDigits}.
-DEFINE VARIABLE ghOldDigit                 AS HANDLE      NO-UNDO EXTENT {&numDigits}.
 DEFINE VARIABLE glDebugMode                AS LOGICAL     NO-UNDO INITIAL FALSE.
 DEFINE VARIABLE giLastDataColumnX          AS INTEGER     NO-UNDO.
-DEFINE VARIABLE glShowFavourites           AS LOGICAL     NO-UNDO. /* show table list of favourite tables */
+DEFINE VARIABLE glShowFavourites           AS LOGICAL     NO-UNDO. /* show table list of Favourite tables */
+DEFINE VARIABLE glUseTimer                 AS LOGICAL     NO-UNDO. /* use PSTimer? */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -124,7 +125,7 @@ DEFINE VARIABLE glShowFavourites           AS LOGICAL     NO-UNDO. /* show table
 &Scoped-define INTERNAL-TABLES ttField ttIndex ttTable
 
 /* Definitions for BROWSE brFields                                      */
-&Scoped-define FIELDS-IN-QUERY-brFields ttField.lShow ttField.iOrder ttField.cFieldName (if ttField.iExtent > 0 then substitute('&1[&2]', ttField.cDataType, ttField.iExtent) else ttField.cDataType ) @ ttField.cDataType ttField.cFormat ttField.cLabel /* Extra fields as per v19 */ ttField.cInitial ttField.cColLabel ttField.lMandatory ttField.iExtent ttField.iDecimals ttField.iFieldRpos ttField.cValExp ttField.cValMsg ttField.cHelp ttField.cDesc ttField.cViewAs   
+&Scoped-define FIELDS-IN-QUERY-brFields ttField.lShow ttField.iOrder ttField.cFieldName (IF ttField.iExtent > 0 THEN SUBSTITUTE('&1[&2]', ttField.cDataType, ttField.iExtent) ELSE ttField.cDataType ) @ ttField.cDataType ttField.cFormat ttField.cLabel /* Extra fields as per v19 */ ttField.cInitial ttField.cColLabel ttField.lMandatory ttField.iExtent ttField.iDecimals ttField.iFieldRpos ttField.cValExp ttField.cValMsg ttField.cHelp ttField.cDesc ttField.cViewAs   
 &Scoped-define ENABLED-FIELDS-IN-QUERY-brFields ttField.lShow  ttField.cFormat   
 &Scoped-define ENABLED-TABLES-IN-QUERY-brFields ttField
 &Scoped-define FIRST-ENABLED-TABLE-IN-QUERY-brFields ttField
@@ -161,27 +162,27 @@ DEFINE VARIABLE glShowFavourites           AS LOGICAL     NO-UNDO. /* show table
     ~{&OPEN-QUERY-brIndexes}
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS rctQuery btnHelp rctEdit rcCounter ~
-btnClearFieldFilter btnFieldFilter fiIndexNameFilter fiFlagsFilter ~
-fiFieldsFilter btnClearIndexFilter btnIndexFilter tgSelAll tgDebugMode ~
-brFields btnMoveTop brIndexes fiTableFilter cbDatabaseFilter ~
-btnClearTableFilter btnTableFilter btnMoveUp brTables btnReset btnMoveDown ~
-btnMoveBottom fiTableDesc btnWhere btnClear btnPrevQuery btnQueries ~
-btnNextQuery btnClipboard ficWhere btnDataDigger btnTools btnTabFields ~
-btnTabIndexes btnTableView btnResizeVer btnClone btnDump btnView btnAdd ~
-btnDelete btnEdit 
-&Scoped-Define DISPLAYED-OBJECTS fiIndexNameFilter fiFlagsFilter ~
-fiFieldsFilter tgSelAll fiTableFilter cbDatabaseFilter fiTableDesc ficWhere 
+&Scoped-Define ENABLED-OBJECTS rctQuery btnFavourite rctEdit fiTableFilter ~
+cbDatabaseFilter btnClearTableFilter btnTableFilter tgSelAll ~
+btnClearFieldFilter fiIndexNameFilter fiFlagsFilter fiFieldsFilter ~
+btnClearIndexFilter tgDebugMode brTables brFields btnMoveTop brIndexes ~
+btnMoveUp btnReset btnMoveDown btnMoveBottom fiTableDesc btnWhere btnClear ~
+btnQueries btnClipboard ficWhere btnNextQuery btnPrevQuery btnDump btnLoad ~
+btnTabFavourites btnTabFields btnTabIndexes btnTabTables btnTools btnDelete ~
+btnResizeVer btnClone btnView btnAdd btnEdit fiFeedback 
+&Scoped-Define DISPLAYED-OBJECTS fiTableFilter cbDatabaseFilter tgSelAll ~
+fiIndexNameFilter fiFlagsFilter fiFieldsFilter fiTableDesc ficWhere ~
+fiFeedback 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
-&Scoped-define List-1 btnAnd rctQueryButtons cbAndOr cbFields cbOperator ~
-ficValue btnInsert btnBegins btnBracket btnContains btnEq btnGT btnLT ~
-btnMatches btnNE btnOr btnQt btnToday 
-&Scoped-define List-2 rcFieldFilter btnClearFieldFilter btnFieldFilter ~
-tgSelAll brFields btnMoveTop btnMoveUp btnReset btnMoveDown btnMoveBottom 
+&Scoped-define List-1 rctQueryButtons btnBegins cbAndOr cbFields cbOperator ~
+ficValue btnInsert btnOr btnAnd btnBracket btnContains btnEq btnGT btnLT ~
+btnMatches btnNE btnQt btnToday 
+&Scoped-define List-2 rcFieldFilter tgSelAll btnClearFieldFilter brFields ~
+btnMoveTop btnMoveUp btnReset btnMoveDown btnMoveBottom 
 &Scoped-define List-3 rcIndexFilter fiIndexNameFilter fiFlagsFilter ~
-fiFieldsFilter btnClearIndexFilter btnIndexFilter brIndexes 
+fiFieldsFilter btnClearIndexFilter brIndexes 
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
@@ -198,7 +199,7 @@ FUNCTION createMenu RETURNS HANDLE
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD createMenuItem C-Win 
 FUNCTION createMenuItem RETURNS HANDLE
-  ( phMenu    AS handle   
+  ( phMenu    AS HANDLE   
   , pcType    AS CHARACTER  
   , pcLabel   AS CHARACTER 
   , pcName    AS CHARACTER 
@@ -214,22 +215,29 @@ FUNCTION getActiveQueryEditor RETURNS HANDLE
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getDroppedFiles C-Win 
+FUNCTION getDroppedFiles RETURNS CHARACTER
+  ( phDropTarget AS HANDLE )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getFieldList C-Win 
-FUNCTION getFieldList returns character
-  ( pcSortBy as character )  FORWARD.
+FUNCTION getFieldList RETURNS CHARACTER
+  ( pcSortBy AS CHARACTER )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getQueryFromFields C-Win 
-FUNCTION getQueryFromFields returns character
-  ( input pcFieldList as character ) FORWARD.
+FUNCTION getQueryFromFields RETURNS CHARACTER
+  ( INPUT pcFieldList AS CHARACTER ) FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getSelectedFields C-Win 
-FUNCTION getSelectedFields returns character
+FUNCTION getSelectedFields RETURNS CHARACTER
   ( /* parameter-definitions */ )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
@@ -237,7 +245,7 @@ FUNCTION getSelectedFields returns character
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getSelectedText C-Win 
 FUNCTION getSelectedText RETURNS CHARACTER
-  ( INPUT hWidget AS handle )  FORWARD.
+  ( INPUT hWidget AS HANDLE )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -257,45 +265,36 @@ FUNCTION saveSelectedFields RETURNS CHARACTER
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setCurrentTable C-Win 
-FUNCTION setCurrentTable returns logical
-  ( pcTableName as character )  FORWARD.
+FUNCTION setCurrentTable RETURNS LOGICAL
+  ( pcTableName AS CHARACTER )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setDebugMode C-Win 
-FUNCTION setDebugMode returns logical
-  ( plDebugMode as logical )  FORWARD.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setNumRecords C-Win 
-FUNCTION setNumRecords returns logical
-  ( input piNumRecords    as integer
-  , input plCountComplete as logical 
-  , input piQueryMSec     as integer)  FORWARD.
+FUNCTION setDebugMode RETURNS LOGICAL
+  ( plDebugMode AS LOGICAL )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setQuery C-Win 
 FUNCTION setQuery RETURNS LOGICAL
-  ( piPointerChange as integer )  FORWARD.
+  ( piPointerChange AS INTEGER )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setQueryEditor C-Win 
 FUNCTION setQueryEditor RETURNS LOGICAL
-  ( pcQueryEditorState as character )  FORWARD.
+  ( pcQueryEditorState AS CHARACTER )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD setUpdatePanel C-Win 
 FUNCTION setUpdatePanel RETURNS LOGICAL
-  ( input pcMode as character )  FORWARD.
+  ( INPUT pcMode AS CHARACTER )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -328,17 +327,10 @@ DEFINE MENU POPUP-MENU-brTables
        MENU-ITEM m_Quick_Connect LABEL "Quick Connect" 
        MENU-ITEM m_Disconnect   LABEL "&Disconnect"   
        MENU-ITEM m_Manage_Connections LABEL "Manage Connections"
-       MENU-ITEM m_Toggle_as_favourite LABEL "Add to &Favourites"
-       MENU-ITEM m_Show_hidden_tables LABEL "Show &hidden tables"
-              TOGGLE-BOX
-       MENU-ITEM m_Dump_table_DF LABEL "&Dump table DF"
+       MENU-ITEM m_Toggle_as_favourite LABEL "Set / Unset as &Favourite"
+       MENU-ITEM m_Dump_table_DF LABEL "&Dump definitions"
+       MENU-ITEM m_Clone_this_Database LABEL "&Clone this Database"
        RULE.
-
-DEFINE MENU POPUP-MENU-btnHelp 
-       MENU-ITEM mShowHelp      LABEL "Show &Help"    
-       MENU-ITEM mShowIntroduction LABEL "Show &Introduction"
-       MENU-ITEM mShowWhatsNew  LABEL "Show What's &New"
-       MENU-ITEM mDataDiggerWebsite LABEL "DataDigger &Website".
 
 DEFINE MENU POPUP-MENU-btnView 
        MENU-ITEM m_View_as_text LABEL "View as TEXT"  
@@ -355,18 +347,13 @@ DEFINE BUTTON btnClearDataFilter
      LABEL "C" 
      SIZE-PIXELS 20 BY 21 TOOLTIP "clear all filters #(SHIFT-DEL)".
 
-DEFINE BUTTON btnDataFilter 
-     LABEL "Y" 
-     SIZE-PIXELS 20 BY 21 TOOLTIP "filter the data #(RETURN)".
-
-DEFINE VARIABLE fiNumResults AS CHARACTER FORMAT "X(256)":U 
+DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U 
       VIEW-AS TEXT 
-     SIZE-PIXELS 70 BY 13 TOOLTIP "nr of results of the query, double click to fetch all records" NO-UNDO.
+     SIZE-PIXELS 90 BY 13 TOOLTIP "nr of results of the query, double click to fetch all records" NO-UNDO.
 
 DEFINE VARIABLE fiNumSelected AS CHARACTER FORMAT "X(256)":U 
-     VIEW-AS FILL-IN 
-     SIZE-PIXELS 35 BY 13 TOOLTIP "nr of selected records"
-     FGCOLOR 7  NO-UNDO.
+      VIEW-AS TEXT 
+     SIZE-PIXELS 29 BY 13 TOOLTIP "nr of selected rows" NO-UNDO.
 
 DEFINE RECTANGLE rctData
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -421,39 +408,25 @@ DEFINE BUTTON btnClone  NO-FOCUS FLAT-BUTTON
      LABEL "Cl&one" 
      SIZE-PIXELS 25 BY 23 TOOLTIP "clone focused record and edit #(ALT-O)".
 
-DEFINE BUTTON btnDataDigger  NO-FOCUS
-     LABEL "DD" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "start a new instance of DataDigger".
-
 DEFINE BUTTON btnDelete  NO-FOCUS FLAT-BUTTON
-     LABEL "Delete" 
+     LABEL "Del" 
      SIZE-PIXELS 25 BY 23 TOOLTIP "delete the selected records #(DEL)".
 
 DEFINE BUTTON btnDump  NO-FOCUS FLAT-BUTTON
-     LABEL "Du&mp" 
-     SIZE-PIXELS 25 BY 23 TOOLTIP "dump all data #(ALT-M)".
+     LABEL "&Save" 
+     SIZE-PIXELS 25 BY 23 TOOLTIP "save data to disk #(CTRL-S)".
 
 DEFINE BUTTON btnEdit  NO-FOCUS FLAT-BUTTON
      LABEL "&Edit" 
      SIZE-PIXELS 25 BY 23 TOOLTIP "edit the selected records #(ALT-E)".
 
-DEFINE BUTTON btnFieldFilter 
-     LABEL "Y" 
-     CONTEXT-HELP-ID 280
-     SIZE-PIXELS 20 BY 21 TOOLTIP "filter the fields #(RETURN)".
-
-DEFINE BUTTON btnHelp  NO-FOCUS
-     LABEL "Help" 
-     SIZE-PIXELS 44 BY 30 TOOLTIP "get help about the DataDigger window".
-
-DEFINE BUTTON btnIndexFilter 
-     LABEL "Y" 
-     CONTEXT-HELP-ID 960
-     SIZE-PIXELS 20 BY 21 TOOLTIP "filter the indexes #(RETURN)".
+DEFINE BUTTON btnFavourite  NO-FOCUS FLAT-BUTTON
+     LABEL "F" 
+     SIZE-PIXELS 20 BY 20 TOOLTIP "toggle as favourite".
 
 DEFINE BUTTON btnLoad  NO-FOCUS FLAT-BUTTON
      LABEL "&Load" 
-     SIZE-PIXELS 25 BY 23 TOOLTIP "load data #(ALT-L)".
+     SIZE-PIXELS 25 BY 23 TOOLTIP "load data #(CTRL-L)".
 
 DEFINE BUTTON btnMoveBottom 
      LABEL "Btm" 
@@ -471,13 +444,13 @@ DEFINE BUTTON btnMoveUp
      LABEL "Up" 
      SIZE-PIXELS 23 BY 23 TOOLTIP "move selected field up #(CTRL-UP)".
 
-DEFINE BUTTON btnNextQuery 
-     LABEL ">" 
-     SIZE-PIXELS 12 BY 23 TOOLTIP "next query #(PAGE-UP)".
+DEFINE BUTTON btnNextQuery  NO-FOCUS FLAT-BUTTON
+     LABEL "->" 
+     SIZE-PIXELS 20 BY 23 TOOLTIP "next query".
 
-DEFINE BUTTON btnPrevQuery 
-     LABEL "<" 
-     SIZE-PIXELS 12 BY 23 TOOLTIP "previous query #(PAGE-DOWN)".
+DEFINE BUTTON btnPrevQuery  NO-FOCUS FLAT-BUTTON
+     LABEL "<-" 
+     SIZE-PIXELS 20 BY 23 TOOLTIP "previous query".
 
 DEFINE BUTTON btnQueries 
      LABEL "&Q" 
@@ -491,29 +464,34 @@ DEFINE BUTTON btnResizeVer  NO-FOCUS FLAT-BUTTON
      LABEL "||||||||||||||||||||||||||" 
      SIZE 156 BY .24 TOOLTIP "drag me up and down".
 
+DEFINE BUTTON btnTabFavourites  NO-FOCUS FLAT-BUTTON
+     LABEL "Fav" 
+     CONTEXT-HELP-ID 270
+     SIZE-PIXELS 25 BY 77 TOOLTIP "show favorites #(CTRL-2)".
+
 DEFINE BUTTON btnTabFields  NO-FOCUS FLAT-BUTTON
      LABEL "Fld" 
      CONTEXT-HELP-ID 270
-     SIZE-PIXELS 25 BY 62 TOOLTIP "show fields #(CTRL-1) = jump #(CTRL-TAB) = switch tabs".
+     SIZE-PIXELS 25 BY 77 TOOLTIP "show fields #(CTRL-3)".
 
 DEFINE BUTTON btnTabIndexes  NO-FOCUS FLAT-BUTTON
      LABEL "Idx" 
      CONTEXT-HELP-ID 270
-     SIZE-PIXELS 25 BY 62 TOOLTIP "show indexes #(CTRL-2) = jump #(CTRL-TAB) = switch tabs".
+     SIZE-PIXELS 25 BY 77 TOOLTIP "show indexes #(CTRL-4)".
 
 DEFINE BUTTON btnTableFilter 
      LABEL "Y" 
      CONTEXT-HELP-ID 950
-     SIZE-PIXELS 34 BY 21 TOOLTIP "press arrow-down for extra filter options #(CTRL-DOWN)".
+     SIZE-PIXELS 20 BY 21 TOOLTIP "press arrow-down for extra filter options #(CTRL-DOWN)".
 
-DEFINE BUTTON btnTableView  NO-FOCUS FLAT-BUTTON
-     LABEL "T" 
-     CONTEXT-HELP-ID 0
-     SIZE-PIXELS 20 BY 21.
+DEFINE BUTTON btnTabTables  NO-FOCUS FLAT-BUTTON
+     LABEL "Tbl" 
+     CONTEXT-HELP-ID 270
+     SIZE-PIXELS 25 BY 77 TOOLTIP "show tables #(CTRL-1)".
 
-DEFINE BUTTON btnTools  NO-FOCUS
+DEFINE BUTTON btnTools  NO-FOCUS FLAT-BUTTON
      LABEL "Tools" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "tools and settings".
+     SIZE-PIXELS 21 BY 21 TOOLTIP "tools and settings".
 
 DEFINE BUTTON btnView  NO-FOCUS FLAT-BUTTON
      LABEL "&View" 
@@ -525,7 +503,7 @@ DEFINE BUTTON btnViewData
 
 DEFINE BUTTON btnWhere 
      LABEL "&Where" 
-     SIZE-PIXELS 50 BY 23 TOOLTIP "show expanded query editor  #(CTRL-ALT-W)".
+     SIZE-PIXELS 20 BY 23 TOOLTIP "show expanded query editor  #(CTRL-ALT-W)".
 
 DEFINE VARIABLE cbDatabaseFilter AS CHARACTER FORMAT "X(256)":U 
      CONTEXT-HELP-ID 950
@@ -537,8 +515,13 @@ DEFINE VARIABLE cbDatabaseFilter AS CHARACTER FORMAT "X(256)":U
 DEFINE VARIABLE ficWhere AS CHARACTER 
      CONTEXT-HELP-ID 110
      VIEW-AS EDITOR NO-WORD-WRAP
-     SIZE-PIXELS 585 BY 21 TOOLTIP "query on your table  #(ALT-W)"
+     SIZE-PIXELS 595 BY 21 TOOLTIP "query on your table  #(ALT-W)"
      FONT 2 NO-UNDO.
+
+DEFINE VARIABLE fiFeedback AS CHARACTER FORMAT "X(256)":U INITIAL "Got a question or feedback?" 
+      VIEW-AS TEXT 
+     SIZE-PIXELS 145 BY 13 TOOLTIP "click me!"
+     FGCOLOR 7  NO-UNDO.
 
 DEFINE VARIABLE fiFieldsFilter AS CHARACTER FORMAT "X(256)":U INITIAL "Fields" 
      CONTEXT-HELP-ID 960
@@ -560,7 +543,7 @@ DEFINE VARIABLE fiIndexNameFilter AS CHARACTER FORMAT "X(256)":U INITIAL "Index 
 
 DEFINE VARIABLE fiTableDesc AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
-     SIZE-PIXELS 200 BY 21 NO-UNDO.
+     SIZE-PIXELS 200 BY 20 NO-UNDO.
 
 DEFINE VARIABLE fiTableFilter AS CHARACTER FORMAT "X(256)":U INITIAL "Table filter" 
      CONTEXT-HELP-ID 950
@@ -573,23 +556,19 @@ DEFINE VARIABLE fiWarning AS CHARACTER FORMAT "X(256)":U
      SIZE-PIXELS 45 BY 21
      BGCOLOR 14 FGCOLOR 12  NO-UNDO.
 
-DEFINE RECTANGLE rcCounter
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 55 BY 20.
-
 DEFINE RECTANGLE rcFieldFilter
      EDGE-PIXELS 2 GRAPHIC-EDGE    
-     SIZE-PIXELS 506 BY 237
+     SIZE-PIXELS 466 BY 237
      BGCOLOR 12 FGCOLOR 12 .
 
 DEFINE RECTANGLE rcIndexFilter
      EDGE-PIXELS 2 GRAPHIC-EDGE    
-     SIZE-PIXELS 315 BY 201
+     SIZE-PIXELS 315 BY 141
      BGCOLOR 12 FGCOLOR 12 .
 
 DEFINE RECTANGLE rcTableFilter
      EDGE-PIXELS 2 GRAPHIC-EDGE    
-     SIZE-PIXELS 226 BY 205
+     SIZE-PIXELS 226 BY 236
      BGCOLOR 12 .
 
 DEFINE RECTANGLE rctEdit
@@ -602,9 +581,9 @@ DEFINE RECTANGLE rctQuery
      BGCOLOR 18 .
 
 DEFINE VARIABLE tgDebugMode AS LOGICAL INITIAL yes 
-     LABEL "dbg" 
+     LABEL "" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 40 BY 13 TOOLTIP "debugging mode".
+     SIZE-PIXELS 15 BY 13 TOOLTIP "debugging mode".
 
 DEFINE VARIABLE tgSelAll AS LOGICAL INITIAL yes 
      LABEL "" 
@@ -618,17 +597,7 @@ DEFINE BUTTON btnAbout
 
 DEFINE BUTTON btnAbout-txt  NO-FOCUS FLAT-BUTTON
      LABEL "About DataDigger" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "about the DataDigger #(CTRL-SHIFT-A)"
-     FONT 0.
-
-DEFINE BUTTON btnChangeLog 
-     LABEL "&Hlp" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "watskeburt #(ALT-H)".
-
-DEFINE BUTTON btnChangeLog-txt  NO-FOCUS FLAT-BUTTON
-     LABEL "Changelog" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "watskeburt #(ALT-H)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "about the DataDigger #(CTRL-SHIFT-A)".
 
 DEFINE BUTTON btnConnections 
      LABEL "Co&n" 
@@ -636,8 +605,23 @@ DEFINE BUTTON btnConnections
 
 DEFINE BUTTON btnConnections-txt  NO-FOCUS FLAT-BUTTON
      LABEL "Co&nnections" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "connections #(CTRL-SHIFT-N)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "connections #(CTRL-SHIFT-N)".
+
+DEFINE BUTTON btnDataAdmin 
+     LABEL "&ADM" 
+     SIZE-PIXELS 30 BY 30 TOOLTIP "Data Administration".
+
+DEFINE BUTTON btnDataAdmin-txt  NO-FOCUS FLAT-BUTTON
+     LABEL "Data Administration" 
+     SIZE-PIXELS 155 BY 30 TOOLTIP "Data Administration".
+
+DEFINE BUTTON btnDataDigger 
+     LABEL "DD" 
+     SIZE-PIXELS 30 BY 30 TOOLTIP "start a new DataDigger window #(ALT-D)".
+
+DEFINE BUTTON btnDataDigger-txt  NO-FOCUS FLAT-BUTTON
+     LABEL "New &Window" 
+     SIZE-PIXELS 155 BY 30 TOOLTIP "start a new DataDigger window #(ALT-D)".
 
 DEFINE BUTTON btnDict 
      LABEL "&DD" 
@@ -645,44 +629,31 @@ DEFINE BUTTON btnDict
 
 DEFINE BUTTON btnDict-txt  NO-FOCUS FLAT-BUTTON
      LABEL "Data &Dictionary" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "start the Data Dictionary #(CTRL-SHIFT-D)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "start the Data Dictionary #(CTRL-SHIFT-D)".
 
-DEFINE BUTTON btnDump-2 
-     LABEL "D&mp" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "dump all data #(ALT-M)".
+DEFINE BUTTON btnHelp 
+     LABEL "Help" 
+     SIZE-PIXELS 30 BY 30 TOOLTIP "get help about the DataDigger window".
 
-DEFINE BUTTON btnDump-txt  NO-FOCUS FLAT-BUTTON
-     LABEL "Du&mp Data" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "dump all data #(ALT-M)"
-     FONT 0.
-
-DEFINE BUTTON btnLoad-2 
-     LABEL "&Load" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "load data #(CTRL-SHIFT-L)".
-
-DEFINE BUTTON btnLoad-txt  NO-FOCUS FLAT-BUTTON
-     LABEL "&Load Data" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "load data #(CTRL-SHIFT-L)"
-     FONT 0.
+DEFINE BUTTON btnHelp-txt  NO-FOCUS FLAT-BUTTON
+     LABEL "Help" 
+     SIZE-PIXELS 155 BY 30 TOOLTIP "show quick intro".
 
 DEFINE BUTTON btnProcEdit 
      LABEL "&Ed" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "start the Procedure Editor #(CTRL-SHIFT-E)".
+     SIZE-PIXELS 30 BY 30 TOOLTIP "start the Procedure Editor #(SHIFT-F3)".
 
 DEFINE BUTTON btnProcEdit-txt  NO-FOCUS FLAT-BUTTON
      LABEL "Procedure &Editor" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "start the Procedure Editor #(CTRL-SHIFT-E)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "start the Procedure Editor #(SHIFT-F3)".
 
 DEFINE BUTTON btnQueries-3 
      LABEL "&Q" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "show previous queries on this table #(CTRL-SHIFT-Q)".
+     SIZE-PIXELS 30 BY 30 TOOLTIP "show previous queries #(CTRL-SHIFT-Q)".
 
 DEFINE BUTTON btnQueries-txt  NO-FOCUS FLAT-BUTTON
      LABEL "Manage &Queries" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "show previous queries on this table #(CTRL-SHIFT-Q)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "show previous queries on this table #(CTRL-SHIFT-Q)".
 
 DEFINE BUTTON btnQueryTester 
      LABEL "Q&T" 
@@ -690,8 +661,7 @@ DEFINE BUTTON btnQueryTester
 
 DEFINE BUTTON btnQueryTester-txt  NO-FOCUS FLAT-BUTTON
      LABEL "Query &Tester" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "start the query tester #(CTRL-SHIFT-T)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "start the query tester #(CTRL-SHIFT-T)".
 
 DEFINE BUTTON btnSettings 
      LABEL "&Set" 
@@ -699,23 +669,22 @@ DEFINE BUTTON btnSettings
 
 DEFINE BUTTON btnSettings-txt  NO-FOCUS FLAT-BUTTON
      LABEL "&Settings" 
-     SIZE-PIXELS 144 BY 30 TOOLTIP "edit your settings file #(ALT-S)"
-     FONT 0.
+     SIZE-PIXELS 155 BY 30 TOOLTIP "edit your settings file #(ALT-S)".
 
 DEFINE BUTTON btnAnd  NO-FOCUS
      LABEL "and" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnBegins  NO-FOCUS
      LABEL "begins" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 60 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 80 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnBracket  NO-FOCUS
      LABEL "()" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field"
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field"
      FONT 0.
 
 DEFINE BUTTON btnCancel-2 DEFAULT 
@@ -737,17 +706,17 @@ DEFINE BUTTON btnClipboard-2
 DEFINE BUTTON btnContains  NO-FOCUS
      LABEL "contains" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 60 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 80 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnEq  NO-FOCUS
      LABEL "=" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnGT  NO-FOCUS
      LABEL ">" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnInsert 
      LABEL "+" 
@@ -757,22 +726,17 @@ DEFINE BUTTON btnInsert
 DEFINE BUTTON btnLT  NO-FOCUS
      LABEL "<" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnMatches  NO-FOCUS
      LABEL "matches" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 60 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 80 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnNE  NO-FOCUS
      LABEL "<>" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
-
-DEFINE BUTTON btnNextQuery-2 
-     LABEL ">" 
-     CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 12 BY 23 TOOLTIP "next query".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnOK AUTO-GO DEFAULT 
      LABEL "OK" 
@@ -783,17 +747,12 @@ DEFINE BUTTON btnOK AUTO-GO DEFAULT
 DEFINE BUTTON btnOr  NO-FOCUS
      LABEL "or" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field".
-
-DEFINE BUTTON btnPrevQuery-2 
-     LABEL "<" 
-     CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 12 BY 23 TOOLTIP "previous query".
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnQt  NO-FOCUS
      LABEL "~"~"" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 30 BY 21 TOOLTIP "insert this text into the where field"
+     SIZE-PIXELS 40 BY 21 TOOLTIP "insert this text into the where field"
      FONT 0.
 
 DEFINE BUTTON btnQueries-2 
@@ -804,7 +763,7 @@ DEFINE BUTTON btnQueries-2
 DEFINE BUTTON btnToday  NO-FOCUS
      LABEL "today" 
      CONTEXT-HELP-ID 1050
-     SIZE-PIXELS 60 BY 21 TOOLTIP "insert this text into the where field".
+     SIZE-PIXELS 80 BY 21 TOOLTIP "insert this text into the where field".
 
 DEFINE BUTTON btnViewData-2 
      LABEL "->" 
@@ -817,14 +776,13 @@ DEFINE VARIABLE cbAndOr AS CHARACTER FORMAT "X(256)":U
      VIEW-AS COMBO-BOX INNER-LINES 5
      LIST-ITEMS "","AND","OR" 
      DROP-DOWN-LIST
-     SIZE-PIXELS 40 BY 21 TOOLTIP "preceding AND or OR for the expression"
-     FONT 2 NO-UNDO.
+     SIZE-PIXELS 55 BY 21 TOOLTIP "preceding AND or OR for the expression" NO-UNDO.
 
 DEFINE VARIABLE cbFields AS CHARACTER FORMAT "X(256)":U 
      CONTEXT-HELP-ID 1050
      VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN-LIST
-     SIZE-PIXELS 210 BY 21 TOOLTIP "field used in the expression"
+     SIZE-PIXELS 186 BY 21 TOOLTIP "field used in the expression"
      FONT 2 NO-UNDO.
 
 DEFINE VARIABLE cbOperator AS CHARACTER FORMAT "X(256)":U 
@@ -838,7 +796,7 @@ DEFINE VARIABLE cbOperator AS CHARACTER FORMAT "X(256)":U
 DEFINE VARIABLE ficWhere2 AS CHARACTER 
      CONTEXT-HELP-ID 1050
      VIEW-AS EDITOR SCROLLBAR-VERTICAL
-     SIZE-PIXELS 525 BY 170 TOOLTIP "alt-cursor-up / down to view/hide query editor"
+     SIZE-PIXELS 501 BY 175 TOOLTIP "alt-cursor-up / down to view/hide query editor"
      FONT 2 NO-UNDO.
 
 DEFINE VARIABLE ficValue AS CHARACTER FORMAT "X(256)":U 
@@ -849,7 +807,7 @@ DEFINE VARIABLE ficValue AS CHARACTER FORMAT "X(256)":U
 
 DEFINE RECTANGLE rctQueryButtons
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 610 BY 180.
+     SIZE-PIXELS 610 BY 190.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -867,12 +825,12 @@ DEFINE QUERY brTables FOR
 DEFINE BROWSE brFields
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brFields C-Win _FREEFORM
   QUERY brFields DISPLAY
-      ttField.lShow view-as toggle-box 
+      ttField.lShow VIEW-AS TOGGLE-BOX 
   ttField.iOrder     
   ttField.cFieldName 
-  (if ttField.iExtent > 0 
-    then substitute('&1[&2]', ttField.cDataType, ttField.iExtent) 
-    else ttField.cDataType ) @ ttField.cDataType  
+  (IF ttField.iExtent > 0 
+    THEN SUBSTITUTE('&1[&2]', ttField.cDataType, ttField.iExtent) 
+    ELSE ttField.cDataType ) @ ttField.cDataType  
   ttField.cFormat    
   ttField.cLabel
 
@@ -889,14 +847,14 @@ DEFINE BROWSE brFields
   ttField.cDesc       
   ttField.cViewAs     
 
-  enable 
+  ENABLE
   ttField.lShow 
   ttField.cFormat
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS NO-VALIDATE
-          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 100 BY 11
-          &ELSE SIZE-PIXELS 500 BY 231 &ENDIF FIT-LAST-COLUMN TOOLTIP "fields of selected table"
+          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 92 BY 11
+          &ELSE SIZE-PIXELS 460 BY 231 &ENDIF FIT-LAST-COLUMN TOOLTIP "fields of selected table"
          CONTEXT-HELP-ID 80.
 
 DEFINE BROWSE brIndexes
@@ -908,8 +866,8 @@ cIndexFields
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS NO-VALIDATE
-          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 62 BY 9
-          &ELSE SIZE-PIXELS 308 BY 193 &ENDIF FIT-LAST-COLUMN TOOLTIP "indexes of the table"
+          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 62 BY 6
+          &ELSE SIZE-PIXELS 308 BY 132 &ENDIF FIT-LAST-COLUMN TOOLTIP "indexes of the table"
          CONTEXT-HELP-ID 90.
 
 DEFINE BROWSE brTables
@@ -921,76 +879,99 @@ ttTable.iNumQueries
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS
-          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 44 BY 8
-          &ELSE SIZE-PIXELS 220 BY 178 &ENDIF FIT-LAST-COLUMN TOOLTIP "(F) to set/unset as favourite#(CTRL-T) or (CTRL-F) to switch view"
+          &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 44 BY 10
+          &ELSE SIZE-PIXELS 220 BY 211 &ENDIF FIT-LAST-COLUMN TOOLTIP "(F) to set/unset as favourite#(CTRL-T) or (CTRL-F) to switch view"
          CONTEXT-HELP-ID 70.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME frMain
-     btnHelp AT Y 5 X 65 WIDGET-ID 260
-     btnClearFieldFilter AT Y 5 X 710 WIDGET-ID 232
-     btnFieldFilter AT Y 5 X 731 WIDGET-ID 234
+     btnFavourite AT Y 239 X 238 WIDGET-ID 310
+     fiTableFilter AT Y 4 X 38 NO-LABEL
+     cbDatabaseFilter AT Y 4 X 99 COLON-ALIGNED NO-LABEL
+     btnClearTableFilter AT Y 4 X 219 WIDGET-ID 222
+     btnTableFilter AT Y 4 X 239 WIDGET-ID 38
+     tgSelAll AT Y 5 X 315 WIDGET-ID 6
+     btnClearFieldFilter AT Y 5 X 735 WIDGET-ID 232
      fiIndexNameFilter AT Y 5 X 785 COLON-ALIGNED NO-LABEL WIDGET-ID 168
      fiFlagsFilter AT Y 5 X 860 COLON-ALIGNED NO-LABEL WIDGET-ID 164
      fiFieldsFilter AT Y 5 X 915 COLON-ALIGNED NO-LABEL WIDGET-ID 166
      btnClearIndexFilter AT Y 5 X 1065 WIDGET-ID 160
-     btnIndexFilter AT Y 5 X 1086 WIDGET-ID 162
-     tgSelAll AT Y 7 X 259 WIDGET-ID 6
-     tgDebugMode AT Y 15 X 120 WIDGET-ID 238
-     brFields AT Y 27 X 255 WIDGET-ID 100
+     tgDebugMode AT Y 25 X 5 WIDGET-ID 238
+     brTables AT Y 27 X 38 WIDGET-ID 300
+     brFields AT Y 27 X 295 WIDGET-ID 100
      btnMoveTop AT Y 28 X 760 WIDGET-ID 198
      brIndexes AT Y 28 X 799 WIDGET-ID 200
-     fiTableFilter AT Y 37 X 5 NO-LABEL
-     cbDatabaseFilter AT Y 37 X 66 COLON-ALIGNED NO-LABEL
-     btnClearTableFilter AT Y 37 X 172 WIDGET-ID 222
-     btnTableFilter AT Y 37 X 192 WIDGET-ID 38
      btnMoveUp AT Y 50 X 760 WIDGET-ID 192
-     brTables AT Y 59 X 5 WIDGET-ID 300
      btnReset AT Y 72 X 760 WIDGET-ID 196
      btnMoveDown AT Y 94 X 760 WIDGET-ID 194
      btnMoveBottom AT Y 116 X 760 WIDGET-ID 200
-     fiTableDesc AT Y 237 X 5 NO-LABEL WIDGET-ID 90
-     btnWhere AT Y 265 X 5 WIDGET-ID 236
-     btnViewData AT Y 265 X 651
-     btnClear AT Y 265 X 671 WIDGET-ID 30
-     btnPrevQuery AT Y 265 X 691 WIDGET-ID 212
-     btnQueries AT Y 265 X 703 WIDGET-ID 190
-     btnNextQuery AT Y 265 X 723 WIDGET-ID 214
+     fiTableDesc AT Y 238 X 38 NO-LABEL WIDGET-ID 90
+     btnWhere AT Y 265 X 653 WIDGET-ID 236
+     btnViewData AT Y 265 X 675
+     btnClear AT Y 265 X 695 WIDGET-ID 30
+     btnQueries AT Y 265 X 715 WIDGET-ID 190
      btnClipboard AT Y 265 X 735 WIDGET-ID 178
-     ficWhere AT Y 266 X 60 NO-LABEL
-     btnDataDigger AT Y 5 X 5 WIDGET-ID 126
-     fiWarning AT Y 620 X 80 COLON-ALIGNED NO-LABEL WIDGET-ID 172
-     btnTools AT Y 5 X 35 WIDGET-ID 264
-     btnTabFields AT Y 45 X 230 WIDGET-ID 156
-     btnTabIndexes AT Y 105 X 230 WIDGET-ID 158
-     btnTableView AT Y 238 X 205 WIDGET-ID 288
+     ficWhere AT Y 266 X 50 NO-LABEL
+     fiWarning AT Y 520 X 450 COLON-ALIGNED NO-LABEL WIDGET-ID 172
+     btnNextQuery AT Y 265 X 27 WIDGET-ID 314
+     btnPrevQuery AT Y 265 X 6 WIDGET-ID 312
+     btnDump AT Y 520 X 145
+     btnLoad AT Y 520 X 195 WIDGET-ID 224
+     btnTabFavourites AT Y 122 X 13 WIDGET-ID 302
+     btnTabFields AT Y 45 X 271 WIDGET-ID 156
+     btnTabIndexes AT Y 122 X 271 WIDGET-ID 158
+     btnTabTables AT Y 45 X 13 WIDGET-ID 300
+     btnTools AT Y 4 X 2 WIDGET-ID 264
+     btnDelete AT Y 520 X 250
      btnResizeVer AT ROW 13.38 COL 1.6 WIDGET-ID 274
-     btnClone AT Y 565 X 50 WIDGET-ID 276
-     btnDump AT Y 565 X 145
-     btnLoad AT Y 565 X 195 WIDGET-ID 224
-     btnView AT Y 565 X 170 WIDGET-ID 4
-     btnAdd AT Y 565 X 25
-     btnDelete AT Y 565 X 250
-     btnEdit AT Y 565 X 75
+     btnClone AT Y 520 X 50 WIDGET-ID 276
+     btnView AT Y 520 X 170 WIDGET-ID 4
+     btnAdd AT Y 520 X 25
+     btnEdit AT Y 520 X 75
+     fiFeedback AT Y 520 X 634 COLON-ALIGNED NO-LABEL WIDGET-ID 308
      rctQuery AT Y 2 X 2
-     rctEdit AT Y 560 X 20
-     rcTableFilter AT Y 56 X 2 WIDGET-ID 254
-     rcFieldFilter AT Y 24 X 252 WIDGET-ID 256
+     rctEdit AT Y 515 X 20
+     rcTableFilter AT Y 24 X 35 WIDGET-ID 254
+     rcFieldFilter AT Y 24 X 292 WIDGET-ID 256
      rcIndexFilter AT Y 24 X 795 WIDGET-ID 258
-     rcCounter AT Y 10 X 165 WIDGET-ID 84
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT X 0 Y 0
-         SIZE-PIXELS 1600 BY 815.
+         SIZE-PIXELS 1494 BY 675 DROP-TARGET.
+
+DEFINE FRAME frSettings
+     btnDataDigger AT Y 0 X 0 WIDGET-ID 126
+     btnAbout-txt AT Y 128 X 216 WIDGET-ID 208
+     btnConnections AT Y 0 X 186 WIDGET-ID 212
+     btnSettings AT Y 32 X 0 WIDGET-ID 210
+     btnProcEdit AT Y 32 X 186 WIDGET-ID 228
+     btnDict AT Y 64 X 0 WIDGET-ID 224
+     btnDataAdmin AT Y 64 X 186 WIDGET-ID 214
+     btnQueries-3 AT Y 96 X 0 WIDGET-ID 190
+     btnQueryTester AT Y 96 X 186 WIDGET-ID 232
+     btnHelp AT Y 128 X 0 WIDGET-ID 260
+     btnAbout AT Y 128 X 186 WIDGET-ID 196
+     btnConnections-txt AT Y 0 X 216 WIDGET-ID 202
+     btnDataAdmin-txt AT Y 64 X 216 WIDGET-ID 206
+     btnDataDigger-txt AT Y 0 X 30 WIDGET-ID 236
+     btnDict-txt AT Y 64 X 30 WIDGET-ID 226
+     btnHelp-txt AT Y 128 X 30 WIDGET-ID 262
+     btnProcEdit-txt AT Y 32 X 216 WIDGET-ID 230
+     btnQueries-txt AT Y 96 X 30 WIDGET-ID 204
+     btnQueryTester-txt AT Y 96 X 216 WIDGET-ID 234
+     btnSettings-txt AT Y 32 X 30 WIDGET-ID 200
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 160.6 ROW 10.67 SCROLLABLE 
+         BGCOLOR 15  WIDGET-ID 500.
 
 DEFINE FRAME frData
-     btnClearDataFilter AT Y 5 X 740 WIDGET-ID 76
-     btnDataFilter AT Y 5 X 760 WIDGET-ID 58
-     fiNumSelected AT Y 198 X 660 NO-LABEL WIDGET-ID 270
-     fiNumResults AT Y 198 X 685 COLON-ALIGNED NO-LABEL WIDGET-ID 210
-     rctData AT Y 0 X 0 WIDGET-ID 272
+     btnClearDataFilter AT Y 5 X 755 WIDGET-ID 76
+     fiNumSelected AT Y 198 X 636 COLON-ALIGNED NO-LABEL WIDGET-ID 298
+     fiNumRecords AT Y 198 X 665 COLON-ALIGNED NO-LABEL WIDGET-ID 210
+     rctData AT Y 0 X 5 WIDGET-ID 272
      rctDataFilter AT Y 1 X 12 WIDGET-ID 296
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -1003,70 +984,42 @@ DEFINE FRAME frHint
      imgArrow AT Y 0 X 0 WIDGET-ID 10
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
-         AT X 1116 Y 80
+         AT X 1194 Y 242
          SIZE-PIXELS 205 BY 110
          BGCOLOR 14  WIDGET-ID 600.
 
 DEFINE FRAME frWhere
-     btnAnd AT Y 98 X 15 WIDGET-ID 22
-     cbAndOr AT Y 5 X 35 COLON-ALIGNED WIDGET-ID 10
-     cbFields AT Y 5 X 76 COLON-ALIGNED NO-LABEL WIDGET-ID 12
+     btnBegins AT Y 123 X 17 WIDGET-ID 74
+     cbAndOr AT Y 5 X 40 COLON-ALIGNED WIDGET-ID 10
+     cbFields AT Y 5 X 100 COLON-ALIGNED NO-LABEL WIDGET-ID 12
      cbOperator AT Y 5 X 286 COLON-ALIGNED NO-LABEL WIDGET-ID 14
      ficValue AT Y 5 X 371 COLON-ALIGNED NO-LABEL WIDGET-ID 16
      btnInsert AT Y 5 X 595 WIDGET-ID 18
-     ficWhere2 AT Y 35 X 86 NO-LABEL WIDGET-ID 130
-     btnViewData-2 AT Y 210 X 90 WIDGET-ID 216
-     btnClear-2 AT Y 210 X 110 WIDGET-ID 30
-     btnPrevQuery-2 AT Y 210 X 130 WIDGET-ID 212
-     btnQueries-2 AT Y 210 X 140 WIDGET-ID 190
-     btnNextQuery-2 AT Y 210 X 160 WIDGET-ID 214
-     btnClipboard-2 AT Y 210 X 170 WIDGET-ID 178
-     btnOK AT Y 210 X 460 WIDGET-ID 132
-     btnCancel-2 AT Y 210 X 540 WIDGET-ID 134
-     btnBegins AT Y 120 X 15 WIDGET-ID 74
-     btnBracket AT Y 77 X 15 WIDGET-ID 28
-     btnContains AT Y 140 X 15 WIDGET-ID 116
-     btnEq AT Y 35 X 15 WIDGET-ID 62
-     btnGT AT Y 56 X 45 WIDGET-ID 66
-     btnLT AT Y 56 X 15 WIDGET-ID 64
-     btnMatches AT Y 161 X 15 WIDGET-ID 114
-     btnNE AT Y 35 X 45 WIDGET-ID 68
-     btnOr AT Y 98 X 45 WIDGET-ID 24
-     btnQt AT Y 77 X 45 WIDGET-ID 72
-     btnToday AT Y 182 X 15 WIDGET-ID 122
+     ficWhere2 AT Y 35 X 110 NO-LABEL WIDGET-ID 130
+     btnViewData-2 AT Y 70 X 623 WIDGET-ID 216
+     btnClear-2 AT Y 95 X 623 WIDGET-ID 30
+     btnQueries-2 AT Y 120 X 623 WIDGET-ID 190
+     btnClipboard-2 AT Y 145 X 623 WIDGET-ID 178
+     btnOK AT Y 230 X 460 WIDGET-ID 132
+     btnCancel-2 AT Y 230 X 540 WIDGET-ID 134
+     btnOr AT Y 101 X 57 WIDGET-ID 24
+     btnAnd AT Y 101 X 17 WIDGET-ID 22
+     btnBracket AT Y 79 X 17 WIDGET-ID 28
+     btnContains AT Y 145 X 17 WIDGET-ID 116
+     btnEq AT Y 35 X 17 WIDGET-ID 62
+     btnGT AT Y 57 X 57 WIDGET-ID 66
+     btnLT AT Y 57 X 17 WIDGET-ID 64
+     btnMatches AT Y 167 X 17 WIDGET-ID 114
+     btnNE AT Y 35 X 57 WIDGET-ID 68
+     btnQt AT Y 79 X 57 WIDGET-ID 72
+     btnToday AT Y 189 X 17 WIDGET-ID 122
      rctQueryButtons AT Y 30 X 5 WIDGET-ID 128
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
-         AT X 800 Y 230
-         SIZE-PIXELS 625 BY 260
+         AT X 799 Y 370
+         SIZE-PIXELS 656 BY 285
          TITLE "Query Editor"
          DEFAULT-BUTTON btnOK WIDGET-ID 400.
-
-DEFINE FRAME frSettings
-     btnSettings AT Y 0 X 0 WIDGET-ID 210
-     btnChangeLog-txt AT Y 128 X 30 WIDGET-ID 206
-     btnConnections AT Y 0 X 177 WIDGET-ID 212
-     btnDict AT Y 32 X 0 WIDGET-ID 224
-     btnProcEdit AT Y 32 X 177 WIDGET-ID 228
-     btnDump-2 AT Y 64 X 0 WIDGET-ID 216
-     btnLoad-2 AT Y 64 X 177 WIDGET-ID 220
-     btnQueries-3 AT Y 96 X 0 WIDGET-ID 190
-     btnQueryTester AT Y 96 X 177 WIDGET-ID 232
-     btnChangeLog AT Y 128 X 0 WIDGET-ID 214
-     btnAbout AT Y 128 X 177 WIDGET-ID 196
-     btnDump-txt AT Y 64 X 30 WIDGET-ID 218
-     btnAbout-txt AT Y 128 X 207 WIDGET-ID 208
-     btnDict-txt AT Y 32 X 30 WIDGET-ID 226
-     btnConnections-txt AT Y 0 X 207 WIDGET-ID 202
-     btnLoad-txt AT Y 64 X 207 WIDGET-ID 222
-     btnProcEdit-txt AT Y 32 X 207 WIDGET-ID 230
-     btnQueries-txt AT Y 96 X 30 WIDGET-ID 204
-     btnQueryTester-txt AT Y 96 X 207 WIDGET-ID 234
-     btnSettings-txt AT Y 0 X 30 WIDGET-ID 200
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 62.8 ROW 27.67 SCROLLABLE 
-         BGCOLOR 15  WIDGET-ID 500.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -1086,12 +1039,12 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "DataDigger"
-         HEIGHT-P           = 705
-         WIDTH-P            = 1467
-         MAX-HEIGHT-P       = 2079
-         MAX-WIDTH-P        = 1920
-         VIRTUAL-HEIGHT-P   = 2079
-         VIRTUAL-WIDTH-P    = 1920
+         HEIGHT-P           = 675
+         WIDTH-P            = 1523
+         MAX-HEIGHT-P       = 675
+         MAX-WIDTH-P        = 1523
+         VIRTUAL-HEIGHT-P   = 675
+         VIRTUAL-WIDTH-P    = 1523
          RESIZE             = yes
          SCROLL-BARS        = no
          STATUS-AREA        = no
@@ -1099,7 +1052,6 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          FGCOLOR            = ?
          KEEP-FRAME-Z-ORDER = yes
          THREE-D            = yes
-         CONTEXT-HELP-FILE  = "datadigger.chm":U
          MESSAGE-AREA       = no
          SENSITIVE          = yes.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
@@ -1124,11 +1076,6 @@ ASSIGN FRAME frData:FRAME = FRAME frMain:HANDLE
 ASSIGN 
        btnClearDataFilter:HIDDEN IN FRAME frData           = TRUE.
 
-ASSIGN 
-       btnDataFilter:HIDDEN IN FRAME frData           = TRUE.
-
-/* SETTINGS FOR FILL-IN fiNumSelected IN FRAME frData
-   NO-ENABLE ALIGN-L                                                    */
 /* SETTINGS FOR RECTANGLE rctDataFilter IN FRAME frData
    NO-ENABLE                                                            */
 ASSIGN 
@@ -1143,9 +1090,9 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FRAME frMain
    FRAME-NAME                                                           */
-/* BROWSE-TAB brFields tgDebugMode frMain */
+/* BROWSE-TAB brTables tgDebugMode frMain */
+/* BROWSE-TAB brFields brTables frMain */
 /* BROWSE-TAB brIndexes btnMoveTop frMain */
-/* BROWSE-TAB brTables btnMoveUp frMain */
 /* SETTINGS FOR BROWSE brFields IN FRAME frMain
    2                                                                    */
 ASSIGN 
@@ -1167,18 +1114,6 @@ ASSIGN
    2                                                                    */
 /* SETTINGS FOR BUTTON btnClearIndexFilter IN FRAME frMain
    3                                                                    */
-/* SETTINGS FOR BUTTON btnFieldFilter IN FRAME frMain
-   2                                                                    */
-ASSIGN 
-       btnHelp:POPUP-MENU IN FRAME frMain       = MENU POPUP-MENU-btnHelp:HANDLE.
-
-/* SETTINGS FOR BUTTON btnIndexFilter IN FRAME frMain
-   3                                                                    */
-/* SETTINGS FOR BUTTON btnLoad IN FRAME frMain
-   NO-ENABLE                                                            */
-ASSIGN 
-       btnLoad:HIDDEN IN FRAME frMain           = TRUE.
-
 /* SETTINGS FOR BUTTON btnMoveBottom IN FRAME frMain
    2                                                                    */
 /* SETTINGS FOR BUTTON btnMoveDown IN FRAME frMain
@@ -1197,6 +1132,9 @@ ASSIGN
 
 /* SETTINGS FOR BUTTON btnViewData IN FRAME frMain
    NO-ENABLE                                                            */
+ASSIGN 
+       fiFeedback:READ-ONLY IN FRAME frMain        = TRUE.
+
 /* SETTINGS FOR FILL-IN fiFieldsFilter IN FRAME frMain
    3                                                                    */
 ASSIGN 
@@ -1353,15 +1291,15 @@ OPEN QUERY {&SELF-NAME} FOR EACH ttTable.
 
 CREATE CONTROL-FRAME CtrlFrame ASSIGN
        FRAME           = FRAME frMain:HANDLE
-       ROW             = 30.29
-       COLUMN          = 11
+       ROW             = 25.52
+       COLUMN          = 85
        HEIGHT          = 1.43
        WIDTH           = 6
        WIDGET-ID       = 292
        HIDDEN          = yes
        SENSITIVE       = yes.
 /* CtrlFrame OCXINFO:CREATE-CONTROL from: {F0B88A90-F5DA-11CF-B545-0020AF6ED35A} type: PSTimer */
-      CtrlFrame:MOVE-AFTER(FRAME frSettings:HANDLE).
+      CtrlFrame:MOVE-AFTER(FRAME frWhere:HANDLE).
 
 &ENDIF
 
@@ -1378,7 +1316,7 @@ DO:
 
   /* Start debugger if found */
   cDebuggerPath = getRegistry('debugger', 'path').
-  if search(cDebuggerPath) = ? then run value(cDebuggerPath).  
+  IF SEARCH(cDebuggerPath) = ? THEN RUN value(cDebuggerPath).  
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1390,7 +1328,7 @@ ON ALT-F OF C-Win /* DataDigger */
 ANYWHERE DO:
   DEFINE BUFFER bFilter FOR ttFilter. 
 
-  RUN setPage(1).
+  RUN setPage({&PAGE-FIELDS}).
 
   FIND bFilter WHERE bFilter.cFieldName = "cFieldName" NO-ERROR.
   IF AVAILABLE bFilter THEN APPLY 'entry' TO bFilter.hFilter.
@@ -1404,11 +1342,10 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON ALT-I OF C-Win /* DataDigger */
-anywhere DO:
-  run setPage(2).
-  apply 'entry' to fiIndexNameFilter in frame {&frame-name}.
-
-  return no-apply.
+ANYWHERE DO:
+  RUN setPage({&PAGE-INDEXES}).
+  APPLY 'entry' TO fiIndexNameFilter IN FRAME {&FRAME-NAME}.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1417,9 +1354,9 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON ALT-T OF C-Win /* DataDigger */
-anywhere DO:
-  apply 'entry' to fiTableFilter in frame {&frame-name}.
-  return no-apply.
+ANYWHERE DO:
+  APPLY 'entry' TO fiTableFilter IN FRAME {&frame-name}.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1428,9 +1365,9 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON ALT-W OF C-Win /* DataDigger */
-anywhere DO:
-  apply 'entry' to ficWhere in frame {&frame-name}.
-  return no-apply.
+ANYWHERE DO:
+  APPLY 'entry' TO ficWhere IN FRAME {&frame-name}.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1441,7 +1378,7 @@ END.
 ON CTRL-F OF C-Win /* DataDigger */
 ANYWHERE
 DO:
-  RUN setTableView(TRUE,NO).
+  RUN setPage({&PAGE-FAVOURITES}).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1452,7 +1389,7 @@ END.
 ON CTRL-T OF C-Win /* DataDigger */
 ANYWHERE
 DO:
-  RUN setTableView(FALSE,NO).
+  RUN setPage({&PAGE-TABLES}).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1461,42 +1398,42 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON END-ERROR OF C-Win /* DataDigger */
-OR ENDKEY OF {&WINDOW-NAME} anywhere 
+OR ENDKEY OF {&WINDOW-NAME} ANYWHERE
 DO:
-  if frame frHint:visible then
-  do:
-    apply 'leave' to frame frHint.
+  IF FRAME frHint:VISIBLE THEN
+  DO:
+    APPLY 'leave' TO FRAME frHint.
     glHintCancelled = TRUE.
-    return no-apply.
-  end.
+    RETURN NO-APPLY.
+  END.
 
-  if frame frSettings:visible then
-  do:
-    apply 'leave' to frame frSettings.
-    return no-apply.
-  end.
+  IF FRAME frSettings:VISIBLE THEN
+  DO:
+    APPLY 'leave' TO FRAME frSettings.
+    RETURN NO-APPLY.
+  END.
 
-  if glRowEditActive 
-    and (   focus:parent = ghDataBrowse 
-         or focus:parent = brFields:handle in frame {&frame-name} ) then 
-  do:
-    glRowEditActive = no.
-    apply 'leave' to focus.
-    focus:screen-value = focus:private-data.
-    focus:parent:refresh().
-    return no-apply.
-  end.
+  IF glRowEditActive 
+    AND (   FOCUS:PARENT = ghDataBrowse 
+         OR FOCUS:PARENT = brFields:HANDLE IN FRAME {&FRAME-NAME} ) THEN 
+  DO:
+    glRowEditActive = NO.
+    APPLY 'leave' TO FOCUS.
+    FOCUS:SCREEN-VALUE = FOCUS:PRIVATE-DATA.
+    FOCUS:PARENT:REFRESH().
+    RETURN NO-APPLY.
+  END.
     
-  if gcQueryEditorState = 'visible' then
-  do:
+  IF gcQueryEditorState = 'visible' THEN
+  DO:
     setQueryEditor('Hidden').
-    return no-apply.
-  end.
+    RETURN NO-APPLY.
+  END.
 
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
      application would exit. */
-  {&window-name}:window-state = 2.
+  {&WINDOW-NAME}:WINDOW-STATE = 2.
   RETURN NO-APPLY.
 END.
 
@@ -1519,10 +1456,10 @@ ANYWHERE DO:
       cbDatabaseFilter:SCREEN-VALUE = gcCurrentDatabase.
   
     /* Get list of all tables of all databases */
-    RUN getTables(OUTPUT TABLE ttTable).
-    ASSIGN cbDatabaseFilter:list-items = ',' + cDatabases.
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    ASSIGN cbDatabaseFilter:LIST-ITEMS = ',' + cDatabases.
   
-    APPLY 'choose' to btnTableFilter. 
+    RUN filterTables.
   END.
   
 END.
@@ -1549,11 +1486,14 @@ ANYWHERE DO:
     IF hWidget:X <> ? THEN iTargetX = iTargetX + hWidget:X.
     IF hWidget:Y <> ? THEN iTargetY = iTargetY + hWidget:Y.
 
-    cWidgets = SUBSTITUTE("&1 &2 : &3,&4 ~n&5"
+    cWidgets = SUBSTITUTE("&1 &2: pos: &3,&4 (&5 x &6) hlp:&7 ~n&8"
                          , hWidget:TYPE
                          , hWidget:NAME
                          , hWidget:X
                          , hWidget:Y
+                         , hWidget:WIDTH-PIXELS
+                         , hWidget:HEIGHT-PIXELS
+                         , (IF CAN-QUERY(hWidget,'CONTEXT-HELP-ID') THEN STRING(hWidget:CONTEXT-HELP-ID) ELSE '')
                          , cWidgets
                          ).
 
@@ -1561,11 +1501,21 @@ ANYWHERE DO:
   END. 
   
   MESSAGE 
-    cWidgets SKIP(1) iTargetX '/' iTargetY
+    cWidgets SKIP(0) 'Final pos:' iTargetX ',' iTargetY
     VIEW-AS ALERT-BOX INFO BUTTONS OK TITLE ' Debug info '.
 
   &ENDIF
   
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
+ON SHIFT-F12 OF C-Win /* DataDigger */
+ANYWHERE DO:
+  RUN showNewFeatures.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1586,10 +1536,10 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON WINDOW-RESIZED OF C-Win /* DataDigger */
-or "END-MOVE" of btnResizeVer
+OR "END-MOVE" OF btnResizeVer
 DO:
-  run endResize.
-end. /* window-resized */
+  RUN endResize.
+END. /* window-resized */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1598,8 +1548,63 @@ end. /* window-resized */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON WINDOW-RESTORED OF C-Win /* DataDigger */
 DO:
-  apply 'entry' to c-Win.
-  apply 'entry' to frame {&frame-name}.  
+  APPLY 'entry' TO c-Win.
+  APPLY 'entry' TO FRAME {&frame-name}.  
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME frMain
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL frMain C-Win
+ON DROP-FILE-NOTIFY OF FRAME frMain
+DO:
+  DEFINE VARIABLE cDroppedFiles AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE lSuccess      AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE rNewRecord    AS ROWID       NO-UNDO.
+
+  /* Get first dropped file */
+  cDroppedFiles = getDroppedFiles(INPUT FRAME frMain:HANDLE).
+  IF NUM-ENTRIES(cDroppedFiles,'~n') = 0 THEN RETURN. 
+
+  /* If it is a database, connect it */
+  IF NUM-ENTRIES(cDroppedFiles,'~n') = 1 
+    AND cDroppedFiles MATCHES '*.db' THEN
+  DO:
+    RUN connectDroppedDatabase(cDroppedFiles).
+    RETURN. 
+  END.
+
+  /* If it is a param file, check the ldbnames in it */
+  IF NUM-ENTRIES(cDroppedFiles,'~n') = 1 
+    AND cDroppedFiles MATCHES '*.pf' THEN
+  DO:
+    RUN connectParamFile(cDroppedFiles).
+    RETURN. 
+  END.
+
+  /* Otherwise it is probably an .xml file */
+  RUN VALUE(getProgramDir() + 'wImportCheck.w')
+    ( INPUT plReadOnlyDigger
+    , INPUT cDroppedFiles
+    , INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT TABLE ttField  /* do not use by-reference */
+    , INPUT TABLE ttColumn /* do not use by-reference */
+    , OUTPUT lSuccess     
+    , OUTPUT rNewRecord
+    ).
+
+  IF lSuccess = TRUE THEN
+  DO:
+    RUN showHelp('DataLoaded', '').
+    RUN reopenDataBrowse('',?).
+
+    IF rNewRecord <> ? THEN
+      ghDataBrowse:QUERY:REPOSITION-TO-ROWID(rNewRecord).
+  END.
+
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1688,7 +1693,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brFields C-Win
 ON MOUSE-MENU-CLICK OF brFields IN FRAME frMain
 DO:
-  run dropFieldMenu.
+  RUN dropFieldMenu.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1720,28 +1725,28 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brFields C-Win
 ON RETURN OF brFields IN FRAME frMain
-or " "           of ttField.lShow in browse brFields
-or value-changed of ttField.lShow in browse brFields
-do:
-  define buffer ttField for ttField. 
-  define variable cField as character no-undo.
+OR " "           OF ttField.lShow IN BROWSE brFields
+OR VALUE-CHANGED OF ttField.lShow IN BROWSE brFields
+DO:
+  DEFINE BUFFER ttField FOR ttField. 
+  DEFINE VARIABLE cField AS CHARACTER NO-UNDO.
 
-  publish "setUsage" ("hideField"). /* user behaviour */
+  PUBLISH "setUsage" ("hideField"). /* user behaviour */
 
-  do with frame {&frame-name}:
+  DO WITH FRAME {&frame-name}:
 
-    find ttField where ttField.cFullName = brFields:get-browse-column(3):screen-value no-error.
-    ttField.lShow = not ttField.lShow.
+    FIND ttField WHERE ttField.cFullName = brFields:get-browse-column(3):screen-value NO-ERROR.
+    ttField.lShow = NOT ttField.lShow.
     cField = ttField.cFieldName.
 
     /* This will include all extents */
-    if ttField.iExtent > 0 then cField = cField + '*'. 
+    IF ttField.iExtent > 0 THEN cField = cField + '*'. 
 
     brFields:get-browse-column(1):checked = ttField.lShow.
 
-    run showField( input cField, input ttField.lShow).
-  end.
-end.
+    RUN showField( INPUT cField, INPUT ttField.lShow).
+  END.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1790,44 +1795,45 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brFields C-Win
 ON SCROLL-NOTIFY OF brFields IN FRAME frMain
 , brIndexes, brTables
-do:
-  define variable lp as memptr  no-undo. 
-  define variable X  as integer no-undo.
-  define variable Y  as integer no-undo.
+DO:
+  DEFINE VARIABLE lp AS MEMPTR  NO-UNDO. 
+  DEFINE VARIABLE X  AS INTEGER NO-UNDO.
+  DEFINE VARIABLE Y  AS INTEGER NO-UNDO.
 
-  publish "debugMessage" (1, "scroll-notify of brFields").
+  PUBLISH "debugMessage" (1, "scroll-notify of brFields").
 
   set-size( lp ) = 16. 
 
-  run GetCursorPos(input-output lp). 
+  RUN GetCursorPos(INPUT-OUTPUT lp). 
 
   /* Show the location of the mouse relative to the frame */
-  run ScreenToClient ( input frame {&frame-name}:hwnd
-                     , input lp 
+  RUN ScreenToClient ( INPUT FRAME {&frame-name}:hwnd
+                     , INPUT lp 
                      ).
 
-  x = get-long( lp, 1 ). 
-  y = get-long( lp, 5 ). 
+  x = GET-LONG( lp, 1 ). 
+  y = GET-LONG( lp, 5 ). 
 
   /* Ignore when we clicked on the vertical scrollbar or 
    * above the horizontal to avoid flashing 
    */
-  if   self:name = 'brFields' 
-    or self:name = 'brIndexes' then
-  do:
-    if   x > (brFields:x + brFields:width-pixels - 15) 
-      or y < (brFields:y + brFields:height-pixels - 15) 
-      or y > (brFields:y + brFields:height-pixels) then return.
-  end.
+  IF   SELF:name = 'brFields' 
+    OR SELF:name = 'brIndexes' THEN
+  DO:
+    IF   x > (brFields:x + brFields:width-pixels - 15) 
+      OR y < (brFields:y + brFields:height-pixels - 15) 
+      OR y > (brFields:y + brFields:height-pixels) THEN RETURN.
+  END.
 
   set-size( lp ) = 0. 
 
   /* scroll-notify detects a mouse action in the scrollbar area of a browse. */
-  run resizeFilters(input 0). /* tables  */
-  run resizeFilters(input 1). /* fields  */
-  run resizeFilters(input 2). /* indexes */
+  RUN resizeFilters(INPUT {&PAGE-TABLES}). 
+  RUN resizeFilters(INPUT {&PAGE-FAVOURITES}). 
+  RUN resizeFilters(INPUT {&PAGE-FIELDS}). 
+  RUN resizeFilters(INPUT {&PAGE-INDEXES}). 
 
-end. /* scroll-notify */
+END. /* scroll-notify */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1836,8 +1842,8 @@ end. /* scroll-notify */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brFields C-Win
 ON START-SEARCH OF brFields IN FRAME frMain
 DO:
-  publish "setUsage" ("sortFields"). /* user behaviour */
-  run reopenFieldBrowse(brFields:current-column:name,?).
+  PUBLISH "setUsage" ("sortFields"). /* user behaviour */
+  RUN reopenFieldBrowse(brFields:current-column:name,?).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1849,37 +1855,37 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brIndexes C-Win
 ON DEFAULT-ACTION OF brIndexes IN FRAME frMain
 DO:
-  define variable cFieldList     as character no-undo. 
-  define variable cQuery         as character no-undo. 
-  define variable hEditor        as handle    no-undo.
-  define variable lOk            as logical   no-undo. 
-  define variable cColumnClicked as character no-undo. 
+  DEFINE VARIABLE cFieldList     AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cQuery         AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE hEditor        AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE lOk            AS LOGICAL   NO-UNDO. 
+  DEFINE VARIABLE cColumnClicked AS CHARACTER NO-UNDO. 
 
-  if not brIndexes:query:get-buffer-handle(1):available then return. 
+  IF NOT brIndexes:query:get-buffer-handle(1):available THEN RETURN. 
 
-  publish "setUsage" ("useIndexAsWhere"). /* user behaviour */
+  PUBLISH "setUsage" ("useIndexAsWhere"). /* user behaviour */
 
   /* Select the row we clicked on */
-  run selectClickedRow(brIndexes:handle, output lOk, output cColumnClicked).
-  if not lOk then return. 
+  RUN selectClickedRow(brIndexes:handle, OUTPUT lOk, OUTPUT cColumnClicked).
+  IF NOT lOk THEN RETURN. 
 
   /* Create a query expression from all the fields in the index */
   cFieldList = brIndexes:query:get-buffer-handle(1):buffer-field('cFieldList'):buffer-value.
   cQuery = getQueryFromFields(cFieldList).
 
   /* Give custom code a chance to alter the query */
-  publish "customQuery" (input gcCurrentDatabase, input gcCurrentTable, input-output cQuery).
+  PUBLISH "customQuery" (INPUT gcCurrentDatabase, INPUT gcCurrentTable, INPUT-OUTPUT cQuery).
 
   /* If needed, expand the query editor */
-  if logical(getRegistry ("DataDigger", "AutoExpandQueryEditor")) <> no then
+  IF LOGICAL(getRegistry ("DataDigger", "AutoExpandQueryEditor")) <> NO THEN
     setQueryEditor('visible').
 
   /* Fill in the query on the screen */
   hEditor = getActiveQueryEditor().
-  hEditor:screen-value = formatQueryString(cQuery, gcQueryEditorState = 'visible').
+  hEditor:SCREEN-VALUE = formatQueryString(cQuery, gcQueryEditorState = 'visible').
 
-  apply "entry" to hEditor.
-  hEditor:cursor-offset = length(entry(1,cQuery,'~n')) + 2.
+  APPLY "entry" TO hEditor.
+  hEditor:CURSOR-OFFSET = LENGTH(ENTRY(1,cQuery,'~n')) + 2.
 
 END.
 
@@ -1890,36 +1896,36 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brIndexes C-Win
 ON MOUSE-MENU-CLICK OF brIndexes IN FRAME frMain
 DO:
-  define variable hEditor    as handle      no-undo.
-  define variable hIndexName as handle      no-undo.
-  define variable hFieldType as handle      no-undo.
-  define variable cIndex     as character   no-undo. 
-  define variable cColumn    as character   no-undo. 
-  define variable lOk        as logical     no-undo. 
-  define variable iLength    as integer     no-undo. 
-  define variable cUseIndex  as character   no-undo. 
-  define variable iUseIndex  as integer     no-undo. 
-  define variable lUseIndex  as logical     no-undo. 
-  define variable cQuery     as character   no-undo. 
-  define variable cWord      as character   no-undo. 
-  define variable iWord      as integer     no-undo. 
+  DEFINE VARIABLE hEditor    AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hIndexName AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hFieldType AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cIndex     AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cColumn    AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE lOk        AS LOGICAL     NO-UNDO. 
+  DEFINE VARIABLE iLength    AS INTEGER     NO-UNDO. 
+  DEFINE VARIABLE cUseIndex  AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE iUseIndex  AS INTEGER     NO-UNDO. 
+  DEFINE VARIABLE lUseIndex  AS LOGICAL     NO-UNDO. 
+  DEFINE VARIABLE cQuery     AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cWord      AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE iWord      AS INTEGER     NO-UNDO. 
 
-  if not brIndexes:query:get-buffer-handle(1):available then return. 
+  IF NOT brIndexes:query:get-buffer-handle(1):available THEN RETURN. 
 
-  publish "setUsage" ("use-index"). /* user behaviour */
+  PUBLISH "setUsage" ("use-index"). /* user behaviour */
 
   /* Select the row we clicked on */
-  run selectClickedRow(brIndexes:handle, output lOk, output cColumn).
-  if not lOk then return. 
+  RUN selectClickedRow(brIndexes:handle, OUTPUT lOk, OUTPUT cColumn).
+  IF NOT lOk THEN RETURN. 
 
   hIndexName = brIndexes:query:get-buffer-handle(1):buffer-field('cIndexName'):handle.
 
-  if valid-handle(hIndexName) then 
-  do:
+  IF VALID-HANDLE(hIndexName) THEN 
+  DO:
     /* If this is a "default" index, ignore it since this is no real index
      * and we cannot add "USE-INDEX default" to a query
      */
-    if hIndexName:buffer-value = "default" then return. 
+    IF hIndexName:BUFFER-VALUE = "default" THEN RETURN. 
 
     /* If the query editor is expanded, do actions to that field */
     hEditor = getActiveQueryEditor().
@@ -1928,50 +1934,50 @@ DO:
     cQuery = "".
 
     WhereLoop:
-    do iWord = 1 to num-entries(hEditor:screen-value," "):
-      cWord = entry(iWord,hEditor:screen-value," ").
+    DO iWord = 1 TO NUM-ENTRIES(hEditor:SCREEN-VALUE," "):
+      cWord = ENTRY(iWord,hEditor:SCREEN-VALUE," ").
 
       /* Remember we have found the USE-INDEX keyword */
-      if cWord = "USE-INDEX" then 
-      do:
-        lUseIndex = true.
-        next WhereLoop.
-      end.
+      IF cWord = "USE-INDEX" THEN 
+      DO:
+        lUseIndex = TRUE.
+        NEXT WhereLoop.
+      END.
 
       /* Skip index name after USE-INDEX */
-      if lUseIndex and can-find(ttIndex where ttIndex.cIndexName = cWord) then 
-      do: 
-        lUseIndex = false. 
-        next WhereLoop. 
-      end.
+      IF lUseIndex AND CAN-FIND(ttIndex WHERE ttIndex.cIndexName = cWord) THEN 
+      DO: 
+        lUseIndex = FALSE. 
+        NEXT WhereLoop. 
+      END.
 
       cQuery = cQuery + " " + cWord.
-    end.
+    END.
     
-    hEditor:screen-value = cQuery.
-    cIndex = substitute("USE-INDEX &1", hIndexName:buffer-value).
-    iLength = length(cIndex).
+    hEditor:SCREEN-VALUE = cQuery.
+    cIndex = SUBSTITUTE("USE-INDEX &1", hIndexName:BUFFER-VALUE).
+    iLength = LENGTH(cIndex).
 
     /* No text selected */
-    if hEditor:selection-text = "" then
-    do:
+    IF hEditor:SELECTION-TEXT = "" THEN
+    DO:
       /* If ficQuery only holds the text <empty> then delete that */
-      if hEditor:screen-value = '<empty>' then hEditor:screen-value = ''.
-      hEditor:screen-value = trim(substitute("&1 &2", hEditor:screen-value, cIndex)).
-    end.
-    else 
-    do:
-      hEditor:replace-selection-text(cIndex).
-    end.
+      IF hEditor:SCREEN-VALUE = '<empty>' THEN hEditor:SCREEN-VALUE = ''.
+      hEditor:SCREEN-VALUE = TRIM(SUBSTITUTE("&1 &2", hEditor:SCREEN-VALUE, cIndex)).
+    END.
+    ELSE 
+    DO:
+      hEditor:REPLACE-SELECTION-TEXT(cIndex).
+    END.
 
     /* Give custom code a chance to alter the query */
-    cQuery = hEditor:screen-value.
-    publish "customQuery" (input gcCurrentDatabase, input gcCurrentTable, input-output cQuery).
-    hEditor:screen-value = cQuery.
+    cQuery = hEditor:SCREEN-VALUE.
+    PUBLISH "customQuery" (INPUT gcCurrentDatabase, INPUT gcCurrentTable, INPUT-OUTPUT cQuery).
+    hEditor:SCREEN-VALUE = cQuery.
 
-    apply "entry" to hEditor.
-    hEditor:cursor-offset = length(hEditor:screen-value) + 1.
-  end.
+    APPLY "entry" TO hEditor.
+    hEditor:CURSOR-OFFSET = LENGTH(hEditor:SCREEN-VALUE) + 1.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1981,15 +1987,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brIndexes C-Win
 ON OFF-HOME OF brIndexes IN FRAME frMain
 DO:
-  publish "setUsage" ("offHomeIndexes"). /* user behaviour */
+  PUBLISH "setUsage" ("offHomeIndexes"). /* user behaviour */
 
-  if not valid-handle(ghLastIndexFilter) then
+  IF NOT VALID-HANDLE(ghLastIndexFilter) THEN
     ghLastIndexFilter = fiIndexNameFilter:handle.
 
   setFilterFieldColor(ghLastIndexFilter).
-  apply 'entry' to ghLastIndexFilter. 
+  APPLY 'entry' TO ghLastIndexFilter. 
 
-  return no-apply.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1999,15 +2005,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brIndexes C-Win
 ON ROW-DISPLAY OF brIndexes IN FRAME frMain
 DO:
-  define variable hField as handle.
-  define variable iField as integer. 
+  DEFINE VARIABLE hField AS HANDLE.
+  DEFINE VARIABLE iField AS INTEGER. 
 
-  do iField = 1 to num-entries(gcIndexBrowseColumnHandles):
-    hField = handle(entry(iField,gcIndexBrowseColumnHandles)).
+  DO iField = 1 TO NUM-ENTRIES(gcIndexBrowseColumnHandles):
+    hField = HANDLE(ENTRY(iField,gcIndexBrowseColumnHandles)).
 
     /* Set color if index is not active */
-    hField:fgcolor = (if ttIndex.lIndexActive = false then getColor('IndexInactive:fg') else ?). /* red */
-  end.
+    hField:FGCOLOR = (IF ttIndex.lIndexActive = FALSE THEN getColor('IndexInactive:fg') ELSE ?). /* red */
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2017,8 +2023,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brIndexes C-Win
 ON START-SEARCH OF brIndexes IN FRAME frMain
 DO:
-  publish "setUsage" ("sortIndexes"). /* user behaviour */
-  run reopenIndexBrowse(brIndexes:current-column:name,?).
+  PUBLISH "setUsage" ("sortIndexes"). /* user behaviour */
+  RUN reopenIndexBrowse(brIndexes:current-column:name,?).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2028,53 +2034,25 @@ END.
 &Scoped-define BROWSE-NAME brTables
 &Scoped-define SELF-NAME brTables
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
-ON F OF brTables IN FRAME frMain
-OR "f" OF brTables
-OR "*" OF brTables
-OR "CHOOSE" OF MENU-ITEM m_Toggle_as_favourite IN MENU POPUP-MENU-brTables
-DO:
-  DEFINE BUFFER bTable FOR ttTable. 
-  PUBLISH "setUsage" ("addToFavourites"). /* user behaviour */
-
-  /* Find table and set/unset as fav */
-  FIND bTable WHERE bTable.cTableName = gcCurrentTable NO-ERROR.
-  bTable.lFavourite = NOT glShowFavourites.
-
-  /* Save setting */
-  setRegistry( SUBSTITUTE("DB:&1",gcCurrentDatabase)
-             , SUBSTITUTE("&1:Favourite",gcCurrentTable)
-             , (IF bTable.lFavourite THEN "TRUE" ELSE ?)
-             ).
-
-  /* Show the change in the descripton box */
-  fiTableDesc:SCREEN-VALUE = TRIM(STRING(bTable.lFavourite,"Added to/Removed from")) + " favourites".
-
-  /* If we are in the favo-view then refresh the browse to get rid of this table */
-  IF glShowFavourites THEN
-    RUN reopenTableBrowse(?).
-  ELSE 
-    APPLY "CURSOR-DOWN" TO BROWSE brTables.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
 ON MOUSE-SELECT-CLICK OF brTables IN FRAME frMain
 DO:
   /* When we click on a table in the browse, we don't want 
    * to wait until the timer ocx refreshes; do it instantly.
    */
   DEFINE VARIABLE cOldTable AS CHARACTER NO-UNDO.
-  cOldTable = gcCurrentTable.
+  DEFINE VARIABLE cOldDatabase AS CHARACTER NO-UNDO. 
+
+  cOldTable    = gcCurrentTable.
+  cOldDatabase = gcCurrentDatabase.
+
   APPLY "value-changed" TO SELF.
 
   /* Cancel the timer */
   RUN setTimer("timedTableChange", 0).
 
   /* Apply the change immediately */
-  IF cOldTable <> gcCurrentTable THEN
+  IF cOldTable <> gcCurrentTable 
+    OR cOldDatabase <> gcCurrentDatabase THEN
   DO:
     setWindowFreeze(YES).
     RUN setTableContext(INPUT gcCurrentTable ).
@@ -2089,42 +2067,12 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
 ON OFF-HOME OF brTables IN FRAME frMain
 DO:
-  publish "setUsage" ("offHomeTables"). /* user behaviour */
+  PUBLISH "setUsage" ("offHomeTables"). /* user behaviour */
   setFilterFieldColor(fiTableFilter:handle).
-  apply 'entry' to fiTableFilter.
+  APPLY 'entry' TO fiTableFilter.
 
-  return no-apply.
+  RETURN NO-APPLY.
 END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
-ON ROW-DISPLAY OF brTables IN FRAME frMain
-do:
-  /* Wait for v19 :) 
-  if ghTableQuery:current-result-row modulo 2 = 0 then 
-  do:
-    ttTable.cTableName  :fgcolor in browse brTables = giDataOddRowColor[1]. 
-    ttTable.cTableName  :bgcolor in browse brTables = giDataOddRowColor[2].
-    ttTable.cDatabase   :fgcolor in browse brTables = giDataOddRowColor[1]. 
-    ttTable.cDatabase   :bgcolor in browse brTables = giDataOddRowColor[2].
-    ttTable.iNumQueries :fgcolor in browse brTables = giDataOddRowColor[1]. 
-    ttTable.iNumQueries :bgcolor in browse brTables = giDataOddRowColor[2].
-  end.
-
-  else
-  do:
-    ttTable.cTableName  :fgcolor in browse brTables = giDataEvenRowColor[1]. 
-    ttTable.cTableName  :bgcolor in browse brTables = giDataEvenRowColor[2].
-    ttTable.cDatabase   :fgcolor in browse brTables = giDataEvenRowColor[1]. 
-    ttTable.cDatabase   :bgcolor in browse brTables = giDataEvenRowColor[2].
-    ttTable.iNumQueries :fgcolor in browse brTables = giDataEvenRowColor[1]. 
-    ttTable.iNumQueries :bgcolor in browse brTables = giDataEvenRowColor[2].
-  end.
-  */
-end.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -2133,8 +2081,8 @@ end.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
 ON START-SEARCH OF brTables IN FRAME frMain
 DO:
-  publish "setUsage" ("sortTables"). /* user behaviour */
-  run reopenTableBrowse(brTables:current-column:name).
+  PUBLISH "setUsage" ("sortTables"). /* user behaviour */
+  RUN reopenTableBrowse(brTables:current-column:name).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2143,63 +2091,84 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brTables C-Win
 ON VALUE-CHANGED OF brTables IN FRAME frMain
-do:
-  define variable hBuffer      as handle no-undo. 
-  define variable cOldTable    as character no-undo. 
-  define variable cOldDatabase as character no-undo. 
+DO:
+  DEFINE VARIABLE hBuffer      AS HANDLE    NO-UNDO. 
+  DEFINE VARIABLE cOldTable    AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cOldDatabase AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE lTableFound  AS LOGICAL   NO-UNDO.
 
-  hBuffer      = brTables:query:get-buffer-handle(1).
+  setWindowFreeze(YES).
+
+  hBuffer      = brTables:QUERY:GET-BUFFER-HANDLE(1).
   cOldTable    = gcCurrentTable.
   cOldDatabase = gcCurrentDatabase.
+  lTableFound = hBuffer:AVAILABLE.
 
-  if hBuffer:available then
-  do:
-    gcCurrentTable    = hBuffer::cTableName.
-    gcCurrentDatabase = hBuffer::cDatabase.
-    fiTableDesc:screen-value = hBuffer::cTableDesc.
-    fiTableDesc:tooltip      = hBuffer::cTableDesc.
+  IF lTableFound THEN 
+  DO:
+    gcCurrentTable           = hBuffer::cTableName.
+    gcCurrentDatabase        = hBuffer::cDatabase.
+    fiTableDesc:SCREEN-VALUE = hBuffer::cTableDesc.
+    fiTableDesc:TOOLTIP      = hBuffer::cTableDesc.
 
-    btnViewData:sensitive  = true.
-    btnClear:sensitive     = true.
-    btnPrevQuery:sensitive = true.
-    btnNextQuery:sensitive = true.
-    btnQueries:sensitive   = true.
-    btnClipboard:sensitive = true.
-    btnAdd:sensitive       = true.
-  end.
-  else 
-  do:
+    RUN showFavourite(hBuffer::lFavourite).
+
+    PUBLISH "debugMessage" (2,SUBSTITUTE("Select table &1.&2", gcCurrentDatabase, gcCurrentTable)).
+  END.
+  ELSE 
+  DO:
     /* Make sure the data browse is empty. The easies way is redrawing it */
-    IF NUM-DBS > 0 THEN
+    IF NUM-DBS > 0 AND gcCurrentTable <> "" THEN
     DO:
       RUN reopenDataBrowse-create(INPUT gcCurrentDatabase, INPUT gcCurrentTable).
       ghDataBrowse:SENSITIVE = FALSE. 
     END.
 
-    gcCurrentTable    = ''.
-    gcCurrentDatabase = ENTRY(1, getDatabaseList() ).
+    gcCurrentTable           = ''.
+    gcCurrentDatabase        = ENTRY(1, getDatabaseList() ).
     fiTableDesc:SCREEN-VALUE = "".
-    fiTableDesc:TOOLTIP = ''.
-    /*SELF:TOOLTIP = ''.*/
+    fiTableDesc:TOOLTIP      = ''.
 
-    btnViewData:SENSITIVE  = FALSE.
-    btnClear:SENSITIVE     = FALSE.
-    btnPrevQuery:SENSITIVE = FALSE.
-    btnNextQuery:SENSITIVE = FALSE.
-    btnQueries:SENSITIVE   = FALSE.
-    btnClipboard:SENSITIVE = FALSE.
-    btnAdd:SENSITIVE       = FALSE.
+    RUN showFavourite(FALSE).
   END.
+
+  /* Switch on/off UI */
+  btnFavourite:SENSITIVE = lTableFound.
+  btnClearDataFilter:SENSITIVE IN FRAME frData = lTableFound.
+  btnNextQuery:SENSITIVE = lTableFound.
+  btnPrevQuery:SENSITIVE = lTableFound.
+  btnViewData-2:SENSITIVE IN FRAME frWhere = lTableFound.
+  btnViewData:SENSITIVE  = lTableFound.
+  btnWhere:SENSITIVE     = lTableFound.
+  ficWhere:SENSITIVE     = lTableFound.
+  btnWhere:SENSITIVE     = lTableFound.
+  btnViewData:SENSITIVE  = lTableFound.
+  btnClear:SENSITIVE     = lTableFound.
+  btnQueries:SENSITIVE   = lTableFound.
+  btnClipboard:SENSITIVE = lTableFound.
+  btnAdd:SENSITIVE       = lTableFound.
+  btnLoad:SENSITIVE      = lTableFound.
 
   IF cOldTable <> gcCurrentTable 
     OR cOldDatabase <> gcCurrentDatabase THEN
   DO:
+    EMPTY TEMP-TABLE ttField.
+    EMPTY TEMP-TABLE ttIndex.
+
+    /* Clear user query */
+    ficWhere:SCREEN-VALUE = ''.
+
     /* Clear the filters */
-    RUN btnClearFieldFilterChoose. 
-    RUN btnClearIndexFilterChoose.
+    RUN clearFieldFilter.
+    RUN filterFieldsBrowse.
+
+    RUN clearIndexFilter.
+    RUN filterIndexBrowse.
+
     RUN setTimer("timedTableChange", 300).
   END.
 
+  setWindowFreeze(NO).
 END. /* value-changed of brTables */
 
 /* _UIB-CODE-BLOCK-END */
@@ -2245,11 +2214,11 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnAbout C-Win
 ON CHOOSE OF btnAbout IN FRAME frSettings /* Que */
 , btnAbout-txt
-or "CTRL-SHIFT-A" of c-win anywhere
+OR "CTRL-SHIFT-A" OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("About"). /* user behaviour */
-  hide frame frSettings.
-  run value(getProgramDir() + 'dAbout.w') persistent.
+  PUBLISH "setUsage" ("About"). /* user behaviour */
+  HIDE FRAME frSettings.
+  RUN value(getProgramDir() + 'dAbout.w') PERSISTENT.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2260,9 +2229,9 @@ END.
 ON MOUSE-MENU-CLICK OF btnAbout IN FRAME frSettings /* Que */
 , btnAbout-txt
 DO:
-  publish "setUsage" ("showChangelog"). /* user behaviour */
-  hide frame frSettings.
-  os-command no-wait start value(getProgramDir() + '\DataDigger.txt').
+  PUBLISH "setUsage" ("showChangelog"). /* user behaviour */
+  HIDE FRAME frSettings.
+  OS-COMMAND NO-WAIT START VALUE(getProgramDir() + '\DataDigger.txt').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2273,11 +2242,11 @@ END.
 &Scoped-define SELF-NAME btnAdd
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnAdd C-Win
 ON CHOOSE OF btnAdd IN FRAME frMain /* Add */
-or 'insert-mode' of brTables
-do:
-  publish "setUsage" ("addRecord"). /* user behaviour */
-  run btnAddChoose.
-end.
+OR 'insert-mode' OF brTables
+DO:
+  PUBLISH "setUsage" ("addRecord"). /* user behaviour */
+  RUN btnAddChoose.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -2289,12 +2258,12 @@ end.
 ON CHOOSE OF btnAnd IN FRAME frWhere /* and */
 , btnOr, btnEq, btnNe, btnGt, btnLt, btnToday, btnMatches, btnContains, btnBegins
 DO:
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
   /* No text selected */
-  if ficWhere2:selection-text = "" then
-    ficWhere2:insert-string(substitute(' &1 ', self:label)).
-  else 
-    ficWhere2:replace-selection-text(substitute(' &1 ', self:label)).
+  IF ficWhere2:selection-text = "" THEN
+    ficWhere2:insert-string(SUBSTITUTE(' &1 ', SELF:label)).
+  ELSE 
+    ficWhere2:replace-selection-text(SUBSTITUTE(' &1 ', SELF:label)).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2305,15 +2274,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnBracket C-Win
 ON CHOOSE OF btnBracket IN FRAME frWhere /* () */
 DO:
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
   /* No text selected */
-  if ficWhere2:selection-text = "" then
-  do:
-    ficWhere2:insert-string(substitute(' &1 ', self:label)).
+  IF ficWhere2:selection-text = "" THEN
+  DO:
+    ficWhere2:insert-string(SUBSTITUTE(' &1 ', SELF:label)).
     ficWhere2:cursor-offset = ficWhere2:cursor-offset - 2.
-  end.
-  else 
-    ficWhere2:replace-selection-text(substitute(' ( &1 ) ', ficWhere2:selection-text)).
+  END.
+  ELSE 
+    ficWhere2:replace-selection-text(SUBSTITUTE(' ( &1 ) ', ficWhere2:selection-text)).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2324,25 +2293,9 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnCancel-2 C-Win
 ON CHOOSE OF btnCancel-2 IN FRAME frWhere /* Cancel */
 DO:
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
-  ficWhere2:screen-value in frame frWhere = ficWhere:screen-value in frame frMain. 
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
+  ficWhere2:screen-value IN FRAME frWhere = ficWhere:screen-value IN FRAME frMain. 
   setQueryEditor('Hidden').
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define FRAME-NAME frSettings
-&Scoped-define SELF-NAME btnChangeLog
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnChangeLog C-Win
-ON CHOOSE OF btnChangeLog IN FRAME frSettings /* Hlp */
-, btnChangeLog-txt
-or "ALT-H" of c-win anywhere
-DO:
-  publish "setUsage" ("showChangelog"). /* user behaviour */
-  hide frame frSettings.
-  os-command no-wait start value(getProgramDir() + '\DataDigger.txt').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2353,23 +2306,23 @@ END.
 &Scoped-define SELF-NAME btnClear
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClear C-Win
 ON CHOOSE OF btnClear IN FRAME frMain /* C */
-or SHIFT-DEL of ficWhere  in frame frMain
-or SHIFT-DEL of ficWhere2 in frame frWhere
-or 'CHOOSE' of btnClear-2 in frame frWhere
+OR SHIFT-DEL OF ficWhere  IN FRAME frMain
+OR SHIFT-DEL OF ficWhere2 IN FRAME frWhere
+OR 'CHOOSE' OF btnClear-2 IN FRAME frWhere
 DO:
-  define variable hEditor as handle      no-undo.
-  publish "setUsage" ("clearQuery"). /* user behaviour */
+  DEFINE VARIABLE hEditor AS HANDLE      NO-UNDO.
+  PUBLISH "setUsage" ("clearQuery"). /* user behaviour */
 
   hEditor = getActiveQueryEditor().
 
-  hEditor:screen-value = ''.
-  hEditor:bgcolor      = ?. /* default */
-  hEditor:fgcolor      = ?. /* default */
-  hEditor:tooltip      = ''.
+  hEditor:SCREEN-VALUE = ''.
+  hEditor:BGCOLOR      = ?. /* default */
+  hEditor:FGCOLOR      = ?. /* default */
+  hEditor:TOOLTIP      = ''.
 
   /* Clear query in ini file */
-  setRegistry ( substitute('DB:&1'   , gcCurrentDatabase )
-              , substitute('&1:query', gcCurrentTable )
+  setRegistry ( SUBSTITUTE('DB:&1'   , gcCurrentDatabase )
+              , SUBSTITUTE('&1:query', gcCurrentTable )
               , '' 
               ).
 END.
@@ -2383,8 +2336,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClearDataFilter C-Win
 ON CHOOSE OF btnClearDataFilter IN FRAME frData /* C */
 DO:
-  publish "setUsage" ("clearDataFilter"). /* user behaviour */
-  run btnClearDataFilterChoose.
+  PUBLISH "setUsage" ("clearDataFilter"). /* user behaviour */
+  RUN btnClearDataFilterChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2396,9 +2349,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClearFieldFilter C-Win
 ON CHOOSE OF btnClearFieldFilter IN FRAME frMain /* C */
 DO:
-  publish "setUsage" ("clearFieldFilter"). /* user behaviour */
-  run btnClearFieldFilterChoose.
-  apply 'choose' to btnFieldFilter.
+  RUN btnClearFieldFilterChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2409,9 +2360,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClearIndexFilter C-Win
 ON CHOOSE OF btnClearIndexFilter IN FRAME frMain /* C */
 DO:
-  publish "setUsage" ("clearIndexFilter"). /* user behaviour */
-  run btnClearIndexFilterChoose.
-  apply 'choose' to btnIndexFilter.
+  RUN btnClearIndexFilterChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2422,18 +2371,26 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClearTableFilter C-Win
 ON CHOOSE OF btnClearTableFilter IN FRAME frMain /* C */
 DO:
-  publish "setUsage" ("clearTableFilter"). /* user behaviour */
+  PUBLISH "setUsage" ("clearTableFilter"). /* user behaviour */
 
-  fiTableFilter     :screen-value = fiTableFilter     :private-data.
-  cbDatabaseFilter  :screen-value = ' '.
+  RUN initTableFilter(INPUT-OUTPUT TABLE ttTableFilter). 
+
+  fiTableFilter     :SCREEN-VALUE = fiTableFilter:PRIVATE-DATA.
+  cbDatabaseFilter  :SCREEN-VALUE = ' '.
   
-  fiTableFilter     :modified = no.
-  cbDatabaseFilter  :modified = no.
+  fiTableFilter     :MODIFIED = NO.
+  cbDatabaseFilter  :MODIFIED = NO.
 
-  setFilterFieldColor(fiTableFilter     :handle).
-  setFilterFieldColor(cbDatabaseFilter  :handle).
+  setFilterFieldColor(fiTableFilter   :HANDLE).
+  setFilterFieldColor(cbDatabaseFilter:HANDLE).
 
-  apply 'choose' to btnTableFilter.
+  RUN getTablesFiltered(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+
+  /* Get table properties from the INI file */
+  RUN getTableStats(INPUT-OUTPUT TABLE ttTable).
+
+  RUN filterTables. 
+
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2445,37 +2402,37 @@ END.
 ON CHOOSE OF btnClipboard IN FRAME frMain /* Cp */
 /* or 'ctrl-c' of ficWhere  in frame frMain  */
 /* or 'ctrl-c' of ficWhere2 in frame frWhere */
-or 'CHOOSE' of btnClipboard-2 in frame frWhere
-do:
-  define variable cQuery  as character no-undo. 
-  define variable hEditor as handle    no-undo.
+OR 'CHOOSE' OF btnClipboard-2 IN FRAME frWhere
+DO:
+  DEFINE VARIABLE cQuery  AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE hEditor AS HANDLE    NO-UNDO.
 
-  publish "setUsage" ("copyQuery"). /* user behaviour */
+  PUBLISH "setUsage" ("copyQuery"). /* user behaviour */
 
   hEditor = getActiveQueryEditor().
 
-  if length(hEditor:selection-text) > 0 then 
-    cQuery = hEditor:selection-text.
-  else
+  IF LENGTH(hEditor:SELECTION-TEXT) > 0 THEN 
+    cQuery = hEditor:SELECTION-TEXT.
+  ELSE
   IF VALID-HANDLE(ghDataBrowse) THEN
     cQuery = getReadableQuery(ghDataBrowse:QUERY:prepare-string).
   ELSE
   IF hEditor:SCREEN-VALUE = "" THEN
-      cQuery = substitute('for each &1.&2 no-lock'
+      cQuery = SUBSTITUTE('for each &1.&2 no-lock'
                          , gcCurrentDatabase
                          , gcCurrentTable
                          ).
   ELSE
-    cQuery = substitute('for each &1.&2 no-lock &3 &4'
+    cQuery = SUBSTITUTE('for each &1.&2 no-lock &3 &4'
                        , gcCurrentDatabase
                        , gcCurrentTable
-                       , (if not hEditor:screen-value begins 'where' then 'where' else '')
-                       , trim(hEditor:screen-value)
+                       , (IF NOT hEditor:SCREEN-VALUE BEGINS 'where' THEN 'where' ELSE '')
+                       , TRIM(hEditor:SCREEN-VALUE)
                        ).
 
   /* Dont take the tooltip because that is not set until the query is executed */
-  cQuery = formatQueryString(cQuery, yes).
-  clipboard:value = cQuery.
+  cQuery = formatQueryString(cQuery, YES).
+  CLIPBOARD:VALUE = cQuery.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2486,8 +2443,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnClone C-Win
 ON CHOOSE OF btnClone IN FRAME frMain /* Clone */
 DO:
-  publish "setUsage" ("cloneRecord"). /* user behaviour */
-  run btnCloneChoose.
+  PUBLISH "setUsage" ("cloneRecord"). /* user behaviour */
+  RUN btnCloneChoose.
 END. /* choose of btnDelete */
 
 /* _UIB-CODE-BLOCK-END */
@@ -2498,47 +2455,49 @@ END. /* choose of btnDelete */
 &Scoped-define SELF-NAME btnConnections
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnConnections C-Win
 ON CHOOSE OF btnConnections IN FRAME frSettings /* Con */
-, menu-item m_Manage_Connections in menu POPUP-MENU-brTables
+, MENU-ITEM m_Manage_Connections IN MENU POPUP-MENU-brTables
 , btnConnections-txt
-or 'CTRL-SHIFT-N' of c-win anywhere
+OR 'CTRL-SHIFT-N' OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("manageFavourites"). /* user behaviour */
-  hide frame frSettings.
-  run btnFavouritesChoose.
+  PUBLISH "setUsage" ("manageFavourites"). /* user behaviour */
+  HIDE FRAME frSettings.
+  RUN btnFavouritesChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
-&Scoped-define FRAME-NAME frMain
-&Scoped-define SELF-NAME btnDataDigger
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataDigger C-Win
-ON CHOOSE OF btnDataDigger IN FRAME frMain /* DD */
-do:
-  /* If we're in the middle of the tour, ignore this event */
-  if frame frHint:visible then return no-apply. 
-
-  publish "setUsage" ("newInstance"). /* user behaviour */
-
-  /* Set the X and Y a little higher so the new window appears cascaded */
-  setRegistry("DataDigger", "Window:x", string(c-win:x + 20) ).                             
-  setRegistry("DataDigger", "Window:y", string(c-win:y + 20) ).                             
-
-  run value(getProgramDir() + 'wDataDigger.w') persistent.
-end.
+&Scoped-define SELF-NAME btnDataAdmin
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataAdmin C-Win
+ON CHOOSE OF btnDataAdmin IN FRAME frSettings /* ADM */
+, btnDataAdmin-txt
+OR "ALT-H" OF c-win ANYWHERE
+DO:
+  HIDE FRAME frSettings.
+  RUN startTool("Admin").
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
-&Scoped-define FRAME-NAME frData
-&Scoped-define SELF-NAME btnDataFilter
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataFilter C-Win
-ON CHOOSE OF btnDataFilter IN FRAME frData /* Y */
-do:
-  publish "setUsage" ("filterData"). /* user behaviour */
-  run reopenDataBrowse('',?).
+&Scoped-define SELF-NAME btnDataDigger
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataDigger C-Win
+ON CHOOSE OF btnDataDigger IN FRAME frSettings /* DD */
+, btnDataDigger-txt 
+OR "ALT-D" OF FRAME frMain ANYWHERE
+DO:
+  /* If we're in the middle of the tour, ignore this event */
+  IF FRAME frHint:VISIBLE THEN RETURN NO-APPLY. 
+
+  PUBLISH "setUsage" ("newInstance"). /* user behaviour */
+
+  /* Set the X and Y a little higher so the new window appears cascaded */
+  setRegistry("DataDigger", "Window:x", STRING(c-win:X + 20) ).                             
+  setRegistry("DataDigger", "Window:y", STRING(c-win:Y + 20) ).                             
+
+  RUN VALUE(getProgramDir() + 'wDataDigger.w') PERSISTENT (INPUT plReadOnlyDigger) .
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2548,10 +2507,10 @@ END.
 &Scoped-define FRAME-NAME frMain
 &Scoped-define SELF-NAME btnDelete
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDelete C-Win
-ON CHOOSE OF btnDelete IN FRAME frMain /* Delete */
+ON CHOOSE OF btnDelete IN FRAME frMain /* Del */
 DO:
-  publish "setUsage" ("deleteRecord"). /* user behaviour */
-  run btnDeleteChoose.
+  PUBLISH "setUsage" ("deleteRecord"). /* user behaviour */
+  RUN btnDeleteChoose.
 END. /* choose of btnDelete */
 
 /* _UIB-CODE-BLOCK-END */
@@ -2563,38 +2522,11 @@ END. /* choose of btnDelete */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDict C-Win
 ON CHOOSE OF btnDict IN FRAME frSettings /* DD */
 , btnDict-txt
-or 'CTRL-SHIFT-D' of c-win anywhere
+OR 'CTRL-SHIFT-D' OF c-win ANYWHERE
 DO:
 
-  run startTool("Dict").
+  RUN startTool("Dict").
 
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDict C-Win
-ON MOUSE-MENU-CLICK OF btnDict IN FRAME frSettings /* DD */
-DO:
-  
-  run startTool("Admin").
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnDump-2
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDump-2 C-Win
-ON CHOOSE OF btnDump-2 IN FRAME frSettings /* Dmp */
-, btnDump, btnDump-txt
-or 'ALT-M' of c-win anywhere
-DO:
-  publish "setUsage" ("dumpData"). /* user behaviour */
-  hide frame frSettings.
-  run btnDumpChoose. 
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2602,80 +2534,76 @@ END.
 
 
 &Scoped-define FRAME-NAME frMain
+&Scoped-define SELF-NAME btnDump
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDump C-Win
+ON CHOOSE OF btnDump IN FRAME frMain /* Save */
+OR "CTRL-S" OF c-win ANYWHERE 
+DO:
+
+  IF btnDump:SENSITIVE IN FRAME frMain THEN RUN btnDumpChoose.
+
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME btnEdit
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnEdit C-Win
 ON CHOOSE OF btnEdit IN FRAME frMain /* Edit */
-do:
-  publish "setUsage" ("editRecord"). /* user behaviour */
-  run btnEditChoose.
-end.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnFieldFilter
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnFieldFilter C-Win
-ON CHOOSE OF btnFieldFilter IN FRAME frMain /* Y */
 DO:
-  publish "setUsage" ("filterFields"). /* user behaviour */
-  run reopenFieldBrowse(?,?). /* reopen, while maintaining original sort */
-  APPLY "entry" TO ttField.cFieldName IN BROWSE brFields.
+  PUBLISH "setUsage" ("editRecord"). /* user behaviour */
+  RUN btnEditChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME btnFavourite
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnFavourite C-Win
+ON CHOOSE OF btnFavourite IN FRAME frMain /* F */
+OR "f" OF brTables
+OR "*" OF brTables
+OR "CHOOSE" OF MENU-ITEM m_Toggle_as_favourite IN MENU POPUP-MENU-brTables
+OR CHOOSE OF btnFavourite
+DO:
+  DEFINE BUFFER bTable FOR ttTable. 
+  PUBLISH "setUsage" ("addToFavourites"). /* user behaviour */
+
+  /* Find table and set/unset as fav */
+  FIND bTable 
+    WHERE bTable.cDatabase  = gcCurrentDatabase
+      AND bTable.cTableName = gcCurrentTable. 
+          
+  /* Toggle fav-status and save */
+  bTable.lFavourite = NOT bTable.lFavourite.
+  setRegistry( SUBSTITUTE("DB:&1",gcCurrentDatabase)
+             , SUBSTITUTE("&1:Favourite",gcCurrentTable)
+             , (IF bTable.lFavourite THEN "TRUE" ELSE ?)
+             ).
+
+  /* If we are in the favo-view then refresh the browse to get rid of this table */
+  IF glShowFavourites THEN RUN reopenTableBrowse(?).
+
+  IF giCurrentPage <> {&PAGE-FAVOURITES} THEN
+    RUN showFavourite(bTable.lFavourite).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define FRAME-NAME frSettings
 &Scoped-define SELF-NAME btnHelp
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnHelp C-Win
-ON CHOOSE OF btnHelp IN FRAME frMain /* Help */
-OR "CHOOSE" OF MENU-ITEM mShowHelp 
+ON CHOOSE OF btnHelp IN FRAME frSettings /* Help */
+, btnHelp-txt
 OR "HELP" OF c-win ANYWHERE 
 DO:
-  DEFINE VARIABLE iMouseX AS INTEGER NO-UNDO. 
-  DEFINE VARIABLE iMouseY AS INTEGER NO-UNDO. 
-  DEFINE VARIABLE iReturn AS INTEGER NO-UNDO.
-
-  publish "setUsage" ("filterTables"). /* user behaviour */
-
-  IF SELF = btnHelp:HANDLE THEN
-  DO:
-    RUN getMouseXY ( INPUT btnHelp:HANDLE
-                   , OUTPUT iMouseX
-                   , OUTPUT iMouseY
-                   ).
-
-    /* Make sure we only activate the help when we
-     * have really clicked on the left part of the button.
-     * When we do APPLY "CHOOSE" to this button, ignore the 
-     * tableFilterOptions
-     */
-    IF isMouseOver(btnHelp:HANDLE) 
-      AND iMouseX > 28 THEN 
-    DO:
-      RUN SendMessageA (btnHelp:HWND, 517, 0, 0, OUTPUT iReturn).
-      RETURN NO-APPLY.
-    END.
-  END. 
-
-  PUBLISH "setUsage" ("help").
-  RUN startWinHelp(FOCUS).
+  HIDE FRAME frSettings.
+  RUN showTour.  
   RETURN NO-APPLY.
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnIndexFilter
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnIndexFilter C-Win
-ON CHOOSE OF btnIndexFilter IN FRAME frMain /* Y */
-or 'return' of fiIndexNameFilter, fiFlagsFilter, fiFieldsFilter
-DO:
-  publish "setUsage" ("filterIndexes"). /* user behaviour */
-  run reopenIndexBrowse(?,?). /* reopen, while maintaining original sort */
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2686,49 +2614,32 @@ END.
 &Scoped-define SELF-NAME btnInsert
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnInsert C-Win
 ON CHOOSE OF btnInsert IN FRAME frWhere /* + */
-or "return" of /* cbAndOr, cbFields, cbOperator, */ ficValue
+OR "return" OF /* cbAndOr, cbFields, cbOperator, */ ficValue
 DO:
-  define buffer ttField for ttField. 
-  define variable cField as character no-undo.
+  DEFINE BUFFER ttField FOR ttField. 
+  DEFINE VARIABLE cField AS CHARACTER NO-UNDO.
 
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
 
-  find ttField where ttField.cFullName = cbFields:screen-value no-error.
-  if not available ttField then return. 
+  FIND ttField WHERE ttField.cFullName = cbFields:screen-value NO-ERROR.
+  IF NOT AVAILABLE ttField THEN RETURN. 
   cField = ttField.cFullName.
 
-  if cField = 'RECID' or cField = 'ROWID' 
-    then cField = substitute('&1(&2)', cField, gcCurrentTable ).
+  IF cField = 'RECID' OR cField = 'ROWID' 
+    THEN cField = SUBSTITUTE('&1(&2)', cField, gcCurrentTable ).
 
-  ficWhere2:insert-string(left-trim(substitute('&1 &2 &3 &4&5'
-                                        , (if cbAndOr:screen-value = ? then '' else cbAndOr:screen-value)
+  ficWhere2:insert-string(LEFT-TRIM(SUBSTITUTE('&1 &2 &3 &4&5'
+                                        , (IF cbAndOr:screen-value = ? THEN '' ELSE cbAndOr:screen-value)
                                         , cField
                                         , cbOperator:screen-value
-                                        , if ttField.cDataType = 'character' then quoter(ficValue:screen-value) else ficValue:screen-value
-                                        , chr(13)
+                                        , IF ttField.cDataType = 'character' THEN QUOTER(ficValue:screen-value) ELSE ficValue:screen-value
+                                        , CHR(13)
                                         )
                               )
                          ).
 
-  apply "entry" to cbAndOr.
-  return no-apply.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define FRAME-NAME frSettings
-&Scoped-define SELF-NAME btnLoad-2
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnLoad-2 C-Win
-ON CHOOSE OF btnLoad-2 IN FRAME frSettings /* Load */
-, btnLoad, btnLoad-txt
-or 'CTRL-SHIFT-L' of c-win anywhere
-DO:
-  return.
-  /* publish "setUsage" ("loadData"). /* user behaviour */ */
-  /* hide frame frSettings.                                */
-  /* run loadData.                                         */
+  APPLY "entry" TO cbAndOr.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2736,13 +2647,27 @@ END.
 
 
 &Scoped-define FRAME-NAME frMain
+&Scoped-define SELF-NAME btnLoad
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnLoad C-Win
+ON CHOOSE OF btnLoad IN FRAME frMain /* Load */
+OR "CTRL-L" OF c-win ANYWHERE 
+DO:
+
+  IF btnLoad:SENSITIVE IN FRAME frMain THEN RUN btnLoadChoose.
+  
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME btnMoveBottom
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnMoveBottom C-Win
 ON CHOOSE OF btnMoveBottom IN FRAME frMain /* Btm */
-or 'ctrl-shift-cursor-down' of brFields
+OR 'ctrl-shift-cursor-down' OF brFields
 DO:
-  publish "setUsage" ("changeFieldOrder"). /* user behaviour */
-  run moveField('bottom').
+  PUBLISH "setUsage" ("changeFieldOrder"). /* user behaviour */
+  RUN moveField('bottom').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2752,14 +2677,14 @@ END.
 &Scoped-define SELF-NAME btnMoveDown
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnMoveDown C-Win
 ON CHOOSE OF btnMoveDown IN FRAME frMain /* Dn */
-or 'ctrl-cursor-down' of brFields
+OR 'ctrl-cursor-down' OF brFields
 DO:
   /* Show a hint when user uses this for the first time */
   IF getRegistry("DataDigger:Usage", "changeFieldOrder:numUsed") = ? THEN 
     RUN showHint(brFields:HANDLE,2,"~nYou can also use CTRL-UP / CTRL-DOWN on the field browse to move fields around").
 
-  publish "setUsage" ("changeFieldOrder"). /* user behaviour */
-  run moveField('down').
+  PUBLISH "setUsage" ("changeFieldOrder"). /* user behaviour */
+  RUN moveField('down').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2769,10 +2694,10 @@ END.
 &Scoped-define SELF-NAME btnMoveTop
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnMoveTop C-Win
 ON CHOOSE OF btnMoveTop IN FRAME frMain /* Top */
-or 'ctrl-shift-cursor-up' of brFields
+OR 'ctrl-shift-cursor-up' OF brFields
 DO:
-  publish "setUsage" ("changeFieldOrder"). /* user behaviour */
-  run moveField('top').
+  PUBLISH "setUsage" ("changeFieldOrder"). /* user behaviour */
+  RUN moveField('top').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2796,43 +2721,14 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME btnNextQuery
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnNextQuery C-Win
-ON CHOOSE OF btnNextQuery IN FRAME frMain /* > */
-or 'page-up' of ficWhere       in frame frMain 
-or 'choose'  of btnNextQuery-2 in frame frWhere
-do:
-  publish "setUsage" ("navigateQuery"). /* user behaviour */
-  setQuery(-1).
-end.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define FRAME-NAME frWhere
 &Scoped-define SELF-NAME btnOK
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnOK C-Win
 ON CHOOSE OF btnOK IN FRAME frWhere /* OK */
 DO:
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
   setQueryEditor('Hidden').
 END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define FRAME-NAME frMain
-&Scoped-define SELF-NAME btnPrevQuery
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnPrevQuery C-Win
-ON CHOOSE OF btnPrevQuery IN FRAME frMain /* < */
-OR 'page-down' of ficWhere       in frame frMain 
-or 'choose'    of btnPrevQuery-2 in frame frWhere
-do:
-  publish "setUsage" ("navigateQuery"). /* user behaviour */
-  setQuery(+1).
-end.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -2843,17 +2739,17 @@ end.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnProcEdit C-Win
 ON CHOOSE OF btnProcEdit IN FRAME frSettings /* Ed */
 , btnProcEdit-txt
-or "CTRL-SHIFT-E" of c-win anywhere
+OR "SHIFT-F3" OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("Editor"). /* user behaviour */
+  PUBLISH "setUsage" ("Editor"). /* user behaviour */
 
   /* Return if progress version is runtime */
-  if progress = "Run-time" then return. 
+  IF PROGRESS = "Run-time" THEN RETURN. 
 
   /* In read-only mode, return */
-  if ReadOnlyDigger then return. 
+  IF plReadOnlyDigger THEN RETURN. 
 
-  run _edit.p.
+  RUN _edit.p.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2865,16 +2761,16 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnQt C-Win
 ON CHOOSE OF btnQt IN FRAME frWhere /* "" */
 DO:
-  publish "setUsage" ("useWherePanel"). /* user behaviour */
+  PUBLISH "setUsage" ("useWherePanel"). /* user behaviour */
 
   /* No text selected */
-  if ficWhere2:selection-text = "" then
-  do:
-    ficWhere2:insert-string(substitute(' &1 ', self:label)).
+  IF ficWhere2:selection-text = "" THEN
+  DO:
+    ficWhere2:insert-string(SUBSTITUTE(' &1 ', SELF:label)).
     ficWhere2:cursor-offset = ficWhere2:cursor-offset - 2.
-  end.
-  else 
-    ficWhere2:replace-selection-text(substitute('"&1"', ficWhere2:selection-text)).
+  END.
+  ELSE 
+    ficWhere2:replace-selection-text(SUBSTITUTE('"&1"', ficWhere2:selection-text)).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2885,16 +2781,16 @@ END.
 &Scoped-define SELF-NAME btnQueries
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnQueries C-Win
 ON CHOOSE OF btnQueries IN FRAME frMain /* Q */
-or 'ALT-Q'        of c-win 
-or 'CTRL-SHIFT-Q' of c-win 
-or 'CTRL-INS'     of ficWhere       in frame frMain
-or 'CTRL-INS'     of ficWhere2      in frame frWhere 
-or 'CHOOSE'       of btnQueries-2   in frame frWhere 
-or 'CHOOSE'       of btnQueries-txt in frame frSettings
+OR 'ALT-Q'        OF c-win 
+OR 'CTRL-SHIFT-Q' OF c-win 
+OR 'CTRL-INS'     OF ficWhere       IN FRAME frMain
+OR 'CTRL-INS'     OF ficWhere2      IN FRAME frWhere 
+OR 'CHOOSE'       OF btnQueries-2   IN FRAME frWhere 
+OR 'CHOOSE'       OF btnQueries-txt IN FRAME frSettings
 DO:
-  publish "setUsage" ("selectQuery"). /* user behaviour */
-  hide frame frSettings.
-  run btnQueriesChoose.
+  PUBLISH "setUsage" ("selectQuery"). /* user behaviour */
+  HIDE FRAME frSettings.
+  RUN btnQueriesChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2906,11 +2802,11 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnQueryTester C-Win
 ON CHOOSE OF btnQueryTester IN FRAME frSettings /* QT */
 , btnQueryTester-txt
-or "CTRL-Q" of c-win anywhere
+OR "CTRL-Q" OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("QueryTester"). /* user behaviour */
-  hide frame frSettings.
-  run value(getProgramDir() + 'query-tester.w') (input-output table ttTestQuery by-reference).
+  PUBLISH "setUsage" ("QueryTester"). /* user behaviour */
+  HIDE FRAME frSettings.
+  RUN value(getProgramDir() + 'query-tester.w') (INPUT-OUTPUT table ttTestQuery BY-REFERENCE).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2936,11 +2832,11 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
 ON CHOOSE OF btnSettings IN FRAME frSettings /* Set */
 , btnSettings-txt 
-or 'ALT-S' of c-win anywhere
+OR 'ALT-S' OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("Settings"). /* user behaviour */
-  hide frame frSettings.
-  run btnSettingsChoose.
+  PUBLISH "setUsage" ("Settings"). /* user behaviour */
+  HIDE FRAME frSettings.
+  RUN btnSettingsChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2949,10 +2845,43 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
 ON CURSOR-DOWN OF btnSettings IN FRAME frSettings /* Set */
-, btnSettings, btnConnections, btnDict, btnProcEdit, btnDump-2
-, btnLoad-2, btnQueries-3, btnQueryTester, btnChangeLog, btnAbout
+, btnDataDigger, btnConnections
+, btnSettings, btnProcEdit
+, btnDict, btnDataAdmin
+, btnQueries-3, btnQueryTester
+, btnHelp, btnAbout 
 DO:
-  apply "TAB" to self.
+  RUN navigateSettings(SELF:HANDLE,LAST-EVENT:LABEL).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
+ON CURSOR-LEFT OF btnSettings IN FRAME frSettings /* Set */
+, btnDataDigger, btnConnections
+, btnSettings, btnProcEdit
+, btnDict, btnDataAdmin
+, btnQueries-3, btnQueryTester
+, btnHelp, btnAbout
+DO:
+  RUN navigateSettings(SELF:HANDLE,LAST-EVENT:LABEL).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
+ON CURSOR-RIGHT OF btnSettings IN FRAME frSettings /* Set */
+, btnDataDigger, btnConnections
+, btnSettings, btnProcEdit
+, btnDict, btnDataAdmin
+, btnQueries-3, btnQueryTester
+, btnHelp, btnAbout
+DO:
+  RUN navigateSettings(SELF:HANDLE,LAST-EVENT:LABEL).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2961,10 +2890,13 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
 ON CURSOR-UP OF btnSettings IN FRAME frSettings /* Set */
-, btnConnections, btnDict, btnProcEdit, btnDump-2
-, btnLoad-2, btnQueries-3, btnChangeLog, btnAbout
+, btnDataDigger, btnConnections
+, btnSettings, btnProcEdit
+, btnDict, btnDataAdmin
+, btnQueries-3, btnQueryTester
+, btnHelp, btnAbout
 DO:
-  apply "SHIFT-TAB" to self.
+  RUN navigateSettings(SELF:HANDLE,LAST-EVENT:LABEL).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2974,19 +2906,16 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
 ON MOUSE-MENU-CLICK OF btnSettings IN FRAME frSettings /* Set */
 DO:
-  define variable cEnvironment as character   no-undo.
+  DEFINE VARIABLE cEnvironment AS CHARACTER   NO-UNDO.
 
-  publish "setUsage" ("EditSettings"). /* user behaviour */
-  hide frame frSettings.
+  PUBLISH "setUsage" ("EditSettings"). /* user behaviour */
+  HIDE FRAME frSettings.
 
   /* Load or create personalized ini file */
-  cEnvironment = substitute('&1DataDigger-&2.ini'
-                           , getProgramDir()
-                           , getUserName() 
-                           ).
+  cEnvironment = SUBSTITUTE('&1DataDigger-&2.ini', getProgramDir(), getUserName()).
 
   /* Start default editor for ini file */
-  os-command no-wait start value( cEnvironment ).
+  OS-COMMAND NO-WAIT START VALUE( cEnvironment ).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2994,15 +2923,58 @@ END.
 
 
 &Scoped-define FRAME-NAME frMain
+&Scoped-define SELF-NAME btnTabFavourites
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabFavourites C-Win
+ON CHOOSE OF btnTabFavourites IN FRAME frMain /* Fav */
+OR 'ctrl-2' OF FRAME {&frame-name} ANYWHERE
+DO:
+  /* Keep track of user behaviour */
+  PUBLISH "setUsage" ("setPage").
+  RUN setPage({&PAGE-FAVOURITES}).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabFavourites C-Win
+ON MOUSE-MENU-CLICK OF btnTabFavourites IN FRAME frMain /* Fav */
+DO:
+  DEFINE VARIABLE dRow           AS DECIMAL     NO-UNDO.
+  DEFINE VARIABLE iRow           AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cFieldList     AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cQuery         AS CHARACTER NO-UNDO. 
+
+  /* Find the primary index */
+  FIND FIRST ttIndex WHERE ttIndex.cIndexFlags MATCHES '*P*' NO-ERROR.
+  IF NOT AVAILABLE ttIndex THEN RETURN. 
+
+  /* Create a query expression from all the fields in the index */
+  cQuery = getQueryFromFields(ttIndex.cFieldList).
+
+  /* If needed, expand the query editor */
+  IF LOGICAL(getRegistry ("DataDigger", "AutoExpandQueryEditor")) <> NO THEN
+    setQueryEditor('visible').
+
+  /* Fill in the query on the screen */
+  ficWhere:screen-value = formatQueryString(cQuery, gcQueryEditorState = 'visible').
+
+  APPLY "entry" TO ficWhere.
+  ficWhere:cursor-offset = LENGTH(ENTRY(1,cQuery,'~n')) + 2.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME btnTabFields
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabFields C-Win
 ON CHOOSE OF btnTabFields IN FRAME frMain /* Fld */
-or 'ctrl-1' of frame {&frame-name} anywhere
+OR 'ctrl-3' OF FRAME {&frame-name} ANYWHERE
 DO:
   /* Keep track of user behaviour */
-  publish "setUsage" ("setPage").
-
-  run setPage(1).
+  PUBLISH "setUsage" ("setPage").
+  RUN setPage({&PAGE-FIELDS}).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3012,12 +2984,11 @@ END.
 &Scoped-define SELF-NAME btnTabIndexes
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabIndexes C-Win
 ON CHOOSE OF btnTabIndexes IN FRAME frMain /* Idx */
-or 'ctrl-2' of frame {&frame-name} anywhere
+OR 'ctrl-4' OF FRAME {&FRAME-NAME} ANYWHERE
 DO:
   /* Keep track of user behaviour */
-  publish "setUsage" ("setPage").
-
-  run setPage(2).
+  PUBLISH "setUsage" ("setPage").
+  RUN setPage({&PAGE-INDEXES}).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3027,27 +2998,27 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabIndexes C-Win
 ON MOUSE-MENU-CLICK OF btnTabIndexes IN FRAME frMain /* Idx */
 DO:
-  define variable dRow           as decimal     no-undo.
-  define variable iRow           as integer     no-undo.
-  define variable cFieldList     as character no-undo. 
-  define variable cQuery         as character no-undo. 
+  DEFINE VARIABLE dRow           AS DECIMAL     NO-UNDO.
+  DEFINE VARIABLE iRow           AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cFieldList     AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cQuery         AS CHARACTER NO-UNDO. 
 
   /* Find the primary index */
-  find first ttIndex where ttIndex.cIndexFlags matches '*P*' no-error.
-  if not available ttIndex then return. 
+  FIND FIRST ttIndex WHERE ttIndex.cIndexFlags MATCHES '*P*' NO-ERROR.
+  IF NOT AVAILABLE ttIndex THEN RETURN. 
 
   /* Create a query expression from all the fields in the index */
   cQuery = getQueryFromFields(ttIndex.cFieldList).
 
   /* If needed, expand the query editor */
-  if logical(getRegistry ("DataDigger", "AutoExpandQueryEditor")) <> no then
+  IF LOGICAL(getRegistry ("DataDigger", "AutoExpandQueryEditor")) <> NO THEN
     setQueryEditor('visible').
 
   /* Fill in the query on the screen */
   ficWhere:screen-value = formatQueryString(cQuery, gcQueryEditorState = 'visible').
 
-  apply "entry" to ficWhere.
-  ficWhere:cursor-offset = length(entry(1,cQuery,'~n')) + 2.
+  APPLY "entry" TO ficWhere.
+  ficWhere:cursor-offset = LENGTH(ENTRY(1,cQuery,'~n')) + 2.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3057,48 +3028,40 @@ END.
 &Scoped-define SELF-NAME btnTableFilter
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTableFilter C-Win
 ON CHOOSE OF btnTableFilter IN FRAME frMain /* Y */
-or 'return' of fiTableFilter, cbDatabaseFilter
-or 'value-changed' of menu-item m_Show_hidden_tables in menu POPUP-MENU-brTables
+OR "CTRL-CURSOR-DOWN" OF fiTableFilter
+  OR "CTRL-CURSOR-DOWN" OF cbDatabaseFilter
+  OR "CTRL-CURSOR-DOWN" OF brTables
+  OR "CTRL-CURSOR-DOWN" OF btnClearTableFilter
+  OR "CTRL-CURSOR-DOWN" OF btnTableFilter
+  OR "ALT-CURSOR-DOWN" OF fiTableFilter
+  OR "ALT-CURSOR-DOWN" OF brTables
+  OR "ALT-CURSOR-DOWN" OF btnClearTableFilter
+  OR "ALT-CURSOR-DOWN" OF btnTableFilter
 DO:
-  define variable iMouseX as integer no-undo. 
-  define variable iMouseY as integer no-undo. 
 
-  publish "setUsage" ("filterTables"). /* user behaviour */
-
-  if self = btnTableFilter:handle then
-  do:
-    run getMouseXY ( input btnTableFilter:handle
-                   , output iMouseX
-                   , output iMouseY
-                   ).
-    /* Make sure we only activate the tableFilterOptions when we
-     * have really clicked on the right part of the button.
-     * When we do APPLY "CHOOSE" to this button, ignore the 
-     * tableFilterOptions
-     */
-    IF isMouseOver(btnTableFilter:HANDLE) 
-      AND iMouseX >= 20 THEN 
-    DO:
-      RUN setTableFilterOptions.
-      RETURN NO-APPLY.
-    END.
+  /* Filter options only available on normal table page */
+  IF giCurrentPage <> {&PAGE-FAVOURITES} 
+    AND btnTableFilter:SENSITIVE THEN 
+  DO:
+    RUN setTableFilterOptions.
+    APPLY 'VALUE-CHANGED' TO brTables IN FRAME frMain. 
+    APPLY 'ENTRY' TO brTables IN FRAME frMain. 
   END. 
 
-  RUN reopenTableBrowse(?).
-  APPLY 'value-changed' TO brTables.
-  APPLY 'entry' TO brTables.
-  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME btnTableView
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTableView C-Win
-ON CHOOSE OF btnTableView IN FRAME frMain /* T */
+&Scoped-define SELF-NAME btnTabTables
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTabTables C-Win
+ON CHOOSE OF btnTabTables IN FRAME frMain /* Tbl */
+OR 'ctrl-1' OF FRAME {&frame-name} ANYWHERE
 DO:
-  RUN setTableView(NOT glShowFavourites,NO).
+  /* Keep track of user behaviour */
+  PUBLISH "setUsage" ("setPage").
+  RUN setPage({&PAGE-TABLES}).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3108,6 +3071,7 @@ END.
 &Scoped-define SELF-NAME btnTools
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnTools C-Win
 ON CHOOSE OF btnTools IN FRAME frMain /* Tools */
+OR "CTRL-T" OF FRAME frMain ANYWHERE
 DO:
   PUBLISH "setUsage" ("showTools"). /* user behaviour */
 
@@ -3118,14 +3082,15 @@ DO:
   END.
 
   /* Show settings frame */
-  FRAME frSettings:X = 35.
-  FRAME frSettings:Y = 35.
+  FRAME frSettings:X = btnTools:X.
+  FRAME frSettings:Y = btnTools:Y + btnTools:HEIGHT-PIXELS.
   VIEW FRAME frSettings.
 
   /* Try to hide it every 2 seconds */
-  RUN setTimer("hideSettingsFrame",3000).
+  IF KEYLABEL(LASTKEY) <> "CTRL-T" THEN
+    RUN setTimer("hideSettingsFrame",3000).
 
-  APPLY 'entry' TO btnSettings IN FRAME frSettings.
+  APPLY 'entry' TO btnDataDigger IN FRAME frSettings.
   RETURN NO-APPLY.
 END.
 
@@ -3137,8 +3102,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnView C-Win
 ON CHOOSE OF btnView IN FRAME frMain /* View */
 DO:
-  publish "setUsage" ("viewData"). /* user behaviour */
-  run btnViewChoose.
+  PUBLISH "setUsage" ("viewData"). /* user behaviour */
+  RUN btnViewChoose.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3149,27 +3114,35 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnViewData C-Win
 ON CHOOSE OF btnViewData IN FRAME frMain /* -> */
 OR 'ctrl-j' OF cbAndOr, cbFields, cbOperator, ficValue, ficWhere, fiTableFilter, brTables, brFields
-OR mouse-select-dblclick, RETURN OF brTables
+OR MOUSE-SELECT-DBLCLICK, RETURN OF brTables
 OR 'ctrl-j' OF ficWhere2 IN FRAME frWhere
 OR 'F2' OF ficWhere 
 OR 'F2' OF ficWhere2 IN FRAME frWhere
 OR 'CTRL-J' OF ttField.cFormat IN BROWSE brFields
 OR 'CHOOSE' OF btnViewData-2 IN FRAME frWhere
 DO:
+  DEFINE BUFFER bTimer FOR ttTimer.
+
   PUBLISH "setUsage" ("viewData"). /* user behaviour */
 
   /* Only proceed if the button is sensitive */
   IF NOT btnViewData:SENSITIVE THEN RETURN NO-APPLY.
 
-  /* question is: how realistic it the below? 
-   * Some tests show that its next to impossible to achieve this. So leave it out first 
+  /* Make sure the table browse is up to date. Because we use a slight delay
+   * to show the fields of the table, there is a theoretical chance the user
+   * points to a new table and starts the query within 200 msec.
+   * This is a realistic scenario when you use the keyboard: 
+   * - select table A
+   * - press cursor down
+   * - IMMEDIATELY (within 200 msec) press ENTER
    */
-/*   /* Make sure the table browse is up to date. Because we use a slight delay */
-/*    * to show the fields of the table, there is a theoretical chance the user */
-/*    * points to a new table and starts the query within 200 msec.             */
-/*    */                                                                        */
-/*   APPLY "VALUE-CHANGED" TO brTables IN FRAME frMain.                         */
-/*   RUN setTableContext(input gcCurrentTable).                                 */
+  APPLY "VALUE-CHANGED" TO brTables IN FRAME frMain.
+
+  /* Check whether a table change event is pending 
+   * And speed it up if needed. 
+   */
+  FIND bTimer WHERE bTimer.cProc = 'timedTableChange' NO-ERROR.
+  IF AVAILABLE bTimer THEN RUN setTimer('timedTableChange',1).
 
   /* Open the query */
   RUN reopenDataBrowse('',?).
@@ -3185,24 +3158,24 @@ END.
 &Scoped-define SELF-NAME btnWhere
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnWhere C-Win
 ON CHOOSE OF btnWhere IN FRAME frMain /* Where */
-or 'CTRL-ALT-W' of c-win anywhere
+OR 'CTRL-ALT-W' OF c-win ANYWHERE
 DO:
-  publish "setUsage" ("switchQueryEditor"). /* user behaviour */
+  PUBLISH "setUsage" ("switchQueryEditor"). /* user behaviour */
 
-  case gcQueryEditorState:
-    when 'visible' then 
-    do: 
+  CASE gcQueryEditorState:
+    WHEN 'visible' THEN 
+    DO: 
       setQueryEditor('hidden').
-      apply 'entry' to ficWhere in frame frMain.
-    end.
+      APPLY 'entry' TO ficWhere IN FRAME frMain.
+    END.
 
-    when 'hidden'  then 
-    do:
+    WHEN 'hidden'  THEN 
+    DO:
       setQueryEditor('visible').
-      apply 'entry' to ficWhere2 in frame frWhere.
-    end.
+      APPLY 'entry' TO ficWhere2 IN FRAME frWhere.
+    END.
 
-  end case.
+  END CASE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3214,7 +3187,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL cbAndOr C-Win
 ON RETURN OF cbAndOr IN FRAME frWhere /* Where */
 DO:
-  apply 'entry' to cbFields.
+  APPLY 'entry' TO cbFields.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3225,7 +3198,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL cbFields C-Win
 ON RETURN OF cbFields IN FRAME frWhere
 DO:
-  apply 'entry' to cbOperator.
+  APPLY 'entry' TO cbOperator.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3236,7 +3209,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL cbOperator C-Win
 ON RETURN OF cbOperator IN FRAME frWhere
 DO:
-  apply 'entry' to ficValue.
+  APPLY 'entry' TO ficValue.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3256,10 +3229,12 @@ PROCEDURE CtrlFrame.PSTimer.Tick .
   DEFINE BUFFER bTimer FOR ttTimer. 
   
   /* Turn off events when we're running */
+  IF NOT glUseTimer THEN RETURN.
+  
   chCtrlFrame:pstimer:ENABLED = FALSE.
   
   /* No timer stuff in debug mode */
-  IF glDebugMode THEN RETURN. 
+  IF glDebugMode THEN RETURN.
 
   FIND FIRST bTimer NO-ERROR.
   IF AVAILABLE bTimer THEN
@@ -3272,6 +3247,7 @@ PROCEDURE CtrlFrame.PSTimer.Tick .
       bTimer.tNext = ADD-INTERVAL(NOW, bTimer.iTime,"milliseconds").
   END.
 
+  /* Schedule the next event to run */
   RUN SetTimerInterval.
 
 END PROCEDURE. /* OCX.psTimer.Tick */
@@ -3285,8 +3261,8 @@ END PROCEDURE. /* OCX.psTimer.Tick */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ficValue C-Win
 ON ENTRY OF ficValue IN FRAME frWhere
 DO:
-  if self:screen-value = "" then 
-    self:screen-value = getLinkInfo(cbFields:screen-value). 
+  IF SELF:screen-value = "" THEN 
+    SELF:screen-value = getLinkInfo(cbFields:screen-value). 
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3299,7 +3275,35 @@ END.
 ON ALT-CURSOR-DOWN OF ficWhere IN FRAME frMain
 DO:
   setQueryEditor('visible').
-  apply 'entry' to ficWhere2 in frame frWhere.
+  APPLY 'entry' TO ficWhere2 IN FRAME frWhere.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ficWhere C-Win
+ON PAGE-DOWN OF ficWhere IN FRAME frMain
+OR "CHOOSE" OF btnPrevQuery
+OR "ALT-CURSOR-LEFT" OF ficWhere
+OR "CURSOR-DOWN" OF ficWhere
+DO:
+  PUBLISH "setUsage" ("navigateQuery"). /* user behaviour */
+  setQuery(+1).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ficWhere C-Win
+ON PAGE-UP OF ficWhere IN FRAME frMain
+OR "CHOOSE" OF btnNextQuery
+OR "ALT-CURSOR-RIGHT" OF ficWhere
+OR "CURSOR-UP" OF ficWhere
+DO:
+  PUBLISH "setUsage" ("navigateQuery"). /* user behaviour */
+  setQuery(-1).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3310,13 +3314,13 @@ END.
 ON RETURN OF ficWhere IN FRAME frMain
 DO:
   /* If the editor is small, interpret an ENTER as CTRL-ENTER */
-  if gcQueryEditorState = 'hidden' then 
-  do:
-    apply 'choose' to btnViewData.
-    return no-apply.
-  end. 
-  else
-    self:insert-string ( '~n' ) .
+  IF gcQueryEditorState = 'hidden' THEN 
+  DO:
+    APPLY 'choose' TO btnViewData.
+    RETURN NO-APPLY.
+  END. 
+  ELSE
+    SELF:insert-string ( '~n' ) .
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3329,7 +3333,7 @@ END.
 ON ALT-CURSOR-UP OF ficWhere2 IN FRAME frWhere
 DO:
   setQueryEditor('hidden').
-  apply 'entry' to ficWhere in frame frMain.
+  APPLY 'entry' TO ficWhere IN FRAME frMain.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3337,12 +3341,23 @@ END.
 
 
 &Scoped-define FRAME-NAME frMain
+&Scoped-define SELF-NAME fiFeedback
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiFeedback C-Win
+ON MOUSE-SELECT-CLICK OF fiFeedback IN FRAME frMain
+DO:
+  OS-COMMAND NO-WAIT START VALUE("https://datadigger.wordpress.com/contact/").
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME fiIndexNameFilter
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiIndexNameFilter C-Win
 ON ANY-PRINTABLE OF fiIndexNameFilter IN FRAME frMain
 , fiIndexNameFilter, fiFlagsFilter, fiFieldsFilter
-do:
-  setFilterFieldColor(self:handle).
+DO:
+  setFilterFieldColor(SELF:handle).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3355,7 +3370,7 @@ ON CURSOR-DOWN OF fiIndexNameFilter IN FRAME frMain
 DO:
   setFilterFieldColor(SELF:HANDLE).
   ghLastIndexFilter = SELF.
-  APPLY 'entry' to brIndexes.
+  APPLY 'entry' TO brIndexes.
   RETURN NO-APPLY.
 END.
 
@@ -3367,14 +3382,14 @@ END.
 ON ENTRY OF fiIndexNameFilter IN FRAME frMain
 , fiTableFilter
 , fiIndexNameFilter, fiFlagsFilter, fiFieldsFilter
-do:
+DO:
   /* If you enter the field and you have not put in a filter, 
    * clear out the field so you can type something yourself
    */
-  if self:screen-value = self:private-data then
-    self:screen-value = ''.
+  IF SELF:screen-value = SELF:private-data THEN
+    SELF:screen-value = ''.
 
-  setFilterFieldColor(self:handle).
+  setFilterFieldColor(SELF:handle).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3385,9 +3400,20 @@ END.
 ON LEAVE OF fiIndexNameFilter IN FRAME frMain
 , fiTableFilter
 , fiIndexNameFilter, fiFlagsFilter, fiFieldsFilter
-do:
-  if self:screen-value = '' then self:screen-value = self:private-data.
-  setFilterFieldColor(self:handle).
+DO:
+  IF SELF:SCREEN-VALUE = '' THEN SELF:SCREEN-VALUE = SELF:PRIVATE-DATA.
+  setFilterFieldColor(SELF:handle).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiIndexNameFilter C-Win
+ON RETURN OF fiIndexNameFilter IN FRAME frMain
+, fiFlagsFilter, fiFieldsFilter
+DO:
+  RUN reopenIndexBrowse(?,?). /* reopen, while maintaining original sort */
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3398,10 +3424,10 @@ END.
 ON SHIFT-DEL OF fiIndexNameFilter IN FRAME frMain
 , fiFlagsFilter, fiFieldsFilter
 DO:
-  apply 'choose' to btnClearIndexFilter.
-  self:screen-value = ''.
-  apply 'value-changed' to self.
-  apply 'entry' to self.
+  APPLY 'choose' TO btnClearIndexFilter.
+  SELF:screen-value = ''.
+  APPLY 'value-changed' TO SELF.
+  APPLY 'entry' TO SELF.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3409,45 +3435,58 @@ END.
 
 
 &Scoped-define FRAME-NAME frData
-&Scoped-define SELF-NAME fiNumResults
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiNumResults C-Win
-ON MOUSE-SELECT-DBLCLICK OF fiNumResults IN FRAME frData
-, fiNumSelected 
+&Scoped-define SELF-NAME fiNumRecords
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiNumRecords C-Win
+ON MOUSE-SELECT-DBLCLICK OF fiNumRecords IN FRAME frData
 DO:
-  define variable hQuery  as handle      no-undo.
-  define variable hBuffer as handle      no-undo.
-  define variable cQuery  as character   no-undo.
-  define variable cTable  as character   no-undo.
-  define variable iStartTime as integer     no-undo.
+  DEFINE VARIABLE hQuery  AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hBuffer AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cQuery  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cTable  AS CHARACTER   NO-UNDO.
 
-  if not valid-handle(ghDataBrowse) then return.
-
-  session:set-wait-state('general'). 
-  iStartTime = etime.
+  IF NOT VALID-HANDLE(ghDataBrowse) THEN RETURN.
+  SESSION:SET-WAIT-STATE('general'). 
 
   /* Change query to a PRESELECT query to get number of rows */
-  cQuery = ghDataBrowse:query:prepare-string.
-  entry(1,cQuery,' ') = 'preselect'.
+  cQuery = ghDataBrowse:QUERY:prepare-string.
+  ENTRY(1,cQuery,' ') = 'preselect'.
 
   /* Create buffer for the table we selected in the data browse */
-  cTable = ghDataBrowse:query:get-buffer-handle(1):dbname + '.' + ghDataBrowse:query:get-buffer-handle(1):name.
+  cTable = ghDataBrowse:QUERY:get-buffer-handle(1):dbname + '.' + ghDataBrowse:QUERY:get-buffer-handle(1):name.
 
-  create query hQuery.
-  create buffer hBuffer for table ghDataBrowse:query:get-buffer-handle(1):dbname + '.' + ghDataBrowse:query:get-buffer-handle(1):name no-error.
+  CREATE QUERY hQuery.
+  CREATE BUFFER hBuffer FOR TABLE ghDataBrowse:QUERY:get-buffer-handle(1):dbname + '.' + ghDataBrowse:QUERY:get-buffer-handle(1):name NO-ERROR.
 
-  hQuery:set-buffers(hBuffer).
-  hQuery:query-prepare(cQuery).
-  hQuery:query-open.
+  hQuery:SET-BUFFERS(hBuffer).
+  hQuery:QUERY-PREPARE(cQuery).
+  hQuery:QUERY-OPEN.
 
-  session:set-wait-state('').
+  SESSION:SET-WAIT-STATE('').
 
-  /* Show nr of records */
-  setNumRecords(hQuery:num-results, yes, etime - iStartTime).
+  /* Num results of query */
+  RUN showNumRecords(hQuery:NUM-RESULTS, YES).
+  RUN showNumSelected.
 
-  hQuery:query-close.
+  hQuery:QUERY-CLOSE.
 
-  delete object hQuery.
-  delete object hBuffer.
+  DELETE OBJECT hQuery.
+  DELETE OBJECT hBuffer.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME fiNumSelected
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiNumSelected C-Win
+ON MOUSE-SELECT-DBLCLICK OF fiNumSelected IN FRAME frData
+DO:
+  
+  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN 
+    RUN dataSelectAll.
+  ELSE 
+    RUN dataSelectNone.
+
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3457,12 +3496,11 @@ END.
 &Scoped-define FRAME-NAME frMain
 &Scoped-define SELF-NAME fiTableFilter
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiTableFilter C-Win
-ON CTRL-CURSOR-DOWN OF fiTableFilter IN FRAME frMain
-or "CTRL-CURSOR-DOWN" of fiTableFilter
-or "CTRL-CURSOR-DOWN" of cbDatabaseFilter
-or "CTRL-CURSOR-DOWN" of brTables
+ON CURSOR-DOWN OF fiTableFilter IN FRAME frMain
 DO:
-  run setTableFilterOptions.
+  setFilterFieldColor(SELF:handle).
+  APPLY 'entry' TO brTables.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3470,11 +3508,10 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiTableFilter C-Win
-ON CURSOR-DOWN OF fiTableFilter IN FRAME frMain
+ON RETURN OF fiTableFilter IN FRAME frMain
+, cbDatabaseFilter
 DO:
-  setFilterFieldColor(self:handle).
-  apply 'entry' to brTables.
-  return no-apply.
+  RUN filterTables.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3485,10 +3522,10 @@ END.
 ON SHIFT-DEL OF fiTableFilter IN FRAME frMain
 , cbDatabaseFilter, cbDatabaseFilter
 DO:
-  apply 'choose' to btnClearIndexFilter.
-  self:screen-value = ''.
-  apply 'value-changed' to self.
-  apply 'entry' to self.
+  APPLY 'choose' TO btnClearTableFilter.
+  SELF:SCREEN-VALUE = ''.
+  APPLY 'value-changed' TO SELF.
+  APPLY 'entry' TO SELF.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3500,7 +3537,6 @@ ON VALUE-CHANGED OF fiTableFilter IN FRAME frMain
 , cbDatabaseFilter
 , fiIndexNameFilter, fiFlagsFilter, fiFieldsFilter
 DO:
-
   DEFINE VARIABLE cSetting AS CHARACTER NO-UNDO.
 
   /* Save last used database */
@@ -3514,7 +3550,6 @@ DO:
   /* Schedule the correct timer */
   IF LOOKUP(SELF:NAME,"fiTableFilter,cbDatabaseFilter") > 0 THEN
     RUN setTimer("timedTableFilter", 300).
-
   ELSE
   IF LOOKUP(SELF:NAME,"fiIndexNameFilter,fiFlagsFilter,fiFieldsFilter") > 0 THEN 
     RUN setTimer("timedIndexFilter", 300).
@@ -3525,33 +3560,41 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME mDataDiggerWebsite
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mDataDiggerWebsite C-Win
-ON CHOOSE OF MENU-ITEM mDataDiggerWebsite /* DataDigger Website */
+&Scoped-define SELF-NAME m_Clone_this_Database
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Clone_this_Database C-Win
+ON CHOOSE OF MENU-ITEM m_Clone_this_Database /* Clone this Database */
 DO:
-  OS-COMMAND NO-WAIT START VALUE("http://datadigger.wordpress.com").
-END.
+  DEFINE VARIABLE cNewDatabaseList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cOldDatabaseList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLogicalName     AS CHARACTER   NO-UNDO.
 
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
+  DO WITH FRAME frMain:
+    CREATE ALIAS dictdb FOR DATABASE VALUE( gcCurrentDatabase ).
+  
+    /* Get list of connected databases */
+    cOldDatabaseList = getDatabaseList().
 
+    RUN VALUE(getProgramDir() + 'dCloneDatabase.w')
+     ( INPUT-OUTPUT gcCurrentDatabase
+     , INPUT SUBSTITUTE("x=&1,y=&2", brTables:x + 10, brTables:y + 50)
+     , OUTPUT cLogicalName
+     ).
+  
+    /* Get all connected databases */
+    cNewDatabaseList = getDatabaseList().
+    
+    IF cNewDatabaseList <> cOldDatabaseList THEN
+    /* Get list of all tables of all databases */
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    ASSIGN cbDatabaseFilter:LIST-ITEMS IN FRAME frMain = ',' + cNewDatabaseList.
+  
+    IF LOOKUP(cLogicalName,cNewDatabaseList) > 0 THEN
+    DO:
+      cbDatabaseFilter:SCREEN-VALUE = cLogicalName.
+      APPLY 'value-changed' TO cbDatabaseFilter.
+    END.
 
-&Scoped-define SELF-NAME mShowIntroduction
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mShowIntroduction C-Win
-ON CHOOSE OF MENU-ITEM mShowIntroduction /* Show Introduction */
-DO:
-  RUN showTour.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME mShowWhatsNew
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mShowWhatsNew C-Win
-ON CHOOSE OF MENU-ITEM mShowWhatsNew /* Show What's New */
-DO:
-  RUN showNewFeatures.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3563,66 +3606,7 @@ END.
 ON CHOOSE OF MENU-ITEM m_Disconnect /* Disconnect */
 OR "-",DELETE-CHARACTER OF cbDatabaseFilter
 DO:
-  DEFINE VARIABLE cDatabases  AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE cCurrentDb  AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE lDisconnect AS LOGICAL   NO-UNDO.
-  DEFINE VARIABLE hBuffer     AS HANDLE    NO-UNDO.
-
-  DO WITH FRAME {&FRAME-NAME}:
-    hBuffer = brTables:QUERY:GET-BUFFER-HANDLE(1).
-    IF hBuffer:AVAILABLE THEN 
-      cCurrentDb = hBuffer::cDatabase.
-    ELSE 
-      RETURN.
-  END.
-
-  /* Cannot disconnect "all" */
-  IF cCurrentDb = "" OR cCurrentDb = ? THEN RETURN. 
-
-  /* Confirm by user */
-  RUN showHelp("Disconnect", cCurrentDb).
-  IF getRegistry("DataDigger:help", "Disconnect:answer") <> "1" THEN RETURN.
-
-  DISCONNECT VALUE(cCurrentDb).
-
-  ASSIGN 
-    gcCurrentDatabase = ""
-    gcCurrentTable    = "".
-
-  /* Remove all tables of this db from the "tables" table */
-  FOR EACH ttTable WHERE ttTable.cDatabase = cCurrentDb:
-    DELETE ttTable. 
-  END.
-  RUN reopenTableBrowse(?).
-
-  /* Get all connected databases */
-  cDatabases = getDatabaseList().
-  cbDatabaseFilter:LIST-ITEMS = "," + cDatabases.
-
-  /* Wipe database filter when it's the one that was just disconnected */
-  IF cbDatabaseFilter:SCREEN-VALUE = cCurrentDb THEN
-    cbDatabaseFilter:SCREEN-VALUE = "".
-
-  /* If we have no db connected, kill the fields tt */
-  IF NUM-DBS = 0 THEN 
-  DO: 
-    RUN deleteDataFilters(ghDataBrowse).
-    IF VALID-HANDLE(ghDataBrowse) AND VALID-HANDLE(ghDataBrowse:QUERY) THEN DELETE OBJECT ghDataBrowse:QUERY NO-ERROR.
-    IF VALID-HANDLE(ghDataBrowse) THEN DELETE OBJECT ghDataBrowse NO-ERROR.
-    IF VALID-HANDLE(ghLockTable)  THEN DELETE OBJECT ghLockTable  NO-ERROR.
-    IF VALID-HANDLE(ghDataBuffer) THEN DELETE OBJECT ghDataBuffer NO-ERROR.
-
-    EMPTY TEMP-TABLE ttField. 
-    EMPTY TEMP-TABLE ttIndex.
-
-    /* Reopen the queries on Fields and Indexes */
-    RUN reopenFieldBrowse(?,?).
-    RUN reopenIndexBrowse(?,?).
-    setUpdatePanel(?). /* Refresh sensitivity of buttons if needed */
-  END.
-
-  APPLY "value-changed" TO brTables.  /* this sets the gcCurrentDatabase */
-  APPLY "choose" TO btnTableFilter. 
+  RUN disconnectDatabase.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3631,18 +3615,19 @@ END.
 
 &Scoped-define SELF-NAME m_Dump_table_DF
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Dump_table_DF C-Win
-ON CHOOSE OF MENU-ITEM m_Dump_table_DF /* Dump table DF */
+ON CHOOSE OF MENU-ITEM m_Dump_table_DF /* Dump definitions */
 DO:
 
-  do with frame frMain:
+  DO WITH FRAME frMain:
   
-    create alias dictdb for database value( gcCurrentDatabase ).
+    CREATE ALIAS dictdb FOR DATABASE VALUE( gcCurrentDatabase ).
 
-    run value(getProgramDir() + 'dDumpDf.w')
-     ( input-output gcCurrentTable
-     , input substitute("x=&1,y=&2", brTables:x + 10, brTables:y + 50)
+    RUN VALUE(getProgramDir() + 'dDumpDf.w')
+     ( INPUT gcCurrentDatabase
+     , INPUT gcCurrentTable
+     , INPUT SUBSTITUTE("x=&1,y=&2", brTables:x + 10, brTables:y + 50)
      ).
-  end.
+  END.
 
 END.
 
@@ -3653,7 +3638,7 @@ END.
 &Scoped-define SELF-NAME m_Quick_Connect
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Quick_Connect C-Win
 ON CHOOSE OF MENU-ITEM m_Quick_Connect /* Quick Connect */
-or '+', insert-mode of cbDatabaseFilter 
+OR '+', INSERT-MODE OF cbDatabaseFilter 
 DO:
   DEFINE VARIABLE cPhysicalName AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cLogicalName  AS CHARACTER   NO-UNDO.
@@ -3671,7 +3656,7 @@ DO:
   IF NUM-DBS = iNumDbs THEN RETURN. /* nothing connected */
 
   /* Get list of all tables of all databases */
-  RUN getTables(OUTPUT TABLE ttTable).
+  RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
 
   /* Get all connected databases */
   cDatabases = getDatabaseList().
@@ -3684,28 +3669,11 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME m_Show_hidden_tables
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Show_hidden_tables C-Win
-ON VALUE-CHANGED OF MENU-ITEM m_Show_hidden_tables /* Show hidden tables */
-DO:
-  define variable cSetting as character   no-undo.
-
-  cSetting = string(menu-item m_Show_hidden_tables:checked in menu POPUP-MENU-brTables).
-  setRegistry('DataDigger', 'ShowHiddenTables', cSetting ).
-  
-  RUN setTimer("timedTableFilter", 300).
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME m_View_as_Excel
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_View_as_Excel C-Win
 ON CHOOSE OF MENU-ITEM m_View_as_Excel /* View as Excel */
 DO:
-  run setViewType('XLS').
+  RUN setViewType('XLS').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3716,7 +3684,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_View_as_HTML C-Win
 ON CHOOSE OF MENU-ITEM m_View_as_HTML /* View as HTML */
 DO:
-  run setViewType('HTML').
+  RUN setViewType('HTML').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3727,7 +3695,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_View_as_text C-Win
 ON CHOOSE OF MENU-ITEM m_View_as_text /* View as TEXT */
 DO:
-  run setViewType('TXT').
+  RUN setViewType('TXT').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3736,10 +3704,10 @@ END.
 
 &Scoped-define SELF-NAME tgDebugMode
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgDebugMode C-Win
-ON VALUE-CHANGED OF tgDebugMode IN FRAME frMain /* dbg */
+ON VALUE-CHANGED OF tgDebugMode IN FRAME frMain
 DO:
 
-  setDebugMode(self:checked).
+  setDebugMode(SELF:checked).
 
 END.
 
@@ -3751,49 +3719,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgSelAll C-Win
 ON VALUE-CHANGED OF tgSelAll IN FRAME frMain
 DO:
-  DEFINE VARIABLE cFieldList AS CHARACTER NO-UNDO. 
-  DEFINE VARIABLE hQuery AS HANDLE      NO-UNDO.
-  DEFINE VARIABLE hBuffer AS HANDLE NO-UNDO. 
-
-  SESSION:SET-WAIT-STATE('general').
-  setWindowFreeze(YES).
-
-  DEFINE BUFFER bField FOR ttField.
-  DEFINE BUFFER bColumn FOR ttColumn. 
-
-  DO WITH FRAME {&FRAME-NAME}:
-
-    CREATE QUERY hQuery.
-    CREATE BUFFER hBuffer FOR TABLE "ttField".
-    hQuery:ADD-BUFFER(hBuffer).
-    hQuery:QUERY-PREPARE(BROWSE brFields:QUERY:PREPARE-STRING).
-    hQuery:QUERY-OPEN.
-
-    /* Walk thru all fields that are currently visible */
-    REPEAT:
-      hQuery:GET-NEXT().
-      IF hQuery:QUERY-OFF-END THEN LEAVE.
-
-      hBuffer::lShow = SELF:CHECKED.
-      /*brFields:GET-BROWSE-COLUMN(1):CHECKED = bField.lShow.*/
-
-      FOR EACH bColumn WHERE bColumn.cFieldName = hBuffer::cFieldName:
-        cFieldList = cFieldList + "," + bColumn.cFullName.
-      END.
-    END.
-
-    RUN showField(INPUT cFieldList, INPUT SELF:CHECKED). 
-    RUN reopenFieldBrowse(?,?).
-
-    hQuery:QUERY-CLOSE.
-    DELETE OBJECT hQuery.
-    DELETE OBJECT hBuffer. 
-
-    setWindowFreeze(no).
-    SESSION:SET-WAIT-STATE('').
-
-    APPLY "entry" TO ttField.cFieldName IN BROWSE brFields.
-  END.
+  
+  RUN tgSelAllChoose(SELF:CHECKED).
 
 END.
 
@@ -3810,11 +3737,7 @@ END.
 SESSION:DEBUG-ALERT = YES.
 
 /* ***************************  Main Block  *************************** */
-PUBLISH "timerCommand" ("start", "startDiggerLib").
 RUN startDiggerLib.
-PUBLISH "timerCommand" ("stop", "startDiggerLib").
-
-PUBLISH "timerCommand" ("start", "PostDiggerLib").
 
 /* More than one DataDigger window can be open. The 
  * startup procedure can demand that all windows are 
@@ -3826,7 +3749,7 @@ SUBSCRIBE TO 'DataDiggerClose' ANYWHERE.
  * DWP, then exit the DataDigger as well. 
  * Requested by Jeroen Stam from NetSetup 30-3-2012
  */
-SUBSCRIBE to "dwp_stop" ANYWHERE RUN-PROCEDURE 'DataDiggerClose'.
+SUBSCRIBE TO "dwp_stop" ANYWHERE RUN-PROCEDURE 'DataDiggerClose'.
   
 /* Save queries in a temp-table for the query tester */
 SUBSCRIBE TO "query" ANYWHERE RUN-PROCEDURE "processQuery".
@@ -3834,6 +3757,7 @@ SUBSCRIBE TO "query" ANYWHERE RUN-PROCEDURE "processQuery".
 /* Avoid drawing */
 /* {&WINDOW-NAME}:Y              = -1000. /* out of sight */ */
 {&WINDOW-NAME}:VISIBLE           = YES. /* otherwise lockwindow complains */
+{&WINDOW-NAME}:HIDDEN            = YES. /* otherwise lockwindow complains */
 {&WINDOW-NAME}:MAX-WIDTH-PIXELS  = ?.
 {&WINDOW-NAME}:MAX-HEIGHT-PIXELS = ?.
 
@@ -3848,7 +3772,7 @@ SUBSCRIBE TO "query" ANYWHERE RUN-PROCEDURE "processQuery".
 DEFINE VARIABLE winWait AS HANDLE NO-UNDO.
 RUN showMessage.p("DataDigger", "Digging the schema, please wait", OUTPUT winWait).
 
-setWindowFreeze(yes).
+setWindowFreeze(YES).
 
 /* Set CURRENT-WINDOW: this will parent dialog-boxes and frames.        */
 ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME} 
@@ -3857,34 +3781,35 @@ ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME}
 /* The CLOSE event can be used from inside or outside the procedure to  */
 /* terminate it.                                                        */
 ON CLOSE OF THIS-PROCEDURE 
-do:
-  define variable cSetting as character no-undo. 
+DO:
+  DEFINE VARIABLE cSetting AS CHARACTER NO-UNDO. 
 
   /* If we click this in the middle of the tour, ignore it */
-  if frame frHint:visible then return no-apply. 
+  IF FRAME frHint:visible THEN RETURN NO-APPLY. 
 
   /* Cancel all running timer events */
-  chCtrlFrame:pstimer:ENABLED = FALSE.
+  IF glUseTimer THEN
+    chCtrlFrame:pstimer:ENABLED = FALSE.
   
   /* Save size and position of the window */
-  run saveWindow.
+  RUN saveWindow.
 
-  cSetting = cbDatabaseFilter:screen-value in frame {&frame-name}.
-  if cSetting = ? then cSetting = '<empty>'.
+  cSetting = cbDatabaseFilter:screen-value IN FRAME {&frame-name}.
+  IF cSetting = ? THEN cSetting = '<empty>'.
   setRegistry("DataDigger", "Database", cSetting ).
 
   /* Notify launcher that the window closes */
-  publish 'DataDigger'(-1).
+  PUBLISH 'DataDigger'(-1).
   
-  run disable_UI.
-end. /* CLOSE OF THIS-PROCEDURE  */
+  RUN disable_UI.
+END. /* CLOSE OF THIS-PROCEDURE  */
 
 
-on 'menu-drop' of menu POPUP-MENU-brTables
-do:
-  publish "setUsage" ("TableMenu"). /* user behaviour */
-  run setConnectionMenu.
-end.
+ON 'menu-drop' OF MENU POPUP-MENU-brTables
+DO:
+  PUBLISH "setUsage" ("TableMenu"). /* user behaviour */
+  RUN setConnectionMenu.
+END.
 
 
 ON ENTRY OF ttField.cFormat IN BROWSE brFields
@@ -3902,15 +3827,15 @@ DO:
     IF cOrgValue <> SELF:SCREEN-VALUE THEN
     DO:
       fiWarning:x            = 300.
-      fiWarning:y            = self:y + brFields:y - 2.
-      fiWarning:visible      = yes.
-      fiWarning:screen-value = substitute('Original format: &1', cOrgValue).
-      fiWarning:width        = length(fiWarning:screen-value) + 1.
-      fiWarning:x            = self:x - fiWarning:width-pixels + brFields:x - 10.
-    end.
+      fiWarning:y            = SELF:y + brFields:y - 2.
+      fiWarning:visible      = YES.
+      fiWarning:screen-value = SUBSTITUTE('Original format: &1', cOrgValue).
+      fiWarning:width        = LENGTH(fiWarning:screen-value) + 1.
+      fiWarning:x            = SELF:x - fiWarning:width-pixels + brFields:x - 10.
+    END.
 
     /* Set a flag for reopenDataBrowse to indicate that the browse must be rebuilt */
-    glFormatChanged = true.
+    glFormatChanged = TRUE.
 
     RETURN NO-APPLY.
   END. 
@@ -3951,20 +3876,20 @@ DO:
 END. /* on leave of ttField.cFormat */
 
 
-ON CTRL-TAB OF C-Win anywhere /* DataDigger */
+ON CTRL-TAB OF C-Win ANYWHERE /* DataDigger */
 DO:
-  publish "setUsage" ("setPage"). /* user behaviour */
-  case giCurrentPage:
-    when 1 then run setPage(2).
-    when 2 then run setPage(1).
-  end case.
+  PUBLISH "setUsage" ("setPage"). /* user behaviour */
+  CASE giCurrentPage:
+    WHEN {&PAGE-TABLES} THEN RUN setPage({&PAGE-FAVOURITES}).
+    WHEN {&PAGE-FAVOURITES} THEN RUN setPage({&PAGE-TABLES}).
+  END CASE.
 END. /* CTRL-TAB OF C-Win anywhere */
 
 
-ON "CTRL-ALT-D" OF C-Win anywhere /* Debugger */ 
+ON "CTRL-ALT-D" OF C-Win ANYWHERE /* Debugger */ 
 DO:
-  publish "setUsage" ("debugger"). /* user behaviour */
-  run value(getProgramDir() + "wDebugger.w") persistent.
+  PUBLISH "setUsage" ("debugger"). /* user behaviour */
+  RUN value(getProgramDir() + "wDebugger.w") PERSISTENT.
 END.
 
 
@@ -3978,25 +3903,20 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
 
   /* Notify launcher that the window started */
-  publish 'DataDigger'(+1).
+  PUBLISH 'DataDigger'(+1).
 
-  run enable_UI.
-  publish "timerCommand" ("stop", "PostDiggerLib").
+  RUN initializeUi. 
+  RUN initializeObjects.
 
-  publish "timerCommand" ("start", "Initialize").
-  run initializeObjects.
-  publish "timerCommand" ("stop", "Initialize").
-
-  setWindowFreeze(no).
+  setWindowFreeze(NO).
 
   /* Clear wait-message */
   DELETE WIDGET winWait.
+  {&WINDOW-NAME}:HIDDEN = NO. 
 
-  publish "timerCommand" ("stop", "Startup").
-  run startSession.
-
-/*  run showTour. */
-/*  run showNewFeatures. */
+  PUBLISH "timerCommand" ("stop", "Startup").
+  RUN startSession.
+  RUN checkNewVersion.
 
   APPLY 'entry' TO fiTableFilter.
 
@@ -4019,55 +3939,46 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnAddChoose C-Win 
 PROCEDURE btnAddChoose :
-/*------------------------------------------------------------------------
-  Name         : btnAddChoose
-  Description  : Add new record
-  ---------------------------------------------------------------------- 
-  05-04-2011 pti Created
-  ----------------------------------------------------------------------*/
+/* Add new record
+ */
+  DEFINE VARIABLE lRecordsUpdated AS LOGICAL   NO-UNDO.
+  DEFINE VARIABLE rNewRecord      AS ROWID     NO-UNDO.
 
-  define variable lRecordsUpdated as logical no-undo. 
-  define variable rNewRecord as rowid no-undo. 
-
-  define buffer ttField for ttField. 
+  DEFINE BUFFER ttField FOR ttField. 
 
   /* Keep track of user behaviour */
-  publish "setUsage" ("AddRecord").
+  PUBLISH "setUsage" ("AddRecord").
 
   /* In read-only mode, return */
-  if ReadOnlyDigger then return. 
+  IF plReadOnlyDigger THEN RETURN. 
 
-  run value(getProgramDir() + 'wEdit.w')
-    ( input 'Add'
-    , input ghDataBrowse
-    , input gcCurrentDatabase
-    , input gcCurrentTable
-    , input table ttField  /* do not use by-reference */
-    , input table ttColumn /* do not use by-reference */
-    , output lRecordsUpdated
-    , output rNewRecord
+  RUN VALUE(getProgramDir() + 'wEdit.w')
+    ( INPUT plReadOnlyDigger
+    , INPUT 'Add'
+    , INPUT ghDataBrowse
+    , INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT TABLE ttField  /* do not use by-reference */
+    , INPUT TABLE ttColumn /* do not use by-reference */
+    , OUTPUT lRecordsUpdated
+    , OUTPUT rNewRecord
     ).
 
-  if lRecordsUpdated = true then 
-  do:
-    run reopenDataBrowse('',?).
-    ghDataBrowse:query:reposition-to-rowid(rNewRecord).
-  end.
+  IF lRecordsUpdated = TRUE THEN 
+  DO:
+    RUN reopenDataBrowse('',?).
+    ghDataBrowse:QUERY:REPOSITION-TO-ROWID(rNewRecord).
+  END.
 
-end procedure. /* btnAddChoose */
+END PROCEDURE. /* btnAddChoose */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnClearDataFilterChoose C-Win 
 PROCEDURE btnClearDataFilterChoose :
-/*------------------------------------------------------------------------
-  Name         : btnClearDataFilterChoose
-  Description  : Clear filters and reopen data browse
-  ---------------------------------------------------------------------- 
-  04-02-2011 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Clear filters and reopen data browse
+ */
   DEFINE BUFFER bColumn FOR ttColumn. 
 
   FOR EACH bColumn:
@@ -4091,27 +4002,12 @@ END PROCEDURE. /* btnClearDataFilterChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnClearFieldFilterChoose C-Win 
 PROCEDURE btnClearFieldFilterChoose :
-/*------------------------------------------------------------------------
-  Name         : btnClearFieldFilterChoose
-  Description  : Clear field filters 
-  ---------------------------------------------------------------------- 
-  26-08-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  DEFINE VARIABLE hFilter AS HANDLE  NO-UNDO.
-  DEFINE VARIABLE iFilter AS INTEGER NO-UNDO.
-
-  do iFilter = 1 to num-entries(gcFieldFilterHandles):
-    hFilter = widget-handle(entry(iFilter, gcFieldFilterHandles)) no-error.
-    if valid-handle(hFilter) and hFilter:type <> "Toggle-Box" then
-    do:
-      assign
-        hFilter:modified     = no
-        hFilter:screen-value = hFilter:private-data.
-
-      setFilterFieldColor(hFilter).
-    end.
-  end.
+/*
+ * Clear field filters and set focus to field browse
+ */
+  RUN clearFieldFilter.
+  RUN filterFieldsBrowse.
+  APPLY "entry" TO ttField.cFieldName IN BROWSE brFields.
 
 END PROCEDURE. /* btnClearFieldFilterChoose */
 
@@ -4120,22 +4016,15 @@ END PROCEDURE. /* btnClearFieldFilterChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnClearIndexFilterChoose C-Win 
 PROCEDURE btnClearIndexFilterChoose :
-/*------------------------------------------------------------------------
-  Name         : btnClearIndexFilterChoose
-  Description  : Clear index filters 
-  ---------------------------------------------------------------------- 
-  26-08-2011 pti Created
-  ----------------------------------------------------------------------*/
+/*
+ * Clear index filters 
+ */
+  PUBLISH "setUsage" ("clearIndexFilter"). /* user behaviour */
 
-  do with frame frMain:
-    fiIndexNameFilter:screen-value = fiIndexNameFilter:private-data. 
-    fiFlagsFilter    :screen-value = fiFlagsFilter    :private-data. 
-    fiFieldsFilter   :screen-value = fiFieldsFilter   :private-data. 
-  
-    setFilterFieldColor(fiIndexNameFilter:handle).
-    setFilterFieldColor(fiFlagsFilter    :handle).
-    setFilterFieldColor(fiFieldsFilter   :handle).
-  end. 
+  RUN clearIndexFilter.
+  RUN filterIndexBrowse.
+
+  APPLY 'entry' TO brIndexes IN FRAME {&FRAME-NAME}.
 
 END PROCEDURE. /* btnClearIndexFilterChoose */
 
@@ -4144,77 +4033,68 @@ END PROCEDURE. /* btnClearIndexFilterChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnCloneChoose C-Win 
 PROCEDURE btnCloneChoose :
-/*------------------------------------------------------------------------
-  Name         : btnCloneChoose
-  Description  : Copy the current record and edit it.
-
-  ----------------------------------------------------------------------
-  28-02-2012 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable lRecordsUpdated as logical no-undo. 
-  define variable rNewRecord      as rowid   no-undo. 
-  define buffer ttField for ttField. 
+/* Copy the current record and edit it.
+ */
+  DEFINE VARIABLE lRecordsUpdated AS LOGICAL NO-UNDO. 
+  DEFINE VARIABLE rNewRecord      AS ROWID   NO-UNDO. 
+  DEFINE BUFFER ttField FOR ttField. 
 
   /* In read-only mode, return */
-  if ReadOnlyDigger then return. 
+  IF plReadOnlyDigger THEN RETURN. 
 
   /* If no data then go back */
-  if ghDataBrowse:query:num-results = 0 
-    or ghDataBrowse:query:num-results = ? then return. 
+  IF ghDataBrowse:QUERY:num-results = 0 
+    OR ghDataBrowse:QUERY:num-results = ? THEN RETURN. 
 
   /* If there is no record selected, select the focused one */
-  if ghDataBrowse:num-selected-rows = 0 then
-    ghDataBrowse:select-focused-row().
+  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
+    ghDataBrowse:SELECT-FOCUSED-ROW().
 
-  if not ghDataBrowse:query:get-buffer-handle(1):available then
-  do:
-    run showHelp('RecordGone', '').
-    ghDataBrowse:refresh().
-    return.
-  end.
+  IF NOT ghDataBrowse:QUERY:get-buffer-handle(1):available THEN
+  DO:
+    RUN showHelp('RecordGone', '').
+    ghDataBrowse:REFRESH().
+    RETURN.
+  END.
 
-  run value(getProgramDir() + 'wEdit.w')
-    ( input 'Clone'
-    , input ghDataBrowse
-    , input gcCurrentDatabase
-    , input gcCurrentTable
-    , input table ttField  /* do not use by-reference ! */
-    , input table ttColumn /* do not use by-reference ! */
-    , output lRecordsUpdated
-    , output rNewRecord
+  RUN value(getProgramDir() + 'wEdit.w')
+    ( INPUT plReadOnlyDigger
+    , INPUT 'Clone'
+    , INPUT ghDataBrowse
+    , INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT table ttField  /* do not use by-reference ! */
+    , INPUT table ttColumn /* do not use by-reference ! */
+    , OUTPUT lRecordsUpdated
+    , OUTPUT rNewRecord
     ).
 
-  if lRecordsUpdated = true then 
-  do:
-    ghDataBrowse:query:reposition-to-rowid(rNewRecord) no-error.
-    ghDataBrowse:select-focused-row().
-    run reopenDataBrowse('',?).
-  end.
+  IF lRecordsUpdated = TRUE THEN 
+  DO:
+    ghDataBrowse:QUERY:reposition-to-rowid(rNewRecord) NO-ERROR.
+    ghDataBrowse:SELECT-FOCUSED-ROW().
+    RUN reopenDataBrowse('',?).
+  END.
 
-end procedure. /* btnCloneChoose */
+END PROCEDURE. /* btnCloneChoose */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnDeleteChoose C-Win 
 PROCEDURE btnDeleteChoose :
-/*------------------------------------------------------------------------
-  Name         : btnDeleteChoose 
-  Description  : Delete selected records
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
+/* Delete selected records
+ */
   DEFINE VARIABLE iCount          AS INTEGER NO-UNDO.
   DEFINE VARIABLE hBuffer         AS HANDLE  NO-UNDO.
+  DEFINE VARIABLE hFileBuffer     AS HANDLE  NO-UNDO.
   DEFINE VARIABLE lContinue       AS LOGICAL NO-UNDO.
   DEFINE VARIABLE lDeleted        AS LOGICAL NO-UNDO. 
   DEFINE VARIABLE lError          AS LOGICAL NO-UNDO. 
   DEFINE VARIABLE lEnableTriggers AS LOGICAL NO-UNDO. 
 
   /* In read-only mode, return */
-  IF ReadOnlyDigger THEN RETURN. 
+  IF plReadOnlyDigger THEN RETURN. 
 
   /* If nothing selected, go back */
   IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN RETURN. 
@@ -4258,14 +4138,20 @@ PROCEDURE btnDeleteChoose :
       END.
 
       hBuffer:BUFFER-DELETE() NO-ERROR.
-      IF hBuffer:AVAILABLE THEN 
+      /* Records with dictionary validations cannot be dynamically deleted. 
+       * In that case, build a delete procedure and compile it on the fly
+       */
+      IF hBuffer:AVAILABLE THEN
       DO:
-        RUN deleteRecord( gcCurrentDatabase
-                        , gcCurrentTable 
-                        , hBuffer:ROWID
-                        , lEnableTriggers
-                        , OUTPUT lDeleted
-                        ).
+        /* That is, if you have a full version of Progress */
+        IF PROGRESS = "FULL" THEN
+          RUN deleteRecord( gcCurrentDatabase
+                          , gcCurrentTable 
+                          , hBuffer:ROWID
+                          , lEnableTriggers
+                          , OUTPUT lDeleted
+                          ).
+        ELSE lDeleted = FALSE.
       END.
       ELSE lDeleted = TRUE.
 
@@ -4279,8 +4165,26 @@ PROCEDURE btnDeleteChoose :
   setWindowFreeze(NO).
   SESSION:SET-WAIT-STATE("").
 
-  IF lError THEN
-    MESSAGE 'Sorry, could not delete record.' VIEW-AS ALERT-BOX INFO BUTTONS OK.
+  /* 20141119: Not deleted because of validations + runtime version */
+  IF lError THEN 
+    IF PROGRESS <> "FULL" THEN 
+    DO:
+      CREATE BUFFER hFileBuffer FOR TABLE gcCurrentDatabase + "._file".
+      hFileBuffer:FIND-UNIQUE(SUBSTITUTE("WHERE _file-name = &1", QUOTER(gcCurrentTable))).
+
+      MESSAGE 
+        SUBSTITUTE("Your table &1.&2 contains a validation expression:", gcCurrentDatabase, gcCurrentTable) 
+        SKIP(1) hFileBuffer::_valexp
+        SKIP(1) "Therefore, it cannot be dynamically deleted. Normally,"
+        SKIP    "DataDigger would generate a small program and compile "
+        SKIP    "it but your Progress version does not allow this.     "
+        SKIP(1) "So I'm sorry, but the" STRING(ghDataBrowse:NUM-SELECTED-ROWS = 1,"record/records") "could not be deleted :("
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+
+      DELETE OBJECT hFileBuffer.
+    END.
+    ELSE 
+      MESSAGE 'Sorry, could not delete record.' VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
   RUN reopenDataBrowse(?,?).
 
@@ -4291,30 +4195,25 @@ END PROCEDURE. /* btnDeleteChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnDumpChoose C-Win 
 PROCEDURE btnDumpChoose :
-/*------------------------------------------------------------------------
-  Name         : btnDumpChoose 
-  Description  : Dump selected records
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define variable cSetting       as character   no-undo.
-  define variable cOldDateFormat as character   no-undo.
-  define variable cOldNumFormat  as character   no-undo.
+/* Dump selected records
+ */
+  DEFINE VARIABLE cSetting       AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cOldDateFormat AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cOldNumFormat  AS CHARACTER   NO-UNDO.
 
-  define buffer ttField for ttField. 
+  DEFINE BUFFER ttField FOR ttField. 
 
   /* Prevent illegal calls */
-  if not valid-handle(ghDataBrowse) then return. 
+  IF NOT VALID-HANDLE(ghDataBrowse) THEN RETURN. 
 
   /* If no data then go back */
-  if ghDataBrowse:query:num-results = 0 
-    or ghDataBrowse:query:num-results = ? then return. 
+  IF ghDataBrowse:QUERY:num-results = 0 
+    OR ghDataBrowse:QUERY:num-results = ? THEN RETURN. 
 
   /* If there is no record selected, select the focused one */
-  if valid-handle(ghDataBrowse) 
-    and ghDataBrowse:num-selected-rows = 0 then
-    ghDataBrowse:select-focused-row().
+  IF VALID-HANDLE(ghDataBrowse) 
+    AND ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
+    ghDataBrowse:SELECT-FOCUSED-ROW().
 
   /* When you start DataDigger from more than 1 environment, chances are
    * that you might start with different date-format settings. The dump 
@@ -4322,30 +4221,30 @@ PROCEDURE btnDumpChoose :
    * so this needs to be consistent throughout all runs of DataDigger.
    */
   /* 2011-09-14 JEE Same goes for numeric format */
-  assign
-    cOldDateFormat = session:date-format
-    cOldNumFormat  = session:numeric-format
+  ASSIGN
+    cOldDateFormat = SESSION:DATE-FORMAT
+    cOldNumFormat  = SESSION:NUMERIC-FORMAT
     .
 
   /* Check Date-format in ini file */
   cSetting = getRegistry('DataDigger', 'DateFormat').
 
-  case cSetting:
-    when ? then setRegistry('DataDigger', 'DateFormat', session:date-format).
-    when session:date-format then .
-    otherwise session:date-format = cSetting.
-  end case. 
+  CASE cSetting:
+    WHEN ? THEN setRegistry('DataDigger', 'DateFormat', SESSION:DATE-FORMAT).
+    WHEN SESSION:DATE-FORMAT THEN .
+    OTHERWISE SESSION:DATE-FORMAT = cSetting.
+  END CASE. 
 
-  run value(getProgramDir() + 'wDump.w')
-    ( input ghDataBrowse
-    , input getSelectedFields()
-    , input table ttField by-reference
+  RUN value(getProgramDir() + 'wDump.w')
+    ( INPUT ghDataBrowse
+    , INPUT getSelectedFields()
+    , INPUT table ttField BY-REFERENCE
     ).
 
   /* Restore date format */
-  assign
-    session:date-format     = cOldDateFormat
-    session:numeric-format  = cOldNumFormat
+  ASSIGN
+    SESSION:DATE-FORMAT     = cOldDateFormat
+    SESSION:NUMERIC-FORMAT  = cOldNumFormat
     .
 
 END PROCEDURE. /* btnDumpChoose */
@@ -4355,66 +4254,55 @@ END PROCEDURE. /* btnDumpChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnEditChoose C-Win 
 PROCEDURE btnEditChoose :
-/*------------------------------------------------------------------------
-  Name         : btnEditChoose
-  Description  : Edit one or more records in a separate window
-
-  ----------------------------------------------------------------------
-  14-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable lRecordsUpdated as logical no-undo. 
-  define variable rNewRecord      as rowid   no-undo. 
-  define buffer ttField for ttField. 
+/* Edit one or more records in a separate window
+ */
+  DEFINE VARIABLE lRecordsUpdated AS LOGICAL NO-UNDO. 
+  DEFINE VARIABLE rNewRecord      AS ROWID   NO-UNDO. 
+  DEFINE BUFFER ttField FOR ttField. 
 
   /* If no data then go back */
-  if ghDataBrowse:query:num-results = 0 
-    or ghDataBrowse:query:num-results = ? then return. 
+  IF ghDataBrowse:QUERY:num-results = 0 
+    OR ghDataBrowse:QUERY:num-results = ? THEN RETURN. 
 
   /* If there is no record selected, select the focused one */
-  if ghDataBrowse:num-selected-rows = 0 then
-    ghDataBrowse:select-focused-row().
+  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
+    ghDataBrowse:SELECT-FOCUSED-ROW().
 
-  if not ghDataBrowse:query:get-buffer-handle(1):available then
-  do:
-    run showHelp('RecordGone', '').
-    ghDataBrowse:refresh().
-    return.
-  end.
+  IF NOT ghDataBrowse:QUERY:get-buffer-handle(1):available THEN
+  DO:
+    RUN showHelp('RecordGone', '').
+    ghDataBrowse:REFRESH().
+    RETURN.
+  END.
 
-  run value(getProgramDir() + 'wEdit.w')
-    ( input 'Edit'
-    , input ghDataBrowse
-    , input gcCurrentDatabase
-    , input gcCurrentTable
-    , input table ttField  /* do not use by-reference ! */
-    , input table ttColumn /* do not use by-reference ! */
-    , output lRecordsUpdated
-    , output rNewRecord /* not handled here */
+  RUN value(getProgramDir() + 'wEdit.w')
+    ( INPUT plReadOnlyDigger
+    , INPUT 'Edit'
+    , INPUT ghDataBrowse
+    , INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT table ttField  /* do not use by-reference ! */
+    , INPUT table ttColumn /* do not use by-reference ! */
+    , OUTPUT lRecordsUpdated
+    , OUTPUT rNewRecord /* not handled here */
     ).
 
-  if lRecordsUpdated then ghDataBrowse:refresh().
+  IF lRecordsUpdated THEN ghDataBrowse:REFRESH().
 
-end procedure. /* btnEditChoose */
+END PROCEDURE. /* btnEditChoose */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnFavouritesChoose C-Win 
 PROCEDURE btnFavouritesChoose :
-/*------------------------------------------------------------------------
-  Name         : btnFavouritesChoose
-  Description  : Maintenance of database connection settings
-
-  ----------------------------------------------------------------------
-  14-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cDummy        as character   no-undo.
-  define variable cProgDir      as character   no-undo.
-  define variable cDatabases    as character   no-undo.
-  define variable cDatabasesOld as character   no-undo.
-  define variable cCurrentDb    as character   no-undo. 
+/* Maintenance of database connection settings
+ */
+  DEFINE VARIABLE cDummy        AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cProgDir      AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabases    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabasesOld AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cCurrentDb    AS CHARACTER   NO-UNDO. 
 
   cProgDir   = getProgramDir().
   cCurrentDb = gcCurrentDatabase. 
@@ -4429,10 +4317,10 @@ PROCEDURE btnFavouritesChoose :
   IF cDatabases <> cDatabasesOld THEN
   DO:
     /* Get list of all tables of all databases */
-    RUN getTables(OUTPUT TABLE ttTable).
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
     ASSIGN cbDatabaseFilter:LIST-ITEMS IN FRAME frMain = ',' + cDatabases.
 
-    APPLY 'choose' TO btnTableFilter.
+    RUN filterTables.
   END.
 
 END PROCEDURE.
@@ -4440,40 +4328,70 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnLoadChoose C-Win 
+PROCEDURE btnLoadChoose :
+/* Load data into table
+ */
+  DEFINE VARIABLE lRecordsUpdated AS LOGICAL   NO-UNDO.
+  DEFINE VARIABLE rNewRecord      AS ROWID     NO-UNDO.
+
+  DEFINE BUFFER ttField FOR ttField. 
+
+  /* Keep track of user behaviour */
+  PUBLISH "setUsage" ("LoadData").
+
+/*   /* In read-only mode, return */  */
+/*   IF plReadOnlyDigger THEN RETURN. */
+
+  RUN VALUE(getProgramDir() + 'wImportSel.w')
+    ( INPUT plReadOnlyDigger
+    , INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT TABLE ttField  /* do not use by-reference */
+    , INPUT TABLE ttColumn /* do not use by-reference */
+    , OUTPUT lRecordsUpdated
+    , OUTPUT rNewRecord
+    ).
+
+  IF lRecordsUpdated = TRUE THEN 
+  DO:
+    RUN reopenDataBrowse('',?).
+    ghDataBrowse:QUERY:REPOSITION-TO-ROWID(rNewRecord) NO-ERROR.
+  END.
+
+END PROCEDURE. /* btnLoadChoose */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnQueriesChoose C-Win 
 PROCEDURE btnQueriesChoose :
-/*------------------------------------------------------------------------
-  Name         : btnQueriesChoose
-  Description  : Maintenance of database connection settings
-
-  ----------------------------------------------------------------------
-  14-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable iQuery  as integer no-undo. 
-  define variable hEditor as handle  no-undo.
+/* Maintenance of database connection settings
+ */
+  DEFINE VARIABLE iQuery  AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE hEditor AS HANDLE  NO-UNDO.
 
   hEditor = getActiveQueryEditor().
 
-  run value(getProgramDir() + 'dQueries.w')
-    ( input gcCurrentDatabase
-    , input gcCurrentTable
-    , input hEditor:screen-value
-    , output iQuery
+  RUN value(getProgramDir() + 'dQueries.w')
+    ( INPUT gcCurrentDatabase
+    , INPUT gcCurrentTable
+    , INPUT hEditor:SCREEN-VALUE
+    , OUTPUT iQuery
     ).
 
-  if iQuery = ? then 
-    return.
-  else 
-  do:
+  IF iQuery = ? THEN 
+    RETURN.
+  ELSE 
+  DO:
     /* Queries might be changed, so reload them */
-    run collectQueryInfo
-      ( input gcCurrentDatabase
-      , input gcCurrentTable 
+    RUN collectQueryInfo
+      ( INPUT gcCurrentDatabase
+      , INPUT gcCurrentTable 
       ).
     giQueryPointer = iQuery.
     setQuery(0).
-  end.
+  END.
 
 END PROCEDURE. /* btnQueriesChoose */
 
@@ -4482,45 +4400,38 @@ END PROCEDURE. /* btnQueriesChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnSettingsChoose C-Win 
 PROCEDURE btnSettingsChoose :
-/*------------------------------------------------------------------------
-  Name         : btnSettingsChoose
-  Description  : Show DataDigger settings window
-
-  ----------------------------------------------------------------------
-  14-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define variable cEnvironment as character   no-undo.
-  define variable lOkClicked   as logical     no-undo.
+/* Show DataDigger settings window
+ */
+  DEFINE VARIABLE cEnvironment AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE lOkClicked   AS LOGICAL     NO-UNDO.
 
   /* Load or create personalized ini file */
-  cEnvironment = substitute('&1DataDigger-&2.ini'
+  cEnvironment = SUBSTITUTE('&1DataDigger-&2.ini'
                            , getProgramDir()
                            , getUserName() 
                            ).
 
-  /* Save window pos & size because the initializeObject will reset 
-   * it to its last known position and size. That might be different 
-   * from the actual position of the window. The window would flash
-   * and move on the screen.
+  /* Save window pos & size because the initializeObject will reset it to its last known
+   * position and size. That might be differentfrom the actual position of the window.
+   * The window would flash and move on the screen.
    */
-  run saveWindow.
+  RUN saveWindow.
 
-  run value(getProgramDir() + '\wSettings.w') 
-     ( input cEnvironment
-     , output lOkClicked
+  RUN VALUE(getProgramDir() + '\wSettings.w') 
+     ( INPUT cEnvironment
+     , OUTPUT lOkClicked
      ).
 
-  if lOkClicked then 
-  do:
-    setWindowFreeze(yes).
-    run initializeObjects. 
-    run clearRegistryCache.
+  IF lOkClicked THEN 
+  DO:
+    setWindowFreeze(YES).
+    RUN clearRegistryCache.
+    RUN initializeObjects. 
 
     gcCurrentTable = ?.
-    apply "value-changed" to brTables in frame frMain.
-    setWindowFreeze(no).
-  end.
+    APPLY "value-changed" TO brTables IN FRAME frMain.
+    setWindowFreeze(NO).
+  END.
 
 END PROCEDURE. /* btnSettingsChoose */
 
@@ -4529,124 +4440,131 @@ END PROCEDURE. /* btnSettingsChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE btnViewChoose C-Win 
 PROCEDURE btnViewChoose :
-/*------------------------------------------------------------------------
-  Name         : btnViewChoose
-  Description  : Show a record in a more readable format in a new window. 
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  27-08-2010 pti Rewritten to show multiple records.
-  ----------------------------------------------------------------------*/
+/* Show a record in a more readable format in a new window.
+ */
+  DEFINE VARIABLE cDataEnd     AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDataFormat  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDataStart   AS CHARACTER   NO-UNDO EXTENT 2.
+  DEFINE VARIABLE cDocEnd      AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDocStart    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cFilename    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cFileType    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLabelEnd    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLabelStart  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLineEnd     AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLineStart   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE hDataBuffer  AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE iFieldExtent AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iLineNr      AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iMaxWidth    AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iRecord      AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iRowNr       AS INTEGER     NO-UNDO.
   
-  define variable cFileType   as character   no-undo.
-  define variable hDataBuffer as handle      no-undo.
-  define variable iMaxWidth   as integer     no-undo. 
-  define variable cDataFormat as character   no-undo.
-  define variable iFieldExtent as integer     no-undo.
-  define variable iRecord     as integer     no-undo.
-  define variable cLineStart  as character   no-undo.
-  define variable cLabelEnd   as character   no-undo.
-  define variable iRowNr      as integer     no-undo. 
-  define variable cColumnSep  as character   no-undo.
-  define variable cLineEnd    as character   no-undo.
-  define variable cDocStart   as character   no-undo.
-  define variable cDocEnd     as character   no-undo.
-  define variable cFilename   as character   no-undo.
-  define variable cLabelStart as character   no-undo.
-  define variable cDataStart  as character   no-undo extent 2.
-  define variable cDataEnd    as character   no-undo.
-  define variable iLineNr     as integer     no-undo.
-  
-  define buffer bView for ttView. 
-  define buffer ttField for ttField. 
+  DEFINE BUFFER bView  FOR ttView. 
+  DEFINE BUFFER bField FOR ttField. 
 
   /* If there is no record selected, select the focused one */
-  if ghDataBrowse:num-selected-rows = 0 then
-    ghDataBrowse:select-focused-row().
+  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
+    ghDataBrowse:SELECT-FOCUSED-ROW().
 
-  if not ghDataBrowse:query:get-buffer-handle(1):available then
-  do:
-    run showHelp('RecordGone', '').
-    ghDataBrowse:refresh().
-    return.
-  end.
+  IF NOT ghDataBrowse:QUERY:GET-BUFFER-HANDLE(1):AVAILABLE THEN
+  DO:
+    RUN showHelp('RecordGone', '').
+    ghDataBrowse:REFRESH().
+    RETURN.
+  END.
   
   /* What type do we want? */
   cFileType = getRegistry('DataDigger', 'ViewType').
 
   /* Cleanup */
-  empty temp-table ttView. 
-  empty temp-table ttColumnWidth.
+  EMPTY TEMP-TABLE bView. 
+  EMPTY TEMP-TABLE ttColumnWidth.
 
   /* Get data */
-  if not valid-handle(ghDataBrowse) then return.
-  hDataBuffer = ghDataBrowse:query:get-buffer-handle(1).
-  if not hDataBuffer:available then return.
+  IF NOT VALID-HANDLE(ghDataBrowse) THEN RETURN.
+  hDataBuffer = ghDataBrowse:QUERY:GET-BUFFER-HANDLE(1).
+  IF NOT hDataBuffer:AVAILABLE THEN RETURN.
 
   collectLoop:
-  for each ttField 
-    where ttField.lShow      = true
-/*      and ttField.lDataField = true */
-      and ttField.cFieldName <> 'RECID'
-      and ttField.cFieldName <> 'ROWID' 
-    break by ttField.iOrder
-          by ttField.iExtent:
+  FOR EACH bField 
+    WHERE bField.lShow      = TRUE
+    BREAK BY bField.iOrder
+          BY bField.iExtent:
 
     /* Move it one down */
     iRowNr = iRowNr + 1.
 
     /* Label is the first column, so HOR=0 */
-    create ttView.
-    assign ttView.iHor   = 0
-           ttView.iVer   = iRowNr
-           ttView.cValue = ttField.cFullName
+    CREATE bView.
+    ASSIGN bView.iHor   = 0
+           bView.iVer   = iRowNr
+           bView.cValue = bField.cFullName
            .
   
     /* Walk thru all selected records */
-    do iRecord = 1 to ghDataBrowse:num-selected-rows:
-      ghDataBrowse:fetch-selected-row(iRecord).
+    DO iRecord = 1 TO ghDataBrowse:NUM-SELECTED-ROWS:
+      ghDataBrowse:FETCH-SELECTED-ROW(iRecord).
 
-      create ttView.
-      assign ttView.iHor   = iRecord
-             ttView.iVer   = iRowNr 
-             ttView.cValue = trim(string(hDataBuffer:buffer-field(ttField.cFieldName):buffer-value(ttField.iExtent), ttField.cFormat ))
+      CREATE bView.
+      ASSIGN bView.iHor   = iRecord
+             bView.iVer   = iRowNr 
+             bView.cValue = TRIM(STRING(hDataBuffer:BUFFER-FIELD(bField.cFieldName):BUFFER-VALUE(bField.iExtent), bField.cFormat )) NO-ERROR.
              .
-    end. /* iRecord */
-  end. /* for each ttField */
+
+      /* Time-formatted fields */
+      IF bField.cFormat BEGINS "HH:MM" THEN
+      DO:
+        /* Try to format in time format */
+        bView.cValue = TRIM(STRING(INTEGER(hDataBuffer:BUFFER-FIELD(bField.cFieldName):BUFFER-VALUE(bField.iExtent)), bField.cFormat )) NO-ERROR.
+
+        /* If you type a crappy time format like HH:MAM:SS just ignore it */
+        IF ERROR-STATUS:ERROR THEN
+          bView.cValue = STRING(hDataBuffer:BUFFER-FIELD(bField.cFieldName):BUFFER-VALUE(bField.iExtent)).
+      END.
+
+      IF bField.cFieldName = 'RECID' THEN
+        bView.cValue = STRING(hDataBuffer:RECID).
+
+      IF bField.cFieldName = 'ROWID' THEN
+        bView.cValue = STRING(hDataBuffer:ROWID).
+
+    END. /* iRecord */
+  END. /* for each bField */
 
   /* Calculate maximum width per column */
-  do iRecord = 0 to ghDataBrowse:num-selected-rows:
+  DO iRecord = 0 TO ghDataBrowse:NUM-SELECTED-ROWS:
 
     /* Find out maximum width of all elements in this col */
     iMaxWidth = 1.
-    for each ttView where ttView.iHor = iRecord:
+    FOR EACH bView WHERE bView.iHor = iRecord:
       /* Correct cValue for unknown values */
-      ttView.cValue = substitute('&1',ttView.cValue).
-      iMaxWidth = maximum(iMaxWidth, length(ttView.cValue)).
-    end.
+      bView.cValue = SUBSTITUTE('&1',bView.cValue).
+      iMaxWidth = MAXIMUM(iMaxWidth, LENGTH(bView.cValue)).
+    END.
 
-    create ttColumnWidth.
-    assign ttColumnWidth.iHor   = iRecord
+    CREATE ttColumnWidth.
+    ASSIGN ttColumnWidth.iHor   = iRecord
            ttColumnWidth.iWidth = iMaxWidth.
-  end.
+  END.
 
   /* Determine a unique filename 
    * Something like: datadigger-view-customer.txt
    */
-  cFilename = substitute('&1datadigger-view.&2', session:temp-dir, cFileType ).
+  cFilename = SUBSTITUTE('&1datadigger-view.&2', SESSION:TEMP-DIR, cFileType ).
 
   /* Showtime! */
-  if search(cFileName) <> ?
-    and isFileLocked(cFileName) then
-  do:
-    message 'Error opening temporary file.~nDo you have it open for editing?~n~n' cFilename view-as alert-box info buttons ok.
-    return.
-  end.
+  IF SEARCH(cFileName) <> ?
+    AND isFileLocked(cFileName) THEN
+  DO:
+    MESSAGE 'Error opening temporary file.~nDo you have it open for editing?~n~n' cFilename VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN.
+  END.
 
-  output to value( cFilename ).
+  OUTPUT TO VALUE( cFilename ).
 
-  case cFileType:
-    when 'txt'  then assign cDocStart     = ''
+  CASE cFileType:
+    WHEN 'txt'  THEN ASSIGN cDocStart     = ''
                             cLineStart    = '~n'
                             cLabelStart   = ''      cLabelEnd  = ' = '
                             cDataStart[1] = ''      cDataEnd   = ' | '
@@ -4654,8 +4572,8 @@ PROCEDURE btnViewChoose :
                             cLineEnd      = ''
                             cDocEnd       = ''
                             .
-    when 'xls' or 
-    when 'html' then assign cDocStart     = '<html><body><table border=1>'
+    WHEN 'xls' OR 
+    WHEN 'html' THEN ASSIGN cDocStart     = '<html><body><table border=1>'
                             cLineStart    = '~n<tr>'
                             cLabelStart   = '<td bgcolor="KHAKI"><b>'         cLabelEnd   = '</b></td>'
                             cDataStart[1] = '<td bgcolor="LIGHTYELLOW">'      cDataEnd    = '&nbsp;</td>'
@@ -4663,36 +4581,36 @@ PROCEDURE btnViewChoose :
                             cLineEnd      = '</td> </tr>'
                             cDocEnd       = '~n</table></body></html>'
                             .
-  end case. 
+  END CASE. 
 
-  put unformatted cDocStart.
-  for each ttView 
-    break by ttView.iVer by ttView.iHor:
+  PUT UNFORMATTED cDocStart.
+  FOR EACH bView 
+    BREAK BY bView.iVer BY bView.iHor:
 
     /* Determine format for data to get names aligned */
-    find ttColumnWidth where ttColumnWidth.iHor = ttView.iHor.
-    cDataFormat = fill('x', ttColumnWidth.iWidth).
+    FIND ttColumnWidth WHERE ttColumnWidth.iHor = bView.iHor.
+    cDataFormat = FILL('x', ttColumnWidth.iWidth).
 
-    if first-of(ttView.iVer) then
-    do:
-      iLineNr = iLineNr mod 2 + 1.
-      put unformatted cLineStart cLabelStart string(ttView.cValue,cDataFormat) cLabelEnd.
-    end.
-    else
-      put unformatted cDataStart[iLineNr] string(ttView.cValue,cDataFormat) cDataEnd.
+    IF FIRST-OF(bView.iVer) THEN
+    DO:
+      iLineNr = iLineNr MOD 2 + 1.
+      PUT UNFORMATTED cLineStart cLabelStart STRING(bView.cValue,cDataFormat) cLabelEnd.
+    END.
+    ELSE
+      PUT UNFORMATTED cDataStart[iLineNr] STRING(bView.cValue,cDataFormat) cDataEnd.
     
-    if last-of(ttView.iVer) then 
-      put unformatted cLineEnd.
-  end.
-  put unformatted cDocEnd.
-  output close. 
+    IF LAST-OF(bView.iVer) THEN 
+      PUT UNFORMATTED cLineEnd.
+  END.
+  PUT UNFORMATTED cDocEnd.
+  OUTPUT CLOSE. 
 
   /* Start associated program for the txt file */
-  os-command no-wait start value(cFilename).
+  OS-COMMAND NO-WAIT START VALUE(cFilename).
 
   /* Cleanup */
-  empty temp-table ttView. 
-  empty temp-table ttColumnWidth.
+  EMPTY TEMP-TABLE bView. 
+  EMPTY TEMP-TABLE ttColumnWidth.
 
 END PROCEDURE. /* btnViewChoose */
 
@@ -4701,28 +4619,23 @@ END PROCEDURE. /* btnViewChoose */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE checkFonts C-Win 
 PROCEDURE checkFonts :
-/*------------------------------------------------------------------------
-  Name         : checkFonts
-  Description  : If the default fonts have been messed up, try to set the 
-                 fonts to reasonable settings.
-  ----------------------------------------------------------------------
-  19-09-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable iFont     as integer     no-undo.
-  define variable cFontName as character   no-undo.
-
-  {&timerStart} 
+/* If the default fonts have been messed up, try to set the fonts to reasonable settings.
+ */
+  {&timerStart}
+  DEFINE VARIABLE iFont     AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE cFontName AS CHARACTER NO-UNDO.
 
   /* 
-   * If no fonts are set and the default fonts have
-   * been changed, try to set them for the user.
+   * If we want DD to manage the fonts itself 
+   * -- OR --
+   * If the default fonts have been changed and the fonts 
+   * are not specified, try to set them for the user.
    */
-  if isDefaultFontsChanged() 
-    and (   logical(getRegistry("DataDigger:fonts","AutoSetFont")) = true
-         or getRegistry("DataDigger:fonts","default") = ? 
-         or getRegistry("DataDigger:fonts","fixed") = ? ) then 
-  do:
+  IF LOGICAL(getRegistry("DataDigger:fonts","AutoSetFont")) = TRUE
+    OR ( isDefaultFontsChanged() 
+        AND ( getRegistry("DataDigger:fonts","default") = ? OR getRegistry("DataDigger:fonts","fixed") = ? )
+       ) THEN 
+  DO:
     /* 
      * Try to find fonts:
      * 
@@ -4739,65 +4652,81 @@ PROCEDURE checkFonts :
      * 
      * If still nothing found, give a warning as last resort.
      */
-    empty temp-table ttFont. 
+    EMPTY TEMP-TABLE ttFont. 
 
     checkFont:
-    do iFont = 0 to font-table:num-entries - 1:
-      create ttFont.
-      assign ttFont.iFontNr = iFont.
+    DO iFont = 0 TO FONT-TABLE:NUM-ENTRIES - 1:
+      CREATE ttFont.
+      ASSIGN ttFont.iFontNr = iFont.
       
-      get-key-value section "fonts" key "font" + string(iFont) value ttFont.cFontName.
-    end. /* checkFont */
+      GET-KEY-VALUE SECTION "fonts" KEY "font" + STRING(iFont) VALUE ttFont.cFontName.
+    END. /* checkFont */
 
     /* Set default font */
-    find first ttFont where ttFont.cFontName matches "MS Sans Serif, size*8" no-error.
-    if not available ttFont then 
-      find first ttFont where ttFont.cFontName begins "MS Sans Serif" no-error.
-    if available ttFont then setRegistry("DataDigger:fonts","default",string(ttFont.iFontNr)).
+    FIND FIRST ttFont WHERE ttFont.cFontName MATCHES "MS Sans Serif, size*8" NO-ERROR.
+    IF NOT AVAILABLE ttFont THEN 
+      FIND FIRST ttFont WHERE ttFont.cFontName BEGINS "MS Sans Serif" NO-ERROR.
+    IF AVAILABLE ttFont THEN setRegistry("DataDigger:fonts","default",STRING(ttFont.iFontNr)).
 
     /* Set fixed font */
-    find first ttFont where ttFont.cFontName matches "Courier New, size*8" no-error.
-    if not available ttFont then 
-      find first ttFont where ttFont.cFontName begins "Courier New" no-error.
-    if available ttFont then setRegistry("DataDigger:fonts","fixed",string(ttFont.iFontNr)).
+    FIND FIRST ttFont WHERE ttFont.cFontName MATCHES "Courier New, size*8" NO-ERROR.
+    IF NOT AVAILABLE ttFont THEN 
+      FIND FIRST ttFont WHERE ttFont.cFontName BEGINS "Courier New" NO-ERROR.
+    IF AVAILABLE ttFont THEN setRegistry("DataDigger:fonts","fixed",STRING(ttFont.iFontNr)).
 
     /* Clean up; records are no longer needed */
-    empty temp-table ttFont. 
+    EMPTY TEMP-TABLE ttFont. 
 
     /* Now, check again to see if we found both fonts and have been able to set them */
-    if   getRegistry("DataDigger:fonts","default") = ?
-      or getRegistry("DataDigger:fonts","fixed") = ?  then
-    do:
-      run showHelp("FontsChanged","").
+    IF   getRegistry("DataDigger:fonts","default") = ?
+      OR getRegistry("DataDigger:fonts","fixed") = ?  THEN
+    DO:
+      RUN showHelp("FontsChanged","").
   
       /* Don't accept a choice "YES" in combination with HIDDEN=YES because 
        * then the help will pop up everytime automatically. Kinda annoying.
        */
       setRegistry( "DataDigger:help", "FontsChanged:answer","2").
-    end.
-  end.
+    END.
+  END.
 
   /* Get user defined Default font and fixed-size font */
   giDefaultFont = getFont("Default").
   giFixedFont   = getFont("Fixed").
 
   /* Make the font table large enough to hold at least 24 fonts */
-  if font-table:num-entries < 24 then font-table:num-entries = 24.
+  IF FONT-TABLE:NUM-ENTRIES < 24 THEN FONT-TABLE:NUM-ENTRIES = 24.
 
   {&timerStop}
+END PROCEDURE. /* checkFonts */
 
-end procedure. /* checkFonts */
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE checkNewVersion C-Win 
+PROCEDURE checkNewVersion :
+/* Check for new versions on GitHub 
+ */  
+  DEFINE VARIABLE cLastUpdateCheck AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iChannel   AS INTEGER   NO-UNDO.
+
+  cLastUpdateCheck = getRegistry('DataDigger:Update','LastUpdateCheck').
+  IF cLastUpdateCheck <> ISO-DATE(TODAY) THEN
+  DO:
+    setRegistry('DataDigger:Update','LastUpdateCheck',ISO-DATE(TODAY)).
+    iChannel = INTEGER(getRegistry('DataDigger:Update','UpdateChannel')).
+    RUN checkVersion.p(INPUT iChannel, INPUT FALSE). /* no manual check */
+  END. 
+
+END PROCEDURE. /* checkNewVersion */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE clearDataFilter C-Win 
 PROCEDURE clearDataFilter :
-/*------------------------------------------------------------------------
-  Name : clearDataFilter
-  ----------------------------------------------------------------------
-  13-11-2013 pti Created
-  ----------------------------------------------------------------------*/
+/* clear the Data Filters
+ */
   DEFINE INPUT PARAMETER phFilterField AS HANDLE NO-UNDO.
 
   DEFINE BUFFER bColumn FOR ttColumn. 
@@ -4818,10 +4747,8 @@ END PROCEDURE. /* clearDataFilter */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE clearField C-Win 
 PROCEDURE clearField :
-/*------------------------------------------------------------------------
-  Name : clearField
-  Desc : Clear a field
-  ----------------------------------------------------------------------*/
+/* Clear a field
+ */
   DEFINE INPUT PARAMETER phWidget AS HANDLE NO-UNDO.
   phWidget:SCREEN-VALUE = "".
 END PROCEDURE.
@@ -4829,15 +4756,56 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE clearFieldFilter C-Win 
+PROCEDURE clearFieldFilter :
+/* Reset the field filters to the blank values
+ */
+ DEFINE VARIABLE hFilter AS HANDLE  NO-UNDO.
+ DEFINE VARIABLE iFilter AS INTEGER NO-UNDO.
+
+ PUBLISH "setUsage" ("clearFieldFilter"). /* user behaviour */
+
+ DO iFilter = 1 TO NUM-ENTRIES(gcFieldFilterHandles):
+   hFilter = WIDGET-HANDLE(ENTRY(iFilter, gcFieldFilterHandles)) NO-ERROR.
+   IF VALID-HANDLE(hFilter) AND hFilter:TYPE <> "Toggle-Box" THEN
+   DO:
+     ASSIGN
+       hFilter:MODIFIED     = NO
+       hFilter:SCREEN-VALUE = hFilter:PRIVATE-DATA.
+
+     setFilterFieldColor(hFilter).
+   END.
+ END.
+
+END PROCEDURE. /* clearFieldFilter */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE clearIndexFilter C-Win 
+PROCEDURE clearIndexFilter :
+/*
+ * Reset the index filters to the blank values
+ */
+  DO WITH FRAME frMain:
+    fiIndexNameFilter:screen-value = fiIndexNameFilter:private-data. 
+    fiFlagsFilter    :screen-value = fiFlagsFilter    :private-data. 
+    fiFieldsFilter   :screen-value = fiFieldsFilter   :private-data. 
+  
+    setFilterFieldColor(fiIndexNameFilter:handle).
+    setFilterFieldColor(fiFlagsFilter    :handle).
+    setFilterFieldColor(fiFieldsFilter   :handle).
+  END. 
+
+END PROCEDURE. /* clearIndexFilter */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE collectFieldInfo C-Win 
 PROCEDURE collectFieldInfo PRIVATE :
-/*------------------------------------------------------------------------
-  Name         : collectFieldInfo 
-  Description  : Fill the fields temp-table
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
+/* Fill the fields temp-table
+ */
   DEFINE INPUT PARAMETER pcTableName AS CHARACTER NO-UNDO.
   
   DEFINE BUFFER ttField FOR ttField. 
@@ -4862,44 +4830,37 @@ END PROCEDURE. /* collectFieldInfo */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE collectIndexInfo C-Win 
 PROCEDURE collectIndexInfo :
-/*------------------------------------------------------------------------
-  Name         : collectIndexInfo
-  Description  : Fill the index temp-table
-  ---------------------------------------------------------------------- 
-  01-09-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Fill the index temp-table
+ */
+  {&timerStart}
+  DEFINE INPUT PARAMETER pcTableName   AS CHARACTER   NO-UNDO.
   
-  define input parameter pcTableName   as character   no-undo.
-  
-  define variable hBufferFile       as handle      no-undo.
-  define variable hBufferIndex      as handle      no-undo.
-  define variable hBufferIndexField as handle      no-undo.
-  define variable hBufferField      as handle      no-undo.
-  define variable cQuery            as character   no-undo. 
-  define variable hQuery            as handle      no-undo.
-  define variable cCurrentDatabase  as character   no-undo. /* NelsonAlcala */
+  DEFINE VARIABLE hBufferFile       AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hBufferIndex      AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hBufferIndexField AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hBufferField      AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cQuery            AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE hQuery            AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cCurrentDatabase  AS CHARACTER   NO-UNDO. /* NelsonAlcala */
   
   DEFINE BUFFER bIndex FOR ttIndex. 
-  {&timerStart}
 
   /* Return if no db connected */
-  if num-dbs = 0 then return. 
+  IF NUM-DBS = 0 THEN RETURN. 
 
   /* NelsonAlcala */
-  cCurrentDatabase = sdbname(gcCurrentDatabase).  /*use DB schemaholder name*/
-  /*
-  ** Fill the tt with _Fields
-  */
+  cCurrentDatabase = SDBNAME(gcCurrentDatabase).  /*use DB schemaholder name*/
+  /* Fill the tt with _Fields */
                                            /* NelsonAlcala */
-  create buffer hBufferFile       for table /*g*/ cCurrentDatabase + "._File".
-  create buffer hBufferIndex      for table /*g*/ cCurrentDatabase + "._Index".
-  create buffer hBufferIndexField for table /*g*/ cCurrentDatabase + "._Index-Field".
-  create buffer hBufferField      for table /*g*/ cCurrentDatabase + "._Field".
+  CREATE BUFFER hBufferFile       FOR TABLE /*g*/ cCurrentDatabase + "._File".
+  CREATE BUFFER hBufferIndex      FOR TABLE /*g*/ cCurrentDatabase + "._Index".
+  CREATE BUFFER hBufferIndexField FOR TABLE /*g*/ cCurrentDatabase + "._Index-Field".
+  CREATE BUFFER hBufferField      FOR TABLE /*g*/ cCurrentDatabase + "._Field".
 
-  create query hQuery.
-  hQuery:set-buffers(hBufferFile,hBufferIndex,hBufferIndexField,hBufferField).
+  CREATE QUERY hQuery.
+  hQuery:SET-BUFFERS(hBufferFile,hBufferIndex,hBufferIndexField,hBufferField).
 
-  cQuery = substitute("for each &1._File  where &1._file._file-name = '&2' no-lock " +
+  cQuery = SUBSTITUTE("for each &1._File  where &1._file._file-name = '&2' no-lock " +
                       "  , each &1._Index       of &1._File        no-lock " + 
                       "  , each &1._Index-field of &1._Index       no-lock " + 
                       "  , each &1._Field       of &1._Index-field no-lock where true " 
@@ -4907,109 +4868,205 @@ PROCEDURE collectIndexInfo :
                      , pcTableName
                      ).
 
-  hQuery:query-prepare(cQuery).
-  empty temp-table bIndex.
-  hQuery:query-open().
-  hQuery:get-first().
+  hQuery:QUERY-PREPARE(cQuery).
+  EMPTY TEMP-TABLE bIndex.
+  hQuery:QUERY-OPEN().
+  hQuery:GET-FIRST().
 
-  repeat while not hQuery:query-off-end:
+  REPEAT WHILE NOT hQuery:QUERY-OFF-END:
 
-    find bIndex where bIndex.cIndexName = hBufferIndex:buffer-field('_index-name'):buffer-value no-error.
-    if not available bIndex then 
-    do:
-      create bIndex.
+    FIND bIndex WHERE bIndex.cIndexName = hBufferIndex:BUFFER-FIELD('_index-name'):buffer-value NO-ERROR.
+    IF NOT AVAILABLE bIndex THEN 
+    DO:
+      CREATE bIndex.
 
-      bIndex.cIndexName  = hBufferIndex:buffer-field('_index-name'):buffer-value.
-      bIndex.cIndexFlags = string( hBufferFile:buffer-field('_prime-index'):buffer-value = hBufferIndex:recid, 'P/') 
-                          + string( hBufferIndex:buffer-field('_unique'):buffer-value, ' U/') 
-                          + string( hBufferIndex:buffer-field('_WordIdx'):buffer-value <> ?, ' W/') 
-                          + string( hBufferIndex:buffer-field('_Active'):buffer-value , ' /INACTIVE') 
+      bIndex.cIndexName  = hBufferIndex:BUFFER-FIELD('_index-name'):buffer-value.
+      bIndex.cIndexFlags = STRING( hBufferFile:BUFFER-FIELD('_prime-index'):buffer-value = hBufferIndex:RECID, 'P/') 
+                          + string( hBufferIndex:BUFFER-FIELD('_unique'):buffer-value, ' U/') 
+                          + string( hBufferIndex:BUFFER-FIELD('_WordIdx'):buffer-value <> ?, ' W/') 
+                          + string( hBufferIndex:BUFFER-FIELD('_Active'):buffer-value , ' /INACTIVE') 
                           .
-      bIndex.cIndexFlags  = trim(bIndex.cIndexFlags).
-      bIndex.lIndexActive = hBufferIndex:buffer-field('_Active'):buffer-value.
-    end.
+      bIndex.cIndexFlags  = TRIM(bIndex.cIndexFlags).
+      bIndex.lIndexActive = hBufferIndex:BUFFER-FIELD('_Active'):buffer-value.
+    END.
 
     /* Add field */
-    bIndex.cIndexFields = substitute('&1  &2&3'
+    bIndex.cIndexFields = SUBSTITUTE('&1  &2&3'
                                      , bIndex.cIndexFields 
-                                     , hBufferField:buffer-field('_field-name'):buffer-value 
-                                     , string( hBufferIndexField:buffer-field('_Ascending'):buffer-value, '+/-')
+                                     , hBufferField:BUFFER-FIELD('_field-name'):buffer-value 
+                                     , STRING( hBufferIndexField:BUFFER-FIELD('_Ascending'):buffer-value, '+/-')
                                      ).
-    bIndex.cIndexFields = trim(bIndex.cIndexFields,' ').
+    bIndex.cIndexFields = TRIM(bIndex.cIndexFields,' ').
 
     /* Naked list of just fieldnames */
-    bIndex.cFieldList   = substitute('&1,&2'
+    bIndex.cFieldList   = SUBSTITUTE('&1,&2'
                                      , bIndex.cFieldList 
-                                     , hBufferField:buffer-field('_field-name'):buffer-value 
+                                     , hBufferField:BUFFER-FIELD('_field-name'):buffer-value 
                                      ).
-    bIndex.cFieldList   = trim(bIndex.cFieldList,', ').
+    bIndex.cFieldList   = TRIM(bIndex.cFieldList,', ').
 
-    hQuery:get-next().
-  end.
-  hQuery:query-close().
+    hQuery:GET-NEXT().
+  END.
+  hQuery:QUERY-CLOSE().
 
-  delete object hQuery.
-  delete object hBufferFile.      
-  delete object hBufferIndex.     
-  delete object hBufferIndexField.
-  delete object hBufferField.     
+  DELETE OBJECT hQuery.
+  DELETE OBJECT hBufferFile.      
+  DELETE OBJECT hBufferIndex.     
+  DELETE OBJECT hBufferIndexField.
+  DELETE OBJECT hBufferField.     
 
   {&timerStop}
-  
-end procedure. /* collectIndexInfo */
+END PROCEDURE. /* collectIndexInfo */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE connectDatabase C-Win 
 PROCEDURE connectDatabase :
-/*------------------------------------------------------------------------
-  Name         : connectDatabase
-  Description  : Quick-Connect to a database via the context menu
-  ---------------------------------------------------------------------- 
-  18-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define input parameter pcDatabase as character no-undo.
+/* Quick-Connect to a database via the context menu
+ */
+  DEFINE INPUT PARAMETER pcDatabase AS CHARACTER NO-UNDO.
   
-  define variable cError        as character   no-undo.
-  define variable cProgDir      as character   no-undo.
-  define variable cDatabases    as character   no-undo.
-  define variable cDatabasesOld as character   no-undo.
-  define variable cCurrentDb    as character   no-undo. 
+  DEFINE VARIABLE cError        AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cProgDir      AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabases    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabasesOld AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cCurrentDb    AS CHARACTER   NO-UNDO. 
 
-  do with frame {&frame-name}:
+  DO WITH FRAME {&frame-name}:
     cProgDir   = getProgramDir().
     cCurrentDb = gcCurrentDatabase. 
     
     cDatabasesOld = getDatabaseList().
-    run value(cProgDir + 'wConnections.w') (input 'CONNECT', input pcDatabase, output cError).
-    if cError <> '' then
-      message cError view-as alert-box info buttons ok.
+    RUN value(cProgDir + 'wConnections.w') (INPUT 'CONNECT', INPUT pcDatabase, OUTPUT cError).
+    IF cError <> '' THEN
+      MESSAGE cError VIEW-AS ALERT-BOX INFO BUTTONS OK.
   
     /* Get all connected databases */
     cDatabases = getDatabaseList().
   
     /* If needed, repopulate db combo */
-    if cDatabases <> cDatabasesOld then
-    do:
-      assign 
+    IF cDatabases <> cDatabasesOld THEN
+    DO:
+      ASSIGN 
         cbDatabaseFilter:list-items   = ',' + cDatabases
         cbDatabaseFilter:screen-value = cCurrentDb
         .
 
       /* Get list of all tables of all databases */
-      run getTables(output table ttTable).
-    end.
+      RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    END.
   
     /* If the chosen DB is connected, switch to that one */
-    if lookup(pcDatabase, cDatabases) > 0 then
+    IF LOOKUP(pcDatabase, cDatabases) > 0 THEN
       cbDatabaseFilter:screen-value = pcDatabase.
   
-    apply 'value-changed' to cbDatabaseFilter. 
-  end.
+    APPLY 'value-changed' TO cbDatabaseFilter. 
+  END.
 
 END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE connectDroppedDatabase C-Win 
+PROCEDURE connectDroppedDatabase :
+/* Quick-Connect to a drag-and-dropped database 
+ */
+  DEFINE INPUT PARAMETER pcDatabase AS CHARACTER   NO-UNDO.
+
+  DEFINE VARIABLE cDatabaseList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iDatabase     AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cLdbName      AS CHARACTER   NO-UNDO.
+
+  /* Accept one database at a time */
+  pcDatabase = ENTRY(1,pcDatabase,'~n').
+
+  /* Check if the name is already in use */
+  cLdbName = ENTRY(NUM-ENTRIES(pcDatabase,'\'),pcDatabase,'\').
+  cLdbName = REPLACE(cLdbName,'.db','').
+  
+  /* Add a nr if the ldbname is already in use, we draw a line at 10 */
+  IF CONNECTED(cLdbName) THEN
+  REPEAT iDatabase = 2 TO 10:
+    IF NOT CONNECTED(cLdbName + STRING(iDatabase)) THEN 
+    DO:
+      cLdbName = cLdbName + STRING(iDatabase).
+      LEAVE.
+    END.
+  END.
+
+  /* Try to connect to the database single user */
+  CONNECT VALUE(pcDatabase) VALUE(SUBSTITUTE('-ld &1 -1', cLdbName)) NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN
+  DO:
+    MESSAGE ERROR-STATUS:GET-MESSAGE(1) VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN.
+  END.
+  
+  /* Get all connected databases */
+  DO WITH FRAME frMain:
+    cDatabaseList = getDatabaseList().
+    ASSIGN 
+      cbDatabaseFilter:LIST-ITEMS   = ',' + cDatabaseList
+      cbDatabaseFilter:SCREEN-VALUE = LDBNAME(NUM-DBS).
+
+    /* Get list of all tables of all databases */
+    SESSION:SET-WAIT-STATE('general').
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    SESSION:SET-WAIT-STATE('').
+  END.
+
+  /* If the chosen DB is connected, switch to that one */
+  IF LOOKUP(pcDatabase, cDatabaseList) > 0 THEN
+    cbDatabaseFilter:SCREEN-VALUE = LDBNAME(NUM-DBS).
+
+  APPLY 'value-changed' TO cbDatabaseFilter. 
+
+END PROCEDURE. /* connectDroppedDatabase */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE connectParamFile C-Win 
+PROCEDURE connectParamFile :
+/* Quick-Connect to a drag-and-dropped database 
+ */
+  DEFINE INPUT PARAMETER pcParamfile AS CHARACTER NO-UNDO.
+
+  DEFINE VARIABLE cDatabaseList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iDb           AS INTEGER     NO-UNDO.
+
+  RUN getLdbsFromParamFile(INPUT pcParamfile, OUTPUT cDatabaseList).
+
+  IF cDatabaseList <> '' THEN
+  DO:
+    RUN showHelp("DisconnectGroup", cDatabaseList).
+    IF getRegistry("DataDigger:help", "DisconnectGroup:answer") <> "1" THEN RETURN.
+
+    DO iDb = 1 TO NUM-ENTRIES(cDatabaseList):
+      DISCONNECT VALUE(ENTRY(iDb,cDatabaseList)).
+    END.
+  END.
+
+  CONNECT -pf VALUE(pcParamFile).
+
+  /* Get all connected databases */
+  DO WITH FRAME frMain:
+    cDatabaseList = getDatabaseList().
+    ASSIGN 
+      cbDatabaseFilter:LIST-ITEMS   = ',' + cDatabaseList
+      cbDatabaseFilter:SCREEN-VALUE = ''.
+
+    /* Get list of all tables of all databases */
+    SESSION:SET-WAIT-STATE('general').
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    SESSION:SET-WAIT-STATE('').
+  END.
+
+  APPLY 'value-changed' TO cbDatabaseFilter. 
+
+END PROCEDURE. /* connectParamFile */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -5054,13 +5111,8 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE convertSettings C-Win 
 PROCEDURE convertSettings :
-/*------------------------------------------------------------------------
-  Name         : convertSettings
-  Description  : Do one-time conversions for new versions
-  ---------------------------------------------------------------------- 
-  12-09-2012 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Do one-time conversions for new versions
+ */
   DEFINE INPUT PARAMETER piOldVersion AS INTEGER   NO-UNDO.
   DEFINE INPUT PARAMETER pcOldBuild   AS CHARACTER NO-UNDO.
 
@@ -5070,67 +5122,64 @@ PROCEDURE convertSettings :
   DEFINE VARIABLE cLine      AS CHARACTER NO-UNDO.
   DEFINE VARIABLE cSection   AS CHARACTER NO-UNDO.
   DEFINE VARIABLE iLine      AS INTEGER   NO-UNDO.
+  DEFINE BUFFER bfConfig FOR ttConfig. 
 
   SESSION:SET-WAIT-STATE("general").
   CASE piOldVersion:
 
-    WHEN 18 THEN
+    WHEN 19 THEN
     DO:
-      /* Obsolete code */
-      OS-DELETE VALUE( "frLoadChooseFile.w").
-      OS-DELETE VALUE( "frLoadChooseFile.r").
-      OS-DELETE VALUE( "frLoadImport.w").
-      OS-DELETE VALUE( "frLoadImport.r").
-      OS-DELETE VALUE( "frLoadMapping.w").
-      OS-DELETE VALUE( "frLoadMapping.r").
-      OS-DELETE VALUE( "frLoadSettings.w").
-      OS-DELETE VALUE( "frLoadSettings.r").
-      OS-DELETE VALUE( "wLoadData.w").
-      OS-DELETE VALUE( "wLoadData.wrx").
-      OS-DELETE VALUE( "wLoadData.r").
-      OS-DELETE VALUE( "myDump.p").
-      OS-DELETE VALUE( "myDump.r").
-      OS-DELETE VALUE( "dDump.w").
-      OS-DELETE VALUE( "dDump.r").
+      /* Obsolete files */
+      OS-DELETE getNewVersion.p.
+      OS-DELETE getNewVersion.r.
+      OS-DELETE frLoadMapping.w.
+      OS-DELETE frLoadMapping.r.
+      OS-DELETE DataDigger.chm.
+      OS-DELETE images/default_ReleaseNotes.gif.
+      OS-DELETE images/default_FilterCombo.gif.
+      OS-DELETE images/default_FilterComboRed.gif.
+      OS-DELETE images/default_Star.gif.
+      OS-DELETE images/default_Tables.gif.
+      OS-DELETE images/default_PrevQuery.gif.
+      OS-DELETE images/default_NextQuery.gif.
+      OS-DELETE images/default_ViewAsList.gif.
+      OS-DELETE images/default_Pinned.gif.
+      OS-DELETE images/default_Unpinned.gif.
+      OS-DELETE images/default_Undock.gif.
+      OS-DELETE images/default_Dock.gif.
+      OS-DELETE images/default_Tab_Favorites_Active.gif.
+      OS-DELETE images/default_Tab_Favorites_Inactive.gif.
 
-      /* Custom filter settings not needed. CustomFilter event
-       * has little to no impact on performance, so this is obsolete
-       */
-      setRegistry("DataDigger","CustomFilter:Fields",?).
-      setRegistry("DataDigger","CustomFilter:Enabled",?).
+      /* Erase widths of table browse */
+      setRegistry('DataDigger','ColumnWidth:cTableName',?).
+      setRegistry('DataDigger','ColumnWidth:cDatabase',?).
+      setRegistry('DataDigger','ColumnWidth:iNumQueries',?).
 
-      /* Save data filters replaced with combo box of last used values */
-      setRegistry("DataDigger","SaveDataFilters",?).
+      /* Setting for last active page not used anymore */
+      setRegistry("DataDigger", "ActivePage",?).
 
-      /* Load complete INI file in a longchar */
-      cIniFile = SUBSTITUTE('&1DataDigger-&2.ini', getProgramDir(), getUserName() ). 
-      COPY-LOB FILE cIniFile TO cFile.
+      /* Remove last used table from settings */
+      FOR EACH bfConfig WHERE bfConfig.cSection BEGINS 'DB:' BREAK BY bfConfig.cSection:
+        IF FIRST-OF(bfConfig.cSection) THEN setRegistry(bfConfig.cSection,'table',?).
+      END.
 
-      /* Replace old separator char CHR(160) to new CHR(1) for saved queries */
-/*      cFile = REPLACE(cFile,CHR(1),CHR(2)). */
-      cFile = REPLACE(cFile,CHR(160),CHR(1)).
-      COPY-LOB cFile TO FILE cIniFile.
-
-      DO iLine = 1 TO NUM-ENTRIES(cFile,"~n"):
-        cLine = TRIM(ENTRY(iLine,cFile,"~n")).
-
-        /* Remember section */
-        IF cLine MATCHES "[*]" THEN cSection = TRIM(cLine,"[]").
-
-        /* Only proceed if we are in a DB-section */
-        IF NOT cSection MATCHES "DB:*" THEN NEXT.
-
-        /* Remove field list when individual extents are specified. No longer per extent */
-        IF cLine MATCHES "*:Fields=*[*]*" then
-          setRegistry(cSection, ENTRY(1,cLine,"="), ? ).
-
-        /* Remove filter value */
-        IF cLine MATCHES "*:Filter=*" THEN
-          setRegistry(cSection, ENTRY(1,cLine,"="), ? ).
-
-      END. /* do iLine */
-    END. /* 18 */
-
+      /* Updates (are in the general .ini file */
+      USE 'DataDigger.ini' NO-ERROR.
+      IF NOT ERROR-STATUS:ERROR THEN
+      DO:
+        PUT-KEY-VALUE SECTION "DataDigger:Update" KEY "UpdateCheck"     VALUE ? NO-ERROR.
+        PUT-KEY-VALUE SECTION "DataDigger:Update" KEY "UpdateUrl"       VALUE ? NO-ERROR.
+        PUT-KEY-VALUE SECTION "DataDigger:Update" KEY "UpdateChannel"   VALUE ? NO-ERROR.
+        PUT-KEY-VALUE SECTION "DataDigger:Update" KEY "UpdateLastCheck" VALUE ? NO-ERROR.
+        PUT-KEY-VALUE SECTION "DataDigger:Update" KEY ""                VALUE ? NO-ERROR.
+      END. 
+      USE "".
+    END. /* 19 */
+    
+    WHEN 20 THEN
+    DO:
+      OS-DELETE wEdit.wrx.
+    END.
   END CASE. /* old version */
   
   SESSION:SET-WAIT-STATE("").
@@ -5142,34 +5191,27 @@ END PROCEDURE. /* convertSettings */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE copyDataToClipboard C-Win 
 PROCEDURE copyDataToClipboard :
-/*------------------------------------------------------------------------
-  Name         : copyDataToClipboard 
-  Description  : Copy the value of the column to the clipboard
-  ---------------------------------------------------------------------- 
-  22-09-2010 pti Created
-  ----------------------------------------------------------------------*/
+/* Copy the value of the column to the clipboard
+ */
+  DEFINE VARIABLE cColumnName  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cColumnValue AS CHARACTER   NO-UNDO.
 
-  define variable cColumnName  as character   no-undo.
-  define variable cColumnValue as character   no-undo.
+  IF NUM-ENTRIES(ghDataBrowse:PRIVATE-DATA,CHR(1)) <> 3 THEN RETURN. 
 
-  if num-entries(ghDataBrowse:private-data,chr(1)) <> 3 then return. 
+  cColumnName  = ENTRY(1, ghDataBrowse:PRIVATE-DATA,CHR(1)).
+  cColumnValue = ENTRY(2, ghDataBrowse:PRIVATE-DATA,CHR(1)).
 
-  cColumnName  = entry(1, ghDataBrowse:private-data,chr(1)).
-  cColumnValue = entry(2, ghDataBrowse:private-data,chr(1)).
+  IF cColumnValue <> '' AND cColumnValue <> ? THEN CLIPBOARD:VALUE = TRIM(cColumnValue).
 
-  if cColumnValue <> '' and cColumnValue <> ? then clipboard:value = trim(cColumnValue).
-
-end procedure. /* copyDataToClipboard */
+END PROCEDURE. /* copyDataToClipboard */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE copyToClipboard C-Win 
 PROCEDURE copyToClipboard :
-/*------------------------------------------------------------------------
-  Name : copyToClipboard
-  Desc : Copy value to clipboard 
-  ----------------------------------------------------------------------*/
+/* Copy value to clipboard
+ */
   DEFINE INPUT PARAMETER phWidget AS HANDLE NO-UNDO.
   CLIPBOARD:VALUE = phWidget:SCREEN-VALUE.
 END PROCEDURE.
@@ -5177,144 +5219,89 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE createCounter C-Win 
-PROCEDURE createCounter :
-/*------------------------------------------------------------------------
-  Name         : createCounter
-  Description  : Create the digits for the counter
-  ---------------------------------------------------------------------- 
-  25-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable iDigit     as integer no-undo. 
-  define variable iNumDigits as integer no-undo initial {&numDigits}. 
-  define variable hText      as handle  no-undo. 
-  define variable iRow       as integer no-undo. 
-  
-  {&timerStart}
-
-  do with frame frCounter:
-
-    do iRow = 1 to 2:
-      do iDigit = 1 to iNumDigits:
-        create text hText
-          assign 
-            frame         = frame frMain:handle
-            screen-value  = "0"
-            font          = giDefaultFont
-            fgcolor       = getColor('QueryCounter:FG')
-            x             = rcCounter:x + {&marginHor} + (iDigit - 1) * {&digitWidth}
-            y             = rcCounter:y + {&marginVer} - 1
-            width-pixels  = {&digitWidth}
-            height-pixels = {&digitHeight}
-            visible       = yes
-            sensitive     = no
-            .
-        case iRow:
-          when 1 then ghNewDigit[iDigit] = hText.
-          when 2 then ghOldDigit[iDigit] = hText.
-        end case. 
-
-      end.
-    end.  
-
-    rcCounter:width-pixels  = iNumDigits * {&digitWidth} + 2 * {&marginHor}.
-    rcCounter:height-pixels = {&digitHeight} + 2 * {&marginVer} no-error.
-    rcCounter:visible = no.
-  end.
-
-  {&timerStop}
-
-END PROCEDURE. /* createCounter */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE createMenuDataBrowse C-Win 
 PROCEDURE createMenuDataBrowse :
-/*------------------------------------------------------------------------
-  Name         : createMenuDataBrowse2
-  Description  : Rebuild the connection submenu of the 'add' button
-  ----------------------------------------------------------------------*/
-  
-  /* Attach connections to btnConnect */
-  define variable hMenu     as handle no-undo.
-  define variable hMenuItem as handle no-undo.
+/* Rebuild the connection submenu of the 'add' button
+ */
+  DEFINE VARIABLE hMenu     AS HANDLE NO-UNDO.
+  DEFINE VARIABLE hMenuItem AS HANDLE NO-UNDO.
 
   hMenu = createMenu(ghDataBrowse).
 
   /* Copy to clipboard */
   hMenuItem = createMenuItem(hMenu,"Item","Copy to clipboard","copyDataToClipboard").
-  ON "CHOOSE" of hMenuItem persistent run copyDataToClipboard in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN copyDataToClipboard IN THIS-PROCEDURE.
 
   /* Show value of field */
   hMenuItem = createMenuItem(hMenu,"Item","Show Value","showValue").
-  ON "CHOOSE" of hMenuItem persistent run showValue in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN showValue IN THIS-PROCEDURE.
 
   /* Add to filter */
   hMenuItem = createMenuItem(hMenu,"Item","Add to filter","addFilter").
-  on "CHOOSE" of hMenuItem persistent run setDataFilter in this-procedure (no).
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN setDataFilter IN THIS-PROCEDURE (NO).
 
   /* Filter on this field only */
   hMenuItem = createMenuItem(hMenu,"Item","Set as only filter","setFilter").
-  on "CHOOSE" of hMenuItem persistent run setDataFilter in this-procedure (yes).
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN setDataFilter IN THIS-PROCEDURE (YES).
 
   /* Filter on this field only */
   hMenuItem = createMenuItem(hMenu,"Item","Clear Filters","clearFilter").
-  on "CHOOSE" of hMenuItem persistent run btnClearDataFilterChoose in this-procedure (yes).
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnClearDataFilterChoose IN THIS-PROCEDURE (YES).
 
   /* Rule */
   hMenuItem = createMenuItem(hMenu,"Rule","","").
 
   /* Shortcut to viewing records */
   hMenuItem = createMenuItem(hMenu,"Item","View selected","view").
-  on "CHOOSE" of hMenuItem persistent run btnViewChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnViewChoose IN THIS-PROCEDURE.
 
   /* Shortcut to adding records */
   hMenuItem = createMenuItem(hMenu,"Item","Add record","add").
-  on "CHOOSE" of hMenuItem persistent run btnAddChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnAddChoose IN THIS-PROCEDURE.
 
   /* Shortcut to cloning records */
   hMenuItem = createMenuItem(hMenu,"Item","Clone record","clone").
-  on "CHOOSE" of hMenuItem persistent run btnCloneChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnCloneChoose IN THIS-PROCEDURE.
 
   /* Shortcut to editing records */
   hMenuItem = createMenuItem(hMenu,"Item","Edit selected","edit").
-  on "CHOOSE" of hMenuItem persistent run btnEditChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnEditChoose IN THIS-PROCEDURE.
 
   /* Shortcut to dumping records */
   hMenuItem = createMenuItem(hMenu,"Item","Dump selected","dump").
-  on "CHOOSE" of hMenuItem persistent run btnDumpChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnDumpChoose IN THIS-PROCEDURE.
+
+  /* Shortcut to loading records */
+  hMenuItem = createMenuItem(hMenu,"Item","Load data","load").
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnLoadChoose IN THIS-PROCEDURE.
 
   /* Rule */
   hMenuItem = createMenuItem(hMenu,"Rule","","").
 
   /* Shortcut to hiding the column */
   hMenuItem = createMenuItem(hMenu,"Item","Hide this column","hideColumn").
-  on "CHOOSE" of hMenuItem persistent run hideColumn in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN hideColumn IN THIS-PROCEDURE.
 
   /* Shortcut to unhiding the column */
   hMenuItem = createMenuItem(hMenu,"Item","Unhide all columns","unhideColumn").
-  on "CHOOSE" of hMenuItem persistent run showField in this-procedure('*',true).
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN showField IN THIS-PROCEDURE('*',TRUE).
     
   /* Rule */
   hMenuItem = createMenuItem(hMenu,"Rule","","").
 
   /* Shortcut to deleting records */
   hMenuItem = createMenuItem(hMenu,"Item","Delete selected","delete").
-  on "CHOOSE" of hMenuItem persistent run btnDeleteChoose in this-procedure.
+  ON "CHOOSE" OF hMenuItem PERSISTENT RUN btnDeleteChoose IN THIS-PROCEDURE.
 
-end procedure. /* createMenuDataBrowse */
+END PROCEDURE. /* createMenuDataBrowse */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE cutToClipboard C-Win 
 PROCEDURE cutToClipboard :
-/*------------------------------------------------------------------------
-  Name : cutToClipboard
-  Desc : Copy value to clipboard and delete current value
-  ----------------------------------------------------------------------*/
+/* Copy value to clipboard and delete current value
+ */
   DEFINE INPUT PARAMETER phWidget AS HANDLE NO-UNDO.
   CLIPBOARD:VALUE = phWidget:SCREEN-VALUE.
   phWidget:SCREEN-VALUE = "".
@@ -5326,20 +5313,16 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataColumnResize C-Win 
 PROCEDURE dataColumnResize :
-/*------------------------------------------------------------------------
-  Name         : dataColumnResize
-  Description  : Resize a data column
-  ---------------------------------------------------------------------- 
-  18-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-  define input  parameter phColumn as handle no-undo.
+/* Resize a data column
+ */
+  DEFINE INPUT  PARAMETER phColumn AS HANDLE NO-UNDO.
 
-  setRegistry( substitute('DB:&1',gcCurrentDatabase)
-             , substitute('&1.&2:width', gcCurrentTable, phColumn:name)
-             , string(phColumn:width-pixels)
+  setRegistry( SUBSTITUTE('DB:&1',gcCurrentDatabase)
+             , SUBSTITUTE('&1.&2:width', gcCurrentTable, phColumn:NAME)
+             , STRING(phColumn:WIDTH-PIXELS)
              ).
 
-  run dataScrollNotify in this-procedure (ghDataBrowse).
+  RUN dataScrollNotify IN this-procedure (ghDataBrowse).
 
 END PROCEDURE. /* dataColumnResize */
 
@@ -5348,15 +5331,9 @@ END PROCEDURE. /* dataColumnResize */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataColumnSort C-Win 
 PROCEDURE dataColumnSort PRIVATE :
-/*------------------------------------------------------------------------
-  Name         : dataColumnSort
-  Description  : Sort on a datacolumn
-  ---------------------------------------------------------------------- 
-  18-09-2009 pti Created
-  07-02-2011 pti Rewritten
-  ----------------------------------------------------------------------*/
-
-  run reopenDataBrowse(self:current-column:name,?).
+/* Sort on a datacolumn
+ */
+  RUN reopenDataBrowse(SELF:current-column:name,?).
 
 END PROCEDURE. /* dataColumnSort */
 
@@ -5365,72 +5342,70 @@ END PROCEDURE. /* dataColumnSort */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE DataDiggerClose C-Win 
 PROCEDURE DataDiggerClose :
-/*------------------------------------------------------------------------
-  Name         : DataDiggerClose
-  Description  : Close DataDigger after event 'DataDiggerClose'
-  ---------------------------------------------------------------------- 
-  14-12-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Close DataDigger after event 'DataDiggerClose'
+ */
+  APPLY 'close' TO THIS-PROCEDURE. 
 
-  apply 'close' to this-procedure. 
-
-end procedure. /* DataDiggerClose */
+END PROCEDURE. /* DataDiggerClose */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataDoubleClick C-Win 
 PROCEDURE dataDoubleClick :
-/*------------------------------------------------------------------------
-  Name         : dataDoubleClick
-  Description  : Double click on databrowse might result in 
-                 EDIT / VIEW / DUMP
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  28-10-2011 pti Simpler: default action is set in startSession proc
-  ----------------------------------------------------------------------*/
-  define input parameter hBrowseBuffer as handle no-undo.
+/* Double click on databrowse might result in EDIT / VIEW / DUMP
+ */
+  DEFINE INPUT PARAMETER hBrowseBuffer AS HANDLE NO-UNDO.
 
   /* What to do on double click? */
-  case getRegistry('DataDigger','DataDoubleClick'):
-    when 'VIEW' then run btnViewChoose. 
-    when 'EDIT' then run btnEditChoose. 
-    when 'DUMP' then run btnDumpChoose. 
-  end case.
+  CASE getRegistry('DataDigger','DataDoubleClick'):
+    WHEN 'VIEW' THEN RUN btnViewChoose. 
+    WHEN 'EDIT' THEN RUN btnEditChoose. 
+    WHEN 'DUMP' THEN RUN btnDumpChoose. 
+  END CASE.
 
-end procedure. /* dataDoubleClick */
+END PROCEDURE. /* dataDoubleClick */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataGotoFilter C-Win 
+PROCEDURE dataGotoFilter :
+/* Jump from browse straight to the filter fields 
+ */
+  DEFINE BUFFER bColumn FOR ttColumn. 
+
+  FIND bColumn WHERE bColumn.cFullName = gcLastDataField NO-ERROR.
+  IF NOT AVAILABLE bColumn THEN FIND FIRST bColumn. 
+  IF NOT AVAILABLE bColumn THEN RETURN. 
+
+  setFilterFieldColor(bColumn.hFilter).
+  APPLY 'entry' TO bColumn.hFilter. 
+
+  RETURN NO-APPLY.
+
+END PROCEDURE. /* dataGotoFilter */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataOffHome C-Win 
 PROCEDURE dataOffHome :
-define buffer bColumn for ttColumn. 
+/* Show message that this is changed as from DataDigger 21.
+ */
+ 
+  /* Use CTRL-CURSOR-UP / DOWN to jump from filter fields to browse and back */
+  RUN showHelp('JumpToFilter', '').
 
-  find bColumn where bColumn.cFullName = gcLastDataField no-error.
-  if not available bColumn then find first bColumn. 
-  if not available bColumn then return. 
-
-  setFilterFieldColor(bColumn.hFilter).
-  apply 'entry' to bColumn.hFilter. 
-
-  return no-apply.
-
-end procedure. /* dataOffHome */
+END PROCEDURE. /* dataOffHome */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataRowDisplay C-Win 
 PROCEDURE dataRowDisplay :
-/*------------------------------------------------------------------------
-  Name         : dataRowDisplay
-  Description  : Set the background color to another color to get 
-                 an odd/even coloring of the rows.
-                 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Set the background color to another color to get an odd/even coloring of the rows.
+ */
   DEFINE INPUT PARAMETER phBrowseBuffer AS HANDLE NO-UNDO.
 
   DEFINE BUFFER bColumn FOR ttColumn.
@@ -5457,7 +5432,7 @@ PROCEDURE dataRowDisplay :
     END.
 
     /* Add field for ROWID */
-    IF bColumn.cFieldName = "ROWID" then
+    IF bColumn.cFieldName = "ROWID" THEN
     DO:
       bColumn.hColumn:FONT = giFixedFont.
       bColumn.hColumn:SCREEN-VALUE = STRING(phBrowseBuffer:ROWID, "x(30)").
@@ -5481,11 +5456,8 @@ END PROCEDURE. /* dataRowDisplay */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataRowJumpToEnd C-Win 
 PROCEDURE dataRowJumpToEnd :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
+/* End on datarow
+ */
   DEFINE INPUT  PARAMETER hBrowseBuffer AS HANDLE      NO-UNDO.
 
 END PROCEDURE.
@@ -5495,50 +5467,39 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataRowValueChanged C-Win 
 PROCEDURE dataRowValueChanged :
-/*------------------------------------------------------------------------
-  Name         : dataRowValueChanged
-  Description  : Save the content of the fields in linkinfo
-                 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Save the content of the fields in linkinfo
+ */
   DEFINE INPUT  PARAMETER hBrowseBuffer AS HANDLE      NO-UNDO.
 
-  define variable iColumn    as integer     no-undo.
-  define variable hColumn    as handle      no-undo.
-  define variable cFieldName as character   no-undo. 
+  DEFINE VARIABLE iColumn    AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE hColumn    AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cFieldName AS CHARACTER   NO-UNDO. 
 
-  run setNumSelectedRecords.
+  PUBLISH "debugMessage" (3, SUBSTITUTE("Browse columns: &1", gcDataBrowseColumns)).
+  PUBLISH "debugMessage" (3, SUBSTITUTE("Column names  : &1", gcDataBrowseColumnNames)).
 
-  publish "debugMessage" (3, substitute("Browse columns: &1", gcDataBrowseColumns)).
-  publish "debugMessage" (3, substitute("Column names  : &1", gcDataBrowseColumnNames)).
+  DO iColumn = 1 TO NUM-ENTRIES(gcDataBrowseColumns):
 
-  do iColumn = 1 to num-entries(gcDataBrowseColumns):
+    hColumn    = WIDGET-HANDLE( ENTRY(iColumn,gcDataBrowseColumns) ).
+    cFieldName = ENTRY(iColumn,gcDataBrowseColumnNames).
 
-    hColumn    = widget-handle( entry(iColumn,gcDataBrowseColumns) ).
-    cFieldName = entry(iColumn,gcDataBrowseColumnNames).
+    RUN showNumSelected.
 
-    /*
-    if cFieldName = 'RECID' or cFieldName = 'ROWID' then
-      cFieldName = lower(substitute('&1 - &2', gcCurrentTable, cFieldName)).
-    */
-    if hColumn:screen-value <> "" and hColumn:screen-value <> ? then
-      setLinkInfo(cFieldName, hColumn:screen-value).
-  end.
+    IF hColumn:SCREEN-VALUE <> "" AND hColumn:SCREEN-VALUE <> ? THEN
+      setLinkInfo(cFieldName, hColumn:SCREEN-VALUE).
+  END.
 
   setUpdatePanel(?). /* Refresh sensitivity of buttons if needed */
 
-end procedure. /* dataRowValueChanged */
+END PROCEDURE. /* dataRowValueChanged */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataScrollNotify C-Win 
 PROCEDURE dataScrollNotify :
-/*------------------------------------------------------------------------
-  Name         : dataScrollNotify
-  Description  : Adjust size and position of the filterfields to browse
-  ------------------------------------------------------------------------- */
+/* Adjust size and position of the filterfields to browse
+ */
   DEFINE INPUT PARAMETER phBrowse AS HANDLE NO-UNDO.
 
   DEFINE VARIABLE cFilterFields AS CHARACTER NO-UNDO.
@@ -5550,13 +5511,13 @@ PROCEDURE dataScrollNotify :
   DEFINE BUFFER bColumn FOR ttColumn.
 
   {&timerStart}
-  publish "debugMessage" (1, "scroll-notify of dataBrowse").
+  PUBLISH "debugMessage" (1, "scroll-notify of dataBrowse").
 
   /* Might get called when browse is not yet realized, so: */
   IF NOT VALID-HANDLE(phBrowse) THEN RETURN.
 
   /* Freeze all */
-  setWindowFreeze(yes).
+  setWindowFreeze(YES).
 
   getFilterLoop:
   FOR EACH bColumn BY bColumn.iColumnNr: 
@@ -5565,7 +5526,7 @@ PROCEDURE dataScrollNotify :
   END.
 
   DO WITH FRAME frData:
-    cButtons = SUBSTITUTE('&1,&2', btnClearDataFilter:HANDLE, btnDataFilter:HANDLE).
+    cButtons = SUBSTITUTE('&1', btnClearDataFilter:HANDLE).
   END.
 
   /* Resize them */
@@ -5588,63 +5549,55 @@ END PROCEDURE.  /* dataScrollNotify */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataSelectAll C-Win 
 PROCEDURE dataSelectAll :
-/*----------------------------------------------------------------------------
-  Name: dataSelectAll
-  Desc: Select all records in the browse
-  ------------------------------------------------------------------------- */
-  define input  parameter phBrowse as handle     no-undo.
+/* Select all records in the browse
+ */
+  DEFINE INPUT PARAMETER phBrowse AS HANDLE     NO-UNDO.
 
-  setWindowFreeze(yes).
-  phBrowse:select-all().
-  run setNumSelectedRecords.
+  setWindowFreeze(YES).
+  SESSION:SET-WAIT-STATE('general').
+  phBrowse:SELECT-ALL().
+  RUN showNumSelected. 
   setUpdatePanel('display'). /* Activate buttons */
-  setWindowFreeze(no).
+  setWindowFreeze(NO).
+  SESSION:SET-WAIT-STATE('').
 
-end procedure. /* dataSelectAll */
+END PROCEDURE. /* dataSelectAll */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dataSelectNone C-Win 
 PROCEDURE dataSelectNone :
-/*----------------------------------------------------------------------------
-  Name: dataSelectNone
-  Desc: Deselect all records in the browse
-  ------------------------------------------------------------------------- */
-  define input  parameter phBrowse as handle     no-undo.
+/* Deselect all records in the browse
+ */
+  DEFINE INPUT  PARAMETER phBrowse AS HANDLE     NO-UNDO.
 
-  setWindowFreeze(yes).
-  phBrowse:deselect-rows().
-  run setNumSelectedRecords.
+  setWindowFreeze(YES).
+  phBrowse:DESELECT-ROWS().
+  RUN showNumSelected.
   setUpdatePanel('display'). /* Activate buttons */
-  setWindowFreeze(no).
+  setWindowFreeze(NO).
 
-end procedure. /* dataSelectNone */
+END PROCEDURE. /* dataSelectNone */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE deleteDataFilters C-Win 
 PROCEDURE deleteDataFilters :
-/*----------------------------------------------------------------------------
-  Name : deleteDataFilters
-  Desc : Kill the data filters and its menu
-  ------------------------------------------------------------------------- */
-  DEFINE INPUT PARAMETER phParentBrowse AS HANDLE NO-UNDO.
-
-  DEFINE BUFFER bFilter FOR ttFilter. 
-
+/* Kill the data filters and its menu
+ */
   {&timerStart}
+  DEFINE INPUT PARAMETER phParentBrowse AS HANDLE NO-UNDO.
+  DEFINE BUFFER bFilter FOR ttFilter.
 
   FOR EACH bFilter WHERE bFilter.hBrowse = phParentBrowse:
-
     IF VALID-HANDLE(bFilter.hFilter:POPUP-MENU) THEN killMenu(bFilter.hFilter:POPUP-MENU).
     DELETE OBJECT bFilter.hFilter NO-ERROR.
     DELETE bFilter.
   END.
 
   {&timerStop}
-
 END PROCEDURE. /* deleteDataFilters */
 
 /* _UIB-CODE-BLOCK-END */
@@ -5652,53 +5605,61 @@ END PROCEDURE. /* deleteDataFilters */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE deleteRecord C-Win 
 PROCEDURE deleteRecord :
-/*----------------------------------------------------------------------------
-  Name : deleteRecord
-  Desc : Generate a program to delete a record with dictionary validations
-  ------------------------------------------------------------------------- */
-  
-  define input parameter pcDatabase      as character no-undo. 
-  define input parameter pcTable         as character no-undo. 
-  define input parameter prRowid         as rowid     no-undo. 
-  define input parameter plEnableTrigger as logical   no-undo.
-  define output parameter plDeleted      as logical   no-undo. 
+/* Generate a program to delete a record with dictionary validations
+ */
+  DEFINE INPUT PARAMETER pcDatabase      AS CHARACTER NO-UNDO.
+  DEFINE INPUT PARAMETER pcTable         AS CHARACTER NO-UNDO. 
+  DEFINE INPUT PARAMETER prRowid         AS ROWID     NO-UNDO. 
+  DEFINE INPUT PARAMETER plEnableTrigger AS LOGICAL   NO-UNDO.
+  DEFINE OUTPUT PARAMETER plDeleted      AS LOGICAL   NO-UNDO. 
 
-  define variable cTempFile as character no-undo. 
+  DEFINE VARIABLE cTempFile AS CHARACTER NO-UNDO. 
 
-  cTempFile = substitute('&1delrecord.p', session:temp-directory).
+  cTempFile = SUBSTITUTE('&1delrecord.p', SESSION:TEMP-DIRECTORY).
 
-  output to value(cTempFile).
-  put unformatted
-         substitute('/* ' ) 
-    skip substitute(' * Name: delrecord.p ')
-    skip substitute(' * Desc: generated by DataDigger to delete &1.&2                        ', pcDataBase, pcTable)  
-    skip substitute(' * Date: &1 ', now ) 
-    skip substitute(' */  ' ) 
-    skip substitute('     ' ) 
-    skip substitute('define input parameter prRowid    as rowid   no-undo.                   ' ) 
-    skip substitute('define output parameter plDeleted as logical no-undo.                   ' ) 
-    skip substitute('  ' ). 
+  OUTPUT to value(cTempFile).
+  PUT UNFORMATTED
+         SUBSTITUTE('/* ' ) 
+    SKIP SUBSTITUTE(' * Name: delrecord.p ')
+    SKIP SUBSTITUTE(' * Desc: generated by DataDigger to delete &1.&2 ', pcDataBase, pcTable)  
+    SKIP SUBSTITUTE(' * Date: &1 ', NOW ) 
+    SKIP SUBSTITUTE(' */  ' ) 
+    SKIP SUBSTITUTE('     ' ) 
+    SKIP SUBSTITUTE('DEFINE INPUT  PARAMETER prRowid   AS ROWID   NO-UNDO. ' ) 
+    SKIP SUBSTITUTE('DEFINE OUTPUT PARAMETER plDeleted AS LOGICAL NO-UNDO. ' ) 
+    SKIP SUBSTITUTE('  ' ). 
 
-  if not plEnableTrigger then
-    put unformatted 
-    skip substitute('disable triggers for dump of &1.&2.                                     ', pcDataBase, pcTable).
+  IF NOT plEnableTrigger THEN
+    PUT UNFORMATTED 
+    SKIP SUBSTITUTE('DISABLE TRIGGERS FOR DUMP OF &1.&2.', pcDataBase, pcTable).
 
-  put unformatted
-    skip substitute('  ' )
-    skip substitute('/* Find the record to delete */' ) 
-    skip substitute('find &1.&2 where rowid(&1.&2) = prRowid exclusive-lock no-error no-wait.', pcDataBase, pcTable) 
-    skip substitute('if available &1.&2 then delete &1.&2 no-error.                          ', pcDataBase, pcTable) 
-    skip substitute('  ' ) 
-    skip substitute('/* See if its really gone */' ) 
-    skip substitute('plDeleted = not can-find(&1.&2 where rowid(&1.&2) = prRowid).           ', pcDataBase, pcTable) 
-    skip .
-  output close. 
+  PUT UNFORMATTED
+    SKIP SUBSTITUTE('  ' )
+    SKIP SUBSTITUTE('/* Find the record to delete */' ) 
+    SKIP SUBSTITUTE('FIND &1.&2 WHERE ROWID(&1.&2) = prRowid EXCLUSIVE-LOCK NO-ERROR NO-WAIT.', pcDataBase, pcTable) 
+    SKIP SUBSTITUTE('IF NOT AVAILABLE &1.&2 THEN RETURN.                                     ', pcDataBase, pcTable). 
+
+  /* If we don't want triggers, we also skip potential static validations */
+  IF NOT plEnableTrigger THEN
+    PUT UNFORMATTED 
+    SKIP SUBSTITUTE('DISABLE TRIGGERS FOR DUMP OF &1.&2.     ', pcDataBase, pcTable)
+    SKIP SUBSTITUTE('DELETE &1.&2 VALIDATE(YES,"") NO-ERROR. ', pcDataBase, pcTable).
+  ELSE 
+    PUT UNFORMATTED 
+    SKIP SUBSTITUTE('DELETE &1.&2 NO-ERROR. ', pcDataBase, pcTable).
+
+  PUT UNFORMATTED     
+    SKIP SUBSTITUTE('  ' ) 
+    SKIP SUBSTITUTE('/* See if its really gone */' ) 
+    SKIP SUBSTITUTE('plDeleted = NOT CAN-FIND(&1.&2 WHERE ROWID(&1.&2) = prRowid).           ', pcDataBase, pcTable) 
+    SKIP .
+  OUTPUT close. 
 
   /* Run generated prog and cleanup */
-  run value(cTempFile) (input prRowid, output plDeleted).
-  os-delete value(cTempFile).
+  RUN VALUE(cTempFile) (INPUT prRowid, OUTPUT plDeleted).
+  OS-DELETE value(cTempFile).
 
-end procedure. /* deleteRecord */
+END PROCEDURE. /* deleteRecord */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -5722,13 +5683,83 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disconnectDatabase C-Win 
+PROCEDURE disconnectDatabase :
+/* 
+ * Disconnect the current database and rebuild table table
+ */
+ DEFINE VARIABLE cDatabases  AS CHARACTER NO-UNDO.
+ DEFINE VARIABLE cCurrentDb  AS CHARACTER NO-UNDO.
+ DEFINE VARIABLE lDisconnect AS LOGICAL   NO-UNDO.
+ DEFINE VARIABLE hBuffer     AS HANDLE    NO-UNDO.
+
+ DO WITH FRAME {&FRAME-NAME}:
+   hBuffer = brTables:QUERY:GET-BUFFER-HANDLE(1).
+   IF hBuffer:AVAILABLE THEN 
+     cCurrentDb = hBuffer::cDatabase.
+   ELSE 
+     RETURN.
+ END.
+
+ /* Cannot disconnect "all" */
+ IF cCurrentDb = "" OR cCurrentDb = ? THEN RETURN. 
+
+ /* Confirm by user */
+ RUN showHelp("Disconnect", cCurrentDb).
+ IF getRegistry("DataDigger:help", "Disconnect:answer") <> "1" THEN RETURN.
+
+ DISCONNECT VALUE(cCurrentDb).
+
+ ASSIGN 
+   gcCurrentDatabase = ""
+   gcCurrentTable    = "".
+
+ /* Get list of all tables of all databases */
+ RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+/*  /* Remove all tables of this db from the "tables" table */ */
+/*  FOR EACH ttTable WHERE ttTable.cDatabase = cCurrentDb:     */
+/*    DELETE ttTable.                                          */
+/*  END.                                                       */
+/*  RUN reopenTableBrowse(?). */
+
+ /* Get all connected databases */
+ cDatabases = getDatabaseList().
+ cbDatabaseFilter:LIST-ITEMS = "," + cDatabases.
+
+ /* Wipe database filter when it's the one that was just disconnected */
+ IF cbDatabaseFilter:SCREEN-VALUE = cCurrentDb THEN
+   cbDatabaseFilter:SCREEN-VALUE = "".
+
+ /* If we have no db connected, kill the fields tt */
+ IF NUM-DBS = 0 THEN 
+ DO: 
+   RUN deleteDataFilters(ghDataBrowse).
+   IF VALID-HANDLE(ghDataBrowse) AND VALID-HANDLE(ghDataBrowse:QUERY) THEN DELETE OBJECT ghDataBrowse:QUERY NO-ERROR.
+   IF VALID-HANDLE(ghDataBrowse) THEN DELETE OBJECT ghDataBrowse NO-ERROR.
+   IF VALID-HANDLE(ghLockTable)  THEN DELETE OBJECT ghLockTable  NO-ERROR.
+   IF VALID-HANDLE(ghDataBuffer) THEN DELETE OBJECT ghDataBuffer NO-ERROR.
+
+   EMPTY TEMP-TABLE ttField. 
+   EMPTY TEMP-TABLE ttIndex.
+
+   /* Reopen the queries on Fields and Indexes */
+   RUN reopenFieldBrowse(?,?).
+   RUN reopenIndexBrowse(?,?).
+   setUpdatePanel(?). /* Refresh sensitivity of buttons if needed */
+ END.
+
+ APPLY "value-changed" TO brTables.  /* this sets the gcCurrentDatabase */
+ RUN filterTables.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE doNothing C-Win 
 PROCEDURE doNothing :
-/*----------------------------------------------------------------------------
-  Name : doNothing
-  Desc : Wait for an amount of msec
-  ------------------------------------------------------------------------- */
-  
+/* Wait for an amount of msec
+ */
   DEFINE INPUT  PARAMETER piMilliSeconds AS INTEGER     NO-UNDO.
   DEFINE VARIABLE iStartTime AS INTEGER     NO-UNDO.
 
@@ -5744,96 +5775,91 @@ END PROCEDURE. /* doNothing */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE dropFieldMenu C-Win 
 PROCEDURE dropFieldMenu :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-
-  /* Field popup-menu on brFields */
-  define variable hEditor    as handle      no-undo.
-  define variable hFieldName as handle      no-undo.
-  define variable hFieldType as handle      no-undo.
-  define variable cField     as character   no-undo. 
-  define variable cColumn    as character   no-undo. 
-  define variable lOk        as logical     no-undo. 
-  define variable iOldPos    as integer     no-undo. 
-  define variable iLength    as integer     no-undo. 
-  define variable iMouseX    as integer no-undo. 
-  define variable iMouseY    as integer no-undo. 
-  define variable iRet       as integer no-undo. 
+/* Event for opening the field popup-menu on brFields
+ */
+  DEFINE VARIABLE hEditor    AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hFieldName AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hFieldType AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cField     AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cColumn    AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE lOk        AS LOGICAL     NO-UNDO. 
+  DEFINE VARIABLE iOldPos    AS INTEGER     NO-UNDO. 
+  DEFINE VARIABLE iLength    AS INTEGER     NO-UNDO. 
+  DEFINE VARIABLE iMouseX    AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE iMouseY    AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE iRet       AS INTEGER NO-UNDO. 
 
   /* See if we clicked on the browse column */
-  run getMouseXY(input brFields:handle in frame frMain, output iMouseX, output iMouseY).
-  if iMouseY < 18 then 
-  do:
-    RUN SendMessageA (tgSelAll:HWND, 517, 0, 0, output iRet).
-    return. 
-  end.
+  RUN getMouseXY(INPUT brFields:handle IN FRAME frMain, OUTPUT iMouseX, OUTPUT iMouseY).
+  IF iMouseY < 18 THEN 
+  DO:
+    RUN SendMessageA (tgSelAll:HWND, 517, 0, 0, OUTPUT iRet).
+    RETURN. 
+  END.
 
-  else
-  do:
-    if not brFields:query:get-buffer-handle(1):available then return. 
+  ELSE
+  DO:
+    IF NOT brFields:query:get-buffer-handle(1):available THEN RETURN. 
   
-    publish "setUsage" ("showFieldMenu"). /* user behaviour */
+    PUBLISH "setUsage" ("showFieldMenu"). /* user behaviour */
   
     /* Select the row we clicked on */
-    run selectClickedRow(brFields:handle, output lOk, output cColumn).
-    if not lOk then return no-apply. 
+    RUN selectClickedRow(brFields:handle, OUTPUT lOk, OUTPUT cColumn).
+    IF NOT lOk THEN RETURN NO-APPLY. 
   
     hFieldName = brFields:query:get-buffer-handle(1):buffer-field('cFieldName'):handle.
     hFieldType = brFields:query:get-buffer-handle(1):buffer-field('cDataType'):handle.
   
-    if valid-handle(hFieldName) then 
-    do:
+    IF VALID-HANDLE(hFieldName) THEN 
+    DO:
       /* If CTRL is pressed, do not insert the linked value */
-      cField  = hFieldName:buffer-value.
+      cField  = hFieldName:BUFFER-VALUE.
   
-      if lookup("CTRL", GetKeyList() ) <> 0 or getLinkInfo(cField) = "" then 
-      do:
-        case cField:
-          when "RECID" then cField = substitute('RECID(&1)', gcCurrentTable).
-          when "ROWID" then cField = substitute('ROWID(&1)', gcCurrentTable).
-          otherwise cField  = hFieldName:buffer-value.
-        end case. 
-      end.
+      IF LOOKUP("CTRL", GetKeyList() ) <> 0 OR getLinkInfo(cField) = "" THEN 
+      DO:
+        CASE cField:
+          WHEN "RECID" THEN cField = SUBSTITUTE('RECID(&1)', gcCurrentTable).
+          WHEN "ROWID" THEN cField = SUBSTITUTE('ROWID(&1)', gcCurrentTable).
+          OTHERWISE cField  = hFieldName:BUFFER-VALUE.
+        END CASE. 
+      END.
 
-      else 
-      do:
+      ELSE 
+      DO:
         /* In case of RECID / ROWID insert proper syntax */
-        case cField:
-          when "RECID" then cField = substitute('RECID(&1) = &2', gcCurrentTable, quoter(getLinkInfo(cField))).
-          when "ROWID" then cField = substitute('ROWID(&1) = TO-ROWID(&2)', gcCurrentTable, quoter(getLinkInfo(cField))).
-          otherwise cField = substitute('&1 = &2', cField, quoter(getLinkInfo(cField))).
-        end.
-      end.
+        CASE cField:
+          WHEN "RECID" THEN cField = SUBSTITUTE('RECID(&1) = &2', gcCurrentTable, QUOTER(getLinkInfo(cField))).
+          WHEN "ROWID" THEN cField = SUBSTITUTE('ROWID(&1) = TO-ROWID(&2)', gcCurrentTable, QUOTER(getLinkInfo(cField))).
+          OTHERWISE cField = SUBSTITUTE('&1 = &2', cField, QUOTER(getLinkInfo(cField))).
+        END.
+      END.
   
-      iLength = length(cField).
+      iLength = LENGTH(cField).
   
       /* If the query editor is expanded, do actions to that field */
       hEditor = getActiveQueryEditor().
   
       /* Remember old position for positioning cursor */
-      iOldPos = hEditor:cursor-offset.
+      iOldPos = hEditor:CURSOR-OFFSET.
   
       /* No text selected */
-      if hEditor:selection-text = "" then
-      do:
+      IF hEditor:SELECTION-TEXT = "" THEN
+      DO:
         /* If ficWhere only holds the text <empty> then delete that */
-        if hEditor:screen-value = '<empty>' then hEditor:screen-value = ''.
-        hEditor:insert-string(cField).
-      end.
-      else 
-      do:
-        hEditor:replace-selection-text(cField).
-      end.
+        IF hEditor:SCREEN-VALUE = '<empty>' THEN hEditor:SCREEN-VALUE = ''.
+        hEditor:INSERT-STRING(cField).
+      END.
+      ELSE 
+      DO:
+        hEditor:REPLACE-SELECTION-TEXT(cField).
+      END.
   
-      apply "entry" to hEditor.
-      hEditor:cursor-offset = iOldPos + iLength.
-    end.
+      APPLY "entry" TO hEditor.
+      hEditor:CURSOR-OFFSET = iOldPos + iLength.
+    END.
 
-    return no-apply.
-  end. 
+    RETURN NO-APPLY.
+  END. 
 
 END PROCEDURE.
 
@@ -5852,45 +5878,45 @@ PROCEDURE enable_UI :
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
   RUN control_load.
-  DISPLAY fiIndexNameFilter fiFlagsFilter fiFieldsFilter tgSelAll fiTableFilter 
-          cbDatabaseFilter fiTableDesc ficWhere 
+  DISPLAY fiTableFilter cbDatabaseFilter tgSelAll fiIndexNameFilter 
+          fiFlagsFilter fiFieldsFilter fiTableDesc ficWhere fiFeedback 
       WITH FRAME frMain IN WINDOW C-Win.
-  ENABLE rctQuery btnHelp rctEdit rcCounter btnClearFieldFilter btnFieldFilter 
+  ENABLE rctQuery btnFavourite rctEdit fiTableFilter cbDatabaseFilter 
+         btnClearTableFilter btnTableFilter tgSelAll btnClearFieldFilter 
          fiIndexNameFilter fiFlagsFilter fiFieldsFilter btnClearIndexFilter 
-         btnIndexFilter tgSelAll tgDebugMode brFields btnMoveTop brIndexes 
-         fiTableFilter cbDatabaseFilter btnClearTableFilter btnTableFilter 
-         btnMoveUp brTables btnReset btnMoveDown btnMoveBottom fiTableDesc 
-         btnWhere btnClear btnPrevQuery btnQueries btnNextQuery btnClipboard 
-         ficWhere btnDataDigger btnTools btnTabFields btnTabIndexes 
-         btnTableView btnResizeVer btnClone btnDump btnView btnAdd btnDelete 
-         btnEdit 
+         tgDebugMode brTables brFields btnMoveTop brIndexes btnMoveUp btnReset 
+         btnMoveDown btnMoveBottom fiTableDesc btnWhere btnClear btnQueries 
+         btnClipboard ficWhere btnNextQuery btnPrevQuery btnDump btnLoad 
+         btnTabFavourites btnTabFields btnTabIndexes btnTabTables btnTools 
+         btnDelete btnResizeVer btnClone btnView btnAdd btnEdit fiFeedback 
       WITH FRAME frMain IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frMain}
+  ENABLE btnDataDigger btnAbout-txt btnConnections btnSettings btnProcEdit 
+         btnDict btnDataAdmin btnQueries-3 btnQueryTester btnHelp btnAbout 
+         btnConnections-txt btnDataAdmin-txt btnDataDigger-txt btnDict-txt 
+         btnHelp-txt btnProcEdit-txt btnQueries-txt btnQueryTester-txt 
+         btnSettings-txt 
+      WITH FRAME frSettings IN WINDOW C-Win.
+  {&OPEN-BROWSERS-IN-QUERY-frSettings}
   DISPLAY edHint 
       WITH FRAME frHint IN WINDOW C-Win.
   ENABLE edHint btGotIt 
       WITH FRAME frHint IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frHint}
+  DISPLAY fiNumSelected fiNumRecords 
+      WITH FRAME frData IN WINDOW C-Win.
+  ENABLE rctData btnClearDataFilter fiNumSelected fiNumRecords 
+      WITH FRAME frData IN WINDOW C-Win.
+  {&OPEN-BROWSERS-IN-QUERY-frData}
   DISPLAY cbAndOr cbFields cbOperator ficValue ficWhere2 
       WITH FRAME frWhere IN WINDOW C-Win.
-  ENABLE btnAnd rctQueryButtons cbAndOr cbFields cbOperator ficValue btnInsert 
-         ficWhere2 btnClear-2 btnPrevQuery-2 btnQueries-2 btnNextQuery-2 
-         btnClipboard-2 btnOK btnCancel-2 btnBegins btnBracket btnContains 
-         btnEq btnGT btnLT btnMatches btnNE btnOr btnQt btnToday 
+  ENABLE rctQueryButtons btnBegins cbAndOr cbFields cbOperator ficValue 
+         btnInsert ficWhere2 btnClear-2 btnQueries-2 btnClipboard-2 btnOK 
+         btnCancel-2 btnOr btnAnd btnBracket btnContains btnEq btnGT btnLT 
+         btnMatches btnNE btnQt btnToday 
       WITH FRAME frWhere IN WINDOW C-Win.
   VIEW FRAME frWhere IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frWhere}
-  DISPLAY fiNumSelected fiNumResults 
-      WITH FRAME frData IN WINDOW C-Win.
-  ENABLE rctData btnClearDataFilter btnDataFilter fiNumResults 
-      WITH FRAME frData IN WINDOW C-Win.
-  {&OPEN-BROWSERS-IN-QUERY-frData}
-  ENABLE btnSettings btnChangeLog-txt btnConnections btnDict btnProcEdit 
-         btnDump-2 btnLoad-2 btnQueries-3 btnQueryTester btnChangeLog btnAbout 
-         btnDump-txt btnAbout-txt btnDict-txt btnConnections-txt btnLoad-txt 
-         btnProcEdit-txt btnQueries-txt btnQueryTester-txt btnSettings-txt 
-      WITH FRAME frSettings IN WINDOW C-Win.
-  {&OPEN-BROWSERS-IN-QUERY-frSettings}
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -5898,20 +5924,14 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE endResize C-Win 
 PROCEDURE endResize :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-
+/* Event handler for resize of window
+ */
+  {&timerStart}
   DEFINE VARIABLE iButtonSpacingX AS INTEGER    NO-UNDO.
   DEFINE VARIABLE iButtonSpacingY AS INTEGER    NO-UNDO.
   DEFINE VARIABLE hWidget         AS HANDLE     NO-UNDO.
 
   DEFINE BUFFER ttField FOR ttField. 
-  {&timerStart}
-
-  .MESSAGE 'endResize' VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
   setWindowFreeze(YES).
 
@@ -5926,6 +5946,9 @@ PROCEDURE endResize :
   IF btnResizeVer:Y < 150 THEN btnResizeVer:Y = 150.
   IF btnResizeVer:Y > (C-Win:HEIGHT-PIXELS - 180) THEN btnResizeVer:Y = C-Win:HEIGHT-PIXELS - 180.
 
+  /* Park widgets at a safe place, so making the window smaller will 
+   * not results in errors for widgets not being placeable 
+   */
   IF VALID-HANDLE(ghDataBrowse) THEN
   ASSIGN 
     ghDataBrowse:WIDTH-PIXELS  = 100
@@ -5933,8 +5956,11 @@ PROCEDURE endResize :
     ghDataBrowse:Y = 1
     ghDataBrowse:X = 1.
 
+  fiFeedback:X = 1.
+  fiFeedback:Y = 1.
+
   /* Set width of main rectangles */
-  rctQuery:WIDTH-PIXELS  = C-Win:WIDTH-PIXELS - 4 NO-ERROR. /* 4 */
+  rctQuery:WIDTH-PIXELS  = C-Win:WIDTH-PIXELS - 4 NO-ERROR. 
   rctQuery:X             = 0 NO-ERROR.
   rctQuery:Y             = 0 NO-ERROR.
   rctQuery:HEIGHT-PIXELS = btnResizeVer:Y + 32.
@@ -5942,18 +5968,10 @@ PROCEDURE endResize :
   /* Buttons DD / Tools / Help */
   btnResizeVer:WIDTH-PIXELS = rctQuery:WIDTH-PIXELS.
   btnResizeVer:X = 0.
-  btnDataDigger:X = rctQuery:X + 3.
-  btnDataDigger:Y = rctQuery:Y + 2.
-  btnTools:X = btnDataDigger:X + btnDataDigger:WIDTH-PIXELS.
-  btnTools:Y = rctQuery:Y + 2.
-  btnHelp:X = btnTools:X + btnTools:WIDTH-PIXELS.
-  btnHelp:Y = rctQuery:Y + 2.
-  tgDebugMode:X = btnHelp:X + btnHelp:WIDTH-PIXELS + 10.
-  tgDebugMode:Y = rctQuery:Y + 10.
 
   /* Table browse */
-  rcTableFilter:X = rctQuery:X.
-  rcTableFilter:Y = rctQuery:Y + 54.
+  rcTableFilter:X = rctQuery:X + 20.
+  rcTableFilter:Y = rctQuery:Y + 24.
   rcTableFilter:WIDTH-PIXELS = 226.
   rcTableFilter:HEIGHT-PIXELS = btnResizeVer:Y - rcTableFilter:Y.
 
@@ -5961,12 +5979,15 @@ PROCEDURE endResize :
   brTables:Y = rcTableFilter:Y + 3.  
   brTables:WIDTH-PIXELS = rcTableFilter:WIDTH-PIXELS - 6.
   brTables:HEIGHT-PIXELS = rcTableFilter:HEIGHT-PIXELS - 6 - fiTableDesc:HEIGHT-PIXELS.
+  btnTabTables:X = brTables:X - 23.
+  btnTabFavourites:X = brTables:X - 23.
 
   fiTableDesc:X = brTables:X.
   fiTableDesc:Y = brTables:Y + brTables:HEIGHT-PIXELS.
-  fiTableDesc:WIDTH-PIXELS = brTables:WIDTH-PIXELS - btnTableView:WIDTH-PIXELS.
-  btnTableView:X = fiTableDesc:X + fiTableDesc:WIDTH-PIXELS.
-  btnTableView:Y = fiTableDesc:Y.
+  fiTableDesc:WIDTH-PIXELS = brTables:WIDTH-PIXELS - btnFavourite:WIDTH-PIXELS.
+
+  btnFavourite:X = fiTableDesc:X + fiTableDesc:WIDTH-PIXELS.
+  btnFavourite:Y = fiTableDesc:Y.
 
   /* Data */
   DO WITH FRAME frData:
@@ -5985,10 +6006,10 @@ PROCEDURE endResize :
     rctDataFilter:WIDTH-PIXELS  = 1. 
     rctDataFilter:HEIGHT-PIXELS = 27. 
 
-    rctData:X                 = 0.
-    rctData:Y                 = 1.
-    rctData:WIDTH-PIXELS      = FRAME frData:WIDTH-PIXELS - 0 NO-ERROR.
-    rctData:HEIGHT-PIXELS     = FRAME frData:HEIGHT-PIXELS - 10 NO-ERROR.
+    rctData:X             = 0.
+    rctData:Y             = 1.
+    rctData:WIDTH-PIXELS  = FRAME frData:WIDTH-PIXELS - 0 NO-ERROR.
+    rctData:HEIGHT-PIXELS = FRAME frData:HEIGHT-PIXELS - 10 NO-ERROR.
 
     rctDataFilter:WIDTH-PIXELS = FRAME frData:WIDTH-PIXELS - rctDataFilter:X - 4 NO-ERROR.
   END.
@@ -6005,28 +6026,30 @@ PROCEDURE endResize :
   btnEdit:X     = btnClone:X + btnClone:WIDTH-PIXELS.
   btnDump:X     = btnEdit:X + (2 * btnEdit:WIDTH-PIXELS).
   btnView:X     = btnDump:X + btnDump:WIDTH-PIXELS.
-/*   btnLoad:X     = btnView:X + btnView:WIDTH-PIXELS. */
-  btnDelete:X   = btnView:X + (2 * btnView:WIDTH-PIXELS).
+  btnLoad:X     = btnView:X + btnView:WIDTH-PIXELS. 
+  btnDelete:X   = btnLoad:X + (2 * btnLoad:WIDTH-PIXELS).
 
   btnAdd:Y      = rctEdit:Y + iButtonSpacingY.
   btnClone:Y    = rctEdit:Y + iButtonSpacingY.
   btnEdit:Y     = rctEdit:Y + iButtonSpacingY.
   btnDump:Y     = rctEdit:Y + iButtonSpacingY.
   btnView:Y     = rctEdit:Y + iButtonSpacingY.
-/*   btnLoad:Y     = rctEdit:Y + iButtonSpacingY. */
+  btnLoad:Y     = rctEdit:Y + iButtonSpacingY. 
   btnDelete:Y   = rctEdit:Y + iButtonSpacingY.
 
   /* Num results of query */
-  fiNumResults:X = rctData:X + rctData:WIDTH-PIXELS - fiNumResults:WIDTH-PIXELS - 40.
-  fiNumResults:Y = rctData:Y + rctData:HEIGHT-PIXELS - 8.
-  
-  /* Num selected records */
-  fiNumSelected:Y = fiNumResults:Y.
-  fiNumSelected:X = fiNumResults:X - FONT-TABLE:GET-TEXT-WIDTH-PIXELS( fiNumSelected:SCREEN-VALUE, fiNumSelected:FONT) - 5.
+  RUN showNumRecords(?,?).
+  RUN showNumSelected.
+
+  /* Feedback txt */
+  fiFeedback:WIDTH-PIXELS = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(fiFeedback:SCREEN-VALUE,getFont("default")) + 10.
+  fiFeedback:HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(getFont("default")) + 10.
+  fiFeedback:X = FRAME frData:X + FRAME frData:WIDTH-PIXELS - fiFeedback:WIDTH-PIXELS.
+  fiFeedback:Y = rctEdit:Y + rctEdit:HEIGHT-PIXELS - fiFeedback:HEIGHT-PIXELS - 6.
 
   DO:
     /* Positioning of browse with fields */
-    ghFieldBrowse:WIDTH-PIXELS  = rctQuery:WIDTH-PIXELS - 282.
+    ghFieldBrowse:WIDTH-PIXELS  = rctQuery:WIDTH-PIXELS - 322.
     ghFieldBrowse:HEIGHT-PIXELS = btnResizeVer:Y - ghFieldBrowse:Y - 3.
 
     /* Index browse has same dimensions as field browse 
@@ -6052,24 +6075,27 @@ PROCEDURE endResize :
 
     /* right-align buttons with field browse */
     btnClipboard:X = (ghFieldBrowse:X + ghFieldBrowse:WIDTH-PIXELS) - btnClipboard:WIDTH-PIXELS.
-    btnNextQuery:X = btnClipboard:X - btnNextQuery:WIDTH-PIXELS + 1.
-    btnQueries:X   = btnNextQuery:X - btnQueries:WIDTH-PIXELS + 1.
-    btnPrevQuery:X = btnQueries:X   - btnPrevQuery:WIDTH-PIXELS + 1.
-    btnClear:X     = btnPrevQuery:X - btnClear:WIDTH-PIXELS + 1.
-    btnViewData:X  = btnClear:X     - btnViewData:WIDTH-PIXELS + 1.
+    btnQueries:X   = btnClipboard:X - btnQueries:WIDTH-PIXELS.
+    btnClear:X     = btnQueries:X - btnClear:WIDTH-PIXELS.
+    btnViewData:X  = btnClear:X - btnViewData:WIDTH-PIXELS.
+    btnWhere:X     = btnViewData:X - btnWhere:WIDTH-PIXELS.
 
     btnClipboard:Y = btnResizeVer:Y + btnResizeVer:HEIGHT-PIXELS.
-    btnNextQuery:Y = btnClipboard:Y.
     btnQueries:Y   = btnClipboard:Y.
-    btnPrevQuery:Y = btnClipboard:Y.
     btnClear:Y     = btnClipboard:Y.
     btnViewData:Y  = btnClipboard:Y.
+    btnWhere:Y     = btnClipboard:Y.
+
+    /* Query buttons */
+    btnPrevQuery:X = brTables:X + 1.
+    btnNextQuery:X = btnPrevQuery:X + btnPrevQuery:WIDTH-PIXELS.
+    btnPrevQuery:Y = btnClipboard:Y.
+    btnNextQuery:Y = btnClipboard:Y.
 
     /* And align editor to the left of button btnViewData */
-    btnWhere:X = brTables:X.
-    btnWhere:Y = btnClipboard:Y.
-    ficWhere:WIDTH-PIXELS = btnViewData:X - ficWhere:X - 1.
-    ficWhere:Y = btnClipboard:Y.
+    ficWhere:X = btnNextQuery:X + btnNextQuery:WIDTH-PIXELS + 2.
+    ficWhere:WIDTH-PIXELS = btnWhere:X - ficWhere:X - 2.
+    ficWhere:Y = btnClipboard:Y + 1.
 
     /* Buttons for field moving */
     btnMoveUp:X       = rctQuery:WIDTH-PIXELS - 25.
@@ -6091,9 +6117,10 @@ PROCEDURE endResize :
     RUN dataScrollNotify(INPUT ghDataBrowse).
   END.
 
-  RUN resizeFilters(0). /* Resize filterfields on table browse */
-  RUN resizeFilters(1).
-  RUN resizeFilters(2).
+  RUN resizeFilters(INPUT {&PAGE-TABLES}). 
+  RUN resizeFilters(INPUT {&PAGE-FAVOURITES}). 
+  RUN resizeFilters(INPUT {&PAGE-FIELDS}). 
+  RUN resizeFilters(INPUT {&PAGE-INDEXES}). 
 
   RUN fixTooltips(c-win:HANDLE).
 
@@ -6116,12 +6143,23 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterDataBrowse C-Win 
+PROCEDURE filterDataBrowse :
+/*
+ * Apply the filter to the data browse
+ */
+  PUBLISH "setUsage" ("filterData"). /* user behaviour */
+  RUN reopenDataBrowse('',?).
+
+END PROCEDURE. /* filterDataBrowse */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldClearAll C-Win 
 PROCEDURE filterFieldClearAll :
-/*------------------------------------------------------------------------
-  Name : filterFieldClearAll
-  Desc : Wipe contents of all filter fields in the same group
-  ----------------------------------------------------------------------*/
+/* Wipe contents of all filter fields in the same group
+ */
   DEFINE INPUT PARAMETER phFilterField AS HANDLE NO-UNDO.
   DEFINE INPUT PARAMETER phClearButton AS HANDLE NO-UNDO.
 
@@ -6141,42 +6179,38 @@ END PROCEDURE. /* filterFieldClearAll */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldCursorDown C-Win 
 PROCEDURE filterFieldCursorDown :
-/*------------------------------------------------------------------------
-  Name : filterFieldCursorDown
-  Desc : Jump from filter field to browse on cursor down
-  ----------------------------------------------------------------------*/
-  define input parameter phFilterField  as handle      no-undo.
-  define input parameter phBrowseField  as handle      no-undo.
+/* Jump from filter field to browse on cursor down
+ */
+  DEFINE INPUT PARAMETER phFilterField  AS HANDLE      NO-UNDO.
+  DEFINE INPUT PARAMETER phBrowseField  AS HANDLE      NO-UNDO.
 
-  define buffer bColumn for ttColumn. 
+  DEFINE BUFFER bColumn FOR ttColumn. 
 
   /* Remember the field we escaped from */
-  find bColumn where bColumn.hFilter = phFilterField no-error.
-  if available bColumn then gcLastDataField = bColumn.cFullName.
+  FIND bColumn WHERE bColumn.hFilter = phFilterField NO-ERROR.
+  IF AVAILABLE bColumn THEN gcLastDataField = bColumn.cFullName.
 
-  apply 'leave' to phFilterField.
-  apply 'entry' to phBrowseField.
+  APPLY 'leave' TO phFilterField.
+  APPLY 'entry' TO phBrowseField.
 
-  return no-apply.
+  RETURN NO-APPLY.
 
-end procedure. /* filterFieldCursorDown */
+END PROCEDURE. /* filterFieldCursorDown */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldEntry C-Win 
 PROCEDURE filterFieldEntry :
-/*------------------------------------------------------------------------
-  Name : filterFieldEntry
-  Desc : Set the color for the text in the filter to black
-  ----------------------------------------------------------------------*/
-  define input  parameter phFilterField as handle      no-undo.
+/* Set the color for the text in the filter to black
+ */
+  DEFINE INPUT  PARAMETER phFilterField AS HANDLE      NO-UNDO.
 
   /* If you enter the field and you have not put in a filter, 
    * clear out the field so you can type something yourself
    */
-  if phFilterField:screen-value = phFilterField:private-data then
-    phFilterField:screen-value = ''.
+  IF phFilterField:SCREEN-VALUE = phFilterField:PRIVATE-DATA THEN
+    phFilterField:SCREEN-VALUE = ''.
 
   setFilterFieldColor(phFilterField).
 
@@ -6185,36 +6219,44 @@ PROCEDURE filterFieldEntry :
    */
   ghLastFilterField = phFilterField.
 
-end procedure. /* filterFieldEntry */
+END PROCEDURE. /* filterFieldEntry */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldLeave C-Win 
 PROCEDURE filterFieldLeave :
-/*------------------------------------------------------------------------
-  Name : filterFieldLeave
-  Desc : Set the color for the text in the filter to gray 
-  ----------------------------------------------------------------------*/
-  define input parameter phFilterField as handle      no-undo.
+/* Set the color for the text in the filter to gray
+ */
+  DEFINE INPUT PARAMETER phFilterField AS HANDLE      NO-UNDO.
 
   /* If nothing in the filter, restore the shadow text */
-  if   phFilterField:screen-value = '' 
-    or phFilterField:screen-value = ? then phFilterField:screen-value = phFilterField:private-data.
+  IF   phFilterField:SCREEN-VALUE = '' 
+    OR phFilterField:SCREEN-VALUE = ? THEN phFilterField:SCREEN-VALUE = phFilterField:PRIVATE-DATA.
 
   setFilterFieldColor(phFilterField).
 
-end procedure. /* filterFieldLeave */
+END PROCEDURE. /* filterFieldLeave */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldsBrowse C-Win 
+PROCEDURE filterFieldsBrowse :
+/* Apply the filter to the fields browse
+ */
+  PUBLISH "setUsage" ("filterFields"). /* user behaviour */
+  RUN reopenFieldBrowse(?,?). /* reopen, while maintaining original sort */
+
+END PROCEDURE. /* filterFieldsBrowse */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldScrollNotify C-Win 
 PROCEDURE filterFieldScrollNotify :
-/*------------------------------------------------------------------------
-  Name         : filterFieldScrollNotify
-  Description  : Catch CURSOR-LEFT and CURSOR-RIGHT actions on the browse
-  ------------------------------------------------------------------------- */
+/* Catch CURSOR-LEFT and CURSOR-RIGHT actions on the browse
+ */
   DEFINE INPUT PARAMETER phBrowse AS HANDLE   NO-UNDO.
 
   DEFINE VARIABLE cFilterFields AS CHARACTER   NO-UNDO.
@@ -6240,7 +6282,7 @@ PROCEDURE filterFieldScrollNotify :
   END.
 
   DO WITH FRAME frData:
-    cButtons = SUBSTITUTE('&1,&2', btnClearDataFilter:HANDLE, btnDataFilter:HANDLE).
+    cButtons = SUBSTITUTE('&1', btnClearDataFilter:HANDLE).
   END.
 
   /* Resize them */
@@ -6260,18 +6302,17 @@ END PROCEDURE.  /* filterScrollNotify */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldShow C-Win 
 PROCEDURE filterFieldShow :
-/*------------------------------------------------------------------------
-  Name         : filterFieldShow
-  Description  : Show or hide a filter field
-  ------------------------------------------------------------------------- */
-  
+/* Show or hide a filter field
+ */
   DEFINE INPUT PARAMETER phColumn AS HANDLE NO-UNDO.
   DEFINE INPUT PARAMETER phFilter AS HANDLE NO-UNDO.
   DEFINE INPUT PARAMETER phMenu   AS HANDLE NO-UNDO.
 
   phColumn:VISIBLE = phMenu:CHECKED.
   setRegistry("DataDigger:Fields", SUBSTITUTE("&1:Visible", phColumn:NAME), STRING(phMenu:CHECKED) ).
-  RUN resizeFilters(1). /* tables  */
+
+  RUN resizeFilters(INPUT {&PAGE-TABLES}). 
+  RUN resizeFilters(INPUT {&PAGE-FAVOURITES}). 
 
 END PROCEDURE. /* filterFieldShow */
 
@@ -6280,43 +6321,61 @@ END PROCEDURE. /* filterFieldShow */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterFieldValueChanged C-Win 
 PROCEDURE filterFieldValueChanged :
-/*------------------------------------------------------------------------
-  Name : filterFieldValueChanged
-  Desc : Save current filter value
-  ----------------------------------------------------------------------*/
+/* Save current filter value
+ */
   DEFINE INPUT PARAMETER phFilterField   AS HANDLE NO-UNDO.
   DEFINE INPUT PARAMETER plRefreshBrowse AS LOGICAL     NO-UNDO.
 
   setFilterFieldColor(phFilterField).
 
   IF plRefreshBrowse THEN
-    RUN setTimer("timedFieldFilter", 300). 
+    RUN setTimer("timedFieldFilter", 300).
 
 END PROCEDURE. /* filterFieldValueChanged */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterIndexBrowse C-Win 
+PROCEDURE filterIndexBrowse :
+/* Apply the filter to the index browse
+ */
+  PUBLISH "setUsage" ("filterFields"). /* user behaviour */
+  RUN reopenIndexBrowse(?,?). /* reopen, while maintaining original sort */
+
+END PROCEDURE. /* filterIndexBrowse */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE filterTables C-Win 
+PROCEDURE filterTables :
+/*
+ * Apply the filter to the table browse
+ */
+  DO WITH FRAME {&FRAME-NAME}:
+    RUN reopenTableBrowse(?).
+    APPLY 'value-changed' TO brTables.
+    APPLY 'entry' TO brTables.
+  END.
+
+END PROCEDURE. /* filterTables */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE fixTooltips C-Win 
 PROCEDURE fixTooltips :
-/*------------------------------------------------------------------------------
-  Name : fixTooltips
-  Desc : Replace # in tooltips with a CHR(10)
-------------------------------------------------------------------------------*/
-
+/* Replace # in tooltips with a CHR(10)
+ */
   DEFINE INPUT PARAMETER phParent AS HANDLE NO-UNDO.
   DEFINE VARIABLE hWidget AS HANDLE NO-UNDO.
 
   hWidget = phParent:FIRST-CHILD.
 
   DO WHILE VALID-HANDLE(hWidget):
-
-    IF hWidget:TYPE = "FRAME" 
-      OR hWidget:TYPE = "FIELD-GROUP" THEN RUN fixTooltips(hWidget).
-    
-    IF CAN-SET(hWidget,"TOOLTIP") THEN
-      hWidget:TOOLTIP = REPLACE(hWidget:TOOLTIP,"#","~n").
-
+    IF hWidget:TYPE = "FRAME" OR hWidget:TYPE = "FIELD-GROUP" THEN RUN fixTooltips(hWidget).
+    IF CAN-SET(hWidget,"TOOLTIP") THEN hWidget:TOOLTIP = REPLACE(hWidget:TOOLTIP,"#","~n").
     hWidget = hWidget:NEXT-SIBLING.
   END.
 
@@ -6327,13 +6386,8 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getDataQuery C-Win 
 PROCEDURE getDataQuery :
-/*------------------------------------------------------------------------
-  Name         : getDataQuery
-  Description  : Return the query that belongs to the currently shown data
-  ---------------------------------------------------------------------- 
-  04-02-2011 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Return the query that belongs to the currently shown data
+ */
   DEFINE OUTPUT PARAMETER pcQuery AS CHARACTER NO-UNDO.
 
   DEFINE VARIABLE cAndWhere AS CHARACTER   NO-UNDO.
@@ -6385,8 +6439,9 @@ PROCEDURE getDataQuery :
   cWhere = cNewWhere.
 
   /* Extract the sort-by part */
-  IF INDEX(cWhere, 'BY ') > 0 THEN
-    ASSIGN cSort  = SUBSTRING(cWhere,INDEX(cWhere, 'BY '))
+  IF cWhere BEGINS 'BY ' THEN cWhere = ' ' + cWhere.
+  IF INDEX(cWhere, ' BY ') > 0 THEN
+    ASSIGN cSort  = SUBSTRING(cWhere,INDEX(cWhere, ' BY '))
            cWhere = REPLACE(cWhere, cSort, '').
 
   /* Now, lets build it up. Start with the basics */
@@ -6420,13 +6475,8 @@ END PROCEDURE. /* getDataQuery */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getFilterQuery C-Win 
 PROCEDURE getFilterQuery :
-/*------------------------------------------------------------------------
-  Name         : getFilterQuery
-  Description  : Return a query built from fields in the filter fields
-  ---------------------------------------------------------------------- 
-  27-10-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Return a query built from fields in the filter fields
+ */
   DEFINE OUTPUT PARAMETER pcFilterQuery AS CHARACTER NO-UNDO.
 
   DEFINE VARIABLE cOperator  AS CHARACTER NO-UNDO.
@@ -6437,8 +6487,10 @@ PROCEDURE getFilterQuery :
   DEFINE BUFFER bColumn FOR ttColumn. 
 
   /* Collect all filters */
-  FOR EACH bField WHERE bField.lShow
-    , EACH bColumn WHERE bColumn.cFieldName = bField.cFieldName: 
+  FOR EACH bField WHERE bField.lShow = TRUE 
+    , EACH bColumn 
+     WHERE bColumn.cFieldName = bField.cFieldName
+       AND VALID-HANDLE(bColumn.hColumn):  
     
     /* Skip fields with shadowtext or empty value */
     IF   bColumn.hFilter:SCREEN-VALUE = bColumn.cFullName
@@ -6471,14 +6523,15 @@ PROCEDURE getFilterQuery :
       cOperator = SUBSTRING(cOperator, 1, LENGTH(cOperator) - 1).
     END.
     
+    /* Don't trim spaces in value, use RIGHT-TRIM on value, not TRIM */
     ASSIGN 
-      cValue    = IF cOperator <> "" THEN TRIM(SUBSTRING(cValue, LENGTH(cOperator) + 1)) ELSE cValue
-      cValue    = TRIM(cValue," '~"") /* Remove surrounding quotes */
+      cValue    = IF cOperator <> "" THEN RIGHT-TRIM(SUBSTRING(cValue, LENGTH(cOperator) + 1)) ELSE cValue
+      cValue    = TRIM(cValue,"'~"") /* Remove surrounding quotes */
       cOperator = REPLACE(cOperator, "!=", "<>")
       cOperator = REPLACE(cOperator, "!", "<>")
       .      
 
-    IF bField.cDataType = "CHARACTER" then
+    IF bField.cDataType = "CHARACTER" THEN
     DO:
       /* If user wants to search with matches, then ignore
        * this if the asterisk is at the end. In that case
@@ -6505,7 +6558,7 @@ PROCEDURE getFilterQuery :
                         ).
     ELSE
     IF bColumn.cFullName = "ROWID" THEN 
-      pcFilterQuery = SUBSTITUTE("&1 &2 &3(&4) = to-rowid(&5)"
+      pcFilterQuery = SUBSTITUTE("&1 &2 &3(&4) = TO-ROWID(&5)"
                         , pcFilterQuery
                         , IF pcFilterQuery = "" THEN "" ELSE "AND"
                         , bColumn.cFullName
@@ -6529,40 +6582,102 @@ END PROCEDURE. /* getFilterQuery */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getLdbsFromParamFile C-Win 
+PROCEDURE getLdbsFromParamFile :
+/* Analyze a param file and return a list of all logical 
+ * names from it that are currently connected
+ */
+  DEFINE INPUT  PARAMETER pcFileName AS CHARACTER NO-UNDO.
+  DEFINE OUTPUT PARAMETER pcLdbList  AS CHARACTER NO-UNDO.
+
+  DEFINE VARIABLE cConfig   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLine     AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iItem     AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cThisItem AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cNextItem AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cLdbName  AS CHARACTER   NO-UNDO EXTENT 100.
+  DEFINE VARIABLE cPdbName  AS CHARACTER   NO-UNDO EXTENT 100.
+  DEFINE VARIABLE iNumDb    AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iDb       AS INTEGER     NO-UNDO.
+
+  /* Read in the file, make it one long string of config options */
+  INPUT FROM VALUE(pcFileName).
+  REPEAT:
+    IMPORT UNFORMATTED cLine.
+    cConfig = cConfig + ' ' + cLine.
+  END.
+  INPUT CLOSE. 
+
+  /* Remove double spaces */
+  REPEAT WHILE INDEX(cConfig, '  ') > 0:
+    cConfig = REPLACE(cConfig,'  ',' ').
+  END.
+
+  /* Examine string, find -ld or -db option and preserve a list 
+   * of logical database names that are currently already connected
+   */
+  DO iItem = 1 TO NUM-ENTRIES(cConfig,' ') - 1:
+
+    cThisItem = TRIM(ENTRY(iItem,cConfig,' ')).
+    cNextItem = TRIM(ENTRY(iItem + 1,cConfig,' ')).
+
+    IF cThisItem = '-db' THEN 
+    DO: 
+      iNumDb = iNumDb + 1.
+
+      /* Actual db name is the next entry in the string */
+      cPdbName[iNumDb] = cNextItem.
+
+      /* Get just the base name without path */
+      cPdbName[iNumDb] = ENTRY(NUM-ENTRIES(cPdbName[iNumDb],'\'),cPdbName[iNumDb],'\').
+      cPdbName[iNumDb] = REPLACE(cPdbName[iNumDb],'.db','').
+
+      /* Logical name is same as physical name, as long as there is no 
+       * -ld parameter found in the string
+       */
+      cLdbName[iNumDb] = cPdbName[iNumDb].
+    END. 
+
+    /* -ld parameter overrules default logical name */
+    IF cThisItem = '-ld' THEN cLdbName[iNumDb] = cNextItem.
+  END.
+
+  /* Make a list of all ldbnames that are already in use */
+  DO iDb = 1 TO iNumDb:
+    IF CONNECTED(cLdbName[iDb]) THEN pcLdbList = TRIM(SUBSTITUTE('&1,&2',pcLdbList,cLdbName[iDb]),',').
+  END.
+
+END PROCEDURE. /* getLdbsFromParamFile */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE hideColumn C-Win 
 PROCEDURE hideColumn :
-/*------------------------------------------------------------------------
-  Name         : hideColumn
-  Description  : Hide the current column
-  ---------------------------------------------------------------------- 
-  18-01-2011 pti Created
-  ----------------------------------------------------------------------*/
+/* Hide the current column
+ */
+  DEFINE VARIABLE cColumnClicked AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cColumnValue   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iExtentNr      AS INTEGER     NO-UNDO.
 
-  define variable cColumnClicked as character   no-undo.
-  define variable cColumnValue   as character   no-undo.
-  define variable iExtentNr      as integer     no-undo.
-
-  if num-entries(ghDataBrowse:private-data,chr(1)) <> 3 then return. 
-  assign
-    cColumnClicked = entry(1, ghDataBrowse:private-data,chr(1))
-    cColumnValue   = entry(2, ghDataBrowse:private-data,chr(1))
-    iExtentNr      = integer(entry(3, ghDataBrowse:private-data,chr(1)))
+  IF NUM-ENTRIES(ghDataBrowse:PRIVATE-DATA,CHR(1)) <> 3 THEN RETURN. 
+  ASSIGN
+    cColumnClicked = ENTRY(1, ghDataBrowse:PRIVATE-DATA,CHR(1))
+    cColumnValue   = ENTRY(2, ghDataBrowse:PRIVATE-DATA,CHR(1))
+    iExtentNr      = INTEGER(ENTRY(3, ghDataBrowse:PRIVATE-DATA,CHR(1)))
     .
 
-  run showField(cColumnClicked,false).
+  RUN showField(cColumnClicked,FALSE).
 
-end procedure. /* hideColumn */
+END PROCEDURE. /* hideColumn */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE hideSettingsFrame C-Win 
 PROCEDURE hideSettingsFrame :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  None required for OCX.
-  Notes:       
-------------------------------------------------------------------------------*/
+/* Auto-hide the settings frame after 2 seconds
+ */
   
   IF FRAME frSettings:VISIBLE THEN 
   DO:
@@ -6583,85 +6698,73 @@ END PROCEDURE. /* hideSettingsFrame */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE incQueriesOfTable C-Win 
 PROCEDURE incQueriesOfTable :
-/*------------------------------------------------------------------------
-  Name         : incQueriesOfTable 
-  Description  : Increment the number of queries served for a table.
-                 This must be done in one move by fetching the nr 
-                 from the ini file, adding one and saving it back since
-                 the user could have more than one window open. 
-  ----------------------------------------------------------------------
-  17-11-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define input parameter pcDatabase     as character   no-undo.
-  define input parameter pcTable        as character   no-undo.
-  define input parameter piNumIncrement as integer no-undo. 
+/* Increment the number of queries served for a table.
+ * NOTE: This must be done in one move by fetching the nr
+ *       from the ini file, adding one and saving it back since
+ *       the user could have more than one window open.
+ */
+  DEFINE INPUT PARAMETER pcDatabase     AS CHARACTER   NO-UNDO.
+  DEFINE INPUT PARAMETER pcTable        AS CHARACTER   NO-UNDO.
+  DEFINE INPUT PARAMETER piNumIncrement AS INTEGER NO-UNDO. 
 
-  define variable iQueriesServed as integer   no-undo.
-  define buffer bTable for ttTable.
+  DEFINE VARIABLE iQueriesServed AS INTEGER   NO-UNDO.
+  DEFINE BUFFER bTable FOR ttTable.
 
   /* Which table? */
-  find bTable 
-    where bTable.cDatabase  = pcDatabase
-      and bTable.cTableName = pcTable
-          no-error.
-  if not available bTable then return.
+  FIND bTable 
+    WHERE bTable.cDatabase  = pcDatabase
+      AND bTable.cTableName = pcTable
+          NO-ERROR.
+  IF NOT AVAILABLE bTable THEN RETURN.
 
   /* Current number of queries served */
-  iQueriesServed = integer( getRegistry( substitute('DB:&1', pcDatabase)
-                                       , substitute('&1:QueriesServed', pcTable)
+  iQueriesServed = INTEGER( getRegistry( SUBSTITUTE('DB:&1', pcDatabase)
+                                       , SUBSTITUTE('&1:QueriesServed', pcTable)
                                        )
                           ).
-  if iQueriesServed = ? then iQueriesServed = 0.
+  IF iQueriesServed = ? THEN iQueriesServed = 0.
   iQueriesServed = iQueriesServed + piNumIncrement.
 
   /* Save */
-  assign 
+  ASSIGN 
     bTable.iNumQueries = iQueriesServed
-    bTable.tLastUsed   = now.
+    bTable.tLastUsed   = NOW.
 
   /* Save in registry */
-  setRegistry ( substitute('DB:&1', pcDatabase )
-              , substitute('&1:QueriesServed', pcTable )
-              , string(bTable.iNumQueries) 
+  setRegistry ( SUBSTITUTE('DB:&1', pcDatabase )
+              , SUBSTITUTE('&1:QueriesServed', pcTable )
+              , STRING(bTable.iNumQueries) 
               ).
-  setRegistry ( substitute('DB:&1', pcDatabase )
-              , substitute('&1:LastUsed', pcTable )
-              , string(bTable.tLastUsed, '99/99/9999 HH:MM:SS') 
+  setRegistry ( SUBSTITUTE('DB:&1', pcDatabase )
+              , SUBSTITUTE('&1:LastUsed', pcTable )
+              , STRING(bTable.tLastUsed, '99/99/9999 HH:MM:SS') 
               ).
 
-  browse brTables:refresh().
+  BROWSE brTables:refresh().
 
-end procedure. /* incQueriesOfTable */
+END PROCEDURE. /* incQueriesOfTable */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE incQueriesServed C-Win 
 PROCEDURE incQueriesServed :
-/*------------------------------------------------------------------------
-  Name         : incQueriesServed 
-  Description  : Increment the number of queries served. We need to do 
-                 this in one move by fetching the nr of queries served 
-                 from the ini file, adding one and saving it back since
-                 the user could have more than one window open. 
-  ----------------------------------------------------------------------
-  02-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define input parameter piNumIncrement as integer no-undo. 
-
-  define variable iQueriesServed as integer no-undo.
+/*
+ * Increment the number of queries served. We need to do 
+ * this in one move by fetching the nr of queries served 
+ * from the ini file, adding one and saving it back since
+ * the user could have more than one window open. 
+ */
+  DEFINE INPUT PARAMETER piNumIncrement AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE iQueriesServed AS INTEGER NO-UNDO.
 
   {&timerStart}
 
   /* Number of queries served */
-  iQueriesServed = integer(getRegistry("DataDigger", "QueriesServed" )).
-  if iQueriesServed = ? then iQueriesServed = 0.
+  iQueriesServed = INTEGER(getRegistry("DataDigger", "QueriesServed" )).
+  IF iQueriesServed = ? THEN iQueriesServed = 0.
   iQueriesServed = iQueriesServed + piNumIncrement.
-  setRegistry("DataDigger", "QueriesServed", string(iQueriesServed) ).
-
-  run setCounter(iQueriesServed,true).
+  setRegistry("DataDigger", "QueriesServed", STRING(iQueriesServed) ).
 
   {&timerStop}
 
@@ -6672,12 +6775,9 @@ END PROCEDURE. /* incQueriesServed */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeFilters C-Win 
 PROCEDURE initializeFilters :
-/*------------------------------------------------------------------------
-  Name : initializeFilters
-  Desc : Create filter widgets
-  ----------------------------------------------------------------------*/
+/* Create filter widgets
+ */
   DEFINE INPUT PARAMETER phParentBrowse AS HANDLE NO-UNDO.
-  DEFINE INPUT PARAMETER phFilterButton AS HANDLE NO-UNDO.
   DEFINE INPUT PARAMETER phClearButton  AS HANDLE NO-UNDO.
 
   DEFINE VARIABLE iField        AS INTEGER NO-UNDO.
@@ -6728,8 +6828,8 @@ PROCEDURE initializeFilters :
       ON "leave"         PERSISTENT RUN filterFieldLeave        IN THIS-PROCEDURE (hFilterField).
       ON "value-changed" PERSISTENT RUN filterFieldValueChanged IN THIS-PROCEDURE (hFilterField,YES).
       ON "shift-del"     PERSISTENT RUN filterFieldClearAll     IN THIS-PROCEDURE (hFilterField, phClearButton:HANDLE).
-      ON "return"        PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (phFilterButton:HANDLE,"choose").
-      ON "F2"            PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (phFilterButton:HANDLE,"choose").
+      ON "return"        PERSISTENT RUN reopenFieldBrowse       IN THIS-PROCEDURE (?,?).
+      ON "F2"            PERSISTENT RUN reopenFieldBrowse       IN THIS-PROCEDURE (?,?).
       ON "cursor-down"   PERSISTENT RUN filterFieldCursorDown   IN THIS-PROCEDURE (hFilterField, hColumn).
     END TRIGGERS.
 
@@ -6763,13 +6863,8 @@ END PROCEDURE. /* initializeFilters */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObjects C-Win 
 PROCEDURE initializeObjects :
-/*------------------------------------------------------------------------
-  Name         : initializeObject
-  DescriptiON  : Initialize all kind OF things
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* General setup of the window
+ */
   DEFINE VARIABLE cDatabases    AS CHARACTER NO-UNDO.
   DEFINE VARIABLE cSetting      AS CHARACTER NO-UNDO.
   DEFINE VARIABLE iSetting      AS INTEGER   NO-UNDO.
@@ -6787,29 +6882,11 @@ PROCEDURE initializeObjects :
   /* Open the settings file */
   RUN initializeSettingsFile.
 
-  /* Make the color table large enough TO hold at least 25 fONts
-   * Entries 0-23 are for the user and entry 24 will be used for 
-   * the color defined by "ButtONFace" ON the local system. We will
-   * use this color IF the user sets "use system colors"
-   */
-  IF COLOR-TABLE:NUM-ENTRIES < 25 THEN COLOR-TABLE:NUM-ENTRIES = 25.
-  DO iColor = 0 TO COLOR-TABLE:NUM-ENTRIES - 1:
-    /* Make all colors dynamic so the user can change them */
-    COLOR-TABLE:SET-DYNAMIC(iColor, true).
+  /* Set FONTS and load Images */
+  RUN initializeVisuals.
 
-    /* And get the last saved value from the INI file */
-    cSetting = getRegistry( "DataDigger:colors", SUBSTITUTE("color&1",iColor)).
-    IF NUM-ENTRIES(cSetting) = 3 THEN
-    DO:
-      COLOR-TABLE:SET-RED-VALUE  (iColor, INTEGER(ENTRY(1,cSetting))).
-      COLOR-TABLE:SET-GREEN-VALUE(iColor, INTEGER(ENTRY(2,cSetting))).
-      COLOR-TABLE:SET-BLUE-VALUE (iColor, INTEGER(ENTRY(3,cSetting))).
-    END.
-  END.
-
-  /* Get the RGB value for "ButtONFace" and set color 24 */
-  RUN GetSysColor(15, OUTPUT iRgbValue).
-  COLOR-TABLE:SET-RGB-VALUE(24, iRgbValue).
+  /* Table filter */
+  RUN initTableFilter(INPUT-OUTPUT TABLE ttTableFilter).
 
   /* Maximum time for a query */
   giMaxQueryTime = INTEGER(getRegistry("DataDigger","MaxQueryTime")) NO-ERROR.
@@ -6835,63 +6912,17 @@ PROCEDURE initializeObjects :
   IF iStackSize <= 128 THEN
     giMaxColumns = MINIMUM(3 * iStackSize, giMaxColumns).
 
-  /* Set icON */
-  C-Win:LOAD-ICON(getImagePath("DataDigger.ico")). 
-  
-  /* Where-FRAME */
-  DO WITH FRAME frWhere:
-
-    FRAME frWhere:FONT = giDefaultFONt.
-
-    cbAnDOr:FONT = gIFixedFONt.
-    cbFields:FONT = gIFixedFONt.
-    cbOperator:FONT = gIFixedFONt.
-    ficValue:FONT = gIFixedFONt.
-
-    ficWhere2:FONT = gIFixedFONt.
-
-    btnEq:FONT       = gIFixedFONt.
-    btnNe:FONT       = gIFixedFONt.
-    btnGt:FONT       = gIFixedFONt.
-    btnLt:FONT       = gIFixedFONt.
-    btnBracket:FONT  = gIFixedFONt.
-    btnQt:FONT       = gIFixedFONt.
-    btnAnd:FONT      = gIFixedFONt.
-    btnOr:FONT       = gIFixedFONt.
-    btnBegins:FONT   = gIFixedFONt.
-    btnCONtains:FONT = gIFixedFONt.
-    btnMatches:FONT  = gIFixedFONt.
-    btnToday:FONT    = gIFixedFONt.
-
-    btnInsert:LOAD-IMAGE(getImagePath("Add.gif")).
-  END.
-
-  /* Counter FRAME */
-  DO WITH FRAME frMain:
-    FRAME frMain:FONT = giDefaultFONt.
-  END.
-
-
   /* Main FRAME */
   DO WITH FRAME {&FRAME-NAME}:
 
-    /* > UI Stuff */
-    FRAME frHint:FONT = giDefaultFONt.
+    /* > Hint frame */
     FRAME frHint:X = 1.
     FRAME frHint:Y = 1.
-    FRAME frHint:VISIBLE = FALSE.
+    FRAME frHint:HIDDEN = TRUE.
 
-    /* Data FRAME */
-    FRAME frData:FONT = giDefaultFONt.
-
-    /* Show or hide TOggle box for Debug mode */
+    /* Show or hide Toggle box for Debug mode */
     tgDebugMode:HIDDEN  = &IF DEFINED (UIB_is_RUNning) &THEN NO. &ELSE YES. &ENDIF
     .setDebugMode(YES). /* debug-patrick */
-
-    /* FONts */
-    c-win:FONT = giDefaultFONt.
-    FRAME {&FRAME-NAME}:FONT = giDefaultFONt.
-    ficWhere:FONT = gIFixedFONt.
 
     /* Colors for odd/even data rows */
     giDataOddRowColor[1]  = getColor("DataRow:odd:fg" ).
@@ -6906,137 +6937,26 @@ PROCEDURE initializeObjects :
       giDataEvenRowColor[1] = 1
       giDataEvenRowColor[2] = 15.
     
-    /* Filter box around tables, fields and indexes */
-    rcTableFilter:BGCOLOR = getColor("FilterBox:bg").
-    rcFieldFilter:BGCOLOR = getColor("FilterBox:bg").
-    rcIndexFilter:BGCOLOR = getColor("FilterBox:bg").
-
     /* Num selected records */
     DO WITH FRAME frData:
-      fiNumSelected:FGCOLOR = getColor("RecordCount:Selected:fg").
-      fiWarning:BGCOLOR     = getColor("WarningBox:bg").
-      fiWarning:FGCOLOR     = getColor("WarningBox:fg").
       btnClearDataFilter:VISIBLE = (NUM-DBS > 0).
     END.
 
     /* Load images for buttONs */
     DO WITH FRAME frSettings:
-      FRAME frSettings:FONT = giDefaultFONt.
 
-      btnSettings:LOAD-IMAGE      (getImagePath("Settings.gif")).
-      btnCONnectiONs:LOAD-IMAGE   (getImagePath("CONnectiONs.gif")).
-      btnDict:LOAD-IMAGE          (getImagePath("DictiONary.gif")).
-      btnProcEdit:LOAD-IMAGE      (getImagePath("Editor.gif")).
-      btnDump-2:LOAD-IMAGE        (getImagePath("DOwnload.gif")).
-      btnDump-2:LOAD-IMAGE-inSENSITIVE (getImagePath("DOwnload_Ins.gif")).
-      btnLoad-2:LOAD-IMAGE        (getImagePath("Upload.gif")).
-      btnLoad-2:LOAD-IMAGE-inSENSITIVE (getImagePath("Upload_Ins.gif")).
-      btnQueries-3:LOAD-IMAGE     (getImagePath("SavedQueries.gif")).
-      btnQueryTester:LOAD-IMAGE   (getImagePath("QTester.gif")).
-      btnChangeLog:LOAD-IMAGE     (getImagePath("ReleaseNotes.gif")).
-      btnAbout:LOAD-IMAGE         (getImagePath("About.gif")).
-      btnResizeVer:LOAD-IMAGE     (getImagePath("ResizeVer.gif")).
-
-      /* Give the txt buttONs a fixed fONt */
-      btnSettings-txt:FONT    = gIFixedFONt.
-      btnCONnectiONs-txt:FONT = gIFixedFONt.
-      btnDict-txt:FONT        = gIFixedFONt.
-      btnProcEdit-txt:FONT    = gIFixedFONt.
-      btnDump-txt:FONT        = gIFixedFONt.
-      btnLoad-txt:FONT        = gIFixedFONt.
-      btnQueries-txt:FONT     = gIFixedFONt.
-      btnQueryTester-txt:FONT = gIFixedFONt.
-      btnChangeLog-txt:FONT   = gIFixedFONt.
-      btnAbout-txt:FONT       = gIFixedFONt.
-
-      /* Disable these WHEN ReaDONlyDigger */
-      IF ReaDONlyDigger THEN
+      /* Disable these WHEN plReadOnlyDigger */
+      IF plReadOnlyDigger THEN
         ASSIGN
           btnDict        :SENSITIVE = FALSE
           btnDict-txt    :SENSITIVE = FALSE
           btnProcEdit    :SENSITIVE = FALSE
           btnProcEdit-txt:SENSITIVE = FALSE
         .
-
-      /* Set sizes for this FRAME */
-      FRAME frSettings:WIDTH-PIXELS  = btnAbout-txt:X + btnAbout-txt:WIDTH-PIXELS + 4.
-      FRAME frSettings:HEIGHT-PIXELS = btnAbout-txt:Y + btnAbout-txt:HEIGHT-PIXELS + 4.
-
     END.
-
-    btnDataDigger:LOAD-IMAGE      (getImagePath("DataDigger24x24.gif")).
-    btnTools:LOAD-IMAGE           (getImagePath("Tools.gif")).
-    btnHelp:LOAD-IMAGE            (getImagePath("Help.gif")).
-    
-    btnTableFilter:LOAD-IMAGE     (getImagePath("FilterCombo.gif")).
-    btnClearTableFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
-    btnTableView:LOAD-IMAGE       (getImagePath("Tables.gif")).
-
-    btnFieldFilter:LOAD-IMAGE     (getImagePath("Filter.gif")).
-    btnClearFieldFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
-
-    btnIndexFilter:LOAD-IMAGE     (getImagePath("Filter.gif")).
-    btnClearIndexFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
-
-    btnDataFilter:LOAD-IMAGE      (getImagePath("Filter.gif")).
-    btnClearDataFilter:LOAD-IMAGE (getImagePath("Clear.gif")).
-
-    btnViewData:LOAD-IMAGE        (getImagePath("Execute.gif")).
-    btnClear:LOAD-IMAGE           (getImagePath("Clear.gif")).
-    btnPrevQuery:LOAD-IMAGE       (getImagePath("PrevQuery.gif")).
-    btnQueries:LOAD-IMAGE         (getImagePath("SavedQueries_small.gif")).
-    btnNextQuery:LOAD-IMAGE       (getImagePath("NextQuery.gif")).
-    btnClipboard:LOAD-IMAGE       (getImagePath("Clipboard.gif")).
-
-    /* Same buttONs ON editor FRAME */
-    btnViewData-2:LOAD-IMAGE      (getImagePath("Execute.gif")).
-    btnClear-2:LOAD-IMAGE         (getImagePath("Clear.gif")).
-    btnPrevQuery-2:LOAD-IMAGE     (getImagePath("PrevQuery.gif")).
-    btnQueries-2:LOAD-IMAGE       (getImagePath("SavedQueries_small.gif")).
-    btnNextQuery-2:LOAD-IMAGE     (getImagePath("NextQuery.gif")).
-    btnClipboard-2:LOAD-IMAGE     (getImagePath("Clipboard.gif")).
-
-    btnMoveTop:LOAD-IMAGE         (getImagePath("First.gif")).
-    btnMoveUp:LOAD-IMAGE          (getImagePath("Up.gif")).
-    btnReset:LOAD-IMAGE           (getImagePath("Reset.gif")).
-    btnMoveDOwn:LOAD-IMAGE        (getImagePath("DOwn.gif")).
-    btnMoveBottom:LOAD-IMAGE      (getImagePath("Last.gif")).
-
-    /* Add/clONe etc */
-    btnAdd:LOAD-IMAGE             (getImagePath("Add.gif")).
-    btnClONe:LOAD-IMAGE           (getImagePath("ClONe.gif")).
-    btnEdit:LOAD-IMAGE            (getImagePath("Edit.gif")).
-    btnDelete:LOAD-IMAGE          (getImagePath("Delete.gif")).
-
-    btnDump:LOAD-IMAGE            (getImagePath("Dump.gif")).
-
-    btnMoveUp:MOVE-TO-TOP().
-    btnMoveDOwn:MOVE-TO-TOP().
-    btnReset:MOVE-TO-TOP().
-    btnMoveTop:MOVE-TO-TOP().
-    btnMoveBottom:MOVE-TO-TOP().
 
     /* Handle to the browse with fields of a file */
     ghFieldBrowse = brFields:HANDLE IN FRAME {&FRAME-NAME}.
-    
-    /* Set minimum size of the window */
-    C-Win:MIN-WIDTH-PIXELS  = 650.
-    C-Win:MIN-HEIGHT-PIXELS = 460. 
-
-    /* To avoid scrollbars on the frame */
-    FRAME {&FRAME-NAME}:SCROLLABLE = FALSE.
-
-    /* Additional TOOLTIPs */
-    ficValue     :TOOLTIP = ficValue:TOOLTIP + "~n~n(CTRL-ENTER) execute".
-    ficWhere     :TOOLTIP = ficWhere:TOOLTIP + "~n~n(CTRL-ENTER) execute".
-    brFields     :TOOLTIP = brFields:TOOLTIP + "~n~n(RIGHT-CLICK) insert field+value".
-    brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-RIGHT-CLICK) insert field".
-    brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-ENTER) execute".
-
-    fiTableFilter:TOOLTIP = fiTableFilter:TOOLTIP + "~n~n(CTRL-ENTER) execute".
-
-    /* Create digits for the counter */
-    RUN createCounter.
 
     /* restore width of table browser columns */
     DO iField = 1 TO brTables:NUM-COLUMNS:
@@ -7055,7 +6975,7 @@ PROCEDURE initializeObjects :
       END.
       IF iValue <> ? THEN hColumn:WIDTH-PIXELS = iValue.
 
-      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT 0). 
+      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT {&PAGE-TABLES}). 
     END.
 
     /* restore width of index browser columns */
@@ -7074,7 +6994,7 @@ PROCEDURE initializeObjects :
       END.
       IF iValue <> ? THEN hColumn:WIDTH-PIXELS = iValue.
 
-      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT 2). 
+      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT {&PAGE-INDEXES}). 
     END.
 
     /* Build a list OF all columns in the fieldbrowse.
@@ -7106,7 +7026,7 @@ PROCEDURE initializeObjects :
       END.
       IF iValue <> ? THEN hColumn:WIDTH-PIXELS = iValue.
 
-      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT 1). 
+      ON "end-resize" OF hColumn PERSISTENT RUN resizeFilters IN THIS-PROCEDURE (INPUT {&PAGE-FIELDS}). 
     END.
     gcFieldBrowseColumnHANDLEs = TRIM(gcFieldBrowseColumnHANDLEs,",").
     gcFieldBrowseColumnNames = TRIM(gcFieldBrowseColumnNames,",").
@@ -7122,10 +7042,9 @@ PROCEDURE initializeObjects :
     END.
     gcIndexBrowseColumnHANDLEs = TRIM(gcIndexBrowseColumnHANDLEs,",").
 
-    /* Restore active page */
-    iValue = INTEGER(getRegistry("DataDigger", "ActivePage" )).
-    IF iValue = ? THEN iValue = 1.
-    RUN setPage(iValue).
+    /* Init on Fields-page and table-page */
+    RUN setPage({&PAGE-FIELDS}).
+    RUN setPage({&PAGE-TABLES}). 
 
     /* Move index browse and associated filter fields TO the left.
      * Just throw "em ON a stack, the resize event will take care OF it.
@@ -7134,7 +7053,6 @@ PROCEDURE initializeObjects :
     fiFlagsFilter      :X = tgSelAll:X.
     fiFieldsFilter     :X = tgSelAll:X.
     btnClearIndexFilter:X = tgSelAll:X.
-    btnIndexFilter     :X = tgSelAll:X.
 
     /* Initialize the buttON panels TO OFF */
     setUpdatePanel("no-record").
@@ -7146,14 +7064,13 @@ PROCEDURE initializeObjects :
     /* Create filter fill-ins for the fields browse */
     RUN initializeFilters
       ( INPUT brFields:HANDLE
-      , INPUT btnFieldFilter:HANDLE
       , INPUT btnClearFieldFilter:HANDLE
       ). 
 
     /* Set filters for table browse */
     RUN resizeFilters (INPUT 0). 
 
-    RUN getTables(OUTPUT TABLE ttTable).
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
     /* < UI Stuff */
 
     /* 
@@ -7166,23 +7083,23 @@ PROCEDURE initializeObjects :
 
     /* Keep DD ON primary mONitor ? (Rob Willoughby) */
     IF LOGICAL(getRegistry("DataDigger","StartONPrimaryMONitor")) = YES
-      AND (iValue < 0 or iValue > SESSION:WORK-AREA-WIDTH-PIXELS) THEN iValue = 200.
+      AND (iValue < 0 OR iValue > SESSION:WORK-AREA-WIDTH-PIXELS) THEN iValue = 200.
 
     ASSIGN c-win:X = iValue NO-ERROR.
 
     /* Window has been parked at y=-1000 TO get it out OF sight */
     iValue = INTEGER(getRegistry("DataDigger", "Window:Y" )).
     PUBLISH "debugMessage" (1, SUBSTITUTE("window:y from reg = &1", iValue)).
-    IF iValue < 0 or iValue = ? or iValue > SESSION:WORK-AREA-HEIGHT-PIXELS THEN iValue = 200.
+    IF iValue < 0 OR iValue = ? OR iValue > SESSION:WORK-AREA-HEIGHT-PIXELS THEN iValue = 200.
     ASSIGN c-win:Y = iValue NO-ERROR.
     PUBLISH "debugMessage" (1, SUBSTITUTE("Reset window to y = &1", iValue)).
 
     iValue = INTEGER(getRegistry("DataDigger", "Window:height" )).
-    IF iValue = ? or iValue = 0 THEN iValue = 600.
+    IF iValue = ? OR iValue = 0 THEN iValue = 600.
     ASSIGN c-win:HEIGHT-PIXELS = iValue NO-ERROR.
 
     iValue = INTEGER(getRegistry("DataDigger", "Window:width" )).
-    IF iValue = ? or iValue = 0 THEN iValue = 800.
+    IF iValue = ? OR iValue = 0 THEN iValue = 800.
     ASSIGN c-win:WIDTH-PIXELS = iValue NO-ERROR.
 
     /* Resize bar */
@@ -7191,12 +7108,7 @@ PROCEDURE initializeObjects :
     IF iValue > (C-Win:HEIGHT-PIXELS - 180) THEN iValue = C-Win:HEIGHT-PIXELS - 180.
     ASSIGN btnResizeVer:Y = iValue.
 
-    /* Number OF queries served */
-    iValue = INTEGER(getRegistry("DataDigger", "QueriesServed" )).
-    IF iValue = ? THEN iValue = 0.
-    RUN setCounter(iValue,FALSE).
-    
-    /* Get all cONnected databases */
+    /* Get all connected databases */
     cDatabases = getDatabaseList().
     cbDatabaseFilter:LIST-ITEMS = "," + cDatabases.
 
@@ -7210,13 +7122,9 @@ PROCEDURE initializeObjects :
     IF cSetting <> ? THEN
       brIndexes:SET-SORT-ARROW(INTEGER(ENTRY(1,cSetting)), LOGICAL(ENTRY(2,cSetting)) ).
 
-    /* Show or hide hidden tables */
-    cSetting = getRegistry("DataDigger", "ShowHiddenTables").
-    IF cSetting <> ? THEN MENU-ITEM m_Show_hidden_tables:CHECKED IN MENU POPUP-MENU-brTables = LOGICAL(cSetting).
-    
     /* Get last used database from registry */        
     cSetting = getRegistry("DataDigger","Database").    
-    IF cSetting = "<empty>" or cSetting = ? THEN cSetting = "".
+    IF cSetting = "<empty>" OR cSetting = ? THEN cSetting = "".
 
     /* Restore last used database, IF possible */
     IF LOOKUP(cSetting,cbDatabaseFilter:LIST-ITEMS) > 0 THEN    
@@ -7236,15 +7144,14 @@ PROCEDURE initializeObjects :
 
     /* Take whatever is now selected in the db dropDOwn */
     cSetting = gcCurrentDatabase.
-    RUN setDbCONtext(INPUT (IF cbDatabaseFilter:SCREEN-VALUE = ? THEN "<empty>" ELSE cbDatabaseFilter:SCREEN-VALUE)).
     /* < Restore  */
 
-    /* timedScrollNotIFy */
+    /* timedScrollNotify */
     /* RUN setTimer("timedScrollNotIFy", 100). */
 
     /* KeepAlive timer */
     IF LOGICAL(getRegistry("DataDigger", "KeepAlive")) THEN
-      RUN setTimer("KeepAlive", 300000).
+      RUN setTimer("KeepAlive", 5000). /* every 5 seconds */
     ELSE 
       RUN setTimer("KeepAlive", 0).
 
@@ -7270,63 +7177,58 @@ END PROCEDURE. /* initializeObjects */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeSettingsFile C-Win 
 PROCEDURE initializeSettingsFile :
-/*------------------------------------------------------------------------
-  Name         : initializeSettingsFile
-  Description  : Initialize the settings file
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Initialize the settings file
+ */
+  {&timerStart}
   DEFINE VARIABLE cProgDir     AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cEnvironment AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE iColumn      AS INTEGER     NO-UNDO.
   DEFINE VARIABLE hColumn      AS HANDLE      NO-UNDO.
 
-  {&timerStart}
-
   /* Find out where DataDigger is installed and how we"re logged on */
   cProgDir = getProgramDir().
 
   /* If the general ini file does not exist, create it */
-  if search(cProgDir + "DataDigger.ini") = ? THEN
-  do:
-    output to value(cProgDir + "DataDigger.ini").
-    output close. 
-  end.
-  load "DataDigger" dir cProgDir base-key "ini" no-error.
-  if error-status:error THEN
-    load "DataDigger" dir cProgDir new base-key "ini" no-error.
+  IF SEARCH(cProgDir + "DataDigger.ini") = ? THEN
+  DO:
+    OUTPUT TO VALUE(cProgDir + "DataDigger.ini").
+    OUTPUT CLOSE. 
+  END.
+  LOAD "DataDigger" DIR cProgDir BASE-KEY "ini" NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN
+    LOAD "DataDigger" DIR cProgDir NEW BASE-KEY "ini" NO-ERROR.
 
 
   /* Same for the helpfile (though it SHOULD exist!) */
-  if search(cProgDir + "DataDiggerHelp.ini") = ? THEN
-  do:
-    output to value(cProgDir + "DataDiggerHelp.ini").
-    output close. 
-  end.
-  load "DataDiggerHelp" dir cProgDir base-key "ini" no-error.
-  if error-status:error THEN
-    load "DataDiggerHelp" dir cProgDir new base-key "ini" no-error.
+  IF SEARCH(cProgDir + "DataDiggerHelp.ini") = ? THEN
+  DO:
+    OUTPUT TO VALUE(cProgDir + "DataDiggerHelp.ini").
+    OUTPUT CLOSE. 
+  END.
+  LOAD "DataDiggerHelp" DIR cProgDir BASE-KEY "ini" NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN
+    LOAD "DataDiggerHelp" DIR cProgDir NEW BASE-KEY "ini" NO-ERROR.
 
 
   /* Load or create personalized ini file */
-  cEnvironment = substitute("DataDigger-&1", getUserName() ).
+  cEnvironment = SUBSTITUTE("DataDigger-&1", getUserName() ).
 
   /* If not exist, create it */
-  if search(cProgDir + cEnvironment + ".ini") = ? THEN
-  do:
-    output to value(cProgDir + cEnvironment + ".ini").
-    output close. 
-  end.
-  load cEnvironment dir cProgDir base-key "ini" no-error.
-  if error-status:error THEN
-    load cEnvironment dir cProgDir new base-key "ini" no-error.
+  IF SEARCH(cProgDir + cEnvironment + ".ini") = ? THEN
+  DO:
+    OUTPUT TO VALUE(cProgDir + cEnvironment + ".ini").
+    OUTPUT CLOSE. 
+  END.
+  LOAD cEnvironment DIR cProgDir BASE-KEY "ini" NO-ERROR.
+  IF ERROR-STATUS:ERROR THEN
+    LOAD cEnvironment DIR cProgDir NEW BASE-KEY "ini" NO-ERROR.
 
   /*
    * Set some settings to default values 
    */
-  /* Visible page is fields by default */
-  IF getRegistry("DataDigger","ActivePage") = ? THEN setRegistry("DataDigger","ActivePage","1").
+
+  /* Automatically compile */
+  IF getRegistry("DataDigger", "AutoCompile") = ? THEN setRegistry("DataDigger", "AutoCompile","yes").
 
   /* Visibility of columns in brFields */
   DO iColumn = 1 TO brFields:NUM-COLUMNS IN FRAME frMain:
@@ -7367,13 +7269,17 @@ PROCEDURE initializeSettingsFile :
   IF getRegistry("DataDigger","DataDoubleClick") = ? THEN setRegistry("DataDigger","DataDoubleClick", "EDIT").
 
   /* What is the default view type? */
-  IF getRegistry("DataDigger", "ViewType") = ? THEN run setViewType("txt"). 
+  IF getRegistry("DataDigger", "ViewType") = ? THEN RUN setViewType("txt"). 
 
   /* Column label template */
   IF getRegistry("DataDigger", "ColumnLabelTemplate") = ? THEN setRegistry("DataDigger", "ColumnLabelTemplate","&1").
 
-  /* Option to enable / disable triggers. */
-  IF getRegistry("DataDigger","EnableWriteTriggers") = ? THEN setRegistry("DataDigger","EnableWriteTriggers", "true").
+  /* Show hidden tables */
+  IF getRegistry("DataDigger", "ShowHiddenTables") = ? THEN setRegistry("DataDigger", "ShowHiddenTables","FALSE").
+
+  /* Enable WRITE and DELETE triggers by default */
+  IF getRegistry("DataDigger","EnableWriteTriggers")  = ? THEN setRegistry("DataDigger","EnableWriteTriggers", "true").
+  IF getRegistry("DataDigger","EnableDeleteTriggers") = ? THEN setRegistry("DataDigger","EnableDeleteTriggers", "true").
 
   /* Keep-alive function on databases to avoid connection drop */
   IF getRegistry("DataDigger","KeepAlive") = ? THEN setRegistry("DataDigger","KeepAlive", "true").
@@ -7418,157 +7324,474 @@ PROCEDURE initializeSettingsFile :
 
   /* Backup:
    * If user has not set a name for the backup file, we will turn it on.
+   * If backup folder is empty, we set it
    */
   IF getRegistry("DataDigger:Backup","BackupFileTemplate") = ? THEN 
   DO:
     setRegistry("DataDigger:Backup","BackupFileTemplate", "<DB>.<TABLE>.<TIMESTAMP>.<#>.XML").
     setRegistry("DataDigger:Backup","BackupDir"         , "<PROGDIR>\Backup\").
-    setRegistry("DataDigger:Backup","BackupOnDelete"    , "YES").
   END.
 
-  /* Updates */
-  IF getRegistry("DataDigger:Update", "UpdateCheck") = ? THEN 
-  DO:
-    setRegistry("DataDigger:Update", "UpdateCheck"  , "0"). /* weekly check */
-    setRegistry("DataDigger:Update", "UpdateUrl"    , "http://www.oehive.org/files/DataDiggerVersion.txt").
-    setRegistry("DataDigger:Update", "UpdateChannel", "0"). /* default channel */
-    setRegistry("DataDigger:Update", "ChmDownloadUrl"  , "https://github.com/jcaillon/3P/blob/beta/3PA/Data/DataDigger/DataDigger.chm?raw=true").
-    setRegistry("DataDigger:Update", "ChmDownloadUrl2"  , "https://github.com/jcaillon/3P/blob/master/3PA/Data/DataDigger/DataDigger.chm?raw=true").
-  END.
+  /* Turn backups on by default */
+  setRegistry("DataDigger:Backup","BackupOnUpdate", "YES").
+  setRegistry("DataDigger:Backup","BackupOnDelete", "YES").
+
+  IF   getRegistry("DumpAndLoad", "DumpDir") = ? 
+    OR getRegistry("DumpAndLoad", "DumpDir") = '' THEN setRegistry("DumpAndLoad", "DumpDir", "<PROGDIR>\Dump\").
+
+  IF   getRegistry("DataDigger:Backup", "BackupDir") = ? 
+    OR getRegistry("DataDigger:Backup", "BackupDir") = '' THEN setRegistry("DataDigger:Backup", "BackupDir", "<PROGDIR>\Backup\").
+
+  /* Update check, set to check on STABLE (to BETA for the beta testers) */
+  IF getRegistry("DataDigger:Update","UpdateChannel") = ? THEN
+    IF '{&version}' = '20' THEN setRegistry("DataDigger:Update","UpdateChannel", "{&CHECK-BETA}").
+                           ELSE setRegistry("DataDigger:Update","UpdateChannel", "{&CHECK-STABLE}").
 
   {&timerStop}
-
 END PROCEDURE. /* initializeSettingsFile */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeUi C-Win 
+PROCEDURE initializeUi :
+/*------------------------------------------------------------------------------
+  Purpose:     ENABLE the User Interface
+  Parameters:  <none>
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE UIB_S    AS LOGICAL    NO-UNDO.
+  DEFINE VARIABLE OCXFile  AS CHARACTER  NO-UNDO.
+
+  /* Load wrx file */
+  OCXFile = SEARCH( "wDataDigger.wrx":U ).
+  IF OCXFile = ? THEN
+    OCXFile = SEARCH(SUBSTRING(THIS-PROCEDURE:FILE-NAME, 1,
+                       R-INDEX(THIS-PROCEDURE:FILE-NAME, ".":U), "CHARACTER":U) + "wrx":U).
+  
+  IF OCXFile <> ? THEN
+  DO:
+    ASSIGN
+      chCtrlFrame    = CtrlFrame:COM-HANDLE
+      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
+      CtrlFrame:NAME = "CtrlFrame":U
+    .
+    glUseTimer = TRUE.            
+  END.
+
+  /* FRAME frMain */
+  DISPLAY 
+    fiIndexNameFilter fiFlagsFilter fiFieldsFilter tgSelAll fiTableFilter
+    cbDatabaseFilter fiTableDesc ficWhere fiFeedback
+    WITH FRAME frMain IN WINDOW C-Win.
+
+  ENABLE 
+    rctQuery btnDelete rctEdit  
+    btnClearFieldFilter fiIndexNameFilter fiFlagsFilter 
+    fiFieldsFilter btnClearIndexFilter tgSelAll tgDebugMode 
+    brFields brIndexes 
+    btnMoveTop btnMoveUp btnReset btnMoveDown btnMoveBottom /* field move */
+    fiTableFilter cbDatabaseFilter btnClearTableFilter btnTableFilter /* top of table browse */
+    btnTabTables btnTabFavourites brTables fiTableDesc btnFavourite /* table browse + tabs */
+    btnPrevQuery btnNextQuery ficWhere btnWhere btnClear btnQueries btnClipboard /* query */
+    btnTools btnTabFields btnTabIndexes btnResizeVer btnClone 
+    btnDump btnView btnAdd btnEdit fiFeedback 
+    
+    WITH FRAME frMain IN WINDOW C-Win.
+
+  /* FRAME frHint */
+  DISPLAY 
+    edHint
+    WITH FRAME frHint IN WINDOW C-Win.
+
+  ENABLE 
+    edHint btGotIt 
+    WITH FRAME frHint IN WINDOW C-Win.
+
+  /* FRAME frWhere */
+  DISPLAY 
+    cbAndOr cbFields cbOperator ficValue ficWhere2
+    WITH FRAME frWhere IN WINDOW C-Win.
+
+  ENABLE 
+    btnAnd rctQueryButtons cbAndOr cbFields cbOperator ficValue btnInsert 
+    ficWhere2 btnClear-2 btnQueries-2 
+    btnClipboard-2 btnOK btnCancel-2 btnBegins btnBracket btnContains 
+    btnEq btnGT btnLT btnMatches btnNE btnOr btnQt btnToday 
+    WITH FRAME frWhere IN WINDOW C-Win.
+
+  /* FRAME frWhere */
+  VIEW FRAME frWhere IN WINDOW C-Win.
+  DISPLAY fiNumRecords WITH FRAME frData IN WINDOW C-Win. 
+
+  ENABLE 
+    rctData btnClearDataFilter fiNumRecords 
+    WITH FRAME frData IN WINDOW C-Win.
+
+  /* FRAME frSettings */
+  ENABLE 
+    btnDataDigger  btnDataDigger-txt
+    btnSettings    btnSettings-txt 
+    btnDict        btnDict-txt 
+    btnQueries-3   btnQueries-txt  
+    btnDataAdmin btnDataAdmin-txt 
+    btnConnections btnConnections-txt 
+    btnProcEdit    btnProcEdit-txt 
+    btnQueryTester btnQueryTester-txt 
+    btnHelp        btnHelp-txt 
+    btnAbout       btnAbout-txt
+    WITH FRAME frSettings IN WINDOW C-Win.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeVisuals C-Win 
+PROCEDURE initializeVisuals :
+/* Initialize all kind of visual things
+ */
+  {&timerStart}
+  DEFINE VARIABLE cDatabases    AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cSetting      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iSetting      AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE iColor        AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE iValue        AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE iField        AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hColumn       AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE iRgbValue     AS INTEGER   NO-UNDO. 
+  DEFINE VARIABLE iStackSize    AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hFilterField  AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE IFilter       AS INTEGER   NO-UNDO.
+
+  /* Make the color table large enough TO hold at least 25 fONts
+   * Entries 0-23 are for the user and entry 24 will be used for 
+   * the color defined by "ButtONFace" ON the local system. We will
+   * use this color IF the user sets "use system colors"
+   */
+  IF COLOR-TABLE:NUM-ENTRIES < 25 THEN COLOR-TABLE:NUM-ENTRIES = 25.
+  DO iColor = 0 TO COLOR-TABLE:NUM-ENTRIES - 1:
+    /* Make all colors dynamic so the user can change them */
+    COLOR-TABLE:SET-DYNAMIC(iColor, TRUE).
+
+    /* And get the last saved value from the INI file */
+    cSetting = getRegistry( "DataDigger:colors", SUBSTITUTE("color&1",iColor)).
+    IF NUM-ENTRIES(cSetting) = 3 THEN
+    DO:
+      COLOR-TABLE:SET-RED-VALUE  (iColor, INTEGER(ENTRY(1,cSetting))).
+      COLOR-TABLE:SET-GREEN-VALUE(iColor, INTEGER(ENTRY(2,cSetting))).
+      COLOR-TABLE:SET-BLUE-VALUE (iColor, INTEGER(ENTRY(3,cSetting))).
+    END.
+  END.
+
+  /* Get the RGB value for "ButtONFace" and set color 24 */
+  RUN GetSysColor(15, OUTPUT iRgbValue).
+  COLOR-TABLE:SET-RGB-VALUE(24, iRgbValue).
+
+  /* Set icon */
+  C-Win:LOAD-ICON(getImagePath("DataDigger.ico")). 
+  
+  /* Where-FRAME */
+  DO WITH FRAME frWhere:
+
+    FRAME frWhere:FONT = giDefaultFont.
+
+    BROWSE brTables:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
+    BROWSE BRFIELDS:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
+    BROWSE brIndexes:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
+
+    cbAnDOr:FONT     = giFixedFont.
+    cbFields:FONT    = giFixedFont.
+    cbOperator:FONT  = giFixedFont.
+    ficValue:FONT    = giFixedFont.
+    ficWhere2:FONT   = giFixedFont.
+    btnEq:FONT       = giFixedFont.
+    btnNe:FONT       = giFixedFont.
+    btnGt:FONT       = giFixedFont.
+    btnLt:FONT       = giFixedFont.
+    btnBracket:FONT  = giFixedFont.
+    btnQt:FONT       = giFixedFont.
+    btnAnd:FONT      = giFixedFont.
+    btnOr:FONT       = giFixedFont.
+    btnBegins:FONT   = giFixedFont.
+    btnCONtains:FONT = giFixedFont.
+    btnMatches:FONT  = giFixedFont.
+    btnToday:FONT    = giFixedFont.
+
+    btnInsert:LOAD-IMAGE(getImagePath("Add.gif")).
+  END.
+
+  /* Main FRAME */
+  DO WITH FRAME {&FRAME-NAME}:
+
+    /* > UI Stuff */
+    FRAME frHint:FONT = giDefaultFont.
+    FRAME frData:FONT = giDefaultFont.
+
+    /* Fonts */
+    c-win:FONT = giDefaultFont.
+    FRAME frMain:FONT = giDefaultFont.
+    ficWhere:FONT = giFixedFont.
+    fiTableFilter:TOOLTIP = fiTableFilter:TOOLTIP + "~n~n(CTRL-ENTER) execute".
+
+    /* Additional tooltips */
+    ficValue     :TOOLTIP = ficValue:TOOLTIP + "~n~n(CTRL-ENTER) execute".
+    ficWhere     :TOOLTIP = ficWhere:TOOLTIP + "~n~n(CTRL-ENTER) execute".
+    brFields     :TOOLTIP = brFields:TOOLTIP + "~n~n(RIGHT-CLICK) insert field+value".
+    brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-RIGHT-CLICK) insert field".
+    brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-ENTER) execute".
+
+    /* Filter box around tables, fields and indexes */
+    rcTableFilter:BGCOLOR = getColor("FilterBox:bg").
+    rcFieldFilter:BGCOLOR = getColor("FilterBox:bg").
+    rcIndexFilter:BGCOLOR = getColor("FilterBox:bg").
+
+    /* Num selected records */
+    DO WITH FRAME frData:
+      fiNumRecords:FGCOLOR = getColor("RecordCount:Selected:fg").
+      fiWarning:BGCOLOR    = getColor("WarningBox:bg").
+      fiWarning:FGCOLOR    = getColor("WarningBox:fg").
+    END.
+
+    /* Load images for buttons */
+    DO WITH FRAME frSettings:
+
+      /* Set properties for settings FRAME */
+      FRAME frSettings:FONT          = giDefaultFont.
+      FRAME frSettings:WIDTH-PIXELS  = btnAbout-txt:X + btnAbout-txt:WIDTH-PIXELS + 4.
+      FRAME frSettings:HEIGHT-PIXELS = btnAbout-txt:Y + btnAbout-txt:HEIGHT-PIXELS + 4.
+
+      btnSettings:LOAD-IMAGE      (getImagePath("Settings.gif")).
+      btnConnections:LOAD-IMAGE   (getImagePath("Connections.gif")).
+      btnDict:LOAD-IMAGE          (getImagePath("Dictionary.gif")).
+      btnProcEdit:LOAD-IMAGE      (getImagePath("Editor.gif")).
+      btnQueries-3:LOAD-IMAGE     (getImagePath("SavedQueries.gif")).
+      btnQueryTester:LOAD-IMAGE   (getImagePath("QTester.gif")).
+      btnDataAdmin:LOAD-IMAGE(getImagePath("Administration.gif")).
+      btnAbout:LOAD-IMAGE         (getImagePath("About.gif")).
+      btnResizeVer:LOAD-IMAGE     (getImagePath("ResizeVer.gif")).
+      btnDataDigger:LOAD-IMAGE    (getImagePath("DataDigger24x24.gif")).
+      btnHelp:LOAD-IMAGE          (getImagePath("Help.gif")).
+
+      /* Text buttons for tools menu */
+      btnSettings-txt:FONT    = giDefaultFont.
+      btnConnections-txt:FONT = giDefaultFont.
+      btnDict-txt:FONT        = giDefaultFont.
+      btnProcEdit-txt:FONT    = giDefaultFont.
+      btnQueries-txt:FONT     = giDefaultFont.
+      btnQueryTester-txt:FONT = giDefaultFont.
+      btnDataAdmin-txt:FONT   = giDefaultFont.
+      btnAbout-txt:FONT       = giDefaultFont.
+      btnDataDigger-txt:FONT  = giDefaultFont.
+      btnHelp-txt:FONT        = giDefaultFont.
+    END.
+
+    btnTools:LOAD-IMAGE           (getImagePath("Tools.gif")).
+    
+    btnTableFilter:LOAD-IMAGE     (getImagePath("Filter.gif")).
+    btnClearTableFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
+    btnClearFieldFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
+    btnClearIndexFilter:LOAD-IMAGE(getImagePath("Clear.gif")).
+    btnClearDataFilter:LOAD-IMAGE (getImagePath("Clear.gif")).
+
+    btnPrevQuery:LOAD-IMAGE       (getImagePath("Prev.gif")).
+    btnNextQuery:LOAD-IMAGE       (getImagePath("Next.gif")).
+    btnWhere:LOAD-IMAGE           (getImagePath("PopOut.gif")).
+    btnViewData:LOAD-IMAGE        (getImagePath("Execute.gif")).
+    btnClear:LOAD-IMAGE           (getImagePath("Clear.gif")).
+    btnQueries:LOAD-IMAGE         (getImagePath("SavedQueries_small.gif")).
+    btnClipboard:LOAD-IMAGE       (getImagePath("Clipboard.gif")).
+
+    /* Same buttons ON editor FRAME */
+    btnViewData-2:LOAD-IMAGE      (getImagePath("Execute.gif")).
+    btnClear-2:LOAD-IMAGE         (getImagePath("Clear.gif")).
+    btnQueries-2:LOAD-IMAGE       (getImagePath("SavedQueries_small.gif")).
+    btnClipboard-2:LOAD-IMAGE     (getImagePath("Clipboard.gif")).
+
+    /* Buttons for field ordering */
+    btnMoveTop:LOAD-IMAGE         (getImagePath("First.gif")).
+    btnMoveUp:LOAD-IMAGE          (getImagePath("Up.gif")).
+    btnReset:LOAD-IMAGE           (getImagePath("Reset.gif")).
+    btnMoveDown:LOAD-IMAGE        (getImagePath("Down.gif")).
+    btnMoveBottom:LOAD-IMAGE      (getImagePath("Last.gif")).
+
+    /* Add/clone etc */
+    btnAdd:LOAD-IMAGE             (getImagePath("Add.gif")).
+    btnClone:LOAD-IMAGE           (getImagePath("Clone.gif")).
+    btnEdit:LOAD-IMAGE            (getImagePath("Edit.gif")).
+    btnDelete:LOAD-IMAGE          (getImagePath("Delete.gif")).
+
+    btnDump:LOAD-IMAGE            (getImagePath("Dump.gif")).
+    btnLoad:LOAD-IMAGE            (getImagePath("Load.gif")).
+
+    btnMoveUp:MOVE-TO-TOP().
+    btnMoveDown:MOVE-TO-TOP().
+    btnReset:MOVE-TO-TOP().
+    btnMoveTop:MOVE-TO-TOP().
+    btnMoveBottom:MOVE-TO-TOP().
+
+    /* Set minimum size of the window */
+    C-Win:MIN-WIDTH-PIXELS  = 650.
+    C-Win:MIN-HEIGHT-PIXELS = 460. 
+
+    /* To avoid scrollbars on the frame */
+    FRAME {&FRAME-NAME}:SCROLLABLE = FALSE.
+
+  END. /* DO WITH FRAME */
+
+  {&timerStop}
+END PROCEDURE. /* initializeVisuals */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE keepAlive C-Win 
 PROCEDURE keepAlive :
-/*------------------------------------------------------------------------
-  Name         : keepAlive
-  Description  : Do a query on the database to ensure the connection stays alive
-  ----------------------------------------------------------------------
-  12-09-2012 pti Created
-  ----------------------------------------------------------------------*/
-
-  DEFINE VARIABLE hBuffer   AS HANDLE  NO-UNDO.
-  DEFINE VARIABLE iDatabase AS INTEGER NO-UNDO.
+/* Query all databases to keep connection alive
+ */
+  {&timerStart}
+  DEFINE VARIABLE hBuffer       AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE hTable        AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE iDatabase     AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE cTimeStamp    AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cChangedTable AS CHARACTER NO-UNDO.
   
+  DEFINE BUFFER bfTable FOR ttTable.
+  
+  /* hBuffer::_dbstatus-cachestamp */
   DO iDatabase = 1 TO NUM-DBS:
-    CREATE BUFFER hBuffer FOR TABLE SUBSTITUTE("&1._file",SDBNAME(iDatabase)).
-    hBuffer:FIND-FIRST("",no-lock).
+    CREATE BUFFER hBuffer FOR TABLE LDBNAME(iDatabase) + "._DbStatus".
+    hBuffer:FIND-FIRST("",NO-LOCK).
+    cTimeStamp = hBuffer::_dbstatus-cachestamp.
+
+    FIND ttDatabase WHERE ttDatabase.cLogicalName = LDBNAME(iDatabase) NO-ERROR.
+    IF NOT AVAILABLE ttDatabase THEN
+    DO:
+      CREATE ttDatabase.
+      ASSIGN 
+        ttDatabase.cLogicalName = LDBNAME(iDatabase)
+        ttDatabase.cCacheStamp  = cTimeStamp
+        .
+    END.
     DELETE OBJECT hBuffer.
-  END.
+
+    IF ttDatabase.cCacheStamp <> cTimeStamp THEN
+    DO:
+      /* Find table that has been changed */
+      CREATE BUFFER hTable FOR TABLE LDBNAME(iDatabase) + "._File".
+      
+      findChangedTable:
+      FOR EACH bfTable WHERE bfTable.cDatabase = LDBNAME(iDatabase):
+        hTable:FIND-UNIQUE(SUBSTITUTE("WHERE _file-name = &1 AND _crc = &2"
+                                     , QUOTER(bfTable.cTableName)
+                                     , QUOTER(bfTable.cCrc)
+                                     ), NO-LOCK) NO-ERROR.
+        IF NOT hTable:AVAILABLE THEN
+        DO:
+          cChangedTable = SUBSTITUTE("&1.&2", bfTable.cDatabase, bfTable.cTableName).
+          LEAVE findChangedTable.
+        END.
+      END. /* f/e table */
+      DELETE OBJECT hTable.
+      
+      /* If we cannot find the table name, simply use database name */
+      /* IF cChangedTable = "" THEN cChangedTable = ttDatabase.cLogicalName. */
+      IF cChangedTable <> "" THEN
+      DO:
+        RUN unlockWindow(C-Win:HANDLE).
+        RUN showHelp("SchemaRestart", cChangedTable ).
+        IF getRegistry("DataDigger:help", "SchemaRestart:answer") = "1" THEN QUIT.
+      END.
+
+      /* We assign the value here again. This way, the user /CAN/ choose to 
+       * ignore the message and continue working without being either forced 
+       * to quit or repeatedly seeing this message. 
+       */
+      ttDatabase.cCacheStamp = cTimeStamp.
+    END.
+
+  END. 
+
+  {&timerStop} 
 
 END PROCEDURE. /* keepAlive */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE loadData C-Win 
-PROCEDURE loadData :
-/*------------------------------------------------------------------------
-  Name         : loadData 
-  Description  : Load records from a dumpfile 
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  run value(getProgramDir() + 'wLoadData.w')
-    ( input gcCurrentDatabase
-    , input gcCurrentTable
-    , input ''
-    ).
-end procedure. /* loadData */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE menuDropDataBrowse C-Win 
 PROCEDURE menuDropDataBrowse :
-/*------------------------------------------------------------------------
-  Name         : menuDropDataBrowse 
-  Description  : Enable / disable items in the context menu
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable hMenuItem      as handle      no-undo.
-  define variable cColumnName    as character   no-undo.
-  define variable cColumnValue   as character   no-undo.
-  define variable cColumnClicked as character   no-undo. 
-  define variable lOk            as logical     no-undo. 
-  define variable lColumnsHidden as logical     no-undo. 
-  define variable iColumn        as integer     no-undo. 
-  define variable hColumn        as handle      no-undo. 
+/* Enable / disable items in the context menu
+ */
+  DEFINE VARIABLE hMenuItem      AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cColumnName    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cColumnValue   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cColumnClicked AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE lOk            AS LOGICAL     NO-UNDO. 
+  DEFINE VARIABLE lColumnsHidden AS LOGICAL     NO-UNDO. 
+  DEFINE VARIABLE iColumn        AS INTEGER     NO-UNDO. 
+  DEFINE VARIABLE hColumn        AS HANDLE      NO-UNDO. 
 
   /* Select the row we clicked on */
-  run selectClickedRow(ghDataBrowse, output lOk, output cColumnClicked).
-  if not lOk then return. 
+  RUN selectClickedRow(ghDataBrowse, OUTPUT lOk, OUTPUT cColumnClicked).
+  IF NOT lOk THEN RETURN. 
   setUpdatePanel('display'). /* Activate buttons */
 
-  if num-entries( ghDataBrowse:private-data,chr(1) ) = 3 then
-    assign
-      cColumnName  = entry(1, ghDataBrowse:private-data,chr(1))
-      cColumnValue = entry(2, ghDataBrowse:private-data,chr(1))
+  IF NUM-ENTRIES( ghDataBrowse:PRIVATE-DATA,CHR(1) ) = 3 THEN
+    ASSIGN
+      cColumnName  = ENTRY(1, ghDataBrowse:PRIVATE-DATA,CHR(1))
+      cColumnValue = ENTRY(2, ghDataBrowse:PRIVATE-DATA,CHR(1))
       .
 
   /* If there are hidden columns, enable the menu-item 'unhide' */
-  lColumnsHidden = can-find(first ttField where /* ttField.lDataField = true and */ ttField.lShow = false).
+  lColumnsHidden = CAN-FIND(FIRST ttField WHERE /* ttField.lDataField = true and */ ttField.lShow = FALSE).
 
   /* Enable/disable all current items */
-  hMenuItem = ghDataBrowse:popup-menu:first-child.
+  hMenuItem = ghDataBrowse:POPUP-MENU:FIRST-CHILD.
 
-  do while valid-handle(hMenuItem):
-    if hMenuItem:subtype = 'normal' then 
-    do:
-      hMenuItem:label = hMenuItem:private-data.
+  DO WHILE VALID-HANDLE(hMenuItem):
+    IF hMenuItem:SUBTYPE = 'normal' THEN 
+    DO:
+      hMenuItem:LABEL = hMenuItem:PRIVATE-DATA.
       
       /* If we did not use right mouse click but shift-f10 then
        * we do not know the column name. In that case disable all 
        * menu items that do something with the column value
        */
-      if cColumnClicked = '' and lookup(hMenuItem:name,'add,clone,edit,view,dump,delete') = 0 then
-        hMenuItem:sensitive = false.
-      else
-      do with frame {&frame-name}:
-        case hMenuItem:name:
-          when "add"    then hMenuItem:sensitive = btnAdd:sensitive    .
-          when "clone"  then hMenuItem:sensitive = btnClone:sensitive  .
-          when "edit"   then hMenuItem:sensitive = btnEdit:sensitive   .
-          when "view"   then hMenuItem:sensitive = btnView:sensitive   .
-          when "delete" then hMenuItem:sensitive = btnDelete:sensitive .
-          when "dump"   then hMenuItem:sensitive = btnDump:sensitive .
-          otherwise hMenuItem:sensitive = true. 
-        end case. 
-      end.
+      IF cColumnClicked = '' AND LOOKUP(hMenuItem:NAME,'add,clone,edit,view,dump,load,delete') = 0 THEN
+        hMenuItem:SENSITIVE = FALSE.
+      ELSE
+      DO WITH FRAME {&FRAME-NAME}:
+        CASE hMenuItem:NAME:
+          WHEN "add"    THEN hMenuItem:SENSITIVE = btnAdd:SENSITIVE    .
+          WHEN "clone"  THEN hMenuItem:SENSITIVE = btnClone:SENSITIVE  .
+          WHEN "edit"   THEN hMenuItem:SENSITIVE = btnEdit:SENSITIVE   .
+          WHEN "view"   THEN hMenuItem:SENSITIVE = btnView:SENSITIVE   .
+          WHEN "delete" THEN hMenuItem:SENSITIVE = btnDelete:SENSITIVE .
+          WHEN "dump"   THEN hMenuItem:SENSITIVE = btnDump:SENSITIVE .
+          WHEN "load"   THEN hMenuItem:SENSITIVE = btnLoad:SENSITIVE .
+          OTHERWISE hMenuItem:SENSITIVE = TRUE. 
+        END CASE. 
+      END.
 
       /* Entry 'Unhide Columns' is only enabled when there is at least 1 hidden column */
-      if hMenuItem:name = 'unhideColumn' then 
-        hMenuItem:sensitive = lColumnsHidden.
-    end.
+      IF hMenuItem:NAME = 'unhideColumn' THEN 
+        hMenuItem:SENSITIVE = lColumnsHidden.
+    END.
 
     /* if ghDataBrowse:query:num-results = 0 then hMenuItem:sensitive = no. */
 
-    hMenuItem = hMenuItem:next-sibling.
-  end.
+    hMenuItem = hMenuItem:NEXT-SIBLING.
+  END.
 
-end procedure. /* menuDropDataBrowse */
+END PROCEDURE. /* menuDropDataBrowse */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE moveField C-Win 
 PROCEDURE moveField :
-/*------------------------------------------------------------------------
-  Name         : moveField
-  Description  : Move a field up or down in the field browse. 
-
-  ----------------------------------------------------------------------
-  02-12-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Move a field up or down in the field browse.
+ */
   DEFINE INPUT PARAMETER pcDirection AS CHARACTER NO-UNDO.
 
   DEFINE VARIABLE cFieldOrder   AS CHARACTER NO-UNDO.
@@ -7679,7 +7902,7 @@ PROCEDURE moveField :
   RUN setDataBrowseColumns.
 
   /* And resort it */
-  RUN reopenFieldBrowse('iOrder', YES).
+   RUN reopenFieldBrowse('iOrder', YES). 
 
   /* Reopen browse */
   BROWSE brFields:SET-REPOSITIONED-ROW(iCurrentRow,"ALWAYS").
@@ -7692,12 +7915,62 @@ END PROCEDURE. /* moveField */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE navigateSettings C-Win 
+PROCEDURE navigateSettings :
+/*
+ * Navigate between the buttons in the settings frame
+ */
+  DEFINE INPUT  PARAMETER phButton AS HANDLE      NO-UNDO.
+  DEFINE INPUT  PARAMETER pcAction AS CHARACTER   NO-UNDO.
+
+  DEFINE VARIABLE hButton    AS HANDLE EXTENT 10 NO-UNDO.
+  DEFINE VARIABLE iButton    AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iNewButton AS INTEGER NO-UNDO.
+
+  DO WITH FRAME frSettings:
+    hButton[01] = btnDataDigger:HANDLE.
+    hButton[02] = btnConnections:HANDLE.
+    hButton[03] = btnSettings:HANDLE.
+    hButton[04] = btnProcEdit:HANDLE.
+    hButton[05] = btnDict:HANDLE.
+    hButton[06] = btnDataAdmin:HANDLE.
+    hButton[07] = btnQueries-3:HANDLE.
+    hButton[08] = btnQueryTester:HANDLE.
+    hButton[09] = btnHelp:HANDLE.
+    hButton[10] = btnAbout:HANDLE.
+  
+    DO iButton = 1 TO 10:
+      IF hButton[iButton] = phButton THEN 
+      DO:
+        CASE pcAction:
+          WHEN 'cursor-down'  THEN iNewButton = iButton + 2.
+          WHEN 'cursor-up'    THEN iNewButton = iButton - 2.
+          WHEN 'cursor-right' THEN iNewButton = iButton + 1.
+          WHEN 'cursor-left'  THEN iNewButton = iButton - 1.
+          OTHERWISE RETURN. 
+        END CASE.
+  
+        /* Special cases */
+        IF iButton = 2 AND iNewButton =  0 THEN iNewButton = 2.
+        IF iButton = 9 AND iNewButton = 11 THEN iNewButton = 9.
+
+        IF iNewButton < 1  THEN iNewButton = 1.
+        IF iNewButton > 10 THEN iNewButton = 10.
+        APPLY "ENTRY" to hButton[iNewButton].
+      END.
+    END.
+  
+  END.
+
+END PROCEDURE. /* navigateSettings */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE pasteFromClipboard C-Win 
 PROCEDURE pasteFromClipboard :
-/*------------------------------------------------------------------------
-  Name : pasteFromClipboard
-  Desc : Paste value from clipboard to a widget
-  ----------------------------------------------------------------------*/
+/* Paste value from clipboard to a widget
+ */
   DEFINE INPUT PARAMETER phWidget AS HANDLE NO-UNDO.
   phWidget:SCREEN-VALUE = CLIPBOARD:VALUE.
 END PROCEDURE.
@@ -7707,20 +7980,13 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE preCache C-Win 
 PROCEDURE preCache :
-/*------------------------------------------------------------------------
-  Name : preCache
-  Desc : Just grab any table and create a cache for it. 
-  ----------------------------------------------------------------------*/
-
+/* Pre-cache tables that have been queried at least once in the last month
+ */
+  {&timerStart}
   DEFINE VARIABLE lDoneSomething AS LOGICAL NO-UNDO.
   DEFINE BUFFER bTable FOR ttTable.
 
-  {&timerStart}
-
-  /* Pre-cache tables that have been queried  
-   * at least once in the last month
-   */
-  FOR EACH bTable 
+  FOR EACH bTable
     WHERE bTable.iNumQueries > 0
       AND bTable.lCached = FALSE 
       AND bTable.tLastUsed > DATETIME(TODAY - 31) 
@@ -7754,7 +8020,6 @@ PROCEDURE preCache :
   END.
 
   {&timerStop}
-
 END PROCEDURE. /* preCache */
 
 /* _UIB-CODE-BLOCK-END */
@@ -7762,20 +8027,14 @@ END PROCEDURE. /* preCache */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE processQuery C-Win 
 PROCEDURE processQuery :
-/*------------------------------------------------------------------------
-  Name         : moveField
-  Description  : Move a field up or down in the field browse. 
+/* Move a field up or down in the field browse.
+ */
+  DEFINE INPUT PARAMETER ipcQueryString AS CHARACTER NO-UNDO. 
 
-  ----------------------------------------------------------------------
-  02-12-2009 pti Created
-  ----------------------------------------------------------------------*/
+  DEFINE VARIABLE iLastQuery AS INTEGER NO-UNDO. 
+  DEFINE VARIABLE iWord      AS INTEGER NO-UNDO.
 
-  define input parameter ipcQueryString as character no-undo. 
-
-  define variable iLastQuery as integer no-undo. 
-  define variable iWord      as integer no-undo.
-
-  define buffer ttTestQuery for ttTestQuery. 
+  DEFINE BUFFER ttTestQuery FOR ttTestQuery. 
 
   /* <BEU> */
   /* FORWARD-ONLY attribute:                                                             */    
@@ -7784,27 +8043,27 @@ PROCEDURE processQuery :
   /* queries. The default is FALSE. When TRUE, you cannot use the GET PREV, GET LAST,    */
   /* REPOSITION, or BROWSE methods or statements with these queries. If you do, the AVM  */
   /* generates an error.                                                                 */
-  ipcQueryString = trim(ipcQueryString).
-  ipcQueryString = replace(ipcQueryString,"INDEXED-REPOSITION","").
+  ipcQueryString = TRIM(ipcQueryString).
+  ipcQueryString = REPLACE(ipcQueryString,"INDEXED-REPOSITION","").
   /* </BEU> */
 
   /* The highest query nr is the first record (index is descending) */
-  find first ttTestQuery no-error.
-  iLastQuery = (if available ttTestQuery then ttTestQuery.iId else 0) + 1.
+  FIND FIRST ttTestQuery NO-ERROR.
+  iLastQuery = (IF AVAILABLE ttTestQuery THEN ttTestQuery.iId ELSE 0) + 1.
 
   /* Don't save this one if its already in the tt 
    * Just move it up the stack.
    */
-  find first ttTestQuery where ttTestQuery.cQuery = ipcQueryString no-error.
-  if available ttTestQuery then 
-  do:
+  FIND FIRST ttTestQuery WHERE ttTestQuery.cQuery = ipcQueryString NO-ERROR.
+  IF AVAILABLE ttTestQuery THEN 
+  DO:
     ttTestQuery.iId = iLastQuery.
-    return. 
-  end.
+    RETURN. 
+  END.
 
   /* Save this query */
-  create ttTestQuery.
-  assign 
+  CREATE ttTestQuery.
+  ASSIGN 
     ttTestQuery.iId       = iLastQuery
     ttTestQuery.cProgName = "" 
     ttTestQuery.cQuery    = ipcQueryString
@@ -7812,30 +8071,23 @@ PROCEDURE processQuery :
 
   /* Find table name in the query */
   findTable:
-  do iWord = 1 to num-entries(ttTestQuery.cQuery," "):
-    if can-do("EACH,LAST,FIRST", entry(iWord,ttTestQuery.cQuery," ")) then 
-    do:
-      ttTestQuery.cProgName = entry(iWord + 1,ttTestQuery.cQuery," ").
-      leave findTable.
-    end.
-  end. 
+  DO iWord = 1 TO NUM-ENTRIES(ttTestQuery.cQuery," "):
+    IF CAN-DO("EACH,LAST,FIRST", ENTRY(iWord,ttTestQuery.cQuery," ")) THEN 
+    DO:
+      ttTestQuery.cProgName = ENTRY(iWord + 1,ttTestQuery.cQuery," ").
+      LEAVE findTable.
+    END.
+  END. 
 
-end procedure. /* processQuery */
+END PROCEDURE. /* processQuery */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE reopenDataBrowse C-Win 
 PROCEDURE reopenDataBrowse :
-/*------------------------------------------------------------------------
-  Name         : reopenDataBrowse
-  Description  : Build the query, based on where-box and filter fields
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  04-02-2011 pti Restructured, merged with some other procedures.
-  ----------------------------------------------------------------------*/
-
+/* Build the query, based on where-box and filter fields
+ */
   DEFINE INPUT PARAMETER pcSortField AS CHARACTER   NO-UNDO.
   DEFINE INPUT PARAMETER plAscending AS LOGICAL     NO-UNDO.
 
@@ -7859,11 +8111,11 @@ PROCEDURE reopenDataBrowse :
   
   DEFINE BUFFER bField  FOR ttField. 
   DEFINE BUFFER bColumn FOR ttColumn.
-
+  
   /* In case we come from a filter field, that field needs
    * to have the leave event to restore the shadow text.
    */
-  if valid-handle(focus) then
+  IF VALID-HANDLE(FOCUS) THEN
     APPLY "LEAVE" TO FOCUS.
 
   {&timerStart}
@@ -7890,163 +8142,171 @@ PROCEDURE reopenDataBrowse :
   END.
 
   /* Clean up existing dynamic stuff */
-  if valid-handle(ghDataBrowse) then
-  do:
+  IF VALID-HANDLE(ghDataBrowse) THEN
+  DO:
     /* Remember record we're on */
-    if ghDataBrowse:num-selected-rows > 0 then 
-      rCurrentRecord = ghDataBrowse:query:get-buffer-handle(1):rowid.
+    IF ghDataBrowse:NUM-SELECTED-ROWS > 0 THEN 
+      rCurrentRecord = ghDataBrowse:QUERY:GET-BUFFER-HANDLE(1):ROWID.
 
     /* Find out what the current sort is */
-    cBaseQuery = ghDataBrowse:query:prepare-string.
-    lAscending = (lookup('DESCENDING',cBaseQuery,' ') = 0).
-    iWord = lookup("BY",cBaseQuery," ").
-    if iWord > 0 then cOldSort = entry(iWord + 1,cBaseQuery," ").
+    cBaseQuery = ghDataBrowse:QUERY:PREPARE-STRING.
+    lAscending = (LOOKUP('DESCENDING',cBaseQuery,' ') = 0).
+    iWord = LOOKUP("BY",cBaseQuery," ").
+    IF iWord > 0 THEN cOldSort = ENTRY(iWord + 1,cBaseQuery," ").
 
-    if pcSortField = cOldSort then
-      case lAscending:
-        when true  then assign lAscending = false.
-        when false then assign lAscending = ? pcSortField = ?.
-        when ?     then assign lAscending = true.
-      end case. 
-    else
-      lAscending = true.
+    IF pcSortField = cOldSort THEN
+      CASE lAscending:
+        WHEN TRUE  THEN ASSIGN lAscending = FALSE.
+        WHEN FALSE THEN ASSIGN lAscending = ? pcSortField = ?.
+        WHEN ?     THEN ASSIGN lAscending = TRUE.
+      END CASE. 
+    ELSE
+      lAscending = TRUE.
 
     /* Sort direction might be overruled */
-    if plAscending <> ? then lAscending = plAscending.
-  end.
+    IF plAscending <> ? THEN lAscending = plAscending.
+  END.
 
   /* If we do a query on the _lock table then create and fill a temp-table */
-  if cTable = '_lock' then
-  do:
+  IF cTable = '_lock' THEN
+  DO:
     cFullTable = '_Lock'. 
 
     /* Empty the Lock TT */
-    ghDataBuffer:empty-temp-table().
+    ghDataBuffer:EMPTY-TEMP-TABLE().
 
-    create buffer hBufferDB for table cDatabase + '._lock'.
-    create query hQuery.
-    hQuery:add-buffer(hBufferDB).
-    hQuery:query-prepare(substitute('for each &1._lock no-lock', cDatabase)).
+    CREATE BUFFER hBufferDB FOR TABLE cDatabase + '._lock'.
+    CREATE QUERY hQuery.
+    hQuery:ADD-BUFFER(hBufferDB).
+    hQuery:QUERY-PREPARE(SUBSTITUTE('for each &1._lock no-lock', cDatabase)).
 
-    hQuery:query-open().
-    repeat:
-      hQuery:get-next().
-      if hQuery:query-off-end then leave.
-      if not hBufferDB:available then leave. 
-      if hBufferDB::_Lock-Usr = ? then leave.
-      ghDataBuffer:buffer-create().
-      ghDataBuffer:buffer-copy(hBufferDB).
-    end.
-    hQuery:query-close().
+    hQuery:QUERY-OPEN().
+    REPEAT:
+      hQuery:GET-NEXT().
+      IF hQuery:QUERY-OFF-END THEN LEAVE.
+      IF NOT hBufferDB:AVAILABLE THEN LEAVE. 
+      IF hBufferDB::_Lock-Usr = ? THEN LEAVE.
+      ghDataBuffer:BUFFER-CREATE().
+      ghDataBuffer:BUFFER-COPY(hBufferDB).
+    END.
+    hQuery:QUERY-CLOSE().
 
-    delete object hQuery.
-    delete object hBufferDB.
-  end.
+    DELETE OBJECT hQuery.
+    DELETE OBJECT hBufferDB.
+  END.
 
   /* Reset query pointer */
   giQueryPointer = 1.
   RUN getDataQuery(OUTPUT cQuery).
-  cUserQuery = ficWhere:screen-value in frame {&frame-name}. /* this one will be saved if it has no errors */
+  cUserQuery = ficWhere:screen-value IN FRAME {&frame-name}. /* this one will be saved if it has no errors */
 
-  cQuery = replace(cQuery, substitute("&1._lock", cDatabase), cFullTable).
+  cQuery = REPLACE(cQuery, SUBSTITUTE("&1._lock", cDatabase), cFullTable).
 
   /* Sort field might be overruled when user clicks on data column header 
    * When query is: FOR EACH CUSTOMER BY CUSTNUM but we click on the ADDRESS 
    * column, the query should be rewritten to FOR EACH CUSTOMER BY ADDRESS
    */
-  if pcSortField <> ? and pcSortField <> "" then
-  do:
-    if lookup('BY',cQuery,' ') > 0 then
-      cQuery = substitute('&1 BY &2 &3 INDEXED-REPOSITION'
-                         , trim(substring(cQuery,1,index(cQuery,' BY ')))
+  IF pcSortField <> ? AND pcSortField <> "" THEN
+  DO:
+    IF LOOKUP('BY',cQuery,' ') > 0 THEN
+      cQuery = SUBSTITUTE('&1 BY &2 &3 INDEXED-REPOSITION'
+                         , TRIM(SUBSTRING(cQuery,1,INDEX(cQuery,' BY ')))
                          , pcSortField 
-                         , string(lAscending,'/DESCENDING')
+                         , STRING(lAscending,'/DESCENDING')
                          ).
-    else
-      cQuery = substitute('&1 BY &2 &3 INDEXED-REPOSITION'
-                         , trim(substring(cQuery,1,index(cQuery,' INDEXED-REPOSITION')))
+    ELSE
+      cQuery = SUBSTITUTE('&1 BY &2 &3 INDEXED-REPOSITION'
+                         , TRIM(SUBSTRING(cQuery,1,INDEX(cQuery,' INDEXED-REPOSITION')))
                          , pcSortField 
-                         , string(lAscending,'/DESCENDING')
+                         , STRING(lAscending,'/DESCENDING')
                          ).
-  end.
+  END.
 
   /* If the user has set a sort field, use that to set the sort arrow */
-  iWord = lookup('BY',cQuery,' ').
-  if iWord > 0 then 
-    assign pcSortField = entry(iWord + 1,cQuery,' ')
-           lAscending  = (lookup('DESCENDING',cQuery,' ') = 0).
+  iWord = LOOKUP('BY',cQuery,' ').
+  IF iWord > 0 THEN 
+    ASSIGN pcSortField = ENTRY(iWord + 1,cQuery,' ')
+           lAscending  = (LOOKUP('DESCENDING',cQuery,' ') = 0).
 
   /* Set the sort arrow to the right column */
-  run setSortArrow(ghDataBrowse, pcSortField, lAscending).
+  RUN setSortArrow(ghDataBrowse, pcSortField, lAscending).
 
   /* for DWP query tester */
-  publish "debugMessage" (input 1, "cQuery = " + cQuery ).
-  publish 'query' (input cQuery).
+  PUBLISH "debugMessage" (INPUT 1, "cQuery = " + cQuery ).
+  PUBLISH 'query' (INPUT cQuery).
 
   /* Try to open it */
-  lPrepare = ghDataQuery:query-prepare(cQuery) no-error.
+  lPrepare = ghDataQuery:QUERY-PREPARE(cQuery) NO-ERROR.
 
-  /* if the QUERY-PREPARE failed because of the where-clause, reopen it without it */ 
-  if not lPrepare then 
-  do with frame {&frame-name}:
-    ficWhere:bgcolor = getColor('QueryError:fg'). /* red */
-    ficWhere:fgcolor = getColor('QueryError:bg'). /* yellow */
+  /* if the QUERY-PREPARE failed because of the where-clause, don't open it */ 
+  IF NOT lPrepare THEN 
+  DO WITH FRAME {&FRAME-NAME}:
+    ficWhere:BGCOLOR = getColor('QueryError:fg'). /* red */
+    ficWhere:FGCOLOR = getColor('QueryError:bg'). /* yellow */
 
-    ficWhere:tooltip = substitute('Open query failed due to this error:~n~n&1~n~nYour WHERE-clause will be ignored.'
-                                 , trim(error-status:get-message(1))
+    ficWhere:TOOLTIP = SUBSTITUTE('Open query failed due to this error:~n~n&1~n~nYour WHERE-clause will be ignored.'
+                                 , TRIM(ERROR-STATUS:GET-MESSAGE(1))
                                  ).
-    cQuery = substitute("for each &1 no-lock", cFullTable).
-    lPrepare = ghDataQuery:query-prepare(cQuery).
+    cQuery = SUBSTITUTE("FOR EACH &1 NO-LOCK WHERE FALSE", cFullTable).
+    lPrepare = ghDataQuery:QUERY-PREPARE(cQuery).
 
-    apply "entry" to ficWhere. 
-  end.
-  else
-  do with frame {&frame-name}:
-    ficWhere:bgcolor = ?. /* default */
-    ficWhere:fgcolor = ?. /* default */
-    ficWhere:tooltip = getReadableQuery(cQuery).
+    /* Activate buttons */
+    setUpdatePanel('no-data').
+    
+    APPLY "entry" TO ficWhere.
+  END.
+  ELSE
+  DO WITH FRAME {&frame-name}:
+    ficWhere:BGCOLOR = ?. /* default */
+    ficWhere:FGCOLOR = ?. /* default */
+    ficWhere:TOOLTIP = getReadableQuery(cQuery).
 
     /* Save the user-query and set the pointer to 1 */
-    run saveQuery(cDatabase, cTable, cUserQuery).
-  end.
+    RUN saveQuery(cDatabase, cTable, cUserQuery).
 
-  /* Try to grab as many records as we can in a limited time. 
-   * This will give an indication of the amount of records. 
-   */
-  ghDataQuery:query-open().
-  iStartTime = etime.
-  do while (etime - iStartTime) < giMaxQueryTime and not ghDataQuery:query-off-end:
-    ghDataQuery:get-next.
-    iNumRecords = iNumRecords + 1.
-  end.
-  lCountComplete = ghDataQuery:query-off-end.
-  iQueryTime = etime - iStartTime.
+    /* Try to grab as many records as we can in a limited time.
+     * This will give an indication of the amount of records.
+     */
+    ghDataQuery:QUERY-OPEN().
+    iStartTime = ETIME.
+    DO WHILE (ETIME - iStartTime) < giMaxQueryTime AND NOT ghDataQuery:QUERY-OFF-END:
+      ghDataQuery:GET-NEXT.
+      iNumRecords = iNumRecords + 1.
+    END.
+    
+    lCountComplete = ghDataQuery:QUERY-OFF-END.
+    iQueryTime = ETIME - iStartTime.
 
-  /* query might have gotten off end, so: */
-  if ghDataQuery:query-off-end then 
-    ghDataQuery:query-open().
+    /* query might have gotten off end, so: */
+    IF ghDataQuery:QUERY-OFF-END THEN
+      ghDataQuery:QUERY-OPEN().
 
-  /* Show nr of records 
-   * Sometimes opening of the query takes some time so no records can be counted in 
-   * the query-time-out period. So then DD shows "> 0 records" while the actual browse 
-   * shows some records. This is odd, so we then set the nr of records to that of the browse. 
-   */
-  if ghDataBrowse:query:num-results > iNumRecords then
-    iNumRecords = ghDataBrowse:query:num-results.
+    /* Show nr of records
+     * Sometimes opening of the query takes some time so no records can be counted in
+     * the query-time-out period. So then DD shows "> 0 records" while the actual browse
+     * shows some records. This is odd, so we then set the nr of records to that of the browse.
+     */
+    IF ghDataBrowse:QUERY:NUM-RESULTS > iNumRecords THEN
+      iNumRecords = ghDataBrowse:QUERY:NUM-RESULTS.
 
-  setNumRecords(iNumRecords, lCountComplete, iQueryTime).
-  run setNumSelectedRecords.
+    /* Jump back to selected row */
+    IF NOT ghDataBrowse:QUERY:QUERY-OFF-END
+      AND rCurrentRecord <> ? THEN
+    DO:
+      ghDataBrowse:QUERY:REPOSITION-TO-ROWID(rCurrentRecord) NO-ERROR.
+      ghDataBrowse:SELECT-FOCUSED-ROW().
+    END.
 
-  /* Jump back to selected row */
-  if not ghDataBrowse:query:query-off-end 
-    and rCurrentRecord <> ? then
-  do:
-    ghDataBrowse:query:reposition-to-rowid(rCurrentRecord) no-error.
-    ghDataBrowse:select-focused-row().
-  end.
+    /* Activate buttons */
+    setUpdatePanel('display').
+  END.
+  
+  RUN showNumRecords(iNumRecords,lCountComplete).
+  RUN showNumSelected.
 
+  /* Show or hide red line around filters */
   rctDataFilter:VISIBLE IN FRAME frData = FALSE.
-  FOR EACH bColumn:
+  FOR EACH bColumn WHERE VALID-HANDLE(bColumn.hColumn):
     IF bColumn.hFilter:SCREEN-VALUE <> bColumn.cFullName
       AND bColumn.hFilter:SCREEN-VALUE <> ""
       AND bColumn.hFilter:SCREEN-VALUE <> ? THEN 
@@ -8054,36 +8314,31 @@ PROCEDURE reopenDataBrowse :
       rctDataFilter:VISIBLE IN FRAME frData = TRUE.
       LEAVE.
     END. 
-  END. 
-
-  /* Activate buttons */
-  setUpdatePanel('display').
+  END.
 
   /* For some reasons, these #*$&# scrollbars keep coming back */
-  run showScrollBars(frame {&frame-name}:handle, no, no). /* KILL KILL KILL */
+  RUN showScrollBars(FRAME {&frame-name}:handle, NO, NO). /* KILL KILL KILL */
 
   /* Unfreeze it */
-  session:set-wait-state(''). 
-  setWindowFreeze(no).
+  SESSION:SET-WAIT-STATE(''). 
+  setWindowFreeze(NO).
+  APPLY 'entry' TO ghDataBrowse.
 
   {&timerStop}
-
-  apply 'entry' to ghDataBrowse. 
-
-end procedure. /* reopenDataBrowse */
+END PROCEDURE. /* reopenDataBrowse */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE reopenDataBrowse-create C-Win 
 PROCEDURE reopenDataBrowse-create :
-/*------------------------------------------------------------------------------
-  Name : reopenDataBrowse-create
-  Desc : Create the browse and open the query
-------------------------------------------------------------------------------*/
+/* Create the browse and open the query
+ */
+  {&timerStart}
   DEFINE INPUT PARAMETER pcDatabase AS CHARACTER   NO-UNDO.
   DEFINE INPUT PARAMETER pcTable    AS CHARACTER   NO-UNDO.
 
+  DEFINE VARIABLE cCustomValue   AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cColumnName    AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cFilterHistory AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cFullTable     AS CHARACTER   NO-UNDO.
@@ -8104,24 +8359,25 @@ PROCEDURE reopenDataBrowse-create :
   /* Protect against rubbish */
   IF pcTable = "" THEN RETURN. 
 
-  PUBLISH "timerCommand" ("start", "CreateBrowse:Procedure").
+  PUBLISH "debugMessage" (1, SUBSTITUTE("Create browse for &1.&2", pcDatabase, pcTable )).
+
   setWindowFreeze(YES).
 
   /* Clean up old stuff */
-  PUBLISH "timerCommand" ("start", "CreateBrowse:Cleanup").
+  IF VALID-HANDLE(ghDataBuffer) THEN
+    PUBLISH "debugMessage" (1, SUBSTITUTE("Old DataBuffer:&1 &2",ghDataBuffer, ghDataBuffer:NAME )).
+
+  RUN deleteDataFilters(ghDataBrowse).
+
   IF VALID-HANDLE(ghDataBrowse) AND VALID-HANDLE(ghDataBrowse:QUERY) THEN DELETE OBJECT ghDataBrowse:QUERY NO-ERROR.
   IF VALID-HANDLE(ghDataBrowse) THEN DELETE OBJECT ghDataBrowse NO-ERROR.
   IF VALID-HANDLE(ghLockTable)  THEN DELETE OBJECT ghLockTable  NO-ERROR.
   IF VALID-HANDLE(ghDataBuffer) THEN DELETE OBJECT ghDataBuffer NO-ERROR.
-  RUN deleteDataFilters(ghDataBrowse).
   rctDataFilter:VISIBLE IN FRAME frData = FALSE.
-  PUBLISH "timerCommand" ("stop", "CreateBrowse:Cleanup").
 
   cFullTable = pcDatabase + "." + pcTable.
 
   /* For _LOCK, create a dynamic TT to prevent choking */
-  PUBLISH "timerCommand" ("start", "CreateBrowse:Create").
-
   IF pcTable = "_Lock" THEN
   DO:
     cFullTable = pcTable.
@@ -8177,12 +8433,11 @@ PROCEDURE reopenDataBrowse-create :
       ON "SCROLL-NOTIFY"    PERSISTENT RUN dataScrollNotify        IN THIS-PROCEDURE (ghDataBrowse). 
       ON "DEFAULT-ACTION"   PERSISTENT RUN dataDoubleClick         IN THIS-PROCEDURE (ghDataBrowse). 
       ON "OFF-HOME"         PERSISTENT RUN dataOffHome             IN THIS-PROCEDURE. 
-      ON "F5"               PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (btnDataFilter:HANDLE,"choose").
+      ON "CTRL-CURSOR-UP"   PERSISTENT RUN dataGotoFilter          IN THIS-PROCEDURE.
+      ON "F5"               PERSISTENT RUN filterDataBrowse        IN THIS-PROCEDURE.
       ON "ENTRY"            PERSISTENT RUN setTimer                IN THIS-PROCEDURE ("timedScrollNotify", 100).
       ON "LEAVE"            PERSISTENT RUN setTimer                IN THIS-PROCEDURE ("timedScrollNotify", 0).
     END TRIGGERS.
-
-  PUBLISH "timerCommand" ("stop", "CreateBrowse:Create").
 
   /* Add the columns to the browse */
   gcDataBrowseColumns = "".
@@ -8199,8 +8454,6 @@ PROCEDURE reopenDataBrowse-create :
       AND LOOKUP(ENTRY(1,bField.cDataType,"["),"date,decimal,integer,int64,logical,datetime,datetime-tz,character,blob,clob,raw,recid,rowid") = 0 THEN NEXT.
 
     /* Walk thru all extents of this field. May be only one! */
-    PUBLISH "timerCommand" ("start", "CreateBrowse:Column").
-
     FOR EACH bColumn
       WHERE bColumn.cTableCacheId = bField.cTableCacheId 
         AND bColumn.cFieldName    = bField.cFieldName
@@ -8215,10 +8468,9 @@ PROCEDURE reopenDataBrowse-create :
       /* Recid and Rowid column */
       IF CAN-DO("RECID,ROWID", bColumn.cFieldName) THEN
       DO:
-        PUBLISH "timerCommand" ("start", "CreateBrowse:Column:Add").
         bColumn.hColumn = ghDataBrowse:ADD-CALC-COLUMN(bField.cDataType, bField.cFormat, "", bColumn.cFullName).
-        PUBLISH "timerCommand" ("stop", "CreateBrowse:Column:Add").
 
+        bColumn.hColumn:NAME      = bColumn.cFieldName.
         bColumn.hColumn:VISIBLE   = bField.lShow.
         bColumn.hColumn:READ-ONLY = TRUE.
         bColumn.hColumn:LABEL     = getColumnLabel(BUFFER bColumn:HANDLE).
@@ -8227,7 +8479,17 @@ PROCEDURE reopenDataBrowse-create :
       ELSE
       DO:
         /* Get handle to this field in the buffer */
-        hField = ghDataBuffer:BUFFER-FIELD(bField.cFieldName):HANDLE.
+        hField = ghDataBuffer:BUFFER-FIELD(bField.cFieldName):HANDLE NO-ERROR.
+
+        /* It seems that it is not possible to refresh the schema cache of the running
+         * session. You just have to restart your session when the schema is changed. 
+         */
+        IF ERROR-STATUS:ERROR THEN
+        DO:
+          RUN unlockWindow(C-Win:HANDLE). 
+          RUN showHelp("SchemaRestart", SUBSTITUTE("&1.&2", bColumn.cDatabase, bColumn.cTableName)).
+          IF getRegistry("DataDigger:help", "SchemaRestart:answer") = "1" THEN QUIT.
+        END.
 
         /* For some strange reason the format is not saved when you change the format in the field browse
          * and press CTRL-ENTER while still in the format field. Possibly due to order of triggers or so.
@@ -8248,9 +8510,18 @@ PROCEDURE reopenDataBrowse-create :
             OR bField.cDataType BEGINS "INT") /* Use BEGINS to cover integer / int64 and extents of both */ 
            AND NOT cMyFormat BEGINS "HH:MM"   /* Skip time fields */ THEN 
         DO:
-          /* Add minus sign if needed */
-          IF INDEX(cMyFormat,"-") = 0 AND INDEX(cMyFormat,"+") = 0 THEN 
-            cMyFormat = "-" + cMyFormat.
+          /* Add minus sign if needed. Because a format can contain extra characters like "$"  
+           * we need to find out what the right place might be to add it. If the format begins 
+           * with extra chars, we add it at the back. But if there are extra chars too, we just
+           * cannot add the extra minus char. So be it :( 
+           */
+          IF INDEX(cMyFormat,"-") = 0 
+            AND INDEX(cMyFormat,"+") = 0 THEN 
+          DO:
+            IF cMyFormat BEGINS '9' OR cMyFormat BEGINS '>' THEN cMyFormat = "-" + cMyFormat.
+            ELSE 
+            IF cMyFormat MATCHES '*9' THEN cMyFormat = cMyFormat + "-".
+          END.
         
           /* Add extra digit placeholders */
           addDigits:
@@ -8286,8 +8557,6 @@ PROCEDURE reopenDataBrowse-create :
         END.
 
         /* Add a calculated column for integers with time format */
-        PUBLISH "timerCommand" ("start", "CreateBrowse:Column:Add").
-
         cColumnName = SUBSTITUTE("&1.&2", cFullTable, bColumn.cFullName).
 
         IF (   bField.cDataType = "DECIMAL"
@@ -8300,11 +8569,10 @@ PROCEDURE reopenDataBrowse-create :
         DO:
           bColumn.hColumn = ghDataBrowse:ADD-LIKE-COLUMN(cColumnName).
         END.
-        PUBLISH "timerCommand" ("stop", "CreateBrowse:Column:Add").
 
         /* Set label and name */
         bColumn.hColumn:LABEL     = getColumnLabel(BUFFER bColumn:HANDLE).
-        bColumn.hColumn:NAME      = bField.cFullName.
+        bColumn.hColumn:NAME      = bColumn.cFullName. 
         bColumn.hColumn:READ-ONLY = TRUE.
         bColumn.hColumn:VISIBLE   = bField.lShow.
       END. /* not recid/rowid */
@@ -8320,7 +8588,6 @@ PROCEDURE reopenDataBrowse-create :
       /* Create a filterfield for this column 
        * If the user doesn't want history, we will show a normal fill-in 
        */
-      PUBLISH "timerCommand" ("start", "CreateBrowse:Column:Filter").
       IF giMaxFilterHistory = 0 THEN 
         CREATE FILL-IN hFilterField
           ASSIGN
@@ -8362,8 +8629,6 @@ PROCEDURE reopenDataBrowse-create :
         IF NUM-ENTRIES(cFilterHistory,CHR(1)) > 0 THEN hFilterField:LIST-ITEMS = cFilterHistory.
 
         /* Add context menu to combo */
-        PUBLISH "timerCommand" ("start", "CreateBrowse:Column:Filter:Menu").
-  
         hMenu = createMenu(hFilterField).
         hFilterField:POPUP-MENU = hMenu.
   
@@ -8398,23 +8663,19 @@ PROCEDURE reopenDataBrowse-create :
         hMenuItem = createMenuItem(hMenu,"ITEM","Delete","delete").
         ON "CHOOSE" OF hMenuItem PERSISTENT RUN clearField IN THIS-PROCEDURE (hFilterField).
   
-        PUBLISH "timerCommand" ("stop", "CreateBrowse:Column:Filter:Menu").
       END. /* combo */
-      PUBLISH "timerCommand" ("stop", "CreateBrowse:Column:Filter").
   
       /* triggers */
-      PUBLISH "timerCommand" ("start", "CreateBrowse:Column:Triggers").
       ON "CTRL-A"           OF hFilterField PERSISTENT RUN dataSelectAll           IN THIS-PROCEDURE (ghDataBrowse).
       ON "CTRL-D"           OF hFilterField PERSISTENT RUN dataSelectNone          IN THIS-PROCEDURE (ghDataBrowse).
       ON "ENTRY"            OF hFilterField PERSISTENT RUN filterFieldEntry        IN THIS-PROCEDURE (hFilterField).
       ON "LEAVE"            OF hFilterField PERSISTENT RUN filterFieldLeave        IN THIS-PROCEDURE (hFilterField).
       ON "VALUE-CHANGED"    OF hFilterField PERSISTENT RUN filterFieldValueChanged IN THIS-PROCEDURE (hFilterField,NO).
       ON "SHIFT-DEL"        OF hFilterField PERSISTENT RUN filterFieldClearAll     IN THIS-PROCEDURE (hFilterField, btnClearDataFilter:HANDLE).
-      ON "RETURN"           OF hFilterField PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (btnDataFilter:HANDLE,"choose").
-      ON "F2"               OF hFilterField PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (btnDataFilter:HANDLE,"choose").
-      ON "F5"               OF hFilterField PERSISTENT RUN applyEvent              IN THIS-PROCEDURE (btnDataFilter:HANDLE,"choose").
+      ON "RETURN"           OF hFilterField PERSISTENT RUN filterDataBrowse        IN THIS-PROCEDURE.
+      ON "F2"               OF hFilterField PERSISTENT RUN filterDataBrowse        IN THIS-PROCEDURE.
+      ON "F5"               OF hFilterField PERSISTENT RUN filterDataBrowse        IN THIS-PROCEDURE.
       ON "CTRL-CURSOR-DOWN" OF hFilterField PERSISTENT RUN filterFieldCursorDown   IN THIS-PROCEDURE (hFilterField, bColumn.hColumn).
-      PUBLISH "timerCommand" ("stop", "CreateBrowse:Column:Triggers").
   
       /* Keep track of filters */
       CREATE bFilter. 
@@ -8424,22 +8685,23 @@ PROCEDURE reopenDataBrowse-create :
         bFilter.hColumn    = bColumn.hColumn
         bFilter.hBrowse    = ghDataBrowse
         .
-  
+
+      cCustomValue = hFilterField:SCREEN-VALUE.
+      PUBLISH "CustomGetFilterValue" (pcDatabase, pcTable, bField.cFieldName, INPUT-OUTPUT cCustomValue).
+      IF cCustomValue <> ? THEN hFilterField:SCREEN-VALUE = cCustomValue.
+
       /* Connect filter to field and set color */
       bColumn.hFilter = hFilterField.
       setFilterFieldColor(hFilterField).
     END. /* f/e bColumn */
 
-    PUBLISH "timerCommand" ("stop", "CreateBrowse:Column").
   END. /* addColumnLoop */
 
-  gcDataBrowseColumns     = trim(gcDataBrowseColumns,",").
-  gcDataBrowseColumnNames = trim(gcDataBrowseColumnNames,",").
+  gcDataBrowseColumns     = TRIM(gcDataBrowseColumns,",").
+  gcDataBrowseColumnNames = TRIM(gcDataBrowseColumnNames,",").
 
   /* Create the context menu for the databrowse if that has not been done yet */
-  PUBLISH "timerCommand" ("start", "CreateBrowse:Menu").
   RUN createMenuDataBrowse.
-  PUBLISH "timerCommand" ("stop", "CreateBrowse:Menu").
 
   /* Show the browse */
   ghDataBrowse:VISIBLE = TRUE.
@@ -8449,30 +8711,29 @@ PROCEDURE reopenDataBrowse-create :
    */
   adjustFilterLoop:
   FOR EACH bColumn WHERE VALID-HANDLE(bColumn.hColumn):
-    PUBLISH "timerCommand" ("start", "CreateBrowse:AdjustFilter").
 
     /* Get last defined width from registry. Might have been set by user */
-    iColumnWidth = INTEGER( getRegistry( SUBSTITUTE("DB:&1",pcDatabase), SUBSTITUTE("&1.&2:width", pcTable, bColumn.cFullname)) ) NO-ERROR.
+    iColumnWidth = INTEGER(getRegistry( SUBSTITUTE("DB:&1",pcDatabase)
+                                      , SUBSTITUTE("&1.&2:width", pcTable, bColumn.cFullname)) ) NO-ERROR.
 
     /* Make sure it is not wider than 300px */
     IF iColumnWidth = ? THEN iColumnWidth = MINIMUM(300, bColumn.hColumn:WIDTH-PIXELS).
 
     /* Make sure the column is at least as wide as its name */
     /* And if the filter is of type COMBO, reserve some extra space for the arrow down */
-    iMinWidth = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(bColumn.hColumn:LABEL,getFont("default")). 
+    iMinWidth = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(bColumn.hColumn:NAME,getFont("default")). 
     IF giMaxFilterHistory > 0 THEN iMinWidth = iMinWidth + 21.
     IF iColumnWidth < iMinWidth THEN iColumnWidth = iMinWidth.
 
     bColumn.hColumn:WIDTH-PIXELS = iColumnWidth.
-    PUBLISH "timerCommand" ("stop", "CreateBrowse:AdjustFilter").
   END.
+
   /* Activate buttons */
   setUpdatePanel("no-record").
+  RUN showNumSelected.
 
   /* Adjust all filters */
-  PUBLISH "timerCommand" ("start", "CreateBrowse:ScrollNotify").
   RUN dataScrollNotify(ghDataBrowse).
-  PUBLISH "timerCommand" ("stop", "CreateBrowse:ScrollNotify").
 
   setWindowFreeze(NO).
 
@@ -8493,7 +8754,7 @@ PROCEDURE reopenDataBrowse-create :
     RUN showHelp("TooManyExtents", giMaxExtent).
   END.
 
-  PUBLISH "timerCommand" ("stop", "CreateBrowse:Procedure").
+  {&timerStop}
 END PROCEDURE. /* reopenDataBrowse-create */
 
 /* _UIB-CODE-BLOCK-END */
@@ -8501,15 +8762,8 @@ END PROCEDURE. /* reopenDataBrowse-create */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE reopenFieldBrowse C-Win 
 PROCEDURE reopenFieldBrowse :
-/*------------------------------------------------------------------------
-  Name         : reopenFieldBrowse
-  Description  : Open the field browse again, taking into account the 
-                 filter values the user has entered. 
-                 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Open the field browse again, taking into account the filter values the user has entered.
+ */
   DEFINE INPUT PARAMETER pcSortField  AS CHARACTER   NO-UNDO.
   DEFINE INPUT PARAMETER plAscending  AS LOGICAL     NO-UNDO.
 
@@ -8538,38 +8792,38 @@ PROCEDURE reopenFieldBrowse :
   DO WITH FRAME frMain:
     
     /* Protect routine against invalid input */
-    if pcSortField = '' then pcSortField = ?.
+    IF pcSortField = '' THEN pcSortField = ?.
   
     /* Remember record we're on */
-    if brFields:num-selected-rows > 0 then 
+    IF brFields:num-selected-rows > 0 THEN 
       rCurrentRecord = brFields:query:get-buffer-handle(1):rowid.
   
     /* Find out what the current sort is */
-    run getColumnSort(input brFields:handle, output cOldSort, output lAscending).
+    RUN getColumnSort(INPUT brFields:handle, OUTPUT cOldSort, OUTPUT lAscending).
   
     /* If no new sortfield is provided, we don't want to change the sort.
      * This happens when we press the filter button.
      */
-    if pcSortField = ? then
-      assign 
+    IF pcSortField = ? THEN
+      ASSIGN 
         cNewSort   = cOldSort
         lAscending = lAscending. /* dont change order */
-    else
-    if pcSortField = cOldSort then
-      assign 
+    ELSE
+    IF pcSortField = cOldSort THEN
+      ASSIGN 
         cNewSort   = cOldSort
-        lAscending = not lAscending. /* invert order */
-    else
+        lAscending = NOT lAscending. /* invert order */
+    ELSE
       /* New field */
-      assign 
+      ASSIGN 
         cNewSort   = pcSortField
-        lAscending = true.
+        lAscending = TRUE.
   
     /* Sort direction might be overruled */
-    if plAscending <> ? then lAscending = plAscending.
+    IF plAscending <> ? THEN lAscending = plAscending.
   
     /* Wich column should have what arrow? */
-    run setSortArrow(brFields:handle, cNewSort, lAscending).
+    RUN setSortArrow(brFields:handle, cNewSort, lAscending).
   
     /* If - and only if - the sort is on 'Order', the buttons for moving are enabled */
     btnMoveUp:sensitive     = (cNewSort = "iOrder").
@@ -8578,52 +8832,52 @@ PROCEDURE reopenFieldBrowse :
     btnMoveBottom:sensitive = (cNewSort = "iOrder").
   
     /* Close open query */
-    if valid-handle(brFields:query) then brFields:query:query-close().
+    IF VALID-HANDLE(brFields:query) THEN brFields:query:query-close().
   
     /* Build the query */
-    create query hQuery.
-    create buffer hBuffer for table 'ttField'.
-    hQuery:set-buffers(hBuffer).
+    CREATE QUERY hQuery.
+    CREATE BUFFER hBuffer FOR TABLE 'ttField'.
+    hQuery:SET-BUFFERS(hBuffer).
   
     /* Initially hide red line around browse */
-    rcFieldFilter:visible = false.
+    rcFieldFilter:visible = FALSE.
 
     cQuery = 'for each ttField where true'.
-    for each bFilter 
-      where bFilter.hBrowse = brFields:handle:
+    FOR EACH bFilter 
+      WHERE bFilter.hBrowse = brFields:handle:
   
-      if bFilter.hColumn:data-type = "CHARACTER" then
-        assign 
+      IF bFilter.hColumn:data-type = "CHARACTER" THEN
+        ASSIGN 
           cFilterValue = getMatchesValue(bFilter.hFilter)
           cOperator    = "MATCHES".
-      else 
-        assign 
-          cFilterValue = substitute("&1", bFilter.hFilter:screen-value)
+      ELSE 
+        ASSIGN 
+          cFilterValue = SUBSTITUTE("&1", bFilter.hFilter:screen-value)
           cOperator    = "=".
   
       /* Only add to the query if it has a real value */
-      if    cFilterValue <> "" 
-        and cFilterValue <> "*" 
-        and cFilterValue <> ?
-        and cFilterValue <> bFilter.hFilter:private-data then
-      do:
-        cQuery = substitute("&1 and substitute('&6',ttField.&2) &3 &4 /* &5 */"
+      IF    cFilterValue <> "" 
+        AND cFilterValue <> "*" 
+        AND cFilterValue <> ?
+        AND cFilterValue <> bFilter.hFilter:private-data THEN
+      DO:
+        cQuery = SUBSTITUTE("&1 and substitute('&6',ttField.&2) &3 &4 /* &5 */"
                            , cQuery
                            , bFilter.cFieldName
                            , cOperator
-                           , quoter(cFilterValue)
-                           , if valid-handle(bFilter.hColumn) then bFilter.hColumn:data-type else "?"
+                           , QUOTER(cFilterValue)
+                           , IF VALID-HANDLE(bFilter.hColumn) THEN bFilter.hColumn:data-type ELSE "?"
                            , "&1"
                            ).
         /* Show red line */
-        rcFieldFilter:visible = true.
-      end.
-    end.
+        rcFieldFilter:visible = TRUE.
+      END.
+    END.
 
-    cQuery = substitute("&1 by &2 &3", cQuery, cNewSort, string(lAscending,'/descending')).
+    cQuery = SUBSTITUTE("&1 by &2 &3", cQuery, cNewSort, STRING(lAscending,'/descending')).
 
-    hQuery:query-prepare(cQuery).
-    hQuery:query-open().
+    hQuery:QUERY-PREPARE(cQuery).
+    hQuery:QUERY-OPEN().
   
     /* Find out if all visible fields have the same 'visibility flags'. If they are all 
      * the same, set the "toggle all" toggle-box to this same value. 
@@ -8637,7 +8891,7 @@ PROCEDURE reopenFieldBrowse :
       hQuery:GET-NEXT.
     END.
   
-    tgSelAll:CHECKED = lAllVisible.
+    .tgSelAll:CHECKED = lAllVisible.
 
     /* Attach query to the browse */
     hQuery:GET-FIRST.
@@ -8652,16 +8906,12 @@ PROCEDURE reopenFieldBrowse :
     END.
   
     /* If we have fields, set VIEW button on */
-    btnViewData:sensitive     = lFieldsFound. 
-    btnViewData-2:sensitive in frame frWhere = lFieldsFound. 
-    btnWhere:sensitive        = lFieldsFound. 
-    tgSelAll:sensitive        = lFieldsFound. 
-  
-    btnMoveUp:sensitive       = lFieldsFound.
-    btnMoveDown:sensitive     = lFieldsFound.
-    btnReset:sensitive        = lFieldsFound.
-    btnMoveTop:sensitive      = lFieldsFound.
-    btnMoveBottom:sensitive   = lFieldsFound.
+    tgSelAll:SENSITIVE      = lFieldsFound. 
+    btnMoveUp:SENSITIVE     = lFieldsFound.
+    btnMoveDown:SENSITIVE   = lFieldsFound.
+    btnReset:SENSITIVE      = lFieldsFound.
+    btnMoveTop:SENSITIVE    = lFieldsFound.
+    btnMoveBottom:SENSITIVE = lFieldsFound.
   END.
 
 END PROCEDURE. /* reopenFieldBrowse */
@@ -8671,106 +8921,102 @@ END PROCEDURE. /* reopenFieldBrowse */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE reopenIndexBrowse C-Win 
 PROCEDURE reopenIndexBrowse :
-/*------------------------------------------------------------------------
-  Name         : reopenIndexBrowse
-  Description  : Reopen the browse with indexes. 
-                 
-  ----------------------------------------------------------------------
-  01-09-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Reopen the browse with indexes.
+ */
+  DEFINE INPUT PARAMETER pcSortField  AS CHARACTER   NO-UNDO.
+  DEFINE INPUT PARAMETER plAscending  AS LOGICAL     NO-UNDO.
 
-  define input parameter pcSortField  as character   no-undo.
-  define input parameter plAscending  as logical     no-undo.
+  DEFINE VARIABLE hColumn          AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE hQuery           AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE iColumn          AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE lAscending       AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE hBuffer          AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cOldSort         AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cNewSort         AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cNameFilter      AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cFlagFilter      AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cFieldsFilter    AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cQuery           AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE rCurrentRecord   AS ROWID       NO-UNDO. 
+  DEFINE VARIABLE lFieldsFound     AS LOGICAL     NO-UNDO.
 
-  define variable hColumn          as handle      no-undo.
-  define variable hQuery           as handle      no-undo.
-  define variable iColumn          as integer     no-undo.
-  define variable lAscending       as logical     no-undo.
-  define variable hBuffer          as handle      no-undo.
-  define variable cOldSort         as character   no-undo. 
-  define variable cNewSort         as character   no-undo. 
-  define variable cNameFilter      as character   no-undo. 
-  define variable cFlagFilter      as character   no-undo. 
-  define variable cFieldsFilter    as character   no-undo. 
-  define variable cQuery           as character   no-undo.
-  define variable rCurrentRecord   as rowid       no-undo. 
-  define variable lFieldsFound     as logical     no-undo.
+  PUBLISH "setUsage" ("filterIndexes"). /* user behaviour */
 
   /* Set filters */
-  do with frame {&frame-name}:
+  DO WITH FRAME {&frame-name}:
     cNameFilter   = getMatchesValue(fiIndexNameFilter:handle).
     cFlagFilter   = getMatchesValue(fiFlagsFilter    :handle).
     cFieldsFilter = getMatchesValue(fiFieldsFilter   :handle).
-  end.
+  END.
 
-  run setRedLines.
+  RUN setRedLines.
 
   /* Protect routine against invalid input */
-  if pcSortField = '' then pcSortField = ?.
+  IF pcSortField = '' THEN pcSortField = ?.
 
   /* Find out what the current sort is */
-  run getColumnSort(input brIndexes:handle, output cOldSort, output lAscending).
+  RUN getColumnSort(INPUT brIndexes:handle, OUTPUT cOldSort, OUTPUT lAscending).
 
   /* If no new sortfield is provided, we don't want to change the sort.
    * This happens when we press the filter button.
    */
-  if pcSortField = ? then
-    assign 
+  IF pcSortField = ? THEN
+    ASSIGN 
       cNewSort   = cOldSort
       lAscending = lAscending. /* dont change order */
-  else
-  if pcSortField = cOldSort then
-    assign 
+  ELSE
+  IF pcSortField = cOldSort THEN
+    ASSIGN 
       cNewSort   = cOldSort
-      lAscending = not lAscending. /* invert order */
-  else
+      lAscending = NOT lAscending. /* invert order */
+  ELSE
     /* New field */
-    assign 
+    ASSIGN 
       cNewSort   = pcSortField
-      lAscending = true.
+      lAscending = TRUE.
 
   /* Protection against first-time usage (in that case
    * sort is not set).
    */
-  if cNewSort = "" then cNewSort = brIndexes:get-browse-column(1):name.
+  IF cNewSort = "" THEN cNewSort = brIndexes:get-browse-column(1):name.
 
   /* Sort direction might be overruled */
-  if plAscending <> ? then lAscending = plAscending.
+  IF plAscending <> ? THEN lAscending = plAscending.
 
   /* Wich column should have what arrow? */
-  run setSortArrow(brIndexes:handle, cNewSort, lAscending).
+  RUN setSortArrow(brIndexes:handle, cNewSort, lAscending).
   
   /* Remember record */
-  if brIndexes:num-selected-rows > 0 then
+  IF brIndexes:num-selected-rows > 0 THEN
     rCurrentRecord = brIndexes:query:get-buffer-handle(1):rowid.
 
   /* Build the query */
-  create query hQuery.
-  create buffer hBuffer for table 'ttIndex'.
-  hQuery:set-buffers(hBuffer).
+  CREATE QUERY hQuery.
+  CREATE BUFFER hBuffer FOR TABLE 'ttIndex'.
+  hQuery:SET-BUFFERS(hBuffer).
 
   cQuery = 'for each ttIndex where true'.
-  if cNameFilter   <> "" and cNameFilter   <> "*" then cQuery = substitute("&1 and ttIndex.cIndexName   matches &2", cQuery, quoter(cNameFilter  )).
-  if cFlagFilter   <> "" and cFlagFilter   <> "*" then cQuery = substitute("&1 and ttIndex.cIndexFlags  matches &2", cQuery, quoter(cFlagFilter  )).
-  if cFieldsFilter <> "" and cFieldsFilter <> "*" then cQuery = substitute("&1 and ttIndex.cIndexFields matches &2", cQuery, quoter(cFieldsFilter)).
-  cQuery = substitute("&1 by &2 &3", cQuery, cNewSort, string(lAscending,'/descending')).
+  IF cNameFilter   <> "" AND cNameFilter   <> "*" THEN cQuery = SUBSTITUTE("&1 and ttIndex.cIndexName   matches &2", cQuery, QUOTER(cNameFilter  )).
+  IF cFlagFilter   <> "" AND cFlagFilter   <> "*" THEN cQuery = SUBSTITUTE("&1 and ttIndex.cIndexFlags  matches &2", cQuery, QUOTER(cFlagFilter  )).
+  IF cFieldsFilter <> "" AND cFieldsFilter <> "*" THEN cQuery = SUBSTITUTE("&1 and ttIndex.cIndexFields matches &2", cQuery, QUOTER(cFieldsFilter)).
+  cQuery = SUBSTITUTE("&1 by &2 &3", cQuery, cNewSort, STRING(lAscending,'/descending')).
 
-  hQuery:query-prepare(cQuery).
-  hQuery:query-open().
-  hQuery:get-first().
+  hQuery:QUERY-PREPARE(cQuery).
+  hQuery:QUERY-OPEN().
+  hQuery:GET-FIRST().
 
-  lFieldsFound = not hQuery:query-off-end.
+  lFieldsFound = NOT hQuery:QUERY-OFF-END.
 
   /* Attach query to the browse */
-  brIndexes:query in frame {&frame-name} = hQuery.
+  brIndexes:query IN FRAME {&frame-name} = hQuery.
 
   /* Jump back to selected row */
-  if not hQuery:query-off-end 
-    and rCurrentRecord <> ? then
-  do:
-    hQuery:reposition-to-rowid(rCurrentRecord) no-error.
+  IF NOT hQuery:QUERY-OFF-END 
+    AND rCurrentRecord <> ? THEN
+  DO:
+    hQuery:REPOSITION-TO-ROWID(rCurrentRecord) NO-ERROR.
     brIndexes:select-focused-row().
-  end.
+  END.
 
 END PROCEDURE. /* reopenIndexBrowse */
 
@@ -8779,59 +9025,50 @@ END PROCEDURE. /* reopenIndexBrowse */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE reopenTableBrowse C-Win 
 PROCEDURE reopenTableBrowse :
-/*------------------------------------------------------------------------
-  Name         : reopenTableBrowse
-  Description  : Open the table browse again, taking into account the 
-                 filter values the user has entered. 
-                 
-  ----------------------------------------------------------------------
-  29-10-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Open the table browse again, taking into account the filter values the user has entered.
+ */
+  DEFINE INPUT PARAMETER pcSortField  AS CHARACTER   NO-UNDO.
 
-  define input parameter pcSortField  as character   no-undo.
+  DEFINE VARIABLE hColumn           AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE iColumn           AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE lAscending        AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE cOldSort          AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cNewSort          AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cTableFilter      AS CHARACTER   NO-UNDO. 
+  DEFINE VARIABLE cQuery            AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE rCurrentRecord    AS ROWID       NO-UNDO. 
+  DEFINE VARIABLE cTableSet         AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabaseFilter   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cSetting          AS CHARACTER   NO-UNDO.
 
-  define variable hColumn           as handle      no-undo.
-  define variable iColumn           as integer     no-undo.
-  define variable lAscending        as logical     no-undo.
-  define variable lShowHiddenTables as logical     no-undo.
-  define variable cOldSort          as character   no-undo. 
-  define variable cNewSort          as character   no-undo. 
-  define variable cTableFilter      as character   no-undo. 
-  define variable cQuery            as character   no-undo.
-  define variable rCurrentRecord    as rowid       no-undo. 
-  define variable cTableSet         as character   no-undo.
-  define variable cDatabaseFilter   as character   no-undo.
-  define variable cSetting          as character   no-undo.
+  DEFINE BUFFER bTable FOR ttTable. 
 
-  define buffer bTable for ttTable. 
+  DO WITH FRAME {&FRAME-NAME}:
 
-  do with frame {&frame-name}:
+    PUBLISH "setUsage" ("filterTables"). /* user behaviour */
+    setWindowFreeze(YES).
 
-    setWindowFreeze(yes).
-
-    /* TODO: check if the value for _dbstatus._dbstatus-cachestamp
-     * has changed for one of the connected databases.
-     * If so, then reread tables.
+    /* Get filters. If you type more than one table, you get
+     * exactly what you type. Otherwise, DD treats it cleverly
      */
+    IF NUM-ENTRIES(fiTableFilter:SCREEN-VALUE) > 1 THEN 
+      cTableFilter = fiTableFilter:SCREEN-VALUE.
+    ELSE 
+      cTableFilter = getMatchesValue(fiTableFilter:HANDLE).
+      
+    cDatabaseFilter = cbDatabaseFilter:SCREEN-VALUE.
 
-    /* Get filters */
-    cTableFilter      = getMatchesValue(fiTableFilter:handle).
-    cDatabaseFilter   = cbDatabaseFilter:screen-value.
-    lShowHiddenTables = menu-item m_Show_hidden_tables:checked in menu POPUP-MENU-brTables. /* tHiddenTables:checked. */
-    
-    run setRedLines.
+    RUN setRedLines.
 
     /* Protect routine against invalid input */
-    if pcSortField = '' then pcSortField = ?.
-    if cDatabaseFilter = ? then cDatabaseFilter = '*'.
+    IF pcSortField = '' THEN pcSortField = ?.
+    IF cDatabaseFilter = ? THEN cDatabaseFilter = '*'.
 
     /* Remember currently selected record */
     FIND bTable 
       WHERE bTable.cDatabase   = gcCurrentDatabase
         AND bTable.cTableName  = gcCurrentTable NO-ERROR.
     IF AVAILABLE bTable THEN rCurrentRecord = ROWID(bTable).
-/*     if brTables:num-selected-rows > 0 then                        */
-/*       rCurrentRecord = brTables:query:get-buffer-handle(1):rowid. */
 
     /* If we have entered the name of a table that exactly matches the name of a table 
      * in the database (say "order" in sports) then focus on that table, even if another
@@ -8844,98 +9081,95 @@ PROCEDURE reopenTableBrowse :
             NO-ERROR.
     IF AVAILABLE bTable THEN rCurrentRecord = ROWID(bTable).
 
-
     /* Find out what the current sort is */
     cSetting = getRegistry('DataDigger','ColumnSortTables').
-    if cSetting <> ? then 
-      assign
-        cOldSort   = brTables:get-browse-column(integer(entry(1,cSetting))):name
-        lAscending = logical(entry(2,cSetting)) no-error.
+    IF cSetting <> ? THEN 
+      ASSIGN
+        cOldSort   = brTables:GET-BROWSE-COLUMN(INTEGER(ENTRY(1,cSetting))):NAME 
+        lAscending = LOGICAL(ENTRY(2,cSetting)) no-error.
 
     /* If no new sortfield is provided, we don't want to change the sort.
      * This happens when we press the filter button.
      */
-    if pcSortField = ? then
+    IF pcSortField = ? THEN
       cNewSort = cOldSort. /* sorting stays the same */
-    else
-    if pcSortField = cOldSort then
-    do:
+    ELSE
+    IF pcSortField = cOldSort THEN
+    DO:
       cNewSort = cOldSort.
-      case lAscending:
-        when true  then assign lAscending = false.           /* asc  -> desc */
-        when false then assign lAscending = ? cNewSort = "". /* desc -> none */
-        when ?     then assign lAscending = true.            /* none -> asc  */
-      end case.
-    end.
-    else
-      assign 
+      CASE lAscending:
+        WHEN TRUE  THEN ASSIGN lAscending = FALSE.           /* asc  -> desc */
+        WHEN FALSE THEN ASSIGN lAscending = ? cNewSort = "". /* desc -> none */
+        WHEN ?     THEN ASSIGN lAscending = TRUE.            /* none -> asc  */
+      END CASE.
+    END.
+    ELSE
+      ASSIGN 
         cNewSort   = pcSortField
-        lAscending = true.
+        lAscending = TRUE.
 
     /* Protection against wrong parameters (in case of first-time usage sort is not set). */
-    if cNewSort = ? then cNewSort = "".
-    if lAscending = ? then lAscending = true.
+    IF cNewSort = ? THEN cNewSort = "".
+    IF lAscending = ? THEN lAscending = TRUE.
 
     /* Wich column should have what arrow? */
-    run setSortArrow(brTables:handle, cNewSort, lAscending).
+    RUN setSortArrow(brTables:handle, cNewSort, lAscending).
 
     /* Close query, which may be open */
-    if valid-handle(brTables:query) then brTables:query:query-close().
+    IF VALID-HANDLE(brTables:query) THEN brTables:query:query-close().
   
     /* Build the query */
-    if not valid-handle(ghTableQuery) then
-    do:
-      create query ghTableQuery.
-      create buffer ghTableBuffer for table 'ttTable'.
-      ghTableQuery:set-buffers(ghTableBuffer).
-    end.
+    IF NOT VALID-HANDLE(ghTableQuery) THEN
+    DO:
+      CREATE QUERY ghTableQuery.
+      CREATE BUFFER ghTableBuffer FOR TABLE 'ttTable'.
+      ghTableQuery:SET-BUFFERS(ghTableBuffer).
+    END.
 
-    /* Base query */
-    cQuery = substitute('FOR EACH ttTable WHERE ttTable.lShowInList = TRUE').
-
-    /* Start with tables of the selected database (if set) */
-    if cDatabaseFilter <> "*" then
-      cQuery = substitute('&1 AND cDatabase MATCHES &2', cQuery, quoter(cDatabaseFilter)).
-
-    /* Then only the tables that match the table name filter (if set) */
-    if cTableFilter <> "*" then
-      cQuery = substitute("&1 AND cTableName MATCHES &2", cQuery, quoter(cTableFilter)).
-
-    /* But don't show the hidden tables (unless set) */
-    if not lShowHiddenTables then 
-      cQuery = substitute("&1 AND lHidden = FALSE", cQuery ).
-
-    /* Favourites or normal table list? */
+    /* If Favourites-view then limited restrictions. Just show the list*/
     IF glShowFavourites THEN
-      cQuery = substitute("&1 AND lFavourite = TRUE", cQuery ).
+      cQuery = 'FOR EACH ttTable WHERE ttTable.lFavourite = TRUE'.
+    ELSE 
+    DO:
+      /* Base query */
+      cQuery = 'FOR EACH ttTable WHERE ttTable.lShowInList = TRUE'.
+
+      /* Show only tables of selected database (if set) */
+      IF cDatabaseFilter <> '*' THEN
+        cQuery = SUBSTITUTE('&1 AND cDatabase MATCHES &2', cQuery, QUOTER(cDatabaseFilter)).
+    END.
+
+    /* Show only the tables that match the table name filter (if set) */
+    IF cTableFilter <> "*" THEN
+      cQuery = SUBSTITUTE("&1 AND CAN-DO(&2,cTableName)", cQuery, QUOTER(cTableFilter)).
 
     /* Then proceed with the user's sort */
-    if cNewSort <> "" then
-      cQuery = substitute("&1 BY &2 &3", cQuery, cNewSort, string(lAscending,'/descending') ).
+    IF cNewSort <> "" THEN
+      cQuery = SUBSTITUTE("&1 BY &2 &3", cQuery, cNewSort, STRING(lAscending,'/descending') ).
 
     /* Additional sort: tables that have been accessed at least once rank higher
      * then followed by date/time of last access
      */
-    cQuery = substitute("&1 BY tLastUsed <> ? DESCENDING ", cQuery).
-    cQuery = substitute("&1 BY tLastUsed DESCENDING", cQuery).
+    cQuery = SUBSTITUTE("&1 BY tLastUsed <> ? DESCENDING ", cQuery).
+    cQuery = SUBSTITUTE("&1 BY tLastUsed DESCENDING", cQuery).
 
-    ghTableQuery:query-prepare(cQuery).
-    ghTableQuery:query-open().
+    ghTableQuery:QUERY-PREPARE(cQuery).
+    ghTableQuery:QUERY-OPEN().
   
     /* Attach query to the browse */
-    brTables:query in frame {&frame-name} = ghTableQuery.
+    brTables:QUERY IN FRAME {&FRAME-NAME} = ghTableQuery.
 
     /* Jump back to selected row */
-    if not ghTableQuery:query-off-end 
-      and rCurrentRecord <> ? then
-    do:
-      ghTableQuery:reposition-to-rowid(rCurrentRecord) no-error.
-      brTables:select-focused-row().
-      apply 'value-changed' to brTables. 
-    end.
-  end. /* do with frame */
+    IF NOT ghTableQuery:QUERY-OFF-END 
+      AND rCurrentRecord <> ? THEN
+    DO:
+      ghTableQuery:REPOSITION-TO-ROWID(rCurrentRecord) NO-ERROR.
+      brTables:SELECT-FOCUSED-ROW().
+      APPLY 'value-changed' TO brTables. 
+    END.
+  END. /* do with frame */
 
-  setWindowFreeze(no).
+  setWindowFreeze(NO).
 
 END PROCEDURE. /* reopenTableBrowse */
 
@@ -8944,14 +9178,8 @@ END PROCEDURE. /* reopenTableBrowse */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE resetFields C-Win 
 PROCEDURE resetFields :
-/*------------------------------------------------------------------------
-  Name         : resetFields
-  Description  : Reset the field order of all fields and reset databrowse
-                 
-  ----------------------------------------------------------------------
-  29-10-2012 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Reset the field order of all fields and reset databrowse
+ */
   DEFINE BUFFER bField  FOR ttField.
   DEFINE BUFFER bColumn FOR ttColumn.
 
@@ -8997,101 +9225,87 @@ END PROCEDURE. /* resetFields */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE resizeFilters C-Win 
 PROCEDURE resizeFilters :
-/*------------------------------------------------------------------------
-  Name         : resizeFilters
-  Description  : Redraw the filters. This is needed when the window 
-                 resizes, one of the columns resizes or the user scrolls
-                 in the browse.
-                 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define input parameter piPageNr as integer no-undo.
-
-  define variable cFilterFields as character no-undo. 
-  define variable cButtons      as character no-undo. 
-  define variable hBrowse       as handle    no-undo.
-  define variable iField        as integer   no-undo.
-  define variable hField        as handle    no-undo.
-
+/* Redraw the filters. This is needed when the window resizes, one of
+ * the columns resizes or the user scrolls in the browse.
+ */
   {&timerStart}
+  DEFINE INPUT PARAMETER piPageNr AS INTEGER NO-UNDO.
 
-  if piPageNr = ? then piPageNr = giCurrentPage.
+  DEFINE VARIABLE cFilterFields AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cButtons      AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE hBrowse       AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE iField        AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hField        AS HANDLE    NO-UNDO.
 
-  do with frame {&frame-name}:
+  IF piPageNr = ? THEN piPageNr = giCurrentPage.
+
+  DO WITH FRAME {&frame-name}:
 
     /* Make one string of all handles */
-    case piPageNr:
+    CASE piPageNr:
 
-      when 0 then do: /* Tables */
-        assign 
-          cFilterFields = substitute('&1,&2'
-                                    , fiTableFilter:handle
-                                    , cbDatabaseFilter:handle 
+      WHEN {&PAGE-TABLES} OR 
+      WHEN {&PAGE-FAVOURITES} THEN DO: /* Tables */
+        ASSIGN 
+          cFilterFields = SUBSTITUTE('&1,&2'
+                                    , fiTableFilter:HANDLE
+                                    , cbDatabaseFilter:HANDLE 
                                     )
-          cButtons      = substitute('&1,&2'
-                                    , btnClearTableFilter:handle
-                                    , btnTableFilter:handle
+          cButtons      = SUBSTITUTE('&1,&2'
+                                    , btnClearTableFilter:HANDLE
+                                    , btnTableFilter:HANDLE
                                     )
-          hBrowse       = brTables:handle
+          hBrowse       = brTables:HANDLE
           .
 
-      end. /* 0 */
+      END. /* 0 */
 
-      when 1 then do: /* Fields */
-        assign 
+      WHEN {&PAGE-FIELDS} THEN DO: /* Fields */
+        ASSIGN 
           cFilterFields = gcFieldFilterHandles
-          cButtons      = substitute('&1,&2'
-                                    , btnClearFieldFilter:handle
-                                    , btnFieldFilter:handle
-                                    )
-          hBrowse       = brFields:handle
+          cButtons      = SUBSTITUTE('&1', btnClearFieldFilter:HANDLE)
+          hBrowse       = brFields:HANDLE 
           .
-      end. /* 1 */
+      END. /* 1 */
 
-      when 2 then do: /* Indexes */
-        assign 
-          cFilterFields = substitute('&1,&2,&3'
-                                    , fiIndexNameFilter:handle
-                                    , fiFlagsFilter:handle 
-                                    , fiFieldsFilter:handle  
+      WHEN {&PAGE-INDEXES} THEN DO: /* Indexes */
+        ASSIGN 
+          cFilterFields = SUBSTITUTE('&1,&2,&3'
+                                    , fiIndexNameFilter:HANDLE
+                                    , fiFlagsFilter:HANDLE 
+                                    , fiFieldsFilter:HANDLE  
                                     )
-          cButtons      = substitute('&1,&2'
-                                    , btnClearIndexFilter:handle
-                                    , btnIndexFilter:handle
-                                    )
-          hBrowse       = brIndexes:handle
+          cButtons      = SUBSTITUTE('&1', btnClearIndexFilter:HANDLE)
+          hBrowse       = brIndexes:HANDLE
           .
-      end. /* 2 */
-    end case. /* giCurrentPage */
+      END. /* 2 */
+    END CASE. /* giCurrentPage */
 
-    setWindowFreeze(yes).
+    setWindowFreeze(YES).
 
     /* Save current widths to registry */
     fieldLoop:
-    do iField = 1 to num-entries(cFilterFields):
-      hField = hBrowse:get-browse-column(iField).
+    DO iField = 1 TO NUM-ENTRIES(cFilterFields):
+      hField = hBrowse:GET-BROWSE-COLUMN(iField).
   
       setRegistry('DataDigger'
-                 , substitute('ColumnWidth:&1', hField:name)
-                 , substitute('&1', hField:width-pixels)
+                 , SUBSTITUTE('ColumnWidth:&1', hField:NAME)
+                 , SUBSTITUTE('&1', hField:WIDTH-PIXELS)
                  ).
-    end.
+    END.
 
     /* Resize them */
-    run resizeFilterFields
-      ( input cFilterFields
-      , input cButtons
-      , input hBrowse
+    RUN resizeFilterFields
+      ( INPUT cFilterFields
+      , INPUT cButtons
+      , INPUT hBrowse
       ).
-  end.
+  END.
 
-  run showScrollBars(frame {&frame-name}:handle, no, no).
-  setWindowFreeze(no).
+  RUN showScrollBars(FRAME {&frame-name}:HANDLE, NO, NO).
+  setWindowFreeze(NO).
 
   {&timerStop}
-
 END PROCEDURE. /* resizeFilters */
 
 /* _UIB-CODE-BLOCK-END */
@@ -9099,13 +9313,8 @@ END PROCEDURE. /* resizeFilters */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE saveFilterValue C-Win 
 PROCEDURE saveFilterValue :
-/*------------------------------------------------------------------------
-  Name         : saveFilterValue
-  Description  : Save the last x filter values to registry
-  ----------------------------------------------------------------------
-  12-11-2013 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Save the last x filter values to registry
+ */
   DEFINE INPUT  PARAMETER pcDatabase AS CHARACTER   NO-UNDO.
   DEFINE INPUT  PARAMETER pcTable    AS CHARACTER   NO-UNDO.
   DEFINE INPUT  PARAMETER pcField    AS CHARACTER   NO-UNDO.
@@ -9117,6 +9326,9 @@ PROCEDURE saveFilterValue :
   DEFINE VARIABLE iPos       AS INTEGER     NO-UNDO.
 
   IF pcNewValue = "" OR pcNewValue = ? THEN RETURN. 
+
+  /* PAT 2016-10-27 */
+  PUBLISH "customSaveFilterValue" (pcDatabase, pcTable, pcField, pcNewValue).
 
   cOldList = getRegistry( SUBSTITUTE("DB:&1",pcDatabase)
                         , SUBSTITUTE("&1.&2:FilterHistory",pcTable,pcField)
@@ -9155,14 +9367,8 @@ END PROCEDURE. /* saveFilterValue */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE saveWindow C-Win 
 PROCEDURE saveWindow :
-/*------------------------------------------------------------------------
-  Name         : saveWindow
-  Description  : Save size and position of the window.
-                 
-  ----------------------------------------------------------------------
-  25-03-2011 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Save size and position of the window.
+ */
   /* Upper left corner of window */
   setRegistry("DataDigger", "Window:x", STRING(c-win:X) ).                             
   setRegistry("DataDigger", "Window:y", STRING(c-win:Y) ).                             
@@ -9183,13 +9389,8 @@ END PROCEDURE. /* saveWindow */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE selectClickedRow C-Win 
 PROCEDURE selectClickedRow :
-/*------------------------------------------------------------------------
-  Name         : selectClickedRow
-  Description  : Select the row the user last clicked on
-
-  ----------------------------------------------------------------------
-  20-05-2010 pti Created
-  ----------------------------------------------------------------------*/
+/* Select the row the user last clicked on
+ */
   DEFINE INPUT  PARAMETER phBrowse        AS HANDLE    NO-UNDO.
   DEFINE OUTPUT PARAMETER plOk            AS LOGICAL   NO-UNDO.
   DEFINE OUTPUT PARAMETER pcColumnName    AS CHARACTER NO-UNDO.
@@ -9205,12 +9406,12 @@ PROCEDURE selectClickedRow :
   DEFINE VARIABLE hBuffer          AS HANDLE    NO-UNDO.
   DEFINE VARIABLE hBrowseColumn    AS HANDLE    NO-UNDO. 
 
-  DEFINE buffer bColumn for ttColumn. 
+  DEFINE BUFFER bColumn FOR ttColumn. 
 
-  PUBLISH "debugMessage" (1, "Select Clicked Row").
+  PUBLISH "debugMessage" (1, SUBSTITUTE("Select Clicked Row.")).
 
   /* Get mouse position (but not if we used SHIFT-F10 for the context menu */
-  IF LAST-EVENT:LABEL = 'SHIFT-F10' then
+  IF LAST-EVENT:LABEL = 'SHIFT-F10' THEN
   DO:
     iRow = phBrowse:FOCUSED-ROW.
     PUBLISH "debugMessage" (2, SUBSTITUTE("Pressed SHIFT-F10 on row &1", iRow)).
@@ -9221,33 +9422,52 @@ PROCEDURE selectClickedRow :
     RUN getMouseXY(INPUT phBrowse:FRAME, OUTPUT iMouseX, OUTPUT iMouseY).
 
     /* Find out what row number we clicked on */
-    dRow = (iMouseY - phBrowse:y - 18) / (phBrowse:row-height-pixels + 4).
-    iRow = (if dRow = integer(dRow) then integer(dRow) else truncate(dRow,0) + 1). /* ceiling of dRow */
+    dRow = (iMouseY - phBrowse:Y - 18) / (phBrowse:ROW-HEIGHT-PIXELS + 4).
+    iRow = (IF dRow = integer(dRow) THEN INTEGER(dRow) ELSE TRUNCATE(dRow,0) + 1). /* ceiling of dRow */
 
     /* Is it a valid row nr? (could be invalid if we clicked below last record) */
-    if phBrowse:num-iterations > 0
-      and iRow > phBrowse:num-iterations then return. 
-    if iRow < 1 then return.
+    PUBLISH "debugMessage" (2, SUBSTITUTE(" - Clicked row &1", iRow)).
+    IF phBrowse:NUM-ITERATIONS > 0 AND iRow > phBrowse:NUM-ITERATIONS THEN RETURN. 
+    IF iRow < 1 THEN RETURN.
 
     /* Get the record in the buffer */
-    if phBrowse:query:num-results > 0 then 
-    do:
-      phBrowse:select-row(iRow).
-      phBrowse:fetch-selected-row(phBrowse:num-selected-rows).
-    end.
+    IF phBrowse:QUERY:NUM-RESULTS > 0 THEN 
+    DO:
+      phBrowse:SELECT-ROW(iRow).
+      phBrowse:FETCH-SELECTED-ROW(phBrowse:NUM-SELECTED-ROWS).
+    END.
 
-    plOk = true.
+    plOk = TRUE.
+
+    
+/*     /* Should be something like this in a perfect world */        */
+/*     hBrowseColumn = getClickedColumn(phBrowse).                   */
+/*     IF VALID-HANDLE(hBrowseColumn)                                */
+/*       AND phBrowse:QUERY:NUM-RESULTS > 0 THEN                     */
+/*     DO:                                                           */
+/*       hBuffer = phBrowse:QUERY:GET-BUFFER-HANDLE(1).              */
+/*       CASE pcColumnName:                                          */
+/*         WHEN 'RECID' THEN cColumnValue = STRING( hBuffer:RECID ). */
+/*         WHEN 'ROWID' THEN cColumnValue = STRING( hBuffer:ROWID ). */
+/*         OTHERWISE cColumnValue = hBrowseColumn:SCREEN-VALUE.      */
+/*       END.                                                        */
+/*     END.                                                          */
+
+    PUBLISH "debugMessage" (2, SUBSTITUTE(" - Browse:&1  Cols:&2", phBrowse:NAME, phBrowse:NUM-COLUMNS)).
 
     /* Find out which column we clicked on */
     findColumn:
     DO iColumn = 1 TO phBrowse:NUM-COLUMNS:
       hBrowseColumn = phBrowse:GET-BROWSE-COLUMN(iColumn).
 
-      IF    (iMouseX - phBrowse:X) > hBrowseColumn:X
+      PUBLISH "debugMessage" (2, SUBSTITUTE(" - Column:&1  XY:&2/&3 W:&4", hBrowseColumn:NAME, hBrowseColumn:X, hBrowseColumn:Y,hBrowseColumn:WIDTH-PIXELS)).
+
+      IF hBrowseColumn:X > -1
+        AND (iMouseX - phBrowse:X) > hBrowseColumn:X
         AND (iMouseX - phBrowse:X) < (hBrowseColumn:X + hBrowseColumn:WIDTH-PIXELS) THEN
       DO: 
         pcColumnName = hBrowseColumn:NAME.
-  
+
         /* This is the record the user clicked on in the buffer 
          * Only proceed when the browse holds some data */
         IF phBrowse:QUERY:NUM-RESULTS > 0 THEN 
@@ -9267,7 +9487,7 @@ PROCEDURE selectClickedRow :
     /* Save the column value to be able to add it to filters */
     phBrowse:PRIVATE-DATA = pcColumnName + CHR(1) + cColumnValue + CHR(1) + STRING(iExtentNr).
 
-    PUBLISH "debugMessage" (2, substitute("Column &1 has value &2", pcColumnName, cColumnValue)).
+    PUBLISH "debugMessage" (2, SUBSTITUTE("Column &1 has value &2", pcColumnName, cColumnValue)).
   END. /* used the mouse */
 
 END PROCEDURE. /* selectClickedRow */
@@ -9277,162 +9497,58 @@ END PROCEDURE. /* selectClickedRow */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setConnectionMenu C-Win 
 PROCEDURE setConnectionMenu :
-/*------------------------------------------------------------------------
-  Name         : setConnectionMenu
-  Description  : Rebuild the connection submenu of the 'add' button
-                 
-  ----------------------------------------------------------------------
-  18-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  /* Attach connections to btnConnect */
-  define variable hMenuItem       as handle      no-undo.
-  define variable cProgDir        as character   no-undo.
-  define variable cConnectionList as character   no-undo.
-  define variable cDatabase       as character   no-undo.
-  define variable iConn           as integer     no-undo.
-  define variable hItemToDelete   as handle      no-undo. 
+/* Rebuild the connection submenu of the 'add' button
+ */
+  DEFINE VARIABLE hMenuItem       AS HANDLE      NO-UNDO.
+  DEFINE VARIABLE cProgDir        AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cConnectionList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabase       AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iConn           AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE hItemToDelete   AS HANDLE      NO-UNDO. 
 
-  hMenuItem = brTables:popup-menu:first-child in frame {&frame-name}.
+  hMenuItem = brTables:popup-menu:first-child IN FRAME {&frame-name}.
   cProgDir = getProgramDir().
 
   /* Remove all current items except first 3 */
-  do while valid-handle(hMenuItem):
-    if hMenuItem:dynamic then hItemToDelete = hMenuItem.
-    hMenuItem = hMenuItem:next-sibling.
-    if valid-handle(hItemToDelete) then 
-      delete object hItemToDelete.
-  end.
+  DO WHILE VALID-HANDLE(hMenuItem):
+    IF hMenuItem:DYNAMIC THEN hItemToDelete = hMenuItem.
+    hMenuItem = hMenuItem:NEXT-SIBLING.
+    IF VALID-HANDLE(hItemToDelete) THEN 
+      DELETE OBJECT hItemToDelete.
+  END.
   
   /* Get list of connections */
-  run value(cProgDir + 'wConnections.w') 
-    ( input 'getConnections'
-    , input ''
-    , output cConnectionList
+  RUN value(cProgDir + 'wConnections.w') 
+    ( INPUT 'getConnections'
+    , INPUT ''
+    , OUTPUT cConnectionList
     ).
 
   /* And add them to the menu */
-  do iConn = 1 to num-entries(cConnectionList):
-    cDatabase = entry(iConn,cConnectionList).
+  DO iConn = 1 TO NUM-ENTRIES(cConnectionList):
+    cDatabase = ENTRY(iConn,cConnectionList).
 
     /* Skip if already connected */
-    if not connected(cDatabase) then 
-      create menu-item hMenuItem
-        assign
-          label  = cDatabase
-          name   = cDatabase
-          parent = brTables:popup-menu
-        triggers:
-          on 'CHOOSE':U persistent run connectDatabase in this-procedure (cDatabase).
-        end triggers.
-  end. /* do iConn */
+    IF NOT CONNECTED(cDatabase) THEN 
+      CREATE MENU-ITEM hMenuItem
+        ASSIGN
+          LABEL  = cDatabase
+          NAME   = cDatabase
+          PARENT = brTables:popup-menu
+        TRIGGERS:
+          ON 'CHOOSE':U PERSISTENT RUN connectDatabase IN this-procedure (cDatabase).
+        END TRIGGERS.
+  END. /* do iConn */
 
-end procedure. /* setConnectionMenu */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setCounter C-Win 
-PROCEDURE setCounter :
-/*------------------------------------------------------------------------
-  Name         : setCounter
-  Description  : Set the counter to a certain number with small animation
-  ----------------------------------------------------------------------
-  25-01-2011 pti Created
-  ----------------------------------------------------------------------*/
-  
-  DEFINE input PARAMETER piCounter  AS integer NO-UNDO.
-  define input parameter plAnimated as logical no-undo. 
-
-  DEFINE VARIABLE cNewDigit AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE cOldDigit AS CHARACTER   NO-UNDO.
-
-  DEFINE VARIABLE iMove      AS INTEGER     NO-UNDO.
-  DEFINE VARIABLE iPos       AS INTEGER     NO-UNDO.
-  DEFINE VARIABLE iStartingY AS INTEGER     NO-UNDO.
-  DEFINE VARIABLE iStartTime AS INTEGER     NO-UNDO.
-  DEFINE VARIABLE iNumDigits AS INTEGER     no-undo initial {&numDigits}.
-  
-  {&timerStart}
-
-  if piCounter < 0 or piCounter = ? then piCounter = 0.
-  piCounter = piCounter modulo 1000000.
-
-  do with frame frMain:
-    iStartingY = ghNewDigit[iNumDigits]:y.
-    cNewDigit = string(piCounter,fill('9',iNumDigits)).
-    cOldDigit = string(maximum(0,piCounter - 1), fill('9',iNumDigits)).
-  
-    /* Prepare the screen */
-    do iPos = 1 to iNumDigits:
-      /* Set digits on proper line with proper height and label */
-      ghOldDigit[iPos]:y = iStartingY.
-      ghNewDigit[iPos]:y = iStartingY.
-      ghOldDigit[iPos]:height-pixels = {&digitHeight}.
-      ghNewDigit[iPos]:height-pixels = {&digitHeight}.
-      ghOldDigit[iPos]:screen-value = substring(cOldDigit,iPos,1).
-      ghNewDigit[iPos]:screen-value = substring(cNewDigit,iPos,1).
-      
-      /* Hide leading zeros of old value */
-      ghOldDigit[iPos]:visible = integer(substring(cOldDigit,1,iPos)) > 0.
-      ghNewDigit[iPos]:visible = no.
-    end.
-
-    if plAnimated then
-    do iMove = 1 to {&digitHeight} by 1:
-      do iPos = 1 to iNumDigits :
-
-        /* Only move the digit when it's changed */
-        if substring(cOldDigit,iPos,1) = substring(cNewDigit,iPos,1) then next.
-
-        /* Move the old number down, making it smaller */
-        ghOldDigit[iPos]:y             = iStartingY + iMove.
-        ghOldDigit[iPos]:height-pixels = maximum(1,{&digitHeight} - iMove).
-        ghOldDigit[iPos]:visible       = (iMove < {&digitHeight}).
-
-        /* And insert the new number, making it larger */
-        ghNewDigit[iPos]:height-pixels = iMove.
-        ghNewDigit[iPos]:visible       = yes.
-      end.
-
-      /* Enforce a small pause */
-      RUN doNothing(15).
-    end.
-
-    /* Reset all images to their proper place */
-    do iPos = 1 to iNumDigits:
-
-      /* Show old value at the location of the digits */
-      ghOldDigit[iPos]:y = iStartingY.
-      ghNewDigit[iPos]:y = iStartingY.
-
-      ghOldDigit[iPos]:height-pixels = {&digitHeight}.
-      ghNewDigit[iPos]:height-pixels = {&digitHeight}.
-
-      /* Hide leading zeros of old value */
-      ghOldDigit[iPos]:visible      = no.
-      ghOldDigit[iPos]:screen-value = ghNewDigit[iPos]:label.
-      ghNewDigit[iPos]:visible      = integer(substring(cNewDigit,1,iPos)) > 0.
-      ghNewDigit[iPos]:tooltip      = substitute('served &1 queries~n... and counting', piCounter).
-    end.
-  end.
-
-  /* For some reasons, these #*$&# scrollbars keep coming back */
-  run showScrollBars(frame frMain:handle, no, no). /* KILL KILL KILL */
-  {&timerStop}
-
-END PROCEDURE. /* setCounter */
+END PROCEDURE. /* setConnectionMenu */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setDataBrowseColumns C-Win 
 PROCEDURE setDataBrowseColumns :
-/*------------------------------------------------------------------------------
-  Name : setDataBrowseColumns
-  Desc : Set all columns according to their iColumnNr
-------------------------------------------------------------------------------*/
-
+/* Set all columns according to their iColumnNr
+ */
   DEFINE VARIABLE iOldPos  AS INTEGER NO-UNDO.
 
   DEFINE BUFFER bColumn FOR ttColumn.
@@ -9474,13 +9590,8 @@ END PROCEDURE. /* setDataBrowseColumns */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setDataFilter C-Win 
 PROCEDURE setDataFilter :
-/*------------------------------------------------------------------------
-  Name         : setDataFilter
-  Description  : Optionally clear the filters and set a filter value
-  ----------------------------------------------------------------------
-  18-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
+/* Optionally clear the filters and set a filter value
+ */
   DEFINE INPUT PARAMETER plClearOtherFilters AS LOGICAL NO-UNDO.
 
   DEFINE VARIABLE cColumnName  AS CHARACTER NO-UNDO.
@@ -9521,120 +9632,26 @@ END PROCEDURE. /* setDataFilter */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setDbContext C-Win 
-PROCEDURE setDbContext :
-/*------------------------------------------------------------------------
-  Name         : setDbContext 
-  Description  : Fill the list of tables and get last used table name 
-                 and user query from registry.
-  ---------------------------------------------------------------------- 
-  18-03-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define input parameter pcDatabase as character   no-undo.
-
-  define variable cTableList as character   no-undo.
-  define variable cQuery     as character   no-undo.
-  define variable cTable     as character   no-undo.
-
-  {&timerStart}
-
-  do with frame {&frame-name}:
-    
-    /* Save last used db in registry */
-    if pcDatabase = '' then
-      setRegistry('DataDigger', 'Database',  '<empty>').
-    else
-      setRegistry('DataDigger', 'Database',  pcDatabase).
-    
-    /* Collect list of tables in this db */
-    cTableList = getTableList( pcDatabase
-                             , getMatchesValue(fiTableFilter:handle)
-                             , menu-item m_Show_hidden_tables:checked in menu POPUP-MENU-brTables /* tHiddenTables:checked */
-                             , ?
-                             , ?
-                             ).
-
-    run reopenTableBrowse(?).
-
-    btnViewData:sensitive = false. /* Until we know there is a table, VIEW is off */
-    btnViewData-2:sensitive in frame frWhere = false.
-    btnWhere:sensitive    = false. 
-    if valid-handle (ghDataBrowse) then ghDataBrowse:hidden = true.
-
-    /* Restore last used table for this db. If you switch back to a database, 
-     * you want to see the last used table for that database. 
-     */
-    if pcDatabase <> ? then
-      cTable = getRegistry ('DB:' + cbDatabaseFilter:screen-value, 'table').
-    else 
-      assign cTable = ''.
-
-    /* Unknown table or 'All databases' selected, then just pick the first */
-    if cTable = ? or lookup(cTable,cTableList) = 0 then 
-      assign cTable = entry(1,cTableList).
-
-    /* Make sure globals are set */
-    apply 'value-changed' to brTables.
-
-    run setTableContext(input cTable).
-  end.  
-
-  {&timerStop}
-
-end procedure. /* setDbContext */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setNumSelectedRecords C-Win 
-PROCEDURE setNumSelectedRecords :
-/*------------------------------------------------------------------------
-  Name         : setNumSelectedRecords 
-  Description  : Set the nr of selected records and set the fill-in
-  ---------------------------------------------------------------------- 
-  13-04-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  /* Num selected records */
-  do with frame frData:
-    fiNumSelected:screen-value = substitute('&1  /', string(ghDataBrowse:num-selected-rows)).
-    fiNumSelected:width-pixels = font-table:get-text-width-pixels( fiNumSelected:screen-value, fiNumSelected:font) + 6.
-    fiNumSelected:x = fiNumResults:x - fiNumSelected:width-pixels .
-  end.
-  
-end procedure. /* setNumSelectedRecords */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setPage C-Win 
 PROCEDURE setPage :
-/*------------------------------------------------------------------------
-  Name         : setPage
-  Description  : Activate either the fields browse or the indexes browse. 
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-  DEFINE INPUT  PARAMETER piPage AS INTEGER     NO-UNDO.
+/* Set active page: Tables/Pinned/Fields/Indexes
+ */
+  {&timerStart}
+  DEFINE INPUT PARAMETER piPage AS INTEGER NO-UNDO.
 
   /* If we are already on this page, then we're ready */
   IF giCurrentPage = piPage THEN RETURN.
 
-  {&timerStart}
-
   /* remember page */
   giCurrentPage = piPage.
-  setRegistry("DataDigger", "ActivePage", STRING(giCurrentPage)).
-
   setWindowFreeze(YES).
 
   DO WITH FRAME {&FRAME-NAME}:
     CASE piPage:
 
       /* FIELDS */
-      WHEN 1 THEN DO:
+      WHEN {&PAGE-FIELDS} THEN 
+      DO:
         btnTabFields :LOAD-IMAGE( getImagePath('tab_fields_active.gif'    )).
         btnTabIndexes:LOAD-IMAGE( getImagePath('tab_indexes_inactive.gif' )).
         
@@ -9647,12 +9664,13 @@ PROCEDURE setPage :
 
         IF NOT VALID-HANDLE(ghDataBrowse) THEN
         DO WITH FRAME frData:
-          HIDE btnClearDataFilter btnDataFilter.
+          HIDE btnClearDataFilter.
         END.
       END.
   
       /* INDEXES */
-      WHEN 2 THEN DO:
+      WHEN {&PAGE-INDEXES} THEN 
+      DO:
         btnTabFields :LOAD-IMAGE( getImagePath('tab_fields_inactive.gif' )).
         btnTabIndexes:LOAD-IMAGE( getImagePath('tab_indexes_active.gif'  )).
 
@@ -9663,6 +9681,22 @@ PROCEDURE setPage :
 
         RUN setRedLines.
       END.                                          
+
+      WHEN {&PAGE-TABLES} THEN
+      DO:
+        btnTabTables   :LOAD-IMAGE( getImagePath('tab_tables_active.gif'    )).
+        btnTabFavourites:LOAD-IMAGE( getImagePath('tab_Favourites_inactive.gif' )).
+        btnTableFilter:SENSITIVE = TRUE.
+        RUN setTableView(NO,NO).
+      END.
+
+      WHEN {&PAGE-FAVOURITES} THEN
+      DO:
+        btnTabTables   :LOAD-IMAGE( getImagePath('tab_tables_inactive.gif'    )).
+        btnTabFavourites:LOAD-IMAGE( getImagePath('tab_Favourites_active.gif' )).
+        btnTableFilter:SENSITIVE = FALSE.
+        RUN setTableView(YES,NO).
+      END.
     END CASE. /* piPage */
 
     RUN resizeFilters(INPUT piPage). 
@@ -9680,32 +9714,31 @@ END PROCEDURE. /* setPage */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setRedLines C-Win 
 PROCEDURE setRedLines :
-/*------------------------------------------------------------------------
-  Name         : setRedLines
-  Description  : Show red lines around browse when filtered
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Show red lines around browse when filtered
+ */
+  {&timerStart}
   DEFINE BUFFER bFilter FOR ttFilter. 
   DEFINE VARIABLE cFilterValue AS CHARACTER NO-UNDO.
 
-  {&timerStart}
-
   DO WITH FRAME {&FRAME-NAME}:
 
-    /* Tables */
-    IF getMatchesValue(fiTableFilter:HANDLE) <> "*" OR gcFieldFilterList <> "" THEN
+    /* Table Filter above browse */
+    IF getMatchesValue(fiTableFilter:HANDLE) <> "*" THEN
       rcTableFilter:VISIBLE = TRUE.
     ELSE 
       rcTableFilter:VISIBLE = FALSE.
+
+    /* Table filter options */
+    IF isTableFilterUsed(INPUT TABLE ttTableFilter) THEN
+      btnTableFilter:LOAD-IMAGE(getImagePath("FilterRed.gif")).
+    ELSE 
+      btnTableFilter:LOAD-IMAGE(getImagePath("Filter.gif")).
 
 
     CASE giCurrentPage:
 
       /* Fields */
-      WHEN 1 THEN 
+      WHEN {&PAGE-FIELDS} THEN 
       DO:
         rcFieldFilter:VISIBLE = FALSE. 
 
@@ -9717,7 +9750,7 @@ PROCEDURE setRedLines :
               cFilterValue = getMatchesValue(bFilter.hFilter).
           ELSE 
             ASSIGN 
-              cFilterValue = substitute("&1", bFilter.hFilter:screen-value).
+              cFilterValue = SUBSTITUTE("&1", bFilter.hFilter:screen-value).
 
           /* Show red line when filter value was entered */
           IF    cFilterValue <> "" 
@@ -9732,7 +9765,7 @@ PROCEDURE setRedLines :
         END.
       END.
 
-      WHEN 2 THEN 
+      WHEN {&PAGE-INDEXES} THEN 
       DO:
         /* Indexes */
         IF   getMatchesValue(fiIndexNameFilter:HANDLE) <> "*"
@@ -9746,7 +9779,6 @@ PROCEDURE setRedLines :
   END.
 
   {&timerStop}
-
 END PROCEDURE. /* setRedLines */
 
 /* _UIB-CODE-BLOCK-END */
@@ -9754,164 +9786,151 @@ END PROCEDURE. /* setRedLines */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTable C-Win 
 PROCEDURE setTable :
-/*------------------------------------------------------------------------
-  Name         : setTable
-  Description  : If some text is selected in the session or a text is on 
-                 the clipboard, select the table with that name.
-  ----------------------------------------------------------------------
-  7-3-2012 pti Created
-  ----------------------------------------------------------------------*/
-  define input parameter pcSelectedText as character no-undo. 
+/* If some text is selected in the session or a text is on the clipboard, select the table with that name.
+ */
+  DEFINE INPUT PARAMETER pcSelectedText AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE cTable AS CHARACTER NO-UNDO.
 
-  define variable cTable as character no-undo.
-
-  publish "timerCommand" ("start", "SetTable").
+  PUBLISH "timerCommand" ("start", "SetTable").
      
-  if pcSelectedText = ? then
-  do:
+  IF pcSelectedText = ? THEN
+  DO:
     /* Look in all windows if there is any text selected. 
      * If not, look on the clipboard.
      */
-    cTable = getSelectedText(session:first-child).
-    if cTable = "" then cTable = trim(clipboard:value) no-error.
+    cTable = getSelectedText(SESSION:FIRST-CHILD).
+    IF cTable = "" THEN cTable = TRIM(CLIPBOARD:VALUE) NO-ERROR.
 
     /* protect against garbage */
-    if cTable = ? then cTable = "".
-    cTable = entry(1,cTable," ").
-    if length(cTable) > 20 then cTable = "".
+    IF cTable = ? THEN cTable = "".
+    cTable = ENTRY(1,cTable," ").
+    IF LENGTH(cTable) > 20 THEN cTable = "".
 
-  end.
-  else 
+  END.
+  ELSE 
     cTable = pcSelectedText.
 
   /* Now see if we can do anything with the text */
-  if cTable <> "" then
-  do:
-    if can-find(first ttTable where ttTable.cTableName matches '*' + cTable + '*') then
-    do with frame frMain:
+  IF cTable <> "" THEN
+  DO:
+    IF CAN-FIND(FIRST ttTable WHERE ttTable.cTableName MATCHES '*' + cTable + '*') THEN
+    DO WITH FRAME frMain:
 
-      session:set-wait-state("general").
-      setWindowFreeze(true).
+      SESSION:SET-WAIT-STATE("general").
+      setWindowFreeze(TRUE).
   
       fiTableFilter:screen-value = cTable.
-      apply 'value-changed' to fiTableFilter.
+      APPLY 'value-changed' TO fiTableFilter.
   
-      run reopenTableBrowse(?).
+      RUN reopenTableBrowse(?).
   
       /* If we have a full match on table name, for example when text "ORDER"
        * is selected, make sure table is set to "ORDER" and not "ORDERLINE" 
        */
-      find ttTable where ttTable.cTableName = cTable no-error.
-      if available ttTable then
-      do:
-        brTables:query:reposition-to-rowid( rowid(ttTable)).
+      FIND ttTable WHERE ttTable.cTableName = cTable NO-ERROR.
+      IF AVAILABLE ttTable THEN
+      DO:
+        brTables:query:reposition-to-rowid( ROWID(ttTable)).
         brTables:refresh().
-      end.
-      apply 'value-changed' to brTables.
+      END.
+      APPLY 'value-changed' TO brTables.
 
-      if gcCurrentTable <> "" then
-      do:
-        run setTableContext(input gcCurrentTable ).
-        run reopenDataBrowse('',?).
-      end. 
-      else 
-      do:
+      IF gcCurrentTable <> "" THEN
+      DO:
+        RUN setTableContext(INPUT gcCurrentTable ).
+        RUN reopenDataBrowse('',?).
+      END. 
+      ELSE 
+      DO:
         fiTableFilter:screen-value = "".
-        apply 'value-changed' to fiTableFilter.
-        run reopenTableBrowse(?).
-      end.                             
+        APPLY 'value-changed' TO fiTableFilter.
+        RUN reopenTableBrowse(?).
+      END.                             
       
-      apply 'value-changed' to brTables.
+      APPLY 'value-changed' TO brTables.
       
-      setWindowFreeze(no).
-      session:set-wait-state("").
-    end.
-  end. /* has value */
+      setWindowFreeze(NO).
+      SESSION:SET-WAIT-STATE("").
+    END.
+  END. /* has value */
 
-  publish "timerCommand" ("stop", "SetTable").
+  PUBLISH "timerCommand" ("stop", "SetTable").
 
-end procedure. /* setTable */
+END PROCEDURE. /* setTable */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTableContext C-Win 
 PROCEDURE setTableContext :
-/*------------------------------------------------------------------------
-  Name         : setTableContext
-  Description  : Perform actions when a change of table has occurred. 
-                 Reread the fields, indexes, selected fields. 
-                 Change title of window
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define input parameter pcTable as character no-undo. 
+/* Perform actions when a change of table has occurred.
+ */
+  DEFINE INPUT PARAMETER pcTable AS CHARACTER NO-UNDO. 
 
-  define variable cFieldList as character no-undo.
-  define variable cQuery     as character no-undo. 
-  define variable hEditor    as handle    no-undo. 
+  DEFINE VARIABLE cFieldList AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cQuery     AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE hEditor    AS HANDLE    NO-UNDO. 
 
-  do with frame {&frame-name}:
+  DO WITH FRAME {&frame-name}:
       
-    if pcTable = "" then return. 
-    setWindowFreeze(yes).
+    IF pcTable = "" THEN RETURN. 
+    setWindowFreeze(YES).
 
     /* If table has changed adjust the screen */
-    if pcTable <> gcCurrentTable then
+    IF pcTable <> gcCurrentTable THEN
       setCurrentTable( pcTable ).
 
     /* Delete filters */
-    run deleteDataFilters(ghDataBrowse).
+    RUN deleteDataFilters(ghDataBrowse).
 
     /* Disable edit panel */
     setUpdatePanel('no-record').
 
     /* Refill the tt with fields of this table */
-    run collectFieldInfo(input pcTable).
+    RUN collectFieldInfo(INPUT pcTable).
 
     /* Refill the index tt */
-    run collectIndexInfo(input pcTable).
+    RUN collectIndexInfo(INPUT pcTable).
 
     /* Get all saved queries of this table */
-    run collectQueryInfo( input gcCurrentDatabase, input pcTable ).
-    assign giQueryPointer = 1.
+    RUN collectQueryInfo( INPUT gcCurrentDatabase, INPUT pcTable ).
+    ASSIGN giQueryPointer = 1.
 
     /* If the query editor is expanded, do actions to that field */
     hEditor = getActiveQueryEditor().
 
     /* Give custom code a chance to alter the query */
-    cQuery = "".
-    publish "customQuery" (input gcCurrentDatabase, input gcCurrentTable, input-output cQuery).
-    hEditor:screen-value = cQuery.
+    cQuery = hEditor:SCREEN-VALUE.
+    PUBLISH "customQuery" (INPUT gcCurrentDatabase, INPUT gcCurrentTable, INPUT-OUTPUT cQuery).
+    hEditor:SCREEN-VALUE = cQuery.
 
     /* Reopen the queries on Fields and Indexes */
-    run reopenFieldBrowse(?,?).
-    run reopenIndexBrowse(?,?).
+    RUN reopenFieldBrowse(?,?).
+    RUN reopenIndexBrowse(?,?).
 
     /* Set toggle to de/select all fields */
-    tgSelAll:checked = true.
+    tgSelAll:checked = TRUE.
 
     /* Unless no field is selected */
-    if getSelectedFields() = '' then tgSelAll:checked = false.
+    IF getSelectedFields() = '' THEN tgSelAll:checked = FALSE.
 
     /* Get a list of all fields (extents NOT expanded) */
-    for each ttField by ttField.cFieldName by ttField.iExtent:
+    FOR EACH ttField BY ttField.cFieldName BY ttField.iExtent:
       cFieldList = cFieldList + ',' + ttField.cFullname.
-    end.
+    END.
 
-    do with frame frWhere:
+    DO WITH FRAME frWhere:
       /* Set list of fields in field combo */
       cbFields:list-items     = cFieldList.
-      cbAndOr:screen-value    = entry(1,cbAndOr:list-items).
-      cbFields:screen-value   = entry(1,cbFields:list-items).
-      cbOperator:screen-value = entry(1,cbOperator:list-items).
-    end.
+      cbAndOr:screen-value    = ENTRY(1,cbAndOr:list-items).
+      cbFields:screen-value   = ENTRY(1,cbFields:list-items).
+      cbOperator:screen-value = ENTRY(1,cbOperator:list-items).
+    END.
     
     /* Reset query-pointer */
-    assign giQueryPointer = 0.
+    ASSIGN giQueryPointer = 0.
 
-    fiWarning:visible = no.
+    fiWarning:visible = NO.
     ficWhere:bgcolor = ?. /* default */
     ficWhere:fgcolor = ?. /* default */
     ficWhere:tooltip = ''.
@@ -9919,66 +9938,47 @@ PROCEDURE setTableContext :
     /* Save last used table and position in browse in registry */
     setRegistry ("DB:" + gcCurrentDatabase, "table", pcTable ).
     
-    run setWindowTitle.
+    RUN setWindowTitle.
 
     /* Create a browse for this table */
-    run reopenDataBrowse-create(input gcCurrentDatabase, input pcTable).
+    RUN reopenDataBrowse-create(INPUT gcCurrentDatabase, INPUT pcTable).
 
-    setWindowFreeze(no).
-  end.
-end procedure. /* setTableContext */
+    setWindowFreeze(NO).
+  END.
+END PROCEDURE. /* setTableContext */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTableFilterOptions C-Win 
 PROCEDURE setTableFilterOptions :
-/*------------------------------------------------------------------------
-  Name         : setTableFilterOptions
-  Description  : Filter tables based on whether they hold certain fields
-  ----------------------------------------------------------------------
-  22-10-2012 pti Created
-  ----------------------------------------------------------------------*/
-  
-  DEFINE VARIABLE cFilter     AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE cOldTable   AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE lFirstUsage AS LOGICAL     NO-UNDO.
+/* Filter tables based on whether they hold certain fields
+ */
+  DEFINE VARIABLE cOldTable        AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE lFirstUsage      AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE lAnythingChanged AS LOGICAL     NO-UNDO.
 
   /* Check if this is the first time we are using it */
   lFirstUsage = getRegistry("DataDigger:Usage", "setTableFilter:numUsed") = ?.
   PUBLISH "setUsage" ("setTableFilter"). /* user behaviour */
 
-  cFilter = gcFieldFilterList.
   DO WITH FRAME frMain:
-    RUN VALUE(getProgramDir() + 'dFilter.w')
-     ( INPUT-OUTPUT cFilter
-     , INPUT SUBSTITUTE("x=&1,y=&2", brTables:x + 10, brTables:y + 50)
-     ).
+    RUN VALUE(getProgramDir() + 'dFilter.w') (INPUT-OUTPUT TABLE ttTableFilter).
+    FIND ttTableFilter.
+    gcFieldFilterList = ttTableFilter.cTableFieldShow.
   END.
 
-  /* Sanity check */
-  IF cFilter = ? OR cFilter = "*" THEN cFilter = "".
+  RUN setRedLines. 
 
-  /* If nothing changed, then don't reset anything on the screen */
-  IF cFilter = gcFieldFilterList THEN RETURN NO-APPLY.
-  
-  /* Set color for down-arrow */
-  IF cFilter = "" THEN 
-    btnTableFilter:LOAD-IMAGE(getImagePath("FilterCombo.gif")).
-  ELSE 
-  DO:
-    btnTableFilter:LOAD-IMAGE(getImagePath("FilterComboRed.gif")).
-    IF lFirstUsage THEN 
-      RUN showHint(btnTableFilter:HANDLE, 1, "~nThis arrow is red to indicate you are using a filter").
-  END.
+  IF lFirstUsage THEN 
+    RUN showHint(btnTableFilter:HANDLE, 1, "~nThis arrow is red to indicate you are using a filter").
 
   SESSION:SET-WAIT-STATE("general").
   setWindowFreeze(YES).
 
-  gcFieldFilterList = TRIM(cFilter, ',').
   cOldTable = gcCurrentTable.
 
-  RUN getTablesWithField(INPUT gcFieldFilterList, OUTPUT TABLE ttTable).
+  RUN getTablesFiltered(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
   RUN reopenTableBrowse(?).   
 
   IF cOldTable <> gcCurrentTable THEN
@@ -10000,32 +10000,18 @@ END PROCEDURE. /* setTableFilterOptions */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTableView C-Win 
 PROCEDURE setTableView :
-/*------------------------------------------------------------------------------
-  Name : setTableView
-  Desc : Set tables or favourites view
-------------------------------------------------------------------------------*/
+/* Set tables view to either 'tables' or 'favourites'
+ */
   DEFINE INPUT PARAMETER plFavouritesView AS LOGICAL NO-UNDO.
-  DEFINE INPUT PARAMETER plFiredBySystem  AS LOGICAL     NO-UNDO.
+  DEFINE INPUT PARAMETER plFiredBySystem  AS LOGICAL NO-UNDO.
 
   DEFINE VARIABLE iNumFav   AS INTEGER NO-UNDO.
-  DEFINE VARIABLE lFirstRun AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE lFirstRun AS LOGICAL NO-UNDO.
 
   /* What view are we in? */
   glShowFavourites = plFavouritesView.
 
-  /* Set label and tooltips according to view */
-  IF glShowFavourites THEN
-  DO:
-    MENU-ITEM m_Toggle_as_favourite:LABEL IN MENU POPUP-MENU-brTables = "Remove from &Favourites".
-    brTables:TOOLTIP IN FRAME frMain = "(F) to remove from favourites~n(CTRL-T) or (CTRL-F) to switch view".
-  END. 
-  ELSE 
-  DO:
-    MENU-ITEM m_Toggle_as_favourite:LABEL IN MENU POPUP-MENU-brTables = "Add to &Favourites".
-    brTables:TOOLTIP IN FRAME frMain = "(F) to add to favourites~n(CTRL-T) or (CTRL-F) to switch view".
-  END.
-
-  /* If we swithc manually to Fav-view for the first time... */
+  /* If we switch manually to Fav-view for the first time... */
   IF NOT plFiredBySystem
     AND glShowFavourites = TRUE
     AND getRegistry("DataDigger:Usage", "switchTableView:numUsed") = ? THEN
@@ -10051,20 +10037,6 @@ PROCEDURE setTableView :
   PUBLISH "setUsage" ("switchTableView"). /* user behaviour */
 
   DO WITH FRAME frMain:
-    IF glShowFavourites THEN
-    DO:
-      btnTableView:LABEL = "F".
-      btnTableView:LOAD-IMAGE(getImagePath('Star.gif')).
-    END.
-    ELSE 
-    DO:
-      btnTableView:LABEL = "T".
-      btnTableView:LOAD-IMAGE(getImagePath('Tables.gif')).
-    END.
-    
-    btnTableView:TOOLTIP = SUBSTITUTE("Currently showing &1~n(CTRL-F) = favourites ~n(CTRL-T) = tables"
-                                     , TRIM(STRING(glShowFavourites,"FAVOURITES/TABLES"))
-                                     ).
     setRegistry("DataDigger","TableView", STRING(glShowFavourites,"F/T")).
     RUN reopenTableBrowse(?).
   
@@ -10079,15 +10051,22 @@ END PROCEDURE. /* setTableView */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTimer C-Win 
 PROCEDURE setTimer :
-/*------------------------------------------------------------------------------
-    Name : setTimer
-    Desc : enable / disable a timer
-  ------------------------------------------------------------------------------*/
-  
+/*
+ * Enable or disable a named timer. 
+ * Disable timer by setting piInterval to 0
+ */
   DEFINE INPUT PARAMETER pcTimerProc AS CHARACTER NO-UNDO. /* name of timer */
   DEFINE INPUT PARAMETER piInterval  AS INTEGER   NO-UNDO. /* time in msec  */
 
   DEFINE BUFFER bTimer FOR ttTimer. 
+  
+  /* If the timer is not running, execute 
+   * the procedure immediately and exit */
+  IF NOT glUseTimer THEN 
+  DO:
+    IF piInterval > 0 THEN RUN VALUE(pcTimerProc).
+    RETURN.
+  END.
 
   /* Find it */
   FIND bTimer WHERE bTimer.cProc = pcTimerProc NO-ERROR.
@@ -10110,7 +10089,8 @@ PROCEDURE setTimer :
       .
   END.
 
-  RUN setTimerInterval.
+  /* Schedule the next event to run */
+  RUN SetTimerInterval.
 
 END PROCEDURE. /* setTimer */
 
@@ -10119,25 +10099,24 @@ END PROCEDURE. /* setTimer */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setTimerInterval C-Win 
 PROCEDURE setTimerInterval :
-/*------------------------------------------------------------------------------
-    Name : setTimerInterval
-    Desc : Set the interval of the timer so that it will tick exactly when 
-           the next timed event is due.
-  ------------------------------------------------------------------------------*/
+/*
+ * Set the interval of the timer so that it will tick exactly when the next timed event is due.
+ */
+  DEFINE BUFFER bTimer FOR ttTimer.
+
+  /* Ignore this when the timer is not running */
+  IF NOT glUseTimer THEN RETURN.
   
-  DEFINE BUFFER bTimer FOR ttTimer. 
+  IF NOT VALID-HANDLE(chCtrlFrame) THEN RETURN.
 
   /* Find the next timer to fire */
   FOR FIRST bTimer BY bTimer.tNext:
 
-    IF VALID-HANDLE(chCtrlFrame) THEN
-    DO:
-      /* How long until it should run? */
-      chCtrlFrame:pstimer:INTERVAL = MAXIMUM(1,MTIME(bTimer.tNext) - MTIME(NOW)).
+    /* How long until it should run? */
+    chCtrlFrame:pstimer:INTERVAL = MAXIMUM(1,MTIME(bTimer.tNext) - MTIME(NOW)).
 
-      /* Turn on events */
-      chCtrlFrame:pstimer:ENABLED = TRUE.
-    END.
+    /* Turn on events */
+    chCtrlFrame:pstimer:ENABLED = TRUE.
   END.
 
 END PROCEDURE. /* setTimerInterval */
@@ -10147,26 +10126,21 @@ END PROCEDURE. /* setTimerInterval */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setViewType C-Win 
 PROCEDURE setViewType :
-/*------------------------------------------------------------------------
-  Name         : setViewType
-  Description  : Set the type of view to view records (TXT HTML XLS)
-  ----------------------------------------------------------------------
-  10-09-2010 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define input  parameter pcViewType as character   no-undo.
+/* Set the type of view to view records (TXT HTML XLS)
+ */
+  DEFINE INPUT  PARAMETER pcViewType AS CHARACTER   NO-UNDO.
 
-  do with frame frMain:
-    btnView:label = substitute('View:&1',pcViewType).
+  DO WITH FRAME frMain:
+    btnView:label = SUBSTITUTE('View:&1',pcViewType).
 
-    case pcViewType:
-      when "txt"  then btnView:load-image(getImagePath("Text.gif")).
-      when "html" then btnView:load-image(getImagePath("Html.gif")).
-      when "xls"  then btnView:load-image(getImagePath("Excel.gif")).
-    end case.
+    CASE pcViewType:
+      WHEN "txt"  THEN btnView:load-image(getImagePath("Text.gif")).
+      WHEN "html" THEN btnView:load-image(getImagePath("Html.gif")).
+      WHEN "xls"  THEN btnView:load-image(getImagePath("Excel.gif")).
+    END CASE.
     
     setRegistry('DataDigger', 'ViewType', pcViewType).
-  end.
+  END.
 
 END PROCEDURE. /* setViewType */
 
@@ -10175,92 +10149,94 @@ END PROCEDURE. /* setViewType */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setWindowTitle C-Win 
 PROCEDURE setWindowTitle :
-/*------------------------------------------------------------------------
-  Name         : setWindowTitle
-  Description  : Set the title of the DataDigger window
-  ----------------------------------------------------------------------
-  17-02-2011 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cTitle       as character no-undo.
-  define variable hParent      as integer   no-undo.
-  define variable hOwner       as integer   no-undo.
+/* Set the title of the DataDigger window
+ */
+  DEFINE VARIABLE cTitle       AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE hParent      AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hOwner       AS INTEGER   NO-UNDO.
 
   /*
   ** Display the current database and table name in the windowtitle
   **
   ** DataDigger 17 - DEVELOP - sports.customer 
   */
-  cTitle = substitute( "&1 &2 &3 - &4.&5 &6" 
+  cTitle = SUBSTITUTE( "&1 &2 &3 - &4.&5 &6" 
                      , "DataDigger"
                      , "{&version}"
-                     , (if session:parameter <> '' then '- ' + session:parameter else '')
+                     , (IF SESSION:PARAMETER <> '' THEN '- ' + SESSION:PARAMETER ELSE '')
                      , gcCurrentDatabase
                      , gcCurrentTable
-                     , (if gcFieldFilterList <> '' then '(' + gcFieldFilterList + ')'  else '')
+                     , (IF gcFieldFilterList <> '' THEN '(' + gcFieldFilterList + ')'  ELSE '')
                      ).
 
   /* Add warning for read-only mode */
-  if ReadOnlyDigger then cTitle = cTitle + " ** READ-ONLY **".
+  IF plReadOnlyDigger THEN cTitle = cTitle + " ** READ-ONLY **".
 
   /* Add warning for debug-mode */
-  if glDebugMode then cTitle = cTitle + " ** DEBUG MODE **".
+  IF glDebugMode THEN cTitle = cTitle + " ** DEBUG MODE **".
 
-  C-Win:title = cTitle.
+  C-Win:TITLE = cTitle.
 
-  run GetParent (c-win:hwnd, output hParent).
-  run GetWindow (hParent, 4, output hOwner).
-  run SetWindowTextA ( hOwner, cTitle ).
+  RUN GetParent (c-win:HWND, OUTPUT hParent).
+  RUN GetWindow (hParent, 4, OUTPUT hOwner).
+  RUN SetWindowTextA ( hOwner, cTitle ).
 
-end procedure. /* setWindowTitle */
+END PROCEDURE. /* setWindowTitle */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showDataFilters C-Win 
 PROCEDURE showDataFilters :
-/*----------------------------------------------------------------------------
-  Name : showDataFilters
-  Desc : Show/hide the data filters 
-  ------------------------------------------------------------------------- */
+/* Show/hide the data filters
+ */
+  {&timerStart}
   DEFINE INPUT PARAMETER phParentBrowse AS HANDLE  NO-UNDO.
   DEFINE INPUT PARAMETER plShow         AS LOGICAL NO-UNDO.
-
-  DEFINE BUFFER bFilter FOR ttFilter. 
-
-  {&timerStart}
+  DEFINE BUFFER bFilter FOR ttFilter.
 
   FOR EACH bFilter WHERE bFilter.hBrowse = phParentBrowse:
-
-    IF VALID-HANDLE(bFilter.hFilter) THEN 
+    IF VALID-HANDLE(bFilter.hFilter) THEN
       bFilter.hFilter:VISIBLE = plShow.
-
   END.
 
   {&timerStop}
-
 END PROCEDURE. /* showDataFilters */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showFavourite C-Win 
+PROCEDURE showFavourite :
+/* Show Favourite icon
+ */
+  DEFINE INPUT  PARAMETER plFavourite AS LOGICAL     NO-UNDO.
+  
+  DO WITH FRAME frMain:
+    
+    IF plFavourite THEN
+      btnFavourite:LOAD-IMAGE(getImagePath("StarBlack.gif")). 
+    ELSE 
+      btnFavourite:LOAD-IMAGE(getImagePath("StarWhite.gif")). 
+
+  END. 
+
+END PROCEDURE. /* showFavourite */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showField C-Win 
 PROCEDURE showField :
-/*------------------------------------------------------------------------
-  Name         : showField
-  Description  : Toggle the selected status of a field. 
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
+/* Toggle the selected status of a field.
+ */
   DEFINE INPUT PARAMETER pcFieldList AS CHARACTER NO-UNDO. 
   DEFINE INPUT PARAMETER plSelected  AS LOGICAL   NO-UNDO. 
   
   DEFINE BUFFER bColumn FOR ttColumn. 
   DEFINE BUFFER bField  FOR ttField. 
   
-  setWindowFreeze(yes).
+  setWindowFreeze(YES).
 
   DO WITH FRAME {&FRAME-NAME}:
 
@@ -10268,6 +10244,10 @@ PROCEDURE showField :
       , EACH bField WHERE bField.cFieldName = bColumn.cFieldName:
     
       bField.lShow = (IF plSelected = ? THEN NOT bField.lShow ELSE plSelected).
+
+      /* Customization option for the user to show/hide certain fields */
+      IF NUM-ENTRIES(pcFieldList) > 1 THEN
+        PUBLISH 'customShowField' (gcCurrentDatabase, gcCurrentTable, bField.cFieldName, INPUT-OUTPUT bField.lShow).
     
       /* Hide data columns */
       IF VALID-HANDLE(bColumn.hColumn) THEN 
@@ -10305,11 +10285,8 @@ END PROCEDURE. /* showField */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showHint C-Win 
 PROCEDURE showHint :
-/*------------------------------------------------------------------------
-  Name         : showHint
-  Description  : Show a small window with a hint
-  ----------------------------------------------------------------------*/
-  
+/* Show a small window with a hint
+ */
   DEFINE INPUT PARAMETER phWidget AS HANDLE    NO-UNDO.
   DEFINE INPUT PARAMETER piLayout AS INTEGER   NO-UNDO.
   DEFINE INPUT PARAMETER pcText   AS CHARACTER NO-UNDO.
@@ -10334,15 +10311,11 @@ PROCEDURE showHint :
     FRAME frHint:VISIBLE = TRUE.
     FRAME frHint:MOVE-TO-TOP().
   
-    btGotIt:X = 1.
-    btGotIt:WIDTH = LENGTH(btGotIt:LABEL) + 4.
-    btGotIt:X = (FRAME frHint:WIDTH-PIXELS / 2 - btGotIt:WIDTH-PIXELS / 2).
-
     CASE piLayout:
       /* point nowhere */
       WHEN 0 THEN ASSIGN 
-                    iOffsetX = phWidget:WIDTH-PIXELS / 2
-                    iOffsetY = phWidget:HEIGHT-PIXELS / 2.
+                    iOffsetX = (phWidget:WIDTH-PIXELS - FRAME frHint:WIDTH-PIXELS) / 2
+                    iOffsetY = (phWidget:HEIGHT-PIXELS - FRAME frHint:HEIGHT-PIXELS) / 2.
 
       /* point left up */
       WHEN 1 THEN ASSIGN 
@@ -10444,9 +10417,13 @@ PROCEDURE showHint :
 
     /* Button label */
     IF piLayout = 0 THEN
-      btGotIt:LABEL = "Okidoki !".
+      btGotIt:LABEL = "Ok".
     ELSE 
       btGotIt:LABEL = "I Got it".
+
+    btGotIt:X = 1.
+    btGotIt:WIDTH = LENGTH(btGotIt:LABEL) + 4.
+    btGotIt:X = (FRAME frHint:WIDTH-PIXELS / 2 - btGotIt:WIDTH-PIXELS / 2).
 
     /* Animation. Needless, but fun to program :) */
     DO iStep = 1 TO 25:
@@ -10472,11 +10449,8 @@ END PROCEDURE. /* showHint */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showNewFeatures C-Win 
 PROCEDURE showNewFeatures :
-/*------------------------------------------------------------------------
-  Name         : showNewFeatures
-  Description  : Highlight some new features
-  ----------------------------------------------------------------------*/
-
+/* Highlight some new features
+ */
   DEFINE VARIABLE iBarPos   AS INTEGER NO-UNDO.
   DEFINE VARIABLE iColumnNr AS INTEGER NO-UNDO.
 
@@ -10488,68 +10462,45 @@ PROCEDURE showNewFeatures :
 
     /* This will be checked within showHint */
     glHintCancelled = FALSE. 
-  
-    /* Select field columns */
-    RUN showHint(brFields:GET-BROWSE-COLUMN(3), 1, "~nRight-click the column header to select which columns you want to see.").
 
-    /* Drag bar. Set window to default sizes first */
-    c-win:WIDTH-PIXELS = 800.
-    c-win:HEIGHT-PIXELS = 600.
-    btnResizeVer:Y = 260. 
-    RUN endResize.
-    RUN showHint(btnResizeVer:HANDLE, 2, "~nDrag this bar up and down to change the size of the upper browse.").
+    RUN showHint(C-Win:HANDLE, 0, "~nWelcome to the new Digger!~n~nLet's see what's new").
     IF glHintCancelled THEN LEAVE demoLoop.
 
-    DO iBarPos = 260 TO 160 BY -25:
-      setWindowFreeze(YES).
-      btnResizeVer:Y = iBarPos.
-      RUN endResize.
-      setWindowFreeze(NO).
-      PROCESS EVENTS. 
-    END.
-
-    /* If started without database, the data browse is not there */
-    IF VALID-HANDLE(ghDataBrowse) THEN
-      RUN showHint(ghDataBrowse:HANDLE, 3, "~nSo you can see more data.").
-    ELSE 
-      RUN showHint(btnResizeVer:HANDLE, 3, "~nSo you can see more data.").
-
+    /* Tools manu */
+    RUN showHint(btnTools:HANDLE, 1, "~nThe tool buttons have been moved to their own menu").
+    IF glHintCancelled THEN LEAVE demoLoop.
+    APPLY 'choose' TO btnTools.
+    RUN setTimer("hideSettingsFrame",0). /* to disable the auto-hide */
+    RUN showHint(btnDataAdmin-txt:HANDLE IN FRAME frSettings, 1, "~nAnd the menu has been cleaned up a bit").
+    APPLY 'choose' TO btnTools.
     IF glHintCancelled THEN LEAVE demoLoop.
     
-    DO iBarPos = 160 TO 410 BY 25:
-      setWindowFreeze(YES).
-      btnResizeVer:Y = iBarPos.
-      RUN endResize.
-      setWindowFreeze(NO).
-      PROCESS EVENTS. 
-    END.
-    RUN showHint(brFields:HANDLE, 3, "~n... or more fields").
+    /* Clone options */
+    RUN showHint(brTables:HANDLE, 1, "~nRight-click on a table name to dump a table .df or to clone the database structure").
+    IF glHintCancelled THEN LEAVE demoLoop.
+    
+    /* Edit screen */
+    RUN setPage({&PAGE-TABLES}).
+    RUN showHint(btnEdit:HANDLE, 4, "~nThe edit screen has been improved and now also includes a date picker ").
     IF glHintCancelled THEN LEAVE demoLoop.
 
-    /* back to normal */
-    btnResizeVer:Y = 260. 
-    RUN endResize.
+    /* Load data */
+    RUN showHint(btnLoad:HANDLE, 4, "~nYes, you can now actually LOAD data into the database").
+    IF glHintCancelled THEN LEAVE demoLoop.
 
-    /* Favourite tables */
-    IF NOT glHintCancelled THEN 
-    DO:
-      RUN showHint(btnTableView:HANDLE, 1, "~nSet your favourite tables and switch between all tables and favourites view. Let's do that.").
-      RUN setTableView(YES,YES).
-      RUN showHint(brTables:HANDLE, 4, "~nPress right mouse button on the table browse to add tables to your list of favourites").
-      RUN setTableView(NO,YES).
-    END. 
+    /* Favorite tables */
+    RUN setPage({&PAGE-TABLES}).
+    RUN showHint(btnTabFavourites:HANDLE, 1, "~nSet your favourite tables and switch between all tables and favourites view.").
+    IF glHintCancelled THEN LEAVE demoLoop.
 
-    /* Filter history is saved */
-    iColumnNr = 0.
-    FOR EACH bColumn:
-      IF NOT bColumn.hColumn:VISIBLE THEN NEXT. 
-      iColumnNr = iColumnNr + 1.
-      IF iColumnNr > 1 THEN 
-      DO:
-        RUN showHint(bColumn.hFilter, 1, "~nYour 10 last used values are automatically saved for easy re-use on the data filters").
-        LEAVE.
-      END.
-    END.
+    RUN setPage({&PAGE-FAVOURITES}).
+    RUN showHint(btnFavourite:HANDLE, 4, "~nThis star shows when a table is also a favourite. Click to add or remove a table from the favourites.").
+    RUN setPage({&PAGE-TABLES}).
+    IF glHintCancelled THEN LEAVE demoLoop.
+
+    /* feedback */
+    RUN showHint(fiFeedback:HANDLE, 3, "~nGot some tips, bugs, questions or something to say? Click this one to mail me").
+    IF glHintCancelled THEN LEAVE demoLoop.
 
     /* Done! */
     RUN showHint(C-Win:HANDLE, 0, "~n That's it, happy Digging!").
@@ -10572,12 +10523,74 @@ END PROCEDURE. /* showNewFeatures */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showNumRecords C-Win 
+PROCEDURE showNumRecords :
+/*
+ * Show nr of total and selected records 
+ */
+  DEFINE INPUT PARAMETER piNumRecords    AS INTEGER NO-UNDO.
+  DEFINE INPUT PARAMETER plQueryComplete AS LOGICAL NO-UNDO.
+
+  DO WITH FRAME frData:
+
+    IF plQueryComplete <> ? AND piNumRecords <> ? THEN
+    DO:
+      IF plQueryComplete = TRUE THEN 
+      DO:
+        fiNumRecords:SCREEN-VALUE = SUBSTITUTE('&1 records', piNumRecords).
+        fiNumRecords:FGCOLOR = getColor('RecordCount:Complete:fg'). /* green */
+      END.
+      ELSE 
+      DO:
+        fiNumRecords:SCREEN-VALUE = SUBSTITUTE('> &1 records', piNumRecords).
+        fiNumRecords:FGCOLOR = getColor('RecordCount:Incomplete:fg'). /* red */
+      END.
+
+      fiNumRecords:VISIBLE = (piNumRecords > 0).
+    END.
+
+    /* Set proper position. */
+    fiNumRecords:X = 1. /* park it to the left so we can expand it */
+    fiNumRecords:WIDTH-PIXELS = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(fiNumRecords:SCREEN-VALUE,FRAME frMain:FONT) + 5.
+    fiNumRecords:X = rctData:X + rctData:WIDTH-PIXELS - fiNumRecords:WIDTH-PIXELS - 40.
+    fiNumRecords:Y = rctData:Y + rctData:HEIGHT-PIXELS - 6.
+
+  END.
+
+END PROCEDURE. /* showNumRecords */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showNumSelected C-Win 
+PROCEDURE showNumSelected :
+/*
+ * Show nr of selected records 
+ */
+  IF NOT VALID-HANDLE(ghDataBrowse) THEN RETURN. 
+
+  DO WITH FRAME frData:
+
+    fiNumSelected:SCREEN-VALUE = SUBSTITUTE('&1 /',ghDataBrowse:NUM-SELECTED-ROWS).
+
+    /* Set proper position. */
+    fiNumSelected:X = 1. /* park it to the left so we can expand it */
+    fiNumSelected:WIDTH-PIXELS = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(fiNumSelected:SCREEN-VALUE,FRAME frMain:FONT) + 10.
+    fiNumSelected:X = fiNumRecords:X - fiNumSelected:WIDTH-PIXELS.
+    fiNumSelected:Y = rctData:Y + rctData:HEIGHT-PIXELS - 6.
+    fiNumSelected:VISIBLE = (ghDataBrowse:NUM-SELECTED-ROWS > 0).
+
+  END.
+
+END PROCEDURE. /* showNumSelected */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showTour C-Win 
 PROCEDURE showTour :
-/*------------------------------------------------------------------------
-  Name         : showTour
-  Description  : Highlight some of the main features of DD
-  ----------------------------------------------------------------------*/
+/* Highlight some of the main features of DD
+ */
   DEFINE VARIABLE hWidget AS HANDLE  NO-UNDO.
   DEFINE VARIABLE iColumn AS INTEGER NO-UNDO.
 
@@ -10596,21 +10609,21 @@ PROCEDURE showTour :
    */
   hintBlock:
   DO WITH FRAME frMain:
-    RUN showHint(C-Win:HANDLE, 0, "~nWelcome to the Digger!~n~nGet ready for the 1-minute-tour").
+    RUN showHint(C-Win:HANDLE, 0, "~nWelcome to the DataDigger!~n~nGet ready for the 1-minute-tour").
     IF glHintCancelled THEN LEAVE hintBlock.
 
     /* Select a table and show data */
-    RUN setPage(1).
+    RUN setPage({&PAGE-TABLES}).
 
-    RUN showHint(brTables:HANDLE     , 4, "~nThis browse shows all the tables in your connected databases").
+    RUN showHint(brTables:HANDLE     , 1, "~nHere are all tables of the currently connected databases").
     RUN showHint(fiTableFilter:HANDLE, 1, "~nType in (a part of) the table name to filter the browse").
     RUN showHint(btnViewData:HANDLE  , 3, "~nThen press enter or click this button to show the data in this table").
 
     /* Filter fields */
-    RUN showHint(BROWSE brFields:GET-BROWSE-COLUMN(1), 1, "~nYou can hide fields from the data browse by simply deselecting them here").
+    RUN showHint(BROWSE brFields:GET-BROWSE-COLUMN(1), 1, "~nHide fields from the data browse by deselecting them here").
 
-    RUN showHint(BROWSE brFields:GET-BROWSE-COLUMN(5), 2, "~nDon't like a field format? Click on the format to change it on the fly").
-    RUN showHint(btnReset:HANDLE                     , 2, "~nDon't like the field order? Change it with the buttons in this panel").
+    RUN showHint(BROWSE brFields:GET-BROWSE-COLUMN(5), 2, "~nClick on the format to change it on the fly").
+    RUN showHint(btnReset:HANDLE                     , 2, "~nRe-arrange fields with the buttons in this panel").
 
     /* Filter data */
     RUN showHint(ficWhere:handle, 4 , "~nYour custom query goes here ...").
@@ -10640,7 +10653,7 @@ PROCEDURE showTour :
         RUN showHint(bColumn.hColumn, 4, "~nClick on a column header to sort on that column. Again to change the sort").
       ELSE 
       IF iColumn = 2 THEN 
-        RUN showHint(bColumn.hColumn, 4, "~nOr grab the side of a column to resize it. DD will remember its width on the next run").
+        RUN showHint(bColumn.hColumn, 4, "~nOr grab the side of a column to resize it.").
       ELSE 
         LEAVE.
     END.
@@ -10669,38 +10682,28 @@ END PROCEDURE. /* showTour */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showValue C-Win 
 PROCEDURE showValue :
-/*------------------------------------------------------------------------
-  Name         : showValue
-  Description  : Show the value of the current cell
-  ---------------------------------------------------------------------- 
-  18-01-2011 pti Created
-  ----------------------------------------------------------------------*/
+/* Show the value of the current cell
+ */
+  DEFINE VARIABLE cColumnName  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cColumnValue AS CHARACTER   NO-UNDO.
 
-  define variable cColumnName  as character   no-undo.
-  define variable cColumnValue as character   no-undo.
+  IF NUM-ENTRIES(ghDataBrowse:PRIVATE-DATA,CHR(1)) <> 3 THEN RETURN. 
 
-  if num-entries(ghDataBrowse:private-data,chr(1)) <> 3 then return. 
+  cColumnName  = ENTRY(1, ghDataBrowse:PRIVATE-DATA,CHR(1)).
+  cColumnValue = ENTRY(2, ghDataBrowse:PRIVATE-DATA,CHR(1)).
 
-  cColumnName  = entry(1, ghDataBrowse:private-data,chr(1)).
-  cColumnValue = entry(2, ghDataBrowse:private-data,chr(1)).
+  IF cColumnValue <> '' AND cColumnValue <> ? THEN 
+    MESSAGE TRIM(cColumnValue) VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
-  if cColumnValue <> '' and cColumnValue <> ? then 
-    message trim(cColumnValue)
-      view-as alert-box info buttons ok.
-
-end procedure. /* showValue */
+END PROCEDURE. /* showValue */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sortComboBox C-Win 
 PROCEDURE sortComboBox :
-/*------------------------------------------------------------------------
-  Name : sortComboBox
-  ----------------------------------------------------------------------
-  13-11-2013 pti Created
-  ----------------------------------------------------------------------*/
-  
+/* Sort the entries of a ComboBox
+ */
   DEFINE INPUT  PARAMETER phCombo AS HANDLE NO-UNDO.
 
   DEFINE VARIABLE iItem  AS INTEGER     NO-UNDO.
@@ -10730,75 +10733,68 @@ END. /* sortComboBox */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE startDiggerLib C-Win 
 PROCEDURE startDiggerLib :
-/*------------------------------------------------------------------------
-  Name         : startDiggerLib
-  Description  : Start DiggerLib if it has not already been started
+/* Start DiggerLib if it has not already been started
+ */
+  DEFINE VARIABLE cProgDir   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE hDiggerLib AS HANDLE      NO-UNDO.
 
-  ----------------------------------------------------------------------
-  21-10-2009 pti Created
-  ----------------------------------------------------------------------*/
+  FILE-INFO:FILE-NAME = REPLACE(THIS-PROCEDURE:FILE-NAME,"wdatadigger.w","wdatadigger.r").
+  IF FILE-INFO:FULL-PATHNAME = ? THEN
+    FILE-INFO:FILE-NAME = REPLACE(THIS-PROCEDURE:FILE-NAME,"wdatadigger.r","wdatadigger.w").
 
-  define variable hDiggerLib as handle    no-undo.
-  define variable cProgDir   as character no-undo.
+  cProgDir = SUBSTRING(FILE-INFO:FULL-PATHNAME,1,R-INDEX(FILE-INFO:FULL-PATHNAME,'\')).
 
-  file-info:file-name = this-procedure:file-name.
-  cProgDir = substring(file-info:full-pathname,1,r-index(file-info:full-pathname,'\')).
+  /* If we run in the UIB we know where we are running from */
+  IF "{&UIB_is_Running}" <> "" THEN cProgDir = '.\'.
 
   /* Call out to see if the lib has been started for this build nr */
   PUBLISH 'DataDiggerLib' (OUTPUT hDiggerLib).
   
   /* If it is not, then start it */
-  if not valid-handle(hDiggerLib) then
-  do:
-    run value(cProgDir + 'DataDiggerLib.p') persistent set hDiggerLib.
-    session:add-super-procedure(hDiggerLib,search-target).
-  end.
+  IF NOT VALID-HANDLE(hDiggerLib) THEN
+  DO:
+    RUN VALUE(cProgDir + 'DataDiggerLib.p') PERSISTENT SET hDiggerLib.
+    SESSION:ADD-SUPER-PROCEDURE(hDiggerLib,SEARCH-TARGET).
+  END.
 
   /* Start customizations in myDataDigger.p */
-  if search(cProgDir + 'myDataDigger.p') <> ? then
-  do:
-    run value(cProgDir + 'myDataDigger.p') persistent set hDiggerLib.
-    session:add-super-procedure(hDiggerLib, search-target).
+  IF SEARCH(cProgDir + 'myDataDigger.p') <> ? THEN
+  DO:
+    RUN VALUE(cProgDir + 'myDataDigger.p') PERSISTENT SET hDiggerLib.
+    SESSION:ADD-SUPER-PROCEDURE(hDiggerLib, SEARCH-TARGET).
 
-    subscribe procedure hDiggerLib to "customFilter" anywhere.
-    subscribe procedure hDiggerLib to "customDump"   anywhere.
-    subscribe procedure hDiggerLib to "customQuery"  anywhere.
-  end.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "customDump"   ANYWHERE.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "customQuery"  ANYWHERE.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "customShowField" ANYWHERE.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "CustomGetFilterValue" ANYWHERE.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "customSaveFilterValue" ANYWHERE.
 
-end procedure. /* startDiggerLib */
+  END.
+END PROCEDURE. /* startDiggerLib */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE startSession C-Win 
 PROCEDURE startSession :
-/*------------------------------------------------------------------------
-  Name         : startSession
-  Description  : Show a welcome message to the user.
-  ----------------------------------------------------------------------
-  07-09-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cError     as character no-undo.
-  define variable cBuild     as character no-undo.
-  define variable iStackSize as integer   no-undo.
-  define variable iVersion   as integer   no-undo.
-  define variable hWindow    as handle    no-undo. 
-  define variable lNewUser   as logical   no-undo. 
-  define variable lNewBuild  as logical   no-undo. 
-  define variable lUpgraded  as logical   no-undo. 
+/* Show a welcome message to the user.
+ */
+  DEFINE VARIABLE cBuild     AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cError     AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE hWindow    AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE iStackSize AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE iVersion   AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE lNewBuild  AS LOGICAL   NO-UNDO.
+  DEFINE VARIABLE lNewUser   AS LOGICAL   NO-UNDO.
+  DEFINE VARIABLE lUpgraded  AS LOGICAL   NO-UNDO.
+  DEFINE VARIABLE lOpenBlog  AS LOGICAL   NO-UNDO.
 
   /* Set debug flag */
-  setDebugMode(logical(getRegistry('DataDigger:debugger','DebugMode'))).
-
-  /* DEBUG */
-/*   &IF DEFINED (UIB_is_running) &THEN */
-/*     RUN clearDiskCache.              */
-/*   &ENDIF                             */
+  setDebugMode(LOGICAL(getRegistry('DataDigger:debugger','DebugMode'))).
 
   /* Check if this is the first run with a new version */
-  iVersion = integer(getRegistry('DataDigger', 'Version')) no-error.
-  if iVersion = ? then lNewUser = true.
+  iVersion = INTEGER(getRegistry('DataDigger', 'Version')) NO-ERROR.
+  IF iVersion = ? THEN lNewUser = TRUE.
 
   cBuild = getRegistry('DataDigger', 'Build').
   IF cBuild = ? THEN cBuild = "".
@@ -10806,37 +10802,31 @@ PROCEDURE startSession :
   /* obsolete files, only for beta-users, only for first build after 20140314 */
   OS-DELETE VALUE( "dDump.w").
   OS-DELETE VALUE( "dDump.r").
-  
-  IF iVersion <> {&version} THEN
+
+  IF iVersion <> {&VERSION} THEN
   DO:
     lUpgraded = TRUE.
 
     /* If we come from an older version, do some conversions */
     IF iVersion <> ? THEN
     DO:
-      RUN showMessage.p( INPUT "Conversion"
-                       , INPUT "Please wait while your settings are converted."
-                       , OUTPUT hWindow).
+      RUN showMessage.p(INPUT "Conversion", INPUT "Please wait while your settings are converted.", OUTPUT hWindow).
       
       /* Do one-time conversions if needed */
-      session:set-wait-state("general").
-  
+      SESSION:SET-WAIT-STATE("general").
       convLoop:
-      repeat:
-        run convertSettings(iVersion,cBuild).
+      REPEAT:
+        RUN convertSettings(iVersion,cBuild).
         iVersion = iVersion + 1.
-        if iVersion >= {&version} then leave convLoop.
-      end.
-      delete object hWindow. 
-      session:set-wait-state("").
-    end.
+        IF iVersion >= {&VERSION} THEN LEAVE convLoop.
+      END.
+      DELETE OBJECT hWindow. 
+      SESSION:SET-WAIT-STATE("").
+    END.
 
     /* Save this version nr */
     setRegistry('DataDigger', 'Version', '{&version}').
     setRegistry('DataDigger', 'Build', '{&build}').
-
-    /* Assume that unblocking files is only needed on version change */
-    RUN unblockFile(getProgramDir() + 'DataDigger.chm.dat').
   END.
   
   /* New build nr? Then wipe disk cache */
@@ -10849,84 +10839,155 @@ PROCEDURE startSession :
   END.
 
   /* Check on the use of -rereadnolock */
-  if lookup('-rereadnolock', session:startup-parameters) = 0 then 
-    run showHelp('RereadNoLock', '').
+  IF LOOKUP('-rereadnolock', SESSION:STARTUP-PARAMETERS) = 0 THEN 
+    RUN showHelp('RereadNoLock', '').
 
   /* Check on the value for -s, should preferrably be > 128 */
   iStackSize = getStackSize().
-  if iStackSize <= 128 then
-    run showHelp('StackSize', string(iStackSize)).
+  IF iStackSize <= 128 THEN
+    RUN showHelp('StackSize', STRING(iStackSize)).
 
   /* If we are a READ-ONLY digger, show a warning */
-  if ReadOnlyDigger then
-    run showHelp("ReadOnlyDigger", "").
+  IF plReadOnlyDigger THEN
+    RUN showHelp("ReadOnlyDigger", "").
 
   /* The user could be:
    * 1) a new user 
    * 2) existing user on upgraded DD
    * 3) existing user on non-upgraded DD
    */
-  if lNewUser then run showTour.
-  else if lUpgraded then run showNewFeatures.
+  IF lNewUser THEN RUN showTour.
+  ELSE IF lUpgraded THEN RUN showNewFeatures.
 
-end procedure. /* startSession */
+  /* Start up the page on WordPress.com for this build */
+  IF lNewBuild THEN 
+  DO:
+    lOpenBlog = LOGICAL(getRegistry('DataDigger','OpenBlogOnNewVersion')).
+    IF lOpenBlog = ? OR lOpenBlog = TRUE THEN
+      OS-COMMAND NO-WAIT START VALUE("http://datadigger.wordpress.com/{&build}").
+  END. 
+
+END PROCEDURE. /* startSession */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE startTool C-Win 
 PROCEDURE startTool :
-/*------------------------------------------------------------------------
-  Name         : startTool   
-  Description  : Start Dictionary or Data Adminstration
-  ----------------------------------------------------------------------
-  07-05-2013 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Start Dictionary or Data Adminstration
+ */
   DEFINE INPUT PARAMETER pcTool AS CHARACTER   NO-UNDO.
 
-  define variable cDatabasesOld as character no-undo. 
-  define variable cDatabases    as character no-undo. 
+  DEFINE VARIABLE cDatabases    AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cDatabasesOld AS CHARACTER   NO-UNDO.
 
   /* Return if no db connected */
-  if num-dbs = 0 then return. 
+  IF NUM-DBS = 0 THEN RETURN. 
 
-  hide frame frSettings.
-  create alias dictdb for database value( gcCurrentDatabase ).
+  HIDE FRAME frSettings.
+  CREATE ALIAS dictdb FOR DATABASE VALUE(gcCurrentDatabase).
+
+  /* Turn off KeepAlive timer to avoid "DB has changed warnings" */
+  RUN setTimer("KeepAlive", 0).
 
   /* Remember all connected db's */
   cDatabasesOld = getDatabaseList().
 
-  case pcTool:
-    when "Dict" then do:
-      publish "setUsage" ("Dictionary"). /* user behaviour */
+  CASE pcTool:
+    WHEN "Dict" THEN DO:
+      PUBLISH "setUsage" ("Dictionary"). /* user behaviour */
 
       RUN setTimer("resizeDictWindow", 500).
-      RUN dict.p.
+      RUN DICT.p.
       RUN setTimer("resizeDictWindow", 0).
-    end.
+    END.
 
-    when "Admin" then
-    do:
-      publish "setUsage" ("DataAdmin"). /* user behaviour */
-      run _admin.p.
-    end.
-  end case.
+    WHEN "Admin" THEN
+    DO:
+      PUBLISH "setUsage" ("DataAdmin"). /* user behaviour */
+      RUN _admin.p.
+    END.
+  END CASE.
+
+  /* re-enable KeepAlive timer */
+  IF LOGICAL(getRegistry("DataDigger", "KeepAlive")) THEN
+    RUN setTimer("KeepAlive", 5000). /* every 5 seconds */
 
   /* Get all connected databases */
   cDatabases = getDatabaseList().
 
   /* If needed, repopulate db combo */
-  if cDatabases <> cDatabasesOld then 
-  do:
+  IF cDatabases <> cDatabasesOld THEN 
+  DO:
     /* Get list of all tables of all databases */
-    run getTables(output table ttTable).
-    assign cbDatabaseFilter:list-items in frame frMain = ',' + cDatabases.
+    RUN getTables(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+    ASSIGN cbDatabaseFilter:LIST-ITEMS IN FRAME frMain = ',' + cDatabases.
+    RUN filterTables. 
+  END.
+  ELSE 
+    CREATE ALIAS dictdb FOR DATABASE VALUE(gcCurrentDatabase).
 
-    apply 'choose' to btnTableFilter. 
-  end.
-  else 
-    create alias dictdb for database value( gcCurrentDatabase ).
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE tgSelAllChoose C-Win 
+PROCEDURE tgSelAllChoose :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER plSelectAll AS LOGICAL NO-UNDO.
+
+  DEFINE VARIABLE cFieldList AS CHARACTER NO-UNDO. 
+  DEFINE VARIABLE hQuery     AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE hBuffer    AS HANDLE    NO-UNDO. 
+
+  SESSION:SET-WAIT-STATE('general').
+  setWindowFreeze(YES).
+
+  DEFINE BUFFER bField  FOR ttField.
+  DEFINE BUFFER bColumn FOR ttColumn. 
+
+  DO WITH FRAME {&FRAME-NAME}:
+
+    CREATE QUERY hQuery.
+    CREATE BUFFER hBuffer FOR TABLE "ttField".
+    hQuery:ADD-BUFFER(hBuffer).
+    hQuery:QUERY-PREPARE(BROWSE brFields:QUERY:PREPARE-STRING).
+    hQuery:QUERY-OPEN.
+
+    /* Walk thru all fields that are currently visible */
+    REPEAT:
+      hQuery:GET-NEXT().
+      IF hQuery:QUERY-OFF-END THEN LEAVE.
+
+      /* Update the buffer with checked/unchecked value */
+      hBuffer::lShow = plSelectAll.
+
+      FOR EACH bColumn WHERE bColumn.cFieldName = hBuffer::cFieldName:
+        cFieldList = cFieldList + "," + bColumn.cFullName.
+      END.
+    END.
+
+    RUN showField(INPUT cFieldList, INPUT plSelectAll). 
+
+    hQuery:QUERY-CLOSE.
+    DELETE OBJECT hQuery.
+    DELETE OBJECT hBuffer. 
+
+    saveSelectedFields().
+    brFields:REFRESH().
+  
+    RUN reopenFieldBrowse(?,?).
+
+    setWindowFreeze(NO).
+    SESSION:SET-WAIT-STATE('').
+
+    APPLY "entry" TO ttField.cFieldName IN BROWSE brFields.
+  END.
 
 END PROCEDURE.
 
@@ -10935,11 +10996,8 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE timedFieldFilter C-Win 
 PROCEDURE timedFieldFilter :
-/*------------------------------------------------------------------------------
-  Name : timedFieldFilter
-  Desc : Activated by the timer to apply the filter
-------------------------------------------------------------------------------*/
-
+/* Activated by the timer to apply the filter
+ */
   setWindowFreeze(YES).
 
   RUN reopenFieldBrowse(?,?).
@@ -10947,7 +11005,6 @@ PROCEDURE timedFieldFilter :
   RUN setTimer("timedFieldFilter", 0). /* turn off the timer */
 
   setWindowFreeze(NO).
-
 END PROCEDURE. /* timedFieldFilter */
 
 /* _UIB-CODE-BLOCK-END */
@@ -10955,11 +11012,8 @@ END PROCEDURE. /* timedFieldFilter */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE timedIndexFilter C-Win 
 PROCEDURE timedIndexFilter :
-/*------------------------------------------------------------------------------
-  Name : timedIndexFilter
-  Desc : Activated by the timer to apply the filter
-------------------------------------------------------------------------------*/
-
+/* Activated by the timer to apply the filter
+ */
   setWindowFreeze(YES).
 
   RUN reopenIndexBrowse(?,?).
@@ -10967,7 +11021,6 @@ PROCEDURE timedIndexFilter :
   RUN setTimer("timedIndexFilter", 0). /* turn off the timer */
 
   setWindowFreeze(NO).
-
 END PROCEDURE. /* timedIndexFilter */
 
 /* _UIB-CODE-BLOCK-END */
@@ -10975,11 +11028,8 @@ END PROCEDURE. /* timedIndexFilter */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE timedScrollNotify C-Win 
 PROCEDURE timedScrollNotify :
-/*------------------------------------------------------------------------------
-  Name : timedScrollNotify
-  Desc : Run scrollnotify when user scrolls using cursor keys
-------------------------------------------------------------------------------*/
-  
+/* Run scrollnotify when user scrolls using cursor keys
+ */
   DEFINE BUFFER bColumn FOR ttColumn. 
 
   /* Might get called when browse is not yet realized, so: */
@@ -10999,8 +11049,6 @@ PROCEDURE timedScrollNotify :
 
     LEAVE. 
   END. 
-
-
 END PROCEDURE. /* timedScrollNotify */
 
 /* _UIB-CODE-BLOCK-END */
@@ -11008,11 +11056,8 @@ END PROCEDURE. /* timedScrollNotify */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE timedTableChange C-Win 
 PROCEDURE timedTableChange :
-/*------------------------------------------------------------------------------
-  Name : timedTableChange
-  Desc : Activated by the timer to change the browse 
-------------------------------------------------------------------------------*/
-
+/* Activated by the timer to change the browse
+ */
   setWindowFreeze(YES).
   RUN setTimer("timedTableChange", 0).
   RUN setTableContext(INPUT gcCurrentTable ).
@@ -11025,11 +11070,8 @@ END PROCEDURE. /* timedTableChange */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE timedTableFilter C-Win 
 PROCEDURE timedTableFilter :
-/*------------------------------------------------------------------------------
-  Name : timedTableFilter
-  Desc : Activated by the timer to apply the filter
-------------------------------------------------------------------------------*/
-
+/* Activated by the timer to apply the filter
+ */
   setWindowFreeze(YES).
 
   RUN reopenTableBrowse(?).
@@ -11037,7 +11079,6 @@ PROCEDURE timedTableFilter :
   RUN setTimer("timedTableFilter", 0). /* turn off the timer */
 
   setWindowFreeze(NO).
-
 END PROCEDURE. /* timedTableChange */
 
 /* _UIB-CODE-BLOCK-END */
@@ -11078,50 +11119,49 @@ END FUNCTION. /* createMenu */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION createMenuItem C-Win 
 FUNCTION createMenuItem RETURNS HANDLE
-  ( phMenu    AS handle   
+  ( phMenu    AS HANDLE   
   , pcType    AS CHARACTER  
   , pcLabel   AS CHARACTER 
   , pcName    AS CHARACTER 
   ) :
 
-  define variable hMenuItem as handle no-undo.
+  DEFINE VARIABLE hMenuItem AS HANDLE NO-UNDO.
 
-  case pcType:
-    when "SUBMENU" then 
-      create sub-menu hMenuItem
-        assign 
-          label        = pcLabel
-          private-data = pcLabel
-          name         = pcName
-          parent       = phMenu.
+  CASE pcType:
+    WHEN "SUBMENU" THEN 
+      CREATE SUB-MENU hMenuItem
+        ASSIGN 
+          LABEL        = pcLabel
+          PRIVATE-DATA = pcLabel
+          NAME         = pcName
+          PARENT       = phMenu.
 
-    when "TOGGLE-BOX" then 
-      create menu-item hMenuItem
-        assign 
-          label        = pcLabel
-          private-data = pcLabel
-          name         = pcName
-          toggle-box   = true
-          checked      = true
-          parent       = phMenu.
+    WHEN "TOGGLE-BOX" THEN 
+      CREATE MENU-ITEM hMenuItem
+        ASSIGN 
+          LABEL        = pcLabel
+          PRIVATE-DATA = pcLabel
+          NAME         = pcName
+          TOGGLE-BOX   = TRUE
+          CHECKED      = TRUE
+          PARENT       = phMenu.
 
-    when "RULE" then 
-      create menu-item hMenuItem
-        assign
-          parent       = phMenu
-          subtype      = "rule". 
+    WHEN "RULE" THEN 
+      CREATE MENU-ITEM hMenuItem
+        ASSIGN
+          PARENT       = phMenu
+          SUBTYPE      = "rule". 
 
-    otherwise
-      create menu-item hMenuItem
-        assign
-          label        = pcLabel
-          private-data = pcLabel
-          name         = pcName
-          parent       = phMenu.
+    OTHERWISE
+      CREATE MENU-ITEM hMenuItem
+        ASSIGN
+          LABEL        = pcLabel
+          PRIVATE-DATA = pcLabel
+          NAME         = pcName
+          PARENT       = phMenu.
+  END CASE.
 
-  end case.
-
-  return hMenuItem.
+  RETURN hMenuItem.
 
 END FUNCTION. /* createMenuItem */
 
@@ -11132,38 +11172,48 @@ END FUNCTION. /* createMenuItem */
 FUNCTION getActiveQueryEditor RETURNS HANDLE
   ( /* parameter-definitions */ ) :
 
-/*------------------------------------------------------------------------
-  Name         : getActiveQueryEditor
-  Description  : Return the handle of the active query editor
-  ----------------------------------------------------------------------
-  07-09-2009 pti Created
-  ----------------------------------------------------------------------*/
+/* Return the handle of the active query editor
+ */
+  IF gcQueryEditorState = 'hidden' THEN
+    RETURN ficWhere:HANDLE IN FRAME frMain.
+  ELSE 
+    RETURN ficWhere2:HANDLE IN FRAME frWhere.
 
-  /* If the query editor is expanded, do actions to that field */
-  if gcQueryEditorState = 'hidden' then 
-    return ficWhere:handle in frame frMain.
-  else 
-    return ficWhere2:handle in frame frWhere.
+END FUNCTION. /* getActiveQueryEditor */
 
-end function. /* getActiveQueryEditor */
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getDroppedFiles C-Win 
+FUNCTION getDroppedFiles RETURNS CHARACTER
+  ( phDropTarget AS HANDLE ) :
+  /* Return a list of dropped files onto a target.
+   * 
+   * Note: list is returned as separated list, separated with ~n (newline) 
+   * instead of comma's since a comma can be part of the file name
+   */
+  DEFINE VARIABLE iFile     AS INTEGER NO-UNDO.
+  DEFINE VARIABLE cFileList AS CHARACTER   NO-UNDO.
+
+  DO iFile = 1 TO phDropTarget:NUM-DROPPED-FILES:
+    cFileList = cFileList + "~n" + phDropTarget:GET-DROPPED-FILE(iFile).
+  END.
+
+  RETURN TRIM(cFileList,"~n").
+
+END FUNCTION. /* getDroppedFiles */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getFieldList C-Win 
-FUNCTION getFieldList returns character
-  ( pcSortBy as character ) :
-
-/*------------------------------------------------------------------------
-  Name         : getFieldList
-  Description  : Return a comma separated list of all fields.
-  ---------------------------------------------------------------------- 
-  09-07-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define variable cFieldList as character  no-undo.
-  define variable iMaxFields as integer    no-undo.
-  define variable iNumFields as integer    no-undo.
+FUNCTION getFieldList RETURNS CHARACTER
+  ( pcSortBy AS CHARACTER ) :
+/* Return a comma separated list of all fields.
+ */
+  DEFINE VARIABLE cFieldList AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iMaxFields AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iNumFields AS INTEGER     NO-UNDO.
   
   DEFINE BUFFER ttField FOR ttField.
   DEFINE QUERY qField FOR ttField.
@@ -11176,124 +11226,103 @@ FUNCTION getFieldList returns character
   QUERY qField:GET-FIRST.
 
   /* All fields */
-  repeat while not query qField:query-off-end:
+  REPEAT WHILE NOT QUERY qField:QUERY-OFF-END:
     cFieldList = cFieldList + ',' + ttField.cFieldName.
-    query qField:get-next.
+    QUERY qField:GET-NEXT.
     iNumFields = iNumFields + 1.
-    if iNumFields > iMaxFields then leave.
-  end.
-  query qField:query-close.
+    IF iNumFields > iMaxFields THEN LEAVE.
+  END.
+  QUERY qField:QUERY-CLOSE.
 
-  cFieldList = left-trim(cFieldList, ",").
+  cFieldList = LEFT-TRIM(cFieldList, ",").
 
-  return cFieldList.
-end function. /* getFieldList */
+  RETURN cFieldList.
+END FUNCTION. /* getFieldList */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getQueryFromFields C-Win 
-FUNCTION getQueryFromFields returns character
-  ( input pcFieldList as character ):
+FUNCTION getQueryFromFields RETURNS CHARACTER
+  ( INPUT pcFieldList AS CHARACTER ):
 
-/*------------------------------------------------------------------------
-  Name         : getQueryFromFields
-  Description  : Return a query built from fields in a list
-  ---------------------------------------------------------------------- 
-  20-10-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cField         as character   no-undo.
-  define variable iField         as integer   no-undo. 
-  define variable cNameFormat    as character no-undo. 
-  define variable cFieldList     as character no-undo. 
-  define variable cQuery         as character no-undo. 
+/* Return a query built from fields in a list
+ */
+  DEFINE VARIABLE cField      AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cFieldList  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cNameFormat AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cQuery      AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iField      AS INTEGER     NO-UNDO.
 
   /* Determine format for names */
-  cNameFormat = fill('x', getMaxLength(pcFieldList) ).
+  cNameFormat = FILL('x', getMaxLength(pcFieldList) ).
 
   /* Build query */
   cQuery = ''.
-  do iField = 1 to num-entries(pcFieldList):
-    cField = entry(iField,pcFieldList).
-    find ttField where ttField.cFieldName = cField.
-    cQuery = substitute('&1&2 &3 = &4'
+  DO iField = 1 TO NUM-ENTRIES(pcFieldList):
+    cField = ENTRY(iField,pcFieldList).
+    FIND ttField WHERE ttField.cFieldName = cField.
+    cQuery = SUBSTITUTE('&1&2 &3 = &4'
                        , cQuery 
-                       , (if iField = 1 then 'where' else '~n  and') 
-                       , string(cField,cNameFormat) 
-                       , quoter(getLinkInfo(cField))
+                       , (IF iField = 1 THEN 'WHERE' ELSE '~n  AND') 
+                       , STRING(cField,cNameFormat) 
+                       , QUOTER(getLinkInfo(cField))
                        ).
-  end.
+  END.
 
-  publish "debugMessage" (1,substitute('Query From Fields: &1', cQuery)).
+  PUBLISH "debugMessage" (1,SUBSTITUTE('Query From Fields: &1', cQuery)).
 
-  return cQuery.
-end function. /* getQueryFromFields */
+  RETURN cQuery.
+END FUNCTION. /* getQueryFromFields */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getSelectedFields C-Win 
-FUNCTION getSelectedFields returns character
+FUNCTION getSelectedFields RETURNS CHARACTER
   ( /* parameter-definitions */ ) :
 
-/*------------------------------------------------------------------------
-  Name         : getSelectedFields
-  Description  : Return all selected fields. 
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cSelectedFields as character  no-undo.
-  define buffer ttField for ttField.
+/* Return all selected fields.
+ */
+  DEFINE VARIABLE cSelectedFields AS CHARACTER  NO-UNDO.
+  DEFINE BUFFER ttField FOR ttField.
 
   /* All selected fields */
-  for each ttField where ttField.lShow = true 
-    by ttField.iOrder:
-
+  FOR EACH ttField WHERE ttField.lShow = TRUE BY ttField.iOrder:
     cSelectedFields = cSelectedFields + ',' + ttField.cFullName.
-         
-    if length(cSelectedFields) > 20000 then leave.
-  end.
+    IF LENGTH(cSelectedFields) > 20000 THEN LEAVE.
+  END.
 
-  cSelectedFields = left-trim(cSelectedFields, ",").
+  cSelectedFields = LEFT-TRIM(cSelectedFields, ",").
 
-  return cSelectedFields.
-end function. /* getSelectedFields */
+  RETURN cSelectedFields.
+END FUNCTION. /* getSelectedFields */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getSelectedText C-Win 
 FUNCTION getSelectedText RETURNS CHARACTER
-  ( INPUT hWidget AS handle ) :
-/*------------------------------------------------------------------------------
-  Purpose:  
-    Notes:  
-------------------------------------------------------------------------------*/
-  define variable cSelectedText as character no-undo. 
+  ( INPUT hWidget AS HANDLE ) :
+/* Return the currently selected text in a widget
+ */
+  DEFINE VARIABLE cSelectedText AS CHARACTER   NO-UNDO.
 
-  repeat while valid-handle(hWidget):
+  REPEAT WHILE VALID-HANDLE(hWidget):
 
-    /* SalesRep */
-    if can-query(hWidget,'SELECTION-TEXT')
-      and hWidget:selection-text <> '' then
-    do:
-      return trim(hWidget:selection-text).
-    end.
+    IF CAN-QUERY(hWidget,'SELECTION-TEXT') AND hWidget:SELECTION-TEXT <> '' THEN
+      RETURN TRIM(hWidget:SELECTION-TEXT).
 
-    if can-query(hWidget,'first-child')
-      and hWidget:first-child <> ? then 
-    do:
-      cSelectedText = getSelectedText(hWidget:first-child).
-      if cSelectedText <> "" then return cSelectedText.
-    end.
+    IF CAN-QUERY(hWidget,'first-child') AND hWidget:FIRST-CHILD <> ? THEN
+    DO:
+      cSelectedText = getSelectedText(hWidget:FIRST-CHILD).
+      IF cSelectedText <> "" THEN RETURN cSelectedText.
+    END.
 
-    hWidget = hWidget:next-sibling.
-  end.
+    hWidget = hWidget:NEXT-SIBLING.
+  END.
   
-  return "".
+  RETURN "".
 END FUNCTION. /* getSelectedText */
 
 /* _UIB-CODE-BLOCK-END */
@@ -11303,13 +11332,8 @@ END FUNCTION. /* getSelectedText */
 FUNCTION killMenu RETURNS LOGICAL
   ( phMenu AS HANDLE ) :
 
-  /*------------------------------------------------------------------------
-    Name         : killMenu
-    Description  : Kill a menu and all of its siblings
-    ----------------------------------------------------------------------
-    26-11-2013 pti Created
-    ----------------------------------------------------------------------*/
-
+  /* Delete a menu and all of its siblings
+   */
   IF VALID-HANDLE(phMenu) THEN
   DO:
     /* Kill subitems */
@@ -11332,13 +11356,8 @@ END FUNCTION. /* killMenu */
 FUNCTION saveSelectedFields RETURNS CHARACTER
   ( /* parameter-definitions */ ) :
 
-/*------------------------------------------------------------------------
-  Name         : saveSelectedFields
-  Description  : Write the selected fields to the INI
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+/* Write the selected fields to the INI
+ */
   DEFINE VARIABLE cTable          AS CHARACTER NO-UNDO. 
   DEFINE VARIABLE cSelectedFields AS CHARACTER NO-UNDO.
     
@@ -11366,166 +11385,113 @@ END FUNCTION. /* saveSelectedFields */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setCurrentTable C-Win 
-FUNCTION setCurrentTable returns logical
-  ( pcTableName as character ) :
-/*------------------------------------------------------------------------------
-  Purpose:  
-    Notes:  
-------------------------------------------------------------------------------*/
+FUNCTION setCurrentTable RETURNS LOGICAL
+  ( pcTableName AS CHARACTER ) :
+/* Save last used table to ini
+ */
+  DEFINE BUFFER bTable FOR ttTable.
 
-  define buffer bTable for ttTable.
+  DO WITH FRAME {&FRAME-NAME}:
+    FIND bTable 
+      WHERE bTable.cDatabase  = gcCurrentDatabase
+        AND bTable.cTableName = pcTableName
+            NO-ERROR.
+    IF NOT AVAILABLE bTable THEN RETURN NO.
 
-  do with frame {&frame-name}:
-    find bTable 
-      where bTable.cDatabase  = gcCurrentDatabase
-        and bTable.cTableName = pcTableName
-            no-error.
-    if not available bTable then return no.
-
-    brTables:query:reposition-to-rowid( rowid(bTable) ) no-error.
-  end.
-end function. /* setCurrentTable */
+    brTables:QUERY:REPOSITION-TO-ROWID( ROWID(bTable) ) NO-ERROR.
+  END.
+END FUNCTION. /* setCurrentTable */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setDebugMode C-Win 
-FUNCTION setDebugMode returns logical
-  ( plDebugMode as logical ) :
+FUNCTION setDebugMode RETURNS LOGICAL
+  ( plDebugMode AS LOGICAL ) :
 
-/*------------------------------------------------------------------------
-  Name         : setDebugMode
-  Description  : Turn debug mode on of off. Affects timers and LockWindow
-  ----------------------------------------------------------------------*/
+/* Turn debug mode on of off. Affects timers and LockWindow
+ */
+  IF plDebugMode = ? THEN RETURN NO.
+  glDebugMode = plDebugMode.
+  IF glUseTimer THEN chCtrlFrame:pstimer:ENABLED = NOT glDebugMode.
 
-  if plDebugMode = ? then return no.
-
-  glDebugMode                 = plDebugMode.
-  chCtrlFrame:pstimer:ENABLED = NOT glDebugMode.
-
-  return true.
-
-end function. /* setDebugMode */
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setNumRecords C-Win 
-FUNCTION setNumRecords returns logical
-  ( input piNumRecords    as integer
-  , input plCountComplete as logical 
-  , input piQueryMSec     as integer) :
-
-  define variable cNumResults as character   no-undo.
-
-  do with frame frData:
-    fiNumresults:visible = true.
-
-    if plCountComplete then 
-      fiNumResults:fgcolor = getColor('RecordCount:Complete:fg'). /* green */
-    else 
-      fiNumResults:fgcolor = getColor('RecordCount:Incomplete:fg'). /* red */
-  
-    if plCountComplete then
-      cNumResults = substitute(' &1 records in &2 msec', piNumRecords, piQueryMSec).
-    else 
-      cNumResults = substitute(' > &1 records', piNumRecords).
-
-    fiNumResults:x = 100. /* park it to the left so we can expand it */
-    fiNumResults:width-pixels = font-table:get-text-width-pixels(cNumResults) + 5.
-    fiNumResults:x = rctData:x + rctData:width-pixels - fiNumResults:width-pixels - 40.
-    fiNumResults:screen-value = cNumResults.
-  end.
-
-  return yes.
-end function. /* setNumRecords */
+  RETURN TRUE.
+END FUNCTION. /* setDebugMode */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setQuery C-Win 
 FUNCTION setQuery RETURNS LOGICAL
-  ( piPointerChange as integer ) :
+  ( piPointerChange AS INTEGER ) :
 
-/*------------------------------------------------------------------------
-  Name         : setQuery
-  Description  : Fetches the previous or next query from the settings 
-                 and fills it in in the query editor.
-                 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  define variable cQuery  as character no-undo. 
-  define variable hEditor as handle    no-undo.
+/* Fetches the previous or next query from the settings and fills it in in the query editor.
+ */
+  DEFINE VARIABLE cQuery  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE hEditor AS HANDLE      NO-UNDO.
 
   hEditor = getActiveQueryEditor().
 
   /* See if the requested query exists */
   cQuery = getQuery(gcCurrentDatabase, gcCurrentTable, giQueryPointer + piPointerChange).
 
-  if cQuery <> ? then 
-  do:
+  IF cQuery <> ? THEN 
+  DO:
     giQueryPointer = giQueryPointer + piPointerChange.
-    hEditor:screen-value = formatQueryString(cQuery, gcQueryEditorState = 'visible').
-  end.
+    hEditor:SCREEN-VALUE = formatQueryString(cQuery, gcQueryEditorState = 'visible').
+  END.
 
-  return cQuery <> ?.
-end function. /* setQuery */
+  RETURN cQuery <> ?.
+END FUNCTION. /* setQuery */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setQueryEditor C-Win 
 FUNCTION setQueryEditor RETURNS LOGICAL
-  ( pcQueryEditorState as character ) :
-/*------------------------------------------------------------------------
-  Name         : setQueryEditor
-  Description  : Show or hide the query editor and associated fields.
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
+  ( pcQueryEditorState AS CHARACTER ) :
+/* Show or hide the query editor and associated fields.
+ */
   /* If we try to set it to its current value, nothing will happen so: */
-  if pcQueryEditorState = gcQueryEditorState then return false.
+  IF pcQueryEditorState = gcQueryEditorState THEN RETURN FALSE.
 
-  case pcQueryEditorState:
-    when 'visible' then 
-    do:
-      if (ficWhere:x in frame frMain + frame frWhere:width-pixels) > c-win:width-pixels then
-        frame frWhere:x = (c-win:width-pixels - frame frWhere:width-pixels) / 2.
-      else
-        frame frWhere:x = ficWhere:x.
+  CASE pcQueryEditorState:
+    WHEN 'visible' THEN 
+    DO:
+      IF (ficWhere:X IN FRAME frMain + FRAME frWhere:WIDTH-PIXELS) > c-win:WIDTH-PIXELS THEN
+        FRAME frWhere:X = (c-win:WIDTH-PIXELS - FRAME frWhere:WIDTH-PIXELS) / 2.
+      ELSE
+        FRAME frWhere:X = ficWhere:X.
 
-      if (ficWhere:y in frame frMain + frame frWhere:height-pixels) > rctEdit:y in frame frMain then
-        frame frWhere:y = rctEdit:y in frame frMain - frame frWhere:height-pixels - 20.
-      else 
-        frame frWhere:y = ficWhere:y.
+      IF (ficWhere:Y IN FRAME frMain + FRAME frWhere:HEIGHT-PIXELS) > rctEdit:Y IN FRAME frMain THEN
+        FRAME frWhere:Y = rctEdit:Y IN FRAME frMain - FRAME frWhere:HEIGHT-PIXELS - 20.
+      ELSE 
+        FRAME frWhere:Y = ficWhere:Y.
 
-      view frame frWhere.
+      VIEW FRAME frWhere.
       
       gcQueryEditorState = pcQueryEditorState.
-      if ficWhere:screen-value in frame frMain <> '' then
-        ficWhere2:screen-value in frame frWhere = formatQueryString(ficWhere:screen-value in frame frMain, yes). 
-    end.
+      IF ficWhere:SCREEN-VALUE IN FRAME frMain <> '' THEN
+        ficWhere2:SCREEN-VALUE IN FRAME frWhere = formatQueryString(ficWhere:SCREEN-VALUE IN FRAME frMain, YES). 
+    END.
 
-    when 'hidden'  then 
-    do:
-      hide frame frWhere.
+    WHEN 'hidden'  THEN 
+    DO:
+      HIDE FRAME frWhere.
       
       gcQueryEditorState = pcQueryEditorState.
-      if ficWhere2:screen-value in frame frWhere <> '' then
-        ficWhere:screen-value in frame frMain = formatQueryString(ficWhere2:screen-value in frame frWhere, no). 
-    end.
+      IF ficWhere2:SCREEN-VALUE IN FRAME frWhere <> '' THEN
+        ficWhere:SCREEN-VALUE IN FRAME frMain = formatQueryString(ficWhere2:SCREEN-VALUE IN FRAME frWhere, NO). 
+    END.
 
     /* All other settings will be ignored */
-    otherwise return false.
-  end case.
+    OTHERWISE RETURN FALSE.
+  END CASE.
 
   /* Save setting for query editor state */
   setRegistry("DataDigger", "QueryEditorState", gcQueryEditorState).
 
-  return true.
+  RETURN TRUE.
 END FUNCTION. /* setQueryEditor */
 
 /* _UIB-CODE-BLOCK-END */
@@ -11533,7 +11499,7 @@ END FUNCTION. /* setQueryEditor */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setUpdatePanel C-Win 
 FUNCTION setUpdatePanel RETURNS LOGICAL
-  ( input pcMode as character ) :
+  ( INPUT pcMode AS CHARACTER ) :
 
 /*------------------------------------------------------------------------------
   Purpose: setUpdatePanel
@@ -11545,61 +11511,43 @@ FUNCTION setUpdatePanel RETURNS LOGICAL
     no-record  add
     update     save,cancel
 ------------------------------------------------------------------------------*/
-  define variable lHasRecords as logical no-undo. 
+  DEFINE VARIABLE lHasRecords AS LOGICAL NO-UNDO. 
 
   {&timerStart} 
 
-  if pcMode <> ? then gcRecordMode = pcMode.
+  IF pcMode <> ? THEN gcRecordMode = pcMode.
 
-  do with frame frMain:
+  DO WITH FRAME frMain:
 
-    lHasRecords = (    valid-handle(ghDataBrowse)
-                   and valid-handle(ghDataBrowse:query) 
-                   and ghDataBrowse:query:num-results <> ?
-                   and ghDataBrowse:query:num-results > 0).
+    lHasRecords = (    VALID-HANDLE(ghDataBrowse)
+                   AND VALID-HANDLE(ghDataBrowse:QUERY) 
+                   AND ghDataBrowse:QUERY:NUM-RESULTS <> ?
+                   AND ghDataBrowse:QUERY:NUM-RESULTS > 0).
     
-    assign 
-      btnAdd:sensitive      = lookup( gcRecordMode, 'display,no-record') > 0 and not ReadOnlyDigger
-      btnClone:sensitive    = lookup( gcRecordMode, 'display') > 0 and lHasRecords and not ReadOnlyDigger
-      btnEdit:sensitive     = lookup( gcRecordMode, 'display') > 0 and lHasRecords and ghDataBrowse:num-selected-rows > 0 
-      btnDelete:sensitive   = lookup( gcRecordMode, 'display') > 0 and lHasRecords and ghDataBrowse:num-selected-rows > 0 and not ReadOnlyDigger
-      btnView:sensitive     = lookup( gcRecordMode, 'display') > 0 and lHasRecords and ghDataBrowse:num-selected-rows > 0
-      
-      btnDump:sensitive     = lookup( gcRecordMode, 'display') > 0 and lHasRecords AND ghDataBrowse:num-iterations > 0
-      btnDump-2:sensitive   in frame frSettings = btnDump:sensitive
-      btnDump-txt:sensitive in frame frSettings = btnDump:sensitive
-      .
-
-    /* Load buttons noersion 16 */
-    if getRegistry('DataDigger','LoadWindow') = 'yes' then
-    assign
-      btnLoad:sensitive          = lookup( gcRecordMode, 'display') > 0 and not ReadOnlyDigger 
-      btnLoad-2:sensitive   in frame frSettings = btnLoad:sensitive and not ReadOnlyDigger 
-      btnLoad-txt:sensitive in frame frSettings = btnLoad:sensitive and not ReadOnlyDigger
-      .
-    else 
-    assign
-      btnLoad:sensitive                         = false             and not ReadOnlyDigger
-      btnLoad-2:sensitive   in frame frSettings = btnLoad:sensitive and not ReadOnlyDigger
-      btnLoad-txt:sensitive in frame frSettings = btnLoad:sensitive and not ReadOnlyDigger
+    ASSIGN 
+      btnAdd:SENSITIVE         = LOOKUP( gcRecordMode, 'display,no-record') > 0 AND NOT plReadOnlyDigger
+      btnClone:SENSITIVE       = LOOKUP( gcRecordMode, 'display') > 0 AND lHasRecords AND NOT plReadOnlyDigger
+      btnEdit:SENSITIVE        = LOOKUP( gcRecordMode, 'display') > 0 AND lHasRecords AND ghDataBrowse:NUM-SELECTED-ROWS > 0 
+      btnDelete:SENSITIVE      = LOOKUP( gcRecordMode, 'display') > 0 AND lHasRecords AND ghDataBrowse:NUM-SELECTED-ROWS > 0 AND NOT plReadOnlyDigger
+      btnView:SENSITIVE        = LOOKUP( gcRecordMode, 'display') > 0 AND lHasRecords AND ghDataBrowse:NUM-SELECTED-ROWS > 0
+      btnDump:SENSITIVE        = LOOKUP( gcRecordMode, 'display') > 0 AND lHasRecords AND ghDataBrowse:NUM-ITERATIONS > 0
+      btnLoad:SENSITIVE        = LOOKUP( gcRecordMode, 'display,no-record') > 0 AND NOT plReadOnlyDigger 
       .
                                  
     /* Hide these when no data browse */
     DO WITH FRAME frData:
-      assign
-        btnDataFilter:visible      = VALID-HANDLE(ghDataBrowse)
-        btnClearDataFilter:visible = VALID-HANDLE(ghDataBrowse)
-        fiNumresults:visible       = (gcRecordMode <> 'no-record')
-        fiNumSelected:visible      = (gcRecordMode <> 'no-record')
+      ASSIGN
+        btnClearDataFilter:VISIBLE = VALID-HANDLE(ghDataBrowse)
+        fiNumRecords:VISIBLE       = (gcRecordMode <> 'no-record')
         .
     END.
-  end.
+  END.
 
   /* Kill scrollbars */
-  run showScrollBars(frame {&frame-name}:handle, no, no).
+  RUN showScrollBars(FRAME {&FRAME-NAME}:HANDLE, NO, NO).
 
   {&timerStop}
-end function. /* setUpdatePanel */
+END FUNCTION. /* setUpdatePanel */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -11607,13 +11555,9 @@ end function. /* setUpdatePanel */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION setWindowFreeze C-Win 
 FUNCTION setWindowFreeze RETURNS LOGICAL
   ( plWindowsLocked AS LOGICAL ) :
-
-/*------------------------------------------------------------------------------
-  Purpose: setWindowFreeze
-    Notes: enable / disable debug mode
-------------------------------------------------------------------------------*/
-
-  IF glDebugMode THEN RETURN NO. 
+  /* Freeze updates to the screen
+   */
+  IF glDebugMode THEN RETURN NO.
   RUN LockWindow (INPUT C-Win:HANDLE, INPUT plWindowsLocked).
 
   RETURN TRUE.
@@ -11643,3 +11587,4 @@ END FUNCTION. /* trimList */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+

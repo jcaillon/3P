@@ -1,9 +1,0 @@
--s 1000
--d dmy
--E
--rereadnolock
--h 255
--T c:\temp
--Bt 4000
--tmpbsize 8
--p DataDigger.p

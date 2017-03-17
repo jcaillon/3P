@@ -37,6 +37,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This is not the conventional tree searching but this makes more sense to me
     /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
+
         #region constants
 
         /// <summary>
@@ -67,6 +68,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private bool _showTreeBranches = true;
         protected int _nodeExpandClickMargin = 20;
+
+        private volatile bool _isHandlingClick;
 
         #endregion
 
@@ -178,7 +181,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         private List<ListItem> GetExpandedItemsList(List<FilteredTypeTreeListItem> list, ForceExpansion forceExpansion) {
             if (list == null)
-                return null;
+                return new List<ListItem>();
 
             var outList = new List<ListItem>();
 
@@ -217,7 +220,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         private List<ListItem> GetFullItemsList(List<FilteredTypeTreeListItem> list) {
             if (list == null)
-                return null;
+                return new List<ListItem>();
             var outList = new List<ListItem>();
             foreach (var item in list) {
                 outList.Add(item);
@@ -474,15 +477,18 @@ namespace YamuiFramework.Controls.YamuiList {
             // handles node expansion
             if (!_isSearching) {
                 var curItem = SelectedItem as FilteredTypeTreeListItem;
-                if (curItem != null && curItem.CanExpand) {
+                if (curItem != null && curItem.CanExpand && !_isHandlingClick) {
+                    _isHandlingClick = true;
                     var widthOfArrow = TreeWidth + NodeExpandClickMargin;
                     for (int i = 0; i <= curItem.Level; i++) {
                         widthOfArrow += TreeWidth;
                     }
                     if (eventArgs.X <= widthOfArrow) {
                         ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+                        _isHandlingClick = false;
                         return;
                     }
+                    _isHandlingClick = false;
                 }
             }
             base.OnItemClick(sender, eventArgs);

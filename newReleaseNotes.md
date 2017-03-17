@@ -4,6 +4,8 @@ Config.IsDevelopper in DocumentLines!
 
 **Improvements :**
 
+- 3P now correctly reads the Npp configuration from the cloud folder (if any)
+- Updated [DataDigger](https://datadigger.wordpress.com/2017/02/20/20170220/) to version 22, thanks [Patrick](https://github.com/patrickTingen/DataDigger)!
 - Improvements to the parser, this should be its final form; it now parses include files exactly like the progress compiler, replacing the include call by the content of the file
 - Replaced the old option "Npp openable extension" by "NppFilesPattern" to be in line with the other options of that type (it allows you to describe the files that should be opened with Npp from the file explorer)
 - Improvements to the tree view

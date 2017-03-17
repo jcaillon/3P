@@ -143,12 +143,6 @@ namespace _3PA {
                 // once this method is done, we are able to publish notifications
                 UserCommunication.Init();
 
-                // Clear the %temp% directory if we didn't do it properly last time
-                Utils.DeleteDirectory(Config.FolderTemp, true);
-
-                // ask to disable the default autocompletion
-                Npp.ConfXml.AskToDisableAutocompletion();
-
                 // if the UDL is not installed
                 if (!Style.InstallUdl(true)) {
                     Style.InstallUdl();
@@ -165,7 +159,7 @@ namespace _3PA {
                 }
 
                 // check Npp version, 3P requires version 6.8 or higher
-                if (!String.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherVersionThan("7.2")) {
+                if (!string.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherVersionThan("7.2")) {
                     if (!Config.Instance.NppOutdatedVersion) {
                         UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.SoftwareVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
                         Config.Instance.NppOutdatedVersion = true;
@@ -218,6 +212,9 @@ namespace _3PA {
             ParserHandler.OnParseEnded += CodeExplorer.Instance.OnParseEnded;
 
             AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
+            
+            // Clear the %temp% directory if we didn't do it properly last time
+            Utils.DeleteDirectory(Config.FolderTemp, true);
 
             Keywords.Import();
             //Snippets.Init();
@@ -228,6 +225,9 @@ namespace _3PA {
 
             // Make sure to give the focus to scintilla on startup
             WinApi.SetForegroundWindow(Npp.HandleNpp);
+
+            // ask to disable the default autocompletion
+            Npp.ConfXml.AskToDisableAutocompletion();
         }
 
         #endregion

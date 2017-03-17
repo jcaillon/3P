@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.MainFeatures;
-using _3PA.NppCore;
+using _3PA.WindowsCore;
 
-namespace _3PA.WindowsCore {
+namespace _3PA.NppCore {
     /// <summary>
     /// This class calls the appropriate methods depending on the notifications received from both notepad++ and scintilla
     /// </summary>

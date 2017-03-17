@@ -19,6 +19,7 @@
 #endregion
 
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -45,6 +46,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         protected override void InitForm() {
             Form = new CodeExplorerForm(_fakeForm);
+            if (NotificationsPublisher.PluginIsReady)
+                ParserHandler.ParseCurrentDocument();
         }
 
         #endregion

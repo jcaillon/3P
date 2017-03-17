@@ -164,7 +164,7 @@ DEFINE FRAME Dialog-Frame
      btDelQuery-5 AT Y 305 X 420 WIDGET-ID 64
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         SIZE-PIXELS 560 BY 412
+         SIZE-PIXELS 560 BY 420
          TITLE "Select query"
          DEFAULT-BUTTON BtnOK CANCEL-BUTTON BtnCancel WIDGET-ID 100.
 
@@ -863,34 +863,27 @@ end procedure. /* showQueries */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE startDiggerLib Dialog-Frame 
 PROCEDURE startDiggerLib :
-/*------------------------------------------------------------------------
-  Name         : startDiggerLib
-  Description  : Start DiggerLib if it has not already been started
-
-  ----------------------------------------------------------------------
-  21-10-2009 pti Created
-  ----------------------------------------------------------------------*/
-  
-  define variable hDiggerLib   as handle      no-undo.
-  define variable cProgDir     as character   no-undo.
+/*
+ * Start DiggerLib if it has not already been started
+ */
+  DEFINE VARIABLE hDiggerLib AS HANDLE    NO-UNDO.
+  DEFINE VARIABLE cProgDir   AS CHARACTER NO-UNDO.
 
   /* Call out to see if the lib has been started */
   PUBLISH 'DataDiggerLib' (OUTPUT hDiggerLib).
 
-  if not valid-handle(hDiggerLib) then
-  do:
-    cProgDir = SUBSTRING(THIS-PROCEDURE:FILE-NAME,1,R-INDEX(THIS-PROCEDURE:FILE-NAME,'\')).
-    /*
-    file-info:file-name = this-procedure:file-name.
-    cProgDir = substring(file-info:full-pathname,1,r-index(file-info:full-pathname,'\')).
-    if '{&uib_is_running}' <> '' then cProgDir = 'd:\data\dropbox\datadigger\'.
-    */
+  IF NOT VALID-HANDLE(hDiggerLib) THEN
+  DO:
+    /* gcProgramDir = SUBSTRING(THIS-PROCEDURE:FILE-NAME,1,R-INDEX(THIS-PROCEDURE:FILE-NAME,'\')). */
+    cProgDir = THIS-PROCEDURE:FILE-NAME.
+    cProgDir = REPLACE(cProgDir,"\","/").
+    cProgDir = SUBSTRING(cProgDir,1,R-INDEX(cProgDir,'/')).
+    
+    RUN VALUE(cProgDir + 'DataDiggerLib.p') PERSISTENT SET hDiggerLib.
+    SESSION:ADD-SUPER-PROCEDURE(hDiggerLib,SEARCH-TARGET).
+  END.
 
-    run value(cProgDir + 'DataDiggerLib.p') persistent set hDiggerLib.
-    session:add-super-procedure(hDiggerLib,search-target).
-  end.
-
-end procedure. /* startDiggerLib */
+END PROCEDURE. /* startDiggerLib */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

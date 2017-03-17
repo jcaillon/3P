@@ -45,8 +45,8 @@
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS btnDataDigger BtnOK btnTabAbout edChangelog ~
-btnTabChanges 
+&Scoped-Define ENABLED-OBJECTS btnTabAbout btnTabChanges BtnOK edChangelog ~
+btnDataDigger 
 &Scoped-Define DISPLAYED-OBJECTS edChangelog fiDataDigger-1 fiDataDigger-2 
 
 /* Custom List Definitions                                              */
@@ -73,11 +73,11 @@ DEFINE BUTTON BtnOK AUTO-GO DEFAULT
 
 DEFINE BUTTON btnTabAbout  NO-FOCUS FLAT-BUTTON
      LABEL "About" 
-     SIZE 16 BY 1.14.
+     SIZE 19 BY 1.24.
 
 DEFINE BUTTON btnTabChanges  NO-FOCUS FLAT-BUTTON
      LABEL "Changes" 
-     SIZE 16 BY 1.14.
+     SIZE 19 BY 1.24.
 
 DEFINE VARIABLE edChangelog AS CHARACTER 
      VIEW-AS EDITOR NO-WORD-WRAP SCROLLBAR-VERTICAL LARGE
@@ -98,11 +98,11 @@ DEFINE VARIABLE fiDataDigger-2 AS CHARACTER FORMAT "X(256)":U INITIAL "Build ~{&
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     btnDataDigger AT ROW 1.24 COL 2 WIDGET-ID 82
+     btnTabAbout AT ROW 3.19 COL 1 WIDGET-ID 78
+     btnTabChanges AT ROW 3.19 COL 20 WIDGET-ID 80
      BtnOK AT Y 5 X 545 WIDGET-ID 48
-     btnTabAbout AT ROW 3.24 COL 1 WIDGET-ID 78
      edChangelog AT Y 70 X 0 NO-LABEL WIDGET-ID 72
-     btnTabChanges AT ROW 3.24 COL 17 WIDGET-ID 80
+     btnDataDigger AT ROW 1.24 COL 2 WIDGET-ID 82
      fiDataDigger-1 AT Y 5 X 35 COLON-ALIGNED NO-LABEL WIDGET-ID 74
      fiDataDigger-2 AT Y 20 X 35 COLON-ALIGNED NO-LABEL WIDGET-ID 76
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
@@ -249,7 +249,7 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   DISPLAY edChangelog fiDataDigger-1 fiDataDigger-2 
       WITH FRAME Dialog-Frame.
-  ENABLE btnDataDigger BtnOK btnTabAbout edChangelog btnTabChanges 
+  ENABLE btnTabAbout btnTabChanges BtnOK edChangelog btnDataDigger 
       WITH FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}
 END PROCEDURE.
@@ -291,29 +291,29 @@ PROCEDURE initializeObject :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-  define buffer bQuery for ttQuery.
+  DEFINE BUFFER bQuery FOR ttQuery.
 
-  do with frame {&frame-name}:
+  DO WITH FRAME {&FRAME-NAME}:
 
-    frame {&frame-name}:font = getFont('Default').
-    fiDataDigger-1:font = getFont('Fixed').
-    fiDataDigger-2:font = getFont('Fixed').
-    edChangelog:font = getFont('Fixed').
+    FRAME {&FRAME-NAME}:FONT = getFont('Default').
+    fiDataDigger-1:FONT = getFont('Fixed').
+    fiDataDigger-2:FONT = getFont('Fixed').
+    edChangelog:FONT = getFont('Fixed').
 
-    btnDataDigger:load-image(getImagePath('DataDigger24x24.gif')).
+    btnDataDigger:LOAD-IMAGE(getImagePath('DataDigger24x24.gif')).
     RUN setPage(1).
 
-    fiDataDigger-1:screen-value = "DataDigger {&version} - {&edition}".
-    fiDataDigger-2:screen-value = 'Build {&build}'.
+    fiDataDigger-1:SCREEN-VALUE = "DataDigger {&version} - {&edition}".
+    fiDataDigger-2:SCREEN-VALUE = 'Build {&build}'.
 
-    run setTransparency(input FRAME Dialog-Frame:handle, 1).
+    RUN setTransparency(INPUT FRAME Dialog-Frame:HANDLE, 1).
 
     /* For some reasons, these #*$&# scrollbars keep coming back */
-    run showScrollBars(frame {&frame-name}:handle, no, no). /* KILL KILL KILL */
+    RUN showScrollBars(FRAME {&FRAME-NAME}:HANDLE, NO, NO). /* KILL KILL KILL */
 
-  end.
+  END.
 
-end procedure. /* initializeObject. */
+END PROCEDURE. /* initializeObject. */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -355,3 +355,4 @@ END PROCEDURE. /* setPage */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+

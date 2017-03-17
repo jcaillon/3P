@@ -18,15 +18,18 @@
 
 /* ***************************  Definitions  ************************** */
 
-&GLOBAL-DEFINE version 19
-&GLOBAL-DEFINE edition Straight A's
+&GLOBAL-DEFINE version {version.i}
+&GLOBAL-DEFINE edition Titanium
 &GLOBAL-DEFINE build {build.i}
 &GLOBAL-DEFINE QUERYSEP CHR(1, SESSION:CPINTERNAL, "UTF-8")
 &GLOBAL-DEFINE timerStart PUBLISH "timerCommand" ("start", ENTRY(1,PROGRAM-NAME(1)," ")).
 &GLOBAL-DEFINE timerStop  PUBLISH "timerCommand" ("stop" , ENTRY(1,PROGRAM-NAME(1)," ")).
 
-/* Special var for the read-only version of DataDigger */
-DEFINE NEW GLOBAL SHARED VARIABLE ReadOnlyDigger AS LOGICAL NO-UNDO.
+/* Constant values for update channels */
+&GLOBAL-DEFINE CHECK-MANUAL 0
+&GLOBAL-DEFINE CHECK-STABLE 1
+&GLOBAL-DEFINE CHECK-BETA   2
+
 DEFINE VARIABLE gcThisProcedure AS CHARACTER   NO-UNDO.
 
 /* TT for field data to link DataDiggers to each other */
@@ -46,10 +49,13 @@ DEFINE TEMP-TABLE ttTable NO-UNDO RCODE-INFORMATION
   FIELD cTableDesc    AS CHARACTER LABEL "Desc"      
   FIELD cFields       AS CHARACTER LABEL "Fields"
   FIELD lHidden       AS LOGICAL   LABEL ""
+  FIELD lFrozen       AS LOGICAL   LABEL ""
   FIELD iNumQueries   AS INTEGER   LABEL "#"         FORMAT "zzzzz"
   FIELD tLastUsed     AS DATETIME  LABEL "Last Used" FORMAT "99/99/9999 HH:MM:SS"
   FIELD lFavourite    AS LOGICAL   LABEL ""
   FIELD lCached       AS LOGICAL   LABEL "" /* for preCaching */
+  FIELD iFileNumber   AS INTEGER   LABEL "_File-Number"
+  FIELD cCategory     AS CHARACTER LABEL "Category"
   INDEX idxPrim IS PRIMARY cDatabase cTableName
   INDEX idxSec cTableName
   .
@@ -76,7 +82,7 @@ DEFINE TEMP-TABLE ttField NO-UNDO RCODE-INFORMATION
   FIELD lShow         AS LOGICAL                     LABEL ""                            /* toggle box                */
   FIELD cDataType     AS CHARACTER                   LABEL "Type"      FORMAT "X(16)"
   FIELD cInitial      AS CHARACTER                   LABEL "Initial"                     /* initial value from dict   */
-  FIELD cFormat       AS CHARACTER                   LABEL "Format"    FORMAT "X(32)"    /* user defined format       */
+  FIELD cFormat       AS CHARACTER                   LABEL "Format"    FORMAT "X(80)"    /* user defined format       */
   FIELD cFormatOrg    AS CHARACTER                   LABEL "Format"                      /* original format           */
   FIELD cLabel        AS CHARACTER                   LABEL "Label"     FORMAT "X(24)"
   FIELD iOrderOrg     AS DECIMAL                                                         /* original order            */
@@ -179,10 +185,26 @@ DEFINE TEMP-TABLE ttFilter NO-UNDO RCODE-INFORMATION
 /*  INDEX idxColumnHandle hColumnHandle */
   .
 
+/* TT for filter on database tables */
+DEFINE TEMP-TABLE ttTableFilter NO-UNDO RCODE-INFORMATION
+  FIELD cTableNameShow  AS CHARACTER
+  FIELD cTableNameHide  AS CHARACTER
+  FIELD cTableFieldShow AS CHARACTER
+  FIELD cTableFieldHide AS CHARACTER
+  FIELD lShowNormal     AS LOGICAL INITIAL TRUE
+  FIELD lShowSchema     AS LOGICAL
+  FIELD lShowVst        AS LOGICAL
+  FIELD lShowSql        AS LOGICAL
+  FIELD lShowOther      AS LOGICAL
+  FIELD lShowHidden     AS LOGICAL
+  FIELD lShowFrozen     AS LOGICAL
+  .
+
 /* TT For currently connected databases */
 DEFINE TEMP-TABLE ttDatabase NO-UNDO RCODE-INFORMATION
   FIELD cLogicalName  AS CHARACTER column-label "Logical Name" FORMAT "x(20)"
   FIELD cSection      AS CHARACTER column-label "Section"      FORMAT "x(20)"
+  FIELD cCacheStamp   AS CHARACTER column-label "CacheStamp"   FORMAT "x(24)"
   INDEX idxPrim IS PRIMARY unique cLogicalName
   .
 
@@ -346,9 +368,6 @@ function getStackSize returns intege
 function getTableList returns character
   ( input  pcDatabaseFilter   as character
   , input  pcTableFilter      as character
-  , input  plShowHiddenTables AS LOGICAL  
-  , input  pcSortField        as character
-  , input  plAscending        AS LOGICAL  
   ) in super.
 
 function getUsername returns character in super.
@@ -367,9 +386,15 @@ function isBrowseChanged returns logical
 function isMouseOver returns logical
   ( input phWidget AS HANDLE ) in super.
 
+FUNCTION isTableFilterUsed RETURNS LOGICAL
+  ( INPUT TABLE ttTableFilter )  in super.
+  
 function isWidgetChanged returns logical
   ( input phWidget AS HANDLE ) in super.
-
+  
+FUNCTION readFile RETURNS LONGCHAR
+  ( INPUT pcFilename AS CHARACTER) IN SUPER.
+  
 function removeConnection returns logical
   ( pcDatabase AS CHARACTER ) in super.
 
