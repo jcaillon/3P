@@ -31,13 +31,14 @@ using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal partial class FileExplorerForm : NppDockableDialogForm {
+
         #region Private
 
         private string[] _explorerDirStr;
@@ -60,12 +61,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                         return;
                     if (_refreshing) {
                         refreshButton.BackGrndImage = ImageResources.Refreshing;
-                        refreshButton.Invalidate();
                         btDirectory.Enabled = false;
                         toolTipHtml.SetToolTip(refreshButton, "The list is being refreshed, please wait");
                     } else {
                         refreshButton.BackGrndImage = ImageResources.Refresh;
-                        refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic //refreshing is done so you have to use this button when you add/delete a file in said directory");
                         btDirectory.Enabled = true;
                     }
@@ -93,7 +92,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region constructor
 
-        public FileExplorerForm(NppDockableDialogEmptyForm formToCover) : base(formToCover) {
+        public FileExplorerForm(NppEmptyForm formToCover) : base(formToCover) {
             InitializeComponent();
 
             #region Current env
@@ -193,19 +192,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
 
             #endregion
-        }
-
-        #endregion
-
-        #region core
-
-        /// <summary>
-        /// Check/uncheck the menu depending on this form visibility
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnVisibleChanged(EventArgs e) {
-            FileExplorer.Instance.UpdateMenuItemChecked();
-            base.OnVisibleChanged(e);
         }
 
         #endregion

@@ -21,9 +21,10 @@ using System;
 using System.Runtime.InteropServices;
 
 // ReSharper disable InconsistentNaming
-
 namespace _3PA.NppCore {
+
     /*
+     * THIS FILE TARGETS NOTEPAD++ 7.3.3
      * Extracted from scintilla\include\Scintilla.iface
      */
 

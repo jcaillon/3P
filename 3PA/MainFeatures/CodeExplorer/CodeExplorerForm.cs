@@ -26,13 +26,14 @@ using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
+using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal partial class CodeExplorerForm : NppDockableDialogForm {
+
         #region private
 
         private volatile bool _refreshing;
@@ -60,11 +61,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
                         return;
                     if (_refreshing) {
                         refreshButton.BackGrndImage = ImageResources.Refreshing;
-                        refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "The tree is being refreshed, please wait");
                     } else {
                         refreshButton.BackGrndImage = ImageResources.Refresh;
-                        refreshButton.Invalidate();
                         toolTipHtml.SetToolTip(refreshButton, "Click to <b>Refresh</b> the tree");
                     }
                 });
@@ -83,7 +82,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region constructor
 
-        public CodeExplorerForm(NppDockableDialogEmptyForm formToCover) : base(formToCover) {
+        public CodeExplorerForm(NppEmptyForm formToCover) : base(formToCover) {
+
             InitializeComponent();
 
             // add the refresh button to the filter box
@@ -109,37 +109,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 }
             };
             filterbox.Initialize(yamuiList);
-
-            yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
-            yamuiList.EmptyListString = @"Nothing to display";
-
-            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
-            yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
-
-            Refreshing = false;
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
 
+            Refreshing = false;
+
+            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
+            yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
+            yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
+            yamuiList.EmptyListString = @"Nothing to display";
+            
             // list events
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
-
-            //var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
-            //return curScope != null && !IsNotBlock && DisplayText.Equals(curScope.Name);
-        }
-
-        #endregion
-
-        #region core
-
-        /// <summary>
-        /// Check/uncheck the menu depending on this form visibility
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnVisibleChanged(EventArgs e) {
-            CodeExplorer.Instance.UpdateMenuItemChecked();
-            base.OnVisibleChanged(e);
         }
 
         #endregion
@@ -270,13 +253,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 var currentScope = ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine);
                 if (currentScope != null) {
                     pbCurrentScope.BackGrndImage = Utils.GetImageFromStr(currentScope.ScopeType.ToString());
-                    pbCurrentScope.Invalidate();
                     lbCurrentScope.Text = currentScope.Name;
                     return;
                 }
             }
             pbCurrentScope.BackGrndImage = ImageResources.NotApplicable;
-            pbCurrentScope.Invalidate();
             lbCurrentScope.Text = @"Not applicable";
         }
 
@@ -326,7 +307,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private void buttonRefresh_Click(YamuiButtonImage sender, EventArgs e) {
             if (Refreshing)
                 return;
-            ParserHandler.ParserVisitor.ClearSavedParserVisitors();
+            ParserHandler.ClearStaticData();
             ParserHandler.ParseCurrentDocument(true);
             Npp.CurrentSci.Lines.Reset();
             Sci.GrabFocus();

@@ -28,7 +28,6 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
     internal partial class Parser {
-        #region Do the job 
 
         #region Analyze
 
@@ -174,9 +173,9 @@ namespace _3PA.MainFeatures.Parser {
                         default:
                             // try to match a known word
                             if (_matchKnownWords) {
-                                if (_knownStaticItems.ContainsKey(lowerTok)) {
+                                if (KnownStaticItems.ContainsKey(lowerTok)) {
                                     // we known the word
-                                    if (_knownStaticItems[lowerTok] == CompletionType.Table) {
+                                    if (KnownStaticItems[lowerTok] == CompletionType.Table) {
                                         // it's a table from the database
                                         AddParsedItem(new ParsedFoundTableUse(token.Value, token, false), token.OwnerNumber);
                                     }
@@ -254,237 +253,6 @@ namespace _3PA.MainFeatures.Parser {
                     CreateParsedLabel(token);
                 NewStatement(token);
             }
-        }
-
-        #endregion
-
-        #region utils
-
-        /// <summary>
-        /// If it is a pre-processed variable, replaces a token at "current position + posAhead" by its value
-        /// </summary>
-        private void ReplacePreProcVariablesAhead(int posAhead) {
-            // we check if the token + posAhead will be a preprocessed variable { & x} that needs to be replaced
-            var toReplaceToken = PeekAt(posAhead);
-
-            HashSet<string> replacedVar = null; // keep track of each var replaced here
-
-            while (toReplaceToken is TokenPreProcVariable) {
-                // replace the {&var} present within this {&var}
-                var count = 1;
-                while (true) {
-                    var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol || curToken is TokenEof) break;
-                    ReplacePreProcVariablesAhead(posAhead + count);
-                    count++;
-                }
-
-                var nameToken = PeekAt(posAhead + 1);
-                var varName = (toReplaceToken.Value == "{" ? "" : "&") + nameToken.Value;
-                List<Token> valueTokens = null;
-
-                // make sure to not replace the same var name in the same replacement loop, if we do that
-                // this means we will go into an infinite loop
-                if (replacedVar == null)
-                    replacedVar = new HashSet<string>();
-                if (replacedVar.Contains(varName))
-                    break;
-                replacedVar.Add(varName);
-
-                // count nb of tokens composing this |{&|name|  |}| (will 3 or more depending if there are spaces after the name)
-                count = 1;
-                while (true) {
-                    var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol || curToken is TokenEof) break;
-                    count++;
-                }
-                count++;
-
-                // remove the tokens composing |{&|name|  |}|
-                RemoveTokens(posAhead, count);
-
-                // do we have a definition for the var?
-                if (_parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables.ContainsKey(varName))
-                    valueTokens = _parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables[varName].ToList();
-                else if (_globalPreProcVariables.ContainsKey(varName))
-                    valueTokens = _globalPreProcVariables[varName].ToList();
-
-                if (valueTokens == null) {
-                    // if we don't have the definition for the variable, it must be replaced by an empty string
-                    valueTokens = new List<Token> {
-                        new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
-                    };
-                } else {
-                    // we have to "merge" the TokenWord at the beginning and end of what we are inserting, this allows to take care of
-                    // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
-                    var prevToken = PeekAt(posAhead - 1);
-                    if (valueTokens.FirstOrDefault() is TokenWord && prevToken is TokenWord) {
-                        // append previous word with the first word of the value tokens
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + valueTokens.First().Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, prevToken.EndPosition));
-                        valueTokens.RemoveAt(0);
-                    }
-                    var nextToken = PeekAt(posAhead);
-                    if (valueTokens.LastOrDefault() is TokenWord && nextToken is TokenWord) {
-                        ReplaceToken(posAhead, new TokenWord(valueTokens.Last().Value + nextToken.Value, nextToken.Line, nextToken.Column, nextToken.StartPosition, nextToken.EndPosition));
-                        valueTokens.RemoveAt(valueTokens.Count - 1);
-                    }
-                }
-
-                // if we have tokens insert, do it
-                if (valueTokens.Count > 0)
-                    InsertTokens(posAhead, valueTokens);
-                else {
-                    // otherwise, make sure we don't have two TokenWord following each other
-                    var prevToken = PeekAt(posAhead - 1);
-                    var nextToken = PeekAt(posAhead);
-                    if (prevToken is TokenWord && PeekAt(posAhead) is TokenWord) {
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + nextToken.Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, nextToken.EndPosition));
-                        RemoveTokens(posAhead, 1);
-                    }
-                }
-                toReplaceToken = PeekAt(posAhead);
-            }
-        }
-
-        /// <summary>
-        /// called when a Eos token is found, store information on the statement's line
-        /// </summary>
-        private void NewStatement(Token token) {
-            // store the line information for the base file
-            if (_context.StatementFirstToken != null && _context.StatementFirstToken.OwnerNumber == 0) {
-                var statementStartLine = _context.StatementFirstToken.Line;
-
-                // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
-                var depth = GetCurrentDepth();
-                if (!_lineInfo.ContainsKey(statementStartLine))
-                    _lineInfo.Add(statementStartLine, new LineInfo(depth, _context.Scope));
-
-                // add missing values to the line dictionary (lines from start statement + 1 to end of statement have a depth + 1)
-                if (statementStartLine > -1 && token.Line > statementStartLine) {
-                    for (int i = statementStartLine + 1; i <= token.Line; i++)
-                        if (!_lineInfo.ContainsKey(i))
-                            _lineInfo.Add(i, new LineInfo(depth + 1, _context.Scope));
-                }
-            }
-
-            // Pop all the then/else blocks that are on top
-            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount)
-                while (_context.BlockStack.Peek().IndentType == IndentType.ThenElse) {
-                    _context.BlockStack.Pop();
-                    if (_context.BlockStack.Count == 0)
-                        break;
-                }
-
-            // This statement made the BlockState count go to 0
-            if (_context.BlockStack.Count == 0) {
-                // did we match an end of a proc, func or on event block?
-                if (!(_context.Scope is ParsedFile)) {
-                    var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem && !(item is ParsedPreProcBlock));
-                    if (parsedScope != null) {
-                        parsedScope.EndBlockLine = token.Line;
-                        parsedScope.EndBlockPosition = token.EndPosition;
-                    }
-                    _context.Scope = _rootScope;
-                }
-            }
-
-            _context.StatementUnknownFirstWord = false;
-            _context.StatementCount++;
-            _context.StatementWordCount = 0;
-            _context.StatementFirstToken = null;
-            _context.IsTokenIsEos = true;
-        }
-
-        /// <summary>
-        /// Returns the current block depth
-        /// </summary>
-        /// <returns></returns>
-        private int GetCurrentDepth() {
-            var depth = 0;
-            var lastLine = -1;
-            bool lastStackThenDo = false;
-            foreach (var blockInfo in _context.BlockStack) {
-                if (blockInfo.LineTriggerWord != lastLine)
-                    depth++;
-                else if (depth == 1)
-                    lastStackThenDo = true;
-                lastLine = blockInfo.LineTriggerWord;
-            }
-            if (depth > 0 && _context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.BlockStack.Peek().LineStart && !lastStackThenDo)
-                depth--;
-            return depth;
-        }
-
-        /// <summary>
-        /// Add a block info on top of the block Stack
-        /// </summary>
-        /// <param name="indentType"></param>
-        /// <param name="currentLine"></param>
-        private void PushBlockInfoToStack(IndentType indentType, int currentLine) {
-            _context.BlockStack.Push(new BlockInfo(_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : 0, currentLine, indentType, _context.StatementCount));
-        }
-
-        /// <summary>
-        /// Call this method instead of adding the items directly in the list,
-        /// updates the scope and file name
-        /// </summary>
-        private void AddParsedItem(ParsedItem item, ushort ownerNumber) {
-            // add external flag + include line if needed
-            if (ownerNumber > 0) {
-                item.FilePath = _parsedIncludes[ownerNumber].FullFilePath;
-                item.IncludeLine = _parsedIncludes[ownerNumber].Line;
-                item.Flags |= ParseFlag.FromInclude;
-            } else {
-                item.FilePath = _filePathBeingParsed;
-            }
-
-            item.Scope = _context.Scope;
-
-            // add the item name's to the known temp tables?
-            if (!_knownWords.ContainsKey(item.Name) && item is ParsedTable)
-                _knownWords.Add(item.Name, CompletionType.Table);
-
-            _parsedItemList.Add(item);
-        }
-
-        /// <summary>
-        /// Append a token value to the StringBuilder, avoid adding too much spaces and new lines
-        /// </summary>
-        private void AddTokenToStringBuilder(StringBuilder strBuilder, Token token) {
-            if ((token is TokenEol || token is TokenWhiteSpace)) {
-                if (!_lastTokenWasSpace) {
-                    _lastTokenWasSpace = true;
-                    strBuilder.Append(" ");
-                }
-            } else {
-                _lastTokenWasSpace = false;
-                strBuilder.Append(token.Value);
-            }
-        }
-
-        /// <summary>
-        /// Returns token value or token value minus starting/ending quote of the token is a string
-        /// </summary>
-        private string GetTokenStrippedValue(Token token) {
-            if (token is TokenString) {
-                var endsWithQuote = token.Value.EndsWith("\"") || token.Value.EndsWith("'");
-                return token.Value.Substring(1, token.Value.Length - (endsWithQuote ? 2 : 1));
-            }
-            return token.Value;
-        }
-
-        /// <summary>
-        /// Trim whitespaces tokens at the beginning and end of the list
-        /// </summary>
-        private List<Token> TrimTokensList(List<Token> tokensList) {
-            while (tokensList.Count > 0 && tokensList[0] is TokenWhiteSpace) {
-                tokensList.RemoveAt(0);
-            }
-            while (tokensList.Count > 0 && tokensList[tokensList.Count - 1] is TokenWhiteSpace) {
-                tokensList.RemoveAt(tokensList.Count - 1);
-            }
-
-            return tokensList;
         }
 
         #endregion
@@ -1841,12 +1609,12 @@ namespace _3PA.MainFeatures.Parser {
                     Lexer lexer;
 
                     // did we already parsed this file in a previous parse session?
-                    if (_savedLexerInclude.ContainsKey(fullFilePath)) {
-                        lexer = _savedLexerInclude[fullFilePath];
+                    if (SavedLexerInclude.ContainsKey(fullFilePath)) {
+                        lexer = SavedLexerInclude[fullFilePath];
                     } else {
                         // Parse it
                         lexer = new Lexer(Utils.ReadAllText(fullFilePath));
-                        _savedLexerInclude.Add(fullFilePath, lexer);
+                        SavedLexerInclude.Add(fullFilePath, lexer);
                     }
 
                     // add this include to the references and modify each token
@@ -1874,6 +1642,5 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #endregion
     }
 }

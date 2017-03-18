@@ -33,14 +33,18 @@ namespace _3PA.MainFeatures.Appli {
 
         private static AppliForm _form;
         private static bool _hasBeenShownOnce;
+        private static volatile bool _initiating;
+        
 
         /// <summary>
         /// Call this method to toggle on/off the application
         /// </summary>
         public static void ToggleView() {
             try {
-                if (_form == null) {
+                if (_form == null && !_initiating) {
+                    _initiating = true;
                     Init();
+                    _initiating = false;
                 }
                 if (_form != null) {
                     // create the form

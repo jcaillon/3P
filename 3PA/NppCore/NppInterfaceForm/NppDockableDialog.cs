@@ -17,16 +17,17 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Drawing;
-using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.NppCore;
+using _3PA.MainFeatures;
 using _3PA._Resource;
 
-namespace _3PA.MainFeatures.NppInterfaceForm {
+namespace _3PA.NppCore.NppInterfaceForm {
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {
-        #region private
+
+        #region private / protected
 
         protected string _dialogDescription = "?";
 
@@ -36,29 +37,47 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         protected T Form { get; set; }
 
-        protected NppDockableDialogEmptyForm _fakeForm;
+        protected NppDockableDialogFakeForm _fakeForm;
+
+        private bool _isVisible;
 
         #endregion
 
-        #region Fields
-
+        #region Properties
+        
         /// <summary>
-        /// Does the form exists and is visible?
+        /// Is this form visible?
         /// </summary>
         public bool IsVisible {
-            get { return !(Form == null || !(bool) Form.SafeSyncInvoke(form => form.Visible)); }
+            get { return _isVisible; }
+            private set {
+                if (_isVisible != value) {
+                    _isVisible = value;
+                    Npp.SetMenuItemCheck(UnmanagedExports.NppFuncItems.Items[DockableCommandIndex]._cmdID, _isVisible);
+                    OnVisibilityChange(_isVisible);
+                }
+            }
         }
 
         public int DockableCommandIndex { get; set; }
 
         #endregion
 
-        #region Methods
+        #region Virtual methods
 
         /// <summary>
-        /// Initialize the form, should set RealForm = new T()
+        /// Called just after the form is first shown, you must set Form in this method
         /// </summary>
-        protected virtual void InitForm() {}
+        protected virtual void InitForm() { }
+
+        /// <summary>
+        /// Called each time the visibility changes
+        /// </summary>
+        protected virtual void OnVisibilityChange(bool visible) { }
+
+        #endregion
+
+        #region Methods
 
         public void Toggle(bool doShow) {
             if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
@@ -74,7 +93,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 // initialize if not done
                 if (_fakeForm == null) {
                     // register fake form to Npp
-                    _fakeForm = new NppDockableDialogEmptyForm();
+                    _fakeForm = new NppDockableDialogFakeForm();
                     NppTbData nppTbData = new NppTbData {
                         hClient = _fakeForm.Handle,
                         pszName = AssemblyInfo.AssemblyProduct + " - " + _dialogDescription,
@@ -84,16 +103,19 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                         pszModuleName = AssemblyInfo.AssemblyProduct
                     };
                     Npp.RegisterDockableDialog(nppTbData);
+                    _fakeForm.OnDockableDialogClose += FormOnOnDockableDialogClose;
                     InitForm();
+                    IsVisible = true;
                 } else {
-                    if (_fakeForm.Visible)
+                    if (IsVisible) {
                         Npp.HideDockableDialog(_fakeForm.Handle);
-                    else
+                        IsVisible = false;
+                    } else {
                         Npp.ShowDockableDialog(_fakeForm.Handle);
+                        IsVisible = true;
+                    }
                 }
                 Form.RefreshPosAndLoc();
-                if (_fakeForm == null) return;
-                UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error loading " + _dialogDescription);
             }
@@ -103,15 +125,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Either check or uncheck the menu, depending on the visibility of the form
         /// (does it both on the menu and toolbar)
         /// </summary>
-        public virtual void UpdateMenuItemChecked() {
-            if (_fakeForm == null)
-                return;
-            Npp.SetMenuItemCheck(UnmanagedExports.NppFuncItems.Items[DockableCommandIndex]._cmdID, _fakeForm.Visible);
+        private void FormOnOnDockableDialogClose() {
+            IsVisible = false;
         }
 
         public void ForceClose() {
             if (Form != null)
-                Form.Close();
+                Form.ForceClose();
             Form = null;
         }
 

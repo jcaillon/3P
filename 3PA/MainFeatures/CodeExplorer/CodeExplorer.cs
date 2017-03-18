@@ -18,13 +18,16 @@
 // ========================================================================
 #endregion
 
-using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
+using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {
+
+        #region Core
+
         #region Singleton
 
         private static CodeExplorer _instance;
@@ -34,6 +37,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             set { _instance = value; }
         }
 
+        #endregion
+
+        #region Constructor
+
         private CodeExplorer() {
             _dialogDescription = "Code explorer";
             _formDefaultPos = NppTbMsg.CONT_RIGHT;
@@ -42,23 +49,31 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        #region InitForm
+        #region Override method
 
         protected override void InitForm() {
             Form = new CodeExplorerForm(_fakeForm);
-            if (NotificationsPublisher.PluginIsReady)
-                ParserHandler.ParseCurrentDocument();
+        }
+
+        protected override void OnVisibilityChange(bool visible) {
+            Config.Instance.CodeExplorerVisible = visible;
+            if (visible) {
+                if (NotificationsPublisher.PluginIsReady)
+                    ParserHandler.ParseCurrentDocument();
+            }
         }
 
         #endregion
 
+        #endregion
+        
         #region handling form
 
         /// <summary>
         /// Use this to redraw the docked form
         /// </summary>
         public void ApplyColorSettings() {
-            if (Form == null)
+            if (!IsVisible)
                 return;
             Form.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             Form.Refresh();
@@ -68,14 +83,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// update the "selected" scope when the user click in scintilla
         /// </summary>
         public void UpdateCurrentScope() {
-            if (Form == null)
+            if (!IsVisible)
                 return;
             Form.UpdateCurrentScope();
-        }
-
-        public override void UpdateMenuItemChecked() {
-            base.UpdateMenuItemChecked();
-            Config.Instance.CodeExplorerVisible = _fakeForm != null && _fakeForm.Visible;
         }
 
         #endregion
@@ -86,15 +96,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
         public void OnParseEnded() {
-            if (Form == null) return;
+            if (!IsVisible)
+                return;
             Form.UpdateTreeData();
         }
 
         public void OnParseStarted() {
-            if (Form == null) return;
+            if (!IsVisible)
+                return;
             Form.Refreshing = true;
         }
 
         #endregion
+
     }
 }

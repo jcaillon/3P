@@ -567,7 +567,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <returns></returns>
         public static bool IsVisible {
-            get { return !(_form == null || !_form.IsShown); }
+            get { return !(_form == null || !_form.IsVisible); }
         }
 
         /// <summary>

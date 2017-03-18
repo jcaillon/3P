@@ -31,10 +31,10 @@ using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
-using _3PA.WindowsCore;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
@@ -161,9 +161,10 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest2() {
-            MeasureIt(() => {
-                Npp.CurrentSci.Lines.Reset();
-            }, "Reset lines");
+
+            //MeasureIt(() => {
+            //    Npp.CurrentSci.Lines.Reset();
+            //}, "Reset lines");
         }
 
         public static void DebugTest3() {

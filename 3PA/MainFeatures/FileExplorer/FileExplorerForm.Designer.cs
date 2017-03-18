@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
     partial class FileExplorerForm {

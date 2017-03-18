@@ -25,8 +25,8 @@ using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
-using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.NppCore;
+using _3PA.NppCore.NppInterfaceForm;
 
 // ReSharper disable LocalizableElement
 
@@ -34,7 +34,7 @@ namespace _3PA.MainFeatures {
     internal static class UserCommunication {
         #region private fields
 
-        private static NppDockableDialogEmptyForm _anchorForm;
+        private static NppEmptyForm _anchorForm;
 
         private static List<YamuiInput> _openedMessage = new List<YamuiInput>();
 
@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures {
         /// from a back groundthread, use : BeginInvoke()
         /// </summary>
         public static void Init() {
-            _anchorForm = new NppDockableDialogEmptyForm {
+            _anchorForm = new NppEmptyForm {
                 Location = new Point(-10000, -10000),
                 Visible = false
             };

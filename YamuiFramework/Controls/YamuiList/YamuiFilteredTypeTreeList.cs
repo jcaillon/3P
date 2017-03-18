@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -68,8 +69,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private bool _showTreeBranches = true;
         protected int _nodeExpandClickMargin = 20;
-
-        private volatile bool _isHandlingClick;
 
         #endregion
 
@@ -477,18 +476,15 @@ namespace YamuiFramework.Controls.YamuiList {
             // handles node expansion
             if (!_isSearching) {
                 var curItem = SelectedItem as FilteredTypeTreeListItem;
-                if (curItem != null && curItem.CanExpand && !_isHandlingClick) {
-                    _isHandlingClick = true;
+                if (curItem != null && curItem.CanExpand && eventArgs.Button == MouseButtons.Left && eventArgs.Clicks == 1) {
                     var widthOfArrow = TreeWidth + NodeExpandClickMargin;
                     for (int i = 0; i <= curItem.Level; i++) {
                         widthOfArrow += TreeWidth;
                     }
                     if (eventArgs.X <= widthOfArrow) {
                         ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
-                        _isHandlingClick = false;
                         return;
                     }
-                    _isHandlingClick = false;
                 }
             }
             base.OnItemClick(sender, eventArgs);

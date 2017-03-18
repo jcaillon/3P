@@ -34,6 +34,7 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli {
     internal partial class AppliForm : YamuiMainAppli {
+
         #region fields
 
         /// <summary>

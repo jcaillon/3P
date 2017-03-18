@@ -24,10 +24,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
+
     internal static class ParserHandler {
 
         #region event
@@ -65,6 +67,47 @@ namespace _3PA.MainFeatures.Parser {
         private static volatile bool _parseRequestedWhenBusy;
 
         private static volatile bool _parsing;
+
+        #endregion
+
+        #region Static data
+
+        /// <summary>
+        /// We keep tracks of the parsed files, to avoid parsing the same file twice
+        /// </summary>
+        public static HashSet<string> RunPersistentFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// Instead of parsing the persistent files each time we store the results of the parsing to use them when we need it
+        /// </summary>
+        public static Dictionary<string, ParserVisitor> SavedPersistent = new Dictionary<string, ParserVisitor>(StringComparer.CurrentCultureIgnoreCase);
+        
+        /// <summary>
+        /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
+        /// </summary>
+        public static Dictionary<string, Lexer> SavedLexerInclude = new Dictionary<string, Lexer>(StringComparer.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// Clear the static data to save up some memory
+        /// </summary>
+        public static void ClearStaticData() {
+            RunPersistentFiles.Clear();
+            SavedPersistent.Clear();
+            SavedLexerInclude.Clear();
+        }
+
+        /// <summary>
+        /// A dictionary of known keywords and database info
+        /// </summary>
+        public static Dictionary<string, CompletionType> KnownStaticItems = new Dictionary<string, CompletionType>();
+
+        public static void UpdateKnownStaticItems() {
+            // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
+            KnownStaticItems = DataBase.GetDbDictionary();
+            foreach (var keyword in Keywords.GetList().Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
+                KnownStaticItems[keyword.DisplayText] = keyword.Type;
+            }
+        }
 
         #endregion
 
@@ -140,13 +183,18 @@ namespace _3PA.MainFeatures.Parser {
             return ParserVisitor.FindAnyTableOrBufferByName(name);
         }
 
+        /// <summary>
+        /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
+        /// </summary>
+        public static Func<string, string> FindIncludeFullPath = s => ProEnvironment.Current.FindFirstFileInPropath(s);
+
         #endregion
 
         #region do the parsing and get the results
 
         /// <summary>
         /// Call this method to parse the current document after a small delay 
-        /// (delay that is reset each time this function is called, so if you call it continously, nothing is done)
+        /// (delay that is reset each time this function is called, so if you call it continuously, nothing is done)
         /// or set doNow = true to do it without waiting a timer
         /// (you can also set forceAsync = true if doNow = true to do the parsing asynchronously, BE CAREFUL!!)
         /// </summary>
@@ -161,7 +209,10 @@ namespace _3PA.MainFeatures.Parser {
             if (_timerLock.TryEnterWriteLock(50)) {
                 try {
                     if (_parserTimer == null) {
-                        _parserTimer = new Timer {AutoReset = false, Interval = 800};
+                        _parserTimer = new Timer {
+                            AutoReset = false, 
+                            Interval = 800
+                        };
                         _parserTimer.Elapsed += (sender, args) => ParseCurrentDocumentTick();
                         _parserTimer.Start();
                     } else {

@@ -22,9 +22,10 @@ using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
+using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-    internal class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
+    internal class AutoCompletionForm : NppInterfaceForm {
         #region public fields
 
         /// <summary>

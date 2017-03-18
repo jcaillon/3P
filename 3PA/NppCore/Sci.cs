@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -33,6 +32,7 @@ namespace _3PA.NppCore {
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
+    /// - This static class sends all its messages to the current scintilla handle (Npp.CurrentSci)<br />
     /// - For every scintilla message that involves a position, the expect position (expected by scintilla) is the<br />
     /// f***** BYTE position, not the character position (as anyone would assume at first!). This messes up with all your<br />
     /// function<br />

@@ -205,13 +205,14 @@ namespace _3PA {
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+            ProEnvironment.OnEnvironmentChange += ParserHandler.ClearStaticData;
             DataBase.OnDatabaseInfoUpdated += AutoCompletion.RefreshStaticItems;
 
             ParserHandler.OnParseStarted += CodeExplorer.Instance.OnParseStarted;
             ParserHandler.OnParseEnded += AutoCompletion.RefreshDynamicItems;
             ParserHandler.OnParseEnded += CodeExplorer.Instance.OnParseEnded;
 
-            AutoCompletion.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
+            AutoCompletion.OnUpdatedStaticItems += ParserHandler.UpdateKnownStaticItems;
             
             // Clear the %temp% directory if we didn't do it properly last time
             Utils.DeleteDirectory(Config.FolderTemp, true);
@@ -245,13 +246,14 @@ namespace _3PA {
                 // unsubscribe to static events
                 ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
                 ProEnvironment.OnEnvironmentChange -= DataBase.UpdateDatabaseInfo;
+                ProEnvironment.OnEnvironmentChange -= ParserHandler.ClearStaticData;
                 DataBase.OnDatabaseInfoUpdated -= AutoCompletion.RefreshStaticItems;
 
                 ParserHandler.OnParseStarted -= CodeExplorer.Instance.OnParseStarted;
                 ParserHandler.OnParseEnded -= AutoCompletion.RefreshDynamicItems;
                 ParserHandler.OnParseEnded -= CodeExplorer.Instance.OnParseEnded;
 
-                AutoCompletion.OnUpdatedStaticItems -= Parser.UpdateKnownStaticItems;
+                AutoCompletion.OnUpdatedStaticItems -= ParserHandler.UpdateKnownStaticItems;
 
                 // clean up timers
                 ReccurentAction.CleanAll();
@@ -261,8 +263,6 @@ namespace _3PA {
                 FileTag.Export();
 
                 // save config (should be done but just in case)
-                CodeExplorer.Instance.UpdateMenuItemChecked();
-                FileExplorer.Instance.UpdateMenuItemChecked();
                 Config.Save();
 
                 // remember the most used keywords
@@ -286,6 +286,7 @@ namespace _3PA {
         #region On mouse message
 
         public static bool MouseMessageHandler(WinApi.Messages message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
+
             switch (message) {
                 // middle click : go to definition
                 case WinApi.Messages.WM_MBUTTONDOWN:
@@ -381,7 +382,7 @@ namespace _3PA {
                 // It only works "almost normally" if we ShowDialog() the form?!
                 // So i gave up and handle things here!
                 // Each control / form that should use a key not handled by Npp should implement a method 
-                // "HandleKeyDown" that will be triggered from here (see below)
+                // "PerformKeyDown" that will be triggered from here (see below)
                 var curControl = Win32Api.GetFocusedControl();
                 if (curControl != null) {
                     var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] {(object) e});

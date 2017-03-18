@@ -30,10 +30,19 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiImageDesigner")]
     public class YamuiPictureBox : PictureBox {
-        #region Fields
+
+        private Image _backGrndImage;
+
+        #region Properties
 
         [Category("Yamui")]
-        public Image BackGrndImage { get; set; }
+        public Image BackGrndImage {
+            get { return _backGrndImage; }
+            set {
+                _backGrndImage = value;
+                Invalidate();
+            }
+        }
 
         [DefaultValue(false)]
         [Category("Yamui")]

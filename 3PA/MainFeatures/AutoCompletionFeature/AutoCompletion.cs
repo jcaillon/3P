@@ -629,7 +629,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
-            get { return !(_form == null || !_form.IsShown); }
+            get { return !(_form == null || !_form.IsVisible); }
         }
 
         /// <summary>

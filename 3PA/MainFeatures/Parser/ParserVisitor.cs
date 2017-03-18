@@ -28,21 +28,22 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
     /// <summary>
-    /// This class sustains the autocompletion list AND the code explorer list
+    /// This class sustains the auto completion list AND the code explorer list
     /// by visiting the parser and creating new completionData
     /// </summary>
     internal class ParserVisitor : IParserVisitor {
+
         #region static
 
         /// <summary>
         /// We keep tracks of the parsed files, to avoid parsing the same file twice
         /// </summary>
-        private static HashSet<string> _runPersistentFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        private static HashSet<string> RunPersistentFiles { get { return ParserHandler.RunPersistentFiles; }}
 
         /// <summary>
         /// Instead of parsing the persistent files each time we store the results of the parsing to use them when we need it
         /// </summary>
-        private static Dictionary<string, ParserVisitor> _savedPersistent = new Dictionary<string, ParserVisitor>();
+        private static Dictionary<string, ParserVisitor> SavedPersistent { get { return ParserHandler.SavedPersistent; } }
 
         #endregion
 
@@ -50,6 +51,9 @@ namespace _3PA.MainFeatures.Parser {
 
         private const string BlockTooLongString = "> Appbuilder max length";
 
+        /// <summary>
+        /// At least 1 prototype has been added
+        /// </summary>
         private bool _prototypeAdded;
 
         /// <summary>
@@ -129,7 +133,7 @@ namespace _3PA.MainFeatures.Parser {
 
             if (_isBaseFile) {
                 // resets the parsed files for this parsing session
-                _runPersistentFiles.Clear();
+                RunPersistentFiles.Clear();
             }
         }
 
@@ -146,8 +150,8 @@ namespace _3PA.MainFeatures.Parser {
 
             // if this document is in the Saved parsed visitors, we remove it now and we will add it back when it is parsed
             if (_isBaseFile) {
-                if (_savedPersistent.ContainsKey(_currentParsedFilePath))
-                    _savedPersistent.Remove(_currentParsedFilePath);
+                if (SavedPersistent.ContainsKey(_currentParsedFilePath))
+                    SavedPersistent.Remove(_currentParsedFilePath);
             }
         }
 
@@ -163,10 +167,10 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // save the info for uses in an another file, where this file is run in persistent
-            if (!_savedPersistent.ContainsKey(_currentParsedFilePath))
-                _savedPersistent.Add(_currentParsedFilePath, this);
+            if (!SavedPersistent.ContainsKey(_currentParsedFilePath))
+                SavedPersistent.Add(_currentParsedFilePath, this);
             else
-                _savedPersistent[_currentParsedFilePath] = this;
+                SavedPersistent[_currentParsedFilePath] = this;
 
             // lose parser reference
             _parser = null;
@@ -195,8 +199,8 @@ namespace _3PA.MainFeatures.Parser {
                 else {
                     // if the run is PERSISTENT, we need to load the functions/proc of the program
                     // ensure to not parse the same file twice in a parser session!
-                    if (!_runPersistentFiles.Contains(fullFilePath)) {
-                        _runPersistentFiles.Add(fullFilePath);
+                    if (!RunPersistentFiles.Contains(fullFilePath)) {
+                        RunPersistentFiles.Add(fullFilePath);
                         LoadProcPersistent(fullFilePath, pars.Scope);
                     }
                 }
@@ -919,8 +923,8 @@ namespace _3PA.MainFeatures.Parser {
             ParserVisitor parserVisitor;
 
             // did we already parsed this file in a previous parse session? (if we are in CodeExplorerDisplayExternalItems mode we need to parse it again anyway)
-            if (_savedPersistent.ContainsKey(filePath)) {
-                parserVisitor = _savedPersistent[filePath];
+            if (SavedPersistent.ContainsKey(filePath)) {
+                parserVisitor = SavedPersistent[filePath];
             } else {
                 // Parse it
                 var ablParser = new Parser(Utils.ReadAllText(filePath), filePath, scopeItem, false);
@@ -953,16 +957,5 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #region others
-
-        /// <summary>
-        /// Allows the clear the SavedParserVisitors (not static because we want to control when
-        /// it can be called
-        /// </summary>
-        public void ClearSavedParserVisitors() {
-            _savedPersistent.Clear();
-        }
-
-        #endregion
     }
 }

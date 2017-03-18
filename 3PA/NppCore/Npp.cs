@@ -40,6 +40,7 @@ using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
     internal static class Npp {
+
         #region CurrentScintilla (scintilla instance)
 
         private static SciApi _primarySci;
@@ -74,6 +75,22 @@ namespace _3PA.NppCore {
         /// </summary>
         public static int CurrentSciId {
             get { return _curSciId; }
+        }
+
+        /// <summary>
+        /// Forces all next Sci commands to be sent to the 1st instance of scintilla
+        /// </summary>
+        public static void SetSciToPrimaryView() {
+            _curSciId = 0;
+            CurrentSci = _primarySci;
+        }
+
+        /// <summary>
+        /// Forces all next Sci commands to be sent to the 2nd instance of scintilla
+        /// </summary>
+        public static void SetSciToSecondaryView() {
+            _curSciId = 1;
+            CurrentSci = _secondarySci;
         }
 
         #endregion

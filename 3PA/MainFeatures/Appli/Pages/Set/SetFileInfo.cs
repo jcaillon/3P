@@ -218,7 +218,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (!val.Equals(FileTag.LastTag) && !val.Equals(FileTag.DefaultTag)) {
                 lb_SaveState.Text = @"<b>Info saved</b>";
                 bt_SaveState.BackGrndImage = ImageResources.Ok;
-                bt_SaveState.Invalidate();
                 toolTip.SetToolTip(bt_SaveState, "3P has access to info on the current file");
             } else {
                 FileHasChanged();
@@ -228,7 +227,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void FileHasChanged() {
             lb_SaveState.Text = @"<b>The visible info are not saved!</b>";
             bt_SaveState.BackGrndImage = ImageResources.NotSaved;
-            bt_SaveState.Invalidate();
             toolTip.SetToolTip(bt_SaveState, "The info you see on this screen are not yet saved<br>and thus, not known to 3P<br>Click the <i>save and close</i> button");
         }
 

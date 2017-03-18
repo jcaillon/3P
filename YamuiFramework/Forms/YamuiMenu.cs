@@ -287,6 +287,7 @@ namespace YamuiFramework.Forms {
                     Close();
                     Dispose();
                 }
+                e.Handled = true;
             }
         }
 

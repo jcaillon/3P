@@ -24,12 +24,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.NppCore;
+using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal class FileExplorer : NppDockableDialog<FileExplorerForm> {
+
+        #region Core
+
         #region Singleton
 
         private static FileExplorer _instance;
@@ -47,12 +50,20 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        #region InitForm
+        #region Override methods
 
         protected override void InitForm() {
             Form = new FileExplorerForm(_fakeForm);
-            Form.RefreshFileList();
         }
+
+        protected override void OnVisibilityChange(bool visible) {
+            Config.Instance.FileExplorerVisible = visible;
+            if (visible) {
+                Form.RefreshFileList();
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -66,11 +77,6 @@ namespace _3PA.MainFeatures.FileExplorer {
                 return;
             Form.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             Form.Refresh();
-        }
-
-        public override void UpdateMenuItemChecked() {
-            base.UpdateMenuItemChecked();
-            Config.Instance.FileExplorerVisible = _fakeForm != null && _fakeForm.Visible;
         }
 
         #endregion
@@ -90,14 +96,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Start a new search for files
         /// </summary>
         public void StartSearch() {
-            try {
-                if (Form == null)
-                    return;
-                Form.Focus();
-                Form.FilterBox.ClearAndFocusFilter();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in StartSearch");
-            }
+            if (!IsVisible)
+                return;
+            Form.Focus();
+            Form.FilterBox.ClearAndFocusFilter();
         }
 
         private DateTime _startTime;

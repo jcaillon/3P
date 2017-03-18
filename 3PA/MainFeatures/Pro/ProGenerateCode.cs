@@ -32,6 +32,7 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
+
         #region Update/delete/add function prototype
 
         private static HashSet<string> _ignoredFiles = new HashSet<string>();

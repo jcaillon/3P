@@ -27,7 +27,8 @@ using System.Windows.Forms;
 
 namespace _3PA.NppCore {
     /*
-     * Everything in this file was taken from header files of notepad++ v7.3.3
+     * THIS FILE TARGETS NOTEPAD++ 7.3.3
+     * Everything in this file was taken from header files of notepad++
      * https://github.com/notepad-plus-plus/notepad-plus-plus/commit/388c430e215f6099923906aa9fa79c5aa820b347
      */
 

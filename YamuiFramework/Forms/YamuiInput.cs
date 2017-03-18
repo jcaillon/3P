@@ -35,6 +35,7 @@ using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiInput : YamuiFormButtons {
+
         #region Fields
 
         public object DataObject;
@@ -194,8 +195,8 @@ namespace YamuiFramework.Forms {
                     // click the first button
                     var firstButton = Controls.Find("yamuiButton0", false).FirstOrDefault() as YamuiButton;
                     if (firstButton != null) {
-                        firstButton.PerformClick();
                         e.Handled = true;
+                        firstButton.PerformClick();
                     }
                     break;
             }

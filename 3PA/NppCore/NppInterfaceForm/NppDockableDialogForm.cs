@@ -17,14 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
-using _3PA.NppCore;
+using _3PA.MainFeatures;
 
-namespace _3PA.MainFeatures.NppInterfaceForm {
+namespace _3PA.NppCore.NppInterfaceForm {
+
     /// <summary>
     /// Okay so... what is the point of this class?
     /// Basically, if you directly feed a form (that you want to display as a dockable panel) to Npp, you will get screwed
@@ -39,10 +41,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// moved
     /// </summary>
     internal class NppDockableDialogForm : Form {
+
         #region fields
 
         private Rectangle _masterRectangle;
-        private NppDockableDialogEmptyForm _masterForm;
+        private Form _masterForm;
+        private bool _forceClose;
 
         #endregion
 
@@ -77,7 +81,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             AutoScaleMode = AutoScaleMode.None;
         }
 
-        public NppDockableDialogForm(NppDockableDialogEmptyForm formToCover) : this() {
+        public NppDockableDialogForm(Form formToCover) : this() {
+
             _masterForm = formToCover;
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
             _masterForm.Closed += MasterFormOnClosed;
@@ -144,6 +149,11 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (ClientSize != Owner.ClientSize) {
                 ClientSize = Owner.ClientSize;
             }
+
+            if (Visible != Owner.Visible) {
+                Visible = Owner.Visible;
+            }
+
             _masterRectangle = rect;
         }
 
@@ -174,9 +184,18 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         protected override void OnClosing(CancelEventArgs e) {
+            if (!_forceClose) {
+                e.Cancel = true;
+                return;
+            }
             // register to Npp
             Npp.UnRegisterToNpp(Handle);
             base.OnClosing(e);
+        }
+
+        public void ForceClose() {
+            _forceClose = true;
+            Close();
         }
 
         #endregion

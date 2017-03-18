@@ -17,19 +17,21 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.NppInterfaceForm {
+namespace _3PA.NppCore.NppInterfaceForm {
+
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
     internal class NppInterfaceForm : YamuiFormBase {
+
         #region constant
 
         private static readonly Point CloakedPosition = new Point(-10000, -10000);
@@ -50,7 +52,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Should be set when you create the new form
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
         /// </summary>
-        public IntPtr CurrentForegroundWindow;
+        public IntPtr CurrentForegroundWindow = IntPtr.Zero;
 
         /// <summary>
         /// Set to true if scintilla should get the focus back, false if you want
@@ -73,7 +75,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public bool IsActivated;
 
-        public bool IsShown { get; set; }
+        public bool IsVisible { get; set; }
 
         #endregion
 
@@ -87,6 +89,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             get { return true; }
         }
 
+        /// <summary>
+        /// Don't show in ATL+TAB
+        /// </summary>
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
@@ -105,12 +110,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public NppInterfaceForm() {
             ShowInTaskbar = false;
             Movable = true;
-
-            // register to Npp
-            Npp.RegisterToNpp(Handle);
-
-            CurrentForegroundWindow = Npp.CurrentSci.Handle;
-
             Opacity = 0;
             Visible = false;
             Tag = false;
@@ -137,7 +136,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // if another window with Opacity <1 is in front Oo
             Location = new Point(-10000, -10000);
             GiveFocusBack();
-            IsShown = false;
+            IsVisible = false;
         }
 
         /// <summary>
@@ -149,14 +148,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _allowInitialdisplay = true;
             Opacity = UnfocusedOpacity;
             Visible = true;
-            IsShown = true;
+            IsVisible = true;
         }
 
         /// <summary>
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
-            Npp.UnRegisterToNpp(Handle);
             Tag = true;
             Close();
         }
@@ -165,7 +163,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Gives focus back to the owner window
         /// </summary>
         protected void GiveFocusBack() {
-            if (GiveFocusBackToScintilla)
+            if (GiveFocusBackToScintilla || CurrentForegroundWindow == IntPtr.Zero)
                 Sci.GrabFocus();
             else
                 WinApi.SetForegroundWindow(CurrentForegroundWindow);
