@@ -152,7 +152,9 @@
     <Compile Include="Lib\Ftp\PathCheck.cs" />
     <Compile Include="Lib\NanoXmlParser.cs" />
     <Compile Include="Lib\ProcessIo.cs" />
-    <Compile Include="Lib\ReccurentAction.cs" />
+    <Compile Include="Lib\RecurentAction.cs" />
+    <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
+    <Compile Include="MainFeatures\Parser\ParseUtils.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,6 +162,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="NppCore\SciApi.cs" />
+    <Compile Include="NppCore\UiThread.cs" />
     <Compile Include="WindowsCore\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
@@ -515,7 +518,7 @@
     <Compile Include="MainFeatures\Pro\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
-    <Compile Include="MainFeatures\UpdateHandler.cs" />
+    <Compile Include="Lib\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
       <SubType>UserControl</SubType>
     </Compile>

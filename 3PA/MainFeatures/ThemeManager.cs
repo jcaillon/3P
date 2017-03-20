@@ -108,7 +108,7 @@ namespace _3PA.MainFeatures {
             Config.Instance.AccentColor = theme.AccentColor;
 
             // force the autocomplete to redraw
-            AutoCompletion.ForceClose();
+            AutoCompletion.ApplyColorSettings();
             CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
             FileExplorer.FileExplorer.Instance.ApplyColorSettings();
             Application.DoEvents();

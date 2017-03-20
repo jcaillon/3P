@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Closes the visible menu (if any)
         /// </summary>
-        public static bool ForceCloseMenu() {
+        public static bool ForceClose() {
             if (_popup != null) {
                 try {
                     _popup.Close();
@@ -83,7 +83,7 @@ namespace _3PA.MainFeatures {
         public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = null, int minWidth = 250) {
             try {
                 // Close any already opened menu
-                ForceCloseMenu();
+                ForceClose();
 
                 if (menuLogo == null)
                     menuLogo = Utils.GetNameOf(() => ImageResources.Logo16x16);

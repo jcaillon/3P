@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <param name="minimumWidth"></param>
         public void SetText(string content, int minimumWidth = 200) {
             if (Visible)
-                Cloack();
+                Cloak();
 
             var screen = Npp.NppScreen;
 

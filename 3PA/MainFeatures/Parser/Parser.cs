@@ -35,21 +35,21 @@ namespace _3PA.MainFeatures.Parser {
     internal partial class Parser {
 
         #region static
-
+        
         /// <summary>
         /// A dictionary of known keywords and database info
         /// </summary>
-        private static Dictionary<string, CompletionType> KnownStaticItems { get { return ParserHandler.KnownStaticItems; }}
+        private Dictionary<string, CompletionType> KnownStaticItems { get { return ParserHandler.KnownStaticItems; } }
 
         /// <summary>
         /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
         /// </summary>
-        private static Func<string, string> FindIncludeFullPath { get { return ParserHandler.FindIncludeFullPath; }}
+        private Func<string, string> FindIncludeFullPath { get { return ParserHandler.FindIncludeFullPath; } }
 
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
         /// </summary>
-        private static Dictionary<string, Lexer> SavedLexerInclude { get { return ParserHandler.SavedLexerInclude; }}
+        private Dictionary<string, Lexer> SavedLexerInclude { get { return ParserHandler.SavedLexerInclude; } }
 
         private static Lexer NewLexerFromData(string data) {
             return new Lexer(data);
@@ -63,6 +63,16 @@ namespace _3PA.MainFeatures.Parser {
         /// List of the parsed items (output)
         /// </summary>
         private List<ParsedItem> _parsedItemList = new List<ParsedItem>();
+
+        /// <summary>
+        /// Contains the information of each line parsed
+        /// </summary>
+        private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
+
+        /// <summary>
+        /// list of errors found by the parser
+        /// </summary>
+        private List<ParserError> _parserErrors = new List<ParserError>();
 
         /// <summary>
         /// Represent the FILE LEVEL scope
@@ -81,11 +91,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Contains the current information of the statement's context (in which proc it is, which scope...)
         /// </summary>
         private ParseContext _context;
-
-        /// <summary>
-        /// Contains the information of each line parsed
-        /// </summary>
-        private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
 
         /// <summary>
         /// Path to the file being parsed (is added to the parseItem info)
@@ -107,11 +112,6 @@ namespace _3PA.MainFeatures.Parser {
         private Dictionary<string, ParsedFunction> _functionPrototype = new Dictionary<string, ParsedFunction>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// list of errors found by the parser
-        /// </summary>
-        private List<ParserError> _parserErrors = new List<ParserError>();
-
-        /// <summary>
         /// In the file being parsed we can have includes, the files included are read, tokenized, and the tokens
         /// are inserted for the current file
         /// But we need to know from which file each token is extracted, this is the purpose of this list :
@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #region public accessors
+        #region Public properties
 
         /// <summary>
         /// dictionary of *line, line info*
@@ -149,13 +149,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public List<ParsedItem> ParsedItemsList {
             get { return _parsedItemList; }
-        }
-
-        /// <summary>
-        /// returns the list of the prototypes
-        /// </summary>
-        public Dictionary<string, ParsedFunction> ParsedPrototypes {
-            get { return _functionPrototype; }
         }
 
         /// <summary>
@@ -227,7 +220,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // add missing values to the line dictionary
             var current = new LineInfo(GetCurrentDepth(), _rootScope);
-            for (int i = lexer.MaxLine - 1; i >= 0; i--) {
+            for (int i = lexer.MaxLine; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
                 else

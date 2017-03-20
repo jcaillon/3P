@@ -322,13 +322,13 @@ namespace _3PA.Lib {
                 fsd.InitialDirectory = initialFolder;
             if (Appli.IsVisible) {
                 try {
-                    Win32Api.EnableWindow(Npp.HandleNpp, false);
+                    Win32Api.EnableWindow(Npp.Handle, false);
                     fsd.ShowDialog(Appli.Form.Handle);
                 } finally {
-                    Win32Api.EnableWindow(Npp.HandleNpp, true);
+                    Win32Api.EnableWindow(Npp.Handle, true);
                 }
             } else
-                fsd.ShowDialog(Npp.HandleNpp);
+                fsd.ShowDialog(Npp.Handle);
             return fsd.FileName ?? string.Empty;
         }
 

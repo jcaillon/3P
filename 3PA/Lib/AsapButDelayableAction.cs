@@ -11,13 +11,13 @@ namespace _3PA.Lib {
 
         #region Static
 
-        private static List<AsapButDelayableAction> _savedDelayedActions = new List<AsapButDelayableAction>();
+        private static List<AsapButDelayableAction> _savedActions = new List<AsapButDelayableAction>();
 
         /// <summary>
         /// Clean all delayed actions started
         /// </summary>
         public static void CleanAll() {
-            foreach (var action in _savedDelayedActions.ToList()) {
+            foreach (var action in _savedActions.ToList()) {
                 action.Cancel();
             }
         }
@@ -40,25 +40,15 @@ namespace _3PA.Lib {
 
         #region private
 
-        private static volatile bool _parseRequestedWhenBusy;
-
-        private static volatile bool _parsing;
-
-        private ReaderWriterLockSlim _timerLock = new ReaderWriterLockSlim();
-
-        private static ReaderWriterLockSlim _parserLock = new ReaderWriterLockSlim();
-
+        private object _lock = new object();
+        private object _timerLock = new object();
         private Timer _timer;
-
         private Action _toDo;
-
         private Task _task;
-
         private CancellationTokenSource _cancelSource;
-
         private int _msDelay;
-
-        private int _msToDoTimeout = 1000;
+        private int _msToDoTimeout = 2000;
+        private volatile bool _timerOnGoing;
 
         #endregion
 
@@ -68,16 +58,29 @@ namespace _3PA.Lib {
             _msDelay = msDelay;
             _toDo = toDo;
             _cancelSource = new CancellationTokenSource();
-            _savedDelayedActions.Add(this);
+            _savedActions.Add(this);
         }
 
         #endregion
-        
+
         #region Public
 
-        public void DoOnTimerDelayable() {
+        /// <summary>
+        /// Max time to wait (in ms) when trying to do the action that has already been started
+        /// (this should be set roughly to the time needed to do the action)..
+        /// </summary>
+        public int MsToDoTimeout {
+            get { return _msToDoTimeout; }
+            set { _msToDoTimeout = value; }
+        }
+
+        /// <summary>
+        /// Start the action with a delay, delay that can be extended if this method is called again within the
+        /// delay
+        /// </summary>
+        public void DoDelayable() {
             // do on delay, can be delayed event more if this method is called again
-            if (_timerLock.TryEnterWriteLock(50)) {
+            if (Monitor.TryEnter(_timerLock, 50)) {
                 try {
                     if (_timer == null) {
                         _timer = new Timer {
@@ -91,14 +94,47 @@ namespace _3PA.Lib {
                         _timer.Stop();
                         _timer.Start();
                     }
+                    _timerOnGoing = true;
                 } finally {
-                    _timerLock.ExitWriteLock();
+                    Monitor.Exit(_timerLock);
                 }
             }
         }
 
-        public void DoSynchronized() {
-            DoParse();
+        /// <summary>
+        /// Wait for the latest task to be completed (but for a max of ms)
+        /// If a timer was already set, it triggers the to do method immediately and returns true
+        /// </summary>
+        public bool WaitLatestTask(int maxMsWait = -1) {
+            if (maxMsWait == -1)
+                maxMsWait = MsToDoTimeout;
+            bool timerOnGoing = false;
+            if (Monitor.TryEnter(_timerLock, 50)) {
+                timerOnGoing = _timerOnGoing;
+                Monitor.Exit(_timerLock);
+            }
+            if (timerOnGoing) {
+                // a timer was set, trigger it now
+                TimerTick();
+            }
+            if (_task != null)
+                _task.Wait(maxMsWait);
+            return timerOnGoing;
+        }
+
+        /// <summary>
+        /// Forces to do the action now, if one is already ongoing then we wait for the end and do another
+        /// </summary>
+        public void DoSync(int maxMsWait = -1) {
+            WaitLatestTask(maxMsWait);
+            ToDo();
+        }
+
+        /// <summary>
+        /// Forces to do the action now but still async
+        /// </summary>
+        public void DoTaskNow(int maxMsWait = -1) {
+            TimerTick();
         }
 
         #endregion
@@ -111,35 +147,30 @@ namespace _3PA.Lib {
         /// as well as the dynamic items found by the parser
         /// </summary>
         private void TimerTick() {
-            if (_parsing) {
-                _parseRequestedWhenBusy = true;
+            if (_task != null && !_task.IsCompleted) {
                 return;
             }
-            _parseRequestedWhenBusy = false;
-            _task = Task.Factory.StartNew(DoParse, _cancelSource.Token);
+            if (Monitor.TryEnter(_timerLock, 500)) {
+                _timerOnGoing = false;
+                _task = Task.Factory.StartNew(ToDo, _cancelSource.Token);
+                Monitor.Exit(_timerLock);
+            }
         }
 
-        private void DoParse() {
-            _parsing = true;
-            try {
-                if (_parserLock.TryEnterWriteLock(_msToDoTimeout)) {
-                    try {
-                        if (BeforeAction != null)
-                            BeforeAction();
-                        if (!_cancelSource.IsCancellationRequested)
-                            _toDo();
-                        if (AfterAction != null)
-                            AfterAction();
-                    } finally {
-                        _parserLock.ExitWriteLock();
-                    }
+        private void ToDo() {
+            if (Monitor.TryEnter(_lock, MsToDoTimeout)) {
+                try {
+                    if (BeforeAction != null)
+                        BeforeAction();
+                    if (!_cancelSource.IsCancellationRequested)
+                        _toDo();
+                    if (AfterAction != null)
+                        AfterAction();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error in AsapButDelayableAction.ToDo");
+                } finally {
+                    Monitor.Exit(_lock);
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick ");
-            } finally {
-                _parsing = false;
-                if (_parseRequestedWhenBusy)
-                    TimerTick();
             }
         }
 
@@ -152,17 +183,17 @@ namespace _3PA.Lib {
         /// </summary>
         public void Cancel() {
             try {
+                if (_task != null) {
+                    _cancelSource.Cancel();
+                }
                 if (_timer != null) {
                     _timer.Stop();
                     _timer.Close();
                 }
-                if (_task != null) {
-                    _cancelSource.Cancel();
-                }
             } catch (Exception) {
                 // clean up proc
             } finally {
-                _savedDelayedActions.Remove(this);
+                _savedActions.Remove(this);
             }
         }
 

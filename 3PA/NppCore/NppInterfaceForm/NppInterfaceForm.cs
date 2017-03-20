@@ -129,7 +129,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
         /// <summary>
         /// hides the form
         /// </summary>
-        public void Cloack() {
+        public void Cloak() {
             _lastPosition = Location;
             Visible = false;
             // move this to an invisible part of the screen, otherwise we can see this window
@@ -142,7 +142,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
         /// <summary>
         /// show the form
         /// </summary>
-        public void UnCloack() {
+        public void UnCloak() {
             if (Location == CloakedPosition)
                 Location = _lastPosition;
             _allowInitialdisplay = true;
@@ -182,7 +182,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
             if ((bool) Tag)
                 return;
             e.Cancel = true;
-            Cloack();
+            Cloak();
             base.OnClosing(e);
         }
 
@@ -193,7 +193,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
         }
 
         private void PlugOnOnNppWindowsMove() {
-            Cloack();
+            Cloak();
         }
 
         /// <summary>

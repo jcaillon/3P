@@ -32,52 +32,18 @@ namespace YamuiFramework.Helper {
     /// </summary>
     public class DelayedAction : IDisposable {
 
-        #region private fields
-
-        private Timer _timer;
-
-        private Action _toDo;
+        #region Static
 
         private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>();
 
-        #endregion
-
-        #region Life and death
-
         /// <summary>
-        /// Use this class to do an action after a given delay
+        /// Start a new delayed action (starts a new task after the given delay)
         /// </summary>
-        public DelayedAction(int msDelay, Action toDo) {
-            _savedDelayedActions.Add(this);
-            _toDo = toDo;
-            _timer = new Timer {AutoReset = false, Interval = msDelay};
-            _timer.Elapsed += TimerOnElapsed;
-            _timer.Start();
+        public static DelayedAction StartNew(int msDelay, Action toDo) {
+            var created = new DelayedAction(msDelay, toDo);
+            _savedDelayedActions.Add(created);
+            return created;
         }
-
-        /// <summary>
-        /// Stop the recurrent action
-        /// </summary>
-        public void Stop() {
-            try {
-                if (_timer != null) {
-                    _timer.Stop();
-                    _timer.Close();
-                }
-            } catch (Exception) {
-                // clean up proc
-            } finally {
-                _savedDelayedActions.Remove(this);
-            }
-        }
-
-        public void Dispose() {
-            Stop();
-        }
-
-        #endregion
-
-        #region public
 
         /// <summary>
         /// Clean all delayed actions started
@@ -90,10 +56,56 @@ namespace YamuiFramework.Helper {
 
         #endregion
 
+        #region private fields
+
+        private Timer _timer;
+
+        private Action _toDo;
+
+        #endregion
+
+        #region Life and death
+
+        /// <summary>
+        /// Use this class to do an action after a given delay
+        /// </summary>
+        private DelayedAction(int msDelay, Action toDo) {
+            _savedDelayedActions.Add(this);
+            _toDo = toDo;
+            _timer = new Timer {
+                AutoReset = false, 
+                Interval = msDelay
+            };
+            _timer.Elapsed += TimerOnElapsed;
+            _timer.Start();
+        }
+
+        public void Dispose() {
+            Stop();
+        }
+
+        #endregion
+
         #region private
+        
+        /// <summary>
+        /// Stop the recurrent action
+        /// </summary>
+        private void Stop() {
+            try {
+                if (_timer != null) {
+                    _timer.Stop();
+                    _timer.Close();
+                }
+            } catch (Exception) {
+                // clean up proc
+            } finally {
+                _savedDelayedActions.Remove(this);
+            }
+        }
 
         private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
-            Task.Factory.StartNew(() => { _toDo(); });
+            Task.Factory.StartNew(_toDo);
             Stop();
         }
 

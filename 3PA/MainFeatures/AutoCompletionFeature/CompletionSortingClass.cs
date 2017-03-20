@@ -82,8 +82,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // then sort by scope type (descending, smaller scope first)
-            if (x.ParsedItem != null && y.ParsedItem != null && x.ParsedItem.Scope != null && y.ParsedItem.Scope != null) {
-                compare = ((int) y.ParsedItem.Scope.ScopeType).CompareTo(((int) x.ParsedItem.Scope.ScopeType));
+            if (x.ParsedItem != null && y.ParsedItem != null) {
+                compare = ((int)y.ParsedItem.GetScopeType()).CompareTo((int)x.ParsedItem.GetScopeType());
                 if (compare != 0) return compare;
             }
 
@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (compare != 0) return compare;
             }
 
-            // sort by display text in last resort
+            // sort by display text in last
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }
 

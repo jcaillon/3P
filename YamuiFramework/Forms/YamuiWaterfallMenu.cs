@@ -311,8 +311,7 @@ namespace YamuiFramework.Forms {
         /// </summary>
         protected override void OnDeactivate(EventArgs e) {
             // close if the new active windows isn't a menu
-            // ReSharper disable once ObjectCreationAsStatement
-            new DelayedAction(30, () => {
+            DelayedAction.StartNew(30, () => {
                 if (!ListOfOpenededMenuHandle.Contains(WinApi.GetForegroundWindow()) && !_closing) {
                     BeginInvoke((Action) CloseAll);
                 }

@@ -178,7 +178,7 @@ namespace _3PA.MainFeatures {
         public static void StartCheckingForUpdates() {
             // check for updates every now and then (15min)
             // ReSharper disable once ObjectCreationAsStatement
-            new ReccurentAction(() => { UpdateList(Config.Instance.SharedConfFolder); }, 1000*60*15);
+            RecurentAction.StartNew(() => { UpdateList(Config.Instance.SharedConfFolder); }, 1000 * 60 * 15);
         }
 
         /// <summary>
@@ -329,10 +329,8 @@ namespace _3PA.MainFeatures {
         }
 
         private static void ImportKeywords(ConfLine conf) {
-            Keywords.Import();
-            // Update autocompletion
-            AutoCompletion.RefreshStaticItems();
-            ParserHandler.ParseCurrentDocument();
+            Keywords.Instance.Import();
+            ParserHandler.ParseDocumentAsap();
         }
 
         #endregion

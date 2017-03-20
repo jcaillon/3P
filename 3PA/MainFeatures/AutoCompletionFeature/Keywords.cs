@@ -26,19 +26,49 @@ using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
+
     //TODO: pour gérer les HANDLE attribute, ajouter une colonne aux keywords qui peut soit être vide soit contenir une liste de nombres qui correspondent à un id de handle:
     // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont 1 dans la 5eme colonne
 
     /// <summary>
     /// this class handles the static keywords of progress
     /// </summary>
-    internal static class Keywords {
+    internal class Keywords {
+
+        #region Singleton
+
+        private static Keywords _instance;
+
+        public static Keywords Instance {
+            get { return _instance ?? (_instance = new Keywords()); }
+        }
+
+        #endregion
+
+        #region Event
+
+        public event Action OnImport;
+
+        #endregion
+
         #region fields
 
-        // Dictionnay of id -> keyword
-        private static Dictionary<string, KeywordDefinition> _keywordList = new Dictionary<string, KeywordDefinition>();
-        private static Dictionary<string, KeywordHelp> _help = new Dictionary<string, KeywordHelp>(StringComparer.CurrentCultureIgnoreCase);
-        private static List<KeywordAbbreviation> _abbreviations = new List<KeywordAbbreviation>();
+        // Dictionary of id -> keyword
+        private Dictionary<string, CompletionItem> _keywordById;
+        private Dictionary<string, KeywordHelp> _help;
+        private List<KeywordAbbreviation> _abbreviations;
+        private List<CompletionItem> _keywords;
+
+        #endregion
+
+        #region Life and death
+
+        public Keywords() {
+            _keywordById = new Dictionary<string, CompletionItem>();
+            _help = new Dictionary<string, KeywordHelp>(StringComparer.CurrentCultureIgnoreCase);
+            _abbreviations = new List<KeywordAbbreviation>();
+            Import();
+        }
 
         #endregion
 
@@ -47,12 +77,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// To call in order to read all the keywords to the private List CompletionItem
         /// </summary>
-        public static void Import() {
+        public void Import() {
+            _keywords = null;
+
             // reads keywords
-            _keywordList.Clear();
+            _keywordById.Clear();
             Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, (i, line) => {
                 var items = line.Split('\t');
-                if (items.Count() == 5) {
+                if (items.Length == 5) {
                     // find the KeywordType from items[1]
                     KeywordType keywordType;
                     if (!Enum.TryParse(items[2], true, out keywordType))
@@ -62,43 +94,40 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     var flag = (items[3] == "1") ? ParseFlag.Reserved : 0;
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
-                    if (!_keywordList.ContainsKey(items[0])) {
-                        _keywordList.Add(items[0], new KeywordDefinition {
+                    if (!_keywordById.ContainsKey(items[0])) {
+                        _keywordById.Add(items[0], new CompletionItem {
                             DisplayText = items[1],
                             Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                             Ranking = int.Parse(items[4]),
-                            Flag = flag,
+                            Flags = flag,
                             KeywordType = keywordType
                         });
                     }
                 }
-            },
-                Encoding.Default);
+            }, Encoding.Default);
 
             // reads keywords rank
             Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], (i, line) => {
                 var items = line.Split('\t');
-                if (items.Count() == 2 && _keywordList.ContainsKey(items[0])) {
+                if (items.Length == 2 && _keywordById.ContainsKey(items[0])) {
                     int val;
                     if (int.TryParse(items[1], out val)) {
-                        _keywordList[items[0]].Ranking = val;
+                        _keywordById[items[0]].Ranking = val;
                     }
                 }
-            },
-                Encoding.Default);
+            }, Encoding.Default);
 
             // reads abbreviations
             _abbreviations.Clear();
             Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, (i, line) => {
                 var items = line.Split('\t');
-                if (items.Count() == 2) {
+                if (items.Length == 2) {
                     _abbreviations.Add(new KeywordAbbreviation {
                         CompleteText = items[1],
                         ShortText = items[0]
                     });
                 }
-            },
-                Encoding.Default);
+            }, Encoding.Default);
 
             // reads keywords help
             _help.Clear();
@@ -114,17 +143,19 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         Synthax = listSynthax
                     });
                 }
-            },
-                Encoding.Default);
+            }, Encoding.Default);
+
+            if (OnImport != null)
+                OnImport();
         }
 
         /// <summary>
         /// Save the keywords data into a file (to remember the ranking of each keyword)
         /// </summary>
-        public static void SaveRanking() {
-            if (_keywordList.Count == 0) return;
+        public void SaveRanking() {
+            if (_keywordById.Count == 0) return;
             var strBuilder = new StringBuilder();
-            foreach (var kpv in _keywordList) {
+            foreach (var kpv in _keywordById) {
                 strBuilder.AppendLine(kpv.Key + "\t" + kpv.Value.Ranking);
             }
             Utils.FileWriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
@@ -135,17 +166,25 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region public methods
 
         /// <summary>
+        /// Allows to reset the list (when changing case for instance)
+        /// </summary>
+        public void ResetCompletionItems() {
+            _keywords = _keywordById.Values.ToList();
+            foreach (var keyword in _keywords) {
+                keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode);
+            }
+        }
+
+        /// <summary>
         /// returns the list of keywords
         /// </summary>
-        public static List<CompletionItem> GetList() {
-            return _keywordList.Values.Select(keyword => new CompletionItem {
-                DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode),
-                Type = keyword.Type,
-                Ranking = keyword.Ranking,
-                SubString = keyword.KeywordType.ToString(),
-                Flags = keyword.Flag,
-                KeywordType = keyword.KeywordType
-            }).ToList();
+        public List<CompletionItem> CompletionItems {
+            get {
+                if (_keywords == null) {
+                    ResetCompletionItems();
+                }
+                return _keywords;
+            }
         }
 
         /// <summary>
@@ -153,7 +192,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <param name="abbreviation"></param>
         /// <returns></returns>
-        public static string GetFullKeyword(string abbreviation) {
+        public string GetFullKeyword(string abbreviation) {
             var found = _abbreviations.Find(abbreviations =>
                 abbreviations.CompleteText.ContainsFast(abbreviation) &&
                 abbreviation.ContainsFast(abbreviations.ShortText)
@@ -166,19 +205,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static KeywordHelp GetKeywordHelp(string key) {
+        public KeywordHelp GetKeywordHelp(string key) {
             return _help.ContainsKey(key) ? _help[key] : null;
         }
 
         #endregion
-    }
-
-    internal class KeywordDefinition {
-        public string DisplayText { get; set; }
-        public CompletionType Type { get; set; }
-        public int Ranking { get; set; }
-        public KeywordType KeywordType { get; set; }
-        public ParseFlag Flag { get; set; }
     }
 
     /// <summary>
@@ -215,4 +246,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public string Description;
         public List<string> Synthax;
     }
+
 }

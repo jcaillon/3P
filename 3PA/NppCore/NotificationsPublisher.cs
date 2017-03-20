@@ -64,10 +64,11 @@ namespace _3PA.NppCore {
 
                         case (uint) NppNotif.NPPN_READY:
                             // notify plugins that all the procedures of launchment of notepad++ are done
-                            // call OnNppReady then OnPlugReady if it all went ok
+                            Npp.UpdateCurrentSci(); // init current scintilla
+                            UiThread.Init();
                             PluginIsReady = Plug.DoNppReady();
+                            // call OnNppReady then OnPlugReady if it all went ok
                             if (PluginIsReady) {
-                                Npp.UpdateCurrentSci(); // init current scintilla
                                 Plug.DoPlugStart();
                                 OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
 
@@ -79,6 +80,7 @@ namespace _3PA.NppCore {
                         case (uint)NppNotif.NPPN_SHUTDOWN:
                             // uninstall hooks on mouse/keyboard
                             UninstallHooks();
+                            UiThread.Close();
                             Plug.DoNppShutDown();
                             return;
 
@@ -223,9 +225,9 @@ namespace _3PA.NppCore {
         }
 
         private static void NppBufferActivated() {
-            Npp.CurrentFile.Update(); // get info on the current file
+            Npp.CurrentFile.Path = Npp.NppFileInfo.GetFullPathApi; // get info on the current file
             Plug.DoNppBufferActivated();
-            Npp.PreviousFile.Update(Npp.CurrentFile); // save info on the "previous" file for the next buffer activated event
+            Npp.PreviousFile.Path = Npp.CurrentFile.Path; // save info on the "previous" file for the next buffer activated event
         }
 
         #endregion

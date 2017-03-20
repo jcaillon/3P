@@ -1319,10 +1319,10 @@ namespace _3PA.MainFeatures.Parser {
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdProto);
 
-                // case of a IN, we add it to the list of item
-                if (!createdProto.SimpleForward) {
-                    AddParsedItem(createdProto, functionToken.OwnerNumber);
+                AddParsedItem(createdProto, functionToken.OwnerNumber);
 
+                // case of a IN
+                if (!createdProto.SimpleForward) {
                     // modify context
                     _context.Scope = createdProto;
 

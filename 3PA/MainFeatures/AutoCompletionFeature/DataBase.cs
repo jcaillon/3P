@@ -27,12 +27,13 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal static class DataBase {
+
         #region events
 
         /// <summary>
         /// Event published when the current database information is updated
         /// </summary>
-        public static event Action OnDatabaseInfoUpdated;
+        public static event Action OnDatabaseUpdate;
 
         #endregion
 
@@ -46,7 +47,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// List of sequences of the database
         /// </summary>
-        private static List<SequenceItem> _sequences = new List<SequenceItem>();
+        private static List<ParsedSequence> _sequences = new List<ParsedSequence>();
+
+        private static List<CompletionItem> _dbItems;
 
         private static bool _isExtracting;
 
@@ -81,6 +84,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         public static void UpdateDatabaseInfo() {
+            _dbItems = null;
             if (IsDbInfoAvailable) {
                 // read file, extract info
                 Read(GetCurrentDumpPath);
@@ -90,8 +94,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _sequences.Clear();
             }
 
-            if (OnDatabaseInfoUpdated != null)
-                OnDatabaseInfoUpdated();
+            if (OnDatabaseUpdate != null)
+                OnDatabaseUpdate();
         }
 
         /// <summary>
@@ -190,9 +194,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     case 'S':
                         if (splitted.Length != 3 || currentDb == null)
                             return;
-                        _sequences.Add(new SequenceItem {
+                        _sequences.Add(new ParsedSequence {
                             SeqName = splitted[1],
-                            DbName = currentDb.LogicalName
+                            DbName = currentDb.Name
                         });
                         break;
                     case 'T':
@@ -254,7 +258,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
-                        curField.Type = ParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempType);
+                        curField.Type = ParserUtils.ConvertStringToParsedPrimitiveType(curField.TempType);
                         currentTable.Fields.Add(curField);
                         break;
                 }
@@ -264,24 +268,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #endregion
 
         #region get list
-
-        /// <summary>
-        /// Exposes the databases info
-        /// </summary>
-        /// <returns></returns>
-        public static List<ParsedDataBase> List {
-            get { return _dataBases; }
-        }
-
-        /// <summary>
-        /// Get db info by name
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedDataBase GetDb(string name) {
-            return _dataBases.FirstOrDefault(@base => @base.LogicalName.EqualsCi(name));
-        }
-
+        
         /// <summary>
         /// returns a dictionary containing all the table names of each database, 
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
@@ -292,8 +279,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
                 if (!output.ContainsKey(table.Name))
                     output.Add(table.Name, CompletionType.Table);
-                if (!output.ContainsKey(string.Join(".", @base.LogicalName, table.Name)))
-                    output.Add(string.Join(".", @base.LogicalName, table.Name), CompletionType.Table);
+                if (!output.ContainsKey(string.Join(".", @base.Name, table.Name)))
+                    output.Add(string.Join(".", @base.Name, table.Name), CompletionType.Table);
             }));
             return output;
         }
@@ -305,10 +292,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (_dataBases.Count <= 0)
                 return new List<CompletionItem>();
             return _dataBases.Select(@base => new CompletionItem {
-                DisplayText = @base.LogicalName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                DisplayText = @base.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                 Type = CompletionType.Database,
                 FromParser = false,
-                Ranking = AutoCompletion.FindRankingOfDatabaseItem(@base.LogicalName),
+                Ranking = 0,
                 Flags = 0
             }).ToList();
         }
@@ -345,10 +332,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
             output.AddRange(dataBase.Tables.Select(table => new CompletionItem {
                 DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                SubString = dataBase.LogicalName,
+                SubString = dataBase.Name,
                 Type = CompletionType.Table,
                 FromParser = false,
-                Ranking = AutoCompletion.FindRankingOfDatabaseItem(table.Name),
+                Ranking = 0,
                 Flags = 0
             }).ToList());
             return output;
@@ -368,7 +355,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
-                Ranking = AutoCompletion.FindRankingOfDatabaseItem(field.Name),
+                Ranking = 0,
                 Flags = (field.Flags.HasFlag(ParseFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
                         (field.Flags.HasFlag(ParseFlag.Index) ? ParseFlag.Index : 0) |
                         (field.Flags.HasFlag(ParseFlag.Extent) ? ParseFlag.Extent : 0),
@@ -377,19 +364,109 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return output;
         }
 
+        /// <summary>
+        /// Allows to recompute the database list of completion item (when changing case for instance)
+        /// </summary>
+        public static void ResetCompletionItems() {
+            _dbItems = GetCompletionItems();
+        }
+
+        /// <summary>
+        /// List of items for the autocompletion
+        /// </summary>
+        public static List<CompletionItem> CompletionItems {
+            get { return _dbItems ?? (_dbItems = GetCompletionItems()); }
+        }
+
+        private static List<CompletionItem> GetCompletionItems() {
+            // Sequences
+            var output = _sequences.Select(item => new CompletionItem {
+                DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                Type = CompletionType.Sequence,
+                SubString = item.DbName
+            }).ToList();
+
+            // Databases
+            foreach (var db in _dataBases) {
+                var curDb = new CompletionItem {
+                    DisplayText = db.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                    Type = CompletionType.Database,
+                    FromParser = false,
+                    ParsedItem = db,
+                    Ranking = 0,
+                    Flags = 0,
+                    Children = new List<CompletionItem>(),
+                    ChildSeparator = '.'
+                };
+                output.Add(curDb);
+
+                // Tables
+                foreach (var table in db.Tables) {
+                    var curTable = new CompletionItem {
+                        DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                        Type = CompletionType.Table,
+                        SubString = db.Name,
+                        FromParser = false,
+                        ParsedItem = table,
+                        Ranking = 0,
+                        Flags = 0,
+                        Children = new List<CompletionItem>(),
+                        ChildSeparator = '.',
+                        ParentItem = curDb
+                    };
+                    curDb.Children.Add(curTable); // add the table as a child of db
+                    output.Add(curTable); // but also as an item
+
+                    // Fields
+                    foreach (var field in table.Fields) {
+                        curTable.Children.Add(new CompletionItem {
+                            DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                            Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
+                            SubString = field.Type.ToString(),
+                            FromParser = false,
+                            ParsedItem = field,
+                            Ranking = 0,
+                            Flags = field.Flags | ~ParseFlag.Primary,
+                            ParentItem = curTable
+                        });
+                    }
+                }
+            }
+            return output;
+        }
+
         #endregion
 
         #region find item
 
+        /// <summary>
+        /// Get db info by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedDataBase GetDb(string name) {
+            return _dataBases.FirstOrDefault(@base => @base.Name.EqualsCi(name));
+        }
+
         public static ParsedDataBase FindDatabaseByName(string name) {
-            return _dataBases.Find(@base => @base.LogicalName.EqualsCi(name));
+            return _dataBases.Find(@base => @base.Name.EqualsCi(name));
         }
 
         public static ParsedTable FindTableByName(string name, ParsedDataBase db) {
             return db.Tables.Find(table => table.Name.EqualsCi(name));
         }
 
+        /// <summary>
+        /// Find the table referenced among database and defined temp tables; 
+        /// name is the table's name (can also be BASE.TABLE)
+        /// </summary>
         public static ParsedTable FindTableByName(string name) {
+            if (name.CountOccurences(".") > 0) {
+                var splitted = name.Split('.');
+                // find db then find table
+                var foundDb = FindDatabaseByName(splitted[0]);
+                return foundDb == null ? null : FindTableByName(splitted[1], foundDb);
+            }
             return _dataBases.Select(dataBase => FindTableByName(name, dataBase)).FirstOrDefault(found => found != null);
         }
 
@@ -397,15 +474,37 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return table.Fields.Find(field => field.Name.EqualsCi(name));
         }
 
+        /// <summary>
+        /// Returns the field corresponding to the input TABLE.FIELD or DB.TABLE.FIELD
+        /// </summary>
         public static ParsedField FindFieldByName(string name) {
-            return (from dataBase in _dataBases where dataBase.Tables != null from table in dataBase.Tables select FindFieldByName(name, table)).FirstOrDefault(found => found != null);
+            var splitted = name.Split('.');
+            if (splitted.Length == 1)
+                return null;
+
+            var tableName = splitted[splitted.Length == 3 ? 1 : 0];
+            var fieldName = splitted[splitted.Length == 3 ? 2 : 1];
+
+            ParsedTable foundTable;
+
+            if (splitted.Length == 3) {
+                // find db
+                var foundDb = FindDatabaseByName(splitted[0]);
+                if (foundDb == null)
+                    return null;
+
+                // find table
+                foundTable = FindTableByName(tableName, foundDb);
+            } else {
+                // find table
+                foundTable = FindTableByName(tableName);
+            }
+
+            // find field
+            return foundTable == null ? null : FindFieldByName(fieldName, foundTable);
         }
 
         #endregion
 
-        internal class SequenceItem {
-            public string SeqName { get; set; }
-            public string DbName { get; set; }
-        }
     }
 }

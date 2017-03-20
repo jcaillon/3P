@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.Appli {
         public static void Init() {
             ForceClose();
             _form = new AppliForm {
-                CurrentForegroundWindow = Npp.HandleNpp
+                CurrentForegroundWindow = Npp.Handle
             };
         }
 

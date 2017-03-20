@@ -50,13 +50,24 @@ namespace _3PA.NppCore.NppInterfaceForm {
 
         #endregion
 
-        #region Don't show in ATL+TAB
+        #region ShowWithoutActivation & Don't show in ATL+TAB
 
+        /// <summary>
+        /// This indicates that the form should not take focus when shown
+        /// specify it through the CreateParams
+        /// </summary>
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Don't show in ATL+TAB
+        /// </summary>
         protected override CreateParams CreateParams {
             get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
-                return Params;
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return createParams;
             }
         }
 

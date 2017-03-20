@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
@@ -42,6 +43,40 @@ namespace _3PA.Tests {
     /// This class is only for debug/dev purposes, it will not be used in production
     /// </summary>
     internal class PlugDebug {
+        
+        #region Debug test
+
+        private static AsapButDelayableAction _ac;
+
+        public static void DebugTest1() {
+        }
+
+        public static void DebugTest2() {
+        }
+
+        public static void DebugTest3() {
+            /*
+            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + Npp.NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
+            MeasureIt(() => {
+                var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
+                UserCommunication.Notify(parser.GetWordsList.Count.ToString());
+            });
+             */
+            //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
+            //RunParserTests(Npp.Text);
+            /*
+            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
+                MessageImg.MsgUpdate,
+                "A new version has been installed!",
+                "Updated to version " + AssemblyInfo.Version,
+                new List<string> {"ok", "cancel"},
+                true);
+             */
+        }
+
+        #endregion
+
+
         #region debug
 
         public static void ParseReferenceFile() {
@@ -83,7 +118,7 @@ namespace _3PA.Tests {
                     outStr += "Visitor (" + watch.ElapsedMilliseconds + " ms)\r\n";
 
                     if (parser.ParserErrors.Count > 0) {
-                        parserErrors = file + "<br>" + ProCodeFormat.GetParserErrorDescription(parser.ParserErrors) + "<br>";
+                        parserErrors = file + "<br>" + GetParserErrorDescription(parser.ParserErrors) + "<br>";
                     }
 
                     watch.Stop();
@@ -101,94 +136,25 @@ namespace _3PA.Tests {
             UserCommunication.Notify(outNotif + "<br>Done :<br>" + outFile.ToHtmlLink(), 0);
         }
 
+        public static string GetParserErrorDescription(List<ParserError> listErrors) {
+            if (listErrors == null || listErrors.Count == 0)
+                return string.Empty;
+            var error = new StringBuilder();
+            foreach (var parserError in listErrors) {
+                error.AppendLine("<div>");
+                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
+                error.AppendLine("</div>");
+            }
+            return error.ToString();
+        }
+
         #endregion
 
         #region tests and dev
 
-        public static void DebugTest1() {
-            /*
-            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
-            webServiceJson.AddToReq("UUID", "allo");
-            webServiceJson.AddToReq("userName", "yoyo");
-            webServiceJson.AddToReq("version", AssemblyInfo.Version);
-            webServiceJson.OnRequestEnded += req => {
-                UserCommunication.Notify(req.JsonResponse);
-            };
-            webServiceJson.Execute();
-            */
-
-            var list = AppliMenu.Instance.MainMenuList.ToList();
-            foreach (var menuItem in list) {
-                menuItem.ItemType = -1;
-            }
-            var popup = new YamuiMenu {
-                HtmlTitle = "<div align='center'>Yop</div>",
-                SpawnLocation = Cursor.Position,
-                MenuList = list.Cast<YamuiMenuItem>().ToList(),
-                DisplayNbItems = true
-            };
-            popup.Show(Npp.Win32Handle);
-            /*
-
-            object fuck = (int)0;
-            UserCommunication.Input(ref fuck, "yo", MessageImg.MsgInfo, "title", "sub", null);
-            UserCommunication.Notify(fuck.ToString());
-
-            var popup2 = new YamuiMenu {
-                SpawnLocation = Cursor.Position,
-                MenuList = new List<YamuiMenuItem> {
-                    new YamuiMenuItem { DisplayText = "numero 1"},
-                    new YamuiMenuItem { DisplayText = "numero 2", IsSelectedByDefault = true},
-                },
-                DisplayFilterBox = false
-            };
-            popup2.ClicItemWrapper = item => {
-                UserCommunication.Notify(item.DisplayText);
-                popup2.Close();
-                popup2.Dispose();
-            };
-            popup2.Show(new WindowWrapper(Npp.HandleNpp));
-            */
-            //UserCommunication.Notify("test");
-            //UserCommunication.Notify("test");
-            /*
-            var form = new Form();
-            form.Size = new Size(1200, 1000);
-            form.Controls.Add(new ProfilesPage());
-            form.Controls[0].Dock = DockStyle.Fill;
-            form.ShowDialog();
-             * */
-        }
-
-        public static void DebugTest2() {
-
-            //MeasureIt(() => {
-            //    Npp.CurrentSci.Lines.Reset();
-            //}, "Reset lines");
-        }
-
-        public static void DebugTest3() {
-
-            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + Npp.NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
-
-            MeasureIt(() => {
-                var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
-                UserCommunication.Notify(parser.GetWordsList.Count.ToString());
-            });
-            //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
-
-            //RunParserTests(Npp.Text);
-
-            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
-                MessageImg.MsgUpdate,
-                "A new version has been installed!",
-                "Updated to version " + AssemblyInfo.Version,
-                new List<string> {"ok", "cancel"},
-                true);
-        }
-
         public static void DisplayBugs() {
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.BugsGetWebWervice);
+            // wb.AddToReq("UUID", "allo");
             wb.OnRequestEnded += webServ => {
                 if (webServ.StatusCodeResponse != HttpStatusCode.OK)
                     UserCommunication.Notify(webServ.ResponseException.ToString());
@@ -270,158 +236,6 @@ namespace _3PA.Tests {
 
             UserCommunication.Notify("Done :<br>" + testDir.ToHtmlLink());
         }
-
-        #endregion
-
-        #region extract color scheme from less files
-
-        /*
-        private static void ExtracFromMultipleLess() {
-            var output = @"D:\Profiles\jcaillon\Downloads\bootwatch\out.txt";
-            foreach (var file in Directory.GetFiles(@"D:\Profiles\jcaillon\Downloads\bootwatch", "*.less")) {
-                ExtracFromLess(file, output);
-            }
-        }
-
-        private static void ExtracFromLess(string lessFile, string outputFile) {
-
-            var colorsDictionary = new Dictionary<string, string>();
-
-            var matchArray = new Dictionary<string, string> {
-                {"ThemeAccentColor", "@brand-primary"},
-
-                {"FormBack", "@body-bg"},
-                {"FormFore", "@text-color"},
-                {"FormBorder", "@jumbotron-bg"},
-                {"FormAltBack", "@breadcrumb-bg"},
-                {"SubTextFore", "@brand-primary"},
-
-                {"ScrollBarNormalBack", "@breadcrumb-bg"},
-                {"ScrollThumbNormalBack", "@breadcrumb-color"},
-                {"ScrollBarHoverBack", "@breadcrumb-bg"},
-                {"ScrollThumbHoverBack", "@breadcrumb-active-color"},
-                {"ScrollBarDisabledBack", "@breadcrumb-bg"},
-                {"ScrollThumbDisabledBack", "@buttondisabled-bg"},
-
-                {"ButtonNormalBack", "@pagination-bg"},
-                {"ButtonNormalFore", "@pagination-color"},
-                {"ButtonNormalBorder", "@input-border"},
-
-                {"ButtonHoverBack", "@buttonhover-bg"},
-                {"ButtonHoverFore", "@buttonhover-color"},
-                {"ButtonHoverBorder", "@buttonhover-border"},
-                
-                {"ButtonDisabledBack", "@buttondisabled-bg"},
-                {"ButtonDisabledFore", "@text-muted"},
-                {"ButtonDisabledBorder", "@input-border"},
-
-                {"ButtonPressedFore", "@buttondpressed-bg"},
-
-                {"LabelNormalFore", "@text-color"},
-                {"LabelPressedFore", "@brand-primary"},
-                {"LabelDisabledFore", "@text-muted"},
-
-                {"TabNormalBack", "@body-bg"},
-                {"TabNormalFore", "@text-color"},
-                {"TabHoverFore", "@link-color"},
-                {"TabPressedFore", "@link-hover-color"},
-
-                {"MenuHoverBack", "@buttonhover-bg"},
-                {"MenuHoverFore", "@buttonhover-color"},
-                {"MenuFocusBack", "@buttondpressed-bg"},
-                {"MenuFocusFore", "@buttonhover-color"},
-
-                {"AutoCompletionHighlightBack", "@brand-warning"},
-                {"AutoCompletionHighlightBorder", "@brand-warning-darker"},
-
-                {"GenericLinkColor", "@link-color"},
-                {"GenericErrorColor", "@brand-danger"},
-            };
-
-            var result = new StringBuilder();
-
-            // extract colors from less file
-            var regex = new Regex(@"(^@[\w-]*)\:\s*(.*?)\;.*?$");
-            foreach (var line in File.ReadAllLines(lessFile).Select(s => s.Trim())) {
-                if (regex.IsMatch(line)) {
-                    string colorName = null;
-                    string colorValue = null;
-                    foreach (Match match in regex.Matches(line)) {
-                        colorName = match.Groups[1].Value;
-                        colorValue = match.Groups[2].Value;
-                    }
-                    if (colorValue != null) {
-                        if (!colorsDictionary.ContainsKey(colorName))
-                            colorsDictionary.Add(colorName, colorValue);
-                    }
-                }
-            }
-
-            // convert stuff like lighten/darken of reference to other colors
-            var colorsDictTemp = new Dictionary<string, string>();
-            foreach (var color in colorsDictionary) {
-                var colorValue = color.Value;
-                // ref
-                if (colorValue.StartsWith("@") && colorsDictionary.ContainsKey(colorValue))
-                    colorValue = colorsDictionary[colorValue];
-
-                // transparent
-                else if (colorValue.EqualsCi("transparent") && colorsDictionary.ContainsKey("@body-bg"))
-                    colorValue = colorsDictionary["@body-bg"];
-                if (!colorsDictTemp.ContainsKey(color.Key))
-                    colorsDictTemp.Add(color.Key, FindColor(colorsDictTemp, colorValue));
-            }
-
-            var isBgDark = ColorTranslator.FromHtml(colorsDictTemp["@body-bg"]).IsColorDark();
-            colorsDictTemp.Add("@brand-primary-darker", @"darken(@brand-warning, " + (isBgDark ? "" : "-") + "35%)");
-            colorsDictTemp.Add("@buttonhover-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "20%)");
-            colorsDictTemp.Add("@buttonhover-color", @"darken(@pagination-color, " + (isBgDark ? "" : "-") + "15%)");
-            colorsDictTemp.Add("@buttonhover-border", @"darken(@input-border, " + (isBgDark ? "-" : "") + "15%)");
-            colorsDictTemp.Add("@buttondisabled-bg", @"darken(@pagination-bg, " + (isBgDark ? "" : "-") + "35%)");
-            colorsDictTemp.Add("@buttondpressed-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "35%)");
-
-            colorsDictionary.Clear();
-            foreach (var color in colorsDictTemp) {
-                if (!colorsDictionary.ContainsKey(color.Key))
-                    colorsDictionary.Add(color.Key, FindColor(colorsDictTemp, color.Value));
-            }
-
-            // and now write the result...
-            foreach (var kpv in matchArray) {
-                // the var corresponds to one of our var?
-                if (colorsDictionary.ContainsKey(kpv.Value)) {
-                    result.AppendLine(kpv.Key + "\t" + colorsDictionary[kpv.Value]);
-                }
-            }
-
-            File.AppendAllText(outputFile, "\r\n\r\n\r\n> " + Path.GetFileNameWithoutExtension(lessFile) + "\r\n" + result);
-
-        }
-
-        private static string FindColor(Dictionary<string, string> refDic, string link) {
-            if (link.StartsWith("@")) {
-                if (refDic.ContainsKey(link))
-                    return ConvertLightenDarken(refDic, FindColor(refDic, refDic[link]));
-            }
-            return ConvertLightenDarken(refDic, link);
-        }
-
-        private static string ConvertLightenDarken(Dictionary<string, string> refDic, string link) {
-            try {
-                if (link.StartsWith("darken") || link.StartsWith("lighten")) {
-                    var darken = link.StartsWith("darken");
-                    link = link.Substring(link.IndexOf("(", StringComparison.CurrentCultureIgnoreCase) + 1);
-                    link = link.Substring(0, link.Length - 2);
-                    var split = link.Split(',');
-                    link = FindColor(refDic, split[0]);
-                    var percent = float.Parse((split[1].Trim().Replace("%", "").Replace(",", "."))) / 100;
-                    link = ColorTranslator.ToHtml(ColorTranslator.FromHtml(link).ModifyColorLuminosity((darken ? -1 : 1) * percent));
-                }
-            } catch (Exception) {
-            }
-            return link;
-        }
-        */
 
         #endregion
     }

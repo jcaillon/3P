@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// When the FromParser is true, contains the ParsedItem extracted by the parser
         /// </summary>
-        public ParsedItem ParsedItem { get; set; }
+        public ParsedBaseItem ParsedItem { get; set; }
 
         /// <summary>
         /// This field is only used when Type == CompletionType.Keyword, it contains the keyword type...
@@ -153,6 +153,22 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return outList;
             }
         }
+
+        /// <summary>
+        /// return the list of the children for this item (if any) or null
+        /// </summary>
+        public List<CompletionItem> Children { get; set; }
+
+        /// <summary>
+        /// The char or chars that, once entered after THIS word, should trigger the list of children
+        /// If you add a new child separator, you should register it in the AutoCompletion class
+        /// </summary>
+        public char ChildSeparator { get; set; }
+
+        /// <summary>
+        /// Parent completionItem of this item (the parent has this item in its children)
+        /// </summary>
+        public CompletionItem ParentItem { get; set; }
     }
 
     internal enum CompletionType {

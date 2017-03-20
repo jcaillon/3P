@@ -25,15 +25,26 @@ namespace _3PA.MainFeatures.Parser {
 
     #region base classes
 
-    /// <summary>
-    /// base abstract class for ParsedItem
-    /// </summary>
-    internal abstract class ParsedItem {
+    internal abstract class ParsedBaseItem {
+
         /// <summary>
         /// Name of the parsed item
         /// </summary>
         public string Name { get; private set; }
 
+        protected ParsedBaseItem(string name) {
+            Name = name;
+        }
+
+        public virtual ParsedScopeType GetScopeType() {
+            return ParsedScopeType.Root;
+        }
+    }
+
+    /// <summary>
+    /// base abstract class for ParsedItem
+    /// </summary>
+    internal abstract class ParsedItem : ParsedBaseItem {
         /// <summary>
         /// full file path in which this item has been parsed
         /// </summary>
@@ -78,13 +89,20 @@ namespace _3PA.MainFeatures.Parser {
 
         public abstract void Accept(IParserVisitor visitor);
 
-        protected ParsedItem(string name, Token token) {
-            Name = name;
+        protected ParsedItem(string name, Token token) : base(name) {
             Line = token.Line;
             Column = token.Column;
             Position = token.StartPosition;
             EndPosition = token.EndPosition;
             IncludeLine = -1;
+        }
+
+        public virtual bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
+        }
+
+        public override ParsedScopeType GetScopeType() {
+            return Scope != null ? Scope.ScopeType : ParsedScopeType.Root;
         }
     }
 
@@ -385,6 +403,24 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         public ParsedLabel(string name, Token token) : base(name, token) {}
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            // check for scope
+            var output = true;
+            if (currentScope != null && !(Scope is ParsedFile)) {
+                output = Scope.ScopeType == currentScope.ScopeType;
+                output = output && Scope.Name.Equals(currentScope.Name);
+            }
+            
+            // check for the definition line
+            if (currentLine >= 0) {
+                output = output && currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
+
+                // for labels, only dislay them in the block which they label
+                output = output && currentLine <= UndefinedLine;
+            }
+            return output;
+        }
     }
 
     /// <summary>
@@ -514,6 +550,17 @@ namespace _3PA.MainFeatures.Parser {
             UndefinedLine = undefinedLine;
             Value = value;
         }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            var output = true;
+            if (currentLine >= 0) {
+                // if preproc, check line of definition and undefine
+                output = currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
+                if (UndefinedLine > 0)
+                    output = output && currentLine <= UndefinedLine;
+            }
+            return output;
+        }
     }
 
     /// <summary>
@@ -565,6 +612,20 @@ namespace _3PA.MainFeatures.Parser {
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
             BufferFor = bufferFor;
+        }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            // check for scope
+            var output = true;
+            if (currentScope != null && !(Scope is ParsedFile)) {
+                output = Scope.ScopeType == currentScope.ScopeType;
+                output = output && Scope.Name.Equals(currentScope.Name);
+            }
+            // check for the definition line
+            if (currentLine >= 0) {
+                output = output && currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
+            }
+            return output;
         }
     }
 
@@ -670,16 +731,15 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// data base parsed item
+    /// data base parsed item (the Name field is the LogicalName)
     /// </summary>
-    internal class ParsedDataBase {
-        public string LogicalName { get; private set; }
+    internal class ParsedDataBase : ParsedBaseItem {
         public string PhysicalName { get; private set; }
         public string ProgressVersion { get; private set; }
         public List<ParsedTable> Tables { get; private set; }
 
-        public ParsedDataBase(string logicalName, string physicalName, string progressVersion, List<ParsedTable> tables) {
-            LogicalName = logicalName;
+        public ParsedDataBase(string logicalName, string physicalName, string progressVersion, List<ParsedTable> tables)
+            : base(logicalName) {
             PhysicalName = physicalName;
             ProgressVersion = progressVersion;
             Tables = tables;
@@ -739,9 +799,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// describes a field of a table
     /// </summary>
-    internal class ParsedField {
-        public string Name { get; private set; }
-
+    internal class ParsedField : ParsedBaseItem {
         /// <summary>
         /// When parsing, we store the value of the "primitive-type" in there, 
         /// with the visitor, we convert this to a ParsedPrimitiveType later
@@ -760,8 +818,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public ParsedAsLike AsLike { get; set; }
 
-        public ParsedField(string name, string lcTempType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) {
-            Name = name;
+        public ParsedField(string name, string lcTempType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) : base(name) {
             TempType = lcTempType;
             Format = format;
             Order = order;
@@ -806,6 +863,11 @@ namespace _3PA.MainFeatures.Parser {
             Event = @event;
             ProcName = procName;
         }
+    }
+
+    internal class ParsedSequence {
+        public string SeqName { get; set; }
+        public string DbName { get; set; }
     }
 
     #endregion

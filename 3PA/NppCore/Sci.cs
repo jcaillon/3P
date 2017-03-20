@@ -911,6 +911,28 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
+        /// Returns a part of the text of the current document; you specify how much length max (in bytes)
+        /// you want to get and it returns the text. The text is retrieved around the first visible line,
+        /// by default we try maxLenght/2 before and after and it will adjust
+        /// </summary>
+        public static string GetTextAroundFirstVisibleLine(int maxLenght) {
+            var docLength = Api.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32();
+            int start = 0;
+            int lgt = docLength;
+            if (docLength > maxLenght) {
+                var firstVisPos = Api.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Api.Send(SciMsg.SCI_GETFIRSTVISIBLELINE).ToInt32())).ToInt32();
+                start = (firstVisPos - maxLenght/2).Clamp(0, firstVisPos);
+                if (start + maxLenght > docLength)
+                    start = (docLength - maxLenght).Clamp(0, firstVisPos);
+                lgt = maxLenght;
+            }
+            var ptr = Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(start), new IntPtr(lgt));
+            if (ptr == IntPtr.Zero)
+                return String.Empty;
+            return GetString(ptr, lgt, Encoding);
+        }
+
+        /// <summary>
         /// Gets a range of text from the document.
         /// </summary>
         /// <param name="position">The zero-based starting character position of the range to get.</param>

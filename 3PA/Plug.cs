@@ -69,7 +69,7 @@ namespace _3PA {
         public static event Action OnShutDown;
 
         /// <summary>
-        /// Envent published when the plugin is ready
+        /// Event published when the plugin is ready
         /// </summary>
         public static event Action OnPlugReady;
 
@@ -97,7 +97,7 @@ namespace _3PA {
         /// Called by notepad++ when the plugin is loaded
         /// </summary>
         internal static void DoPlugLoad() {
-            // Triggered when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
+            // Triggered when the resolution of an assembly fails, gives us the opportunity to feed the required assembly
             AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
 
             // catch unhandled errors to log them
@@ -138,11 +138,6 @@ namespace _3PA {
                 // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
 
-                // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
-                // from a back groundthread with BeginInvoke()
-                // once this method is done, we are able to publish notifications
-                UserCommunication.Init();
-
                 // if the UDL is not installed
                 if (!Style.InstallUdl(true)) {
                     Style.InstallUdl();
@@ -175,7 +170,7 @@ namespace _3PA {
                 ShareExportConf.StartCheckingForUpdates();
 
                 // ReSharper disable once ObjectCreationAsStatement
-                new ReccurentAction(User.Ping, 1000*60*120);
+                RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
@@ -206,29 +201,29 @@ namespace _3PA {
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
             ProEnvironment.OnEnvironmentChange += ParserHandler.ClearStaticData;
-            DataBase.OnDatabaseInfoUpdated += AutoCompletion.RefreshStaticItems;
 
-            ParserHandler.OnParseStarted += CodeExplorer.Instance.OnParseStarted;
-            ParserHandler.OnParseEnded += AutoCompletion.RefreshDynamicItems;
-            ParserHandler.OnParseEnded += CodeExplorer.Instance.OnParseEnded;
+            Keywords.Instance.OnImport += ParserHandler.UpdateKnownStaticItems;
+            DataBase.OnDatabaseUpdate += ParserHandler.UpdateKnownStaticItems;
+            Keywords.Instance.OnImport += AutoCompletion.SetStaticItems;
+            DataBase.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
 
-            AutoCompletion.OnUpdatedStaticItems += ParserHandler.UpdateKnownStaticItems;
-            
+            ParserHandler.OnEndSendCompletionItems += AutoCompletion.OnParseEnded;
+            ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
+            ParserHandler.OnEndSendParserItems += CodeExplorer.Instance.OnParseEndParserItems;
+            ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
+            ParserHandler.OnEnd += CodeExplorer.Instance.OnParseEnd;
+
             // Clear the %temp% directory if we didn't do it properly last time
             Utils.DeleteDirectory(Config.FolderTemp, true);
 
-            Keywords.Import();
             //Snippets.Init();
             FileTag.Import();
 
-            // initialize the list of objects of the autocompletion form
-            AutoCompletion.RefreshStaticItems();
-
             // Make sure to give the focus to scintilla on startup
-            WinApi.SetForegroundWindow(Npp.HandleNpp);
+            Sci.GrabFocus();
 
             // ask to disable the default autocompletion
-            Npp.ConfXml.AskToDisableAutocompletion();
+            DelayedAction.StartNew(100, Npp.ConfXml.AskToDisableAutocompletion);
         }
 
         #endregion
@@ -247,17 +242,19 @@ namespace _3PA {
                 ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
                 ProEnvironment.OnEnvironmentChange -= DataBase.UpdateDatabaseInfo;
                 ProEnvironment.OnEnvironmentChange -= ParserHandler.ClearStaticData;
-                DataBase.OnDatabaseInfoUpdated -= AutoCompletion.RefreshStaticItems;
+                ProEnvironment.OnEnvironmentChange -= ParserHandler.UpdateKnownStaticItems;
 
-                ParserHandler.OnParseStarted -= CodeExplorer.Instance.OnParseStarted;
-                ParserHandler.OnParseEnded -= AutoCompletion.RefreshDynamicItems;
-                ParserHandler.OnParseEnded -= CodeExplorer.Instance.OnParseEnded;
+                ParserHandler.OnEndSendCompletionItems -= AutoCompletion.OnParseEnded;
 
-                AutoCompletion.OnUpdatedStaticItems -= ParserHandler.UpdateKnownStaticItems;
-
+                ParserHandler.OnStart -= CodeExplorer.Instance.OnStart;
+                ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
+                ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
+                ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
+                
                 // clean up timers
-                ReccurentAction.CleanAll();
+                RecurentAction.CleanAll();
                 DelayedAction.CleanAll();
+                AsapButDelayableAction.CleanAll();
 
                 // export modified conf
                 FileTag.Export();
@@ -266,7 +263,7 @@ namespace _3PA {
                 Config.Save();
 
                 // remember the most used keywords
-                Keywords.SaveRanking();
+                Keywords.Instance.SaveRanking();
 
                 // close every form
                 FileExplorer.Instance.ForceClose();
@@ -275,7 +272,7 @@ namespace _3PA {
                 InfoToolTip.ForceClose();
                 Appli.ForceClose();
                 UserCommunication.ForceClose();
-                AppliMenu.ForceCloseMenu();
+                AppliMenu.ForceClose();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Stop");
             }
@@ -400,7 +397,7 @@ namespace _3PA {
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp || e.KeyCode == Keys.Next || e.KeyCode == Keys.Prior)
                     ClosePopups();
             } catch (Exception ex) {
-                ErrorHandler.ShowErrors(ex, "Occured in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
+                ErrorHandler.ShowErrors(ex, "Occurred in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
             }
 
             return handled;
@@ -512,8 +509,10 @@ namespace _3PA {
             FilesInfo.UpdateErrorsInScintilla();
             ProEnvironment.Current.ReComputeProPath();
 
+            AutoCompletion.SetStaticItems();
+
             // Parse the document
-            ParserHandler.ParseCurrentDocument(true);
+            ParserHandler.ParseDocumentNow();
 
             // publish the event
             if (OnDocumentChangedEnd != null)
@@ -655,7 +654,7 @@ namespace _3PA {
         /// Called when the text in scintilla is modified by the user
         /// </summary>
         public static void OnTextModified(SCNotification nc, bool insertedText, bool deletedText) {
-            ParserHandler.ParseCurrentDocument();
+            ParserHandler.ParseDocumentAsap();
 
             // did the user supress 1 char? (or one line)
             if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
@@ -691,7 +690,7 @@ namespace _3PA {
             if (!Npp.CurrentFile.IsProgress)
                 return;
 
-            if (WinApi.GetForegroundWindow() == Npp.HandleNpp)
+            if (WinApi.GetForegroundWindow() == Npp.Handle)
                 InfoToolTip.ShowToolTipFromDwell();
         }
 
@@ -735,8 +734,8 @@ namespace _3PA {
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder && !FilesInfo.CurrentFileInfoObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
-                var explorerItemsList = ParserHandler.ParserVisitor.ParsedExplorerItemsList;
 
+                var explorerItemsList = CodeExplorer.Instance.ParsedExplorerItemsList;
                 if (explorerItemsList != null) {
                     foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flags.HasFlag(ParseFlag.IsTooLong)))
                         warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
@@ -754,8 +753,10 @@ namespace _3PA {
             }
 
             // for debug purposes, check if the document can be parsed
-            if (Config.IsDevelopper && ParserHandler.AblParser.ParserErrors.Count > 0) {
-                UserCommunication.Notify("The parser found errors on this file:<br>" + ProCodeFormat.GetParserErrorDescription(ParserHandler.AblParser.ParserErrors), MessageImg.MsgInfo, "Parser message", "Errors found", 3);
+            if (Config.IsDevelopper) {
+                var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
+                if (!string.IsNullOrEmpty(parserErrors))
+                    UserCommunication.Notify("The parser found errors on this file:<br>" + parserErrors, MessageImg.MsgInfo, "Parser message", "Errors found", 3);
             }
 
             // update function prototypes

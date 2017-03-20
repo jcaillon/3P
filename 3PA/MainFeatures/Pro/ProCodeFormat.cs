@@ -26,20 +26,6 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProCodeFormat {
-        /// <summary>
-        /// Returns a string that describes the errors found by the parser (relative to block start/end)
-        /// </summary>
-        public static string GetParserErrorDescription(List<ParserError> listErrors) {
-            if (listErrors == null || listErrors.Count == 0)
-                return string.Empty;
-            var error = new StringBuilder();
-            foreach (var parserError in listErrors) {
-                error.AppendLine("<div>");
-                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
-                error.AppendLine("</div>");
-            }
-            return error.ToString();
-        }
 
         /// <summary>
         /// Tries to re-indent the code of the whole document
@@ -50,10 +36,9 @@ namespace _3PA.MainFeatures.Pro {
                 return;
 
             // make sure to parse the current document before doing anything
-            ParserHandler.ParseCurrentDocument(true, true);
-
             var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
-            var canIndent = ParserHandler.AblParser.ParserErrors.Count == 0;
+            var parseErrors = ParserHandler.GetLastParseErrorsInHtml();
+            var canIndent = string.IsNullOrEmpty(parseErrors);
 
             // start indenting
             Sci.BeginUndoAction();
@@ -61,7 +46,7 @@ namespace _3PA.MainFeatures.Pro {
             StringBuilder x = new StringBuilder();
             var indentWidth = Sci.TabWidth;
             var i = 0;
-            var dic = ParserHandler.AblParser.LineInfo;
+            var dic = ParserHandler.LineInfo;
             while (dic.ContainsKey(i)) {
                 if (canIndent)
                     Sci.GetLine(i).Indentation = dic[i].BlockDepth*indentWidth;
@@ -75,7 +60,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
             if (!canIndent) {
-                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + GetParserErrorDescription(ParserHandler.AblParser.ParserErrors) : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
+                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles successfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + parseErrors : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
             }
         }
 

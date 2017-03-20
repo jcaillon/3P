@@ -113,14 +113,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 yamuiFilteredTypeList1.Height -= 10;
             };
 
-            yamuiButton1.ButtonPressed += (sender, args) => {
-                yamuiFilteredTypeList1.SetItems(AutoCompletion.CurrentItems.Select(item => new FuckItem {
-                    DisplayText = item.DisplayText,
-                    Type = item.Type,
-                    SubString = item.SubString,
-                    Flag = item.Flags
-                }).Cast<ListItem>().ToList());
-            };
+
 
             yamuiButton2.Text = @"switch tree mode";
             yamuiButton2.ButtonPressed += (sender, args) => { yamuiFilteredTypeTreeList1.SearchMode = yamuiFilteredTypeTreeList1.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? YamuiFilteredTypeTreeList.SearchModeOption.FilterOnlyAndIncludeParent : YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent; };
@@ -216,48 +209,4 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
     }
 
-    internal class FuckItem : FilteredTypeListItem {
-        public CompletionType Type;
-        public string SubString;
-        public ParseFlag Flag;
-
-        public override int ItemType {
-            get { return (int) Type; }
-        }
-
-        public override Image ItemTypeImage {
-            get {
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((CompletionType) ItemType).ToString());
-                return tryImg ?? ImageResources.Error;
-            }
-        }
-
-        public override Image ItemImage {
-            get { return null; }
-        }
-
-        public override bool IsRowHighlighted {
-            get { return false; }
-        }
-
-        public override string SubText {
-            get { return SubString; }
-        }
-
-        public override List<Image> TagImages {
-            get {
-                var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
-                    if (tryImg != null) {
-                        outList.Add(tryImg);
-                    }
-                }
-                return outList;
-            }
-        }
-    }
 }

@@ -625,10 +625,6 @@ namespace _3PA.MainFeatures {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DatabaseInfo")); }
         }
 
-        public static string FolderLibrary {
-            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries")); }
-        }
-
         public static string FolderUpdate {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
         }
@@ -661,10 +657,6 @@ namespace _3PA.MainFeatures {
         // errors
         public static string FileErrorLog {
             get { return Path.Combine(FolderLog, "error.log"); }
-        }
-
-        public static string FileErrorToSend {
-            get { return Path.Combine(FolderLog, "error_.log"); }
         }
 
         // dumps
@@ -719,7 +711,11 @@ namespace _3PA.MainFeatures {
 
         // updates related
         public static string FileVersionLog {
-            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+            get { return Path.Combine(FolderUpdate, "version.log"); }
+        }
+
+        public static string FilePreviousVersion {
+            get { return Path.Combine(FolderUpdate, "previous.ver"); }
         }
 
         public static string FileDownloadedPlugin {
