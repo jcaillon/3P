@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Drawing;
-using YamuiFramework.Helper;
 using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.NppCore {
-
     internal class UiThread {
-
         private static NppEmptyForm _anchorForm;
-        
+
         /// <summary>
         /// init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
         /// from a back groundthread, use : BeginInvoke()
@@ -61,7 +58,5 @@ namespace _3PA.NppCore {
             }
             return false;
         }
-
-
     }
 }

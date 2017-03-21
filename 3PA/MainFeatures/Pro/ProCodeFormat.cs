@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProCodeFormat.cs) is part of 3P.
@@ -16,8 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
-using System.Collections.Generic;
+
 using System.IO;
 using System.Text;
 using _3PA.Lib;
@@ -26,7 +28,6 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProCodeFormat {
-
         /// <summary>
         /// Tries to re-indent the code of the whole document
         /// </summary>

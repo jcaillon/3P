@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Keywords.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +29,6 @@ using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     //TODO: pour gérer les HANDLE attribute, ajouter une colonne aux keywords qui peut soit être vide soit contenir une liste de nombres qui correspondent à un id de handle:
     // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont 1 dans la 5eme colonne
 
@@ -34,7 +36,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// this class handles the static keywords of progress
     /// </summary>
     internal class Keywords {
-
         #region Singleton
 
         private static Keywords _instance;
@@ -246,5 +247,4 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public string Description;
         public List<string> Synthax;
     }
-
 }

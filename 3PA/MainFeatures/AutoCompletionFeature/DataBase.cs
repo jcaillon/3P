@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DataBase.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,7 +30,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal static class DataBase {
-
         #region events
 
         /// <summary>
@@ -268,7 +270,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #endregion
 
         #region get list
-        
+
         /// <summary>
         /// returns a dictionary containing all the table names of each database, 
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
@@ -281,85 +283,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     output.Add(table.Name, CompletionType.Table);
                 if (!output.ContainsKey(string.Join(".", @base.Name, table.Name)))
                     output.Add(string.Join(".", @base.Name, table.Name), CompletionType.Table);
-            }));
-            return output;
-        }
-
-        /// <summary>
-        /// returns the list of databases
-        /// </summary>
-        public static List<CompletionItem> GetDbList() {
-            if (_dataBases.Count <= 0)
-                return new List<CompletionItem>();
-            return _dataBases.Select(@base => new CompletionItem {
-                DisplayText = @base.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                Type = CompletionType.Database,
-                FromParser = false,
-                Ranking = 0,
-                Flags = 0
-            }).ToList();
-        }
-
-        /// <summary>
-        /// returns the list of keywords
-        /// </summary>
-        public static List<CompletionItem> GetSequencesList() {
-            return _sequences.Select(item => new CompletionItem {
-                DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                Type = CompletionType.Sequence,
-                SubString = item.DbName
-            }).ToList();
-        }
-
-        /// <summary>
-        /// returns the list tables of each database
-        /// </summary>
-        /// <returns></returns>
-        public static List<CompletionItem> GetTablesList() {
-            var output = new List<CompletionItem>();
-            foreach (var dataBase in _dataBases)
-                output.AddRange(GetTablesList(dataBase));
-            return output;
-        }
-
-        /// <summary>
-        /// Returns the list of tables for a given database
-        /// </summary>
-        /// <param name="dataBase"></param>
-        /// <returns></returns>
-        public static List<CompletionItem> GetTablesList(ParsedDataBase dataBase) {
-            var output = new List<CompletionItem>();
-            if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
-            output.AddRange(dataBase.Tables.Select(table => new CompletionItem {
-                DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                SubString = dataBase.Name,
-                Type = CompletionType.Table,
-                FromParser = false,
-                Ranking = 0,
-                Flags = 0
-            }).ToList());
-            return output;
-        }
-
-        /// <summary>
-        /// Returns the list of fields for a given table (it can also be a temp table!)
-        /// </summary>
-        /// <param name="table"></param>
-        /// <returns></returns>
-        public static List<CompletionItem> GetFieldsList(ParsedTable table) {
-            var output = new List<CompletionItem>();
-            if (table == null)
-                return output;
-            output.AddRange(table.Fields.Select(field => new CompletionItem {
-                DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
-                FromParser = false,
-                SubString = field.Type.ToString(),
-                Ranking = 0,
-                Flags = (field.Flags.HasFlag(ParseFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
-                        (field.Flags.HasFlag(ParseFlag.Index) ? ParseFlag.Index : 0) |
-                        (field.Flags.HasFlag(ParseFlag.Extent) ? ParseFlag.Extent : 0),
-                ParsedItem = table
             }));
             return output;
         }
@@ -392,7 +315,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     DisplayText = db.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                     Type = CompletionType.Database,
                     FromParser = false,
-                    ParsedItem = db,
+                    ParsedBaseItem = db,
                     Ranking = 0,
                     Flags = 0,
                     Children = new List<CompletionItem>(),
@@ -407,7 +330,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         Type = CompletionType.Table,
                         SubString = db.Name,
                         FromParser = false,
-                        ParsedItem = table,
+                        ParsedBaseItem = table,
                         Ranking = 0,
                         Flags = 0,
                         Children = new List<CompletionItem>(),
@@ -416,7 +339,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     };
                     curDb.Children.Add(curTable); // add the table as a child of db
                     output.Add(curTable); // but also as an item
-                    
+
                     // Fields
                     foreach (var field in table.Fields) {
                         curTable.Children.Add(new CompletionItem {
@@ -424,7 +347,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                             SubString = field.Type.ToString(),
                             FromParser = false,
-                            ParsedItem = field,
+                            ParsedBaseItem = field,
                             Ranking = 0,
                             Flags = field.Flags & ~ParseFlag.Primary,
                             ParentItem = curTable
@@ -505,6 +428,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
     }
 }

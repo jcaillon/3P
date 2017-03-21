@@ -7,7 +7,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
     /// An empty form that does absolutely nothing
     /// </summary>
     internal class NppEmptyForm : Form {
-
         #region ShowWithoutActivation & Don't show in ATL+TAB
 
         /// <summary>
@@ -24,7 +23,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
         protected override CreateParams CreateParams {
             get {
                 CreateParams createParams = base.CreateParams;
-                createParams.ExStyle |= (int)WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
                 return createParams;
             }
         }

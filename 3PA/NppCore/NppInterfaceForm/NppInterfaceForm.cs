@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppInterfaceForm.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -26,12 +28,10 @@ using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 
 namespace _3PA.NppCore.NppInterfaceForm {
-
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
     internal class NppInterfaceForm : YamuiFormBase {
-
         #region constant
 
         private static readonly Point CloakedPosition = new Point(-10000, -10000);

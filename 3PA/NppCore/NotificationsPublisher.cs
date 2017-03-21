@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NotificationsPublisher.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -29,7 +31,6 @@ namespace _3PA.NppCore {
     /// This class calls the appropriate methods depending on the notifications received from both notepad++ and scintilla
     /// </summary>
     internal static class NotificationsPublisher {
-
         #region Members
 
         /// <summary>
@@ -70,21 +71,21 @@ namespace _3PA.NppCore {
                             // call OnNppReady then OnPlugReady if it all went ok
                             if (PluginIsReady) {
                                 Plug.DoPlugStart();
-                                OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
+                                OnNppNotification(new SCNotification((uint) NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
 
                                 // set hooks on mouse/keyboard
                                 SetHooks();
                             }
                             return;
-                            
-                        case (uint)NppNotif.NPPN_SHUTDOWN:
+
+                        case (uint) NppNotif.NPPN_SHUTDOWN:
                             // uninstall hooks on mouse/keyboard
                             UninstallHooks();
                             UiThread.Close();
                             Plug.DoNppShutDown();
                             return;
 
-                        case (uint)NppNotif.NPPN_CANCELSHUTDOWN:
+                        case (uint) NppNotif.NPPN_CANCELSHUTDOWN:
                             PluginIsReady = true;
                             return;
                     }
@@ -178,7 +179,7 @@ namespace _3PA.NppCore {
                                 Plug.DoNppFileBeforeLoad();
                                 return;
 
-                            case (uint)NppNotif.NPPN_FILEBEFOREOPEN:
+                            case (uint) NppNotif.NPPN_FILEBEFOREOPEN:
                                 ScnModifiedDisabled = false;
                                 return;
 
@@ -211,11 +212,10 @@ namespace _3PA.NppCore {
                                 // and it only updates on npp shutdown
                                 return;
 
-                            case (uint)NppNotif.NPPN_BEFORESHUTDOWN:
+                            case (uint) NppNotif.NPPN_BEFORESHUTDOWN:
                                 // prevent the plugin from handling a lot of events when npp is about to shutdown
                                 PluginIsReady = false;
                                 return;
-
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserVisitor.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,24 +30,26 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// This class sustains the auto completion list AND the code explorer list
     /// by visiting the parser and creating new completionData
     /// </summary>
     internal class ParserVisitor : IParserVisitor {
-
         #region static
 
         /// <summary>
         /// We keep tracks of the parsed files, to avoid parsing the same file twice
         /// </summary>
-        private static HashSet<string> RunPersistentFiles { get { return ParserHandler.RunPersistentFiles; }}
+        private static HashSet<string> RunPersistentFiles {
+            get { return ParserHandler.RunPersistentFiles; }
+        }
 
         /// <summary>
         /// Instead of parsing the persistent files each time we store the results of the parsing to use them when we need it
         /// </summary>
-        private static Dictionary<string, ParserVisitor> SavedPersistent { get { return ParserHandler.SavedPersistent; } }
+        private static Dictionary<string, ParserVisitor> SavedPersistent {
+            get { return ParserHandler.SavedPersistent; }
+        }
 
         #endregion
 
@@ -174,7 +179,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
-
             // try to find the file in the propath
             if (pars.Flags.HasFlag(ParseFlag.Persistent) && !pars.Flags.HasFlag(ParseFlag.Uncertain)) {
                 string procName = pars.Name;
@@ -400,7 +404,7 @@ namespace _3PA.MainFeatures.Parser {
                 SubString = pars.ReturnType.ToString(),
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true
             });
         }
@@ -428,7 +432,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Function,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true,
                 SubString = pars.ReturnType.ToString()
             });
@@ -463,7 +467,7 @@ namespace _3PA.MainFeatures.Parser {
                 ItemImage = pars.Flags.HasFlag(ParseFlag.External) ? Utils.GetImageFromStr(CodeExplorerBranch.ExternalProcedure.ToString()) : null,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true,
                 SubString = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null
             });
@@ -481,7 +485,7 @@ namespace _3PA.MainFeatures.Parser {
                     Type = CompletionType.Preprocessed,
                     Flags = pars.Flags,
                     Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                    ParsedItem = pars,
+                    ParsedBaseItem = pars,
                     FromParser = true,
                     SubString = null
                 });
@@ -512,7 +516,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Label,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true
             });
         }
@@ -626,7 +630,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = type,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true,
                 SubString = subString
             });
@@ -697,7 +701,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.TempTable,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedItem = pars,
+                ParsedBaseItem = pars,
                 FromParser = true,
                 SubString = subStr,
                 ChildSeparator = '.'
@@ -706,7 +710,7 @@ namespace _3PA.MainFeatures.Parser {
                 new CompletionItem {
                     DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                     Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
-                    ParsedItem = field,
+                    ParsedBaseItem = field,
                     FromParser = true,
                     SubString = field.Type.ToString(),
                     Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name),
@@ -756,7 +760,6 @@ namespace _3PA.MainFeatures.Parser {
         /// set to true to also display proc/func in the code explorer tree if asked
         /// </summary>
         private void LoadProcPersistent(string fileName, ParsedScopeItem scopeItem) {
-
             ParserVisitor parserVisitor = ParseFile(fileName, scopeItem);
 
             // add info to the completion list
@@ -774,7 +777,6 @@ namespace _3PA.MainFeatures.Parser {
                 }
                 _parsedExplorerItemsList.AddRange(listExpToAdd);
             }
-
         }
 
         /// <summary>

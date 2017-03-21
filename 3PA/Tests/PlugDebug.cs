@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (PlugDebug.cs) is part of 3P.
@@ -16,23 +17,19 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
@@ -43,16 +40,26 @@ namespace _3PA.Tests {
     /// This class is only for debug/dev purposes, it will not be used in production
     /// </summary>
     internal class PlugDebug {
-        
         #region Debug test
 
-        private static AsapButDelayableAction _ac;
-
         public static void DebugTest1() {
+            //char? sep;
+            //string outstr;
+            //int pos = 0;
+            //outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
+            ////-> "field" = GetKeyword("db:table.field", ref 6, '.')
+            //outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
+            ////-> "table" = GetKeyword("db:table.field", ref 12, ':')
+            //outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
+            ////-> "db" = GetKeyword("db", ref 14, ?)
+            //pos = 1;
+            //outstr += AutoCompletion.GetWord(" word1 word2 ", ref pos, out sep, false);
+            ////-> "db" = GetKeyword("word2", ref 6, ?)
+            //
+            //UserCommunication.Notify(AutoCompletion.GetQualifiedWord("daz:dza azd az az db.table.field", false));
         }
 
-        public static void DebugTest2() {
-        }
+        public static void DebugTest2() {}
 
         public static void DebugTest3() {
             /*
@@ -75,7 +82,6 @@ namespace _3PA.Tests {
         }
 
         #endregion
-
 
         #region debug
 

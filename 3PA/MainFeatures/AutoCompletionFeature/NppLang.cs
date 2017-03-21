@@ -10,7 +10,6 @@ using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
     /// supported by npp; this file list the extensions for each lang as well as the keywords
@@ -19,7 +18,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
     internal class NppLangs {
-
         #region Singleton
 
         private static NppLangs _instance;
@@ -143,7 +141,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal class LangDescription {
-
             private List<CompletionItem> _keywords;
 
             /// <summary>
@@ -234,7 +231,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     DisplayText = keyword,
                                     Type = overloads == null ? CompletionType.Keyword : CompletionType.Function,
                                     SubString = LangName + ".xml",
-                                    ParsedItem = new NppKeyword(keyword) {
+                                    ParsedBaseItem = new NppKeyword(keyword) {
                                         Overloads = overloads,
                                         Origin = NppKeywordOrigin.AutoCompApiXml
                                     }
@@ -271,7 +268,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                                 DisplayText = keyword,
                                                 Type = CompletionType.Keyword,
                                                 SubString = "userDefinedLang.xml",
-                                                ParsedItem = new NppKeyword(keyword) {
+                                                ParsedBaseItem = new NppKeyword(keyword) {
                                                     Origin = NppKeywordOrigin.UserLangXml
                                                 }
                                             });
@@ -296,7 +293,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                             DisplayText = keyword,
                                             Type = CompletionType.Keyword,
                                             SubString = "langs.xml",
-                                            ParsedItem = new NppKeyword(keyword) {
+                                            ParsedBaseItem = new NppKeyword(keyword) {
                                                 Origin = NppKeywordOrigin.LangsXml
                                             }
                                         });
@@ -349,8 +346,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             public NppKeyword(string name)
-                : base(name) {
-            }
+                : base(name) {}
         }
 
         internal enum NppKeywordOrigin {
@@ -361,5 +357,4 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #endregion
     }
-
 }

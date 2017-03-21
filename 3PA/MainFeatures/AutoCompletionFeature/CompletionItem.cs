@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CompletionItem.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -65,7 +68,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// When the FromParser is true, contains the ParsedItem extracted by the parser
         /// </summary>
-        public ParsedBaseItem ParsedItem { get; set; }
+        public ParsedBaseItem ParsedBaseItem { get; set; }
 
         /// <summary>
         /// This field is only used when Type == CompletionType.Keyword, it contains the keyword type...

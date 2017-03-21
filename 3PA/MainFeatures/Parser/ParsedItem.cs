@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParsedItem.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +29,6 @@ namespace _3PA.MainFeatures.Parser {
     #region base classes
 
     internal abstract class ParsedBaseItem {
-
         /// <summary>
         /// Name of the parsed item
         /// </summary>
@@ -411,7 +413,7 @@ namespace _3PA.MainFeatures.Parser {
                 output = Scope.ScopeType == currentScope.ScopeType;
                 output = output && Scope.Name.Equals(currentScope.Name);
             }
-            
+
             // check for the definition line
             if (currentLine >= 0) {
                 output = output && currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);

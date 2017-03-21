@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UpdateHandler.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -33,7 +35,6 @@ using _3PA.MainFeatures;
 using _3PA.NppCore;
 
 namespace _3PA.Lib {
-
     /// <summary>
     /// Handles the update of this software
     /// </summary>
@@ -330,7 +331,6 @@ namespace _3PA.Lib {
         /// Called on an update, allows to do special stuff according to the version updated
         /// </summary>
         private static void UpdateDoneFromVersion(string fromVersion) {
-
             if (!fromVersion.IsHigherVersionThan("1.7.3")) {
                 UserCommunication.Notify("Cleaning libraries...");
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);

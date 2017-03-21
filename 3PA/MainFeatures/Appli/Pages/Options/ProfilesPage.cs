@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProfilesPage.cs) is part of 3P.
@@ -16,17 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletionFeature;
-using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
@@ -112,8 +111,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 yamuiScrollList1.Height -= 10;
                 yamuiFilteredTypeList1.Height -= 10;
             };
-
-
 
             yamuiButton2.Text = @"switch tree mode";
             yamuiButton2.ButtonPressed += (sender, args) => { yamuiFilteredTypeTreeList1.SearchMode = yamuiFilteredTypeTreeList1.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? YamuiFilteredTypeTreeList.SearchModeOption.FilterOnlyAndIncludeParent : YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent; };
@@ -208,5 +205,4 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
         }
     }
-
 }

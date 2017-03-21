@@ -33,7 +33,6 @@ namespace YamuiFramework.Forms {
     /// Form class that implements interesting utilities + shadow + onpaint + movable/resizable borderless
     /// </summary>
     public class YamuiFormBase : Form {
-
         #region Constants
 
         public const int BorderWidth = 2;

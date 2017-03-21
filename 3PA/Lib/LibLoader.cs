@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (LibLoader.cs) is part of 3P.
@@ -16,19 +17,17 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using YamuiFramework.Themes;
 using _3PA.MainFeatures;
 using _3PA._Resource;
 
 namespace _3PA.Lib {
-
     internal static class LibLoader {
-
         /// <summary>
         /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
         /// to the program
@@ -47,7 +46,6 @@ namespace _3PA.Lib {
                     default:
                         return null;
                 }
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in LibLoader");
             }
@@ -59,6 +57,5 @@ namespace _3PA.Lib {
             var v = yamuiAssembly.GetName().Version.ToString();
             return "v" + v;
         }
-
     }
 }

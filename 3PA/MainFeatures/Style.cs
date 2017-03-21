@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Style.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -35,7 +38,6 @@ namespace _3PA.MainFeatures {
     /// This class handles the Styles of scintilla
     /// </summary>
     internal static class Style {
-
         #region Current theme
 
         private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();

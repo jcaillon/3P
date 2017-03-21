@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletion.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +37,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// This class handles the AutoCompletionForm
     /// </summary>
     internal static class AutoCompletion {
-
         #region field
 
         /// <summary>
@@ -46,6 +48,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// position of the caret when the auto completion was opened (from shortcut)
         /// </summary>
         private static int _shownPosition;
+
         private static int _shownLine;
 
         private static AutoCompletionForm _form;
@@ -66,7 +69,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         // contains the list of items that do not come from the parser
         private static List<CompletionItem> _staticItems = new List<CompletionItem>();
-        
+
         private static ReaderWriterLockSlim _itemsListLock = new ReaderWriterLockSlim();
 
         /// <summary>
@@ -114,8 +117,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _staticItems = Keywords.Instance.CompletionItems.ToList();
                 _staticItems.AddRange(DataBase.CompletionItems);
                 _additionalWordChar = new[] {'-', '_', '&'};
-                _childSeparators = new[] { '.', ':' };
-
+                _childSeparators = new[] {'.', ':'};
             } else {
                 _staticItems = Npp.CurrentFile.Lang.Keywords;
                 _additionalWordChar = Npp.CurrentFile.Lang.AdditionalWordChar;
@@ -123,13 +125,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
-        }
-
-        /// <summary>
-        /// is the char part of a word in the current lang
-        /// </summary>
-        public static bool IsCharPartOfWord(char c) {
-            return char.IsLetterOrDigit(c) || _additionalWordChar.Contains(c);
         }
 
         /// <summary>
@@ -149,28 +144,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 UpdateAutocompletion(true);
         }
 
-        private static string GetKeyword(string input, ref int at, out char? separator) {
-            var startPos = input.Length - 1 - at;
-            int wordLenght = 0;
-            int pos = startPos;
-            while (pos >= 0) {
-                var ch = input[pos];
-                // normal word
-                if (IsCharPartOfWord(ch)) {
-                    pos--;
-                    wordLenght++;
-                } else
-                    break;
-            }
-            separator = null;
-            if (pos > 0) {
-                if (_childSeparators.Contains(input[pos]))
-                    separator = input[pos];
-            }
-            at += wordLenght + 1;
-            return wordLenght == 0 ? string.Empty : input.Substring(startPos - wordLenght + 1, wordLenght);
-        }
-
         /// <summary>
         /// Updates the CURRENT ITEMS LIST,
         /// handles the opening or the closing of the auto completion form on key input, 
@@ -180,6 +153,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// the list of completionItem needed and the user is typing a word, increasing the filter
         /// </summary>
         public static void UpdateAutocompletion(bool canChangeListType) {
+            // show autocomp when typing? or not
             if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                 return;
 
@@ -201,12 +175,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
             int charPos = 0;
             char? firstSeparator;
-            var firstKeyword = GetKeyword(strOnLeft, ref charPos, out firstSeparator);
+            var firstKeyword = GetWord(strOnLeft, ref charPos, out firstSeparator);
 
             // if the auto completion is hidden or if the user is not continuing to type a word, we might want to 
             // change the list of items in the auto completion
             if (!isVisible || canChangeListType) {
-                
                 if (firstSeparator == null) {
                     // we didn't match a known separator just before the keyword;
                     // this means we want to display the entire list of keywords
@@ -215,34 +188,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         CurrentActiveTypes = ActiveTypes.All;
                         CurrentItems = _savedAllItems;
                     }
-
                 } else {
-
-                    IEnumerable<CompletionItem> outList = _savedAllItems.ToList();
-
-                    // case of : db.table.field (for instance)
-                    var keywordStack = new Stack<Tuple<string, char?>>();
-
-                    char? latestSeparator = firstSeparator;
-                    char? separator;
-                    string keyword;
-                    do {
-                        keyword = GetKeyword(strOnLeft, ref charPos, out separator);
-                        keywordStack.Push(new Tuple<string, char?>(keyword, latestSeparator));
-                        latestSeparator = separator;
-                    } while (separator != null);
-
-                    // at this point we have this stack :
-                    // db .
-                    // table .
-
-                    while (keywordStack.Count > 0) {
-                        var currentTuple = keywordStack.Pop();
-                        // filter the whole list to only keep the items matching "db" and "." (then "table" and ".")
-                        outList = GetFilteredItems(outList, currentTuple.Item1, currentTuple.Item2);
-                        // now make a new list formed of all the children of the filtered list above (ie children of db then children of table)
-                        outList = GetAllChildrenItems(outList);
-                    }
+                    //
+                    var outList = GetWordsList(_savedAllItems.ToList(), strOnLeft, charPos, firstSeparator);
 
                     // if the current word is directly preceded by a :, we are entering an object field/method
                     // for now, we then display the whole list of object keywords
@@ -251,7 +199,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             CurrentActiveTypes = ActiveTypes.KeywordObject;
                             CurrentItems = _savedAllItems;
                         }
-                        ShowSuggestionList(keyword);
+                        ShowSuggestionList(firstKeyword);
                         return;
                     }
 
@@ -273,6 +221,105 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             ShowSuggestionList(firstKeyword);
         }
 
+        /// <summary>
+        /// is the char part of a word in the current lang
+        /// </summary>
+        public static bool IsCharPartOfWord(char c) {
+            return char.IsLetterOrDigit(c) || _additionalWordChar.Contains(c);
+        }
+
+        /// <summary>
+        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string
+        /// </summary>
+        public static string GetQualifiedWord(string input, bool readRightToLeft = true) {
+            int pos = 0;
+            char? sep;
+            var output = GetWord(input, ref pos, out sep, readRightToLeft);
+            while (sep != null) {
+                if (readRightToLeft) {
+                    output = sep + output;
+                    output = GetWord(input, ref pos, out sep) + output;
+                } else {
+                    output += sep;
+                    output += GetWord(input, ref pos, out sep, false);
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string
+        /// </summary>
+        public static string GetWord(string input, bool readRightToLeft = true) {
+            int pos = 0;
+            char? sep;
+            return GetWord(input, ref pos, out sep, readRightToLeft);
+        }
+
+        /// <summary>
+        /// Read a word from right to left or reverse, stops at the first non word character and 
+        /// returns said char if it's a child separator
+        /// 
+        /// Usage example :
+        /// GetKeyword("db.table.field", ref 0, ?)
+        /// -> "field" = GetKeyword("db:table.field", ref 6, '.')
+        /// GetKeyword("db.table.field", ref 6, ?)
+        /// -> "table" = GetKeyword("db:table.field", ref 12, ':')
+        /// GetKeyword("db.table.field", ref 12, ?)
+        /// -> "db" = GetKeyword("db", ref 14, ?)
+        /// GetKeyword(" word1 word2 ", ref 1, ?)
+        /// -> "db" = GetKeyword("word2", ref 6, ?)
+        /// </summary>
+        public static string GetWord(string input, ref int at, out char? separator, bool readRightToLeft = true) {
+            var lght = input.Length - 1;
+            int wordLenght = 0;
+            int pos = 0;
+            while (wordLenght <= lght - at) {
+                pos = readRightToLeft ? lght - wordLenght - at : wordLenght + at;
+                var ch = input[pos];
+                // normal word
+                if (IsCharPartOfWord(ch))
+                    wordLenght++;
+                else
+                    break;
+            }
+            separator = null;
+            if (_childSeparators.Contains(input[pos]))
+                separator = input[pos];
+            string outStr = wordLenght == 0 ? string.Empty : input.Substring(readRightToLeft ? input.Length - wordLenght - at : at, wordLenght);
+            at += wordLenght + 1;
+            return outStr;
+        }
+
+        private static IEnumerable<CompletionItem> GetWordsList(List<CompletionItem> inputList, string strOnLeft, int charPos, char? firstSeparator) {
+            IEnumerable<CompletionItem> outList = inputList;
+
+            // case of : db.table.field (for instance)
+            var keywordStack = new Stack<Tuple<string, char?>>();
+
+            char? latestSeparator = firstSeparator;
+            char? separator;
+            do {
+                var keyword = GetWord(strOnLeft, ref charPos, out separator);
+                keywordStack.Push(new Tuple<string, char?>(keyword, latestSeparator));
+                latestSeparator = separator;
+            } while (separator != null);
+
+            // at this point we have this stack :
+            // db .
+            // table .
+
+            while (keywordStack.Count > 0) {
+                var currentTuple = keywordStack.Pop();
+                // filter the whole list to only keep the items matching "db" and "." (then "table" and ".")
+                outList = GetFilteredItems(outList, currentTuple.Item1, currentTuple.Item2);
+                // now make a new list formed of all the children of the filtered list above (ie children of db then children of table)
+                outList = GetAllChildrenItems(outList);
+            }
+
+            return outList;
+        }
+
         private static IEnumerable<CompletionItem> GetFilteredItems(IEnumerable<CompletionItem> collection, string keyword, char? chr) {
             foreach (CompletionItem item in collection)
                 if (item.ChildSeparator == chr && item.DisplayText.EqualsCi(keyword)) {
@@ -290,7 +337,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// This function handles the display of the auto complete form, create or update it
         /// </summary>
         private static void ShowSuggestionList(string keyword) {
-
             // instantiate the form if needed
             if (_form == null) {
                 _form = new AutoCompletionForm {
@@ -317,7 +363,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
         private static void ShowSuggestionList(AutoCompletionForm form) {
-
             // we changed the list of items to display
             if (_needToSetItems) {
                 form.SetItems(CurrentItems.Cast<ListItem>().ToList());
@@ -444,6 +489,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
         /// </summary>
         private static Dictionary<string, int> _displayTextRankingParsedItems = new Dictionary<string, int>();
+
         private static string _lastRememberedKeyword = "";
 
         /// <summary>
@@ -524,7 +570,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
         /// </summary>
         public static bool PerformKeyDown(KeyEventArgs e) {
-            return IsVisible && (bool)_form.SafeSyncInvoke(form => form.PerformKeyDown(e));
+            return IsVisible && (bool) _form.SafeSyncInvoke(form => form.PerformKeyDown(e));
         }
 
         /// <summary>
@@ -550,17 +596,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
-        /// try to match the keyword with an item in the autocomplete list
-        /// </summary>
-        /// <returns></returns>
-        public static CompletionItem FindInSavedItems(string keyword, int line) {
-            var filteredList = GetSortedFilteredSavedList(line, false);
-            if (filteredList == null || filteredList.Count <= 0) return null;
-            CompletionItem found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
-            return found;
-        }
-
-        /// <summary>
         /// Find a list of items in the completion and return it
         /// Uses the position to filter the list the same way the autocompletion form would
         /// </summary>
@@ -569,16 +604,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var filteredList = GetSortedFilteredSavedList(Sci.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0)
                 return null;
-            var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
-            if (found.Count > 0)
-                return found;
 
-            // search in tables fields
-            var tableFound = ParserHandler.FindAnyTableOrBufferByName(Sci.GetFirstWordRightAfterPoint(position));
-            if (tableFound == null) return null;
+            int charPos = 0;
+            char? firstSeparator;
+            var firstKeyword = GetWord(keyword, ref charPos, out firstSeparator);
+            if (firstSeparator != null) {
+                filteredList = GetWordsList(filteredList, keyword, charPos, firstSeparator).ToList();
+            }
 
-            var listOfFields = DataBase.GetFieldsList(tableFound).ToList();
-            return listOfFields.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
+            return filteredList.Where(data => data.DisplayText.EqualsCi(firstKeyword)).ToList();
         }
 
         /// <summary>
@@ -588,7 +622,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return _savedAllItems.Where(data => {
                 if (!data.FromParser)
                     return false;
-                var item = data.ParsedItem as ParsedDefine;
+                var item = data.ParsedBaseItem as ParsedDefine;
                 return item != null && item.Scope.Name.EqualsCi(procedureItem.DisplayText) && item.Type == ParseDefineType.Parameter && (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget);
             }).ToList();
         }
@@ -610,6 +644,5 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-
     }
 }

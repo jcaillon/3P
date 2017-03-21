@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (GapBuffer.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +37,6 @@ namespace _3PA.NppCore {
     [Serializable]
     [DebuggerDisplay("Count = {Count}")]
     public class GapBuffer<T> : IList<T>, IList {
-
         #region Fields
 
         private const int MinCapacity = 4;
@@ -87,7 +89,7 @@ namespace _3PA.NppCore {
                     // Allocate a new buffer
                     T[] newBuffer = new T[value];
                     int newGapEnd = newBuffer.Length - (_buffer.Length - _gapEnd);
-                    
+
                     // Copy the spans into the front and back of the new buffer
                     Array.Copy(_buffer, 0, newBuffer, 0, _gapStart);
                     Array.Copy(_buffer, _gapEnd, newBuffer, newGapEnd, newBuffer.Length - newGapEnd);

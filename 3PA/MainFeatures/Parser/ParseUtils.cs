@@ -5,10 +5,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
-
     internal static class ParserUtils {
-
-
         #region find table, buffer, temptable
 
         /// <summary>
@@ -83,7 +80,7 @@ namespace _3PA.MainFeatures.Parser {
                 default:
                     var token1 = str;
                     foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                        return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                        return (ParsedPrimitiveType) Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
                     }
                     break;
             }
@@ -92,7 +89,7 @@ namespace _3PA.MainFeatures.Parser {
             var completeStr = Keywords.Instance.GetFullKeyword(str);
             if (completeStr != null)
                 foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
-                    return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                    return (ParsedPrimitiveType) Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
                 }
 
             return ParsedPrimitiveType.Unknow;
@@ -109,7 +106,6 @@ namespace _3PA.MainFeatures.Parser {
 
             // if it's another var
             if (nbPoints == 0) {
-
                 var foundVar = parsedItems.Find(data => {
                     var def = data as ParsedDefine;
                     return def != null && def.Type != ParseDefineType.Buffer && def.PrimitiveType != ParsedPrimitiveType.Unknow && def.Name.EqualsCi(likeStr);

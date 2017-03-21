@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UserCommunication.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -29,9 +32,8 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures {
     internal static class UserCommunication {
-        
         #region private fields
-        
+
         private static List<YamuiInput> _openedMessage = new List<YamuiInput>();
 
         /// <summary>
@@ -56,7 +58,7 @@ namespace _3PA.MainFeatures {
                 }
             }
         }
-        
+
         #endregion
 
         #region Notify and NotifyUnique
@@ -171,7 +173,7 @@ namespace _3PA.MainFeatures {
         private static int Message(ref object data, string htmlContent, MessageImg imageType, string title, string subTitle, List<string> buttonsList = null, bool waitResponse = true, Action<HtmlLinkClickedEventArgs> clickHandler = null, int minWidth = 450) {
             var clickedButton = -1;
             if (buttonsList == null)
-                buttonsList = new List<string> { "Ok", "Cancel" };
+                buttonsList = new List<string> {"Ok", "Cancel"};
 
             if (waitResponse && data != null) {
                 clickedButton = YamuiInput.ShowDialog(
@@ -181,13 +183,13 @@ namespace _3PA.MainFeatures {
                     ThemeManager.FormatContent(htmlContent),
                     buttonsList,
                     ref data,
-                    Npp.NppScreen.WorkingArea.Width * 3 / 5,
-                    Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                    Npp.NppScreen.WorkingArea.Width*3/5,
+                    Npp.NppScreen.WorkingArea.Height*9/10,
                     minWidth,
                     (sender, args) => {
-                        if (clickHandler != null) 
+                        if (clickHandler != null)
                             clickHandler(args);
-                        else 
+                        else
                             Utils.OpenPathClickHandler(sender, args);
                     });
             } else if (waitResponse) {
@@ -200,8 +202,8 @@ namespace _3PA.MainFeatures {
                         ThemeManager.FormatContent(htmlContent),
                         buttonsList,
                         ref nullObject,
-                        Npp.NppScreen.WorkingArea.Width * 3 / 5,
-                        Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                        Npp.NppScreen.WorkingArea.Width*3/5,
+                        Npp.NppScreen.WorkingArea.Height*9/10,
                         minWidth,
                         (sender, args) => {
                             if (clickHandler != null)
@@ -226,9 +228,9 @@ namespace _3PA.MainFeatures {
                         Npp.NppScreen.WorkingArea.Height*9/10,
                         minWidth,
                         (sender, args) => {
-                            if (clickHandler != null) 
+                            if (clickHandler != null)
                                 clickHandler(args);
-                            else 
+                            else
                                 Utils.OpenPathClickHandler(sender, args);
                         });
                     _openedMessage.Add(form);

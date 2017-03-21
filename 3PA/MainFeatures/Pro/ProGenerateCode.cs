@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProGenerateCode.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +35,6 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
-
         #region Update/delete/add function prototype
 
         private static HashSet<string> _ignoredFiles = new HashSet<string>();
@@ -363,7 +365,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // in case of an incorrect document, warn the user
             if (!string.IsNullOrEmpty(parserErrors)) {
-                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> {"Continue", "Abort"}) != 0)
                     return;
             }
 
@@ -428,11 +430,10 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
         private static int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
-
             var parsedList = ParserHandler.ParsedItemsList;
 
             insertBefore = false;
-            
+
             // at caret position
             if (insertPos == ProInsertPosition.CaretPosition)
                 return Sci.GetPosFromLineColumn(Sci.Line.CurrentLine, 0);

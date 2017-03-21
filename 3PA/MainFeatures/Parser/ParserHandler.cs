@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserHandler.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +32,7 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
-
     internal static class ParserHandler {
-
         #region Core
 
         #region event
@@ -119,24 +120,19 @@ namespace _3PA.MainFeatures.Parser {
             try {
                 if (OnStart != null)
                     OnStart();
-                
+
                 Parser parser = null;
                 bool lastParsedFileIsProgress;
 
                 // make sure to always parse the current file
                 do {
-
                     lastParsedFilePath = Npp.CurrentFile.Path;
                     lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
 
                     if (lastParsedFileIsProgress) {
                         parser = new Parser(Sci.Text, lastParsedFilePath, null, true);
-                    } else {
-                        //
                     }
-
                 } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-
 
                 if (lastParsedFileIsProgress) {
                     // visitor
@@ -152,7 +148,6 @@ namespace _3PA.MainFeatures.Parser {
                         OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
                 }
 
-
                 if (_lock.TryEnterWriteLock(-1)) {
                     try {
                         if (lastParsedFileIsProgress) {
@@ -164,12 +159,10 @@ namespace _3PA.MainFeatures.Parser {
                             _lineInfo = new Dictionary<int, LineInfo>();
                             _parsedItemsList = new List<ParsedItem>();
                         }
-
                     } finally {
                         _lock.ExitWriteLock();
                     }
                 }
-
 
                 // send parserItems
                 if (OnEndSendParserItems != null)
@@ -177,7 +170,6 @@ namespace _3PA.MainFeatures.Parser {
 
                 if (OnEnd != null)
                     OnEnd();
-
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in DoParse " + (lastParsedFilePath ?? "?"));
             }
@@ -188,7 +180,7 @@ namespace _3PA.MainFeatures.Parser {
         #endregion
 
         #region Static data
-        
+
         /// <summary>
         /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
         /// </summary>
@@ -283,7 +275,6 @@ namespace _3PA.MainFeatures.Parser {
             }
             return null;
         }
-
 
         /// <summary>
         /// finds a ParsedTable for the input name, it can either be a database table,

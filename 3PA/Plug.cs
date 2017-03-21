@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Plug.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -48,7 +51,6 @@ namespace _3PA {
     /// - OnKeyDown<br></br>
     /// </summary>
     internal static class Plug {
-
         #region events
 
         /// <summary>
@@ -170,7 +172,7 @@ namespace _3PA {
                 ShareExportConf.StartCheckingForUpdates();
 
                 // ReSharper disable once ObjectCreationAsStatement
-                RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
+                RecurentAction.StartNew(User.Ping, 1000*60*120);
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
@@ -250,7 +252,7 @@ namespace _3PA {
                 ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
                 ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
                 ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
-                
+
                 // clean up timers
                 RecurentAction.CleanAll();
                 DelayedAction.CleanAll();
@@ -283,7 +285,6 @@ namespace _3PA {
         #region On mouse message
 
         public static bool MouseMessageHandler(WinApi.Messages message, Win32Api.MOUSEHOOKSTRUCT mouseStruct) {
-
             switch (message) {
                 // middle click : go to definition
                 case WinApi.Messages.WM_MBUTTONDOWN:
@@ -465,7 +466,6 @@ namespace _3PA {
         /// You can use Npp.CurrentFile and Npp.PreviousFile in this method
         /// </summary>
         public static void DoNppBufferActivated(bool initiating = false) {
-
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyOptionsForScintilla();
 
@@ -556,7 +556,7 @@ namespace _3PA {
         /// </summary>
         public static void OnSciCharTyped(char c) {
             // we are still entering a keyword
-            if (Abl.IsCharAllowedInVariables(c)) {
+            if (AutoCompletion.IsCharPartOfWord(c)) {
                 ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordContinue(c); });
             } else {
                 ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordEnd(c); });
@@ -597,7 +597,7 @@ namespace _3PA {
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
                 if (AutoCompletion.IsVisible && isNormalContext) {
-                    var keyword = Sci.GetKeyword(searchWordAt);
+                    var keyword = AutoCompletion.GetWord(Sci.GetTextOnLeftOfPos(searchWordAt));
 
                     // automatically insert selected keyword of the completion list?
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
@@ -874,6 +874,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

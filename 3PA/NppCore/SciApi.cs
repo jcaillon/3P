@@ -3,12 +3,10 @@ using System.Runtime.InteropServices;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
-
     /// <summary>
     /// Use this class to communicate with scintilla
     /// </summary>
     internal class SciApi {
-
         #region Fields
 
         private Win32Api.Scintilla_DirectFunction _directFunction;
@@ -60,7 +58,5 @@ namespace _3PA.NppCore {
         }
 
         #endregion
-
     }
-
 }

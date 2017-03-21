@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerForm.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,13 +33,11 @@ using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-
     internal partial class CodeExplorerForm : NppDockableDialogForm {
-
         #region private
 
         private volatile bool _refreshing;
-        
+
         private bool _isExpanded = true;
 
         #endregion
@@ -44,7 +45,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region constructor
 
         public CodeExplorerForm(NppEmptyForm formToCover) : base(formToCover) {
-
             InitializeComponent();
 
             // add the refresh button to the filter box
@@ -80,7 +80,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
-            
+
             // list events
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;

@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Scintilla.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,11 +27,10 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.MainFeatures;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
-
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -43,7 +45,6 @@ namespace _3PA.NppCore {
     /// faster execution than with SendMessage<br />
     /// </summary>
     internal static class Sci {
-
         #region const
 
         public const int KeywordMaxLength = 60;
@@ -51,7 +52,7 @@ namespace _3PA.NppCore {
         #endregion
 
         #region Critical Core
-        
+
         /// <summary>
         /// Instance of scintilla, the class that allows communication with the current scintilla
         /// </summary>
@@ -62,7 +63,7 @@ namespace _3PA.NppCore {
         #endregion
 
         #region Class accessors
-        
+
         /// <summary>
         /// Is scintilla currently focused?
         /// </summary>
@@ -1076,17 +1077,6 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Replaces the left part of the keyword found at (CurrentPosition + offset) by
-        /// the keyword given
-        /// (all wrapped in an undo action + handles multiselection) 
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="offset">offset relative to the current carret position</param>
-        public static void ReplaceKeywordWrapped(string keyword, int offset) {
-            ModifyTextAroundCaret(offset - GetKeyword(CurrentPosition + offset).Length, offset, keyword);
-        }
-
-        /// <summary>
         /// returns the text on the left of the position... it will always return empty string at minima
         /// </summary>
         /// <param name="curPos"></param>
@@ -1112,41 +1102,39 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
+        /// Replaces the left part of the keyword found at (CurrentPosition + offset) by
+        /// the keyword given
+        /// (all wrapped in an undo action + handles multiselection) 
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <param name="offset">offset relative to the current carret position</param>
+        public static void ReplaceKeywordWrapped(string keyword, int offset) {
+            ModifyTextAroundCaret(offset - GetKeyword(CurrentPosition + offset).Length, offset, keyword);
+        }
+
+        /// <summary>
         /// Gets the keyword at given position (reading only on the left of the position)
         /// </summary>
         /// <param name="curPos"></param>
         /// <returns></returns>
         public static string GetKeyword(int curPos = -1) {
-            if (curPos < 0) curPos = CurrentPosition;
-            return Abl.ReadAblWord(GetTextOnLeftOfPos(curPos), true);
-        }
-
-        /// <summary>
-        /// returns the first keyword right after the point (reading from right to left)
-        /// it is useful to get a table name when we enter a field, or a database name when we enter a table name,
-        /// also, if you analyse DATABASE.TABLE.CURFIELD, if returns TABLE and not DATABASE!
-        /// </summary>
-        /// <param name="curPos"></param>
-        /// <returns></returns>
-        public static string GetFirstWordRightAfterPoint(int curPos) {
-            int nbPoints;
-            var wholeWord = Abl.ReadAblWord(GetTextOnLeftOfPos(curPos), false, out nbPoints);
-            switch (nbPoints) {
-                case 1:
-                    return wholeWord.Split('.')[0];
-                case 2:
-                    return wholeWord.Split('.')[1];
-            }
-            return String.Empty;
+            if (curPos < 0)
+                curPos = CurrentPosition;
+            return AutoCompletion.GetWord(GetTextOnLeftOfPos(curPos));
         }
 
         /// <summary>
         /// Returns the ABL word at the given position (read on left and right) (stops at points)
         /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        public static string GetAblWordAtPosition(int position) {
-            return Abl.ReadAblWord(GetTextOnLeftOfPos(position), true) + Abl.ReadAblWord(GetTextOnRightOfPos(position), true, false);
+        public static string GetWordAtPosition(int position) {
+            return AutoCompletion.GetWord(GetTextOnLeftOfPos(position)) + AutoCompletion.GetWord(GetTextOnRightOfPos(position), false);
+        }
+
+        /// <summary>
+        /// Returns the ABL word at the given position (read on left and right) (stops at points)
+        /// </summary>
+        public static string GetQualifiedWordAtPosition(int position) {
+            return AutoCompletion.GetQualifiedWord(GetTextOnLeftOfPos(position)) + AutoCompletion.GetWord(GetTextOnRightOfPos(position), false);
         }
 
         public static string GetTextBetween(Point point) {
@@ -1154,7 +1142,7 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Get document lenght (number of character!!)
+        /// Get document length (number of character!!)
         /// </summary>
         public static int TextLength {
             get { return Api.Lines.TextLength; }
@@ -3769,7 +3757,5 @@ namespace _3PA.NppCore {
         }
 
         #endregion
-
     }
-
 }

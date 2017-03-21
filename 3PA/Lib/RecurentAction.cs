@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ReccurentAction.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +33,6 @@ namespace _3PA.Lib {
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
     public class RecurentAction : IDisposable {
-
         #region Static
 
         private static List<RecurentAction> _savedReccurentActionStarted = new List<RecurentAction>();
@@ -66,7 +68,7 @@ namespace _3PA.Lib {
         private int _repeatCounter;
 
         private object _lock;
-        
+
         #endregion
 
         #region Life and death

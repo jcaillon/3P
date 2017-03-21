@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Extensions.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,7 +37,6 @@ namespace _3PA.Lib {
     /// This class regroups all the extension methods
     /// </summary>
     public static class Extensions {
-
         #region object
 
         /// <summary>
@@ -238,7 +240,7 @@ namespace _3PA.Lib {
         //flags &= ~flag; // ClearFlag 
 
         #endregion
-        
+
         #region string extensions
 
         /// <summary>
@@ -541,6 +543,5 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
 }

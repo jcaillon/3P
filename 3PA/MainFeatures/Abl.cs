@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Abl.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using _3PA.NppCore;
 
@@ -35,11 +38,6 @@ namespace _3PA.MainFeatures {
         /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
         /// stopAtPoint or not, if not, output the nbPoints found
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="stopAtPoint"></param>
-        /// <param name="nbPoints"></param>
-        /// <param name="readRightToLeft"></param>
-        /// <returns></returns>
         public static string ReadAblWord(string input, bool stopAtPoint, out int nbPoints, bool readRightToLeft = true) {
             nbPoints = 0;
             var max = input.Length - 1;
@@ -63,10 +61,6 @@ namespace _3PA.MainFeatures {
         /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
         /// stopAtPoint or not
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="stopAtPoint"></param>
-        /// <param name="readRightToLeft"></param>
-        /// <returns></returns>
         public static string ReadAblWord(string input, bool stopAtPoint, bool readRightToLeft = true) {
             int nb;
             return ReadAblWord(input, stopAtPoint, out nb, readRightToLeft);

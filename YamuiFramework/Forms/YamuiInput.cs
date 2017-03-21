@@ -35,7 +35,6 @@ using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiInput : YamuiFormButtons {
-
         #region Fields
 
         public object DataObject;

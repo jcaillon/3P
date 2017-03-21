@@ -38,7 +38,6 @@ using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
     internal static class Npp {
-
         #region CurrentScintilla (scintilla instance)
 
         private static SciApi _primarySci;
@@ -108,7 +107,6 @@ namespace _3PA.NppCore {
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
         internal class NppFileInfo {
-
             #region Private fields
 
             private string _path;
@@ -128,7 +126,6 @@ namespace _3PA.NppCore {
                     var currentInternalLang = CurrentInternalLangName;
                     IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || currentInternalLang.Equals("openedgeabl");
                     _lang = null;
-                    
                 }
             }
 
@@ -882,25 +879,20 @@ namespace _3PA.NppCore {
             /// </summary>
             private string FolderBaseConf { get; set; }
 
-            public string FileNppUserDefinedLang
-            {
+            public string FileNppUserDefinedLang {
                 get { return Path.Combine(FolderBaseConf, @"userDefineLang.xml"); }
             }
 
-            public string FileNppConfigXml
-            {
+            public string FileNppConfigXml {
                 get { return Path.Combine(FolderBaseConf, @"config.xml"); }
             }
 
             public string FileNppStylersXml {
-                get {
-                    return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml");
-                }
+                get { return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml"); }
                 set { _fileNppStylersXml = value; }
             }
 
-            public string FileNppLangsXml
-            {
+            public string FileNppLangsXml {
                 get { return Path.Combine(FolderBaseConf, @"langs.xml"); }
             }
 
@@ -973,7 +965,6 @@ namespace _3PA.NppCore {
             }
 
             #endregion
-
         }
 
         #endregion
@@ -1003,6 +994,5 @@ namespace _3PA.NppCore {
         }
 
         #endregion
-
     }
 }

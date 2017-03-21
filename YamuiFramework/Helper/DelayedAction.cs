@@ -31,7 +31,6 @@ namespace YamuiFramework.Helper {
     /// Simple class to delay an action
     /// </summary>
     public class DelayedAction : IDisposable {
-
         #region Static
 
         private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>();
@@ -73,7 +72,7 @@ namespace YamuiFramework.Helper {
             _savedDelayedActions.Add(this);
             _toDo = toDo;
             _timer = new Timer {
-                AutoReset = false, 
+                AutoReset = false,
                 Interval = msDelay
             };
             _timer.Elapsed += TimerOnElapsed;
@@ -87,7 +86,7 @@ namespace YamuiFramework.Helper {
         #endregion
 
         #region private
-        
+
         /// <summary>
         /// Stop the recurrent action
         /// </summary>

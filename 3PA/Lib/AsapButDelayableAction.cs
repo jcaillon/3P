@@ -8,7 +8,6 @@ using Timer = System.Timers.Timer;
 
 namespace _3PA.Lib {
     internal class AsapButDelayableAction : IDisposable {
-
         #region Static
 
         private static List<AsapButDelayableAction> _savedActions = new List<AsapButDelayableAction>();

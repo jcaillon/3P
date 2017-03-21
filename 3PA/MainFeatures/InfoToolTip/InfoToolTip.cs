@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (InfoToolTip.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -84,11 +87,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <returns></returns>
         public static CompletionItem GetCurrentlyDisplayedCompletionData() {
-            if (_currentCompletionList == null) 
+            if (_currentCompletionList == null)
                 return null;
-            if (IndexToShow < 0) 
+            if (IndexToShow < 0)
                 IndexToShow = _currentCompletionList.Count - 1;
-            if (IndexToShow >= _currentCompletionList.Count) 
+            if (IndexToShow >= _currentCompletionList.Count)
                 IndexToShow = 0;
             return _currentCompletionList.ElementAt(IndexToShow);
         }
@@ -114,7 +117,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // sets the tooltip content
-            var data = AutoCompletion.FindInCompletionData(Sci.GetAblWordAtPosition(position), position);
+            var data = AutoCompletion.FindInCompletionData(Sci.GetQualifiedWordAtPosition(position), position);
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
@@ -240,7 +243,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // only select one item from the list
             var item = GetCurrentlyDisplayedCompletionData();
-            if (item == null) 
+            if (item == null)
                 return;
 
             CurrentWord = item.DisplayText;
@@ -284,15 +287,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width/2);
                         // buffer
                         if (item.FromParser) {
-                            if (item.ParsedItem is ParsedDefine) {
+                            if (item.ParsedBaseItem is ParsedDefine) {
                                 toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(item.SubString)));
                             }
-                            if (item.ParsedItem is ParsedTable && !string.IsNullOrEmpty(item.SubString)) {
-                                toDisplay.Append(FormatRow("Is like", (item.SubString.Contains("?")) ? "Unknown table [" + ((ParsedTable) item.ParsedItem).LcLikeTable + "]" : item.SubString.Replace("Like ", "")));
+                            if (item.ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(item.SubString)) {
+                                toDisplay.Append(FormatRow("Is like", (item.SubString.Contains("?")) ? "Unknown table [" + ((ParsedTable) item.ParsedBaseItem).LcLikeTable + "]" : item.SubString.Replace("Like ", "")));
                             }
                         }
 
-                        var tbItem = item.ParsedItem as ParsedTable;
+                        var tbItem = item.ParsedBaseItem as ParsedTable;
                         if (tbItem != null) {
                             if (!string.IsNullOrEmpty(tbItem.Description)) {
                                 toDisplay.Append(FormatRow("Description", tbItem.Description));
@@ -326,7 +329,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         toDisplay.Append(FormatRow("Database logical name", item.SubString));
                         break;
                     case CompletionType.Database:
-                        var dbItem = item.ParsedItem as ParsedDataBase;
+                        var dbItem = item.ParsedBaseItem as ParsedDataBase;
                         if (dbItem != null) {
                             toDisplay.Append(FormatRow("Logical name", dbItem.Name));
                             toDisplay.Append(FormatRow("Physical name", dbItem.PhysicalName));
@@ -337,13 +340,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Field:
                     case CompletionType.FieldPk:
                         // find field
-                        var fieldFound = item.ParsedItem as ParsedField;
+                        var fieldFound = item.ParsedBaseItem as ParsedField;
                         if (fieldFound != null) {
                             if (fieldFound.AsLike == ParsedAsLike.Like) {
                                 toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
                             }
                             toDisplay.Append(FormatRow("Type", FormatSubString(item.SubString)));
-                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable) item.ParentItem.ParsedItem).Name));
+                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable) item.ParentItem.ParsedBaseItem).Name));
                             if (!string.IsNullOrEmpty(fieldFound.Description))
                                 toDisplay.Append(FormatRow("Description", fieldFound.Description));
                             if (!string.IsNullOrEmpty(fieldFound.Format))
@@ -360,14 +363,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var paramList = AutoCompletion.FindProcedureParameters(item);
                         if (paramList.Count > 0)
                             foreach (var parameter in paramList) {
-                                var defItem = (ParsedDefine) parameter.ParsedItem;
+                                var defItem = (ParsedDefine) parameter.ParsedBaseItem;
                                 toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as <span class='ToolTipSubString'>" + defItem.PrimitiveType + "</span>"));
                             }
                         else
                             toDisplay.Append("None");
                         break;
                     case CompletionType.Function:
-                        var funcItem = (ParsedFunction) item.ParsedItem;
+                        var funcItem = (ParsedFunction) item.ParsedBaseItem;
                         toDisplay.Append(FormatSubtitle("RETURN TYPE"));
                         toDisplay.Append(FormatRowParam(ParseFlag.Output, "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
 
@@ -375,13 +378,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var param2List = AutoCompletion.FindProcedureParameters(item);
                         if (param2List.Count > 0)
                             foreach (var parameter in param2List) {
-                                var defItem = (ParsedDefine) parameter.ParsedItem;
+                                var defItem = (ParsedDefine) parameter.ParsedBaseItem;
                                 toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as " + FormatSubString(defItem.PrimitiveType.ToString())));
                             }
                         else
                             toDisplay.Append("None");
 
-                        var funcImplem = item.ParsedItem as ParsedImplementation;
+                        var funcImplem = item.ParsedBaseItem as ParsedImplementation;
                         if (funcImplem != null) {
                             toDisplay.Append(FormatSubtitle("PROTOTYPE"));
                             if (funcImplem.HasPrototype)
@@ -450,7 +453,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Label:
                         break;
                     case CompletionType.Preprocessed:
-                        var preprocItem = (ParsedPreProcVariable) item.ParsedItem;
+                        var preprocItem = (ParsedPreProcVariable) item.ParsedBaseItem;
                         if (preprocItem.UndefinedLine > 0)
                             toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
                         toDisplay.Append(FormatSubtitle("VALUE"));
@@ -464,7 +467,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.VariableComplex:
                     case CompletionType.VariablePrimitive:
                     case CompletionType.Widget:
-                        var varItem = (ParsedDefine) item.ParsedItem;
+                        var varItem = (ParsedDefine) item.ParsedBaseItem;
                         toDisplay.Append(FormatRow("Define type", FormatSubString(varItem.Type.ToString())));
                         if (!string.IsNullOrEmpty(varItem.TempPrimitiveType))
                             toDisplay.Append(FormatRow("Variable type", FormatSubString(varItem.PrimitiveType.ToString())));
@@ -484,12 +487,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append("Error when appending info :<br>" + e + "<br>");
             }
 
-            var parsedItem = item.ParsedItem as ParsedItem;
+            var parsedItem = item.ParsedBaseItem as ParsedItem;
 
             // parsed item?
-            if (parsedItem != null) {
+            if (parsedItem != null && item.FromParser) {
                 toDisplay.Append(FormatSubtitle("ORIGINS"));
-                toDisplay.Append(FormatRow("Scope name", parsedItem.Scope.Name));
+                if (parsedItem.Scope != null)
+                    toDisplay.Append(FormatRow("Scope name", parsedItem.Scope.Name));
                 if (!Npp.CurrentFile.Path.Equals(parsedItem.FilePath))
                     toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
             }
@@ -506,7 +510,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 [HIT CTRL ONCE] Prevent auto-close");
 
             // parsed item?
-            if (parsedItem != null) {
+            if (parsedItem != null && item.FromParser) {
                 toDisplay.Append(@"<br>[" + Config.Instance.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(parsedItem.Line, parsedItem.Column);
                 GoToDefinitionFile = parsedItem.FilePath;

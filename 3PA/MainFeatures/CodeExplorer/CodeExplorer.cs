@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorer.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System.Collections.Generic;
@@ -30,7 +32,6 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal class CodeExplorer : NppDockableDialog<CodeExplorerForm> {
-
         #region Core
 
         #region Singleton
@@ -71,7 +72,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #endregion
 
         #endregion
-        
+
         #region Public
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             int curLine = Sci.Line.CurrentLine;
             UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
         }
-        
+
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
@@ -153,7 +154,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
             List<CodeExplorerItem> outList;
 
             if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
-
                 outList = new List<CodeExplorerItem>();
 
                 // apply custom sorting
@@ -237,7 +237,5 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         #endregion
-
-
     }
 }

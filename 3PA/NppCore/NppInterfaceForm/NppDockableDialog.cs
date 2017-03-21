@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppDockableDialog.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -26,7 +28,6 @@ using _3PA._Resource;
 
 namespace _3PA.NppCore.NppInterfaceForm {
     internal class NppDockableDialog<T> where T : NppDockableDialogForm {
-
         #region private / protected
 
         protected string _dialogDescription = "?";
@@ -44,7 +45,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
         #endregion
 
         #region Properties
-        
+
         /// <summary>
         /// Is this form visible?
         /// </summary>
@@ -68,12 +69,12 @@ namespace _3PA.NppCore.NppInterfaceForm {
         /// <summary>
         /// Called just after the form is first shown, you must set Form in this method
         /// </summary>
-        protected virtual void InitForm() { }
+        protected virtual void InitForm() {}
 
         /// <summary>
         /// Called each time the visibility changes
         /// </summary>
-        protected virtual void OnVisibilityChange(bool visible) { }
+        protected virtual void OnVisibilityChange(bool visible) {}
 
         #endregion
 
