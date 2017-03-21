@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Appli.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using YamuiFramework.Helper;
 using _3PA.NppCore;
@@ -34,7 +37,6 @@ namespace _3PA.MainFeatures.Appli {
         private static AppliForm _form;
         private static bool _hasBeenShownOnce;
         private static volatile bool _initiating;
-        
 
         /// <summary>
         /// Call this method to toggle on/off the application
@@ -93,7 +95,7 @@ namespace _3PA.MainFeatures.Appli {
         public static void Init() {
             ForceClose();
             _form = new AppliForm {
-                CurrentForegroundWindow = Npp.HandleNpp
+                CurrentForegroundWindow = Npp.Handle
             };
         }
 

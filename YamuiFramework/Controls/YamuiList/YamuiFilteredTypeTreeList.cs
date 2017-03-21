@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -38,7 +37,6 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This is not the conventional tree searching but this makes more sense to me
     /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
-
         #region constants
 
         /// <summary>

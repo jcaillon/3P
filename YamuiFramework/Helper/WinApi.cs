@@ -801,6 +801,9 @@ namespace YamuiFramework.Helper {
         [DllImport("user32.dll")]
         public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
         [DllImport("user32.dll")]
         public static extern int GetMenuItemCount(IntPtr hMenu);
 

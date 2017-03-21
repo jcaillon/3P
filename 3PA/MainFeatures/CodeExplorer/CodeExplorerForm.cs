@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerForm.cs) is part of 3P.
@@ -16,16 +17,16 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
-using YamuiFramework.Helper;
-using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
@@ -33,57 +34,17 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     internal partial class CodeExplorerForm : NppDockableDialogForm {
-
         #region private
 
         private volatile bool _refreshing;
 
-        private volatile bool _updating;
-
-        // remember the original list of items
-        private List<CodeExplorerItem> _initialObjectsList;
         private bool _isExpanded = true;
-
-        #endregion
-
-        #region Fields public
-
-        /// <summary>
-        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
-        /// </summary>
-        public bool Refreshing {
-            get { return _refreshing; }
-            set {
-                _refreshing = value;
-                this.SafeInvoke(form => {
-                    var refreshButton = filterbox.ExtraButtonsList != null && filterbox.ExtraButtonsList.Count > 0 ? filterbox.ExtraButtonsList[0] : null;
-                    if (refreshButton == null)
-                        return;
-                    if (_refreshing) {
-                        refreshButton.BackGrndImage = ImageResources.Refreshing;
-                        toolTipHtml.SetToolTip(refreshButton, "The tree is being refreshed, please wait");
-                    } else {
-                        refreshButton.BackGrndImage = ImageResources.Refresh;
-                        toolTipHtml.SetToolTip(refreshButton, "Click to <b>Refresh</b> the tree");
-                    }
-                });
-            }
-        }
-
-        public YamuiFilteredTypeTreeList YamuiList {
-            get { return yamuiList; }
-        }
-
-        public YamuiFilterBox FilterBox {
-            get { return filterbox; }
-        }
 
         #endregion
 
         #region constructor
 
         public CodeExplorerForm(NppEmptyForm formToCover) : base(formToCover) {
-
             InitializeComponent();
 
             // add the refresh button to the filter box
@@ -105,7 +66,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 new YamuiFilterBox.YamuiFilterBoxButton {
                     Image = ImageResources.FromInclude,
                     OnClic = ButtonFromIncludeOnButtonPressed,
-                    ToolTip = "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)"
+                    ToolTip = "Toggle on/off <b>the display</b>, in the explorer, the functions and procedures loaded in persistent in this file"
                 }
             };
             filterbox.Initialize(yamuiList);
@@ -119,7 +80,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
-            
+
             // list events
             yamuiList.RowClicked += YamuiListOnRowClicked;
             yamuiList.EnterPressed += YamuiListOnEnterPressed;
@@ -127,143 +88,51 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        #region Update tree data
+        #region Public
+
+        /// <summary>
+        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
+        /// </summary>
+        public bool Refreshing {
+            get { return _refreshing; }
+            set {
+                _refreshing = value;
+                var refreshButton = filterbox.ExtraButtonsList != null && filterbox.ExtraButtonsList.Count > 0 ? filterbox.ExtraButtonsList[0] : null;
+                if (refreshButton == null)
+                    return;
+                if (_refreshing) {
+                    refreshButton.BackGrndImage = ImageResources.Refreshing;
+                    toolTipHtml.SetToolTip(refreshButton, "The tree is being refreshed, please wait");
+                } else {
+                    refreshButton.BackGrndImage = ImageResources.Refresh;
+                    toolTipHtml.SetToolTip(refreshButton, "Click to <b>Refresh</b> the tree");
+                }
+            }
+        }
+
+        public void ShowTreeBranches(bool show) {
+            yamuiList.ShowTreeBranches = show;
+        }
 
         /// <summary>
         /// This method uses the items found by the parser to update the code explorer tree (async)
         /// </summary>
-        public void UpdateTreeData() {
-            Task.Factory.StartNew(() => {
-                this.SafeInvoke(form => {
-                    try {
-                        if (!_updating) {
-                            _updating = true;
-                            UpdateTreeDataAction();
-                        }
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
-                    } finally {
-                        _updating = false;
-                        Refreshing = false;
-                    }
-                });
-            });
+        /// <param name="codeExplorerItems"></param>
+        public void UpdateTreeData(List<CodeExplorerItem> codeExplorerItems) {
+            yamuiList.SetItems(codeExplorerItems.Cast<ListItem>().ToList());
         }
-
-        private void UpdateTreeDataAction() {
-            // get the list of items
-            var tempList = ParserHandler.ParserVisitor.ParsedExplorerItemsList.ToList();
-            if (tempList.Count == 0)
-                return;
-
-            _initialObjectsList = new List<CodeExplorerItem>();
-
-            if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
-                // apply custom sorting
-                tempList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
-
-                HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
-
-                // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
-                CodeExplorerItem currentLvl1Parent = null;
-                var iItem = 0;
-                while (iItem < tempList.Count) {
-                    var item = tempList[iItem];
-
-                    // add an extra item that will be a new branch
-                    if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
-                        var branchDisplayText = item.Branch.GetDescription();
-
-                        currentLvl1Parent = new CodeExplorerItem {
-                            DisplayText = branchDisplayText,
-                            Branch = item.Branch,
-                            IsExpanded = true, // by default, expand lvl 1 branch
-                            Children = new List<FilteredTypeTreeListItem>()
-                        };
-                        foundBranches.Add(item.Branch);
-                        _initialObjectsList.Add(currentLvl1Parent);
-                    }
-
-                    // Add a child item to the current branch
-                    if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
-                        // For each duplicated item (same Icon and same displayText), we create a new branch
-                        var iIdentical = iItem + 1;
-                        ParseFlag flags = 0;
-
-                        // while we match identical items
-                        while (iIdentical < tempList.Count &&
-                               tempList[iItem].IconType == tempList[iIdentical].IconType &&
-                               tempList[iItem].Branch == tempList[iIdentical].Branch &&
-                               tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
-                            flags = flags | tempList[iIdentical].Flags;
-                            iIdentical++;
-                        }
-                        // if we found identical item
-                        if (iIdentical > iItem + 1) {
-                            // we create a branch for them
-                            var currentLvl2Parent = new CodeExplorerItem {
-                                DisplayText = tempList[iItem].DisplayText,
-                                Branch = tempList[iItem].Branch,
-                                IconType = tempList[iItem].IconType,
-                                IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
-                                SubString = "x" + (iIdentical - iItem),
-                                IsNotBlock = tempList[iItem].IsNotBlock,
-                                Flags = flags,
-                                Children = new List<FilteredTypeTreeListItem>()
-                            };
-                            currentLvl1Parent.Children.Add(currentLvl2Parent);
-
-                            // add child items to the newly created lvl 2 branch
-                            for (int i = iItem; i < iIdentical; i++) {
-                                currentLvl2Parent.Children.Add(tempList[i]);
-                            }
-
-                            iItem += (iIdentical - iItem);
-                            continue;
-                        }
-
-                        // single item, add it normally
-                        currentLvl1Parent.Children.Add(item);
-                    } else {
-                        // add existing item as a root item
-                        _initialObjectsList.Add(item);
-                    }
-
-                    iItem++;
-                }
-            } else {
-                _initialObjectsList = tempList;
-            }
-
-            yamuiList.SetItems(_initialObjectsList.Cast<ListItem>().ToList());
-
-            // also update current scope 
-            UpdateCurrentScope();
-        }
-
-        #endregion
-
-        #region public
 
         /// <summary>
         /// Updates the current scope to inform the user in which scope the caret is currently in
         /// </summary>
-        public void UpdateCurrentScope() {
-            if (Npp.CurrentFile.IsProgress) {
-                var currentScope = ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine);
-                if (currentScope != null) {
-                    pbCurrentScope.BackGrndImage = Utils.GetImageFromStr(currentScope.ScopeType.ToString());
-                    lbCurrentScope.Text = currentScope.Name;
-                    return;
-                }
-            }
-            pbCurrentScope.BackGrndImage = ImageResources.NotApplicable;
-            lbCurrentScope.Text = @"Not applicable";
+        public void UpdateCurrentScope(string text, Image image) {
+            pbCurrentScope.BackGrndImage = image;
+            lbCurrentScope.Text = text;
         }
 
         #endregion
 
-        #region events
+        #region Private
 
         /// <summary>
         /// Redirect mouse wheel to yamuilist?
@@ -308,8 +177,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Refreshing)
                 return;
             ParserHandler.ClearStaticData();
-            ParserHandler.ParseCurrentDocument(true);
             Npp.CurrentSci.Lines.Reset();
+            ParserHandler.ParseDocumentAsap();
             Sci.GrabFocus();
         }
 
@@ -317,7 +186,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Config.Instance.CodeExplorerSortingType++;
             if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
-            UpdateTreeData();
+            CodeExplorer.Instance.UpdateTreeData();
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
             Sci.GrabFocus();
         }
@@ -337,7 +206,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             // Parse the document
-            ParserHandler.ParseCurrentDocument(true);
+            ParserHandler.ParseDocumentAsap();
             Sci.GrabFocus();
         }
 

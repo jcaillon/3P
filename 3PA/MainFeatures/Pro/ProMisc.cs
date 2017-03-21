@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProMisc.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,32 +56,38 @@ namespace _3PA.MainFeatures.Pro {
             var position = fromMouseClick ? Sci.GetPositionFromMouseLocation() : Sci.CurrentPosition;
             if (fromMouseClick && position <= 0)
                 return;
-            var curWord = Sci.GetAblWordAtPosition(position);
+            var curWord = Sci.GetWordAtPosition(position);
 
             // match a word in the autocompletion? go to definition
-            var data = AutoCompletion.FindInCompletionData(curWord, position, true);
-            if (data != null && data.Count > 0) {
-                var nbFound = data.Count(data2 => data2.FromParser);
-
-                // only one match, then go to the definition
-                if (nbFound == 1) {
-                    var completionData = data.First(data1 => data1.FromParser);
-                    Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
-                    return;
-                }
-                if (nbFound > 1) {
-                    // otherwise, list the items and notify the user
-                    var output = new StringBuilder(@"Found several matching items, please choose the correct one :<br>");
-                    foreach (var cData in data.Where(data2 => data2.FromParser)) {
-                        output.Append("<div>" + (cData.ParsedItem.FilePath + "|" + cData.ParsedItem.Line + "|" + cData.ParsedItem.Column).ToHtmlLink("In " + Path.GetFileName(cData.ParsedItem.FilePath) + " (line " + cData.ParsedItem.Line + ")"));
-                        cData.DoForEachFlag((s, flag) => { output.Append("<img style='padding-right: 0px; padding-left: 5px;' src='" + s + "' height='15px'>"); });
-                        output.Append("</div>");
+            var listKeywords = AutoCompletion.FindInCompletionData(curWord, position, true);
+            if (listKeywords != null) {
+                var listItems = listKeywords.Where(item => item.FromParser && item.ParsedBaseItem is ParsedItem).ToList();
+                if (listItems.Count > 0) {
+                    // only one match, then go to the definition
+                    if (listItems.Count == 1) {
+                        var pItem = listItems.First().ParsedBaseItem as ParsedItem;
+                        if (pItem != null) {
+                            Npp.Goto(pItem.FilePath, pItem.Line, pItem.Column);
+                            return;
+                        }
                     }
-                    UserCommunication.NotifyUnique("GoToDefinition", output.ToString(), MessageImg.MsgQuestion, "Question", "Go to the definition", args => {
-                        Utils.OpenPathClickHandler(null, args);
-                        UserCommunication.CloseUniqueNotif("GoToDefinition");
-                    }, 0, 500);
-                    return;
+                    if (listItems.Count > 1) {
+                        // otherwise, list the items and notify the user
+                        var output = new StringBuilder(@"Found several matching items, please choose the correct one :<br>");
+                        foreach (var cData in listItems) {
+                            var pItem = listItems.First().ParsedBaseItem as ParsedItem;
+                            if (pItem != null) {
+                                output.Append("<div>" + (pItem.FilePath + "|" + pItem.Line + "|" + pItem.Column).ToHtmlLink("In " + Path.GetFileName(pItem.FilePath) + " (line " + pItem.Line + ")"));
+                                cData.DoForEachFlag((s, flag) => { output.Append("<img style='padding-right: 0px; padding-left: 5px;' src='" + s + "' height='15px'>"); });
+                                output.Append("</div>");
+                            }
+                        }
+                        UserCommunication.NotifyUnique("GoToDefinition", output.ToString(), MessageImg.MsgQuestion, "Question", "Go to the definition", args => {
+                            Utils.OpenPathClickHandler(null, args);
+                            UserCommunication.CloseUniqueNotif("GoToDefinition");
+                        }, 0, 500);
+                        return;
+                    }
                 }
             }
 
@@ -159,7 +168,7 @@ namespace _3PA.MainFeatures.Pro {
             if (InfoToolTip.InfoToolTip.IsVisible && !string.IsNullOrEmpty(InfoToolTip.InfoToolTip.CurrentWord))
                 searchWord = InfoToolTip.InfoToolTip.CurrentWord;
 
-            HtmlHelpInterop.DisplayIndex(0, helpPath, searchWord ?? Sci.GetAblWordAtPosition(Sci.CurrentPosition));
+            HtmlHelpInterop.DisplayIndex(0, helpPath, searchWord ?? Sci.GetWordAtPosition(Sci.CurrentPosition));
         }
 
         #endregion

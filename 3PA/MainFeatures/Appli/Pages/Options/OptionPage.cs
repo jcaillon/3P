@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (OptionPage.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -340,11 +343,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
             FileExplorer.FileExplorer.Instance.ApplyColorSettings();
-            AutoCompletion.ForceClose();
+            AutoCompletion.ApplyColorSettings();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyOptionsForScintilla();
             Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
-            AutoCompletion.RefreshStaticItems(); // when changing case
+            Keywords.Instance.ResetCompletionItems(); // when changing case
+            DataBase.ResetCompletionItems();
         }
 
         /// <summary>

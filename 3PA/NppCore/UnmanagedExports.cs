@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UnmanagedExports.cs) is part of 3P.
@@ -16,12 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Runtime.InteropServices;
 using RGiesecke.DllExport;
 using _3PA.Lib;
-using _3PA.WindowsCore;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
@@ -34,7 +36,6 @@ namespace _3PA.NppCore {
     /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
     /// </summary>
     public static class UnmanagedExports {
-
         #region fields
 
         /// <summary>
@@ -54,7 +55,8 @@ namespace _3PA.NppCore {
         #region Exported methods (to be used by npp)
 
         /// <summary>
-        /// A plugin is designed to either work with an ANSI or Unicode build of Notepad++. ANSI plugins must not define this function. Unicode plugins must define it, and it must return true
+        /// A plugin is designed to either work with an ANSI or Unicode build of Notepad++. ANSI plugins must not define this function. 
+        /// Unicode plugins must define it, and it must return true
         /// </summary>
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -73,7 +75,9 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Retrieves a pointer to an array of structures that describe the exposed functions. The expected length of the array is the value pointed by the argument. There must be at least one such routine. Provide one that displays some sort of About dialog box if there is otherwise no need for a menu entry - a typical case for external lexers
+        /// Retrieves a pointer to an array of structures that describe the exposed functions. The expected length of the array is the value pointed by the argument. 
+        /// There must be at least one such routine. 
+        /// Provide one that displays some sort of About dialog box if there is otherwise no need for a menu entry - a typical case for external lexers
         /// </summary>
         /// <param name="nbF"></param>
         /// <returns></returns>
@@ -108,7 +112,8 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// This procedure will be called by Notepad++ for a variety of reasons. The complete list of codes is to be found on the Messages And Notifications. It should handle these tasks using information passed in the notification header
+        /// This procedure will be called by Notepad++ for a variety of reasons. The complete list of codes is to be found on the Messages And Notifications. 
+        /// It should handle these tasks using information passed in the notification header
         /// </summary>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void beNotified(IntPtr notifyCode) {

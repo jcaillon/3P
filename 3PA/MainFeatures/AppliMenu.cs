@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AppliMenu.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,7 +34,6 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 using _3PA.Tests;
-using _3PA.WindowsCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures {
@@ -65,7 +67,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Closes the visible menu (if any)
         /// </summary>
-        public static bool ForceCloseMenu() {
+        public static bool ForceClose() {
             if (_popup != null) {
                 try {
                     _popup.Close();
@@ -83,7 +85,7 @@ namespace _3PA.MainFeatures {
         public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = null, int minWidth = 250) {
             try {
                 // Close any already opened menu
-                ForceCloseMenu();
+                ForceClose();
 
                 if (menuLogo == null)
                     menuLogo = Utils.GetNameOf(() => ImageResources.Logo16x16);

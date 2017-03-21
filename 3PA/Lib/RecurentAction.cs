@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ReccurentAction.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +32,31 @@ namespace _3PA.Lib {
     /// <summary>
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
-    public class ReccurentAction : IDisposable {
+    public class RecurentAction : IDisposable {
+        #region Static
+
+        private static List<RecurentAction> _savedReccurentActionStarted = new List<RecurentAction>();
+
+        /// <summary>
+        /// Clean all recurrent actions started
+        /// </summary>
+        public static void CleanAll() {
+            foreach (var reccurentAction in _savedReccurentActionStarted.ToList()) {
+                reccurentAction.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Start a new recurrent action
+        /// </summary>
+        public static RecurentAction StartNew(Action actionToDo, long interval, int nbRepeat = 0, bool doActionOnCreate = true) {
+            var created = new RecurentAction(actionToDo, interval, nbRepeat, doActionOnCreate);
+            _savedReccurentActionStarted.Add(created);
+            return created;
+        }
+
+        #endregion
+
         #region private fields
 
         private Timer _timer;
@@ -40,9 +67,7 @@ namespace _3PA.Lib {
 
         private int _repeatCounter;
 
-        private ReaderWriterLockSlim _lock;
-
-        private static List<ReccurentAction> _savedReccurentActionStarted = new List<ReccurentAction>();
+        private object _lock;
 
         #endregion
 
@@ -53,17 +78,17 @@ namespace _3PA.Lib {
         /// Allows to do a given action (in a new task) every XXX ms for XXX times
         /// by default it does the action when creating this instance, set doActionOnCreate = false to not do it immediatly
         /// </summary>
-        public ReccurentAction(Action actionToDo, long timeLapse, int nbRepeat = 0, bool doActionOnCreate = true) {
+        private RecurentAction(Action actionToDo, long interval, int nbRepeat = 0, bool doActionOnCreate = true) {
             _nbRepeat = nbRepeat;
             _actionToDo = actionToDo;
-            _lock = new ReaderWriterLockSlim();
+            _lock = new object();
 
             if (_actionToDo == null)
                 throw new Exception("ReccurentAction > the action can't be null");
 
             // initiate the timer if needed
             if (_timer == null) {
-                _timer = new Timer(timeLapse) {
+                _timer = new Timer(interval) {
                     AutoReset = true
                 };
                 _timer.Elapsed += OnTick;
@@ -73,42 +98,21 @@ namespace _3PA.Lib {
             // do the recurrent action immediatly?
             if (doActionOnCreate)
                 OnTick(null, null);
-
-            // keep a reference to this so we can clean them all if needed
-            _savedReccurentActionStarted.Add(this);
         }
 
         /// <summary>
         /// Stop the recurrent action
         /// </summary>
-        public void Stop() {
-            try {
-                if (_timer != null) {
-                    _timer.Stop();
-                    _timer.Close();
-                }
-            } catch (Exception) {
-                // clean up proc
-            } finally {
-                _savedReccurentActionStarted.Remove(this);
+        private void Stop() {
+            if (_timer != null) {
+                _timer.Stop();
+                _timer.Close();
             }
+            _savedReccurentActionStarted.Remove(this);
         }
 
         public void Dispose() {
             Stop();
-        }
-
-        #endregion
-
-        #region public
-
-        /// <summary>
-        /// Clean all recurrent actions started
-        /// </summary>
-        public static void CleanAll() {
-            foreach (var reccurentAction in _savedReccurentActionStarted.ToList()) {
-                reccurentAction.Stop();
-            }
         }
 
         #endregion
@@ -120,7 +124,7 @@ namespace _3PA.Lib {
         /// </summary>
         private void OnTick(object sender, ElapsedEventArgs elapsedEventArgs) {
             Task.Factory.StartNew(() => {
-                if (_lock.TryEnterWriteLock(100)) {
+                if (Monitor.TryEnter(_lock, 100)) {
                     try {
                         // increase number of already repeated action
                         _repeatCounter++;
@@ -130,7 +134,7 @@ namespace _3PA.Lib {
                         // new task, do the action
                         _actionToDo();
                     } finally {
-                        _lock.ExitWriteLock();
+                        Monitor.Exit(_lock);
                     }
                 }
             });

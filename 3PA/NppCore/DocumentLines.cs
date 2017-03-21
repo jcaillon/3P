@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DocumentLines.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -24,7 +27,6 @@ using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore {
-
     /// <summary>
     /// For every scintilla message that involves a position, the expect position (expected by scintilla) is the
     /// BYTE position, not the CHAR position (as anyone would assume at first!)
@@ -40,7 +42,6 @@ namespace _3PA.NppCore {
     /// on a 200Mo document sounds good enough to me...
     /// </remarks>
     internal class DocumentLines {
-
         #region Fields
 
         /// <summary>
@@ -61,6 +62,7 @@ namespace _3PA.NppCore {
         /// and its length, so we can compute everything accordingly
         /// </summary>
         private int _holeLine;
+
         private int _holeLenght;
 
         #endregion
@@ -78,7 +80,7 @@ namespace _3PA.NppCore {
         /// Reset the lines list
         /// </summary>
         private void Init() {
-            _linesList = new GapBuffer<int> { 0, 0 };
+            _linesList = new GapBuffer<int> {0, 0};
             _holeLine = 0;
             _holeLenght = 0;
             _oneByteCharEncoding = false;
@@ -462,7 +464,7 @@ namespace _3PA.NppCore {
         private unsafe int GetCharCount(IntPtr text, int length) {
             if (text == IntPtr.Zero || length == 0)
                 return 0;
-            return _lastEncoding.GetCharCount((byte*)text, length);
+            return _lastEncoding.GetCharCount((byte*) text, length);
         }
 
         private string GetDebugString() {
@@ -481,8 +483,9 @@ namespace _3PA.NppCore {
         }
 
         #endregion
-        
+
         #region To use the scn.text directly?
+
         /*
         private unsafe int GetCharCount(IntPtr text, int pos, int lenght) {
             var bytes = (byte*) text;
@@ -530,7 +533,7 @@ namespace _3PA.NppCore {
             return true;
         }
         */
+
         #endregion
-        
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CompletionSortingClass.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using YamuiFramework.Controls.YamuiList;
@@ -82,8 +85,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // then sort by scope type (descending, smaller scope first)
-            if (x.ParsedItem != null && y.ParsedItem != null && x.ParsedItem.Scope != null && y.ParsedItem.Scope != null) {
-                compare = ((int) y.ParsedItem.Scope.ScopeType).CompareTo(((int) x.ParsedItem.Scope.ScopeType));
+            if (x.ParsedBaseItem != null && y.ParsedBaseItem != null) {
+                compare = ((int) y.ParsedBaseItem.GetScopeType()).CompareTo((int) x.ParsedBaseItem.GetScopeType());
                 if (compare != 0) return compare;
             }
 
@@ -93,7 +96,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (compare != 0) return compare;
             }
 
-            // sort by display text in last resort
+            // sort by display text in last
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }
 

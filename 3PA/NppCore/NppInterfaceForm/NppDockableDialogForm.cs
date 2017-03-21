@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppDockableDialogForm.cs) is part of 3P.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -26,7 +28,6 @@ using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore.NppInterfaceForm {
-
     /// <summary>
     /// Okay so... what is the point of this class?
     /// Basically, if you directly feed a form (that you want to display as a dockable panel) to Npp, you will get screwed
@@ -41,7 +42,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
     /// moved
     /// </summary>
     internal class NppDockableDialogForm : Form {
-
         #region fields
 
         private Rectangle _masterRectangle;
@@ -50,13 +50,24 @@ namespace _3PA.NppCore.NppInterfaceForm {
 
         #endregion
 
-        #region Don't show in ATL+TAB
+        #region ShowWithoutActivation & Don't show in ATL+TAB
 
+        /// <summary>
+        /// This indicates that the form should not take focus when shown
+        /// specify it through the CreateParams
+        /// </summary>
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Don't show in ATL+TAB
+        /// </summary>
         protected override CreateParams CreateParams {
             get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
-                return Params;
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= (int) WinApi.WindowStylesEx.WS_EX_TOOLWINDOW;
+                return createParams;
             }
         }
 
@@ -82,7 +93,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
         }
 
         public NppDockableDialogForm(Form formToCover) : this() {
-
             _masterForm = formToCover;
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
             _masterForm.Closed += MasterFormOnClosed;

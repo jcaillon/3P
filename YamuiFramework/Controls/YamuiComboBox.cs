@@ -387,7 +387,7 @@ namespace YamuiFramework.Controls {
             if (!e.Handled)
                 base.OnKeyDown(e);
         }
-        
+
         protected override void OnKeyUp(KeyEventArgs e) {
             // Enter / space opens the popup
             if (!e.Handled && IsPressed) {

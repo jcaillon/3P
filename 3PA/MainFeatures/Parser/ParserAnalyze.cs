@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Parser2.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +31,6 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
     internal partial class Parser {
-
         #region Analyze
 
         private void Analyze() {
@@ -1319,10 +1321,10 @@ namespace _3PA.MainFeatures.Parser {
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdProto);
 
-                // case of a IN, we add it to the list of item
-                if (!createdProto.SimpleForward) {
-                    AddParsedItem(createdProto, functionToken.OwnerNumber);
+                AddParsedItem(createdProto, functionToken.OwnerNumber);
 
+                // case of a IN
+                if (!createdProto.SimpleForward) {
                     // modify context
                     _context.Scope = createdProto;
 
@@ -1641,6 +1643,5 @@ namespace _3PA.MainFeatures.Parser {
         #endregion
 
         #endregion
-
     }
 }

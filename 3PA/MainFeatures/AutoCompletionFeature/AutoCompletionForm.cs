@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletionForm.cs) is part of 3P.
@@ -16,8 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
@@ -26,21 +30,12 @@ using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal class AutoCompletionForm : NppInterfaceForm {
-        #region public fields
-
-        /// <summary>
-        /// Accessor to the list
-        /// </summary>
-        public YamuiFilteredTypeList YamuiList { get; private set; }
+        #region Public properties and events
 
         /// <summary>
         /// Stores the current word to use a filter in the autocompletion
         /// </summary>
         public string Keyword { get; set; }
-
-        #endregion
-
-        #region events
 
         /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
@@ -51,18 +46,16 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #region Life and death
 
-        public AutoCompletionForm() {
-            YamuiList = new YamuiFilteredTypeList();
-        }
+        private YamuiFilteredTypeList _yamuiList;
 
         protected override void Dispose(bool disposing) {
-            if (YamuiList != null && disposing) {
-                YamuiList.MouseDown -= YamuiListOnMouseDown;
-                YamuiList.EnterPressed -= YamuiListOnEnterPressed;
-                YamuiList.TabPressed -= YamuiListOnTabPressed;
-                YamuiList.KeyPressed -= YamuiListOnKeyPressed;
-                YamuiList.RowClicked -= YamuiListOnRowClicked;
-                YamuiList.MouseLeft -= YamuiListOnMouseLeft;
+            if (_yamuiList != null && disposing) {
+                _yamuiList.MouseDown -= YamuiListOnMouseDown;
+                _yamuiList.EnterPressed -= YamuiListOnEnterPressed;
+                _yamuiList.TabPressed -= YamuiListOnTabPressed;
+                _yamuiList.KeyPressed -= YamuiListOnKeyPressed;
+                _yamuiList.RowClicked -= YamuiListOnRowClicked;
+                _yamuiList.MouseLeft -= YamuiListOnMouseLeft;
             }
             base.Dispose(disposing);
         }
@@ -80,34 +73,47 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // list
             Padding = new Padding(BorderWidth, BorderWidth, BorderWidth, BorderWidth);
-            YamuiList.Dock = DockStyle.Fill;
-            YamuiList.MouseDown += YamuiListOnMouseDown;
-            YamuiList.EnterPressed += YamuiListOnEnterPressed;
-            YamuiList.TabPressed += YamuiListOnTabPressed;
-            YamuiList.RowClicked += YamuiListOnRowClicked;
-            YamuiList.KeyPressed += YamuiListOnKeyPressed;
-            YamuiList.MouseLeft += YamuiListOnMouseLeft;
-            YamuiList.IndexChanged += YamuiListOnIndexChanged;
+
+            _yamuiList = new YamuiFilteredTypeList {
+                Dock = DockStyle.Fill,
+                SortingClass = CompletionSortingClass<ListItem>.Instance,
+                FilterPredicate = CompletionFilterClass.Instance.FilterPredicate,
+                EmptyListString = @"No suggestions!"
+            };
+            _yamuiList.MouseDown += YamuiListOnMouseDown;
+            _yamuiList.EnterPressed += YamuiListOnEnterPressed;
+            _yamuiList.TabPressed += YamuiListOnTabPressed;
+            _yamuiList.RowClicked += YamuiListOnRowClicked;
+            _yamuiList.KeyPressed += YamuiListOnKeyPressed;
+            _yamuiList.MouseLeft += YamuiListOnMouseLeft;
+            _yamuiList.IndexChanged += YamuiListOnIndexChanged;
 
             // add control
-            Controls.Add(YamuiList);
+            Controls.Add(_yamuiList);
 
             // Size the form
-            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*YamuiList.RowHeight + YamuiList.BottomHeight;
+            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*_yamuiList.RowHeight + _yamuiList.BottomHeight;
             Width = Config.Instance.AutoCompleteWidth;
 
             // Set minimum size
-            MinimumSize = new Size(200, BorderWidth*2 + 2*YamuiList.RowHeight + YamuiList.BottomHeight);
+            MinimumSize = new Size(200, BorderWidth*2 + 2*_yamuiList.RowHeight + _yamuiList.BottomHeight);
 
             // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
         }
 
         private void YamuiListOnIndexChanged(YamuiScrollList yamuiScrollList) {
-            InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(YamuiList.SelectedItem as CompletionItem, this);
+            InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(_yamuiList.SelectedItem as CompletionItem, this);
         }
 
         #endregion
+
+        #region Public
+
+        public new void Show(IWin32Window owner) {
+            DrawContent();
+            base.Show(owner);
+        }
 
         /// <summary>
         /// Position the window in a smart way according to the Point in input
@@ -115,22 +121,67 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <param name="position"></param>
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
-            this.SafeInvoke(form => {
-                Location = GetBestAutocompPosition(position, lineHeight);
-                ResizeFormToFitScreen();
-            });
+            Location = GetBestAutocompPosition(position, lineHeight);
+            ResizeFormToFitScreen();
         }
 
-        #region Events
+        public CompletionItem GetCurrentCompletionItem() {
+            return _yamuiList.SelectedItem as CompletionItem;
+        }
+
+        public void SetItems(List<ListItem> items) {
+            _yamuiList.SetItems(items);
+        }
+
+        /// <summary>
+        /// use this to programmatically uncheck any type that is not in the given list
+        /// </summary>
+        public void SetActiveType(List<int> allowedType) {
+            _yamuiList.SetActiveType(allowedType, false);
+        }
+
+        /// <summary>
+        /// use this to programmatically check any type that is not in the given list
+        /// </summary>
+        public void SetUnactiveType(List<int> notAllowedType) {
+            _yamuiList.SetUnactiveType(notAllowedType, false);
+        }
+
+        public void SetFilterString() {
+            _yamuiList.FilterString = Keyword;
+        }
+
+        public int GetNbItems() {
+            return _yamuiList.NbItems;
+        }
+
+        public void SetSelectedIndex(int index) {
+            _yamuiList.SelectedItemIndex = index;
+        }
+
+        public void SortInitialList() {
+            _yamuiList.SortInitialList();
+        }
+
+        /// <summary>
+        /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
+        /// </summary>
+        public new bool PerformKeyDown(KeyEventArgs e) {
+            return _yamuiList.PerformKeyDown(e);
+        }
+
+        #endregion
+
+        #region Private
 
         /// <summary>
         /// Resize to always a int number of rows displayed (and save user size)
         /// </summary>
         protected override void OnResizeEnd(EventArgs e) {
             Config.Instance.AutoCompleteWidth = Width;
-            var nbRows = (int) Math.Floor((float) (Height - BorderWidth*2 - YamuiList.BottomHeight)/YamuiList.RowHeight);
+            var nbRows = (int) Math.Floor((float) (Height - BorderWidth*2 - _yamuiList.BottomHeight)/_yamuiList.RowHeight);
             Config.Instance.AutoCompleteShowListOfXSuggestions = nbRows;
-            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*YamuiList.RowHeight + YamuiList.BottomHeight;
+            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*_yamuiList.RowHeight + _yamuiList.BottomHeight;
             base.OnResizeEnd(e);
         }
 
@@ -140,7 +191,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         private void YamuiListOnKeyPressed(YamuiScrollList yamuiScrollList, KeyEventArgs e) {
             if (e.KeyCode == Keys.Escape) {
-                Cloack();
+                Cloak();
                 InfoToolTip.InfoToolTip.Cloak();
                 e.Handled = true;
             }
@@ -175,15 +226,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 WinApi.ReleaseCapture();
                 WinApi.SendMessage(Handle, (uint) WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int) WinApi.HitTest.HTCAPTION), new IntPtr(0));
             }
-        }
-
-        #endregion
-
-        #region Show
-
-        public new void Show(IWin32Window owner) {
-            DrawContent();
-            base.Show(owner);
         }
 
         #endregion

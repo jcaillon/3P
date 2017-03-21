@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ErrorHandler.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +30,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.NppCore;
@@ -41,29 +43,22 @@ namespace _3PA.MainFeatures {
         /// </summary>
         private static HashSet<string> _catchedErrors = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
-        private static volatile int _nbErrors;
+        private static int _nbErrors;
 
         /// <summary>
         /// Shows a Messagebox informing the user that something went wrong with a file,
         /// renames said file with the suffix "_errors"
         /// </summary>
         public static void ShowErrors(Exception e, string message, string fileName) {
-            if (UserCommunication.Ready) {
-                UserCommunication.Notify("An error has occurred while loading the following file :<div>" + (fileName + "_errors").ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.",
-                    MessageImg.MsgPoison, "File load error", message,
-                    args => {
-                        if (args.Link.EndsWith(".log")) {
-                            Npp.Goto(args.Link);
-                            args.Handled = true;
-                        }
-                    });
-            } else
-                MessageBox.Show("An error has occurred while loading the following file :" + "\n\n" + fileName + "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+            UserCommunication.Notify("An error has occurred while loading the following file :<br>" + (fileName + "_errors").ToHtmlLink() + "<br><br>The file has been suffixed with '_errors' to avoid further problems.",
+                MessageImg.MsgPoison, "File load error", message,
+                args => {
+                    Npp.Goto(args.Link);
+                    args.Handled = true;
+                });
             Utils.DeleteFile(fileName + "_errors");
             Utils.MoveFile(fileName, fileName + "_errors");
-
-            ShowErrors(e, message);
+            ShowErrors(e, message); // show initial error
         }
 
         /// <summary>
@@ -72,22 +67,16 @@ namespace _3PA.MainFeatures {
         /// <param name="e"></param>
         /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message = null) {
-            if (!UserCommunication.Ready) {
-                // show an old school message
-                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a huge probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Plug.OnPlugReady += () => { ShowErrors(e, "Error on plugin loading..."); };
-            } else {
-                if (LogError(e, message, false)) {
-                    // show it to the user
-                    UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
-                        MessageImg.MsgPoison, "An error has occurred", message,
-                        args => {
-                            if (args.Link.EndsWith(".log")) {
-                                Npp.Goto(args.Link);
-                                args.Handled = true;
-                            }
-                        });
-                }
+            if (LogError(e, message, false)) {
+                // show it to the user
+                UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                    MessageImg.MsgPoison, "An error has occurred", message,
+                    args => {
+                        if (args.Link.EndsWith(".log")) {
+                            Npp.Goto(args.Link);
+                            args.Handled = true;
+                        }
+                    });
             }
         }
 
@@ -98,6 +87,7 @@ namespace _3PA.MainFeatures {
         public static bool LogError(Exception e, string message = null, bool showIfDev = true) {
             if (e == null)
                 return false;
+
             if (showIfDev && Config.IsDevelopper) {
                 ShowErrors(e, message);
                 return true;

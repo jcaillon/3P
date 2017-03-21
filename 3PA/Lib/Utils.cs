@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Utils.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -322,13 +325,13 @@ namespace _3PA.Lib {
                 fsd.InitialDirectory = initialFolder;
             if (Appli.IsVisible) {
                 try {
-                    Win32Api.EnableWindow(Npp.HandleNpp, false);
+                    Win32Api.EnableWindow(Npp.Handle, false);
                     fsd.ShowDialog(Appli.Form.Handle);
                 } finally {
-                    Win32Api.EnableWindow(Npp.HandleNpp, true);
+                    Win32Api.EnableWindow(Npp.Handle, true);
                 }
             } else
-                fsd.ShowDialog(Npp.HandleNpp);
+                fsd.ShowDialog(Npp.Handle);
             return fsd.FileName ?? string.Empty;
         }
 

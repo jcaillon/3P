@@ -332,7 +332,7 @@ namespace YamuiFramework.Forms {
         /// </summary>
         protected override void OnDeactivate(EventArgs e) {
             // ReSharper disable once ObjectCreationAsStatement
-            new DelayedAction(30, () => {
+            DelayedAction.StartNew(30, () => {
                 try {
                     this.SafeInvoke(popup => {
                         popup.Close();

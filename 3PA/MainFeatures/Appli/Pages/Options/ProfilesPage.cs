@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProfilesPage.cs) is part of 3P.
@@ -16,17 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletionFeature;
-using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
@@ -111,15 +110,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 YamuiFilteredList1.Height -= 10;
                 yamuiScrollList1.Height -= 10;
                 yamuiFilteredTypeList1.Height -= 10;
-            };
-
-            yamuiButton1.ButtonPressed += (sender, args) => {
-                yamuiFilteredTypeList1.SetItems(AutoCompletion.CurrentItems.Select(item => new FuckItem {
-                    DisplayText = item.DisplayText,
-                    Type = item.Type,
-                    SubString = item.SubString,
-                    Flag = item.Flags
-                }).Cast<ListItem>().ToList());
             };
 
             yamuiButton2.Text = @"switch tree mode";
@@ -212,51 +202,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         DisplayText = "child 3"
                     }
                 };
-            }
-        }
-    }
-
-    internal class FuckItem : FilteredTypeListItem {
-        public CompletionType Type;
-        public string SubString;
-        public ParseFlag Flag;
-
-        public override int ItemType {
-            get { return (int) Type; }
-        }
-
-        public override Image ItemTypeImage {
-            get {
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((CompletionType) ItemType).ToString());
-                return tryImg ?? ImageResources.Error;
-            }
-        }
-
-        public override Image ItemImage {
-            get { return null; }
-        }
-
-        public override bool IsRowHighlighted {
-            get { return false; }
-        }
-
-        public override string SubText {
-            get { return SubString; }
-        }
-
-        public override List<Image> TagImages {
-            get {
-                var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
-                    if (tryImg != null) {
-                        outList.Add(tryImg);
-                    }
-                }
-                return outList;
             }
         }
     }

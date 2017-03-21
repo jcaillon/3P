@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProGenerateCode.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +35,6 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
-
         #region Update/delete/add function prototype
 
         private static HashSet<string> _ignoredFiles = new HashSet<string>();
@@ -55,6 +57,8 @@ namespace _3PA.MainFeatures.Pro {
 
             StringBuilder outputMessage = new StringBuilder();
 
+            // make sure to wait for the latest parse
+            ParserHandler.WaitForParserEnd();
             var nbLoop = 0;
             var nbNotCreated = 0;
             var nbThingsDone = 0;
@@ -74,6 +78,7 @@ namespace _3PA.MainFeatures.Pro {
                         else
                             nbNotCreated++;
 
+                        ParserHandler.ParseDocumentSync();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -89,6 +94,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
                             nbThingsDone++;
 
+                        ParserHandler.ParseDocumentSync();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -102,6 +108,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
                             nbThingsDone++;
 
+                        ParserHandler.ParseDocumentSync();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -116,11 +123,11 @@ namespace _3PA.MainFeatures.Pro {
                     if (nbNotCreated == 0)
                         UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
                     else
-                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + ProCodeFormat.GetParserErrorDescription(ParserHandler.AblParser.ParserErrors), MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
+                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + ParserHandler.GetLastParseErrorsInHtml(), MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
                 }
             } else {
                 outputMessage.Append("<i>");
-                outputMessage.Append("CTRL + Z will cancel the above-mentionned modifications<br>");
+                outputMessage.Append("CTRL + Z will cancel the above-mentioned modifications<br>");
                 outputMessage.Append(Npp.CurrentFile.Path.ToHtmlLink("Click here to stop auto-updating the prototypes for this file"));
                 outputMessage.Append("</i>");
                 UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
@@ -142,27 +149,26 @@ namespace _3PA.MainFeatures.Pro {
         /// Gets the list of functions/proto of interest
         /// </summary>
         private static int GetPrototypesLists(out List<ParsedImplementation> listOfOutDatedProto, out List<ParsedImplementation> listOfSoloImplementation, out List<ParsedPrototype> listOfUselessProto) {
-            // make sure to parse the current document before checking anything
-            ParserHandler.ParseCurrentDocument(true, true);
+            var parsedList = ParserHandler.ParsedItemsList;
 
             // list the outdated proto
-            listOfOutDatedProto = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+            listOfOutDatedProto = parsedList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && funcItem.HasPrototype && !funcItem.PrototypeUpdated;
             }).Select(item => (ParsedImplementation) item).ToList();
 
             // list the implementation w/o prototypes
-            listOfSoloImplementation = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+            listOfSoloImplementation = parsedList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && !funcItem.HasPrototype;
             }).Select(item => (ParsedImplementation) item).ToList();
 
             // list the prototypes w/o implementation
-            listOfUselessProto = ParserHandler.AblParser.ParsedPrototypes.Where(item => {
+            listOfUselessProto = parsedList.Where(item => {
                 // it's a prototype with no implementation
-                var proto = item.Value as ParsedPrototype;
-                return proto != null && proto.SimpleForward && !ParserHandler.AblParser.ParsedItemsList.Exists(func => func is ParsedImplementation && func.Name.EqualsCi(item.Value.Name));
-            }).Select(item => (ParsedPrototype) item.Value).ToList();
+                var proto = item as ParsedPrototype;
+                return proto != null && proto.SimpleForward && !parsedList.Exists(func => func is ParsedImplementation && func.Name.EqualsCi(item.Name));
+            }).Select(item => (ParsedPrototype) item).ToList();
 
             return listOfOutDatedProto.Count + listOfSoloImplementation.Count + listOfUselessProto.Count;
         }
@@ -186,24 +192,21 @@ namespace _3PA.MainFeatures.Pro {
         private static bool AddPrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
             var protoStr = Sci.GetTextByRange(function.Position, function.EndPosition);
 
-            // ensure that the file was correctly parsed
-            if (ParserHandler.AblParser.ParserErrors.Count == 0) {
-                // get the best position to insert the prototype
-                bool insertBefore;
-                int insertPos = GetCaretPositionForInsertion<ParsedPrototype>(function.Name, ProInsertPosition.Last, out insertBefore);
+            // get the best position to insert the prototype
+            bool insertBefore;
+            int insertPos = GetCaretPositionForInsertion<ParsedPrototype>(function.Name, ProInsertPosition.Last, out insertBefore);
 
-                // if we didn't find a good position, then let's assume the user doesn't need one
-                if (insertPos > 0) {
-                    // replace the end ":" or "." by a " FOWARD."
-                    protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
+            // if we didn't find a good position, then let's assume the user doesn't need one
+            if (insertPos > 0) {
+                // replace the end ":" or "." by a " FOWARD."
+                protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
 
-                    Sci.SetTextByRange(insertPos, insertPos, protoStr);
+                Sci.SetTextByRange(insertPos, insertPos, protoStr);
 
-                    //outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + insertPos + "'>" + function.Name + "</a>");
-                    outputMessage.Append("<br> - " + function.Name);
+                //outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + insertPos + "'>" + function.Name + "</a>");
+                outputMessage.Append("<br> - " + function.Name);
 
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -226,38 +229,38 @@ namespace _3PA.MainFeatures.Pro {
         /// otherwise returns null
         /// </summary>
         private static ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
-            // if we parsed the UIB (appbuilder) blocks correctly
-            if (ParserHandler.AblParser.ParserErrors.Count == 0) {
-                // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
-                var protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                    var blockItem = item as ParsedPreProcBlock;
-                    if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
-                        blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
-                        return true;
-                    return false;
-                }).ToList();
+            var parsedList = ParserHandler.ParsedItemsList;
 
-                // if we found a block that actually surrounds our parsedScopeItem then that's it
-                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
-                    if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
-                        return item;
-                }
+            // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
+            var protoPreProcBlock = parsedList.Where(item => {
+                var blockItem = item as ParsedPreProcBlock;
+                if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
+                    blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
+                    return true;
+                return false;
+            }).ToList();
 
-                // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
-                var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
-                protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                    var blockItem = item as ParsedPreProcBlock;
-                    if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
-                        return true;
-                    return false;
-                }).ToList();
-
-                // if we found a block that actually surrounds our parsedScopeItem then that's it
-                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
-                    if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
-                        return item;
-                }
+            // if we found a block that actually surrounds our parsedScopeItem then that's it
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+                if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
+                    return item;
             }
+
+            // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
+            var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
+            protoPreProcBlock = parsedList.Where(item => {
+                var blockItem = item as ParsedPreProcBlock;
+                if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
+                    return true;
+                return false;
+            }).ToList();
+
+            // if we found a block that actually surrounds our parsedScopeItem then that's it
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+                if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
+                    return item;
+            }
+
             return null;
         }
 
@@ -281,10 +284,11 @@ namespace _3PA.MainFeatures.Pro {
 
         public static void DeleteCode<T>() where T : ParsedScopeItem {
             // make sure to parse the current document before doing anything
-            ParserHandler.ParseCurrentDocument(true, true);
+            ParserHandler.WaitForParserEnd();
+            var parsedList = ParserHandler.ParsedItemsList;
 
             // make a list of existing items for this type
-            var existingList = ParserHandler.AblParser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
+            var existingList = parsedList.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
 
             object nameToDelete = new ProCodeDelete {Value = string.Join("|", existingList.Select(arg => arg.Name))};
 
@@ -355,9 +359,13 @@ namespace _3PA.MainFeatures.Pro {
             string insertText;
             string blockDescription;
 
+            // make sure to parse the current document before checking anything
+            var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
+            var parsedList = ParserHandler.ParsedItemsList;
+
             // in case of an incorrect document, warn the user
-            if (ParserHandler.AblParser.ParserErrors.Count > 0) {
-                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + ProCodeFormat.GetParserErrorDescription(ParserHandler.AblParser.ParserErrors) + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> {"Continue", "Abort"}) != 0)
+            if (!string.IsNullOrEmpty(parserErrors)) {
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> {"Continue", "Abort"}) != 0)
                     return;
             }
 
@@ -389,11 +397,8 @@ namespace _3PA.MainFeatures.Pro {
             if (string.IsNullOrEmpty(codeCode.Name))
                 return;
 
-            // make sure to parse the current document before checking anything
-            ParserHandler.ParseCurrentDocument(true, true);
-
             // check if the code already exists
-            if (ParserHandler.AblParser.ParsedItemsList.Exists(item => item.GetType() == typeof(T) && item.Name.EqualsCi(codeCode.Name))) {
+            if (parsedList.Exists(item => item.GetType() == typeof(T) && item.Name.EqualsCi(codeCode.Name))) {
                 UserCommunication.Notify("Sorry, this name is already taken by another existing instance", MessageImg.MsgHighImportance, "Invalid name", "Existing name", 5);
                 return;
             }
@@ -425,6 +430,8 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
         private static int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
+            var parsedList = ParserHandler.ParsedItemsList;
+
             insertBefore = false;
 
             // at caret position
@@ -443,7 +450,7 @@ namespace _3PA.MainFeatures.Pro {
                 // find the previous/next function implementation with a prototype
                 bool found = false;
                 ParsedImplementation foundImplement = null;
-                foreach (var impl in ParserHandler.AblParser.ParsedItemsList.Where(item => item is ParsedImplementation).Cast<ParsedImplementation>()) {
+                foreach (var impl in parsedList.Where(item => item is ParsedImplementation).Cast<ParsedImplementation>()) {
                     if (impl != null) {
                         // we didn't match our current function implementation yet
                         if (!found) {
@@ -468,14 +475,14 @@ namespace _3PA.MainFeatures.Pro {
 
                 // now we need its proto
                 if (foundImplement != null) {
-                    refItem = ParserHandler.AblParser.ParsedPrototypes.Select(pair => pair.Value).FirstOrDefault(fun => {
+                    refItem = parsedList.FirstOrDefault(fun => {
                         var proto = fun as ParsedPrototype;
                         return proto != null && proto.Name.Equals(foundImplement.Name) && proto.SimpleForward;
                     }) as T;
                 }
             } else {
                 // list of existing items of the same type
-                var existingList = ParserHandler.AblParser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Select(item => (T) item).ToList();
+                var existingList = parsedList.Where(item => item.GetType() == typeof(T)).Select(item => (T) item).ToList();
                 if (existingList.Count > 0) {
                     // alphabetical order
                     if (insertPos == ProInsertPosition.AlphabeticalOrder) {
@@ -552,7 +559,7 @@ namespace _3PA.MainFeatures.Pro {
             }
             if (typeof(ParsedPrototype) == typeof(T)) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
-                var preprocessorBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
+                var preprocessorBlock = parsedList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
                 if (preprocessorBlock != null) {
                     insertBefore = false;
                     return ((ParsedPreProcBlock) preprocessorBlock).EndBlockPosition;
@@ -560,7 +567,7 @@ namespace _3PA.MainFeatures.Pro {
             }
             if (typeof(ParsedProcedure) == typeof(T)) {
                 // new procedure goes before the first function implementation of last
-                var firstFunc = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedImplementation) as ParsedImplementation;
+                var firstFunc = parsedList.FirstOrDefault(item => item is ParsedImplementation) as ParsedImplementation;
                 if (firstFunc != null) {
                     insertBefore = true;
 

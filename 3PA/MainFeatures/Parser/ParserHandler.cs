@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserHandler.cs) is part of 3P.
@@ -16,61 +17,184 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
-using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
-
     internal static class ParserHandler {
+        #region Core
 
         #region event
 
         /// <summary>
         /// Event published when the parser starts doing its job
         /// </summary>
-        public static event Action OnParseStarted;
+        public static event Action OnStart;
 
         /// <summary>
         /// Event published when the parser has done its job and it's time to get the results
         /// </summary>
-        public static event Action OnParseEnded;
+        public static event Action OnEnd;
+
+        /// <summary>
+        /// Event published when the parser has done its job and it's time to get the results
+        /// </summary>
+        public static event Action<List<CodeExplorerItem>> OnEndSendCodeExplorerItems;
+
+        /// <summary>
+        /// Event published when the parser has done its job and it's time to get the results
+        /// </summary>
+        public static event Action<List<CompletionItem>> OnEndSendCompletionItems;
+
+        /// <summary>
+        /// Event published when the parser has done its job and it's time to get the results
+        /// </summary>
+        public static event Action<List<ParserError>, Dictionary<int, LineInfo>, List<ParsedItem>> OnEndSendParserItems;
 
         #endregion
 
-        #region fields
+        #region Private fields
 
-        private static string _lastParsedFilePath;
+        private static Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
+        private static List<ParserError> _parserErrors = new List<ParserError>();
+        private static List<ParsedItem> _parsedItemsList = new List<ParsedItem>();
 
-        private static Parser _ablParser = new Parser();
+        private static AsapButDelayableAction _parseAction;
 
-        private static ParserVisitor _parserVisitor = new ParserVisitor();
+        private static AsapButDelayableAction ParseAction {
+            get {
+                return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse) {
+                    MsToDoTimeout = 2000
+                });
+            }
+        }
 
-        private static ReaderWriterLockSlim _parserLock = new ReaderWriterLockSlim();
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        private static ReaderWriterLockSlim _timerLock = new ReaderWriterLockSlim();
+        #endregion
 
-        private static Timer _parserTimer;
+        #region do the parsing and get the results
 
         /// <summary>
-        /// I could, and maybe i should, use a lock on those 2 booleans
-        /// At least make it volatile so the compiler always takes the most updated value...
+        /// Call this method to parse the current document after a small delay 
+        /// (delay that is reset each time this function is called, so if you call it continuously, nothing is done)
         /// </summary>
-        private static volatile bool _parseRequestedWhenBusy;
+        public static void ParseDocumentAsap() {
+            ParseAction.DoDelayable();
+        }
 
-        private static volatile bool _parsing;
+        /// <summary>
+        /// Parse the document now (still async, just skip the timer)
+        /// </summary>
+        public static void ParseDocumentNow() {
+            ParseAction.DoTaskNow();
+        }
+
+        /// <summary>
+        /// Wait for the latest parsing action to be done
+        /// </summary>
+        public static void WaitForParserEnd() {
+            //ParseAction.WaitLatestTask();
+        }
+
+        /// <summary>
+        /// Parses the document synchronously (handle with care!!!!)
+        /// </summary>
+        public static void ParseDocumentSync() {
+            ParseAction.DoSync();
+        }
+
+        private static void DoParse() {
+            string lastParsedFilePath = null;
+            try {
+                if (OnStart != null)
+                    OnStart();
+
+                Parser parser = null;
+                bool lastParsedFileIsProgress;
+
+                // make sure to always parse the current file
+                do {
+                    lastParsedFilePath = Npp.CurrentFile.Path;
+                    lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
+
+                    if (lastParsedFileIsProgress) {
+                        parser = new Parser(Sci.Text, lastParsedFilePath, null, true);
+                    }
+                } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
+
+                if (lastParsedFileIsProgress) {
+                    // visitor
+                    var visitor = new ParserVisitor(true);
+                    parser.Accept(visitor);
+
+                    // send completionItems
+                    if (OnEndSendCompletionItems != null)
+                        OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
+
+                    // send codeExplorerItems
+                    if (OnEndSendCodeExplorerItems != null)
+                        OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+                }
+
+                if (_lock.TryEnterWriteLock(-1)) {
+                    try {
+                        if (lastParsedFileIsProgress) {
+                            _parserErrors = parser.ParserErrors;
+                            _lineInfo = parser.LineInfo;
+                            _parsedItemsList = parser.ParsedItemsList;
+                        } else {
+                            _parserErrors = new List<ParserError>();
+                            _lineInfo = new Dictionary<int, LineInfo>();
+                            _parsedItemsList = new List<ParsedItem>();
+                        }
+                    } finally {
+                        _lock.ExitWriteLock();
+                    }
+                }
+
+                // send parserItems
+                if (OnEndSendParserItems != null)
+                    OnEndSendParserItems(_parserErrors, _lineInfo, _parsedItemsList);
+
+                if (OnEnd != null)
+                    OnEnd();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in DoParse " + (lastParsedFilePath ?? "?"));
+            }
+        }
+
+        #endregion
 
         #endregion
 
         #region Static data
+
+        /// <summary>
+        /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
+        /// </summary>
+        public static Func<string, string> FindIncludeFullPath = s => ProEnvironment.Current.FindFirstFileInPropath(s);
+
+        /// <summary>
+        /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
+        /// </summary>
+        public static Dictionary<string, Lexer> SavedLexerInclude = new Dictionary<string, Lexer>(StringComparer.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// A dictionary of known keywords and database info
+        /// </summary>
+        public static Dictionary<string, CompletionType> KnownStaticItems = new Dictionary<string, CompletionType>();
 
         /// <summary>
         /// We keep tracks of the parsed files, to avoid parsing the same file twice
@@ -81,67 +205,23 @@ namespace _3PA.MainFeatures.Parser {
         /// Instead of parsing the persistent files each time we store the results of the parsing to use them when we need it
         /// </summary>
         public static Dictionary<string, ParserVisitor> SavedPersistent = new Dictionary<string, ParserVisitor>(StringComparer.CurrentCultureIgnoreCase);
-        
-        /// <summary>
-        /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
-        /// </summary>
-        public static Dictionary<string, Lexer> SavedLexerInclude = new Dictionary<string, Lexer>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Clear the static data to save up some memory
         /// </summary>
         public static void ClearStaticData() {
+            WaitForParserEnd();
             RunPersistentFiles.Clear();
             SavedPersistent.Clear();
             SavedLexerInclude.Clear();
         }
 
-        /// <summary>
-        /// A dictionary of known keywords and database info
-        /// </summary>
-        public static Dictionary<string, CompletionType> KnownStaticItems = new Dictionary<string, CompletionType>();
-
         public static void UpdateKnownStaticItems() {
+            WaitForParserEnd();
             // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
             KnownStaticItems = DataBase.GetDbDictionary();
-            foreach (var keyword in Keywords.GetList().Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
+            foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
                 KnownStaticItems[keyword.DisplayText] = keyword.Type;
-            }
-        }
-
-        #endregion
-
-        #region public accessors (thread safe)
-
-        /// <summary>
-        /// Access the parser
-        /// </summary>
-        public static Parser AblParser {
-            get {
-                if (_parserLock.TryEnterReadLock(-1)) {
-                    try {
-                        return _ablParser;
-                    } finally {
-                        _parserLock.ExitReadLock();
-                    }
-                }
-                return new Parser();
-            }
-        }
-
-        /// <summary>
-        /// Access the parser visitor
-        /// </summary>
-        public static ParserVisitor ParserVisitor {
-            get {
-                if (_parserLock.TryEnterReadLock(-1)) {
-                    try {
-                        return _parserVisitor;
-                    } finally {
-                        _parserLock.ExitReadLock();
-                    }
-                }
-                return new ParserVisitor();
             }
         }
 
@@ -150,140 +230,84 @@ namespace _3PA.MainFeatures.Parser {
         #region Public
 
         /// <summary>
+        /// dictionary of *line, line info*
+        /// </summary>
+        public static Dictionary<int, LineInfo> LineInfo {
+            get {
+                if (_lock.TryEnterReadLock(-1)) {
+                    try {
+                        return new Dictionary<int, LineInfo>(_lineInfo);
+                    } finally {
+                        _lock.ExitReadLock();
+                    }
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// returns the list of the parsed items
+        /// </summary>
+        public static List<ParsedItem> ParsedItemsList {
+            get {
+                if (_lock.TryEnterReadLock(-1)) {
+                    try {
+                        return _parsedItemsList.ToList();
+                    } finally {
+                        _lock.ExitReadLock();
+                    }
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Returns Scope of the given line
         /// </summary>
         /// <returns></returns>
         public static ParsedScopeItem GetScopeOfLine(int line) {
-            return !AblParser.LineInfo.ContainsKey(line) ? null : AblParser.LineInfo[line].Scope;
-        }
-
-        /// <summary>
-        /// Returns a list of "parameters" for a given internal procedure
-        /// </summary>
-        /// <param name="procedureItem"></param>
-        /// <returns></returns>
-        public static List<CompletionItem> FindProcedureParameters(CompletionItem procedureItem) {
-            var parserVisitor = ParserVisitor.GetParserVisitor(procedureItem.ParsedItem.FilePath);
-            return parserVisitor.ParsedCompletionItemsList.Where(data => {
-                if (data.FromParser && data.ParsedItem.Scope.Name.EqualsCi(procedureItem.DisplayText)) {
-                    var item = data.ParsedItem as ParsedDefine;
-                    return (item != null && item.Type == ParseDefineType.Parameter && (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget));
+            if (_lock.TryEnterReadLock(-1)) {
+                try {
+                    return !_lineInfo.ContainsKey(line) ? null : _lineInfo[line].Scope;
+                } finally {
+                    _lock.ExitReadLock();
                 }
-                return false;
-            }).ToList();
+            }
+            return null;
         }
 
         /// <summary>
         /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// a temp table, or a buffer name (in which case we return the associated table)
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public static ParsedTable FindAnyTableOrBufferByName(string name) {
-            return ParserVisitor.FindAnyTableOrBufferByName(name);
-        }
-
-        /// <summary>
-        /// Set this function to return the full file path of an include (the parameter is the file name of partial path /folder/include.i)
-        /// </summary>
-        public static Func<string, string> FindIncludeFullPath = s => ProEnvironment.Current.FindFirstFileInPropath(s);
-
-        #endregion
-
-        #region do the parsing and get the results
-
-        /// <summary>
-        /// Call this method to parse the current document after a small delay 
-        /// (delay that is reset each time this function is called, so if you call it continuously, nothing is done)
-        /// or set doNow = true to do it without waiting a timer
-        /// (you can also set forceAsync = true if doNow = true to do the parsing asynchronously, BE CAREFUL!!)
-        /// </summary>
-        public static void ParseCurrentDocument(bool doNow = false, bool forceAsync = false) {
-            // parse immediatly
-            if (doNow) {
-                ParseCurrentDocumentTick(forceAsync);
-                return;
-            }
-
-            // parse in 800ms, if nothing delays the timer
-            if (_timerLock.TryEnterWriteLock(50)) {
+            if (_lock.TryEnterReadLock(-1)) {
                 try {
-                    if (_parserTimer == null) {
-                        _parserTimer = new Timer {
-                            AutoReset = false, 
-                            Interval = 800
-                        };
-                        _parserTimer.Elapsed += (sender, args) => ParseCurrentDocumentTick();
-                        _parserTimer.Start();
-                    } else {
-                        // reset timer
-                        _parserTimer.Stop();
-                        _parserTimer.Start();
-                    }
+                    return ParserUtils.FindAnyTableOrBufferByName(name, _parsedItemsList);
                 } finally {
-                    _timerLock.ExitWriteLock();
+                    _lock.ExitReadLock();
                 }
             }
+            return null;
         }
 
         /// <summary>
-        /// Called when the _parserTimer ticks
-        /// refresh the Items list with all the static items
-        /// as well as the dynamic items found by the parser
+        /// Returns a string that describes the errors found by the parser (relative to block start/end)
+        /// Returns null if no errors were found
         /// </summary>
-        private static void ParseCurrentDocumentTick(bool forceAsync = false) {
-            if (_parsing) {
-                _parseRequestedWhenBusy = true;
-                return;
+        public static string GetLastParseErrorsInHtml() {
+            WaitForParserEnd();
+            if (_parserErrors == null || _parserErrors.Count == 0)
+                return null;
+            var error = new StringBuilder();
+            foreach (var parserError in _parserErrors) {
+                error.AppendLine("<div>");
+                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
+                error.AppendLine("</div>");
             }
-            _parseRequestedWhenBusy = false;
-            _parsing = true;
-            if (forceAsync)
-                DoParse();
-            else
-                Task.Factory.StartNew(DoParse);
-        }
-
-        private static void DoParse() {
-            try {
-                if (OnParseStarted != null)
-                    OnParseStarted();
-
-                if (_parserLock.TryEnterWriteLock(200)) {
-                    try {
-                        // make sure to always parse the current file
-                        do {
-                            //var watch = Stopwatch.StartNew();
-
-                            _lastParsedFilePath = Npp.CurrentFile.Path;
-
-                            // Parse the document
-                            _ablParser = new Parser(!Npp.CurrentFile.IsProgress ? string.Empty : Sci.Text, _lastParsedFilePath, null, true);
-
-                            // visitor
-                            _parserVisitor = new ParserVisitor(true);
-                            _ablParser.Accept(_parserVisitor);
-
-                            //watch.Stop();
-                            //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
-                        } while (!_lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-                    } finally {
-                        _parserLock.ExitWriteLock();
-                    }
-                }
-
-                if (OnParseEnded != null)
-                    OnParseEnded();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick " + _lastParsedFilePath);
-            } finally {
-                _parsing = false;
-                if (_parseRequestedWhenBusy)
-                    ParseCurrentDocumentTick();
-            }
+            return error.ToString();
         }
 
         #endregion
-
     }
 }

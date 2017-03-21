@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UpdateHandler.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,11 +30,11 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
+using _3PA.MainFeatures;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures {
+namespace _3PA.Lib {
     /// <summary>
     /// Handles the update of this software
     /// </summary>
@@ -43,7 +46,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         private static ReleaseInfo _latestReleaseInfo;
 
-        private static ReccurentAction _checkEveryHourAction;
+        private static RecurentAction _checkEveryHourAction;
 
         private static volatile bool _isChecking;
         private static volatile bool _displayResultNotif;
@@ -82,8 +85,10 @@ namespace _3PA.MainFeatures {
                     new List<string> {"ok"},
                     false);
 
+                // Special actions to take depending on the previous version?
+                UpdateDoneFromVersion(Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default));
+
                 // delete update related files/folders
-                Utils.DeleteFile(Config.FileVersionLog);
                 Utils.DeleteDirectory(Config.FolderUpdate, true);
 
                 // reset the log files
@@ -105,7 +110,7 @@ namespace _3PA.MainFeatures {
             if (!DateTime.TryParseExact(Config.Instance.TechnicalLastCheckUpdate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastCheck)) {
                 lastCheck = DateTime.MinValue;
             }
-            _checkEveryHourAction = new ReccurentAction(() => {
+            _checkEveryHourAction = RecurentAction.StartNew(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(true);
@@ -233,11 +238,12 @@ namespace _3PA.MainFeatures {
                                     html_url = Config.UrlCheckReleases
                                 };
 
-                                // write the version log
-                                Utils.FileWriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
-
                                 // set up the update so the .dll file downloaded replaces the current .dll
                                 _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
+
+                                // write the version log
+                                Utils.FileWriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
+                                Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
 
                                 NotifyUpdateAvailable();
                             }
@@ -275,6 +281,7 @@ namespace _3PA.MainFeatures {
 
                         // write the version log
                         Utils.FileWriteAllText(Config.FileVersionLog, _latestReleaseInfo.body, Encoding.Default);
+                        Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
 
                         NotifyUpdateAvailable();
                     } else {
@@ -318,6 +325,16 @@ namespace _3PA.MainFeatures {
                 _checkEveryHourAction.Dispose();
             }
             _isChecking = false;
+        }
+
+        /// <summary>
+        /// Called on an update, allows to do special stuff according to the version updated
+        /// </summary>
+        private static void UpdateDoneFromVersion(string fromVersion) {
+            if (!fromVersion.IsHigherVersionThan("1.7.3")) {
+                UserCommunication.Notify("Cleaning libraries...");
+                Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
+            }
         }
 
         #endregion

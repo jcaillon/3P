@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,7 +39,6 @@ namespace _3PA.MainFeatures {
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
-
         #region config Object
 
         /// <summary>
@@ -435,7 +437,7 @@ namespace _3PA.MainFeatures {
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
-            
+
             #region methods
 
             /// <summary>
@@ -517,7 +519,9 @@ namespace _3PA.MainFeatures {
 
         #region public fields
 
-        public static string EmbeddedDataDiggerVersion { get { return @"v22"; } }
+        public static string EmbeddedDataDiggerVersion {
+            get { return @"v22"; }
+        }
 
         public static string DataDiggerVersionUrl {
             get { return @"https://datadigger.wordpress.com/2017/02/20/20170220/"; }
@@ -543,7 +547,7 @@ namespace _3PA.MainFeatures {
 
         public static string IssueUrl {
             get { return @"https://github.com/jcaillon/3P/issues"; }
-        }        
+        }
 
         // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
         public static string _3PUserCredentials {
@@ -604,8 +608,9 @@ namespace _3PA.MainFeatures {
                 return (bool) _isDevelopper;
             }
         }
+
         private static bool? _isDevelopper;
-        
+
         public static string FileDebug {
             get { return Path.Combine(Npp.ConfigDirectory, "debug"); }
         }
@@ -623,10 +628,6 @@ namespace _3PA.MainFeatures {
 
         public static string FolderDatabase {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DatabaseInfo")); }
-        }
-
-        public static string FolderLibrary {
-            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries")); }
         }
 
         public static string FolderUpdate {
@@ -661,10 +662,6 @@ namespace _3PA.MainFeatures {
         // errors
         public static string FileErrorLog {
             get { return Path.Combine(FolderLog, "error.log"); }
-        }
-
-        public static string FileErrorToSend {
-            get { return Path.Combine(FolderLog, "error_.log"); }
         }
 
         // dumps
@@ -719,7 +716,11 @@ namespace _3PA.MainFeatures {
 
         // updates related
         public static string FileVersionLog {
-            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+            get { return Path.Combine(FolderUpdate, "version.log"); }
+        }
+
+        public static string FilePreviousVersion {
+            get { return Path.Combine(FolderUpdate, "previous.ver"); }
         }
 
         public static string FileDownloadedPlugin {

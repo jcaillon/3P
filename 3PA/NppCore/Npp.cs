@@ -22,13 +22,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -36,11 +33,11 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
     internal static class Npp {
-
         #region CurrentScintilla (scintilla instance)
 
         private static SciApi _primarySci;
@@ -64,7 +61,7 @@ namespace _3PA.NppCore {
             }
 
             long curScintilla;
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
             _curSciId = ((int) curScintilla).ClampMax(1);
             CurrentSci = _curSciId == 0 ? _primarySci : _secondarySci;
         }
@@ -110,21 +107,10 @@ namespace _3PA.NppCore {
         /// We don't want to recompute those values all the time so we store them when the buffer (document) changes
         /// </summary>
         internal class NppFileInfo {
-            #region Update
-
-            public void Update() {
-                CurrentFile.Path = GetFullPathApi;
-            }
-
-            public void Update(NppFileInfo toCopy) {
-                Path = toCopy.Path;
-            }
-
-            #endregion
-
             #region Private fields
 
             private string _path;
+            private NppLangs.LangDescription _lang;
 
             #endregion
 
@@ -137,7 +123,9 @@ namespace _3PA.NppCore {
                 get { return _path; }
                 set {
                     _path = value;
-                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || CurrentInternalLangName.Equals("openedgeabl");
+                    var currentInternalLang = CurrentInternalLangName;
+                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || currentInternalLang.Equals("openedgeabl");
+                    _lang = null;
                 }
             }
 
@@ -145,6 +133,18 @@ namespace _3PA.NppCore {
             /// true if the file is a progress file, false otherwise
             /// </summary>
             public bool IsProgress { get; private set; }
+
+            /// <summary>
+            /// Lang description for the current language
+            /// </summary>
+            public NppLangs.LangDescription Lang {
+                get {
+                    if (_lang == null)
+                        _lang = NppLangs.Instance.GetLangDescription(CurrentInternalLangName);
+                    return _lang;
+                }
+                set { _lang = value; }
+            }
 
             /// <summary>
             /// Is the file a progress + compilable file?
@@ -181,7 +181,7 @@ namespace _3PA.NppCore {
             public static string GetFullPathApi {
                 get {
                     var path = new StringBuilder(Win32Api.MaxPath);
-                    Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+                    Win32Api.SendMessage(Handle, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
                     return path.ToString();
                 }
             }
@@ -190,21 +190,21 @@ namespace _3PA.NppCore {
             /// Saves the current document
             /// </summary>
             public void Save() {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
             }
 
             /// <summary>
             /// Saves current document as...
             /// </summary>
             public void SaveAs(string path) {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 0, path);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_SAVECURRENTFILEAS, 0, path);
             }
 
             /// <summary>
             /// Saves a copy of the current document
             /// </summary>
             public void SaveAsCopy(string path) {
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILEAS, 1, path);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_SAVECURRENTFILEAS, 1, path);
             }
 
             /// <summary>
@@ -235,7 +235,7 @@ namespace _3PA.NppCore {
         /// <summary>
         /// Gets the Notepad++ main window handle.
         /// </summary>
-        public static IntPtr HandleNpp {
+        public static IntPtr Handle {
             get { return UnmanagedExports.NppData._nppHandle; }
         }
 
@@ -243,7 +243,7 @@ namespace _3PA.NppCore {
         /// Is npp currently focused?
         /// </summary>
         public static bool IsNppWindowFocused {
-            get { return WinApi.GetForegroundWindow() == HandleNpp; }
+            get { return WinApi.GetForegroundWindow() == Handle; }
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public static Screen NppScreen {
             get {
-                Rectangle nppRect = WinApi.GetWindowRect(HandleNpp);
+                Rectangle nppRect = WinApi.GetWindowRect(Handle);
                 var nppLoc = nppRect.Location;
                 nppLoc.Offset(nppRect.Width/2, nppRect.Height/2);
                 return Screen.FromPoint(nppLoc);
@@ -264,7 +264,7 @@ namespace _3PA.NppCore {
         /// if the user switches applications, the dialog hides with Notepad++
         /// </summary>
         public static IWin32Window Win32Handle {
-            get { return new Win32Handle(HandleNpp); }
+            get { return new Win32Handle(Handle); }
         }
 
         /// <summary>
@@ -289,14 +289,14 @@ namespace _3PA.NppCore {
         /// Saves the current session into a file
         /// </summary>
         public static void SaveCurrentSession(string file) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
         }
 
         /// <summary>
         /// Load a session from a file
         /// </summary>
         public static void LoadCurrentSession(string file) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_LOADSESSION, 0, file);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_LOADSESSION, 0, file);
         }
 
         /// <summary>
@@ -307,10 +307,10 @@ namespace _3PA.NppCore {
         /// <returns></returns>
         public static List<string> GetFilesListFromSessionFile(string sessionFilePath) {
             var output = new List<string>();
-            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            int nbFile = (int) Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
             if (nbFile > 0) {
                 using (Win32Api.UnmanagedStringArray cStrArray = new Win32Api.UnmanagedStringArray(nbFile, Win32Api.MaxPath)) {
-                    if (Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
+                    if (Win32Api.SendMessage(Handle, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
                         output.AddRange(cStrArray.ManagedStringsUnicode);
                 }
             }
@@ -333,7 +333,7 @@ namespace _3PA.NppCore {
                 SwitchToDocument(file);
                 return true;
             }
-            return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file).ToInt64() > 0;
+            return Win32Api.SendMessage(Handle, NppMsg.NPPM_DOOPEN, 0, file).ToInt64() > 0;
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace _3PA.NppCore {
         /// Switch to given document
         /// </summary>
         public static void SwitchToDocument(string doc) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
         }
 
         /// <summary>
@@ -434,7 +434,7 @@ namespace _3PA.NppCore {
             var tbIcons = new toolbarIcons {hToolbarBmp = image.GetHbitmap()};
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.NppFuncItems.Items[pluginId]._cmdID, pTbIcons);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.NppFuncItems.Items[pluginId]._cmdID, pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
 
@@ -460,7 +460,7 @@ namespace _3PA.NppCore {
         /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
         /// </summary>
         public static void RegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGADD, handle);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGADD, handle);
         }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace _3PA.NppCore {
         /// For the good functioning of your plugin dialog, you're recommended to not ignore this message.
         /// </summary>
         public static void UnRegisterToNpp(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGREMOVE, handle);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_MODELESSDIALOG, (int) NppMsg.MODELESSDIALOGREMOVE, handle);
         }
 
         /// <summary>
@@ -478,7 +478,7 @@ namespace _3PA.NppCore {
         public static void RegisterDockableDialog(NppTbData nppTbData) {
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
         }
 
         /// <summary>
@@ -486,28 +486,28 @@ namespace _3PA.NppCore {
         /// Send this message to update (redraw) the dialog. hDlg is the handle of your dialog to be updated
         /// </summary>
         public static void RedrawDialog(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, handle);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, handle);
         }
 
         /// <summary>
         /// Send this message to show the dialog. handle is the handle of your dialog to be shown
         /// </summary>
         public static void ShowDockableDialog(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMSHOW, 0, handle);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_DMMSHOW, 0, handle);
         }
 
         /// <summary>
         /// Send this message to hide the dialog. handle is the handle of your dialog to be hidden.
         /// </summary>
         public static void HideDockableDialog(IntPtr handle) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_DMMHIDE, 0, handle);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_DMMHIDE, 0, handle);
         }
 
         /// <summary>
         /// Use this message to set/remove the check on menu item. cmdID is the command ID which corresponds to the menu item.
         /// </summary>
         public static void SetMenuItemCheck(int cmdId, bool @checked) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, cmdId, @checked);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_SETMENUITEMCHECK, cmdId, @checked);
         }
 
         #endregion
@@ -544,9 +544,9 @@ namespace _3PA.NppCore {
         /// <returns></returns>
         private static List<string> GetOpenedFilesIn(NppMsg view, NppMsg mode) {
             var output = new List<string>();
-            int nbFile = (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) view);
+            int nbFile = (int) Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNBOPENFILES, 0, (int) view);
             using (Win32Api.UnmanagedStringArray cStrArray = new Win32Api.UnmanagedStringArray(nbFile, Win32Api.MaxPath)) {
-                if (Win32Api.SendMessage(HandleNpp, mode, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+                if (Win32Api.SendMessage(Handle, mode, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
             return output;
@@ -561,7 +561,7 @@ namespace _3PA.NppCore {
         /// Returned value is -1 if the view is invisible (hidden), otherwise is the current index
         /// </summary>
         public static int CurrentDocIndexInView(int view) {
-            return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTDOCINDEX, 0, view).ToInt32();
+            return Win32Api.SendMessage(Handle, NppMsg.NPPM_GETCURRENTDOCINDEX, 0, view).ToInt32();
         }
 
         #endregion
@@ -572,7 +572,7 @@ namespace _3PA.NppCore {
         /// Returns active document buffer ID
         /// </summary>
         public static int CurrentBufferId {
-            get { return Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0).ToInt32(); }
+            get { return Win32Api.SendMessage(Handle, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0).ToInt32(); }
         }
 
         /// <summary>
@@ -581,7 +581,7 @@ namespace _3PA.NppCore {
         /// enum UniMode - uni8Bit 0, uniUTF8 1, uni16BE 2, uni16LE 3, uniCookie 4, uni7Bit 5, uni16BE_NoBOM 6, uni16LE_NoBOM 7
         /// </summary>
         public static int CurrentBufferEncoding {
-            get { return (int) Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, CurrentBufferId, 0); }
+            get { return (int) Win32Api.SendMessage(Handle, NppMsg.NPPM_GETBUFFERENCODING, CurrentBufferId, 0); }
         }
 
         #endregion
@@ -594,7 +594,7 @@ namespace _3PA.NppCore {
         public static int CurrentLangId {
             get {
                 long langId;
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTLANGTYPE, 0, out langId);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETCURRENTLANGTYPE, 0, out langId);
                 return (int) langId;
             }
         }
@@ -620,9 +620,9 @@ namespace _3PA.NppCore {
         public static string CurrentLangName {
             get {
                 var currentLangId = CurrentLangId;
-                var bufLenght = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, 0);
+                var bufLenght = Win32Api.SendMessage(Handle, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, 0);
                 var buffer = new StringBuilder(bufLenght.ToInt32());
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, buffer);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETLANGUAGENAME, currentLangId, buffer);
                 return buffer.ToString();
             }
         }
@@ -633,9 +633,9 @@ namespace _3PA.NppCore {
         public static string CurrentLangDesc {
             get {
                 var currentLangId = CurrentLangId;
-                var bufLenght = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, 0);
+                var bufLenght = Win32Api.SendMessage(Handle, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, 0);
                 var buffer = new StringBuilder(bufLenght.ToInt32());
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, buffer);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETLANGUAGEDESC, currentLangId, buffer);
                 return buffer.ToString();
             }
         }
@@ -651,7 +651,7 @@ namespace _3PA.NppCore {
         public static string SoftwareInstallDirectory {
             get {
                 var buffer = new StringBuilder(Win32Api.MaxPath);
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, Win32Api.MaxPath, buffer);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNPPDIRECTORY, Win32Api.MaxPath, buffer);
                 return buffer.ToString();
             }
         }
@@ -671,7 +671,7 @@ namespace _3PA.NppCore {
         public static string SoftwareVersion {
             get {
                 if (string.IsNullOrEmpty(_nppVersion)) {
-                    var nppVersion = Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
+                    var nppVersion = Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
                     var lowWord = (nppVersion & 0x0000FFFF).ToString();
                     _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (String.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
@@ -688,7 +688,7 @@ namespace _3PA.NppCore {
         public static string SoftwarePluginConfigDirectory {
             get {
                 var buffer = new StringBuilder(Win32Api.MaxPath);
-                Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
                 return buffer.ToString();
             }
         }
@@ -733,346 +733,17 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <param name="cmd"></param>
         public static void RunCommand(NppMenuCmd cmd) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
         }
 
         /// <summary>
         /// Reload given document
         /// </summary>
         public static void Reload(string path, bool askConfirmation) {
-            Win32Api.SendMessage(HandleNpp, NppMsg.NPPM_RELOADFILE, askConfirmation ? 1 : 0, path);
+            Win32Api.SendMessage(Handle, NppMsg.NPPM_RELOADFILE, askConfirmation ? 1 : 0, path);
         }
 
         #endregion
-
-        #endregion
-
-        #region Langs
-
-        /// <summary>
-        /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
-        /// supported by npp; this file list the extensions for each lang as well as the keywords
-        /// Once this is read, we can then read the file in $NPPINSTALL/plugins/APIs/ named "language_name.xml"
-        /// that contains the extra keywords for the autocompletion
-        /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
-        /// </summary>
-        internal class NppLangs {
-            #region Singleton
-
-            private static NppLangs _instance;
-
-            public static NppLangs Instance {
-                get {
-                    if (_instance == null
-                        //|| Utils.HasFileChanged(Config.FileNppLangsXml) 
-                        || Utils.HasFileChanged(ConfXml.FileNppUserDefinedLang)
-                        //|| Utils.HasFileChanged(Npp.Config.FileNppStylersPath)
-                        ) {
-                        _instance = new NppLangs();
-                    }
-                    return _instance;
-                }
-            }
-
-            #endregion
-
-            #region Private fields
-
-            /// <summary>
-            /// To get from a file extension to a language name
-            /// </summary>
-            private Dictionary<string, string> _langNames = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-
-            /// <summary>
-            /// To get the description of a given language name
-            /// </summary>
-            private Dictionary<string, LangDescription> _langDescriptions = new Dictionary<string, LangDescription>(StringComparer.CurrentCultureIgnoreCase);
-
-            #endregion
-
-            #region Life and death
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public NppLangs() {
-                // fill the dictionary extension -> lang name
-
-                // from userDefinedLang.xml
-                try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, true);
-                } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppUserDefinedLang);
-                }
-
-                // from langs.xml
-                try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppLangsXml)).RootNode["Languages"].SubNodes);
-                } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppLangsXml);
-                }
-
-                // from stylers.xml
-                try {
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppStylersXml)).RootNode["LexerStyles"].SubNodes);
-                } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppStylersXml);
-                }
-            }
-
-            /// <summary>
-            /// fill the _langNames and _langDescriptions dictionaries
-            /// </summary>
-            private void FillDictionaries(List<NanoXmlNode> elements, bool fromUserDefinedLang = false) {
-                foreach (var lang in elements) {
-                    var nameAttr = lang.GetAttribute(@"name");
-                    var extAttr = lang.GetAttribute(@"ext");
-                    if (nameAttr != null && extAttr != null) {
-                        var langName = nameAttr.Value.ToLower();
-                        if (!_langDescriptions.ContainsKey(langName)) {
-                            _langDescriptions.Add(langName, new LangDescription {
-                                LangName = langName,
-                                IsUserLang = fromUserDefinedLang
-                            });
-                            foreach (var ext in extAttr.Value.Split(' ')) {
-                                var langExt = "." + ext.ToLower();
-                                if (!_langNames.ContainsKey(langExt))
-                                    _langNames.Add(langExt, langName);
-                            }
-                        }
-                    }
-                }
-            }
-
-            #endregion
-
-            #region public
-
-            /// <summary>
-            /// Returns a language description for the given extension (or null)
-            /// </summary>
-            public LangDescription GetLangDescription(string fileExtention) {
-                var langName = GetLangName(fileExtention);
-                if (string.IsNullOrEmpty(langName) || !_langDescriptions.ContainsKey(langName))
-                    return null;
-                return _langDescriptions[langName].ReadApiFileIfNeeded();
-            }
-
-            /// <summary>
-            /// Returns a language name for the given extension (or null)
-            /// </summary>
-            public string GetLangName(string fileExtention) {
-                return _langNames.ContainsKey(fileExtention) ? _langNames[fileExtention] : "normal";
-            }
-
-            #endregion
-
-            #region LangDescription
-
-            [SuppressMessage("ReSharper", "InconsistentNaming")]
-            internal class LangDescription {
-                private List<NppKeyword> _keywords;
-
-                /// <summary>
-                /// Language name
-                /// </summary>
-                public string LangName { get; set; }
-
-                /// <summary>
-                /// Language read from userDefinedLang.xml
-                /// </summary>
-                public bool IsUserLang { get; set; }
-
-                public string commentLine { get; set; }
-                public string commentStart { get; set; }
-                public string commentEnd { get; set; }
-                public string ignoreCase { get; set; }
-                public string startFunc { get; set; }
-                public string stopFunc { get; set; }
-                public string paramSeparator { get; set; }
-                public string terminal { get; set; }
-                public string additionalWordChar { get; set; }
-                public char[] AdditionalWordChar { get; set; }
-
-                /// <summary>
-                /// A list of keywords for the language
-                /// </summary>
-                public List<NppKeyword> Keywords {
-                    get { return _keywords; }
-                }
-
-                /// <summary>
-                /// Returns this after checking if we need to read the Api xml file for this language
-                /// </summary>
-                public LangDescription ReadApiFileIfNeeded() {
-                    var apiFilePath = Path.Combine(FolderNppAutocompApis, LangName + ".xml");
-                    if (_keywords != null
-                        && !Utils.HasFileChanged(apiFilePath)
-                        && (!IsUserLang || !Utils.HasFileChanged(ConfXml.FileNppUserDefinedLang)))
-                        return this;
-
-                    _keywords = new List<NppKeyword>();
-                    var uniqueKeywords = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-
-                    // get keywords from plugins/Apis/
-                    // FORMAT :
-                    // <AutoComplete language="C++">
-                    //    <Environment ignoreCase="no" startFunc="(" stopFunc=")" paramSeparator="," terminal=";" additionalWordChar = "."/>
-                    //    <KeyWord name="abs" func="yes">
-                    //        <Overload retVal="int" descr="Returns absolute value of given integer">
-                    //            <Param name="int number" />
-                    //        </Overload>
-                    //    </KeyWord>
-                    // </AutoComplete>
-                    try {
-                        if (File.Exists(apiFilePath)) {
-                            var xml = new NanoXmlDocument(Utils.ReadAllText(apiFilePath));
-                            foreach (var keywordElmt in xml.RootNode["AutoComplete"].SubNodes.Where(node => node.Name.Equals("KeyWord"))) {
-                                var attr = keywordElmt.GetAttribute("name");
-                                if (attr == null)
-                                    continue;
-                                var keyword = attr.Value;
-
-                                if (!uniqueKeywords.Contains(keyword)) {
-                                    uniqueKeywords.Add(keyword);
-                                    List<NppKeyword.NppOverload> overloads = null;
-                                    foreach (var overload in keywordElmt.SubNodes.Where(node => node.Name.Equals("Overload"))) {
-                                        if (overloads == null)
-                                            overloads = new List<NppKeyword.NppOverload>();
-                                        var xAttribute = overload.GetAttribute("retVal");
-                                        var retVal = xAttribute != null ? xAttribute.Value : string.Empty;
-                                        xAttribute = overload.GetAttribute("descr");
-                                        var descr = xAttribute != null ? xAttribute.Value : string.Empty;
-                                        var parameters = new List<string>();
-                                        foreach (var para in overload.SubNodes.Where(node => node.Name.Equals("Param"))) {
-                                            var attrname = para.GetAttribute("name");
-                                            if (attrname == null)
-                                                continue;
-                                            parameters.Add(attrname.Value);
-                                        }
-                                        overloads.Add(new NppKeyword.NppOverload {
-                                            ReturnValue = retVal,
-                                            Description = descr,
-                                            Params = parameters
-                                        });
-                                    }
-
-                                    _keywords.Add(new NppKeyword {
-                                        Name = keyword,
-                                        Overloads = overloads,
-                                        Origin = NppKeywordOrigin.AutoCompApiXml
-                                    });
-                                }
-                            }
-
-                            // get other info on the language
-                            var envElement = xml.RootNode["AutoComplete"]["Environment"];
-                            if (envElement != null) {
-                                LoadFromAttributes(this, envElement);
-                                if (!string.IsNullOrEmpty(additionalWordChar))
-                                    AdditionalWordChar = additionalWordChar.ToArray();
-                            }
-                        }
-                    } catch (Exception e) {
-                        ErrorHandler.LogError(e, "Error parsing " + apiFilePath);
-                    }
-
-                    // get core keywords from langs.xml or userDefinedLang.xml
-
-                    if (IsUserLang) {
-                        try {
-                            var langElement = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
-                            if (langElement != null) {
-                                // get the list of keywords from userDefinedLang.xml
-                                foreach (var descendant in langElement["KeywordLists"].SubNodes) {
-                                    var xAttribute = descendant.GetAttribute(@"name");
-                                    if (xAttribute != null && xAttribute.Value.StartsWith("keywords", StringComparison.CurrentCultureIgnoreCase)) {
-                                        foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
-                                            if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
-                                                uniqueKeywords.Add(keyword);
-                                                _keywords.Add(new NppKeyword {
-                                                    Name = keyword,
-                                                    Origin = NppKeywordOrigin.UserLangXml
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppUserDefinedLang);
-                        }
-                    } else {
-                        try {
-                            var langElement = new NanoXmlDocument(Utils.ReadAllText(ConfXml.FileNppLangsXml)).RootNode["Languages"].SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
-                            if (langElement != null) {
-                                // get the list of keywords from langs.xml
-                                foreach (var descendant in langElement.SubNodes) {
-                                    foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
-                                        if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
-                                            uniqueKeywords.Add(keyword);
-                                            _keywords.Add(new NppKeyword {
-                                                Name = keyword,
-                                                Origin = NppKeywordOrigin.LangsXml
-                                            });
-                                        }
-                                    }
-                                }
-
-                                // get other info on the language (comentLine, commentStart, commentEnd)
-                                LoadFromAttributes(this, langElement);
-                            }
-                        } catch (Exception e) {
-                            ErrorHandler.LogError(e, "Error parsing " + ConfXml.FileNppLangsXml);
-                        }
-                    }
-
-                    return this;
-                }
-
-                private void LoadFromAttributes(LangDescription item, NanoXmlNode itemElement) {
-                    var properties = typeof(LangDescription).GetProperties();
-
-                    /* loop through fields */
-                    foreach (var property in properties) {
-                        if (property.PropertyType == typeof(string)) {
-                            var attr = itemElement.GetAttribute(property.Name);
-                            if (attr != null) {
-                                var val = TypeDescriptor.GetConverter(property.PropertyType).ConvertFromInvariantString(attr.Value);
-                                property.SetValue(item, val, null);
-                            }
-                        }
-                    }
-                }
-            }
-
-            #endregion
-
-            #region NppKeyword
-
-            /// <summary>
-            /// As described in the plugins/APIs/ files
-            /// </summary>
-            internal class NppKeyword {
-                public string Name { get; set; }
-                public NppKeywordOrigin Origin { get; set; }
-                public List<NppOverload> Overloads { get; set; }
-
-                internal class NppOverload {
-                    public string Description { get; set; }
-                    public string ReturnValue { get; set; }
-                    public List<string> Params { get; set; }
-                }
-            }
-
-            internal enum NppKeywordOrigin {
-                LangsXml,
-                UserLangXml,
-                AutoCompApiXml
-            }
-
-            #endregion
-        }
 
         #endregion
 
@@ -1208,25 +879,20 @@ namespace _3PA.NppCore {
             /// </summary>
             private string FolderBaseConf { get; set; }
 
-            public string FileNppUserDefinedLang
-            {
+            public string FileNppUserDefinedLang {
                 get { return Path.Combine(FolderBaseConf, @"userDefineLang.xml"); }
             }
 
-            public string FileNppConfigXml
-            {
+            public string FileNppConfigXml {
                 get { return Path.Combine(FolderBaseConf, @"config.xml"); }
             }
 
             public string FileNppStylersXml {
-                get {
-                    return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml"); ;
-                }
+                get { return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml"); }
                 set { _fileNppStylersXml = value; }
             }
 
-            public string FileNppLangsXml
-            {
+            public string FileNppLangsXml {
                 get { return Path.Combine(FolderBaseConf, @"langs.xml"); }
             }
 
@@ -1299,7 +965,6 @@ namespace _3PA.NppCore {
             }
 
             #endregion
-
         }
 
         #endregion
@@ -1329,6 +994,5 @@ namespace _3PA.NppCore {
         }
 
         #endregion
-
     }
 }
