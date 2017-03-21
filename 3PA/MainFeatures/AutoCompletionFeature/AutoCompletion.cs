@@ -75,8 +75,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private enum ActiveTypes {
             Reset,
             All,
-            Fields,
-            Tables,
+            Filtered,
             KeywordObject
         }
 
@@ -129,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// is the char part of a word in the current lang
         /// </summary>
-        private static bool IsCharPartOfWord(char c) {
+        public static bool IsCharPartOfWord(char c) {
             return char.IsLetterOrDigit(c) || _additionalWordChar.Contains(c);
         }
 
@@ -150,10 +149,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 UpdateAutocompletion(true);
         }
 
-        private static string GetKeyword(ref string input, ref int at, out char? separator) {
-            var lenght = input.Length;
+        private static string GetKeyword(string input, ref int at, out char? separator) {
+            var startPos = input.Length - 1 - at;
             int wordLenght = 0;
-            int pos = lenght - 1 - at;
+            int pos = startPos;
             while (pos >= 0) {
                 var ch = input[pos];
                 // normal word
@@ -168,7 +167,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (_childSeparators.Contains(input[pos]))
                     separator = input[pos];
             }
-            return wordLenght == 0 ? null : input.Substring(lenght - at - wordLenght, wordLenght);
+            at += wordLenght + 1;
+            return wordLenght == 0 ? string.Empty : input.Substring(startPos - wordLenght + 1, wordLenght);
         }
 
         /// <summary>
@@ -200,64 +200,90 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // get current word
             var strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
             int charPos = 0;
-            char? latestSep;
-            var keyword = GetKeyword(ref strOnLeft, ref charPos, out latestSep);
+            char? firstSeparator;
+            var firstKeyword = GetKeyword(strOnLeft, ref charPos, out firstSeparator);
 
             // if the auto completion is hidden or if the user is not continuing to type a word, we might want to 
             // change the list of items in the auto completion
             if (!isVisible || canChangeListType) {
+                
+                if (firstSeparator == null) {
+                    // we didn't match a known separator just before the keyword;
+                    // this means we want to display the entire list of keywords
 
-                /*
-                // list of fields or tables
-                if (!String.IsNullOrEmpty(previousWord)) {
-                    // are we entering a field from a known table?
-                    var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-                    if (foundTable != null) {
-                        if (CurrentActiveTypes != ActiveTypes.Fields) {
-                            CurrentActiveTypes = ActiveTypes.Fields;
-                            CurrentItems = DataBase.GetFieldsList(foundTable).ToList();
-                        }
-                        ShowSuggestionList(keyword);
-                        return;
-                    }
-
-                    // are we entering a table from a connected database?
-                    var foundDatabase = DataBase.FindDatabaseByName(previousWord);
-                    if (foundDatabase != null) {
-                        if (CurrentActiveTypes != ActiveTypes.Tables) {
-                            CurrentActiveTypes = ActiveTypes.Tables;
-                            CurrentItems = DataBase.GetTablesList(foundDatabase).ToList();
-                        }
-                        ShowSuggestionList(keyword);
-                        return;
-                    }
-                }
-
-                // if the current is directly preceded by a :, we are entering an object field/method
-                if (lastCharBeforeWord.Equals(":")) {
-                    if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
-                        CurrentActiveTypes = ActiveTypes.KeywordObject;
+                    if (CurrentActiveTypes != ActiveTypes.All) {
+                        CurrentActiveTypes = ActiveTypes.All;
                         CurrentItems = _savedAllItems;
                     }
-                    ShowSuggestionList(keyword);
-                    return;
-                }
-                 * */
 
-                // show normal complete list
-                if (CurrentActiveTypes != ActiveTypes.All) {
-                    CurrentActiveTypes = ActiveTypes.All;
-                    CurrentItems = _savedAllItems;
+                } else {
+
+                    IEnumerable<CompletionItem> outList = _savedAllItems.ToList();
+
+                    // case of : db.table.field (for instance)
+                    var keywordStack = new Stack<Tuple<string, char?>>();
+
+                    char? latestSeparator = firstSeparator;
+                    char? separator;
+                    string keyword;
+                    do {
+                        keyword = GetKeyword(strOnLeft, ref charPos, out separator);
+                        keywordStack.Push(new Tuple<string, char?>(keyword, latestSeparator));
+                        latestSeparator = separator;
+                    } while (separator != null);
+
+                    // at this point we have this stack :
+                    // db .
+                    // table .
+
+                    while (keywordStack.Count > 0) {
+                        var currentTuple = keywordStack.Pop();
+                        // filter the whole list to only keep the items matching "db" and "." (then "table" and ".")
+                        outList = GetFilteredItems(outList, currentTuple.Item1, currentTuple.Item2);
+                        // now make a new list formed of all the children of the filtered list above (ie children of db then children of table)
+                        outList = GetAllChildrenItems(outList);
+                    }
+
+                    // if the current word is directly preceded by a :, we are entering an object field/method
+                    // for now, we then display the whole list of object keywords
+                    if (firstSeparator == ':' && outList == null && !outList.Any()) {
+                        if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
+                            CurrentActiveTypes = ActiveTypes.KeywordObject;
+                            CurrentItems = _savedAllItems;
+                        }
+                        ShowSuggestionList(keyword);
+                        return;
+                    }
+
+                    CurrentItems = outList.ToList();
+                    CurrentActiveTypes = ActiveTypes.Filtered;
+
+                    // we want to show the list no matter how long the filter keyword
+                    ShowSuggestionList(firstKeyword);
+                    return;
                 }
             }
 
             // close if there is nothing to suggest
-            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && (keyword == null || keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && (firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                 Cloak();
                 return;
             }
 
-            ShowSuggestionList(keyword);
+            ShowSuggestionList(firstKeyword);
+        }
+
+        private static IEnumerable<CompletionItem> GetFilteredItems(IEnumerable<CompletionItem> collection, string keyword, char? chr) {
+            foreach (CompletionItem item in collection)
+                if (item.ChildSeparator == chr && item.DisplayText.EqualsCi(keyword)) {
+                    yield return item;
+                }
+        }
+
+        private static IEnumerable<CompletionItem> GetAllChildrenItems(IEnumerable<CompletionItem> collection) {
+            foreach (CompletionItem item in collection)
+                foreach (var completionItem in item.Children)
+                    yield return completionItem;
         }
 
         /// <summary>

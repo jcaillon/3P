@@ -416,7 +416,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     };
                     curDb.Children.Add(curTable); // add the table as a child of db
                     output.Add(curTable); // but also as an item
-
+                    
                     // Fields
                     foreach (var field in table.Fields) {
                         curTable.Children.Add(new CompletionItem {
@@ -426,7 +426,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             FromParser = false,
                             ParsedItem = field,
                             Ranking = 0,
-                            Flags = field.Flags | ~ParseFlag.Primary,
+                            Flags = field.Flags & ~ParseFlag.Primary,
                             ParentItem = curTable
                         });
                     }

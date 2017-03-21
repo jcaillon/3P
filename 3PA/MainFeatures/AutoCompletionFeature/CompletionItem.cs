@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// The char or chars that, once entered after THIS word, should trigger the list of children
         /// If you add a new child separator, you should register it in the AutoCompletion class
         /// </summary>
-        public char ChildSeparator { get; set; }
+        public char? ChildSeparator { get; set; }
 
         /// <summary>
         /// Parent completionItem of this item (the parent has this item in its children)

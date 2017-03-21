@@ -428,6 +428,7 @@
     <Content Include="_Resource\Images\ParserItem\Flags\Primary.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Private.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Protected.png" />
+    <Content Include="_Resource\Images\ParserItem\Flags\Public.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Reserved.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Return.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Serializable.png" />
