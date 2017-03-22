@@ -21,6 +21,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.MainFeatures;
@@ -42,6 +44,11 @@ namespace _3PA.NppCore {
         /// If true, the notification SCN_MODIFIED is disabled
         /// </summary>
         private static bool ScnModifiedDisabled { get; set; }
+
+        /// <summary>
+        /// this is a delegate to defined actions that must be taken after updating the ui
+        /// </summary>
+        public static Queue<Action> ActionsAfterUpdateUi { get; set; }
 
         #endregion
 
@@ -65,6 +72,7 @@ namespace _3PA.NppCore {
 
                         case (uint) NppNotif.NPPN_READY:
                             // notify plugins that all the procedures of launchment of notepad++ are done
+                            ActionsAfterUpdateUi = new Queue<Action>();
                             Npp.UpdateCurrentSci(); // init current scintilla
                             UiThread.Init();
                             PluginIsReady = Plug.DoNppReady();
@@ -99,10 +107,13 @@ namespace _3PA.NppCore {
                             // --------------------------------------------------------
                             case (uint) SciNotif.SCN_CHARADDED:
                                 // called each time the user add a char in the current scintilla
-                                Plug.OnSciCharTyped((char) nc.ch);
+                                ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded((char)nc.ch));
                                 return;
 
                             case (uint) SciNotif.SCN_UPDATEUI:
+                                while (ActionsAfterUpdateUi.Any()) {
+                                    ActionsAfterUpdateUi.Dequeue()();
+                                }
                                 Plug.OnSciUpdateUi(nc);
                                 return;
 

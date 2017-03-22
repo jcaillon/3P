@@ -80,11 +80,6 @@ namespace _3PA {
         #region Fields
 
         /// <summary>
-        /// this is a delegate to defined actions that must be taken after updating the ui
-        /// </summary>
-        public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
-
-        /// <summary>
         /// Allows us to know when a file is opened for the first time (to change encoding for instance)
         /// </summary>
         private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
@@ -552,67 +547,16 @@ namespace _3PA {
         #region On char typed
 
         /// <summary>
-        /// Called when the user enters any character in npp
-        /// </summary>
-        public static void OnSciCharTyped(char c) {
-            // we are still entering a keyword
-            if (AutoCompletion.IsCharPartOfWord(c)) {
-                ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordContinue(c); });
-            } else {
-                ActionsAfterUpdateUi.Enqueue(() => { OnCharAddedWordEnd(c); });
-            }
-        }
-
-        /// <summary>
         /// Called when the user is still typing a word
         /// Called after the UI has updated, allows to correctly read the text style, to correct 
         /// the indentation w/o it being erased and so on...
         /// </summary>
-        public static void OnCharAddedWordContinue(char c) {
+        public static void OnCharAdded(char c) {
             try {
                 // handles the autocompletion
-                AutoCompletion.UpdateAutocompletion(false);
+                AutoCompletion.UpdateAutocompletion(c);
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordContinue");
-            }
-        }
-
-        /// <summary>
-        /// Called when the user has finished entering a word
-        /// Called after the UI has updated, allows to correctly read the text style, to correct 
-        /// the indentation w/o it being erased and so on...
-        /// </summary>
-        public static void OnCharAddedWordEnd(char c) {
-            try {
-                // we finished entering a keyword
-                var curPos = Sci.CurrentPosition;
-                int offset;
-                if (c == '\n' || c == '\r') {
-                    offset = curPos - Sci.GetLine().Position;
-                    offset += Sci.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n") ? 2 : 1;
-                } else
-                    offset = 1;
-
-                var searchWordAt = curPos - offset;
-                var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
-
-                if (AutoCompletion.IsVisible && isNormalContext) {
-                    var keyword = AutoCompletion.GetWord(Sci.GetTextOnLeftOfPos(searchWordAt));
-
-                    // automatically insert selected keyword of the completion list?
-                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
-                        AutoCompletion.UseCurrentSuggestion(-offset);
-                    }
-                }
-
-                // replace semicolon by a point
-                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext && Npp.CurrentFile.IsProgress)
-                    Sci.ModifyTextAroundCaret(-1, 0, ".");
-
-                // handles the autocompletion
-                AutoCompletion.UpdateAutocompletion(true);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
+                ErrorHandler.ShowErrors(e, "Error in OnCharAdded");
             }
         }
 
@@ -621,11 +565,6 @@ namespace _3PA {
         #region OnSciUpdateUi
 
         public static void OnSciUpdateUi(SCNotification nc) {
-            // we need to set the indentation when we received this notification, not before or it's overwritten
-            while (ActionsAfterUpdateUi.Any()) {
-                ActionsAfterUpdateUi.Dequeue()();
-            }
-
             if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
                 nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
                 // user scrolled
@@ -658,7 +597,7 @@ namespace _3PA {
 
             // did the user supress 1 char? (or one line)
             if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
-                AutoCompletion.UpdateAutocompletion(true);
+                AutoCompletion.UpdateAutocompletion();
             }
         }
 

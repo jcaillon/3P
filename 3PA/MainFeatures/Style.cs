@@ -265,8 +265,10 @@ namespace _3PA.MainFeatures {
         public static bool IsCarretInNormalContext(int curPos) {
             try {
                 var curContext = (UdlStyles) Sci.GetStyleAt(curPos);
-                if (curPos <= 0) return true;
-                if (IsNormalContext(curContext)) return true;
+                if (curPos <= 0)
+                    return true;
+                if (IsNormalContext(curContext))
+                    return true;
                 var prevContext = (UdlStyles) Sci.GetStyleAt(curPos - 1);
                 return IsNormalContext(prevContext);
             } catch (Exception) {

@@ -33,11 +33,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region Public properties and events
 
         /// <summary>
-        /// Stores the current word to use a filter in the autocompletion
-        /// </summary>
-        public string Keyword { get; set; }
-
-        /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
         public event Action<CompletionItem> InsertSuggestion;
@@ -147,8 +142,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _yamuiList.SetUnactiveType(notAllowedType, false);
         }
 
-        public void SetFilterString() {
-            _yamuiList.FilterString = Keyword;
+        public void SetFilterString(string filter) {
+            _yamuiList.FilterString = filter;
         }
 
         public int GetNbItems() {

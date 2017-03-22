@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Pro {
             var position = fromMouseClick ? Sci.GetPositionFromMouseLocation() : Sci.CurrentPosition;
             if (fromMouseClick && position <= 0)
                 return;
-            var curWord = Sci.GetWordAtPosition(position);
+            var curWord = Sci.GetWordAtPosition(position, AutoCompletion.CurrentLangAdditionalChars);
 
             // match a word in the autocompletion? go to definition
             var listKeywords = AutoCompletion.FindInCompletionData(curWord, position, true);
@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.Pro {
             if (InfoToolTip.InfoToolTip.IsVisible && !string.IsNullOrEmpty(InfoToolTip.InfoToolTip.CurrentWord))
                 searchWord = InfoToolTip.InfoToolTip.CurrentWord;
 
-            HtmlHelpInterop.DisplayIndex(0, helpPath, searchWord ?? Sci.GetWordAtPosition(Sci.CurrentPosition));
+            HtmlHelpInterop.DisplayIndex(0, helpPath, searchWord ?? Sci.GetWordAtPosition(Sci.CurrentPosition, AutoCompletion.CurrentLangAdditionalChars));
         }
 
         #endregion

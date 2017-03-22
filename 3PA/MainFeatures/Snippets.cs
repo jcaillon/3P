@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures {
         public static bool TriggerCodeSnippetInsertion() {
             if (InsertionActive) return false; // do no insert a snippet within a snippet!
 
-            string token = Sci.GetKeyword(Sci.CurrentPosition);
+            string token = Sci.GetWord(null, Sci.CurrentPosition);
             var curPos = Sci.CurrentPosition;
             Point tokenPoints = new Point(curPos - token.Length, curPos);
 
@@ -158,7 +158,7 @@ namespace _3PA.MainFeatures {
                 string currentParamOriginalText = LocSnippetContext.CurrentParameterValue;
 
                 Sci.SetSelection(currentParam.X, currentParam.X);
-                string currentParamDetectedText = Sci.GetWordAtPosition(Sci.CurrentPosition);
+                string currentParamDetectedText = Sci.GetWordAtPosition(Sci.CurrentPosition, AutoCompletion.CurrentLangAdditionalChars);
 
                 if (currentParamOriginalText != currentParamDetectedText) {
                     //current parameter is modified, indicator is destroyed so restore the indicator first
@@ -266,7 +266,7 @@ namespace _3PA.MainFeatures {
                 startPos = LocSnippetContext.ReplacementString.IndexOf("$", endPos + 1, StringComparison.Ordinal);
             }
 
-            Sci.ReplaceKeywordWrapped(LocSnippetContext.ReplacementString, -1);
+            Sci.ReplaceWordWrapped(LocSnippetContext.ReplacementString, null, -1);
 
             if (LocSnippetContext.Parameters.Any())
                 LocSnippetContext.CurrentParameter = LocSnippetContext.Parameters.FirstOrDefault();

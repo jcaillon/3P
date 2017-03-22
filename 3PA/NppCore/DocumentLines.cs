@@ -207,7 +207,7 @@ namespace _3PA.NppCore {
                 // Clarification : the notification sent is correct (nb lines > 0, length, text are ok), but calling SciLineLength
                 // will always return 0 at this moment!
                 if (scn.length > 0 && TextLength == 0)
-                    Plug.ActionsAfterUpdateUi.Enqueue(Reset);
+                    NotificationsPublisher.ActionsAfterUpdateUi.Enqueue(Reset);
             }
         }
 

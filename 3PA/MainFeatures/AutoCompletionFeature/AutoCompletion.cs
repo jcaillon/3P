@@ -39,6 +39,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal static class AutoCompletion {
         #region field
 
+        private static AutoCompletionForm _form;
+
         /// <summary>
         /// Was the auto completion opened naturally or from the user shortkey?
         /// </summary>
@@ -49,20 +51,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         private static int _shownPosition;
 
+        /// <summary>
+        /// Line of the caret when the auto completion was opened
+        /// </summary>
         private static int _shownLine;
 
-        private static AutoCompletionForm _form;
+        /// <summary>
+        /// Current word being typed by the user
+        /// </summary>
+        private static string _currentWord;
 
-        private static bool _needToSetItems;
-        private static bool _needToSetActiveTypes;
-
-        private static ActiveTypes _currentActiveTypes;
 
         private static char[] _additionalWordChar;
         private static char[] _childSeparators;
 
-        // contains the list of items currently display in the form
-        private static List<CompletionItem> _currentItems = new List<CompletionItem>();
 
         // contains the whole list of items to show
         private static List<CompletionItem> _savedAllItems = new List<CompletionItem>();
@@ -82,6 +84,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             KeywordObject
         }
 
+        private static ActiveTypes _currentActiveTypes;
+        private static bool _needToSetActiveTypes;
+
         /// <summary>
         /// stores the current value of the type of list displayed
         /// </summary>
@@ -93,8 +98,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
         }
 
+        private static List<CompletionItem> _currentItems = new List<CompletionItem>();
+        private static bool _needToSetItems;
+
         /// <summary>
-        /// List of the current items in the auto completion (thread safe)
+        /// List of the current items in the auto completion
         /// </summary>
         private static List<CompletionItem> CurrentItems {
             get { return _currentItems; }
@@ -141,79 +149,125 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // update the auto completion (if shown)
             CurrentActiveTypes = ActiveTypes.Reset;
             if (IsVisible)
-                UpdateAutocompletion(true);
+                UpdateAutocompletion();
         }
 
         /// <summary>
         /// Updates the CURRENT ITEMS LIST,
-        /// handles the opening or the closing of the auto completion form on key input, 
-        /// it is only called when the user adds or delete a char
-        /// 
-        /// canChangeListType : if true, it means the auto completion is already visible, we already have loaded
-        /// the list of completionItem needed and the user is typing a word, increasing the filter
+        /// handles the opening or the closing of the auto completion form on key input
         /// </summary>
-        public static void UpdateAutocompletion(bool canChangeListType) {
-            // show autocomp when typing? or not
-            if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
+        public static void UpdateAutocompletion(char c = char.MinValue) {
+
+            var typing = IsCharPartOfWord(c);
+            var isVisible = IsVisible;
+
+            // currently continuing to type a word
+            if (typing && isVisible) {
+                // the auto completion is already visible, this means the _currentWord is set
+                // we only have to filter the current list even more
+                ShowSuggestionList(_currentWord + c);
                 return;
+            }
 
             var nppCurrentPosition = Sci.CurrentPosition;
             var nppCurrentLine = Sci.Line.CurrentLine;
-            var isVisible = IsVisible;
+            var isNormalContext = Style.IsCarretInNormalContext(nppCurrentPosition);
+            string strOnLeft = null;
 
-            // dont show in string/comments..?
-            if (!_openedFromShortCut && !isVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(nppCurrentPosition))
-                return;
+            // we finished entering a word (we typed a char that is not part of a word, a space of new line or separator...)
+            if (c != char.MinValue && !typing && isNormalContext) {
 
+                strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
+
+                // we finished entering a word, find the offset at which we can find said word
+                int offset;
+                if (c == '\n' || c == '\r') {
+                    offset = nppCurrentPosition - Sci.GetLine(nppCurrentLine).Position;
+                    offset += strOnLeft.Substring(strOnLeft.Length - 1 - offset - 2, 2) .Equals("\r\n") ? 2 : 1;
+                } else
+                    offset = 1;
+
+                // automatically insert selected keyword of the completion list?
+                if (isVisible && Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd) {
+
+                    // make sure at least 1 char of the word we want to replace is a letter or digit
+                    for (int i = strOnLeft.Length - 1 - offset; i >= 0; i--) {
+                        if (!IsCharPartOfWord(strOnLeft[i]))
+                            break;
+                        if (char.IsLetterOrDigit(strOnLeft[i])) {
+                            UseCurrentSuggestion(-offset);
+                            break;
+                        }
+                    }
+                }
+
+                // replace semicolon by a point
+                if (c == ';' && Npp.CurrentFile.IsProgress && Config.Instance.CodeReplaceSemicolon)
+                    Sci.ModifyTextAroundCaret(-offset, 0, ".");
+            }
+
+            // We are here if the auto completion is hidden or if the user is not continuing to type a word, 
+            // We check if we need to change the list of items in the auto completion
+            
+            if (!_openedFromShortCut) {
+                // show autocomp when typing? or not
+                if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions)
+                    return;
+
+                // dont show in string/comments..?
+                if (!isVisible && !isNormalContext && !Config.Instance.AutoCompleteShowInCommentsAndStrings)
+                    return;
+            }
+
+            /*
             // the caret changed line
             if (isVisible && nppCurrentLine != _shownLine) {
                 Cloak();
                 return;
             }
+            */
 
             // get current word
-            var strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
+            if (strOnLeft == null)
+                strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
             int charPos = 0;
             char? firstSeparator;
             var firstKeyword = GetWord(strOnLeft, ref charPos, out firstSeparator);
 
-            // if the auto completion is hidden or if the user is not continuing to type a word, we might want to 
-            // change the list of items in the auto completion
-            if (!isVisible || canChangeListType) {
-                if (firstSeparator == null) {
-                    // we didn't match a known separator just before the keyword;
-                    // this means we want to display the entire list of keywords
+            if (firstSeparator == null) {
+                // we didn't match a known separator just before the keyword;
+                // this means we want to display the entire list of keywords
 
-                    if (CurrentActiveTypes != ActiveTypes.All) {
-                        CurrentActiveTypes = ActiveTypes.All;
+                if (CurrentActiveTypes != ActiveTypes.All) {
+                    CurrentActiveTypes = ActiveTypes.All;
+                    CurrentItems = _savedAllItems;
+                }
+
+            } else {
+                // return the list that should be used in the auto completion, filtered by the previous keywords
+                var outList = GetWordsList(_savedAllItems.ToList(), strOnLeft, charPos, firstSeparator);
+
+                // if the current word is directly preceded by a :, we are entering an object field/method
+                // for now, we then display the whole list of object keywords
+                if (firstSeparator == ':' && outList == null && !outList.Any()) {
+                    if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
+                        CurrentActiveTypes = ActiveTypes.KeywordObject;
                         CurrentItems = _savedAllItems;
                     }
-                } else {
-                    //
-                    var outList = GetWordsList(_savedAllItems.ToList(), strOnLeft, charPos, firstSeparator);
-
-                    // if the current word is directly preceded by a :, we are entering an object field/method
-                    // for now, we then display the whole list of object keywords
-                    if (firstSeparator == ':' && outList == null && !outList.Any()) {
-                        if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
-                            CurrentActiveTypes = ActiveTypes.KeywordObject;
-                            CurrentItems = _savedAllItems;
-                        }
-                        ShowSuggestionList(firstKeyword);
-                        return;
-                    }
-
-                    CurrentItems = outList.ToList();
-                    CurrentActiveTypes = ActiveTypes.Filtered;
-
-                    // we want to show the list no matter how long the filter keyword
                     ShowSuggestionList(firstKeyword);
                     return;
                 }
+
+                CurrentItems = outList.ToList();
+                CurrentActiveTypes = ActiveTypes.Filtered;
+
+                // we want to show the list no matter how long the filter keyword
+                ShowSuggestionList(firstKeyword);
+                return;
             }
 
             // close if there is nothing to suggest
-            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && (firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
                 Cloak();
                 return;
             }
@@ -226,34 +280,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public static bool IsCharPartOfWord(char c) {
             return char.IsLetterOrDigit(c) || _additionalWordChar.Contains(c);
-        }
-
-        /// <summary>
-        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string
-        /// </summary>
-        public static string GetQualifiedWord(string input, bool readRightToLeft = true) {
-            int pos = 0;
-            char? sep;
-            var output = GetWord(input, ref pos, out sep, readRightToLeft);
-            while (sep != null) {
-                if (readRightToLeft) {
-                    output = sep + output;
-                    output = GetWord(input, ref pos, out sep) + output;
-                } else {
-                    output += sep;
-                    output += GetWord(input, ref pos, out sep, false);
-                }
-            }
-            return output;
-        }
-
-        /// <summary>
-        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string
-        /// </summary>
-        public static string GetWord(string input, bool readRightToLeft = true) {
-            int pos = 0;
-            char? sep;
-            return GetWord(input, ref pos, out sep, readRightToLeft);
         }
 
         /// <summary>
@@ -270,12 +296,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// GetKeyword(" word1 word2 ", ref 1, ?)
         /// -> "db" = GetKeyword("word2", ref 6, ?)
         /// </summary>
-        public static string GetWord(string input, ref int at, out char? separator, bool readRightToLeft = true) {
-            var lght = input.Length - 1;
+        private static string GetWord(string input, ref int at, out char? separator) {
+            var max = input.Length - 1;
             int wordLenght = 0;
             int pos = 0;
-            while (wordLenght <= lght - at) {
-                pos = readRightToLeft ? lght - wordLenght - at : wordLenght + at;
+            while (wordLenght <= max - at) {
+                pos = max - wordLenght - at;
                 var ch = input[pos];
                 // normal word
                 if (IsCharPartOfWord(ch))
@@ -284,14 +310,22 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     break;
             }
             separator = null;
-            if (_childSeparators.Contains(input[pos]))
+            if (max >= 0 && _childSeparators.Contains(input[pos]))
                 separator = input[pos];
-            string outStr = wordLenght == 0 ? string.Empty : input.Substring(readRightToLeft ? input.Length - wordLenght - at : at, wordLenght);
+            var outStr = wordLenght == 0 ? string.Empty : input.Substring(input.Length - wordLenght - at, wordLenght);
             at += wordLenght + 1;
             return outStr;
         }
 
-        private static IEnumerable<CompletionItem> GetWordsList(List<CompletionItem> inputList, string strOnLeft, int charPos, char? firstSeparator) {
+        /// <summary>
+        /// Will return a list of items that are the possible inputs for the "fullyQualifiedKeyword"
+        /// For instance, if fullyQualifiedKeyword = "FOR db.table.field", this will return the list of all the fields for
+        /// the database "db" and the table "table"
+        /// It filters the inputList with "db", then takes all the children of "db"
+        /// On the children of "db", it filters with "table" then take all the children of "table"
+        /// it returns this final list of all the children for db.table
+        /// </summary>
+        private static IEnumerable<CompletionItem> GetWordsList(List<CompletionItem> inputList, string fullyQualifiedKeyword, int charPos, char? firstSeparator) {
             IEnumerable<CompletionItem> outList = inputList;
 
             // case of : db.table.field (for instance)
@@ -300,7 +334,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             char? latestSeparator = firstSeparator;
             char? separator;
             do {
-                var keyword = GetWord(strOnLeft, ref charPos, out separator);
+                var keyword = GetWord(fullyQualifiedKeyword, ref charPos, out separator);
                 keywordStack.Push(new Tuple<string, char?>(keyword, latestSeparator));
                 latestSeparator = separator;
             } while (separator != null);
@@ -320,13 +354,19 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return outList;
         }
 
-        private static IEnumerable<CompletionItem> GetFilteredItems(IEnumerable<CompletionItem> collection, string keyword, char? chr) {
+        /// <summary>
+        /// Yields all the items in the given collection that match exactly the keyword and have the given child separator
+        /// </summary>
+        private static IEnumerable<CompletionItem> GetFilteredItems(IEnumerable<CompletionItem> collection, string keyword, char? childSeparator) {
             foreach (CompletionItem item in collection)
-                if (item.ChildSeparator == chr && item.DisplayText.EqualsCi(keyword)) {
+                if (item.ChildSeparator == childSeparator && item.DisplayText.EqualsCi(keyword)) {
                     yield return item;
                 }
         }
 
+        /// <summary>
+        /// Yields all the childs of a list of item
+        /// </summary>
         private static IEnumerable<CompletionItem> GetAllChildrenItems(IEnumerable<CompletionItem> collection) {
             foreach (CompletionItem item in collection)
                 foreach (var completionItem in item.Children)
@@ -336,7 +376,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// This function handles the display of the auto complete form, create or update it
         /// </summary>
-        private static void ShowSuggestionList(string keyword) {
+        private static void ShowSuggestionList(string filter) {
             // instantiate the form if needed
             if (_form == null) {
                 _form = new AutoCompletionForm {
@@ -352,7 +392,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than
             // the thread used to create the form
-            _form.Keyword = keyword;
+            _currentWord = filter;
             if (_form.InvokeRequired)
                 _form.SafeSyncInvoke(ShowSuggestionList);
             else
@@ -389,15 +429,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // the filter uses the current caret line to know which item should be filtered, set it here
-            var nppCurrentLine = Sci.Line.CurrentLine;
-            CompletionFilterClass.Instance.UpdateConditions(nppCurrentLine, false);
+            int nppCurrentLine;
+            if (IsVisible) {
+                nppCurrentLine = _shownLine;
+            } else {
+                nppCurrentLine = Sci.Line.CurrentLine;
+                CompletionFilterClass.Instance.UpdateConditions(nppCurrentLine, false);
+            }
 
             // filter with keyword (keyword can be empty)
-            form.SetFilterString();
+            form.SetFilterString(_currentWord);
 
-            // close?
+            // close if the list ends up empty after the filter
             if (!_openedFromShortCut && Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && form.GetNbItems() == 0) {
-                form.Cloak();
+                Cloak();
                 return;
             }
 
@@ -405,10 +450,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (IsVisible)
                 return;
 
-            _shownLine = nppCurrentLine;
-            _shownPosition = Sci.CurrentPosition;
-
-            // update position
+            // update form position
             var lineHeight = Sci.TextHeight(nppCurrentLine);
             var point = Sci.GetCaretScreenLocation();
             point.Y += lineHeight;
@@ -416,7 +458,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             form.SetPosition(point, lineHeight + 2);
             form.UnCloak();
             form.SetSelectedIndex(0);
+
+            _shownLine = nppCurrentLine;
+            _shownPosition = Sci.CurrentPosition;
         }
+
+        #region Form events
 
         /// <summary>
         /// Method called by the form when the user accepts a suggestion (tab or enter or double-click)
@@ -424,6 +471,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static void OnInsertSuggestion(CompletionItem data) {
             InsertSuggestion(data);
         }
+
+        /// <summary>
+        /// When the user resizes the autocompletion, we need to hide the tooltip
+        /// </summary>
+        private static void OnResizeBegin(object sender, EventArgs eventArgs) {
+            if (InfoToolTip.InfoToolTip.IsVisible)
+                InfoToolTip.InfoToolTip.Cloak();
+        }
+
+        #endregion
+
+        #region Insert suggestion
 
         /// <summary>
         /// Call this method to insert the completionItem at the given offset in regards to the current caret position
@@ -441,7 +500,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     replacementText = fullKeyword ?? data.DisplayText;
                 }
 
-                Sci.ReplaceKeywordWrapped(replacementText, offset);
+                Sci.ReplaceWordWrapped(replacementText, _additionalWordChar, offset);
 
                 // Remember this item to show it higher in the list later
                 RememberUseOf(data);
@@ -454,6 +513,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 ErrorHandler.ShowErrors(e, "Error during InsertSuggestion");
             }
         }
+
+        #endregion
+
+        #region handling item ranking
 
         /// <summary>
         /// Increase ranking of a given CompletionItem
@@ -471,18 +534,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (item.FromParser)
                 RememberUseOfParsedItem(item.DisplayText);
         }
-
-        /// <summary>
-        /// When the user resizes the autocompletion, we need to hide the tooltip
-        /// </summary>
-        private static void OnResizeBegin(object sender, EventArgs eventArgs) {
-            if (InfoToolTip.InfoToolTip.IsVisible)
-                InfoToolTip.InfoToolTip.Cloak();
-        }
-
-        #endregion
-
-        #region handling item ranking
 
         /// <summary>
         /// This dictionary is what is used to remember the ranking of each word for the current session
@@ -512,7 +563,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             else
                 _displayTextRankingParsedItems[displayText]++;
         }
-
+        
         #endregion
 
         #region _form handler
@@ -582,6 +633,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #endregion
 
+        #endregion
+
         #region public misc
 
         /// <summary>
@@ -592,7 +645,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _openedFromShortCut = true;
             _shownLine = Sci.Line.CurrentLine;
             _shownPosition = Sci.CurrentPosition;
-            UpdateAutocompletion(true);
+            UpdateAutocompletion();
         }
 
         /// <summary>
@@ -641,6 +694,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void UseCurrentSuggestion(int offset) {
             if (IsVisible)
                 InsertSuggestion(_form.GetCurrentCompletionItem(), offset);
+        }
+
+        public static char[] CurrentLangAdditionalChars {
+            get { return _additionalWordChar; }
+        }
+
+        public static char[] CurrentLangAllChars {
+            get {
+                var outList = _additionalWordChar.ToList();
+                outList.AddRange(_childSeparators.ToList());
+                return outList.ToArray();
+            }
         }
 
         #endregion

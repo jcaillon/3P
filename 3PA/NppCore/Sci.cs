@@ -1085,7 +1085,7 @@ namespace _3PA.NppCore {
         public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
             var startPos = curPos - maxLenght;
             startPos = startPos > 0 ? startPos : 0;
-            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : String.Empty;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
         }
 
         /// <summary>
@@ -1098,7 +1098,7 @@ namespace _3PA.NppCore {
             var endPos = curPos + maxLenght;
             var fullLength = TextLength;
             endPos = endPos < fullLength ? endPos : fullLength;
-            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : String.Empty;
+            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
         }
 
         /// <summary>
@@ -1106,35 +1106,52 @@ namespace _3PA.NppCore {
         /// the keyword given
         /// (all wrapped in an undo action + handles multiselection) 
         /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="offset">offset relative to the current carret position</param>
-        public static void ReplaceKeywordWrapped(string keyword, int offset) {
-            ModifyTextAroundCaret(offset - GetKeyword(CurrentPosition + offset).Length, offset, keyword);
+        public static void ReplaceWordWrapped(string keyword, char[] additionalWordChar, int offset) {
+            ModifyTextAroundCaret(offset - GetWord(additionalWordChar, CurrentPosition + offset).Length, offset, keyword);
+        }
+
+        /// <summary>
+        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
+        /// stopAtPoint or not, if not, output the nbPoints found
+        /// </summary>
+        private static string ReadWord(string input, char[] additionalWordChar = null, bool readRightToLeft = true) {
+            if (additionalWordChar == null)
+                additionalWordChar = new[] {'_'};
+            var max = input.Length - 1;
+            int count = 0;
+            while (count <= max) {
+                var pos = readRightToLeft ? max - count : count;
+                var ch = input[pos];
+                // normal word
+                if (char.IsLetterOrDigit(ch) || additionalWordChar.Contains(ch))
+                    count++;
+                else
+                    break;
+            }
+            return count == 0 ? string.Empty : input.Substring(readRightToLeft ? input.Length - count : 0, count);
         }
 
         /// <summary>
         /// Gets the keyword at given position (reading only on the left of the position)
         /// </summary>
-        /// <param name="curPos"></param>
-        /// <returns></returns>
-        public static string GetKeyword(int curPos = -1) {
+        public static string GetWord(char[] additionalWordChar = null, int curPos = -1) {
             if (curPos < 0)
                 curPos = CurrentPosition;
-            return AutoCompletion.GetWord(GetTextOnLeftOfPos(curPos));
+            return ReadWord(GetTextOnLeftOfPos(curPos));
         }
 
         /// <summary>
-        /// Returns the ABL word at the given position (read on left and right) (stops at points)
+        /// Returns the ABL word at the given position (read on left and right)
         /// </summary>
-        public static string GetWordAtPosition(int position) {
-            return AutoCompletion.GetWord(GetTextOnLeftOfPos(position)) + AutoCompletion.GetWord(GetTextOnRightOfPos(position), false);
+        public static string GetWordAtPosition(int position, char[] additionalWordChar) {
+            return ReadWord(GetTextOnLeftOfPos(position), additionalWordChar) + ReadWord(GetTextOnRightOfPos(position), additionalWordChar, false);
         }
 
         /// <summary>
-        /// Returns the ABL word at the given position (read on left and right) (stops at points)
+        /// Returns the ABL word at the given position (read on left and right with different additional chars)
         /// </summary>
-        public static string GetQualifiedWordAtPosition(int position) {
-            return AutoCompletion.GetQualifiedWord(GetTextOnLeftOfPos(position)) + AutoCompletion.GetWord(GetTextOnRightOfPos(position), false);
+        public static string GetWordAtPosition(int position, char[] leftPartadditionalWordChar, char[] rightPartadditionalWordChar) {
+            return ReadWord(GetTextOnLeftOfPos(position), leftPartadditionalWordChar) + ReadWord(GetTextOnRightOfPos(position), rightPartadditionalWordChar, false);
         }
 
         public static string GetTextBetween(Point point) {

@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // sets the tooltip content
-            var data = AutoCompletion.FindInCompletionData(Sci.GetQualifiedWordAtPosition(position), position);
+            var data = AutoCompletion.FindInCompletionData(Sci.GetWordAtPosition(position, AutoCompletion.CurrentLangAllChars, AutoCompletion.CurrentLangAdditionalChars), position);
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
