@@ -513,7 +513,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // Remember this item to show it higher in the list later
                 RememberUseOf(data);
 
-                if (data.Type == CompletionType.Snippet)
+                if (data is SnippetCompletionItem)
                     Snippets.TriggerCodeSnippetInsertion();
 
                 Cloak();
@@ -684,7 +684,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (!data.FromParser)
                     return false;
                 var item = data.ParsedBaseItem as ParsedDefine;
-                return item != null && item.Scope.Name.EqualsCi(procedureItem.DisplayText) && item.Type == ParseDefineType.Parameter && (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget);
+                return item != null && item.Scope.Name.EqualsCi(procedureItem.DisplayText) && item.Type == ParseDefineType.Parameter && data is VariableCompletionItem;
             }).ToList();
         }
 

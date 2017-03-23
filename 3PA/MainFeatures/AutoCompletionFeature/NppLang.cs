@@ -227,15 +227,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     });
                                 }
 
-                                _keywords.Add(new CompletionItem {
-                                    DisplayText = keyword,
-                                    Type = overloads == null ? CompletionType.Keyword : CompletionType.Function,
-                                    SubText = LangName + ".xml",
-                                    ParsedBaseItem = new NppKeyword(keyword) {
-                                        Overloads = overloads,
-                                        Origin = NppKeywordOrigin.AutoCompApiXml
-                                    }
-                                });
+                                CompletionItem newWord = CompletionItem.Factory.New(overloads == null ? CompletionType.Keyword : CompletionType.Function);
+                                newWord.DisplayText = keyword;
+                                newWord.SubText = LangName + ".xml";
+                                newWord.ParsedBaseItem = new NppKeyword(keyword) {
+                                    Overloads = overloads,
+                                    Origin = NppKeywordOrigin.AutoCompApiXml
+                                };
+                                _keywords.Add(newWord);
                             }
                         }
 
@@ -264,9 +263,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
-                                            _keywords.Add(new CompletionItem {
+                                            _keywords.Add(new KeywordCompletionItem() {
                                                 DisplayText = keyword,
-                                                Type = CompletionType.Keyword,
                                                 SubText = "userDefinedLang.xml",
                                                 ParsedBaseItem = new NppKeyword(keyword) {
                                                     Origin = NppKeywordOrigin.UserLangXml
@@ -289,9 +287,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                 foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
                                     if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                         uniqueKeywords.Add(keyword);
-                                        _keywords.Add(new CompletionItem {
+                                        _keywords.Add(new KeywordCompletionItem() {
                                             DisplayText = keyword,
-                                            Type = CompletionType.Keyword,
                                             SubText = "langs.xml",
                                             ParsedBaseItem = new NppKeyword(keyword) {
                                                 Origin = NppKeywordOrigin.LangsXml

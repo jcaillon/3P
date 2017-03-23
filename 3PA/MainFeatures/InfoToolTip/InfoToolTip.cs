@@ -398,10 +398,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
+                        var keywordItem = item as KeywordCompletionItem;
+
                         toDisplay.Append(FormatRow("Type of keyword", FormatSubString(item.SubText)));
                         // for abbreviations, find the complete keyword first
                         string keyword = item.DisplayText;
-                        if (item.KeywordType == KeywordType.Abbreviation) {
+                        if (keywordItem.KeywordType == KeywordType.Abbreviation) {
                             keyword = Keywords.Instance.GetFullKeyword(keyword);
                             var associatedKeyword = AutoCompletion.FindInCompletionData(keyword, 0);
                             if (associatedKeyword != null && associatedKeyword.Count > 0)
@@ -409,7 +411,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         }
                         string keyToFind = null;
                         // for the keywords define and create, we try to match the second keyword that goes with it
-                        if (item.KeywordType == KeywordType.Statement &&
+                        if (keywordItem.KeywordType == KeywordType.Statement &&
                             (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
                             var lineStr = Sci.GetLine(Sci.LineFromPosition(Sci.GetPositionFromMouseLocation())).Text;
                             var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
@@ -442,7 +444,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             }
                         } else {
                             toDisplay.Append(FormatSubtitle("404 NOT FOUND"));
-                            if (item.KeywordType == KeywordType.Option)
+                            if (keywordItem.KeywordType == KeywordType.Option)
                                 toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Since this keyword is an option, try to hover the first keyword of the statement or refer to the 4GL help</i>");
                             else
                                 toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");

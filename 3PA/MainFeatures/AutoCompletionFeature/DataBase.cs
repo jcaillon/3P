@@ -318,17 +318,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         private List<CompletionItem> GetCompletionItems() {
             // Sequences
-            var output = _sequences.Select(item => new CompletionItem {
+            var output = _sequences.Select(item => new SequenceCompletionItem {
                 DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                Type = CompletionType.Sequence,
                 SubText = item.DbName
-            }).ToList();
+            }).Cast<CompletionItem>().ToList();
 
             // Databases
             foreach (var db in _dataBases) {
-                var curDb = new CompletionItem {
+                var curDb = new DatabaseCompletionItem {
                     DisplayText = db.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                    Type = CompletionType.Database,
                     FromParser = false,
                     ParsedBaseItem = db,
                     Ranking = 0,
@@ -340,9 +338,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 // Tables
                 foreach (var table in db.Tables) {
-                    var curTable = new CompletionItem {
+                    var curTable = new TableCompletionItem() {
                         DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                        Type = CompletionType.Table,
                         SubText = db.Name,
                         FromParser = false,
                         ParsedBaseItem = table,
@@ -357,16 +354,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                     // Fields
                     foreach (var field in table.Fields) {
-                        curTable.Children.Add(new CompletionItem {
-                            DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                            Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
-                            SubText = field.Type.ToString(),
-                            FromParser = false,
-                            ParsedBaseItem = field,
-                            Ranking = 0,
-                            Flags = field.Flags & ~ParseFlag.Primary,
-                            ParentItem = curTable
-                        });
+                        CompletionItem curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
+                        curField.DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode);
+                        curField.SubText = field.Type.ToString();
+                        curField.FromParser = false;
+                        curField.ParsedBaseItem = field;
+                        curField.Ranking = 0;
+                        curField.Flags = field.Flags & ~ParseFlag.Primary;
+                        curField.ParentItem = curTable;
+                        curTable.Children.Add(curField);
                     }
                 }
             }

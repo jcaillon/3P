@@ -33,10 +33,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// class used in the auto completion feature
     /// </summary>
     internal class CompletionItem : FilteredTypeListItem {
+
         /// <summary>
         /// Type of completion
         /// </summary>
-        public CompletionType Type { get; set; }
+        public virtual CompletionType Type { get { return 0; } }
 
         /// <summary>
         /// Allows to display small "tag" picture on the left of a completionData in the autocomp list,
@@ -47,7 +48,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public ParseFlag Flags { get; set; }
 
         /// <summary>
-        /// Used for sorting the autocompletion list, the higher the ranking, the higher in the list
+        /// Used for sorting the auto completion list, the higher the ranking, the higher in the list
         /// the item is
         /// </summary>
         public int Ranking { get; set; }
@@ -61,11 +62,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// When the FromParser is true, contains the ParsedItem extracted by the parser
         /// </summary>
         public ParsedBaseItem ParsedBaseItem { get; set; }
-
-        /// <summary>
-        /// This field is only used when Type == CompletionType.Keyword, it contains the keyword type...
-        /// </summary>
-        public KeywordType KeywordType { get; set; }
 
         /// <summary>
         /// Use this method to do an action for each flag of the item...
@@ -106,14 +102,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// bottom buttons will be that of the first item found for the given type
         /// </summary>
         public override Image ItemTypeImage {
-            get { return Utils.GetImageFromStr(((CompletionType) ItemType).ToString()); }
+            get { return Utils.GetImageFromStr(Type.ToString()); }
         }
 
         /// <summary>
         /// The text that describes this item type
         /// </summary>
         public override string ItemTypeText {
-            get { return "Category : <span class='SubTextColor'><b>" + ((CompletionType) ItemType) + "</b></span><br><br>"; }
+            get { return "Category : <span class='SubTextColor'><b>" + Type + "</b></span><br><br>"; }
         }
 
         /// <summary>
@@ -165,44 +161,56 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public CompletionItem ParentItem { get; set; }
 
         #endregion
+
+        #region Factory
+
+        public static class Factory {
+            public static CompletionItem New(CompletionType type) {
+                switch (type) {
+                    case CompletionType.Snippet:
+                        return new SnippetCompletionItem();
+                    case CompletionType.VariablePrimitive:
+                        return new VariablePrimitiveCompletionItem();
+                    case CompletionType.VariableComplex:
+                        return new VariableComplexCompletionItem();
+                    case CompletionType.Widget:
+                        return new WidgetCompletionItem();
+                    case CompletionType.Function:
+                        return new FunctionCompletionItem();
+                    case CompletionType.Procedure:
+                        return new ProcedureCompletionItem();
+                    case CompletionType.Database:
+                        return new DatabaseCompletionItem();
+                    case CompletionType.TempTable:
+                        return new TempTableCompletionItem();
+                    case CompletionType.Table:
+                        return new TableCompletionItem();
+                    case CompletionType.Sequence:
+                        return new SequenceCompletionItem();
+                    case CompletionType.Preprocessed:
+                        return new PreprocessedCompletionItem();
+                    case CompletionType.Label:
+                        return new LabelCompletionItem();
+                    case CompletionType.Keyword:
+                        return new KeywordCompletionItem();
+                    case CompletionType.KeywordObject:
+                        return new KeywordObjectCompletionItem();
+                    case CompletionType.FieldPk:
+                        return new FieldPkCompletionItem();
+                    case CompletionType.Field:
+                        return new FieldCompletionItem();
+                    default:
+                        throw new Exception("You forgot to add the type" + type + " to the factory! Noob!");
+                }
+            }
+        }
+
+        #endregion
     }
 
-    internal class SnippetCompletionItem : CompletionItem {
-
-    }
-
-    internal class VariablePrimitiveCompletionItem : CompletionItem {
-
-    }
-
-    internal class VariableComplexCompletionItem : CompletionItem {
-
-    }
-
-    internal class WidgetCompletionItem : CompletionItem {
-
-    }
-
-    internal class FunctionCompletionItem : CompletionItem {
-
-    }
-
-    internal class ProcedureCompletionItem : CompletionItem {
-
-    }
-
-    internal class DatabaseCompletionItem : CompletionItem {
-
-    }
-
-    internal class TempTableCompletionItem : CompletionItem {
-
-    }
-
-    internal class TableCompletionItem : CompletionItem {
-
-    }
-
+    /// <summary>
+    /// This enum order defines the default order for the auto completion
+    /// </summary>
     internal enum CompletionType {
         Snippet,
         VariablePrimitive,
@@ -221,4 +229,165 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         FieldPk,
         Field
     }
+
+
+    internal class SnippetCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Snippet; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Snippet; } }
+    }
+
+
+    internal abstract class VariableCompletionItem : CompletionItem {
+    }
+
+
+    internal class VariablePrimitiveCompletionItem : VariableCompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.VariablePrimitive; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.VariablePrimitive; } }
+    }
+
+
+    internal class VariableComplexCompletionItem : VariableCompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.VariableComplex; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.VariableComplex; } }
+    }
+
+
+    internal class WidgetCompletionItem : VariableCompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Widget; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Widget; } }
+    }
+
+
+    internal class FunctionCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Function; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Function; } }
+    }
+
+
+    internal class ProcedureCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Procedure; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Procedure; } }
+    }
+
+
+    internal class DatabaseCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Database; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Database; } }
+    }
+
+
+    internal class TempTableCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.TempTable; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.TempTable; } }
+    }
+
+
+    internal class TableCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Table; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Table; } }
+    }
+
+
+    internal class SequenceCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Sequence; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Sequence; } }
+    }
+
+
+    internal class PreprocessedCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Preprocessed; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Preprocessed; } }
+    }
+
+
+    internal class LabelCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Label; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Label; } }
+    }
+
+    
+    internal class KeywordCompletionItem : CompletionItem {
+
+        public KeywordType KeywordType { get; set; }
+
+        public override CompletionType Type { get { return CompletionType.Keyword; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Keyword; } }
+    }
+
+
+    /// <summary>
+    /// Keyword types enumeration
+    /// </summary>
+    public enum KeywordType {
+        // below are the types that go to the Keyword category
+        Statement,
+        Function,
+        Operator,
+        Option,
+        Type,
+        Widget,
+        Preprocessor,
+        Handle,
+        Event,
+        Keyboard,
+        Abbreviation,
+        Appbuilder,
+        Unknow,
+
+        // below are the types that go into the KeywordObject category
+        Attribute = 30,
+        Property,
+        Method
+    }
+
+
+    internal class KeywordObjectCompletionItem : KeywordCompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.KeywordObject; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.KeywordObject; } }
+    }
+
+
+    internal class FieldCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Field; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Field; } }
+    }
+
+
+    internal class FieldPkCompletionItem : FieldCompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.FieldPk; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.FieldPk; } }
+    }
+
 }

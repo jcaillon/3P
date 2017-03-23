@@ -398,9 +398,8 @@ namespace _3PA.MainFeatures.Parser {
 
             // to completion data
             pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
-            _parsedCompletionItemsList.Add(new CompletionItem {
+            _parsedCompletionItemsList.Add(new FunctionCompletionItem {
                 DisplayText = pars.Name,
-                Type = CompletionType.Function,
                 SubText = pars.ReturnType.ToString(),
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
@@ -427,9 +426,8 @@ namespace _3PA.MainFeatures.Parser {
 
             // to completion data
             pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
-            _parsedCompletionItemsList.Add(new CompletionItem {
+            _parsedCompletionItemsList.Add(new FunctionCompletionItem {
                 DisplayText = pars.Name,
-                Type = CompletionType.Function,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
@@ -461,9 +459,8 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // to completion data
-            _parsedCompletionItemsList.Add(new CompletionItem {
+            _parsedCompletionItemsList.Add(new ProcedureCompletionItem {
                 DisplayText = pars.Name,
-                Type = CompletionType.Procedure,
                 ItemImage = pars.Flags.HasFlag(ParseFlag.External) ? Utils.GetImageFromStr(CodeExplorerBranch.ExternalProcedure.ToString()) : null,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
@@ -480,9 +477,8 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedPreProcVariable pars) {
             if (pars.Flags.HasFlag(ParseFlag.Global) || !pars.Flags.HasFlag(ParseFlag.FromInclude))
                 // to completion data
-                _parsedCompletionItemsList.Add(new CompletionItem {
+                _parsedCompletionItemsList.Add(new PreprocessedCompletionItem {
                     DisplayText = "&" + pars.Name,
-                    Type = CompletionType.Preprocessed,
                     Flags = pars.Flags,
                     Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                     ParsedBaseItem = pars,
@@ -511,9 +507,8 @@ namespace _3PA.MainFeatures.Parser {
             pars.UndefinedLine = line;
 
             // to completion data
-            _parsedCompletionItemsList.Add(new CompletionItem {
+            _parsedCompletionItemsList.Add(new LabelCompletionItem {
                 DisplayText = pars.Name,
-                Type = CompletionType.Label,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
@@ -625,15 +620,14 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to completion data
-            _parsedCompletionItemsList.Add(new CompletionItem {
-                DisplayText = pars.Name,
-                Type = type,
-                Flags = pars.Flags,
-                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedBaseItem = pars,
-                FromParser = true,
-                SubText = subString
-            });
+            var curItem = CompletionItem.Factory.New(type);
+            curItem.DisplayText = pars.Name;
+            curItem.Flags = pars.Flags;
+            curItem.Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name);
+            curItem.ParsedBaseItem = pars;
+            curItem.FromParser = true;
+            curItem.SubText = subString;
+            _parsedCompletionItemsList.Add(curItem);
         }
 
         /// <summary>
@@ -696,9 +690,8 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to autocompletion
-            var parsedTable = new CompletionItem {
+            var parsedTable = new TempTableCompletionItem {
                 DisplayText = pars.Name,
-                Type = CompletionType.TempTable,
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
@@ -706,17 +699,17 @@ namespace _3PA.MainFeatures.Parser {
                 SubText = subStr,
                 ChildSeparator = '.'
             };
-            parsedTable.Children = pars.Fields.Select(field =>
-                new CompletionItem {
-                    DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                    Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
-                    ParsedBaseItem = field,
-                    FromParser = true,
-                    SubText = field.Type.ToString(),
-                    Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name),
-                    Flags = field.Flags | ~ParseFlag.Primary,
-                    ParentItem = parsedTable
-                }).ToList();
+            parsedTable.Children = pars.Fields.Select(field => {
+                var curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
+                curField.DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode);
+                curField.ParsedBaseItem = field;
+                curField.FromParser = true;
+                curField.SubText = field.Type.ToString();
+                curField.Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name);
+                curField.Flags = field.Flags | ~ParseFlag.Primary;
+                curField.ParentItem = parsedTable;
+                return curField;
+            }).ToList();
             _parsedCompletionItemsList.Add(parsedTable);
 
             // to code explorer

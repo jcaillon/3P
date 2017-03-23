@@ -71,7 +71,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 return 0;
 
             // compare first by CompletionType
-            int compare = _completionTypePriority[(int) x.Type].CompareTo(_completionTypePriority[(int) y.Type]);
+            int compare = _completionTypePriority[x.ItemType].CompareTo(_completionTypePriority[y.ItemType]);
             if (compare != 0) return compare;
 
             // then by ranking
@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (compare != 0) return compare;
 
             // then sort by parsed items first
-            if (x.Type == CompletionType.Table) {
+            if (x is TableCompletionItem) {
                 compare = y.FromParser.CompareTo(x.FromParser);
                 if (compare != 0) return compare;
             }
@@ -91,8 +91,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             // if keyword (ascending)
-            if (x.Type == CompletionType.Keyword || x.Type == CompletionType.KeywordObject) {
-                compare = ((int) x.KeywordType).CompareTo(((int) y.KeywordType));
+            var xk = x as KeywordCompletionItem;
+            var yk = y as KeywordCompletionItem;
+            if (xk != null && yk != null) {
+                compare = ((int)xk.KeywordType).CompareTo(((int) yk.KeywordType));
                 if (compare != 0) return compare;
             }
 

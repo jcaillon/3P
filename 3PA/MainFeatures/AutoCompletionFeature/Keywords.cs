@@ -96,13 +96,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
                     if (!_keywordById.ContainsKey(items[0])) {
-                        _keywordById.Add(items[0], new CompletionItem {
-                            DisplayText = items[1],
-                            Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
-                            Ranking = int.Parse(items[4]),
-                            Flags = flag,
-                            KeywordType = keywordType
-                        });
+                        KeywordCompletionItem curKeyword = CompletionItem.Factory.New((int) keywordType < 30 ? CompletionType.Keyword : CompletionType.KeywordObject) as KeywordCompletionItem;
+                        if (curKeyword != null) {
+                            curKeyword.DisplayText = items[1];
+                            curKeyword.Ranking = int.Parse(items[4]);
+                            curKeyword.Flags = flag;
+                            curKeyword.KeywordType = keywordType;
+                            _keywordById.Add(items[0], curKeyword);
+                        }
                     }
                 }
             }, Encoding.Default);
@@ -170,8 +171,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Allows to reset the list (when changing case for instance)
         /// </summary>
         public void ResetCompletionItems() {
-            _keywords = _keywordById.Values.ToList();
-            foreach (var keyword in _keywords) {
+            foreach (var keyword in _keywordById.Values.ToList()) {
                 keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode);
             }
         }
@@ -211,31 +211,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Keyword types enumeration
-    /// </summary>
-    public enum KeywordType {
-        // below are the types that go to the Keyword category
-        Statement,
-        Function,
-        Operator,
-        Option,
-        Type,
-        Widget,
-        Preprocessor,
-        Handle,
-        Event,
-        Keyboard,
-        Abbreviation,
-        Appbuilder,
-        Unknow,
-
-        // below are the types that go into the KeywordObject category
-        Attribute = 30,
-        Property,
-        Method
     }
 
     internal class KeywordAbbreviation {
