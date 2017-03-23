@@ -171,7 +171,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Allows to reset the list (when changing case for instance)
         /// </summary>
         public void ResetCompletionItems() {
-            foreach (var keyword in _keywordById.Values.ToList()) {
+            _keywords = _keywordById.Values.ToList();
+            foreach (var keyword in _keywords) {
                 keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode);
             }
         }

@@ -110,7 +110,7 @@ namespace _3PA.MainFeatures.Appli {
 
             // title
             string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='" + ThemeManager.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (Environment.Is64BitProcess ? " x64" : "") + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDevelopper ? " (debug)" : "") + @"</b></span>";
+            labelTitle.Text = @"<img src='" + HtmlHelper.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (Environment.Is64BitProcess ? " x64" : "") + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDevelopper ? " (debug)" : "") + @"</b></span>";
 
             // register to Npp
             Npp.RegisterToNpp(Handle);

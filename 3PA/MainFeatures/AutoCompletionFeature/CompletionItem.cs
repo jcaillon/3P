@@ -23,12 +23,16 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Text;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
+
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
@@ -40,7 +44,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public virtual CompletionType Type { get { return 0; } }
 
         /// <summary>
-        /// Allows to display small "tag" picture on the left of a completionData in the autocomp list,
+        /// Allows to display small "tag" picture on the left of a completionData in the auto comp list,
         /// see the ParseFlag enumeration for all the possibilities
         /// It works as a Flag, call HasFlag() method to if a certain flag is set and use
         /// Flag = Flag | ParseFlag.Reserved to set a flag!
@@ -56,7 +60,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Indicates whether or not this completionData is created by the parser Visitor
         /// </summary>
-        public bool FromParser { get; set; }
+        public virtual bool FromParser { get; set; }
 
         /// <summary>
         /// When the FromParser is true, contains the ParsedItem extracted by the parser
@@ -84,7 +88,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// return the image to display for this item
         /// If null, the image corresponding to ItemTypeImage will be used instead
         /// </summary>
-        public override Image ItemImage { get; set; }
+        public override Image ItemImage { get { return null; } }
 
         /// <summary>
         /// return this item type (a unique int for each item type)
@@ -139,6 +143,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 });
                 return outList;
             }
+        }
+
+        /// <summary>
+        /// Html tip for this object
+        /// </summary>
+        public override string ToString() {
+            return Type.ToString();
         }
 
         #region Children and parent
@@ -231,6 +242,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
 
+    /// <summary>
+    /// Snippets
+    /// </summary>
     internal class SnippetCompletionItem : CompletionItem {
 
         public override CompletionType Type { get { return CompletionType.Snippet; } }
@@ -239,7 +253,30 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
 
+    /// <summary>
+    /// Variables (primitive, complex and widgets)
+    /// </summary>
     internal abstract class VariableCompletionItem : CompletionItem {
+        
+        public ParsedDefine ParsedDefine { get { return ParsedBaseItem as ParsedDefine; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            toDisplay.Append(HtmlHelper.FormatRow("Define type", HtmlHelper.FormatSubString(ParsedDefine.Type.ToString())));
+            if (!string.IsNullOrEmpty(ParsedDefine.TempPrimitiveType))
+                toDisplay.Append(HtmlHelper.FormatRow("Variable type", HtmlHelper.FormatSubString(ParsedDefine.PrimitiveType.ToString())));
+            if (ParsedDefine.AsLike == ParsedAsLike.Like)
+                toDisplay.Append(HtmlHelper.FormatRow("Is LIKE", ParsedDefine.TempPrimitiveType));
+            if (!string.IsNullOrEmpty(ParsedDefine.ViewAs))
+                toDisplay.Append(HtmlHelper.FormatRow("Screen representation", ParsedDefine.ViewAs));
+            if (!string.IsNullOrEmpty(ParsedDefine.Left)) {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("END OF DECLARATION"));
+                toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+                toDisplay.Append(ParsedDefine.Left);
+                toDisplay.Append(@"</div>");
+            }
+            return base.ToString();
+        }
     }
 
 
@@ -267,31 +304,155 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
 
+    /// <summary>
+    /// Function
+    /// </summary>
     internal class FunctionCompletionItem : CompletionItem {
-
+        
         public override CompletionType Type { get { return CompletionType.Function; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Function; } }
+
+        public ParsedFunction ParsedFunction { get { return ParsedBaseItem as ParsedFunction; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            toDisplay.Append(HtmlHelper.FormatSubtitle("RETURN TYPE"));
+            toDisplay.Append(HtmlHelper.HtmlFormatRowParam(ParseFlag.Output, "Returns " + HtmlHelper.FormatSubString(ParsedFunction.ReturnType.ToString())));
+
+            toDisplay.Append(HtmlHelper.FormatSubtitle("PARAMETERS"));
+            if (ParsedFunction.Parameters != null && ParsedFunction.Parameters.Count > 0) {
+                foreach (var parameter in ParsedFunction.Parameters) {
+                    toDisplay.Append(HtmlHelper.HtmlFormatRowParam(parameter.Flags, parameter.Name + " as " + HtmlHelper.FormatSubString(parameter.PrimitiveType.ToString())));
+                }
+            } else {
+                toDisplay.Append("None");
+            }
+
+            var funcImplem = ParsedBaseItem as ParsedImplementation;
+            if (funcImplem != null) {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("PROTOTYPE"));
+                if (funcImplem.HasPrototype) {
+                    toDisplay.Append(HtmlHelper.FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + ParsedFunction.FilePath + "#" + funcImplem.PrototypeLine + "#" + funcImplem.PrototypeColumn + "'>Go to prototype</a>"));
+                } else {
+                    toDisplay.Append("Has none");
+                }
+            } else {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("DEFINED IN"));
+                toDisplay.Append("Function defined in an external procedure or is a web service operation");
+            }
+
+            return toDisplay.ToString();
+        }
     }
 
 
+    /// <summary>
+    /// Procedure
+    /// </summary>
     internal class ProcedureCompletionItem : CompletionItem {
-
+        
         public override CompletionType Type { get { return CompletionType.Procedure; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Procedure; } }
+
+        public ParsedProcedure ParsedProcedure { get { return ParsedBaseItem as ParsedProcedure; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            // find its parameters
+            toDisplay.Append(HtmlHelper.FormatSubtitle("PARAMETERS"));
+            if (ParsedProcedure.Parameters != null && ParsedProcedure.Parameters.Count > 0) {
+                foreach (var parameter in ParsedProcedure.Parameters) {
+                    toDisplay.Append(HtmlHelper.HtmlFormatRowParam(parameter.Flags, parameter.Name + " as " + HtmlHelper.FormatSubString(parameter.PrimitiveType.ToString())));
+                }
+            } else
+                toDisplay.Append("None");
+            return toDisplay.ToString();
+        }
     }
 
 
+    /// <summary>
+    /// Database
+    /// </summary>
     internal class DatabaseCompletionItem : CompletionItem {
 
         public override CompletionType Type { get { return CompletionType.Database; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Database; } }
+
+        public ParsedDataBase ParsedDataBase { get { return ParsedBaseItem as ParsedDataBase; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            toDisplay.Append(HtmlHelper.FormatRow("Logical name", ParsedDataBase.Name));
+            toDisplay.Append(HtmlHelper.FormatRow("Physical name", ParsedDataBase.PhysicalName));
+            toDisplay.Append(HtmlHelper.FormatRow("Progress version", ParsedDataBase.ProgressVersion));
+            toDisplay.Append(HtmlHelper.FormatRow("Number of Tables", ParsedDataBase.Tables.Count.ToString()));
+            return toDisplay.ToString();
+        }
     }
 
 
-    internal class TempTableCompletionItem : CompletionItem {
+    /// <summary>
+    /// Table
+    /// </summary>
+    internal class TableCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Table; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Table; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+
+            // buffer
+            if (FromParser) {
+                if (ParsedBaseItem is ParsedDefine) {
+                    toDisplay.Append(HtmlHelper.FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + HtmlHelper.FormatSubString(SubText)));
+                }
+                if (ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(SubText)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Is like", (SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable)ParsedBaseItem).LcLikeTable + "]" : SubText.Replace("Like ", "")));
+                }
+            }
+
+            var tbItem = ParsedBaseItem as ParsedTable;
+            if (tbItem != null) {
+                if (!string.IsNullOrEmpty(tbItem.Description)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Description", tbItem.Description));
+                }
+
+                if (tbItem.Fields.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
+                    toDisplay.Append("<table width='100%;'>");
+                    foreach (var parsedField in tbItem.Fields) {
+                        toDisplay.Append("<tr><td><img src='" + (parsedField.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flags.HasFlag(ParseFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (string.IsNullOrEmpty(parsedField.InitialValue) ? "DEFAULT" : parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
+                    }
+                    toDisplay.Append("</table>");
+                }
+
+                if (tbItem.Triggers.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("TRIGGERS [x" + tbItem.Triggers.Count + "]"));
+                    foreach (var parsedTrigger in tbItem.Triggers) {
+                        toDisplay.Append(HtmlHelper.FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='trigger#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
+                    }
+                }
+
+                if (tbItem.Indexes.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("INDEXES [x" + tbItem.Indexes.Count + "]"));
+                    foreach (var parsedIndex in tbItem.Indexes) {
+                        toDisplay.Append(HtmlHelper.FormatRow(parsedIndex.Name, (parsedIndex.Flag != ParsedIndexFlag.None ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
+                    }
+                }
+            }
+
+            return toDisplay.ToString();
+        }
+    }
+    
+
+    internal class TempTableCompletionItem : TableCompletionItem {
 
         public override CompletionType Type { get { return CompletionType.TempTable; } }
 
@@ -299,27 +460,42 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
 
-    internal class TableCompletionItem : CompletionItem {
-
-        public override CompletionType Type { get { return CompletionType.Table; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Table; } }
-    }
-
-
+    /// <summary>
+    /// Sequence
+    /// </summary>
     internal class SequenceCompletionItem : CompletionItem {
 
         public override CompletionType Type { get { return CompletionType.Sequence; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Sequence; } }
+
+        public override string ToString() {
+            return HtmlHelper.FormatRow("Database logical name", SubText);
+        }
     }
 
 
+    /// <summary>
+    /// Pre processed
+    /// </summary>
     internal class PreprocessedCompletionItem : CompletionItem {
 
         public override CompletionType Type { get { return CompletionType.Preprocessed; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Preprocessed; } }
+
+        public ParsedPreProcVariable ParsedPreProcVariable { get { return ParsedBaseItem as ParsedPreProcVariable; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            if (ParsedPreProcVariable.UndefinedLine > 0)
+                toDisplay.Append(HtmlHelper.FormatRow("Undefined line", ParsedPreProcVariable.UndefinedLine.ToString()));
+            toDisplay.Append(HtmlHelper.FormatSubtitle("VALUE"));
+            toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+            toDisplay.Append(ParsedPreProcVariable.Value);
+            toDisplay.Append(@"</div>");
+            return base.ToString();
+        }
     }
 
 
@@ -331,6 +507,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
     
+    /// <summary>
+    /// Keyword
+    /// </summary>
     internal class KeywordCompletionItem : CompletionItem {
 
         public KeywordType KeywordType { get; set; }
@@ -338,6 +517,61 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override CompletionType Type { get { return CompletionType.Keyword; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Keyword; } }
+
+        public override string SubText { get { return KeywordType.ToString(); } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+
+            toDisplay.Append(HtmlHelper.FormatRow("Type of keyword", HtmlHelper.FormatSubString(SubText)));
+
+            // for abbreviations, find the complete keyword first
+            string keyword = DisplayText;
+            if (KeywordType == KeywordType.Abbreviation) {
+                keyword = Keywords.Instance.GetFullKeyword(keyword);
+                toDisplay.Append(HtmlHelper.FormatRow("Abbreviation of", HtmlHelper.FormatSubString(keyword)));
+            }
+            string keyToFind = string.Join(" ", DisplayText, KeywordType); ;
+            
+            // for the keywords define and create, we try to match the second keyword that goes with it
+            if (KeywordType == KeywordType.Statement && (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
+                var lineStr = Sci.GetLine(Sci.LineFromPosition(Sci.GetPositionFromMouseLocation())).Text;
+                var listOfSecWords = new List<string> { "ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF" };
+                foreach (var word in listOfSecWords) {
+                    if (lineStr.ContainsFast(word)) {
+                        keyToFind = string.Join(" ", keyword, word, KeywordType);
+                        break;
+                    }
+                }
+            }
+
+            var dataHelp = Keywords.Instance.GetKeywordHelp(keyToFind);
+            if (dataHelp != null) {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("DESCRIPTION"));
+                toDisplay.Append(dataHelp.Description);
+
+                // synthax
+                if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("SYNTAX"));
+                    toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+                    var i = 0;
+                    foreach (var synthax in dataHelp.Synthax) {
+                        if (i > 0) toDisplay.Append(@"<br>");
+                        toDisplay.Append(synthax);
+                        i++;
+                    }
+                    toDisplay.Append(@"</div>");
+                }
+            } else {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("404 NOT FOUND"));
+                if (KeywordType == KeywordType.Option)
+                    toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Since this keyword is an option, try to hover the first keyword of the statement or refer to the 4GL help</i>");
+                else
+                    toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");
+            }
+
+            return toDisplay.ToString();
+        }
     }
 
 
@@ -375,11 +609,33 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
 
+    /// <summary>
+    /// Fields
+    /// </summary>
     internal class FieldCompletionItem : CompletionItem {
 
         public override CompletionType Type { get { return CompletionType.Field; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Field; } }
+        
+        public ParsedField ParsedField { get { return ParsedBaseItem as ParsedField; } }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            if (ParsedField.AsLike == ParsedAsLike.Like) {
+                toDisplay.Append(HtmlHelper.FormatRow("Is LIKE", ParsedField.TempType));
+            }
+            toDisplay.Append(HtmlHelper.FormatRow("Type", HtmlHelper.FormatSubString(SubText)));
+            toDisplay.Append(HtmlHelper.FormatRow("Owner table", ((ParsedTable) ParentItem.ParsedBaseItem).Name));
+            if (!string.IsNullOrEmpty(ParsedField.Description))
+                toDisplay.Append(HtmlHelper.FormatRow("Description", ParsedField.Description));
+            if (!string.IsNullOrEmpty(ParsedField.Format))
+                toDisplay.Append(HtmlHelper.FormatRow("Format", ParsedField.Format));
+            if (!string.IsNullOrEmpty(ParsedField.InitialValue))
+                toDisplay.Append(HtmlHelper.FormatRow("Initial value", ParsedField.InitialValue));
+            toDisplay.Append(HtmlHelper.FormatRow("Order", ParsedField.Order.ToString()));
+            return toDisplay.ToString();
+        }
     }
 
 

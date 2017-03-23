@@ -29,7 +29,6 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
-using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA._Resource;
 
@@ -116,42 +115,6 @@ namespace _3PA.MainFeatures {
             FileExplorer.FileExplorer.Instance.ApplyColorSettings();
             Application.DoEvents();
             Appli.Appli.Refresh();
-        }
-
-        /// <summary>
-        /// Returns a formmatted html content
-        /// </summary>
-        public static string FormatContent(string content) {
-            if (string.IsNullOrEmpty(content))
-                return null;
-            return @"
-                <div style='margin-left: 10px; margin-right: 10px; margin-bottom: 4px;'>
-                    " + content + @"
-                </div>";
-        }
-
-        /// <summary>
-        /// Returns a formmatted html message with a title, subtitle and icon
-        /// </summary>
-        public static string FormatTitle(MessageImg image, string title, string subtitle, bool forMessageBox = false) {
-            return @"
-            <table style='width: 100%'>
-                <tr>
-                    <td rowspan='2' style='width: 70px'><img src='" + image + @"' width='64' height='64' /></td>
-                    <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
-                </tr>
-                <tr>
-                    <td class='NotificationSubTitle'>" + subtitle + @"</td>
-                </tr>
-            </table>";
-        }
-
-        /// <summary>
-        /// Returns the image of the logo (30x30)
-        /// </summary>
-        /// <returns></returns>
-        public static string GetLogo {
-            get { return Utils.GetNameOf(() => ImageResources.Logo30x30); }
         }
 
         #endregion

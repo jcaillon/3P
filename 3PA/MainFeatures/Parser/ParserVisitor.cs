@@ -534,7 +534,7 @@ namespace _3PA.MainFeatures.Parser {
             // which completionData type is it?
             CompletionType type;
             string subString;
-            // special case for buffers, they go into the temptable or table section
+            // special case for buffers, they go into the temp-table or table section
             if (pars.PrimitiveType == ParsedPrimitiveType.Buffer) {
                 pars.Flags |= ParseFlag.Buffer;
                 subString = "?";
@@ -689,7 +689,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
             }
 
-            // to autocompletion
+            // to auto completion
             var parsedTable = new TempTableCompletionItem {
                 DisplayText = pars.Name,
                 Flags = pars.Flags,
@@ -756,7 +756,7 @@ namespace _3PA.MainFeatures.Parser {
             ParserVisitor parserVisitor = ParseFile(fileName, scopeItem);
 
             // add info to the completion list
-            var listToAdd = parserVisitor._parsedCompletionItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList();
+            var listToAdd = parserVisitor._parsedCompletionItemsList.Where(data => data is FunctionCompletionItem || data is ProcedureCompletionItem).ToList();
             foreach (var completionData in listToAdd) {
                 completionData.Flags = completionData.Flags | ParseFlag.Persistent;
             }

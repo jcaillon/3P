@@ -273,8 +273,12 @@ namespace _3PA.MainFeatures.Parser {
     /// Procedure parsed item
     /// </summary>
     internal class ParsedProcedure : ParsedScopeItem {
+
         public string Left { get; private set; }
+
         public string ExternalDllName { get; private set; }
+
+        public List<ParsedDefine> Parameters { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -304,7 +308,13 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string Extend { get; set; }
 
-        public string Parameters { get; set; }
+        /// <summary>
+        /// We keep the string formed with the parameters, it allows us to quickly identify if a prototype is up 
+        /// to date or not
+        /// </summary>
+        public string ParametersString { get; set; }
+
+        public List<ParsedDefine> Parameters { get; set; }
 
         protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
             ParsedReturnType = parsedReturnType;

@@ -28,7 +28,6 @@ using System.Text;
 using System.Threading;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
@@ -236,6 +235,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
+
             var popupMinWidth = 250;
             var toDisplay = new StringBuilder();
 
@@ -279,212 +279,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     </tr>
                 </table>");
 
+            if (item is TableCompletionItem) {
+                popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
+            }
+            
             // the rest depends on the item type
             try {
-                switch (item.Type) {
-                    case CompletionType.TempTable:
-                    case CompletionType.Table:
-                        popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width/2);
-                        // buffer
-                        if (item.FromParser) {
-                            if (item.ParsedBaseItem is ParsedDefine) {
-                                toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(item.SubText)));
-                            }
-                            if (item.ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(item.SubText)) {
-                                toDisplay.Append(FormatRow("Is like", (item.SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable) item.ParsedBaseItem).LcLikeTable + "]" : item.SubText.Replace("Like ", "")));
-                            }
-                        }
-
-                        var tbItem = item.ParsedBaseItem as ParsedTable;
-                        if (tbItem != null) {
-                            if (!string.IsNullOrEmpty(tbItem.Description)) {
-                                toDisplay.Append(FormatRow("Description", tbItem.Description));
-                            }
-
-                            if (tbItem.Fields.Count > 0) {
-                                toDisplay.Append(FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
-                                toDisplay.Append("<table width='100%;'>");
-                                foreach (var parsedField in tbItem.Fields) {
-                                    toDisplay.Append("<tr><td><img src='" + (parsedField.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flags.HasFlag(ParseFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (string.IsNullOrEmpty(parsedField.InitialValue) ? "DEFAULT" : parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
-                                }
-                                toDisplay.Append("</table>");
-                            }
-
-                            if (tbItem.Triggers.Count > 0) {
-                                toDisplay.Append(FormatSubtitle("TRIGGERS [x" + tbItem.Triggers.Count + "]"));
-                                foreach (var parsedTrigger in tbItem.Triggers) {
-                                    toDisplay.Append(FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='trigger#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
-                                }
-                            }
-
-                            if (tbItem.Indexes.Count > 0) {
-                                toDisplay.Append(FormatSubtitle("INDEXES [x" + tbItem.Indexes.Count + "]"));
-                                foreach (var parsedIndex in tbItem.Indexes) {
-                                    toDisplay.Append(FormatRow(parsedIndex.Name, (parsedIndex.Flag != ParsedIndexFlag.None ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
-                                }
-                            }
-                        }
-                        break;
-                    case CompletionType.Sequence:
-                        toDisplay.Append(FormatRow("Database logical name", item.SubText));
-                        break;
-                    case CompletionType.Database:
-                        var dbItem = item.ParsedBaseItem as ParsedDataBase;
-                        if (dbItem != null) {
-                            toDisplay.Append(FormatRow("Logical name", dbItem.Name));
-                            toDisplay.Append(FormatRow("Physical name", dbItem.PhysicalName));
-                            toDisplay.Append(FormatRow("Progress version", dbItem.ProgressVersion));
-                            toDisplay.Append(FormatRow("Number of Tables", dbItem.Tables.Count.ToString()));
-                        }
-                        break;
-                    case CompletionType.Field:
-                    case CompletionType.FieldPk:
-                        // find field
-                        var fieldFound = item.ParsedBaseItem as ParsedField;
-                        if (fieldFound != null) {
-                            if (fieldFound.AsLike == ParsedAsLike.Like) {
-                                toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
-                            }
-                            toDisplay.Append(FormatRow("Type", FormatSubString(item.SubText)));
-                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable) item.ParentItem.ParsedBaseItem).Name));
-                            if (!string.IsNullOrEmpty(fieldFound.Description))
-                                toDisplay.Append(FormatRow("Description", fieldFound.Description));
-                            if (!string.IsNullOrEmpty(fieldFound.Format))
-                                toDisplay.Append(FormatRow("Format", fieldFound.Format));
-                            if (!string.IsNullOrEmpty(fieldFound.InitialValue))
-                                toDisplay.Append(FormatRow("Initial value", fieldFound.InitialValue));
-                            toDisplay.Append(FormatRow("Order", fieldFound.Order.ToString()));
-                        }
-
-                        break;
-                    case CompletionType.Procedure:
-                        // find its parameters
-                        toDisplay.Append(FormatSubtitle("PARAMETERS"));
-                        var paramList = AutoCompletion.FindProcedureParameters(item);
-                        if (paramList.Count > 0)
-                            foreach (var parameter in paramList) {
-                                var defItem = (ParsedDefine) parameter.ParsedBaseItem;
-                                toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as <span class='ToolTipSubString'>" + defItem.PrimitiveType + "</span>"));
-                            }
-                        else
-                            toDisplay.Append("None");
-                        break;
-                    case CompletionType.Function:
-                        var funcItem = (ParsedFunction) item.ParsedBaseItem;
-                        toDisplay.Append(FormatSubtitle("RETURN TYPE"));
-                        toDisplay.Append(FormatRowParam(ParseFlag.Output, "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
-
-                        toDisplay.Append(FormatSubtitle("PARAMETERS"));
-                        var param2List = AutoCompletion.FindProcedureParameters(item);
-                        if (param2List.Count > 0)
-                            foreach (var parameter in param2List) {
-                                var defItem = (ParsedDefine) parameter.ParsedBaseItem;
-                                toDisplay.Append(FormatRowParam(defItem.Flags, parameter.DisplayText + " as " + FormatSubString(defItem.PrimitiveType.ToString())));
-                            }
-                        else
-                            toDisplay.Append("None");
-
-                        var funcImplem = item.ParsedBaseItem as ParsedImplementation;
-                        if (funcImplem != null) {
-                            toDisplay.Append(FormatSubtitle("PROTOTYPE"));
-                            if (funcImplem.HasPrototype)
-                                toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcImplem.PrototypeLine + "#" + funcImplem.PrototypeColumn + "'>Go to prototype</a>"));
-                            else
-                                toDisplay.Append("Has none");
-                        } else {
-                            toDisplay.Append(FormatSubtitle("DEFINED IN"));
-                            toDisplay.Append("Function defined in an external procedure or is a web service operation");
-                        }
-                        break;
-                    case CompletionType.Keyword:
-                    case CompletionType.KeywordObject:
-                        var keywordItem = item as KeywordCompletionItem;
-
-                        toDisplay.Append(FormatRow("Type of keyword", FormatSubString(item.SubText)));
-                        // for abbreviations, find the complete keyword first
-                        string keyword = item.DisplayText;
-                        if (keywordItem.KeywordType == KeywordType.Abbreviation) {
-                            keyword = Keywords.Instance.GetFullKeyword(keyword);
-                            var associatedKeyword = AutoCompletion.FindInCompletionData(keyword, 0);
-                            if (associatedKeyword != null && associatedKeyword.Count > 0)
-                                item = associatedKeyword.First();
-                        }
-                        string keyToFind = null;
-                        // for the keywords define and create, we try to match the second keyword that goes with it
-                        if (keywordItem.KeywordType == KeywordType.Statement &&
-                            (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
-                            var lineStr = Sci.GetLine(Sci.LineFromPosition(Sci.GetPositionFromMouseLocation())).Text;
-                            var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
-                            foreach (var word in listOfSecWords) {
-                                if (lineStr.ContainsFast(word)) {
-                                    keyToFind = string.Join(" ", keyword, word, item.SubText);
-                                    break;
-                                }
-                            }
-                        }
-                        if (keyToFind == null)
-                            keyToFind = string.Join(" ", keyword, item.SubText);
-
-                        var dataHelp = Keywords.Instance.GetKeywordHelp(keyToFind);
-                        if (dataHelp != null) {
-                            toDisplay.Append(FormatSubtitle("DESCRIPTION"));
-                            toDisplay.Append(dataHelp.Description);
-
-                            // synthax
-                            if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
-                                toDisplay.Append(FormatSubtitle("SYNTAX"));
-                                toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
-                                var i = 0;
-                                foreach (var synthax in dataHelp.Synthax) {
-                                    if (i > 0) toDisplay.Append(@"<br>");
-                                    toDisplay.Append(synthax);
-                                    i++;
-                                }
-                                toDisplay.Append(@"</div>");
-                            }
-                        } else {
-                            toDisplay.Append(FormatSubtitle("404 NOT FOUND"));
-                            if (keywordItem.KeywordType == KeywordType.Option)
-                                toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Since this keyword is an option, try to hover the first keyword of the statement or refer to the 4GL help</i>");
-                            else
-                                toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");
-                        }
-
-                        CurrentWord = keyToFind;
-                        break;
-                    case CompletionType.Label:
-                        break;
-                    case CompletionType.Preprocessed:
-                        var preprocItem = (ParsedPreProcVariable) item.ParsedBaseItem;
-                        if (preprocItem.UndefinedLine > 0)
-                            toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
-                        toDisplay.Append(FormatSubtitle("VALUE"));
-                        toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
-                        toDisplay.Append(preprocItem.Value);
-                        toDisplay.Append(@"</div>");
-                        break;
-                    case CompletionType.Snippet:
-                        // TODO
-                        break;
-                    case CompletionType.VariableComplex:
-                    case CompletionType.VariablePrimitive:
-                    case CompletionType.Widget:
-                        var varItem = (ParsedDefine) item.ParsedBaseItem;
-                        toDisplay.Append(FormatRow("Define type", FormatSubString(varItem.Type.ToString())));
-                        if (!string.IsNullOrEmpty(varItem.TempPrimitiveType))
-                            toDisplay.Append(FormatRow("Variable type", FormatSubString(varItem.PrimitiveType.ToString())));
-                        if (varItem.AsLike == ParsedAsLike.Like)
-                            toDisplay.Append(FormatRow("Is LIKE", varItem.TempPrimitiveType));
-                        if (!string.IsNullOrEmpty(varItem.ViewAs))
-                            toDisplay.Append(FormatRow("Screen representation", varItem.ViewAs));
-                        if (!string.IsNullOrEmpty(varItem.Left)) {
-                            toDisplay.Append(FormatSubtitle("END OF DECLARATION"));
-                            toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
-                            toDisplay.Append(varItem.Left);
-                            toDisplay.Append(@"</div>");
-                        }
-                        break;
-                }
+                toDisplay.Append(item);
             } catch (Exception e) {
                 toDisplay.Append("Error when appending info :<br>" + e + "<br>");
             }
@@ -493,18 +294,18 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // parsed item?
             if (parsedItem != null && item.FromParser) {
-                toDisplay.Append(FormatSubtitle("ORIGINS"));
+                toDisplay.Append(HtmlHelper.FormatSubtitle("ORIGINS"));
                 if (parsedItem.Scope != null)
-                    toDisplay.Append(FormatRow("Scope name", parsedItem.Scope.Name));
+                    toDisplay.Append(HtmlHelper.FormatRow("Scope name", parsedItem.Scope.Name));
                 if (!Npp.CurrentFile.Path.Equals(parsedItem.FilePath))
-                    toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
+                    toDisplay.Append(HtmlHelper.FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
             }
 
             // Flags
             var flagStrBuilder = new StringBuilder();
-            item.DoForEachFlag((name, flag) => { flagStrBuilder.Append(FormatRowWithImg(name, "<b>" + name + "</b>")); });
+            item.DoForEachFlag((name, flag) => { flagStrBuilder.Append(HtmlHelper.FormatRowWithImg(name, "<b>" + name + "</b>")); });
             if (flagStrBuilder.Length > 0) {
-                toDisplay.Append(FormatSubtitle("FLAGS"));
+                toDisplay.Append(HtmlHelper.FormatSubtitle("FLAGS"));
                 toDisplay.Append(flagStrBuilder);
             }
 
@@ -528,32 +329,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #region formatting functions
 
-        private static string FormatRow(string describe, string result) {
-            return "- " + describe + " : <b>" + result + "</b><br>";
-        }
 
-        private static string FormatRowWithImg(string image, string text) {
-            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
-        }
-
-        private static string FormatRowParam(ParseFlag flags, string text) {
-            var image = ParseFlag.Input.ToString();
-            if (flags.HasFlag(ParseFlag.InputOutput))
-                image = ParseFlag.InputOutput.ToString();
-            else if (flags.HasFlag(ParseFlag.Output))
-                image = ParseFlag.Output.ToString();
-            else if (flags.HasFlag(ParseFlag.Return))
-                image = ParseFlag.Return.ToString();
-            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
-        }
-
-        private static string FormatSubtitle(string text) {
-            return "<div class='ToolTipSubTitle'>" + text + "</div>";
-        }
-
-        private static string FormatSubString(string text) {
-            return "<span class='ToolTipSubString'>" + text + "</span>";
-        }
 
         #endregion
 

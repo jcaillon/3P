@@ -96,8 +96,8 @@ namespace _3PA.MainFeatures {
                 try {
                     var nppScreen = Npp.NppScreen;
                     var toastNotification = new YamuiNotification(
-                        ThemeManager.FormatTitle(imageType, title, subTitle),
-                        ThemeManager.FormatContent(htmlContent),
+                        HtmlHelper.FormatTitle(imageType, title, subTitle),
+                        HtmlHelper.FormatContent(htmlContent),
                         duration,
                         nppScreen,
                         Math.Min(width, nppScreen.WorkingArea.Width/3),
@@ -179,8 +179,8 @@ namespace _3PA.MainFeatures {
                 clickedButton = YamuiInput.ShowDialog(
                     Npp.Handle,
                     "3P: " + title,
-                    ThemeManager.FormatTitle(imageType, title, subTitle),
-                    ThemeManager.FormatContent(htmlContent),
+                    HtmlHelper.FormatTitle(imageType, title, subTitle),
+                    HtmlHelper.FormatContent(htmlContent),
                     buttonsList,
                     ref data,
                     Npp.NppScreen.WorkingArea.Width*3/5,
@@ -198,8 +198,8 @@ namespace _3PA.MainFeatures {
                     clickedButton = YamuiInput.ShowDialog(
                         Npp.Handle,
                         "3P: " + title,
-                        ThemeManager.FormatTitle(imageType, title, subTitle),
-                        ThemeManager.FormatContent(htmlContent),
+                        HtmlHelper.FormatTitle(imageType, title, subTitle),
+                        HtmlHelper.FormatContent(htmlContent),
                         buttonsList,
                         ref nullObject,
                         Npp.NppScreen.WorkingArea.Width*3/5,
@@ -219,8 +219,8 @@ namespace _3PA.MainFeatures {
                     clickedButton = YamuiInput.Show(
                         Npp.Handle,
                         "3P: " + title,
-                        ThemeManager.FormatTitle(imageType, title, subTitle),
-                        ThemeManager.FormatContent(htmlContent),
+                        HtmlHelper.FormatTitle(imageType, title, subTitle),
+                        HtmlHelper.FormatContent(htmlContent),
                         buttonsList,
                         ref nullObject,
                         out form,

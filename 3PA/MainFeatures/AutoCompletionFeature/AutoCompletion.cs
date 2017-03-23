@@ -190,12 +190,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (c != char.MinValue && !typing && isNormalContext) {
 
                 strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
+                var strOnLeftLength = strOnLeft.Length;
 
                 // we finished entering a word, find the offset at which we can find said word
                 int offset;
                 if (c == '\n' || c == '\r') {
                     offset = nppCurrentPosition - Sci.GetLine(nppCurrentLine).Position;
-                    offset += strOnLeft.Substring(strOnLeft.Length - 1 - offset - 2, 2) .Equals("\r\n") ? 2 : 1;
+                    if (offset > 40) {
+                        // the user inserted a new line which is extremely indented, make sure to get the last word by taking a longer string
+                        strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 250);
+                        strOnLeftLength = strOnLeft.Length;
+                    }
+                    offset += strOnLeft.Substring(strOnLeftLength - 1 - offset - 2, 2) .Equals("\r\n") ? 2 : 1;
                 } else
                     offset = 1;
 
@@ -207,7 +213,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         if (!IsCharPartOfWord(strOnLeft[i]))
                             break;
                         if (char.IsLetterOrDigit(strOnLeft[i])) {
-                            UseCurrentSuggestion(-offset);
+                            var replacementWord = InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
+                            // also need to update the strOnLeft since we use it again in this method
+                            int replacePos = offset;
+                            char? replaceSep;
+                            var toReplace = GetWord(strOnLeft, ref replacePos, out replaceSep);
+                            if (strOnLeftLength - offset - toReplace.Length > 0)
+                                strOnLeft = strOnLeft.Substring(0, strOnLeftLength - offset - toReplace.Length) + replacementWord + strOnLeft.Substring(strOnLeftLength - offset);
                             break;
                         }
                     }
@@ -496,13 +508,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Call this method to insert the completionItem at the given offset in regards to the current caret position
         /// (it will replace the word found at CaretPosition + Offset by the completionItem.DisplayText)
         /// </summary>
-        public static void InsertSuggestion(CompletionItem data, int offset = 0) {
+        public static string InsertSuggestion(CompletionItem data, int offset = 0) {
+            string replacementText = null;
             try {
                 if (data == null)
-                    return;
+                    return null;
 
                 // in case of keyword, replace abbreviation if needed
-                var replacementText = data.DisplayText;
+                replacementText = data.DisplayText;
                 if (Config.Instance.CodeReplaceAbbreviations && (data.Flags & ParseFlag.Abbreviation) != 0) {
                     var fullKeyword = Keywords.Instance.GetFullKeyword(data.DisplayText).ConvertCase(Config.Instance.KeywordChangeCaseMode);
                     replacementText = fullKeyword ?? data.DisplayText;
@@ -517,9 +530,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     Snippets.TriggerCodeSnippetInsertion();
 
                 Cloak();
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error during InsertSuggestion");
             }
+            return replacementText;
         }
 
         #endregion
@@ -676,32 +691,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return filteredList.Where(data => data.DisplayText.EqualsCi(firstKeyword)).ToList();
         }
 
-        /// <summary>
-        /// Returns a list of "parameters" for a given internal procedure
-        /// </summary>
-        public static List<CompletionItem> FindProcedureParameters(CompletionItem procedureItem) {
-            return _savedAllItems.Where(data => {
-                if (!data.FromParser)
-                    return false;
-                var item = data.ParsedBaseItem as ParsedDefine;
-                return item != null && item.Scope.Name.EqualsCi(procedureItem.DisplayText) && item.Type == ParseDefineType.Parameter && data is VariableCompletionItem;
-            }).ToList();
-        }
-
         private static List<CompletionItem> GetSortedFilteredSavedList(int lineNumber, bool dontCheckLine) {
             var filterClass = new CompletionFilterClass();
             filterClass.UpdateConditions(lineNumber, dontCheckLine);
             var outList = _savedAllItems.Where(filterClass.FilterPredicate).ToList();
             outList.Sort(CompletionSortingClass<CompletionItem>.Instance);
             return outList;
-        }
-
-        /// <summary>
-        /// Replace the keywork at given offset with the current suggestion
-        /// </summary>
-        public static void UseCurrentSuggestion(int offset) {
-            if (IsVisible)
-                InsertSuggestion(_form.GetCurrentCompletionItem(), offset);
         }
 
         public static char[] CurrentLangAdditionalChars {

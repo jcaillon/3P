@@ -713,6 +713,11 @@ namespace _3PA.MainFeatures.Parser {
                             case "input-output":
                                 flags |= ParseFlag.InputOutput;
                                 break;
+                            /*default:
+                                ParseFlag parsedFlag;
+                                if (Enum.TryParse(lowerToken, true, out parsedFlag))
+                                    flags |= parsedFlag;
+                                break;*/
                         }
                         break;
 
@@ -966,12 +971,22 @@ namespace _3PA.MainFeatures.Parser {
                     EndPosition = token.EndPosition,
                     Flags = flags
                 }, defineToken.OwnerNumber);
-            } else
-                AddParsedItem(new ParsedDefine(name, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor) {
+            } else {
+                var newDefine = new ParsedDefine(name, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition,
                     Flags = flags
-                }, defineToken.OwnerNumber);
+                };
+                AddParsedItem(newDefine, defineToken.OwnerNumber);
+
+                // case of a parameters, add it to the current scope (if procedure)
+                var currentScope = _context.Scope as ParsedProcedure;
+                if (type == ParseDefineType.Parameter && currentScope != null) {
+                    if (currentScope.Parameters == null)
+                        currentScope.Parameters = new List<ParsedDefine>();
+                    currentScope.Parameters.Add(newDefine);
+                }
+            }
         }
 
         /// <summary>
@@ -1234,7 +1249,7 @@ namespace _3PA.MainFeatures.Parser {
             string extend = null;
             ParseFlag flags = 0;
             StringBuilder parameters = new StringBuilder();
-            var parametersList = new List<ParsedItem>();
+            List<ParsedDefine> parametersList = null;
 
             _lastTokenWasSpace = true;
 
@@ -1313,7 +1328,7 @@ namespace _3PA.MainFeatures.Parser {
                     EndBlockPosition = token.EndPosition,
                     Flags = flags,
                     Extend = extend ?? string.Empty,
-                    Parameters = parameters.ToString()
+                    ParametersString = parameters.ToString()
                 };
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdProto);
@@ -1326,9 +1341,11 @@ namespace _3PA.MainFeatures.Parser {
                     _context.Scope = createdProto;
 
                     // add the parameters to the list
-                    if (parametersList.Count > 0) {
+                    if (parametersList != null) {
+                        createdProto.Parameters = new List<ParsedDefine>();
                         foreach (var parsedItem in parametersList) {
                             AddParsedItem(parsedItem, functionToken.OwnerNumber);
+                            createdProto.Parameters.Add(parsedItem);
                         }
                     }
 
@@ -1344,7 +1361,7 @@ namespace _3PA.MainFeatures.Parser {
                 EndPosition = token.EndPosition,
                 Flags = flags,
                 Extend = extend ?? string.Empty,
-                Parameters = parameters.ToString()
+                ParametersString = parameters.ToString()
             };
 
             // it has a prototype?
@@ -1363,7 +1380,7 @@ namespace _3PA.MainFeatures.Parser {
                         createdImp.Flags == proto.Flags &&
                         createdImp.Extend.Equals(proto.Extend) &&
                         createdImp.ParsedReturnType.Equals(proto.ParsedReturnType) &&
-                        createdImp.Parameters.Equals(proto.Parameters));
+                        createdImp.ParametersString.Equals(proto.ParametersString));
                 }
             } else {
                 _functionPrototype.Add(name, createdImp);
@@ -1375,9 +1392,11 @@ namespace _3PA.MainFeatures.Parser {
             _context.Scope = createdImp;
 
             // add the parameters to the list
-            if (parametersList.Count > 0) {
+            if (parametersList != null) {
+                createdImp.Parameters = new List<ParsedDefine>();
                 foreach (var parsedItem in parametersList) {
                     AddParsedItem(parsedItem, functionToken.OwnerNumber);
+                    createdImp.Parameters.Add(parsedItem);
                 }
             }
 
@@ -1387,14 +1406,14 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Parses a parameter definition (used in function, class method, class event)
         /// </summary>
-        private List<ParsedItem> GetParsedParameters(Token functionToken, StringBuilder parameters) {
+        private List<ParsedDefine> GetParsedParameters(Token functionToken, StringBuilder parameters) {
             // info the parameters
             string paramName = "";
             ParseFlag flags = 0;
             ParsedAsLike paramAsLike = ParsedAsLike.None;
             string paramPrimitiveType = "";
             string parameterFor = "";
-            var parametersList = new List<ParsedItem>();
+            var parametersList = new List<ParsedDefine>();
 
             int state = 0;
             do {

@@ -327,7 +327,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             foreach (var db in _dataBases) {
                 var curDb = new DatabaseCompletionItem {
                     DisplayText = db.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
-                    FromParser = false,
                     ParsedBaseItem = db,
                     Ranking = 0,
                     Flags = 0,
@@ -341,7 +340,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     var curTable = new TableCompletionItem() {
                         DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                         SubText = db.Name,
-                        FromParser = false,
                         ParsedBaseItem = table,
                         Ranking = 0,
                         Flags = 0,
@@ -357,7 +355,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         CompletionItem curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
                         curField.DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode);
                         curField.SubText = field.Type.ToString();
-                        curField.FromParser = false;
                         curField.ParsedBaseItem = field;
                         curField.Ranking = 0;
                         curField.Flags = field.Flags & ~ParseFlag.Primary;
