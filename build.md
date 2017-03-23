@@ -4,6 +4,7 @@
 
 - You might have a missing librairy/exe when compiling, install the [SDK for .net 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=8279)
 - Your system envVar path must be extended to include ILDasm.exe directory (e.g. "c:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools")
+- (If everything else fails, install [this](https://developer.microsoft.com/en-us/windows/downloads/windows-8-sdk))
 
 ## When releasing (Note to myself) : ##
 

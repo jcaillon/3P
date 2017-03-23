@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Wait for the latest parsing action to be done
         /// </summary>
         public static void WaitForParserEnd() {
-            //ParseAction.WaitLatestTask();
+            ParseAction.WaitLatestTask();
         }
 
         /// <summary>
@@ -130,23 +130,29 @@ namespace _3PA.MainFeatures.Parser {
                     lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
 
                     if (lastParsedFileIsProgress) {
-                        parser = new Parser(Sci.Text, lastParsedFilePath, null, true);
+                        parser = new Parser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), lastParsedFilePath, null, true);
+
+                        // visitor
+                        var visitor = new ParserVisitor(true);
+                        parser.Accept(visitor);
+
+                        // send completionItems
+                        if (OnEndSendCompletionItems != null)
+                            OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
+
+                        // send codeExplorerItems
+                        if (OnEndSendCodeExplorerItems != null)
+                            OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+
+                    } else {
+                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers);
+
+                        // send completionItems
+                        if (OnEndSendCompletionItems != null)
+                            OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
                     }
+
                 } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-
-                if (lastParsedFileIsProgress) {
-                    // visitor
-                    var visitor = new ParserVisitor(true);
-                    parser.Accept(visitor);
-
-                    // send completionItems
-                    if (OnEndSendCompletionItems != null)
-                        OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
-
-                    // send codeExplorerItems
-                    if (OnEndSendCodeExplorerItems != null)
-                        OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
-                }
 
                 if (_lock.TryEnterWriteLock(-1)) {
                     try {
@@ -170,6 +176,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 if (OnEnd != null)
                     OnEnd();
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in DoParse " + (lastParsedFilePath ?? "?"));
             }
@@ -219,7 +226,7 @@ namespace _3PA.MainFeatures.Parser {
         public static void UpdateKnownStaticItems() {
             WaitForParserEnd();
             // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
-            KnownStaticItems = DataBase.GetDbDictionary();
+            KnownStaticItems = DataBase.Instance.GetDbDictionary();
             foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
                 KnownStaticItems[keyword.DisplayText] = keyword.Type;
             }

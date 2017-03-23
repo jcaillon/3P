@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public DateTime CreateDateTime { get; set; }
         public long Size { get; set; }
         public FileType Type { get; set; }
-        public FileFlag Flag { get; set; }
+        public FileFlag Flags { get; set; }
         public string SubString { get; set; }
 
         /// <summary>
@@ -100,14 +100,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         public override List<Image> TagImages {
             get {
                 var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(FileFlag))) {
-                    FileFlag flag = (FileFlag) Enum.Parse(typeof(FileFlag), name);
-                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
+                typeof(FileFlag).ForEach<FileFlag>((s, l) => {
+                    if (l == 0 || !Flags.HasFlag((FileFlag)l))
+                        return;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
                         outList.Add(tryImg);
-                }
+                });
                 return outList;
             }
         }

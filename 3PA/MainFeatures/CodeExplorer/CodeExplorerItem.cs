@@ -85,18 +85,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
-        /// Apply an action for each flag of the item
-        /// </summary>
-        /// <param name="toApplyOnFlag"></param>
-        public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
-            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0 || !Flags.HasFlag(flag)) continue;
-                toApplyOnFlag(name, flag);
-            }
-        }
-
-        /// <summary>
         /// The piece of text displayed in the list
         /// </summary>
         public override string DisplayText { get; set; }
@@ -155,14 +143,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public override List<Image> TagImages {
             get {
                 var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flags.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
+                typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
+                    if (l == 0 || !Flags.HasFlag((ParseFlag) l))
+                        return;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
                         outList.Add(tryImg);
-                }
+                });
                 return outList;
             }
         }

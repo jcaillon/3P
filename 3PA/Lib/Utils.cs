@@ -844,19 +844,29 @@ namespace _3PA.Lib {
             return true;
         }
 
-        private static bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port, string serverUri) {
+        public static bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port, string serverUri) {
             NetworkCredential credential = null;
             if (!string.IsNullOrEmpty(userName))
                 credential = new NetworkCredential(userName, passWord);
-            foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
-                try {
-                    var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
-                    ftp.Connect(server, curPort, credential, mode, 1800);
-                    ftp.Connected = true;
-                    break;
-                } catch (Exception) {
-                    //ignored
+
+            var modes = new List<EsslSupportMode>();
+            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => {
+                modes.Add((EsslSupportMode) l);
+            });
+
+            ftp.DataConnectionMode = EDataConnectionMode.Passive;
+            while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {
+                foreach (var mode in modes.OrderByDescending(mode => mode)) {
+                    try {
+                        var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
+                        ftp.Connect(server, curPort, credential, mode, 1800);
+                        ftp.Connected = true;
+                        break;
+                    } catch (Exception) {
+                        //ignored
+                    }
                 }
+                ftp.DataConnectionMode = EDataConnectionMode.Active;
             }
 
             // failed?

@@ -133,7 +133,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                         DisplayText = fileInfo.Name,
                         BasePath = fileInfo.DirectoryName,
                         FullPath = fileInfo.FullName,
-                        Flag = FileFlag.ReadOnly,
+                        Flags = FileFlag.ReadOnly,
                         Size = fileInfo.Length,
                         CreateDateTime = fileInfo.CreationTime,
                         ModifieDateTime = fileInfo.LastWriteTime,

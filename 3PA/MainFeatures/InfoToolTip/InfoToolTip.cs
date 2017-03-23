@@ -288,10 +288,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         // buffer
                         if (item.FromParser) {
                             if (item.ParsedBaseItem is ParsedDefine) {
-                                toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(item.SubString)));
+                                toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(item.SubText)));
                             }
-                            if (item.ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(item.SubString)) {
-                                toDisplay.Append(FormatRow("Is like", (item.SubString.Contains("?")) ? "Unknown table [" + ((ParsedTable) item.ParsedBaseItem).LcLikeTable + "]" : item.SubString.Replace("Like ", "")));
+                            if (item.ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(item.SubText)) {
+                                toDisplay.Append(FormatRow("Is like", (item.SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable) item.ParsedBaseItem).LcLikeTable + "]" : item.SubText.Replace("Like ", "")));
                             }
                         }
 
@@ -326,7 +326,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         }
                         break;
                     case CompletionType.Sequence:
-                        toDisplay.Append(FormatRow("Database logical name", item.SubString));
+                        toDisplay.Append(FormatRow("Database logical name", item.SubText));
                         break;
                     case CompletionType.Database:
                         var dbItem = item.ParsedBaseItem as ParsedDataBase;
@@ -345,7 +345,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (fieldFound.AsLike == ParsedAsLike.Like) {
                                 toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
                             }
-                            toDisplay.Append(FormatRow("Type", FormatSubString(item.SubString)));
+                            toDisplay.Append(FormatRow("Type", FormatSubString(item.SubText)));
                             toDisplay.Append(FormatRow("Owner table", ((ParsedTable) item.ParentItem.ParsedBaseItem).Name));
                             if (!string.IsNullOrEmpty(fieldFound.Description))
                                 toDisplay.Append(FormatRow("Description", fieldFound.Description));
@@ -398,7 +398,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
-                        toDisplay.Append(FormatRow("Type of keyword", FormatSubString(item.SubString)));
+                        toDisplay.Append(FormatRow("Type of keyword", FormatSubString(item.SubText)));
                         // for abbreviations, find the complete keyword first
                         string keyword = item.DisplayText;
                         if (item.KeywordType == KeywordType.Abbreviation) {
@@ -415,13 +415,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
                             foreach (var word in listOfSecWords) {
                                 if (lineStr.ContainsFast(word)) {
-                                    keyToFind = string.Join(" ", keyword, word, item.SubString);
+                                    keyToFind = string.Join(" ", keyword, word, item.SubText);
                                     break;
                                 }
                             }
                         }
                         if (keyToFind == null)
-                            keyToFind = string.Join(" ", keyword, item.SubString);
+                            keyToFind = string.Join(" ", keyword, item.SubText);
 
                         var dataHelp = Keywords.Instance.GetKeywordHelp(keyToFind);
                         if (dataHelp != null) {

@@ -30,7 +30,7 @@ namespace _3PA.MainFeatures.Parser {
         /// name is the table's name (can also be BASE.TABLE)
         /// </summary>
         private static ParsedTable FindAnyTableByName(string name, List<ParsedItem> parsedItems) {
-            return DataBase.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
+            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
         }
 
         /// <summary>
@@ -78,19 +78,19 @@ namespace _3PA.MainFeatures.Parser {
                 case "widget-handle":
                     return ParsedPrimitiveType.WidgetHandle;
                 default:
-                    var token1 = str;
-                    foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                        return (ParsedPrimitiveType) Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
-                    }
+                    ParsedPrimitiveType primType;
+                    if (Enum.TryParse(str, true, out primType))
+                        return primType;
                     break;
             }
 
             // try to find the complete word in abbreviations list
             var completeStr = Keywords.Instance.GetFullKeyword(str);
-            if (completeStr != null)
-                foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
-                    return (ParsedPrimitiveType) Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
-                }
+            if (completeStr != null) {
+                ParsedPrimitiveType primType;
+                if (Enum.TryParse(completeStr, true, out primType))
+                    return primType;
+            }
 
             return ParsedPrimitiveType.Unknow;
         }
@@ -114,7 +114,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // Search the databases
-            var foundField = DataBase.FindFieldByName(likeStr);
+            var foundField = DataBase.Instance.FindFieldByName(likeStr);
             if (foundField != null)
                 return foundField.Type;
 

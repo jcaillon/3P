@@ -263,6 +263,18 @@ namespace _3PA.MainFeatures {
 
             public bool NeverAskToDisableDefaultAutoComp = false;
 
+            [Display(Name = "Maximum length for the parser",
+                Description = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            public int AutoCompletionMaxLengthToParse = 5000000;
+
+            [Display(Name = "Ignore numbers",
+                Description = "Should the auto-completion ignore numbers when parsing for words to suggest?",
+                GroupName = "Default auto-completion replacement",
+                AutoGenerateField = false)]
+            public bool NppAutoCompletionIgnoreNumbers = true;
+
             #endregion
 
             #region CODE EDITION
@@ -524,7 +536,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static string DataDiggerVersionUrl {
-            get { return @"https://datadigger.wordpress.com/2017/02/20/20170220/"; }
+            get { return @"https://datadigger.wordpress.com/"; }
         }
 
         /// <summary>
@@ -760,9 +772,10 @@ namespace _3PA.MainFeatures {
         /// <returns></returns>
         public static List<int> GetPriorityList(Type enumerationType, string configPropertyName) {
             var value = (string) Instance.GetValueOf(configPropertyName);
-            if (Enum.GetNames(enumerationType).Length != value.Split(',').Length) {
+            int enumLength = Enum.GetNames(enumerationType).Length;
+            if (enumLength != value.Split(',').Length) {
                 value = "";
-                for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++) {
+                for (int i = 0; i < enumLength; i++) {
                     value += i + ",";
                 }
                 value = value.TrimEnd(',');
@@ -770,7 +783,7 @@ namespace _3PA.MainFeatures {
             }
             var output = new List<int>();
             var temp = value.Split(',').Select(int.Parse).ToList();
-            for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++)
+            for (int i = 0; i < enumLength; i++)
                 output.Add(temp.IndexOf(i));
             return output;
         }

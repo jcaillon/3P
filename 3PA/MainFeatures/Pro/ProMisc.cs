@@ -118,14 +118,6 @@ namespace _3PA.MainFeatures.Pro {
             UserCommunication.Notify("Sorry, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "Information", "Failed to find an origin", 5);
         }
 
-        public static void ForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
-            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0) continue;
-                toApplyOnFlag(name, flag);
-            }
-        }
-
         public static void GoToDefinition() {
             GoToDefinition(false);
         }

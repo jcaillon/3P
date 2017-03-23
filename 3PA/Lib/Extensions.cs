@@ -163,6 +163,24 @@ namespace _3PA.Lib {
 
         #region Enum and attributes extensions
 
+        private static Dictionary<Type, List<Tuple<string, long>>> _enumTypeNameValueKeyPairs = new Dictionary<Type, List<Tuple<string, long>>>();
+
+        public static void ForEach<T>(this Type curType, Action<string, long> actionForEachNameValue) {
+            if (!curType.IsEnum)
+                return;
+            if (!_enumTypeNameValueKeyPairs.ContainsKey(curType)) { 
+                var list = new List<Tuple<string, long>>();
+                foreach (var name in Enum.GetNames(curType)) {
+                    T val = (T)Enum.Parse(curType, name);
+                    list.Add(new Tuple<string, long>(name, Convert.ToInt64(val)));
+                }
+                _enumTypeNameValueKeyPairs.Add(curType, list);
+            }
+            foreach (var tuple in _enumTypeNameValueKeyPairs[curType]) {
+                actionForEachNameValue(tuple.Item1, tuple.Item2);
+            }
+        }
+
         /// <summary>
         /// Returns the attribute array for the given Type T and the given value,
         /// not to self : dont use that on critical path -> reflection is costly
@@ -212,20 +230,6 @@ namespace _3PA.Lib {
         public static string GetDescription(this Enum value) {
             var attr = value.GetAttribute<DescriptionAttribute>();
             return attr != null ? attr.Description : null;
-        }
-
-        /// <summary>
-        /// Returns a collection of all the values of a given Enum
-        /// </summary>
-        public static IEnumerable<T> GetEnumValues<T>(this Enum value) {
-            return Enum.GetValues(typeof(T)).Cast<T>();
-        }
-
-        /// <summary>
-        /// Returns an array of all the names of a given Enum
-        /// </summary>
-        public static string[] GetEnumNames<T>(this Enum value) {
-            return Enum.GetNames(typeof(T));
         }
 
         /// <summary>

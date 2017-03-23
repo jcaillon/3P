@@ -31,6 +31,7 @@ namespace _3PA.MainFeatures.Parser {
     /// it implements a visitor pattern
     /// </summary>
     internal class NppAutoCompParser {
+
         #region private const
 
         private const char Eof = (char) 0;
@@ -59,26 +60,26 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Additionnal characters that will count as a char from a word
         /// </summary>
-        public Char[] AdditionnalCharacters { get; set; }
+        public Char[] AdditionnalCharacters { get; private set; }
 
         /// <summary>
-        /// True to add the number parsed to the output list
+        /// False to add the number parsed to the output list
         /// </summary>
-        public bool ConsiderNumbers { get; set; }
+        public bool IgnoreNumbers { get; private set; }
 
         /// <summary>
         /// Allows to have a unique list of words and not add twice the same
         /// </summary>
-        public HashSet<string> KnownWords { get; set; }
+        public HashSet<string> KnownWords { get; private set; }
 
         #endregion
 
-        #region public accessor
+        #region public accessors
 
         /// <summary>
         /// Returns the tokens list
         /// </summary>
-        public List<CompletionItem> GetWordsList {
+        public List<CompletionItem> ParsedCompletionItemsList {
             get { return _wordsList; }
         }
 
@@ -90,12 +91,14 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        /// <param name="data"></param>
-        public NppAutoCompParser(string data) {
+        public NppAutoCompParser(string data, char[] additionnalCharacters, bool ignoreNumbers) {
             if (data == null)
                 throw new ArgumentNullException("data");
             _data = data;
             _dataLength = _data.Length;
+
+            IgnoreNumbers = ignoreNumbers;
+            AdditionnalCharacters = additionnalCharacters;
 
             if (KnownWords == null)
                 KnownWords = new HashSet<string>();
@@ -130,13 +133,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private char PeekAtChr(int x) {
             return _pos + x >= _dataLength ? Eof : _data[_pos + x];
-        }
-
-        /// <summary>
-        /// peek backward x chars
-        /// </summary>
-        private char PeekAtChrReverse(int x) {
-            return _pos - x < 0 ? Eof : _data[_pos - x];
         }
 
         /// <summary>
@@ -221,7 +217,7 @@ namespace _3PA.MainFeatures.Parser {
                     // number
                     ReadNumber();
 
-                    if (ConsiderNumbers) {
+                    if (!IgnoreNumbers) {
                         var valnum = GetTokenValue();
                         if (!KnownWords.Contains(valnum)) {
                             KnownWords.Add(valnum);

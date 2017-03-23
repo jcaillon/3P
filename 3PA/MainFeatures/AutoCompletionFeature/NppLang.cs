@@ -230,7 +230,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                 _keywords.Add(new CompletionItem {
                                     DisplayText = keyword,
                                     Type = overloads == null ? CompletionType.Keyword : CompletionType.Function,
-                                    SubString = LangName + ".xml",
+                                    SubText = LangName + ".xml",
                                     ParsedBaseItem = new NppKeyword(keyword) {
                                         Overloads = overloads,
                                         Origin = NppKeywordOrigin.AutoCompApiXml
@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                             _keywords.Add(new CompletionItem {
                                                 DisplayText = keyword,
                                                 Type = CompletionType.Keyword,
-                                                SubString = "userDefinedLang.xml",
+                                                SubText = "userDefinedLang.xml",
                                                 ParsedBaseItem = new NppKeyword(keyword) {
                                                     Origin = NppKeywordOrigin.UserLangXml
                                                 }
@@ -292,7 +292,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                         _keywords.Add(new CompletionItem {
                                             DisplayText = keyword,
                                             Type = CompletionType.Keyword,
-                                            SubString = "langs.xml",
+                                            SubText = "langs.xml",
                                             ParsedBaseItem = new NppKeyword(keyword) {
                                                 Origin = NppKeywordOrigin.LangsXml
                                             }

@@ -410,7 +410,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateDownloadButton() {
             // download database information
-            if (DataBase.IsDbInfoAvailable) {
+            if (DataBase.Instance.IsDbInfoAvailable) {
                 btDbDownload.BackGrndImage = ImageResources.DownloadDbOk;
                 btDbDeleteDownload.Enabled = true;
                 btDbView.Enabled = true;
@@ -430,16 +430,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #region misc
 
         private void BtDownloadOnButtonPressed(object sender, EventArgs e) {
-            DataBase.FetchCurrentDbInfo(UpdateDownloadButton);
+            DataBase.Instance.FetchCurrentDbInfo(UpdateDownloadButton);
         }
 
         private void BtDeleteDownloadOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            DataBase.DeleteCurrentDbInfo();
+            DataBase.Instance.DeleteCurrentDbInfo();
             UpdateDownloadButton();
         }
 
         private void BtDbViewOnButtonPressed(object sender, EventArgs eventArgs) {
-            Npp.OpenFile(DataBase.GetCurrentDumpPath);
+            Npp.OpenFile(DataBase.Instance.GetCurrentDumpPath);
         }
 
         private void TgCompLocallyOnCheckedChanged(object sender, EventArgs eventArgs) {

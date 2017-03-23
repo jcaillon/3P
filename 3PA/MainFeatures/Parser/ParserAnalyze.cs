@@ -652,11 +652,8 @@ namespace _3PA.MainFeatures.Parser {
                             case "property":
                             case "sub-menu":
                             case "parameter":
-                                var token1 = lowerToken;
-                                foreach (var typ in Enum.GetNames(typeof(ParseDefineType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                                    type = (ParseDefineType) Enum.Parse(typeof(ParseDefineType), typ, true);
-                                    break;
-                                }
+                                if (!Enum.TryParse(lowerToken, true, out type))
+                                    type = ParseDefineType.None;
                                 state++;
                                 break;
                             case "data-source":

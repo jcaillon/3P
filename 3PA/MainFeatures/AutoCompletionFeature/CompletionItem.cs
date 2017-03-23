@@ -53,14 +53,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public int Ranking { get; set; }
 
         /// <summary>
-        /// A free to use string, can contain :
-        /// - keyword = type of keyword
-        /// - table = name of the owner database
-        /// - field = type
-        /// </summary>
-        public string SubString { get; set; }
-
-        /// <summary>
         /// Indicates whether or not this completionData is created by the parser Visitor
         /// </summary>
         public bool FromParser { get; set; }
@@ -80,11 +72,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <param name="toApplyOnFlag"></param>
         public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
-            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0 || !Flags.HasFlag(flag)) continue;
-                toApplyOnFlag(name, flag);
-            }
+            typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
+                if (l == 0 || !Flags.HasFlag((ParseFlag)l))
+                    return;
+                toApplyOnFlag(s, (ParseFlag) l);
+            });
         }
 
         /// <summary>
@@ -134,9 +126,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// return a string containing the subtext to display
         /// </summary>
-        public override string SubText {
-            get { return SubString; }
-        }
+        public override string SubText { get; set; }
 
         /// <summary>
         /// return a list of images to be displayed (in reverse order) for the item
@@ -144,18 +134,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override List<Image> TagImages {
             get {
                 var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag) Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !Flags.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
-                    if (tryImg != null) {
+                typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
+                    if (l == 0 || !Flags.HasFlag((ParseFlag)l))
+                        return;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
+                    if (tryImg != null)
                         outList.Add(tryImg);
-                    }
-                }
+                });
                 return outList;
             }
         }
+
+        #region Children and parent
 
         /// <summary>
         /// return the list of the children for this item (if any) or null
@@ -163,7 +153,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public List<CompletionItem> Children { get; set; }
 
         /// <summary>
-        /// The char or chars that, once entered after THIS word, should trigger the list of children
+        /// The char that separate this item's word with each child item's word
+        /// The chars that, once entered after THIS word, should trigger the list of children
         /// If you add a new child separator, you should register it in the AutoCompletion class
         /// </summary>
         public char? ChildSeparator { get; set; }
@@ -172,6 +163,44 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Parent completionItem of this item (the parent has this item in its children)
         /// </summary>
         public CompletionItem ParentItem { get; set; }
+
+        #endregion
+    }
+
+    internal class SnippetCompletionItem : CompletionItem {
+
+    }
+
+    internal class VariablePrimitiveCompletionItem : CompletionItem {
+
+    }
+
+    internal class VariableComplexCompletionItem : CompletionItem {
+
+    }
+
+    internal class WidgetCompletionItem : CompletionItem {
+
+    }
+
+    internal class FunctionCompletionItem : CompletionItem {
+
+    }
+
+    internal class ProcedureCompletionItem : CompletionItem {
+
+    }
+
+    internal class DatabaseCompletionItem : CompletionItem {
+
+    }
+
+    internal class TempTableCompletionItem : CompletionItem {
+
+    }
+
+    internal class TableCompletionItem : CompletionItem {
+
     }
 
     internal enum CompletionType {

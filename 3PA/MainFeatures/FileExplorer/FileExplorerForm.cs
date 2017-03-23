@@ -370,12 +370,12 @@ namespace _3PA.MainFeatures.FileExplorer {
                     return;
 
                 // status text, take the last flag found
-                foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
-                    CurrentOperation flag = (CurrentOperation) Enum.Parse(typeof(CurrentOperation), name);
+                typeof(CurrentOperation).ForEach<CurrentOperation>((name, value) => {
+                    var flag = (CurrentOperation) value;
                     if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
                         lbStatus.Text = flag.GetAttribute<CurrentOperationAttr>().Name;
                     }
-                }
+                });
 
                 // blink back color
                 lbStatus.UseCustomBackColor = true;

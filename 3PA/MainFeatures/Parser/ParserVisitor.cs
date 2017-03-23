@@ -401,7 +401,7 @@ namespace _3PA.MainFeatures.Parser {
             _parsedCompletionItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
-                SubString = pars.ReturnType.ToString(),
+                SubText = pars.ReturnType.ToString(),
                 Flags = pars.Flags,
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
@@ -434,7 +434,7 @@ namespace _3PA.MainFeatures.Parser {
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
                 FromParser = true,
-                SubString = pars.ReturnType.ToString()
+                SubText = pars.ReturnType.ToString()
             });
         }
 
@@ -469,7 +469,7 @@ namespace _3PA.MainFeatures.Parser {
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
                 FromParser = true,
-                SubString = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null
+                SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null
             });
         }
 
@@ -487,7 +487,7 @@ namespace _3PA.MainFeatures.Parser {
                     Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                     ParsedBaseItem = pars,
                     FromParser = true,
-                    SubString = null
+                    SubText = null
                 });
         }
 
@@ -632,7 +632,7 @@ namespace _3PA.MainFeatures.Parser {
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
                 FromParser = true,
-                SubString = subString
+                SubText = subString
             });
         }
 
@@ -703,7 +703,7 @@ namespace _3PA.MainFeatures.Parser {
                 Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
                 ParsedBaseItem = pars,
                 FromParser = true,
-                SubString = subStr,
+                SubText = subStr,
                 ChildSeparator = '.'
             };
             parsedTable.Children = pars.Fields.Select(field =>
@@ -712,7 +712,7 @@ namespace _3PA.MainFeatures.Parser {
                     Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                     ParsedBaseItem = field,
                     FromParser = true,
-                    SubString = field.Type.ToString(),
+                    SubText = field.Type.ToString(),
                     Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name),
                     Flags = field.Flags | ~ParseFlag.Primary,
                     ParentItem = parsedTable
@@ -740,7 +740,7 @@ namespace _3PA.MainFeatures.Parser {
         /// name is the table's name (can also be BASE.TABLE)
         /// </summary>
         public ParsedTable FindAnyTableByName(string name, List<ParsedItem> parsedItems) {
-            return DataBase.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
+            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
         }
 
         /// <summary>

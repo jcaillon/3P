@@ -29,36 +29,51 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-    internal static class DataBase {
+    internal class DataBase {
+
+        #region Singleton
+
+        private static DataBase _instance;
+
+        public static DataBase Instance {
+            get { return _instance ?? (_instance = new DataBase()); }
+        }
+
+        #endregion
+        
         #region events
 
         /// <summary>
         /// Event published when the current database information is updated
         /// </summary>
-        public static event Action OnDatabaseUpdate;
+        public event Action OnDatabaseUpdate;
 
         #endregion
+
+        public DataBase() {
+            UpdateDatabaseInfo();
+        }
 
         #region fields
 
         /// <summary>
         /// List of Databases (each of which contains list of tables > list of fields/indexes/triggers)
         /// </summary>
-        private static List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
+        private List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
 
         /// <summary>
         /// List of sequences of the database
         /// </summary>
-        private static List<ParsedSequence> _sequences = new List<ParsedSequence>();
+        private List<ParsedSequence> _sequences = new List<ParsedSequence>();
 
-        private static List<CompletionItem> _dbItems;
+        private List<CompletionItem> _dbItems;
 
-        private static bool _isExtracting;
+        private bool _isExtracting;
 
         /// <summary>
         /// Action called when an extraction is done
         /// </summary>
-        private static Action _onExtractionDone;
+        private Action _onExtractionDone;
 
         #endregion
 
@@ -68,7 +83,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// returns the path of the current dump file
         /// </summary>
         /// <returns></returns>
-        public static string GetCurrentDumpPath {
+        public string GetCurrentDumpPath {
             get { return Path.Combine(Config.FolderDatabase, GetOutputName); }
         }
 
@@ -76,7 +91,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// returns true if the database info is available
         /// </summary>
         /// <returns></returns>
-        public static bool IsDbInfoAvailable {
+        public bool IsDbInfoAvailable {
             get { return File.Exists(GetCurrentDumpPath); }
         }
 
@@ -85,7 +100,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// returns false the info is not available
         /// </summary>
         /// <returns></returns>
-        public static void UpdateDatabaseInfo() {
+        public void UpdateDatabaseInfo() {
             _dbItems = null;
             if (IsDbInfoAvailable) {
                 // read file, extract info
@@ -103,7 +118,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Deletes the file corresponding to the current database (if it exists)
         /// </summary>
-        public static void DeleteCurrentDbInfo() {
+        public void DeleteCurrentDbInfo() {
             if (!Utils.DeleteFile(GetCurrentDumpPath))
                 UserCommunication.Notify("Couldn't delete the current database info stored in the file :<br>" + GetCurrentDumpPath.ToHtmlLink(), MessageImg.MsgError, "Delete failed", "Current database info");
             UpdateDatabaseInfo();
@@ -112,7 +127,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Should be called to extract the database info from the current environnement
         /// </summary>
-        public static void FetchCurrentDbInfo(Action onExtractionDone) {
+        public void FetchCurrentDbInfo(Action onExtractionDone) {
             try {
                 // dont extract 2 db at once
                 if (_isExtracting) {
@@ -139,7 +154,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private static void ExtractionDoneOk(ProExecution lastExec) {
+        private void ExtractionDoneOk(ProExecution lastExec) {
             // copy the dump to the folder database
             if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, Path.GetFileName(lastExec.ExtractDbOutputPath) ?? ""))) {
                 // update info
@@ -160,7 +175,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Returns the output file name for the current appli/env
         /// </summary>
         /// <returns></returns>
-        private static string GetOutputName {
+        private string GetOutputName {
             get { return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump"; }
         }
 
@@ -169,7 +184,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// and fills _dataBases
         /// It then updates the parser with the new info
         /// </summary>
-        private static void Read(string filePath) {
+        private void Read(string filePath) {
             if (!File.Exists(filePath)) return;
             _dataBases.Clear();
             _sequences.Clear();
@@ -276,7 +291,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, CompletionType> GetDbDictionary() {
+        public Dictionary<string, CompletionType> GetDbDictionary() {
             var output = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
             _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
                 if (!output.ContainsKey(table.Name))
@@ -290,23 +305,23 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Allows to recompute the database list of completion item (when changing case for instance)
         /// </summary>
-        public static void ResetCompletionItems() {
+        public void ResetCompletionItems() {
             _dbItems = GetCompletionItems();
         }
 
         /// <summary>
         /// List of items for the autocompletion
         /// </summary>
-        public static List<CompletionItem> CompletionItems {
+        public List<CompletionItem> CompletionItems {
             get { return _dbItems ?? (_dbItems = GetCompletionItems()); }
         }
 
-        private static List<CompletionItem> GetCompletionItems() {
+        private List<CompletionItem> GetCompletionItems() {
             // Sequences
             var output = _sequences.Select(item => new CompletionItem {
                 DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                 Type = CompletionType.Sequence,
-                SubString = item.DbName
+                SubText = item.DbName
             }).ToList();
 
             // Databases
@@ -328,7 +343,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     var curTable = new CompletionItem {
                         DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                         Type = CompletionType.Table,
-                        SubString = db.Name,
+                        SubText = db.Name,
                         FromParser = false,
                         ParsedBaseItem = table,
                         Ranking = 0,
@@ -345,7 +360,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         curTable.Children.Add(new CompletionItem {
                             DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
                             Type = field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
-                            SubString = field.Type.ToString(),
+                            SubText = field.Type.ToString(),
                             FromParser = false,
                             ParsedBaseItem = field,
                             Ranking = 0,
@@ -362,28 +377,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         #region find item
 
-        /// <summary>
-        /// Get db info by name
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedDataBase GetDb(string name) {
-            return _dataBases.FirstOrDefault(@base => @base.Name.EqualsCi(name));
-        }
-
-        public static ParsedDataBase FindDatabaseByName(string name) {
+        public ParsedDataBase FindDatabaseByName(string name) {
             return _dataBases.Find(@base => @base.Name.EqualsCi(name));
         }
 
-        public static ParsedTable FindTableByName(string name, ParsedDataBase db) {
+        public ParsedTable FindTableByName(string name, ParsedDataBase db) {
             return db.Tables.Find(table => table.Name.EqualsCi(name));
         }
 
         /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
+        /// Find the table referenced among database (can be BASE.TABLE)
         /// </summary>
-        public static ParsedTable FindTableByName(string name) {
+        public ParsedTable FindTableByName(string name) {
             if (name.CountOccurences(".") > 0) {
                 var splitted = name.Split('.');
                 // find db then find table
@@ -393,14 +398,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return _dataBases.Select(dataBase => FindTableByName(name, dataBase)).FirstOrDefault(found => found != null);
         }
 
-        public static ParsedField FindFieldByName(string name, ParsedTable table) {
+        public ParsedField FindFieldByName(string name, ParsedTable table) {
             return table.Fields.Find(field => field.Name.EqualsCi(name));
         }
 
         /// <summary>
         /// Returns the field corresponding to the input TABLE.FIELD or DB.TABLE.FIELD
         /// </summary>
-        public static ParsedField FindFieldByName(string name) {
+        public ParsedField FindFieldByName(string name) {
             var splitted = name.Split('.');
             if (splitted.Length == 1)
                 return null;

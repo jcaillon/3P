@@ -196,13 +196,13 @@ namespace _3PA {
 
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
-            ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+            ProEnvironment.OnEnvironmentChange += DataBase.Instance.UpdateDatabaseInfo;
             ProEnvironment.OnEnvironmentChange += ParserHandler.ClearStaticData;
 
             Keywords.Instance.OnImport += ParserHandler.UpdateKnownStaticItems;
-            DataBase.OnDatabaseUpdate += ParserHandler.UpdateKnownStaticItems;
+            DataBase.Instance.OnDatabaseUpdate += ParserHandler.UpdateKnownStaticItems;
             Keywords.Instance.OnImport += AutoCompletion.SetStaticItems;
-            DataBase.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
+            DataBase.Instance.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
 
             ParserHandler.OnEndSendCompletionItems += AutoCompletion.OnParseEnded;
             ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
@@ -237,7 +237,7 @@ namespace _3PA {
 
                 // unsubscribe to static events
                 ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
-                ProEnvironment.OnEnvironmentChange -= DataBase.UpdateDatabaseInfo;
+                ProEnvironment.OnEnvironmentChange -= DataBase.Instance.UpdateDatabaseInfo;
                 ProEnvironment.OnEnvironmentChange -= ParserHandler.ClearStaticData;
                 ProEnvironment.OnEnvironmentChange -= ParserHandler.UpdateKnownStaticItems;
 
@@ -699,8 +699,7 @@ namespace _3PA {
             }
 
             // update function prototypes
-            if (Npp.CurrentFile.IsProgress)
-                ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion

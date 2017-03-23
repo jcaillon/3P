@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 return 0;
 
             // first, the favourite
-            int compare = x.Flag.HasFlag(FileFlag.Favourite).CompareTo(y.Flag.HasFlag(FileFlag.Favourite));
+            int compare = x.Flags.HasFlag(FileFlag.Favourite).CompareTo(y.Flags.HasFlag(FileFlag.Favourite));
             if (compare != 0) return compare;
 
             // then the folders
@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (compare != 0) return compare;
 
             // then the non read only
-            compare = y.Flag.HasFlag(FileFlag.ReadOnly).CompareTo(x.Flag.HasFlag(FileFlag.ReadOnly));
+            compare = y.Flags.HasFlag(FileFlag.ReadOnly).CompareTo(x.Flags.HasFlag(FileFlag.ReadOnly));
             if (compare != 0) return compare;
 
             // sort by FileName

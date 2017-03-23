@@ -24,15 +24,20 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
 using YamuiFramework.Helper;
 using _3PA.Lib;
+using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using _3PA._Resource;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
@@ -42,21 +47,56 @@ namespace _3PA.Tests {
     internal class PlugDebug {
         #region Debug test
 
+
+
+
         public static void DebugTest1() {
-            //char? sep;
-            //string outstr;
-            //int pos = 0;
-            //outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
-            ////-> "field" = GetKeyword("db:table.field", ref 6, '.')
-            //outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
-            ////-> "table" = GetKeyword("db:table.field", ref 12, ':')
-            //outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep, false);
-            ////-> "db" = GetKeyword("db", ref 14, ?)
-            //pos = 1;
-            //outstr += AutoCompletion.GetWord(" word1 word2 ", ref pos, out sep, false);
-            ////-> "db" = GetKeyword("word2", ref 6, ?)
-            //
-            //UserCommunication.Notify(AutoCompletion.GetQualifiedWord("daz:dza azd az az db.table.field", false));
+
+            if (!Utils.ConnectFtp(new FtpsClient(), "cnaf049", "sopra100", "rs28.lyon.fr.sopra", -1, "dfd"))
+                UserCommunication.Notify("connect failed");
+
+
+                int ii = 0;
+            MeasureIt(() => {
+                for (int i = 0; i < 99999; i++) {
+                    foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                        ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                        ii++;
+                    }
+                }
+
+            }, "1 : ");
+
+            int jj = 0;
+            MeasureIt(() => {
+                for (int i = 0; i < 99999; i++) {
+                    typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
+                        jj++;
+                    });
+                }
+
+            }, "2 : ");
+
+            UserCommunication.Notify("ii = " + ii + ", jj = " + jj);
+
+            char? sep;
+            string outstr;
+            int pos = 0;
+            outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep);
+            //-> "field" = GetKeyword("db:table.field", ref 6, '.')
+            outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep);
+            //-> "table" = GetKeyword("db:table.field", ref 12, ':')
+            outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep);
+            //-> "db" = GetKeyword("db", ref 14, ?)
+            pos = 1;
+            outstr += AutoCompletion.GetWord(" word1 word2 ", ref pos, out sep);
+            pos = 0;
+            outstr += AutoCompletion.GetWord("", ref pos, out sep);
+            pos = 20;
+            outstr += AutoCompletion.GetWord("a ", ref pos, out sep);
+
+            //-> "db" = GetKeyword("word2", ref 6, ?)
+            UserCommunication.Notify(outstr);
         }
 
         public static void DebugTest2() {}

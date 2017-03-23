@@ -123,13 +123,25 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static void SetStaticItems() {
             if (Npp.CurrentFile.IsProgress) {
                 _staticItems = Keywords.Instance.CompletionItems.ToList();
-                _staticItems.AddRange(DataBase.CompletionItems);
-                _additionalWordChar = new[] {'-', '_', '&'};
+                _staticItems.AddRange(DataBase.Instance.CompletionItems);
+                _additionalWordChar = new[] { '_', '&', '-' };
                 _childSeparators = new[] {'.', ':'};
             } else {
                 _staticItems = Npp.CurrentFile.Lang.Keywords;
                 _additionalWordChar = Npp.CurrentFile.Lang.AdditionalWordChar;
             }
+
+            // make sure the additional chars and child separators list aren't null (and contains at least '_')
+            if (_additionalWordChar == null)
+                _additionalWordChar = new char['_'];
+            if (!_additionalWordChar.Contains('_')) {
+                var list = _additionalWordChar.ToList();
+                list.Add('_');
+                _additionalWordChar = list.ToArray();
+            }
+
+            if (_childSeparators == null)
+                _childSeparators = new char[char.MinValue];
 
             // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
@@ -296,25 +308,21 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// GetKeyword(" word1 word2 ", ref 1, ?)
         /// -> "db" = GetKeyword("word2", ref 6, ?)
         /// </summary>
-        private static string GetWord(string input, ref int at, out char? separator) {
-            var max = input.Length - 1;
-            int wordLenght = 0;
-            int pos = 0;
-            while (wordLenght <= max - at) {
-                pos = max - wordLenght - at;
-                var ch = input[pos];
-                // normal word
-                if (IsCharPartOfWord(ch))
-                    wordLenght++;
-                else
-                    break;
-            }
+        public static string GetWord(string input, ref int at, out char? separator) {
             separator = null;
-            if (max >= 0 && _childSeparators.Contains(input[pos]))
+            var max = input.Length - 1 - at;
+            int pos = max;
+            while (pos >= 0) {
+                var ch = input[pos];
+                if (!IsCharPartOfWord(ch))
+                    break;
+                pos--;
+            }
+            if (pos >= 0 && _childSeparators.Contains(input[pos]))
                 separator = input[pos];
-            var outStr = wordLenght == 0 ? string.Empty : input.Substring(input.Length - wordLenght - at, wordLenght);
+            var wordLenght = Math.Max(0, max - pos);
             at += wordLenght + 1;
-            return outStr;
+            return wordLenght > 0 ? input.Substring(pos + 1, wordLenght) : string.Empty;
         }
 
         /// <summary>

@@ -348,7 +348,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Plug.ApplyOptionsForScintilla();
             Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
             Keywords.Instance.ResetCompletionItems(); // when changing case
-            DataBase.ResetCompletionItems();
+            DataBase.Instance.ResetCompletionItems();
         }
 
         /// <summary>

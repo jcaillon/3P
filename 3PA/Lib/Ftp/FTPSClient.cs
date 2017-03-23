@@ -299,6 +299,12 @@ namespace _3PA.Lib.Ftp {
 
         #region Public Properties
 
+
+        public EDataConnectionMode DataConnectionMode {
+            get { return _dataConnectionMode; }
+            set { _dataConnectionMode = value; }
+        }
+
         /// <summary>
         /// The requested SSL/TLS support level.
         /// </summary>
@@ -532,7 +538,7 @@ namespace _3PA.Lib.Ftp {
 
             _useCtrlEndPointAddressForData = useCtrlEndPointAddressForData;
 
-            _dataConnectionMode = dataConnectionMode;
+            DataConnectionMode = dataConnectionMode;
 
             _sslInfo = null;
 
@@ -1430,7 +1436,7 @@ namespace _3PA.Lib.Ftp {
         private Stream GetDataStream() {
             Stream s;
 
-            if (_dataConnectionMode == EDataConnectionMode.Active)
+            if (DataConnectionMode == EDataConnectionMode.Active)
                 SetupActiveDataConnectionStep2();
 
             if ((_sslSupportCurrentMode & EsslSupportMode.DataChannelRequested) == EsslSupportMode.DataChannelRequested) {
@@ -1879,7 +1885,7 @@ namespace _3PA.Lib.Ftp {
         }
 
         private void SetupDataConnection() {
-            if (_dataConnectionMode == EDataConnectionMode.Active)
+            if (DataConnectionMode == EDataConnectionMode.Active)
                 PortCmd();
             else
                 switch (GetCtrlConnAddressFamily()) {
