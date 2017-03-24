@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
-    internal class CompletionItem : FilteredTypeListItem {
+    internal abstract class CompletionItem : FilteredTypeListItem {
 
         /// <summary>
         /// Type of completion
@@ -49,13 +49,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// It works as a Flag, call HasFlag() method to if a certain flag is set and use
         /// Flag = Flag | ParseFlag.Reserved to set a flag!
         /// </summary>
-        public ParseFlag Flags { get; set; }
+        public virtual ParseFlag Flags { get; set; }
 
         /// <summary>
         /// Used for sorting the auto completion list, the higher the ranking, the higher in the list
         /// the item is
         /// </summary>
-        public int Ranking { get; set; }
+        public virtual int Ranking { get; set; }
 
         /// <summary>
         /// Indicates whether or not this completionData is created by the parser Visitor
@@ -65,13 +65,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// When the FromParser is true, contains the ParsedItem extracted by the parser
         /// </summary>
-        public ParsedBaseItem ParsedBaseItem { get; set; }
+        public virtual ParsedBaseItem ParsedBaseItem { get; set; }
 
         /// <summary>
         /// Use this method to do an action for each flag of the item...
         /// </summary>
         /// <param name="toApplyOnFlag"></param>
-        public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
+        public virtual void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
                 if (l == 0 || !Flags.HasFlag((ParseFlag)l))
                     return;
@@ -152,6 +152,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return Type.ToString();
         }
 
+        /// <summary>
+        /// Should return true when the completion item survives the filter
+        /// </summary>
+        public virtual bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
+        }
+
         #region Children and parent
 
         /// <summary>
@@ -178,38 +185,44 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static class Factory {
             public static CompletionItem New(CompletionType type) {
                 switch (type) {
-                    case CompletionType.Snippet:
-                        return new SnippetCompletionItem();
                     case CompletionType.VariablePrimitive:
                         return new VariablePrimitiveCompletionItem();
                     case CompletionType.VariableComplex:
                         return new VariableComplexCompletionItem();
                     case CompletionType.Widget:
                         return new WidgetCompletionItem();
+                    case CompletionType.TempTable:
+                        return new TempTableCompletionItem();
+                    case CompletionType.Table:
+                        return new TableCompletionItem();
+                    case CompletionType.Keyword:
+                        return new KeywordCompletionItem();
+                    case CompletionType.KeywordObject:
+                        return new KeywordObjectCompletionItem();
+                    case CompletionType.Field:
+                        return new FieldCompletionItem();
+                    case CompletionType.FieldPk:
+                        return new FieldPkCompletionItem();
+                    /*
+                    case CompletionType.Snippet:
+                        return new SnippetCompletionItem();
                     case CompletionType.Function:
                         return new FunctionCompletionItem();
                     case CompletionType.Procedure:
                         return new ProcedureCompletionItem();
                     case CompletionType.Database:
                         return new DatabaseCompletionItem();
-                    case CompletionType.TempTable:
-                        return new TempTableCompletionItem();
-                    case CompletionType.Table:
-                        return new TableCompletionItem();
                     case CompletionType.Sequence:
                         return new SequenceCompletionItem();
                     case CompletionType.Preprocessed:
                         return new PreprocessedCompletionItem();
                     case CompletionType.Label:
                         return new LabelCompletionItem();
-                    case CompletionType.Keyword:
-                        return new KeywordCompletionItem();
-                    case CompletionType.KeywordObject:
-                        return new KeywordObjectCompletionItem();
-                    case CompletionType.FieldPk:
-                        return new FieldPkCompletionItem();
-                    case CompletionType.Field:
-                        return new FieldCompletionItem();
+                    case CompletionType.Word:
+                        return new WordCompletionItem();
+                    case CompletionType.LangWord:
+                        return new LangWordCompletionItem();
+                    */
                     default:
                         throw new Exception("You forgot to add the type" + type + " to the factory! Noob!");
                 }
@@ -238,7 +251,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Keyword,
         KeywordObject,
         FieldPk,
-        Field
+        Field,
+        Word,
+        LangWord,
     }
 
 
@@ -276,6 +291,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append(@"</div>");
             }
             return base.ToString();
+        }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            // check for scope
+            var output = true;
+            if (currentScope != null && !(ParsedDefine.Scope is ParsedFile)) {
+                output = ParsedDefine.Scope.ScopeType == currentScope.ScopeType;
+                output = output && ParsedDefine.Scope.Name.Equals(currentScope.Name);
+            }
+            // check for the definition line
+            if (currentLine >= 0) {
+                output = output && currentLine >= (ParsedDefine.IncludeLine >= 0 ? ParsedDefine.IncludeLine : ParsedDefine.Line);
+            }
+            return output;
         }
     }
 
@@ -486,6 +515,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public ParsedPreProcVariable ParsedPreProcVariable { get { return ParsedBaseItem as ParsedPreProcVariable; } }
 
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            var output = true;
+            if (currentLine >= 0) {
+                // if preproc, check line of definition and undefine
+                output = currentLine >= (ParsedPreProcVariable.IncludeLine >= 0 ? ParsedPreProcVariable.IncludeLine : ParsedPreProcVariable.Line);
+                if (ParsedPreProcVariable.UndefinedLine > 0)
+                    output = output && currentLine <= ParsedPreProcVariable.UndefinedLine;
+            }
+            return output;
+        }
+
         public override string ToString() {
             var toDisplay = new StringBuilder();
             if (ParsedPreProcVariable.UndefinedLine > 0)
@@ -504,6 +544,26 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override CompletionType Type { get { return CompletionType.Label; } }
 
         public override Image ItemTypeImage { get { return ImageResources.Label; } }
+        
+        public ParsedLabel ParsedLabel { get { return ParsedBaseItem as ParsedLabel; } }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            // check for scope
+            var output = true;
+            if (currentScope != null && !(ParsedLabel.Scope is ParsedFile)) {
+                output = ParsedLabel.Scope.ScopeType == currentScope.ScopeType;
+                output = output && ParsedLabel.Scope.Name.Equals(currentScope.Name);
+            }
+
+            // check for the definition line
+            if (currentLine >= 0) {
+                output = output && currentLine >= (ParsedLabel.IncludeLine >= 0 ? ParsedLabel.IncludeLine : ParsedLabel.Line);
+
+                // for labels, only display them in the block which they label
+                output = output && currentLine <= ParsedLabel.UndefinedLine;
+            }
+            return output;
+        }
     }
 
     
@@ -644,6 +704,28 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override CompletionType Type { get { return CompletionType.FieldPk; } }
 
         public override Image ItemTypeImage { get { return ImageResources.FieldPk; } }
+    }
+
+
+    /// <summary>
+    /// Word (parsed from the npp document)
+    /// </summary>
+    internal class WordCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.Word; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Word; } }
+    }
+
+
+    /// <summary>
+    /// Lang word (read from xml conf files)
+    /// </summary>
+    internal class LangWordCompletionItem : CompletionItem {
+
+        public override CompletionType Type { get { return CompletionType.LangWord; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.LangWord; } }
     }
 
 }

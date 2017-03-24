@@ -29,6 +29,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// performances and handiness
     /// </summary>
     internal class CompletionFilterClass {
+
         #region private
 
         private int _currentLineNumber = -2;
@@ -71,13 +72,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var compData = o as CompletionItem;
             if (compData == null)
                 return false;
-
-            // if the item isn't a parsed item, it is available no matter where we are in the code
-            var parsedItem = compData.ParsedBaseItem as ParsedItem;
-            if (!compData.FromParser || parsedItem == null)
-                return true;
-
-            return parsedItem.SurvivesFilter(_currentLineNumber, _currentScope);
+            return compData.SurvivesFilter(_currentLineNumber, _currentScope);
         }
 
         #endregion

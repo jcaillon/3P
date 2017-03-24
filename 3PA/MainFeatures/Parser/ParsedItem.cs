@@ -99,10 +99,6 @@ namespace _3PA.MainFeatures.Parser {
             IncludeLine = -1;
         }
 
-        public virtual bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
-            return true;
-        }
-
         public override ParsedScopeType GetScopeType() {
             return Scope != null ? Scope.ScopeType : ParsedScopeType.Root;
         }
@@ -415,24 +411,6 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         public ParsedLabel(string name, Token token) : base(name, token) {}
-
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
-            // check for scope
-            var output = true;
-            if (currentScope != null && !(Scope is ParsedFile)) {
-                output = Scope.ScopeType == currentScope.ScopeType;
-                output = output && Scope.Name.Equals(currentScope.Name);
-            }
-
-            // check for the definition line
-            if (currentLine >= 0) {
-                output = output && currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
-
-                // for labels, only dislay them in the block which they label
-                output = output && currentLine <= UndefinedLine;
-            }
-            return output;
-        }
     }
 
     /// <summary>
@@ -563,16 +541,6 @@ namespace _3PA.MainFeatures.Parser {
             Value = value;
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
-            var output = true;
-            if (currentLine >= 0) {
-                // if preproc, check line of definition and undefine
-                output = currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
-                if (UndefinedLine > 0)
-                    output = output && currentLine <= UndefinedLine;
-            }
-            return output;
-        }
     }
 
     /// <summary>
@@ -624,20 +592,6 @@ namespace _3PA.MainFeatures.Parser {
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
             BufferFor = bufferFor;
-        }
-
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
-            // check for scope
-            var output = true;
-            if (currentScope != null && !(Scope is ParsedFile)) {
-                output = Scope.ScopeType == currentScope.ScopeType;
-                output = output && Scope.Name.Equals(currentScope.Name);
-            }
-            // check for the definition line
-            if (currentLine >= 0) {
-                output = output && currentLine >= (IncludeLine >= 0 ? IncludeLine : Line);
-            }
-            return output;
         }
     }
 

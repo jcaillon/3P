@@ -454,6 +454,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\Keyword.png" />
     <Content Include="_Resource\Images\ParserItem\Type\KeywordObject.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Label.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\LangWord.png" />
     <Content Include="_Resource\Images\ParserItem\Type\MainBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Method.png" />
     <Content Include="_Resource\Images\ParserItem\Type\NotApplicable.png" />
@@ -481,6 +482,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\VariableComplex.png" />
     <Content Include="_Resource\Images\ParserItem\Type\VariablePrimitive.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Widget.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Word.png" />
     <Content Include="_Resource\Images\ParserItem\Type\XtfrBlock.png" />
     <Content Include="_Resource\Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="_Resource\Images\ToolBar\CodeExplorerLogo.png" />

@@ -198,11 +198,10 @@ namespace _3PA {
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.Instance.UpdateDatabaseInfo;
             ProEnvironment.OnEnvironmentChange += ParserHandler.ClearStaticData;
-
-            Keywords.Instance.OnImport += ParserHandler.UpdateKnownStaticItems;
-            DataBase.Instance.OnDatabaseUpdate += ParserHandler.UpdateKnownStaticItems;
+            
             Keywords.Instance.OnImport += AutoCompletion.SetStaticItems;
             DataBase.Instance.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
+            AutoCompletion.OnUpdateStaticItems += ParserHandler.UpdateKnownStaticItems;
 
             ParserHandler.OnEndSendCompletionItems += AutoCompletion.OnParseEnded;
             ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
@@ -235,23 +234,34 @@ namespace _3PA {
                 if (OnShutDown != null)
                     OnShutDown();
 
-                // unsubscribe to static events
-                ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
-                ProEnvironment.OnEnvironmentChange -= DataBase.Instance.UpdateDatabaseInfo;
-                ProEnvironment.OnEnvironmentChange -= ParserHandler.ClearStaticData;
-                ProEnvironment.OnEnvironmentChange -= ParserHandler.UpdateKnownStaticItems;
-
-                ParserHandler.OnEndSendCompletionItems -= AutoCompletion.OnParseEnded;
-
-                ParserHandler.OnStart -= CodeExplorer.Instance.OnStart;
-                ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
-                ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
-                ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
-
                 // clean up timers
                 RecurentAction.CleanAll();
                 DelayedAction.CleanAll();
                 AsapButDelayableAction.CleanAll();
+
+                // Triggered when the resolution of an assembly fails, gives us the opportunity to feed the required assembly
+                AppDomain.CurrentDomain.AssemblyResolve -= LibLoader.AssemblyResolver;
+
+                // catch unhandled errors to log them
+                AppDomain.CurrentDomain.UnhandledException -= ErrorHandler.UnhandledErrorHandler;
+                Application.ThreadException -= ErrorHandler.ThreadErrorHandler;
+                TaskScheduler.UnobservedTaskException -= ErrorHandler.UnobservedErrorHandler;
+
+
+                // unsubscribe to static events
+                ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
+                ProEnvironment.OnEnvironmentChange -= DataBase.Instance.UpdateDatabaseInfo;
+                ProEnvironment.OnEnvironmentChange -= ParserHandler.ClearStaticData;
+
+                Keywords.Instance.OnImport -= AutoCompletion.SetStaticItems;
+                DataBase.Instance.OnDatabaseUpdate -= AutoCompletion.SetStaticItems;
+                AutoCompletion.OnUpdateStaticItems -= ParserHandler.UpdateKnownStaticItems;
+
+                ParserHandler.OnEndSendCompletionItems -= AutoCompletion.OnParseEnded;
+                ParserHandler.OnStart -= CodeExplorer.Instance.OnStart;
+                ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
+                ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
+                ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
 
                 // export modified conf
                 FileTag.Export();
@@ -680,7 +690,7 @@ namespace _3PA {
                         warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
                     if (warningMessage.Length > 0) {
                         warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
-                        warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
+                        warningMessage.Append("<br><i>To prevent this, reduce the number of characters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                         var curPath = Npp.CurrentFile.Path;
                         UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                             Npp.Goto(curPath, int.Parse(args.Link));
@@ -693,9 +703,11 @@ namespace _3PA {
 
             // for debug purposes, check if the document can be parsed
             if (Config.IsDevelopper) {
-                var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
-                if (!string.IsNullOrEmpty(parserErrors))
-                    UserCommunication.Notify("The parser found errors on this file:<br>" + parserErrors, MessageImg.MsgInfo, "Parser message", "Errors found", 3);
+                Task.Factory.StartNew(() => {
+                    var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
+                    if (!string.IsNullOrEmpty(parserErrors))
+                        UserCommunication.Notify("The parser found errors on this file:<br>" + parserErrors, MessageImg.MsgInfo, "Parser message", "Errors found", 3);
+                });
             }
 
             // update function prototypes

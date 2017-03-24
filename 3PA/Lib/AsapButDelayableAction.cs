@@ -146,10 +146,10 @@ namespace _3PA.Lib {
         /// as well as the dynamic items found by the parser
         /// </summary>
         private void TimerTick() {
-            if (_task != null && !_task.IsCompleted) {
-                return;
-            }
             if (Monitor.TryEnter(_timerLock, 500)) {
+                if (_task != null && !_task.IsCompleted) {
+                    return;
+                }
                 _timerOnGoing = false;
                 _task = Task.Factory.StartNew(ToDo, _cancelSource.Token);
                 Monitor.Exit(_timerLock);

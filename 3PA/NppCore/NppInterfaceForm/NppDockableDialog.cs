@@ -134,6 +134,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
             if (Form != null)
                 Form.ForceClose();
             Form = null;
+            _isVisible = false;
         }
 
         #endregion

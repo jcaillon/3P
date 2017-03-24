@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
@@ -58,7 +59,7 @@ namespace _3PA.MainFeatures.Parser {
         #region Public properties
 
         /// <summary>
-        /// Additionnal characters that will count as a char from a word
+        /// Additional characters that will count as a char from a word
         /// </summary>
         public Char[] AdditionnalCharacters { get; private set; }
 
@@ -91,14 +92,16 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        public NppAutoCompParser(string data, char[] additionnalCharacters, bool ignoreNumbers) {
+        public NppAutoCompParser(string data, char[] additionnalCharacters, bool ignoreNumbers, HashSet<string> knownWords) {
             if (data == null)
                 throw new ArgumentNullException("data");
             _data = data;
             _dataLength = _data.Length;
+            _pos = 0;
 
             IgnoreNumbers = ignoreNumbers;
             AdditionnalCharacters = additionnalCharacters;
+            KnownWords = knownWords;
 
             if (KnownWords == null)
                 KnownWords = new HashSet<string>();
@@ -141,6 +144,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private void ReadChr() {
             _pos++;
+            if (_pos < 0)
+                Debug.Assert(false);
             //_column++;
         }
 
@@ -221,7 +226,7 @@ namespace _3PA.MainFeatures.Parser {
                         var valnum = GetTokenValue();
                         if (!KnownWords.Contains(valnum)) {
                             KnownWords.Add(valnum);
-                            _wordsList.Add(new CompletionItem {
+                            _wordsList.Add(new WordCompletionItem {
                                 DisplayText = valnum
                             });
                         }
@@ -235,7 +240,7 @@ namespace _3PA.MainFeatures.Parser {
                         var val = GetTokenValue();
                         if (!KnownWords.Contains(val)) {
                             KnownWords.Add(val);
-                            _wordsList.Add(new CompletionItem {
+                            _wordsList.Add(new WordCompletionItem {
                                 DisplayText = val
                             });
                         }

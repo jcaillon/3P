@@ -33,6 +33,7 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
     internal static class ParserHandler {
+
         #region Core
 
         #region event
@@ -75,12 +76,12 @@ namespace _3PA.MainFeatures.Parser {
         private static AsapButDelayableAction ParseAction {
             get {
                 return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse) {
-                    MsToDoTimeout = 2000
+                    MsToDoTimeout = 1500
                 });
             }
         }
 
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private static object _lock = new object();
 
         #endregion
 
@@ -120,42 +121,42 @@ namespace _3PA.MainFeatures.Parser {
             try {
                 if (OnStart != null)
                     OnStart();
-
-                Parser parser = null;
-                bool lastParsedFileIsProgress;
-
-                // make sure to always parse the current file
-                do {
-                    lastParsedFilePath = Npp.CurrentFile.Path;
-                    lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
-
-                    if (lastParsedFileIsProgress) {
-                        parser = new Parser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), lastParsedFilePath, null, true);
-
-                        // visitor
-                        var visitor = new ParserVisitor(true);
-                        parser.Accept(visitor);
-
-                        // send completionItems
-                        if (OnEndSendCompletionItems != null)
-                            OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
-
-                        // send codeExplorerItems
-                        if (OnEndSendCodeExplorerItems != null)
-                            OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
-
-                    } else {
-                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers);
-
-                        // send completionItems
-                        if (OnEndSendCompletionItems != null)
-                            OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
-                    }
-
-                } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-
-                if (_lock.TryEnterWriteLock(-1)) {
+                
+                if (Monitor.TryEnter(_lock)) {
                     try {
+
+                        // make sure to always parse the current file
+                        Parser parser = null;
+                        bool lastParsedFileIsProgress;
+                        do {
+                            lastParsedFilePath = Npp.CurrentFile.Path;
+                            lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
+
+                            if (lastParsedFileIsProgress) {
+                                parser = new Parser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), lastParsedFilePath, null, true);
+
+                                // visitor
+                                var visitor = new ParserVisitor(true);
+                                parser.Accept(visitor);
+
+                                // send completionItems
+                                if (OnEndSendCompletionItems != null)
+                                    OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
+
+                                // send codeExplorerItems
+                                if (OnEndSendCodeExplorerItems != null)
+                                    OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+
+                            } else {
+                                var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers, null);
+
+                                // send completionItems
+                                if (OnEndSendCompletionItems != null)
+                                    OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
+                            }
+
+                        } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
+
                         if (lastParsedFileIsProgress) {
                             _parserErrors = parser.ParserErrors;
                             _lineInfo = parser.LineInfo;
@@ -165,14 +166,15 @@ namespace _3PA.MainFeatures.Parser {
                             _lineInfo = new Dictionary<int, LineInfo>();
                             _parsedItemsList = new List<ParsedItem>();
                         }
+
+                        // send parserItems
+                        if (OnEndSendParserItems != null)
+                            OnEndSendParserItems(_parserErrors, _lineInfo, _parsedItemsList);
+
                     } finally {
-                        _lock.ExitWriteLock();
+                        Monitor.Exit(_lock);
                     }
                 }
-
-                // send parserItems
-                if (OnEndSendParserItems != null)
-                    OnEndSendParserItems(_parserErrors, _lineInfo, _parsedItemsList);
 
                 if (OnEnd != null)
                     OnEnd();
@@ -217,18 +219,33 @@ namespace _3PA.MainFeatures.Parser {
         /// Clear the static data to save up some memory
         /// </summary>
         public static void ClearStaticData() {
-            WaitForParserEnd();
-            RunPersistentFiles.Clear();
-            SavedPersistent.Clear();
-            SavedLexerInclude.Clear();
+            if (Monitor.TryEnter(_lock)) {
+                try {
+
+                    WaitForParserEnd();
+                    RunPersistentFiles.Clear();
+                    SavedPersistent.Clear();
+                    SavedLexerInclude.Clear();
+
+                } finally {
+                    Monitor.Exit(_lock);
+                }
+            }
         }
 
-        public static void UpdateKnownStaticItems() {
-            WaitForParserEnd();
-            // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
-            KnownStaticItems = DataBase.Instance.GetDbDictionary();
-            foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
-                KnownStaticItems[keyword.DisplayText] = keyword.Type;
+        public static void UpdateKnownStaticItems(List<CompletionItem> staticItems) {
+            if (Monitor.TryEnter(_lock)) {
+                try {
+
+                    // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
+                    KnownStaticItems = DataBase.Instance.GetDbDictionary();
+                    foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
+                        KnownStaticItems[keyword.DisplayText] = keyword.Type;
+                    }
+
+                } finally {
+                    Monitor.Exit(_lock);
+                }
             }
         }
 
@@ -241,11 +258,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public static Dictionary<int, LineInfo> LineInfo {
             get {
-                if (_lock.TryEnterReadLock(-1)) {
+                if (Monitor.TryEnter(_lock)) {
                     try {
                         return new Dictionary<int, LineInfo>(_lineInfo);
                     } finally {
-                        _lock.ExitReadLock();
+                        Monitor.Exit(_lock);
                     }
                 }
                 return null;
@@ -257,11 +274,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public static List<ParsedItem> ParsedItemsList {
             get {
-                if (_lock.TryEnterReadLock(-1)) {
+                if (Monitor.TryEnter(_lock)) {
                     try {
                         return _parsedItemsList.ToList();
                     } finally {
-                        _lock.ExitReadLock();
+                        Monitor.Exit(_lock);
                     }
                 }
                 return null;
@@ -273,26 +290,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         public static ParsedScopeItem GetScopeOfLine(int line) {
-            if (_lock.TryEnterReadLock(-1)) {
+            if (Monitor.TryEnter(_lock)) {
                 try {
                     return !_lineInfo.ContainsKey(line) ? null : _lineInfo[line].Scope;
                 } finally {
-                    _lock.ExitReadLock();
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temp table, or a buffer name (in which case we return the associated table)
-        /// </summary>
-        public static ParsedTable FindAnyTableOrBufferByName(string name) {
-            if (_lock.TryEnterReadLock(-1)) {
-                try {
-                    return ParserUtils.FindAnyTableOrBufferByName(name, _parsedItemsList);
-                } finally {
-                    _lock.ExitReadLock();
+                    Monitor.Exit(_lock);
                 }
             }
             return null;

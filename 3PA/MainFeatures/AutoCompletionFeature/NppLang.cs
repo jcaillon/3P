@@ -18,6 +18,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
     internal class NppLangs {
+
         #region Singleton
 
         private static NppLangs _instance;
@@ -141,6 +142,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal class LangDescription {
+
             private List<CompletionItem> _keywords;
 
             /// <summary>
@@ -226,15 +228,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                         Params = parameters
                                     });
                                 }
-
-                                CompletionItem newWord = CompletionItem.Factory.New(overloads == null ? CompletionType.Keyword : CompletionType.Function);
-                                newWord.DisplayText = keyword;
-                                newWord.SubText = LangName + ".xml";
-                                newWord.ParsedBaseItem = new NppKeyword(keyword) {
-                                    Overloads = overloads,
-                                    Origin = NppKeywordOrigin.AutoCompApiXml
-                                };
-                                _keywords.Add(newWord);
+                                
+                                _keywords.Add(new LangWordCompletionItem {
+                                    DisplayText = keyword,
+                                    SubText = LangName + ".xml",
+                                    ParsedBaseItem = new NppKeyword(keyword) {
+                                        Overloads = overloads,
+                                        Origin = NppKeywordOrigin.AutoCompApiXml
+                                    }
+                                });
                             }
                         }
 
@@ -263,7 +265,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
-                                            _keywords.Add(new KeywordCompletionItem() {
+                                            _keywords.Add(new LangWordCompletionItem {
                                                 DisplayText = keyword,
                                                 SubText = "userDefinedLang.xml",
                                                 ParsedBaseItem = new NppKeyword(keyword) {
@@ -287,7 +289,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                 foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
                                     if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                         uniqueKeywords.Add(keyword);
-                                        _keywords.Add(new KeywordCompletionItem() {
+                                        _keywords.Add(new LangWordCompletionItem {
                                             DisplayText = keyword,
                                             SubText = "langs.xml",
                                             ParsedBaseItem = new NppKeyword(keyword) {

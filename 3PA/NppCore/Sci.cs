@@ -766,8 +766,10 @@ namespace _3PA.NppCore {
         /// Gets the current screen location of the caret.
         /// </summary>
         /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
-        public static Point GetCaretScreenLocation() {
-            var point = GetPointXyFromPosition(CurrentPosition);
+        public static Point GetCaretScreenLocation(int pos = -1) {
+            if (pos < 0)
+                pos = CurrentPosition;
+            var point = GetPointXyFromPosition(pos);
             Win32Api.ClientToScreen(Api.Handle, ref point);
             return point;
         }

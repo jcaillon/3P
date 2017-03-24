@@ -26,8 +26,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
@@ -52,51 +54,45 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            if (!Utils.ConnectFtp(new FtpsClient(), "cnaf049", "sopra100", "rs28.lyon.fr.sopra", -1, "dfd"))
-                UserCommunication.Notify("connect failed");
-
-
-                int ii = 0;
-            MeasureIt(() => {
-                for (int i = 0; i < 99999; i++) {
-                    foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                        ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                        ii++;
-                    }
-                }
-
-            }, "1 : ");
-
+            var list = new List<string>();
+            for (int i = 0; i < 99999; i++) {
+                list.Add("");
+            }
             int jj = 0;
+
+            List<string> list2;
             MeasureIt(() => {
-                for (int i = 0; i < 99999; i++) {
-                    typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
+                for (int i = 0; i < 9999; i++) {
+                    char? sep;
+                    string outstr;
+                    int pos = 0;
+                    outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep);
+                    jj++;
+                }
+            }, "1 : ");
+            
+            MeasureIt(() => {
+                for (int i = 0; i < 9999; i++) {
+                    dodo(() => {
+                        list2 = list.ToList();
                         jj++;
                     });
                 }
 
             }, "2 : ");
+            UserCommunication.Notify(jj.ToString());
+        }
+        private static object _lock = new object();
 
-            UserCommunication.Notify("ii = " + ii + ", jj = " + jj);
-
-            char? sep;
-            string outstr;
-            int pos = 0;
-            outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep);
-            //-> "field" = GetKeyword("db:table.field", ref 6, '.')
-            outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep);
-            //-> "table" = GetKeyword("db:table.field", ref 12, ':')
-            outstr += AutoCompletion.GetWord("db.table.field", ref pos, out sep);
-            //-> "db" = GetKeyword("db", ref 14, ?)
-            pos = 1;
-            outstr += AutoCompletion.GetWord(" word1 word2 ", ref pos, out sep);
-            pos = 0;
-            outstr += AutoCompletion.GetWord("", ref pos, out sep);
-            pos = 20;
-            outstr += AutoCompletion.GetWord("a ", ref pos, out sep);
-
-            //-> "db" = GetKeyword("word2", ref 6, ?)
-            UserCommunication.Notify(outstr);
+        private static void dodo(Action yo) {
+            if (Monitor.TryEnter(_lock)) {
+                try {
+                    yo();
+                } finally {
+                    Monitor.Exit(_lock);
+                }
+            }
+            
         }
 
         public static void DebugTest2() {}
