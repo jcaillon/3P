@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProMisc.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,6 +31,81 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProMisc {
+        
+        #region Toggle comment
+
+        /// <summary>
+        /// If no selection, comment the line of the caret
+        /// If selection, comment the selection as a block
+        /// </summary>
+        public static void ToggleComment() {
+            Sci.BeginUndoAction();
+
+            // for each selection (limit selection number)
+            for (var i = 0; i < Sci.Selection.Count; i++) {
+                var selection = Sci.GetSelection(i);
+
+                int startPos;
+                int endPos;
+                bool singleLineComm = false;
+                if (selection.Caret == selection.Anchor) {
+                    // comment line
+                    var thisLine = new Sci.Line(Sci.LineFromPosition(selection.Caret));
+                    startPos = thisLine.IndentationPosition;
+                    endPos = thisLine.EndPosition;
+                    singleLineComm = true;
+                } else {
+                    startPos = selection.Start;
+                    endPos = selection.End;
+                }
+
+                var toggleMode = ToggleCommentOnRange(startPos, endPos);
+                if (toggleMode == 3)
+                    selection.SetPosition(startPos + 3);
+
+                // correct selection...
+                if (!singleLineComm && toggleMode == 2) {
+                    selection.End += 2;
+                }
+            }
+
+            Sci.EndUndoAction();
+        }
+
+        /// <summary>
+        /// Toggle comment on the specified range, returns a value indicating what has been done
+        /// 0: null, 1: toggle off; 2: toggle on, 3: added
+        /// </summary>
+        /// <param name="startPos"></param>
+        /// <param name="endPos"></param>
+        /// <returns></returns>
+        private static int ToggleCommentOnRange(int startPos, int endPos) {
+            // the line is essentially empty
+            if ((endPos - startPos) == 0) {
+                Sci.SetTextByRange(startPos, startPos, "/*  */");
+                return 3;
+            }
+
+            // line is surrounded by /* */
+            if (Sci.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Sci.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
+                if (Sci.GetTextByRange(startPos, endPos).Equals("/*  */")) {
+                    // delete an empty comment
+                    Sci.SetTextByRange(startPos, endPos, String.Empty);
+                } else {
+                    // delete /* */
+                    Sci.SetTextByRange(endPos - 2, endPos, String.Empty);
+                    Sci.SetTextByRange(startPos, startPos + 2, String.Empty);
+                }
+                return 1;
+            }
+
+            Sci.SetTextByRange(endPos, endPos, "*/");
+            Sci.SetTextByRange(startPos, startPos, "/*");
+            return 2;
+        }
+
+        #endregion
+        
         #region Go to definition
 
         /// <summary>
@@ -242,7 +314,7 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // update function prototypes
-            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+            ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
 
             // prolint? check that the StartProlint.p program is created, or do it
             if (executionType == ExecutionType.Prolint) {

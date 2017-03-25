@@ -19,8 +19,9 @@
 /* ***************************  Definitions  ************************** */
 
 &GLOBAL-DEFINE version {version.i}
-&GLOBAL-DEFINE edition Titanium
+&GLOBAL-DEFINE edition Easter Egg
 &GLOBAL-DEFINE build {build.i}
+
 &GLOBAL-DEFINE QUERYSEP CHR(1, SESSION:CPINTERNAL, "UTF-8")
 &GLOBAL-DEFINE timerStart PUBLISH "timerCommand" ("start", ENTRY(1,PROGRAM-NAME(1)," ")).
 &GLOBAL-DEFINE timerStop  PUBLISH "timerCommand" ("stop" , ENTRY(1,PROGRAM-NAME(1)," ")).
@@ -78,6 +79,7 @@ DEFINE TEMP-TABLE ttField NO-UNDO RCODE-INFORMATION
   FIELD cFieldName    AS CHARACTER                   LABEL "Name"      FORMAT "X(40)"
                      
   FIELD cFullName     AS CHARACTER                   LABEL "Name"      FORMAT "X(40)"    /* fieldname incl extent     */
+  FIELD cXmlNodeName  AS CHARACTER                   LABEL "Xml Name"  FORMAT "X(40)"    /* name for usage in XML     */
   FIELD iOrder        AS DECIMAL                     LABEL "Order"     FORMAT ">>>>>9"   /* user defined order        */
   FIELD lShow         AS LOGICAL                     LABEL ""                            /* toggle box                */
   FIELD cDataType     AS CHARACTER                   LABEL "Type"      FORMAT "X(16)"
@@ -235,6 +237,17 @@ DEFINE TEMP-TABLE ttConfig NO-UNDO RCODE-INFORMATION
   FIELD cSetting as character
   FIELD cValue   as character
   INDEX idxPrim IS PRIMARY cSection cSetting.
+
+
+/* TT for sorting options in user query */
+DEFINE TEMP-TABLE ttQuerySort NO-UNDO RCODE-INFORMATION
+  FIELD iGroup     AS INTEGER /* 1:query, 2:browse */
+  FIELD iSortNr    AS INTEGER
+  FIELD cSortField AS CHARACTER
+  FIELD lAscending AS LOGICAL
+  FIELD iExt       AS INTEGER
+  INDEX iPrim IS PRIMARY iGroup iSortNr
+  .
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

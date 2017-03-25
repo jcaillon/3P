@@ -1,8 +1,7 @@
 #region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (Scintilla.cs) is part of 3P.
+// This file (Sci.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,6 +28,7 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -43,8 +41,10 @@ namespace _3PA.NppCore {
     /// So you can this class safely without having headaches ;)<br />
     /// - This class also uses the direct function call to scintilla, as described in scintilla's documention. It allows<br />
     /// faster execution than with SendMessage<br />
+    /// It stays static also for performance reasons
     /// </summary>
     internal static class Sci {
+
         #region const
 
         public const int KeywordMaxLength = 60;

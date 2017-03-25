@@ -425,6 +425,7 @@ PROCEDURE recompileSelf :
 ------------------------------------------------------------------------------*/
 
   DEFINE VARIABLE cDiggerDriveType   AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cBuildNr           AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cExpectedDateTime  AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cMemory            AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cProgressDriveType AS CHARACTER   NO-UNDO.
@@ -444,6 +445,14 @@ PROCEDURE recompileSelf :
   DO:
     INPUT FROM VALUE(SEARCH("version")).
     IMPORT UNFORMATTED cVersionInfo.
+    INPUT CLOSE.
+  END.
+  
+  /* Get DD version */
+  IF SEARCH(gcProgramDir + 'build.i') <> ? THEN
+  DO:
+    INPUT FROM VALUE(SEARCH(gcProgramDir + 'build.i')).
+    IMPORT UNFORMATTED cBuildNr.
     INPUT CLOSE.
   END.
   
@@ -490,6 +499,7 @@ PROCEDURE recompileSelf :
   cProgressDriveType = getDriveType(ENTRY(1,FILE-INFO:FULL-PATHNAME,"\")).
   cDiggerDriveType   = getDriveType(ENTRY(1,gcProgramDir,"\")).
 
+  PUT UNFORMATTED SKIP(1) "DataDigger Buildnr   : " cBuildNr.
   PUT UNFORMATTED SKIP(1) "ENVIRONMENT".
   PUT UNFORMATTED SKIP(0) "  Progress version   : " PROVERSION " " PROGRESS " " SESSION:CLIENT-TYPE.
   PUT UNFORMATTED SKIP(0) "  Version info file  : " cVersionInfo.

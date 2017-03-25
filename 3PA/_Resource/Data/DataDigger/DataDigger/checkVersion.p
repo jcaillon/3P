@@ -7,8 +7,8 @@
     build nr is increaded when something is ready for beta testing.
     
   Parameters:
-    piChannel : 0=no check, 1=check stable, 2=check beta
-    plSilent  : if NO, then report local and remote versions
+    piChannel     : 0=no check, 1=check stable, 2=check beta
+    plManualCheck : TRUE when user presses 'Check Now' button
   ----------------------------------------------------------------------*/
 
 DEFINE INPUT PARAMETER piChannel     AS INTEGER NO-UNDO.
@@ -24,16 +24,21 @@ DEFINE VARIABLE lAutoCheck     AS LOGICAL     NO-UNDO.
 
 RUN getVersionInfo.p(OUTPUT cRemoteVersion, OUTPUT cRemoteBuildNr).
 
+
 IF (cRemoteVersion > cLocalVersion)
-  AND (plManualCheck OR piChannel = {&CHECK-STABLE}) THEN
+  AND (   plManualCheck = TRUE
+       OR piChannel = {&CHECK-STABLE} 
+       OR piChannel = {&CHECK-BETA}) THEN
 DO:
   OS-COMMAND NO-WAIT START VALUE('https://datadigger.wordpress.com/category/status').
   MESSAGE 'A new version is available on the DataDigger website' VIEW-AS ALERT-BOX INFO BUTTONS OK.
 END.
     
 ELSE
-IF (cRemoteBuildNr > cLocalBuildNr)
-  AND (plManualCheck OR piChannel = {&CHECK-BETA}) THEN
+IF    (cRemoteVersion = cLocalVersion)
+  AND (cRemoteBuildNr > cLocalBuildNr)
+  AND (   plManualCheck = TRUE 
+       OR piChannel = {&CHECK-BETA}) THEN
 DO:
   OS-COMMAND NO-WAIT START VALUE('https://datadigger.wordpress.com/category/beta').
   MESSAGE 'A new BETA version is available on the DataDigger website' VIEW-AS ALERT-BOX INFO BUTTONS OK.
@@ -42,8 +47,9 @@ END.
 /* In case of a manual check, report what is found */
 ELSE
 IF plManualCheck
-  AND cRemoteVersion = cLocalVersion
-  AND cRemoteBuildNr = cLocalBuildNr THEN
+  AND cRemoteVersion <= cLocalVersion
+  AND cRemoteBuildNr <= cLocalBuildNr THEN
 DO:
   MESSAGE 'No new version available, you are up to date.' VIEW-AS ALERT-BOX INFO BUTTONS OK.
 END.
+

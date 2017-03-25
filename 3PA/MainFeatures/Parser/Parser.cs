@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Parser.cs) is part of 3P.
@@ -17,15 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.NppCore;
 
@@ -156,6 +154,24 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public List<ParsedItem> ParsedItemsList {
             get { return _parsedItemList; }
+        }
+
+        /// <summary>
+        /// Returns a string that describes the errors found by the parser (relative to block start/end)
+        /// Returns null if no errors were found
+        /// </summary>
+        public string ParseErrorsInHtml {
+            get {
+                var error = new StringBuilder();
+                if (_parserErrors != null && _parserErrors.Count > 0) {
+                    foreach (var parserError in _parserErrors) {
+                        error.AppendLine("<div>");
+                        error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
+                        error.AppendLine("</div>");
+                    }
+                }
+                return error.ToString();
+            }
         }
 
         /// <summary>

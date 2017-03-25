@@ -1,0 +1,16 @@
+-s 1000
+-d dmy
+-E
+-rereadnolock
+-h 255
+-T c:\temp
+-Bt 4000
+-tmpbsize 8
+-p DataDigger.p
+
+#-cpstream UTF-8
+#-cpcase BASIC
+#-cpinternal UTF-8
+#-cplog UTF-8
+#-cpterm UTF-8
+#-cpcoll BASIC

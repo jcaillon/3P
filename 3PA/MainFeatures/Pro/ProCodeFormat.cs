@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProCodeFormat.cs) is part of 3P.
@@ -17,13 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System.IO;
 using System.Text;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
@@ -33,12 +29,14 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static void CorrectCodeIndentation() {
             // handle spam (2s min between 2 indent)
-            if (Utils.IsSpamming("CorrectCodeIndentation", 20000))
+            if (Utils.IsSpamming("CorrectCodeIndentation", 1000))
                 return;
+
+            var parser = new Parser.Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
 
             // make sure to parse the current document before doing anything
             var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
-            var parseErrors = ParserHandler.GetLastParseErrorsInHtml();
+            var parseErrors = parser.ParseErrorsInHtml;
             var canIndent = string.IsNullOrEmpty(parseErrors);
 
             // start indenting
@@ -47,7 +45,7 @@ namespace _3PA.MainFeatures.Pro {
             StringBuilder x = new StringBuilder();
             var indentWidth = Sci.TabWidth;
             var i = 0;
-            var dic = ParserHandler.LineInfo;
+            var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
                 if (canIndent)
                     Sci.GetLine(i).Indentation = dic[i].BlockDepth*indentWidth;

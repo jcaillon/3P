@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletion.cs) is part of 3P.
@@ -17,13 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
@@ -34,8 +30,9 @@ using _3PA.NppCore;
 using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
+
     /// <summary>
-    /// This class handles the AutoCompletionForm
+    /// This class handles the Auto Completion
     /// </summary>
     internal static class AutoCompletion {
 
@@ -202,7 +199,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var typing = IsCharPartOfWord(c);
             var isVisible = IsVisible;
 
-            // currently continuing to type a word
+            // currently continuing to type a word in a visible auto completion, return asap
             if (typing && isVisible) {
                 // the auto completion is already visible, this means the _currentWord is set
                 // we only have to filter the current list even more
@@ -215,7 +212,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var isNormalContext = Style.IsCarretInNormalContext(nppCurrentPosition);
             string strOnLeft = null;
 
+            //----------------------
             // we finished entering a word (we typed a char that is not part of a word, a space of new line or separator...)
+            //----------------------
             if (c != char.MinValue && !typing && isNormalContext) {
 
                 strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
@@ -256,12 +255,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 }
 
                 // replace semicolon by a point
-                if (c == ';' && Npp.CurrentFile.IsProgress && Config.Instance.CodeReplaceSemicolon)
+                if (c == ';' && Npp.CurrentFile.IsProgress && Config.Instance.CodeReplaceSemicolon) {
                     Sci.ModifyTextAroundCaret(-offset, 0, ".");
+                    // need to update the strOnLeft
+                    strOnLeft = strOnLeft.Substring(0, strOnLeft.Length) + ".";
+                }
             }
 
+            //----------------------
             // We are here if the auto completion is hidden or if the user is not continuing to type a word, 
-            // We check if we need to change the list of items in the auto completion
+            // So we have the opportunity to change the list of items in the auto completion if needed
+            //----------------------
 
             if (!_openedFromShortCut) {
                 // show autocomp when typing? or not
@@ -287,6 +291,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             char? firstSeparator;
             var firstKeyword = GetWord(strOnLeft, ref charPos, out firstSeparator);
 
+            
+            if (isVisible) {
+                // close if (we didn't open from shortcut or we are not a the opening position) and the min length is not reached
+                if ((!_openedFromShortCut || nppCurrentPosition < _shownPosition) && firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
+                    Cloak();
+                    return;
+                }
+            } else {
+                // Min length is not reached?
+                if (!_openedFromShortCut && firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
+                    return;
+                }
+            }
+            
             if (firstSeparator == null) {
                 // we didn't match a known separator just before the keyword;
                 // this means we want to display the entire list of keywords
@@ -299,39 +317,50 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 }
 
             } else {
-                // return the list that should be used in the auto completion, filtered by the previous keywords
-                IEnumerable<CompletionItem> outList = null;
+                // return the list of children that should be used in the auto completion, filtered by the previous keywords
+                List<CompletionItem> outList = null;
                 DoInLock(() => {
-                    outList = GetWordsList(_savedAllItems, strOnLeft, charPos, firstSeparator);
+                    outList = GetWordsList(_savedAllItems, strOnLeft, charPos, firstSeparator).ToList();
                 });
 
-                // if the current word is directly preceded by a :, we are entering an object field/method
-                // for now, we then display the whole list of object keywords
-                if (firstSeparator == ':' && (outList == null || !outList.Any())) {
-                    if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
-                        CurrentActiveTypes = ActiveTypes.KeywordObject;
+                // empty list?
+                if (outList == null || outList.Count == 0) {
+
+                    // if the current word is directly preceded by a :, we are entering an object field/method
+                    // for now, we then display the whole list of object keywords
+                    if (firstSeparator == ':') {
+                        if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
+                            CurrentActiveTypes = ActiveTypes.KeywordObject;
+                            DoInLock(() => {
+                                CurrentItems = _savedAllItems;
+                            });
+                        }
+                        ShowSuggestionList(firstKeyword);
+                        return;
+                    }
+
+                    // we should consider the first separator found not as a child separator, display the whole list
+                    if (CurrentActiveTypes != ActiveTypes.All) {
+                        CurrentActiveTypes = ActiveTypes.All;
                         DoInLock(() => {
                             CurrentItems = _savedAllItems;
                         });
                     }
-                    ShowSuggestionList(firstKeyword);
-                    return;
+
+                } else {
+
+                    // we will display the list filtered with all the needed children
+                    CurrentActiveTypes = ActiveTypes.Filtered;
+                    DoInLock(() => {
+                        CurrentItems = outList.ToList();
+                    });
+
+                    // we want to show the list no matter how long the filter keyword
+                    if (Config.Instance.AutoCompleteShowChildrenAfterSeparator) {
+                        ShowSuggestionList(firstKeyword);
+                        return;
+                    }
                 }
-
-                CurrentActiveTypes = ActiveTypes.Filtered;
-                DoInLock(() => {
-                    CurrentItems = outList.ToList();
-                });
-                
-                // we want to show the list no matter how long the filter keyword
-                ShowSuggestionList(firstKeyword);
-                return;
-            }
-
-            // close if there is nothing to suggest
-            if ((!_openedFromShortCut || nppCurrentPosition != _shownPosition) && firstKeyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
-                Cloak();
-                return;
             }
 
             ShowSuggestionList(firstKeyword);
@@ -762,5 +791,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
+
     }
 }

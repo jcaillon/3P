@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserHandler.cs) is part of 3P.
@@ -17,13 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
@@ -32,9 +28,8 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
-    internal static class ParserHandler {
 
-        #region Core
+    internal static class ParserHandler {
 
         #region event
 
@@ -67,15 +62,14 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Private fields
 
+        private static string _lastFilePathParsed;
         private static Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
-        private static List<ParserError> _parserErrors = new List<ParserError>();
-        private static List<ParsedItem> _parsedItemsList = new List<ParsedItem>();
 
         private static AsapButDelayableAction _parseAction;
 
         private static AsapButDelayableAction ParseAction {
             get {
-                return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse) {
+                return _parseAction ?? (_parseAction = new AsapButDelayableAction("Error while parsing text", 800, DoParse) {
                     MsToDoTimeout = 1500
                 });
             }
@@ -85,7 +79,19 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #region do the parsing and get the results
+        #region Public
+
+        /// <summary>
+        /// Returns Scope of the given line
+        /// </summary>
+        /// <returns></returns>
+        public static ParsedScopeItem GetScopeOfLine(int line) {
+            ParsedScopeItem output = null;
+            DoInLock(() => {
+                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null;
+            });
+            return output;
+        }
 
         /// <summary>
         /// Call this method to parse the current document after a small delay 
@@ -102,89 +108,69 @@ namespace _3PA.MainFeatures.Parser {
             ParseAction.DoTaskNow();
         }
 
-        /// <summary>
-        /// Wait for the latest parsing action to be done
-        /// </summary>
-        public static void WaitForParserEnd() {
-            ParseAction.WaitLatestTask();
-        }
-
-        /// <summary>
-        /// Parses the document synchronously (handle with care!!!!)
-        /// </summary>
-        public static void ParseDocumentSync() {
-            ParseAction.DoSync();
-        }
-
         private static void DoParse() {
-            string lastParsedFilePath = null;
-            try {
-                if (OnStart != null)
-                    OnStart();
-                
-                if (Monitor.TryEnter(_lock)) {
-                    try {
+            if (OnStart != null)
+                OnStart();
 
-                        // make sure to always parse the current file
-                        Parser parser = null;
-                        bool lastParsedFileIsProgress;
-                        do {
-                            lastParsedFilePath = Npp.CurrentFile.Path;
-                            lastParsedFileIsProgress = Npp.CurrentFile.IsProgress;
+            DoInLock(() => {
 
-                            if (lastParsedFileIsProgress) {
-                                parser = new Parser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), lastParsedFilePath, null, true);
+                // make sure to always parse the current file
+                Parser parser = null;
+                do {
+                    _lastFilePathParsed = Npp.CurrentFile.Path;
 
-                                // visitor
-                                var visitor = new ParserVisitor(true);
-                                parser.Accept(visitor);
+                    if (Npp.CurrentFile.IsProgress) {
+                        parser = new Parser(Sci.Text, _lastFilePathParsed, null, true);
 
-                                // send completionItems
-                                if (OnEndSendCompletionItems != null)
-                                    OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
+                        // visitor
+                        var visitor = new ParserVisitor(true);
+                        parser.Accept(visitor);
 
-                                // send codeExplorerItems
-                                if (OnEndSendCodeExplorerItems != null)
-                                    OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+                        // send completionItems
+                        if (OnEndSendCompletionItems != null)
+                            OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
 
-                            } else {
-                                var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers, null);
+                        // send codeExplorerItems
+                        if (OnEndSendCodeExplorerItems != null)
+                            OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
 
-                                // send completionItems
-                                if (OnEndSendCompletionItems != null)
-                                    OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
-                            }
+                    } else {
+                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers, null);
 
-                        } while (!lastParsedFilePath.Equals(Npp.CurrentFile.Path));
-
-                        if (lastParsedFileIsProgress) {
-                            _parserErrors = parser.ParserErrors;
-                            _lineInfo = parser.LineInfo;
-                            _parsedItemsList = parser.ParsedItemsList;
-                        } else {
-                            _parserErrors = new List<ParserError>();
-                            _lineInfo = new Dictionary<int, LineInfo>();
-                            _parsedItemsList = new List<ParsedItem>();
-                        }
-
-                        // send parserItems
-                        if (OnEndSendParserItems != null)
-                            OnEndSendParserItems(_parserErrors, _lineInfo, _parsedItemsList);
-
-                    } finally {
-                        Monitor.Exit(_lock);
+                        // send completionItems
+                        if (OnEndSendCompletionItems != null)
+                            OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
                     }
+
+                } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
+
+                if (parser != null) {
+                    
                 }
+                
+                // send parserItems
+                if (OnEndSendParserItems != null) {
+                    if (parser != null)
+                        OnEndSendParserItems(parser.ParserErrors, parser.LineInfo, parser.ParsedItemsList);
+                }
+            });
 
-                if (OnEnd != null)
-                    OnEnd();
+            if (OnEnd != null)
+                OnEnd();
+        }
 
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in DoParse " + (lastParsedFilePath ?? "?"));
+        /// <summary>
+        /// Execute the action behind the lock
+        /// </summary>
+        private static void DoInLock(Action toDo) {
+            if (Monitor.TryEnter(_lock)) {
+                try {
+                    toDo();
+                } finally {
+                    Monitor.Exit(_lock);
+                }
             }
         }
-
-        #endregion
 
         #endregion
 
@@ -219,104 +205,24 @@ namespace _3PA.MainFeatures.Parser {
         /// Clear the static data to save up some memory
         /// </summary>
         public static void ClearStaticData() {
-            if (Monitor.TryEnter(_lock)) {
-                try {
-
-                    WaitForParserEnd();
-                    RunPersistentFiles.Clear();
-                    SavedPersistent.Clear();
-                    SavedLexerInclude.Clear();
-
-                } finally {
-                    Monitor.Exit(_lock);
-                }
-            }
+            DoInLock(() => {
+                RunPersistentFiles.Clear();
+                SavedPersistent.Clear();
+                SavedLexerInclude.Clear();
+            });
         }
 
         public static void UpdateKnownStaticItems(List<CompletionItem> staticItems) {
-            if (Monitor.TryEnter(_lock)) {
-                try {
-
-                    // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
-                    KnownStaticItems = DataBase.Instance.GetDbDictionary();
-                    foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
-                        KnownStaticItems[keyword.DisplayText] = keyword.Type;
-                    }
-
-                } finally {
-                    Monitor.Exit(_lock);
+            DoInLock(() => {
+                // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
+                KnownStaticItems = DataBase.Instance.GetDbDictionary();
+                foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
+                    KnownStaticItems[keyword.DisplayText] = keyword.Type;
                 }
-            }
+            });
         }
 
         #endregion
 
-        #region Public
-
-        /// <summary>
-        /// dictionary of *line, line info*
-        /// </summary>
-        public static Dictionary<int, LineInfo> LineInfo {
-            get {
-                if (Monitor.TryEnter(_lock)) {
-                    try {
-                        return new Dictionary<int, LineInfo>(_lineInfo);
-                    } finally {
-                        Monitor.Exit(_lock);
-                    }
-                }
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// returns the list of the parsed items
-        /// </summary>
-        public static List<ParsedItem> ParsedItemsList {
-            get {
-                if (Monitor.TryEnter(_lock)) {
-                    try {
-                        return _parsedItemsList.ToList();
-                    } finally {
-                        Monitor.Exit(_lock);
-                    }
-                }
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns Scope of the given line
-        /// </summary>
-        /// <returns></returns>
-        public static ParsedScopeItem GetScopeOfLine(int line) {
-            if (Monitor.TryEnter(_lock)) {
-                try {
-                    return !_lineInfo.ContainsKey(line) ? null : _lineInfo[line].Scope;
-                } finally {
-                    Monitor.Exit(_lock);
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Returns a string that describes the errors found by the parser (relative to block start/end)
-        /// Returns null if no errors were found
-        /// </summary>
-        public static string GetLastParseErrorsInHtml() {
-            WaitForParserEnd();
-            if (_parserErrors == null || _parserErrors.Count == 0)
-                return null;
-            var error = new StringBuilder();
-            foreach (var parserError in _parserErrors) {
-                error.AppendLine("<div>");
-                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
-                error.AppendLine("</div>");
-            }
-            return error.ToString();
-        }
-
-        #endregion
     }
 }

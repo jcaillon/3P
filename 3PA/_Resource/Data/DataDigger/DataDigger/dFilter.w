@@ -81,44 +81,44 @@ DEFINE BUTTON Btn_OK AUTO-GO
 DEFINE VARIABLE cbTableFieldHide AS CHARACTER 
      VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN
-     SIZE-PIXELS 385 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
+     SIZE-PIXELS 430 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
 
 DEFINE VARIABLE cbTableFieldShow AS CHARACTER 
      VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN
-     SIZE-PIXELS 385 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
+     SIZE-PIXELS 430 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
 
 DEFINE VARIABLE cbTableNameHide AS CHARACTER 
      VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN
-     SIZE-PIXELS 385 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
+     SIZE-PIXELS 425 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
 
 DEFINE VARIABLE cbTableNameShow AS CHARACTER 
      VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN
-     SIZE-PIXELS 385 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
+     SIZE-PIXELS 425 BY 21 TOOLTIP "provide a comma separated list of (partial) field names" NO-UNDO.
 
 DEFINE RECTANGLE RECT-1
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 415 BY 115.
+     SIZE-PIXELS 450 BY 115.
 
 DEFINE RECTANGLE RECT-2
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 415 BY 115.
+     SIZE-PIXELS 450 BY 115.
 
 DEFINE RECTANGLE RECT-3
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 415 BY 118.
+     SIZE-PIXELS 445 BY 118.
 
 DEFINE VARIABLE tgShowFrozen AS LOGICAL INITIAL no 
      LABEL "Show &Frozen Application Tables" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 180 BY 17 NO-UNDO.
+     SIZE-PIXELS 246 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tgShowHidden AS LOGICAL INITIAL no 
      LABEL "Show &Hidden Application Tables" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 180 BY 17 NO-UNDO.
+     SIZE-PIXELS 246 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tgShowNormalTables AS LOGICAL INITIAL no 
      LABEL "Show &Normal Tables" 
@@ -128,7 +128,7 @@ DEFINE VARIABLE tgShowNormalTables AS LOGICAL INITIAL no
 DEFINE VARIABLE tgShowOther AS LOGICAL INITIAL no 
      LABEL "Show Other &MetaTables" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 160 BY 17 TOOLTIP "show or hide tables in other categories" NO-UNDO.
+     SIZE-PIXELS 246 BY 17 TOOLTIP "show or hide tables in other categories" NO-UNDO.
 
 DEFINE VARIABLE tgShowSchema AS LOGICAL INITIAL no 
      LABEL "Show &Schema Tables" 
@@ -159,30 +159,30 @@ DEFINE FRAME Dialog-Frame
      tgShowFrozen AT Y 241 X 204 WIDGET-ID 42
      cbTableFieldShow AT Y 328 X 10 COLON-ALIGNED NO-LABEL WIDGET-ID 8
      cbTableFieldHide AT Y 373 X 10 COLON-ALIGNED NO-LABEL WIDGET-ID 10
-     Btn_OK AT Y 423 X 270
-     Btn_Cancel AT Y 423 X 350
+     Btn_OK AT Y 420 X 295
+     Btn_Cancel AT Y 420 X 375
      tgShowOther AT Y 193 X 204 WIDGET-ID 44
      tgShowNormalTables AT Y 170 X 25 WIDGET-ID 50
      "But hide these" VIEW-AS TEXT
-          SIZE-PIXELS 138 BY 13 AT Y 80 X 27 WIDGET-ID 20
+          SIZE-PIXELS 138 BY 18 AT Y 77 X 27 WIDGET-ID 20
      "But hide tables that contain any of these" VIEW-AS TEXT
-          SIZE-PIXELS 350 BY 13 AT Y 358 X 22 WIDGET-ID 12
+          SIZE-PIXELS 350 BY 18 AT Y 355 X 22 WIDGET-ID 12
      "Show only tables that contain all of these fields" VIEW-AS TEXT
-          SIZE-PIXELS 350 BY 13 AT Y 313 X 22 WIDGET-ID 6
+          SIZE-PIXELS 350 BY 18 AT Y 310 X 22 WIDGET-ID 6
      "Show these tables" VIEW-AS TEXT
-          SIZE-PIXELS 163 BY 13 AT Y 35 X 27 WIDGET-ID 16
+          SIZE-PIXELS 163 BY 18 AT Y 32 X 27 WIDGET-ID 16
      "Filter by name" VIEW-AS TEXT
           SIZE-PIXELS 75 BY 13 AT Y 10 X 21 WIDGET-ID 36
      "Filter by fields in table" VIEW-AS TEXT
-          SIZE-PIXELS 110 BY 13 AT Y 282 X 20 WIDGET-ID 38
+          SIZE-PIXELS 110 BY 18 AT Y 279 X 20 WIDGET-ID 38
      "Filter by Type" VIEW-AS TEXT
-          SIZE-PIXELS 69 BY 13 AT Y 145 X 21 WIDGET-ID 48
+          SIZE-PIXELS 99 BY 18 AT Y 145 X 21 WIDGET-ID 48
      RECT-1 AT Y 15 X 10 WIDGET-ID 4
      RECT-2 AT Y 288 X 10 WIDGET-ID 22
-     RECT-3 AT Y 152 X 10 WIDGET-ID 32
+     RECT-3 AT Y 155 X 15 WIDGET-ID 32
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         SIZE-PIXELS 446 BY 487
+         SIZE-PIXELS 480 BY 487
          TITLE "Edit table filter"
          DEFAULT-BUTTON Btn_OK CANCEL-BUTTON Btn_Cancel WIDGET-ID 100.
 

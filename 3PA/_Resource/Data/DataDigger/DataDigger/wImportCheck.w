@@ -624,6 +624,9 @@ PROCEDURE checkFiles :
     ghXmlTable:TEMP-TABLE-PREPARE(picTableName).
     DELETE OBJECT hTableBuffer.
   
+    /* Fix XML Node Names for fields in the tt */
+    RUN setXmlNodeNames(INPUT ghXmlTable:DEFAULT-BUFFER-HANDLE).
+
     fileLoop:
     FOR EACH bfXmlFile WHERE bfXmlFile.lValidFile:
       iExpectedRecords = iExpectedRecords + bfXmlFile.iNumRecords. 
@@ -898,4 +901,3 @@ END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-

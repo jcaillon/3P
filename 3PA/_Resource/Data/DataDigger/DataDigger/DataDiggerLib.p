@@ -432,6 +432,17 @@ FUNCTION getWidgetUnderMouse RETURNS HANDLE
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-getXmlNodeName) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getXmlNodeName Procedure 
+FUNCTION getXmlNodeName RETURNS CHARACTER
+  ( pcFieldName AS CHARACTER )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
 &IF DEFINED(EXCLUDE-isBrowseChanged) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD isBrowseChanged Procedure 
@@ -1097,7 +1108,7 @@ PROCEDURE dumpRecord :
 
     WHEN 'browse' THEN 
     DO:
-      hBuffer = phSource:QUERY:get-buffer-handle(1).
+      hBuffer = phSource:QUERY:GET-BUFFER-HANDLE(1).
 
       /* Create temptable-handle... */
       CREATE TEMP-TABLE hExportTt.
@@ -1147,6 +1158,9 @@ PROCEDURE dumpRecord :
     RETURN. 
   END. 
 
+  /* Fix XML Node Names for fields in the tt */
+  RUN setXmlNodeNames(INPUT hExportTt:DEFAULT-BUFFER-HANDLE).
+
   /* See if the user has specified his own dump program
    */
   plContinue = ?. /* To see if it ran or not */
@@ -1181,7 +1195,6 @@ PROCEDURE dumpRecord :
     ).
 
   DELETE OBJECT hExportTt.
-
 END PROCEDURE. /* dumpRecord */
 
 /* _UIB-CODE-BLOCK-END */
@@ -1573,6 +1586,7 @@ PROCEDURE getFields :
   DEFINE VARIABLE cSelectedFields    AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cTableCacheId      AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cUniqueIndexFields AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cSDBName           AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE hBufferField       AS HANDLE      NO-UNDO.
   DEFINE VARIABLE hBufferFile        AS HANDLE      NO-UNDO.
   DEFINE VARIABLE hQuery             AS HANDLE      NO-UNDO.
@@ -1592,12 +1606,12 @@ PROCEDURE getFields :
 
   {&timerStart}
   
-  /* For dataservers, use the schema name */
-  pcDatabase = SDBNAME(pcDatabase).
-
   /* Clean up first */
   EMPTY TEMP-TABLE bField.
   EMPTY TEMP-TABLE bColumn.
+
+  /* For dataservers, use the schema name [dataserver] */
+  ASSIGN cSDBName = SDBNAME(pcDatabase).
 
   /* Return if no db connected */
   IF NUM-DBS = 0 THEN RETURN. 
@@ -1609,7 +1623,8 @@ PROCEDURE getFields :
     FIND bTable WHERE bTable.cDatabase = pcDatabase AND bTable.cTableName = pcTableName.
     
     /* Verify whether the CRC is still the same. If not, kill the cache */
-    CREATE BUFFER hBufferFile FOR TABLE pcDatabase + "._File".
+    CREATE BUFFER hBufferFile FOR TABLE cSDBName + "._File".
+
     hBufferFile:FIND-UNIQUE(SUBSTITUTE('where _file-name = &1 and _File._File-Number < 32768', QUOTER(pcTableName)),NO-LOCK).
     IF hBufferFile::_crc <> bTable.cCrc THEN
     DO:
@@ -1689,15 +1704,15 @@ PROCEDURE getFields :
    */
   FIND bTable WHERE bTable.cDatabase = pcDatabase AND bTable.cTableName = pcTableName.
 
-  CREATE BUFFER hBufferFile  FOR TABLE pcDatabase + "._File".                    
-  CREATE BUFFER hBufferField FOR TABLE pcDatabase + "._Field".
+  CREATE BUFFER hBufferFile  FOR TABLE cSDBName + "._File".                    
+  CREATE BUFFER hBufferField FOR TABLE cSDBName + "._Field".
 
   CREATE QUERY hQuery.
   hQuery:SET-BUFFERS(hBufferFile,hBufferField).
 
   cQuery = SUBSTITUTE("FOR EACH &1._File  WHERE &1._file._file-name = '&2' AND _File._File-Number < 32768 NO-LOCK, " +
                       "    EACH &1._Field OF &1._File NO-LOCK BY _ORDER" 
-                     , pcDatabase
+                     , cSDBName
                      , pcTableName
                      ).
 
@@ -1706,10 +1721,10 @@ PROCEDURE getFields :
   hQuery:GET-FIRST().
 
   /* Get list of fields in primary index. */
-  cPrimIndexFields = getIndexFields(pcDatabase, pcTableName, "P").
+  cPrimIndexFields = getIndexFields(cSDBName, pcTableName, "P").
 
   /* Get list of fields in all unique indexes. */
-  cUniqueIndexFields = getIndexFields(pcDatabase, pcTableName, "U").
+  cUniqueIndexFields = getIndexFields(cSDBName, pcTableName, "U").
 
   /* Get list of all previously selected fields */
   cSelectedFields = getRegistry(SUBSTITUTE("DB:&1",pcDatabase), SUBSTITUTE("&1:Fields",pcTableName)).
@@ -1722,7 +1737,7 @@ PROCEDURE getFields :
               
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
 
-    CREATE bField.
+CREATE bField.
     ASSIGN 
       iFieldOrder          = iFieldOrder + 1
       bField.cTableCacheId = bTable.cCacheId
@@ -1735,7 +1750,7 @@ PROCEDURE getFields :
       bField.iOrderOrg     = iFieldOrder 
 
       bField.cFullName     = hBufferField:BUFFER-FIELD('_field-name'):BUFFER-VALUE 
-      bField.cDataType     = hBufferField:BUFFER-FIELD('_data-type'):BUFFER-VALUE 
+      bField.cDataType     = hBufferField:BUFFER-FIELD('_data-type'):BUFFER-VALUE
       bField.cInitial      = hBufferField:BUFFER-FIELD('_initial'):BUFFER-VALUE   
       bField.cFormat       = hBufferField:BUFFER-FIELD('_format'):BUFFER-VALUE     
       bField.cFormatOrg    = hBufferField:BUFFER-FIELD('_format'):BUFFER-VALUE      
@@ -1754,6 +1769,9 @@ PROCEDURE getFields :
       bField.cHelp         = hBufferField:BUFFER-FIELD('_Help'):BUFFER-VALUE
       bField.cDesc         = hBufferField:BUFFER-FIELD('_Desc'):BUFFER-VALUE
       bField.cViewAs       = hBufferField:BUFFER-FIELD('_View-as'):BUFFER-VALUE
+      .
+    ASSIGN
+      bField.cXmlNodeName  = getXmlNodeName(bField.cFieldName)
       .
 
     /* Make a list of fields on table level */
@@ -2032,10 +2050,12 @@ PROCEDURE getTables :
       CREATE QUERY hFileQuery  IN WIDGET-POOL "metaInfo".
   
       hFileQuery:SET-BUFFERS(hDbBuffer, hFileBuffer).
-      hFileQuery:QUERY-PREPARE("FOR EACH _Db NO-LOCK " +
-                               ", EACH _File NO-LOCK" +
-                               "  WHERE _File._Db-recid    = RECID(_Db)" +
-                               "    AND _File._File-Number < 32768").
+      hFileQuery:QUERY-PREPARE( "FOR EACH _Db NO-LOCK "
+                              + ",   EACH _File NO-LOCK"
+                              + "   WHERE _File._Db-recid    = RECID(_Db)"
+                              + "     AND _File._File-Number < 32768"
+                              + "     AND (IF _Db._Db-slave THEN _File._For-Type = 'TABLE' ELSE TRUE)"
+                              ).
 
       /* To get all fields */
       CREATE QUERY hFieldQuery IN WIDGET-POOL "metaInfo".
@@ -2088,10 +2108,30 @@ PROCEDURE getTables :
       DO:
         /* Move the tables of the current db to a separate tt so we can dump it. */
         EMPTY TEMP-TABLE ttTableXml.
-        FOR EACH ttTable WHERE ttTable.cDatabase = LDBNAME(iDatabase):
+
+        CREATE QUERY hFileQuery IN WIDGET-POOL "metaInfo".
+
+        CREATE BUFFER hDbBuffer    FOR TABLE LDBNAME(iDatabase) + "._Db"    IN WIDGET-POOL "metaInfo".
+
+        hFileQuery:SET-BUFFERS(hDbBuffer).
+        hFileQuery:QUERY-PREPARE("FOR EACH _Db NO-LOCK ").
+
+        hFileQuery:QUERY-OPEN().
+        REPEAT:
+           hFileQuery:GET-NEXT().
+           IF hFileQuery:QUERY-OFF-END THEN LEAVE.
+
+           FOR EACH ttTable 
+              WHERE ttTable.cDatabase = (IF hDbBuffer::_Db-slave THEN hDbBuffer::_Db-name ELSE LDBNAME(iDatabase)):
           CREATE ttTableXml.
           BUFFER-COPY ttTable TO ttTableXml.
         END.
+        END.
+
+        hFileQuery:QUERY-CLOSE().
+        DELETE OBJECT hFileQuery.
+        DELETE OBJECT hDbBuffer.
+
         TEMP-TABLE ttTableXml:WRITE-XML("file", cCacheFile, YES, ?, ?, NO, NO).
         EMPTY TEMP-TABLE ttTableXml.
       END.
@@ -2558,18 +2598,14 @@ END PROCEDURE. /* readConfigFile */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE resizeFilterFields Procedure 
 PROCEDURE resizeFilterFields :
-/*------------------------------------------------------------------------
-  Name         : resizeFilterFields
-  Description  : Generic procedure to redraw the filter fields of the 
-                 fields browse and of the index browse. 
-
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  ----------------------------------------------------------------------*/
-
-  DEFINE INPUT  PARAMETER pcFilterFields AS CHARACTER   NO-UNDO.
-  DEFINE INPUT  PARAMETER pcButtons      AS CHARACTER   NO-UNDO.
-  DEFINE INPUT  PARAMETER phBrowse       AS HANDLE      NO-UNDO.
+/*
+ * Generic procedure to redraw the filter fields of the 
+ * fields browse and of the index browse. 
+ */
+  DEFINE INPUT PARAMETER phLeadButton   AS HANDLE      NO-UNDO.
+  DEFINE INPUT PARAMETER pcFilterFields AS CHARACTER   NO-UNDO.
+  DEFINE INPUT PARAMETER pcButtons      AS CHARACTER   NO-UNDO.
+  DEFINE INPUT PARAMETER phBrowse       AS HANDLE      NO-UNDO.
 
   DEFINE VARIABLE iField        AS INTEGER NO-UNDO. 
   DEFINE VARIABLE iButton       AS INTEGER NO-UNDO. 
@@ -2670,6 +2706,12 @@ PROCEDURE resizeFilterFields :
   END.
   PUBLISH "timerCommand" ("stop", "resizeFilterFields:fieldLoop").
   
+  /* Finally, set the lead button to the utmost left */
+  IF VALID-HANDLE(phLeadButton) THEN
+    ASSIGN 
+      phLeadButton:X = phBrowse:X 
+      phLeadButton:Y = phBrowse:Y - 23.
+
   {&timerStop}
 
 END PROCEDURE. /* resizeFilterFields */
@@ -2964,6 +3006,28 @@ END PROCEDURE. /* setCaching */
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-setLabelPosition) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setLabelPosition Procedure 
+PROCEDURE setLabelPosition :
+/*
+ * Correct the position of the label for larger fonts 
+ */
+  DEFINE INPUT PARAMETER phWidget AS HANDLE NO-UNDO.
+
+  /* Move horizontally far enough from the widget */
+  phWidget:SIDE-LABEL-HANDLE:X = phWidget:X 
+    - FONT-TABLE:GET-TEXT-WIDTH-PIXELS(phWidget:SIDE-LABEL-HANDLE:SCREEN-VALUE, phWidget:FRAME:FONT)
+    - (IF phWidget:TYPE = 'fill-in' THEN 5 ELSE 0)
+    .
+
+END PROCEDURE. /* setLabelPosition */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
 &IF DEFINED(EXCLUDE-setSortArrow) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setSortArrow Procedure 
@@ -3113,11 +3177,32 @@ END PROCEDURE. /* setUsage */
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-setXmlNodeNames) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setXmlNodeNames Procedure 
+PROCEDURE setXmlNodeNames :
+/* 
+ * Set the XML-NODE-NAMES of all fields in a buffer
+ */
+  DEFINE INPUT PARAMETER phTable AS HANDLE NO-UNDO.
+  DEFINE VARIABLE iField AS INTEGER NO-UNDO.
+
+  DO iField = 1 TO phTable:NUM-FIELDS:
+    phTable:BUFFER-FIELD(iField):XML-NODE-NAME = getXmlNodeName(phTable:BUFFER-FIELD(iField):NAME).
+  END.
+
+END PROCEDURE. /* setXmlNodeNames */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
 &IF DEFINED(EXCLUDE-showHelp) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE showHelp Procedure 
 PROCEDURE showHelp :
-  DEFINE INPUT  PARAMETER pcTopic   AS CHARACTER   NO-UNDO.
+DEFINE INPUT  PARAMETER pcTopic   AS CHARACTER   NO-UNDO.
   DEFINE INPUT  PARAMETER pcStrings AS CHARACTER   NO-UNDO.
 
   DEFINE VARIABLE cButtons       AS CHARACTER   NO-UNDO.
@@ -3278,7 +3363,6 @@ END PROCEDURE. /* ShowScrollbars */
 
 &ENDIF
 
-
 &IF DEFINED(EXCLUDE-unlockWindow) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE unlockWindow Procedure 
@@ -3380,6 +3464,12 @@ PROCEDURE updateFields :
   lSaveDataFilters = LOGICAL(getRegistry ("DataDigger", "SaveDataFilters")).
 
   FOR EACH bField:
+
+    /* Due to a bug the nr of decimals may be set on non-decimal fields
+     * See PKB P185263 (article 18087) for more information
+     * http://knowledgebase.progress.com/articles/Article/P185263
+     */
+    IF bField.cDataType <> 'DECIMAL' THEN bField.iDecimals = ?.
 
     /* Was this field selected? */
     bField.lShow = CAN-DO(cSelectedFields, bField.cFullName).
@@ -3727,19 +3817,26 @@ FUNCTION getDatabaseList RETURNS CHARACTER:
   22-01-2009 pti Created
   ----------------------------------------------------------------------*/
   
-  DEFINE VARIABLE cDatabaseList AS CHARACTER   NO-UNDO.
-
-  DEFINE VARIABLE iCount AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cDatabaseList  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cSchemaHolders AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE iCount         AS INTEGER     NO-UNDO.
 
   {&timerStart}
   
-  /* Special options */
-  do iCount = 1 to num-dbs:
-    cDatabaseList = cDatabaseList + ',' + ldbname(iCount).
+  /* Make a list of schema holders */
+  DO iCount = 1 TO NUM-DBS:
+    IF DBTYPE(iCount) <> 'PROGRESS' THEN cSchemaHolders = cSchemaHolders + ',' + SDBNAME(iCount).
+  END.
+
+  /* And a list of all databases. If a database is in the list of schemaholders
+   * we don't want to see it here. */
+  DO iCount = 1 to NUM-DBS:
+    IF LOOKUP(LDBNAME(iCount),cSchemaHolders) > 0 THEN NEXT.
+    cDatabaseList = cDatabaseList + ',' + LDBNAME(iCount).
   END.
 
   {&timerStop}
-  return trim(cDatabaseList,',').
+  RETURN TRIM(cDatabaseList,',').
 
 END FUNCTION. /* getDatabaseList */
 
@@ -3993,17 +4090,17 @@ FUNCTION getKeyList RETURNS CHARACTER
   DEFINE VARIABLE L-RETURNVALUE AS INTEGER NO-UNDO. 
   DEFINE VARIABLE L-SHIFTLIST AS CHARACTER NO-UNDO. 
   
-  set-size(L-KBSTATE) = 256. 
+  SET-SIZE(L-KBSTATE) = 256.
   
   /* Get the current state of the keyboard */ 
   RUN GetKeyboardState(GET-POINTER-VALUE(L-KBSTATE), OUTPUT L-RETURNVALUE). 
   
   IF GET-BITS(GET-BYTE(L-KBSTATE, 1 + 16), 8, 1) = 1 
-  THEN L-SHIFTLIST = L-SHIFTLIST + ",SHIFT". 
+  THEN L-SHIFTLIST = TRIM(L-SHIFTLIST + ",SHIFT",",").
   IF GET-BITS(GET-BYTE(L-KBSTATE, 1 + 17), 8, 1) = 1 
-  THEN L-SHIFTLIST = L-SHIFTLIST + ",CTRL". 
+  THEN L-SHIFTLIST = TRIM(L-SHIFTLIST + ",CTRL",",").
   IF GET-BITS(GET-BYTE(L-KBSTATE, 1 + 18), 8, 1) = 1 
-  THEN L-SHIFTLIST = L-SHIFTLIST + ",ALT". 
+  THEN L-SHIFTLIST = TRIM(L-SHIFTLIST + ",ALT",",").
   
   SET-SIZE(L-KBSTATE) = 0. 
   
@@ -4421,17 +4518,9 @@ FUNCTION getTableList RETURNS CHARACTER
   , INPUT  pcTableFilter    AS CHARACTER
   ) :
 
-/*------------------------------------------------------------------------
-  Name         : getTableList
-  Description  : Get a list of all tables in the current database that 
-                 match a certain filter. 
-  ----------------------------------------------------------------------
-  16-01-2009 pti Created
-  23-01-2009 pti added filter
-  08-10-2009 pti added input parm plShowHiddenTables
-  17-12-2009 pti added input parm pcSortField / plAscending
-  ----------------------------------------------------------------------*/
-  
+/* Get a list of all tables in the current 
+ * database that match a certain filter 
+ */
   DEFINE VARIABLE cTableList  AS CHARACTER   NO-UNDO.
   DEFINE VARIABLE cQuery      AS CHARACTER   NO-UNDO.
 
@@ -4532,6 +4621,27 @@ FUNCTION getWidgetUnderMouse RETURNS HANDLE
   return ?.
 
 END FUNCTION. /* getWidgetUnderMouse */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-getXmlNodeName) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getXmlNodeName Procedure 
+FUNCTION getXmlNodeName RETURNS CHARACTER
+  ( pcFieldName AS CHARACTER ) :
+  /* Return a name that is safe to use in XML output by
+   * replacing forbidden characters with an underscore
+   */
+
+  pcFieldName = REPLACE(pcFieldName,'%', '_').
+  pcFieldName = REPLACE(pcFieldName,'#', '_').
+
+  RETURN pcFieldName. 
+
+END FUNCTION. /* getXmlNodeName */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

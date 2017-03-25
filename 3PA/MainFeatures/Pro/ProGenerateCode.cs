@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProGenerateCode.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,29 +25,170 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Forms;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
-        #region Update/delete/add function prototype
 
-        private static HashSet<string> _ignoredFiles = new HashSet<string>();
+        #region Factory
+
+        /// <summary>
+        /// Get a new instance of ProGenerateCode (parses the current document in the constructor
+        /// </summary>
+        public static ProGenerateCode Factory {
+            get { return new ProGenerateCode(); }
+        }
+
+        #endregion
+
+        #region Fields
+
+        private HashSet<string> _ignoredFiles = new HashSet<string>();
+
+        private Parser.Parser _parser;
+
+        #endregion
+
+        #region Life and death
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ProGenerateCode() {
+            ParseNow();
+        }
+
+        #endregion
+
+        #region Public
+
+        /// <summary>
+        /// Call this method to insert a new piece of code
+        /// </summary>
+        public void InsertCode<T>() where T : ParsedScopeItem {
+
+            IProCode codeCode;
+            string insertText;
+            string blockDescription;
+
+            // in case of an incorrect document, warn the user
+            var parserErrors = _parser.ParseErrorsInHtml;
+            if (!string.IsNullOrEmpty(parserErrors)) {
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
+                    return;
+            }
+
+            if (typeof(ParsedImplementation) == typeof(T)) {
+                object input = new ProCodeFunction();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
+                    return;
+                codeCode = (IProCode)input;
+
+                codeCode.Name = codeCode.Name.MakeValidVariableName();
+
+                blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
+                insertText = insertText.Replace("{&type}", ((ProCodeFunction)codeCode).Type);
+                insertText = insertText.Replace("{&private}", ((ProCodeFunction)codeCode).IsPrivate ? " PRIVATE" : "");
+            } else if (typeof(ParsedProcedure) == typeof(T)) {
+                object input = new ProCodeProcedure();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
+                    return;
+                codeCode = (IProCode)input;
+
+                blockDescription = @"_PROCEDURE " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
+                insertText = insertText.Replace("{&private}", ((ProCodeProcedure)codeCode).IsPrivate ? " PRIVATE" : "");
+            } else {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(codeCode.Name))
+                return;
+
+            // check if the code already exists
+            if (_parser.ParsedItemsList.Exists(item => item.GetType() == typeof(T) && item.Name.EqualsCi(codeCode.Name))) {
+                UserCommunication.Notify("Sorry, this name is already taken by another existing instance", MessageImg.MsgHighImportance, "Invalid name", "Existing name", 5);
+                return;
+            }
+
+            insertText = insertText.Replace("{&name}", codeCode.Name);
+
+            // reposition caret and insert
+            bool insertBefore;
+            int insertPos = GetCaretPositionForInsertion<T>(codeCode.Name, codeCode.InsertPosition, out insertBefore);
+            if (insertPos < 0) insertPos = Sci.GetPosFromLineColumn(Sci.Line.CurrentLine, 0);
+
+            insertText = FormatInsertion(insertText, blockDescription, insertBefore);
+            int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
+            insertText = insertText.Replace("|||", "");
+
+            Sci.SetSelection(insertPos);
+            Sci.ModifyTextAroundCaret(0, 0, insertText);
+
+            Sci.GoToLine(Sci.LineFromPosition(insertPos));
+            Sci.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
+
+            // in the case of a new function, create the prototype if needed
+            if (typeof(ParsedImplementation) == typeof(T)) {
+                UpdateFunctionPrototypes(true);
+            }
+        }
+
+        public void DeleteCode<T>() where T : ParsedScopeItem {
+
+            // make a list of existing items for this type
+            var existingList = _parser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
+
+            object nameToDelete = new ProCodeDelete { Value = string.Join("|", existingList.Select(arg => arg.Name)) };
+
+            if (string.IsNullOrEmpty(((ProCodeDelete)nameToDelete).Value)) {
+                UserCommunication.Notify("Sorry, there was nothing to do!", MessageImg.MsgInfo, "Delete code", "Nothing to delete!", 5);
+                return;
+            }
+
+            if (UserCommunication.Input(ref nameToDelete, "Please select which piece of code should be deleted", MessageImg.MsgQuestion, "Delete code", "Select the item to delete") != 0)
+                return;
+
+            var delete = (ProCodeDelete)nameToDelete;
+
+            if (string.IsNullOrEmpty(delete.Value))
+                return;
+
+            var toDelete = existingList.FirstOrDefault(item => item.Name.Equals(delete.Value));
+            if (toDelete != null)
+                DeleteCode(toDelete);
+        }
 
         /// <summary>
         /// This method checks if the current document contains function prototypes that are not updated
         /// and correct them if needed
         /// </summary>
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
-        public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
+        public void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
+
             if (_ignoredFiles.Contains(Npp.CurrentFile.Path) || Config.Instance.DisablePrototypeAutoUpdate) {
                 if (silent)
                     return;
                 _ignoredFiles.Remove(Npp.CurrentFile.Path);
             }
 
+            UpdateFunctionPrototypes(silent);
+        }
+
+        #endregion
+
+        #region Update/delete/add function prototype
+
+        /// <summary>
+        /// This method checks if the current document contains function prototypes that are not updated
+        /// and correct them if needed
+        /// </summary>
+        /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
+        private void UpdateFunctionPrototypes(bool silent) {
+            
             List<ParsedImplementation> listOfOutDatedProto;
             List<ParsedImplementation> listOfSoloImplementation;
             List<ParsedPrototype> listOfUselessProto;
@@ -58,7 +196,6 @@ namespace _3PA.MainFeatures.Pro {
             StringBuilder outputMessage = new StringBuilder();
 
             // make sure to wait for the latest parse
-            ParserHandler.WaitForParserEnd();
             var nbLoop = 0;
             var nbNotCreated = 0;
             var nbThingsDone = 0;
@@ -78,7 +215,7 @@ namespace _3PA.MainFeatures.Pro {
                         else
                             nbNotCreated++;
 
-                        ParserHandler.ParseDocumentSync();
+                        ParseNow();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -94,7 +231,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
                             nbThingsDone++;
 
-                        ParserHandler.ParseDocumentSync();
+                        ParseNow();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -108,7 +245,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
                             nbThingsDone++;
 
-                        ParserHandler.ParseDocumentSync();
+                        ParseNow();
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
                         nbLoop++;
                     }
@@ -123,7 +260,7 @@ namespace _3PA.MainFeatures.Pro {
                     if (nbNotCreated == 0)
                         UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
                     else
-                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + ParserHandler.GetLastParseErrorsInHtml(), MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
+                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + _parser.ParseErrorsInHtml, MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
                 }
             } else {
                 outputMessage.Append("<i>");
@@ -148,27 +285,26 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Gets the list of functions/proto of interest
         /// </summary>
-        private static int GetPrototypesLists(out List<ParsedImplementation> listOfOutDatedProto, out List<ParsedImplementation> listOfSoloImplementation, out List<ParsedPrototype> listOfUselessProto) {
-            var parsedList = ParserHandler.ParsedItemsList;
+        private int GetPrototypesLists(out List<ParsedImplementation> listOfOutDatedProto, out List<ParsedImplementation> listOfSoloImplementation, out List<ParsedPrototype> listOfUselessProto) {
 
             // list the outdated proto
-            listOfOutDatedProto = parsedList.Where(item => {
+            listOfOutDatedProto = _parser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && funcItem.HasPrototype && !funcItem.PrototypeUpdated;
-            }).Select(item => (ParsedImplementation) item).ToList();
+            }).Select(item => (ParsedImplementation)item).ToList();
 
             // list the implementation w/o prototypes
-            listOfSoloImplementation = parsedList.Where(item => {
+            listOfSoloImplementation = _parser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && !funcItem.HasPrototype;
-            }).Select(item => (ParsedImplementation) item).ToList();
+            }).Select(item => (ParsedImplementation)item).ToList();
 
             // list the prototypes w/o implementation
-            listOfUselessProto = parsedList.Where(item => {
+            listOfUselessProto = _parser.ParsedItemsList.Where(item => {
                 // it's a prototype with no implementation
                 var proto = item as ParsedPrototype;
-                return proto != null && proto.SimpleForward && !parsedList.Exists(func => func is ParsedImplementation && func.Name.EqualsCi(item.Name));
-            }).Select(item => (ParsedPrototype) item).ToList();
+                return proto != null && proto.SimpleForward && !_parser.ParsedItemsList.Exists(func => func is ParsedImplementation && func.Name.EqualsCi(item.Name));
+            }).Select(item => (ParsedPrototype)item).ToList();
 
             return listOfOutDatedProto.Count + listOfSoloImplementation.Count + listOfUselessProto.Count;
         }
@@ -177,7 +313,7 @@ namespace _3PA.MainFeatures.Pro {
         /// This method checks if the current document contains function prototypes that are not updated
         /// and correct them if needed
         /// </summary>
-        private static bool UpdatePrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
+        private bool UpdatePrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
             var protoStr = Sci.GetTextByRange(function.Position, function.EndPosition);
 
             // replace the end ":" or "." by a " FOWARD."
@@ -189,7 +325,7 @@ namespace _3PA.MainFeatures.Pro {
             return true;
         }
 
-        private static bool AddPrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
+        private bool AddPrototypes(ref StringBuilder outputMessage, ParsedImplementation function) {
             var protoStr = Sci.GetTextByRange(function.Position, function.EndPosition);
 
             // get the best position to insert the prototype
@@ -212,7 +348,7 @@ namespace _3PA.MainFeatures.Pro {
             return false;
         }
 
-        private static bool DeletePrototypes(ref StringBuilder outputMessage, ParsedPrototype function) {
+        private bool DeletePrototypes(ref StringBuilder outputMessage, ParsedPrototype function) {
             DeleteCode(function);
 
             outputMessage.Append("<br> - " + function.Name);
@@ -228,11 +364,10 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
         /// otherwise returns null
         /// </summary>
-        private static ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
-            var parsedList = ParserHandler.ParsedItemsList;
+        private ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
 
             // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
-            var protoPreProcBlock = parsedList.Where(item => {
+            var protoPreProcBlock = _parser.ParsedItemsList.Where(item => {
                 var blockItem = item as ParsedPreProcBlock;
                 if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
                     blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
@@ -241,14 +376,14 @@ namespace _3PA.MainFeatures.Pro {
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
 
             // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
             var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
-            protoPreProcBlock = parsedList.Where(item => {
+            protoPreProcBlock = _parser.ParsedItemsList.Where(item => {
                 var blockItem = item as ParsedPreProcBlock;
                 if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
                     return true;
@@ -256,7 +391,7 @@ namespace _3PA.MainFeatures.Pro {
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
@@ -267,7 +402,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Surround the text to insert with the appbuilder directives if needed
         /// </summary>
-        private static string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
+        private string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
             var eol = Sci.GetEolString;
             if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
                 insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
@@ -278,42 +413,10 @@ namespace _3PA.MainFeatures.Pro {
             return insertText;
         }
 
-        #endregion
-
-        #region Delete existing
-
-        public static void DeleteCode<T>() where T : ParsedScopeItem {
-            // make sure to parse the current document before doing anything
-            ParserHandler.WaitForParserEnd();
-            var parsedList = ParserHandler.ParsedItemsList;
-
-            // make a list of existing items for this type
-            var existingList = parsedList.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
-
-            object nameToDelete = new ProCodeDelete {Value = string.Join("|", existingList.Select(arg => arg.Name))};
-
-            if (string.IsNullOrEmpty(((ProCodeDelete) nameToDelete).Value)) {
-                UserCommunication.Notify("Sorry, there was nothing to do!", MessageImg.MsgInfo, "Delete code", "Nothing to delete!", 5);
-                return;
-            }
-
-            if (UserCommunication.Input(ref nameToDelete, "Please select which piece of code should be deleted", MessageImg.MsgQuestion, "Delete code", "Select the item to delete") != 0)
-                return;
-
-            var delete = (ProCodeDelete) nameToDelete;
-
-            if (string.IsNullOrEmpty(delete.Value))
-                return;
-
-            var toDelete = existingList.FirstOrDefault(item => item.Name.Equals(delete.Value));
-            if (toDelete != null)
-                DeleteCode(toDelete);
-        }
-
         /// <summary>
         /// Delete the given ParsedScopeItem whose name is qualified through proCode.Name
         /// </summary>
-        public static bool DeleteCode<T>(T toDelete) where T : ParsedScopeItem {
+        private void DeleteCode<T>(T toDelete) where T : ParsedScopeItem {
             string preProcBlockType = null;
             if (typeof(ParsedImplementation) == typeof(T)) {
                 preProcBlockType = @"_FUNCTION";
@@ -341,96 +444,14 @@ namespace _3PA.MainFeatures.Pro {
 
             // in the case of a new function, create the prototype if needed
             if (typeof(ParsedImplementation) == typeof(T)) {
-                UpdateFunctionPrototypesIfNeeded(true);
-            }
-
-            return true;
-        }
-
-        #endregion
-
-        #region Insert new
-
-        /// <summary>
-        /// Call this method to insert a new piece of code
-        /// </summary>
-        public static void InsertCode<T>() where T : ParsedScopeItem {
-            IProCode codeCode;
-            string insertText;
-            string blockDescription;
-
-            // make sure to parse the current document before checking anything
-            var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
-            var parsedList = ParserHandler.ParsedItemsList;
-
-            // in case of an incorrect document, warn the user
-            if (!string.IsNullOrEmpty(parserErrors)) {
-                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> {"Continue", "Abort"}) != 0)
-                    return;
-            }
-
-            if (typeof(ParsedImplementation) == typeof(T)) {
-                object input = new ProCodeFunction();
-                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
-                    return;
-                codeCode = (IProCode) input;
-
-                codeCode.Name = codeCode.Name.MakeValidVariableName();
-
-                blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
-                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
-                insertText = insertText.Replace("{&type}", ((ProCodeFunction) codeCode).Type);
-                insertText = insertText.Replace("{&private}", ((ProCodeFunction) codeCode).IsPrivate ? " PRIVATE" : "");
-            } else if (typeof(ParsedProcedure) == typeof(T)) {
-                object input = new ProCodeProcedure();
-                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
-                    return;
-                codeCode = (IProCode) input;
-
-                blockDescription = @"_PROCEDURE " + codeCode.Name + " Procedure";
-                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
-                insertText = insertText.Replace("{&private}", ((ProCodeProcedure) codeCode).IsPrivate ? " PRIVATE" : "");
-            } else {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(codeCode.Name))
-                return;
-
-            // check if the code already exists
-            if (parsedList.Exists(item => item.GetType() == typeof(T) && item.Name.EqualsCi(codeCode.Name))) {
-                UserCommunication.Notify("Sorry, this name is already taken by another existing instance", MessageImg.MsgHighImportance, "Invalid name", "Existing name", 5);
-                return;
-            }
-
-            insertText = insertText.Replace("{&name}", codeCode.Name);
-
-            // reposition caret and insert
-            bool insertBefore;
-            int insertPos = GetCaretPositionForInsertion<T>(codeCode.Name, codeCode.InsertPosition, out insertBefore);
-            if (insertPos < 0) insertPos = Sci.GetPosFromLineColumn(Sci.Line.CurrentLine, 0);
-
-            insertText = FormatInsertion(insertText, blockDescription, insertBefore);
-            int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
-            insertText = insertText.Replace("|||", "");
-
-            Sci.SetSelection(insertPos);
-            Sci.ModifyTextAroundCaret(0, 0, insertText);
-
-            Sci.GoToLine(Sci.LineFromPosition(insertPos));
-            Sci.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
-
-            // in the case of a new function, create the prototype if needed
-            if (typeof(ParsedImplementation) == typeof(T)) {
-                UpdateFunctionPrototypesIfNeeded(true);
+                UpdateFunctionPrototypes(true);
             }
         }
 
         /// <summary>
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
-        private static int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
-            var parsedList = ParserHandler.ParsedItemsList;
+        private int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
 
             insertBefore = false;
 
@@ -450,7 +471,7 @@ namespace _3PA.MainFeatures.Pro {
                 // find the previous/next function implementation with a prototype
                 bool found = false;
                 ParsedImplementation foundImplement = null;
-                foreach (var impl in parsedList.Where(item => item is ParsedImplementation).Cast<ParsedImplementation>()) {
+                foreach (var impl in _parser.ParsedItemsList.Where(item => item is ParsedImplementation).Cast<ParsedImplementation>()) {
                     if (impl != null) {
                         // we didn't match our current function implementation yet
                         if (!found) {
@@ -475,14 +496,14 @@ namespace _3PA.MainFeatures.Pro {
 
                 // now we need its proto
                 if (foundImplement != null) {
-                    refItem = parsedList.FirstOrDefault(fun => {
+                    refItem = _parser.ParsedItemsList.FirstOrDefault(fun => {
                         var proto = fun as ParsedPrototype;
                         return proto != null && proto.Name.Equals(foundImplement.Name) && proto.SimpleForward;
                     }) as T;
                 }
             } else {
                 // list of existing items of the same type
-                var existingList = parsedList.Where(item => item.GetType() == typeof(T)).Select(item => (T) item).ToList();
+                var existingList = _parser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Select(item => (T)item).ToList();
                 if (existingList.Count > 0) {
                     // alphabetical order
                     if (insertPos == ProInsertPosition.AlphabeticalOrder) {
@@ -559,15 +580,15 @@ namespace _3PA.MainFeatures.Pro {
             }
             if (typeof(ParsedPrototype) == typeof(T)) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
-                var preprocessorBlock = parsedList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
+                var preprocessorBlock = _parser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock)item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
                 if (preprocessorBlock != null) {
                     insertBefore = false;
-                    return ((ParsedPreProcBlock) preprocessorBlock).EndBlockPosition;
+                    return ((ParsedPreProcBlock)preprocessorBlock).EndBlockPosition;
                 }
             }
             if (typeof(ParsedProcedure) == typeof(T)) {
                 // new procedure goes before the first function implementation of last
-                var firstFunc = parsedList.FirstOrDefault(item => item is ParsedImplementation) as ParsedImplementation;
+                var firstFunc = _parser.ParsedItemsList.FirstOrDefault(item => item is ParsedImplementation) as ParsedImplementation;
                 if (firstFunc != null) {
                     insertBefore = true;
 
@@ -583,6 +604,13 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             return -1;
+        }
+
+        /// <summary>
+        /// Parse the current document
+        /// </summary>
+        private void ParseNow() {
+            _parser = new Parser.Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
         }
 
         #endregion
@@ -645,151 +673,5 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region Modification tags
-
-        /// <summary>
-        /// Allows the user to surround its selection with custom modification tags
-        /// </summary>
-        public static void SurroundSelectionWithTag() {
-            CommonTagAction(fileInfo => {
-                var output = new StringBuilder();
-
-                Sci.TargetFromSelection();
-                var indent = new String(' ', Sci.GetLine(Sci.LineFromPosition(Sci.TargetStart)).Indentation);
-
-                var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
-                var eol = Sci.GetEolString;
-                output.Append(opener);
-                output.Append(eol);
-                output.Append(indent);
-                output.Append(Sci.SelectedText);
-                output.Append(eol);
-                output.Append(indent);
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
-
-                Sci.TargetFromSelection();
-                Sci.ReplaceTarget(output.ToString());
-
-                Sci.SetSel(Sci.TargetStart + opener.Length + eol.Length);
-            });
-        }
-
-        /// <summary>
-        /// Allows the user to generate a title block at the caret location, using the current file info
-        /// </summary>
-        public static void AddTitleBlockAtCaret() {
-            CommonTagAction(fileInfo => {
-                var output = new StringBuilder();
-                var eol = Sci.GetEolString;
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
-                output.Append(eol);
-
-                // description
-                var regex = new Regex(@"({&de\s*})");
-                var match = regex.Match(Config.Instance.TagTitleBlock2);
-                if (match.Success && !String.IsNullOrEmpty(fileInfo.CorrectionDecription)) {
-                    var matchedStr = match.Groups[1].Value;
-                    foreach (var line in fileInfo.CorrectionDecription.BreakText(matchedStr.Length).Split('\n')) {
-                        output.Append(Config.Instance.TagTitleBlock2.Replace(matchedStr, String.Format("{0,-" + matchedStr.Length + @"}", line)));
-                        output.Append(eol);
-                    }
-                }
-
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
-                output.Append(eol);
-
-                Sci.SetTextByRange(Sci.CurrentPosition, Sci.CurrentPosition, output.ToString());
-                Sci.SetSel(Sci.CurrentPosition + output.Length);
-            });
-        }
-
-        private static void CommonTagAction(Action<FileTagObject> performAction) {
-            var filename = Npp.CurrentFile.FileName;
-            if (FileTag.Contains(filename)) {
-                var fileInfo = FileTag.GetLastFileTag(filename);
-                Sci.BeginUndoAction();
-                performAction(fileInfo);
-                Sci.EndUndoAction();
-            } else {
-                UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
-                Appli.Appli.GoToPage(PageNames.FileInfo);
-            }
-        }
-
-        #endregion
-
-        #region Toggle comment
-
-        /// <summary>
-        /// If no selection, comment the line of the caret
-        /// If selection, comment the selection as a block
-        /// </summary>
-        public static void ToggleComment() {
-            Sci.BeginUndoAction();
-
-            // for each selection (limit selection number)
-            for (var i = 0; i < Sci.Selection.Count; i++) {
-                var selection = Sci.GetSelection(i);
-
-                int startPos;
-                int endPos;
-                bool singleLineComm = false;
-                if (selection.Caret == selection.Anchor) {
-                    // comment line
-                    var thisLine = new Sci.Line(Sci.LineFromPosition(selection.Caret));
-                    startPos = thisLine.IndentationPosition;
-                    endPos = thisLine.EndPosition;
-                    singleLineComm = true;
-                } else {
-                    startPos = selection.Start;
-                    endPos = selection.End;
-                }
-
-                var toggleMode = ToggleCommentOnRange(startPos, endPos);
-                if (toggleMode == 3)
-                    selection.SetPosition(startPos + 3);
-
-                // correct selection...
-                if (!singleLineComm && toggleMode == 2) {
-                    selection.End += 2;
-                }
-            }
-
-            Sci.EndUndoAction();
-        }
-
-        /// <summary>
-        /// Toggle comment on the specified range, returns a value indicating what has been done
-        /// 0: null, 1: toggle off; 2: toggle on, 3: added
-        /// </summary>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        /// <returns></returns>
-        private static int ToggleCommentOnRange(int startPos, int endPos) {
-            // the line is essentially empty
-            if ((endPos - startPos) == 0) {
-                Sci.SetTextByRange(startPos, startPos, "/*  */");
-                return 3;
-            }
-
-            // line is surrounded by /* */
-            if (Sci.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Sci.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
-                if (Sci.GetTextByRange(startPos, endPos).Equals("/*  */")) {
-                    // delete an empty comment
-                    Sci.SetTextByRange(startPos, endPos, String.Empty);
-                } else {
-                    // delete /* */
-                    Sci.SetTextByRange(endPos - 2, endPos, String.Empty);
-                    Sci.SetTextByRange(startPos, startPos + 2, String.Empty);
-                }
-                return 1;
-            }
-
-            Sci.SetTextByRange(endPos, endPos, "*/");
-            Sci.SetTextByRange(startPos, startPos, "/*");
-            return 2;
-        }
-
-        #endregion
     }
 }

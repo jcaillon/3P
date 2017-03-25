@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (PlugDebug.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,56 +40,18 @@ using _3PA._Resource;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
+
     /// <summary>
     /// This class is only for debug/dev purposes, it will not be used in production
     /// </summary>
     internal class PlugDebug {
         #region Debug test
-
-
-
-
+        
         public static void DebugTest1() {
 
-            var list = new List<string>();
-            for (int i = 0; i < 99999; i++) {
-                list.Add("");
-            }
-            int jj = 0;
-
-            List<string> list2;
             MeasureIt(() => {
-                for (int i = 0; i < 9999; i++) {
-                    char? sep;
-                    string outstr;
-                    int pos = 0;
-                    outstr = AutoCompletion.GetWord("db.table.field", ref pos, out sep);
-                    jj++;
-                }
+
             }, "1 : ");
-            
-            MeasureIt(() => {
-                for (int i = 0; i < 9999; i++) {
-                    dodo(() => {
-                        list2 = list.ToList();
-                        jj++;
-                    });
-                }
-
-            }, "2 : ");
-            UserCommunication.Notify(jj.ToString());
-        }
-        private static object _lock = new object();
-
-        private static void dodo(Action yo) {
-            if (Monitor.TryEnter(_lock)) {
-                try {
-                    yo();
-                } finally {
-                    Monitor.Exit(_lock);
-                }
-            }
-            
         }
 
         public static void DebugTest2() {}

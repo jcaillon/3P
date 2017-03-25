@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -164,8 +161,8 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// AUTOCOMPLETION
             /// </summary>
-            [Display(Name = "Show autocompletion on key input",
-                Description = "Automatically show the autocompletion list when you start entering characters",
+            [Display(Name = "Show auto completion on key input",
+                Description = "Automatically show the auto completion list when you start entering characters",
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnKeyInputShowSuggestions = true;
@@ -177,14 +174,20 @@ namespace _3PA.MainFeatures {
             [Range(1, 99)]
             public int AutoCompleteStartShowingListAfterXChar = 1;
 
-            [Display(Name = "Hide autocompletion if empty",
+            [Display(Name = "Hide auto completion if empty",
                 Description = "If the list was displayed automatically and there are no suggestions matching your input,<br>this option will automatically hide the list instead of showing it empty",
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnKeyInputHideIfEmpty = true;
+            
+            [Display(Name = "Show children on separator input",
+                Description = "Choose this option to immediately show the auto completion after a '.' or a ':'<br>Otherwise 3P waits for the set number of characters to show it",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteShowChildrenAfterSeparator = true;
 
             [Display(Name = "Show list in comments and strings",
-                Description = "By default, the autocompletion list is hidden in comments and strings<br>you can still show the completion list manually!",
+                Description = "By default, the auto completion list is hidden in comments and strings<br>you can still show the completion list manually!",
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteShowInCommentsAndStrings = false;
@@ -531,6 +534,13 @@ namespace _3PA.MainFeatures {
 
         #region public fields
 
+        public static string RequiredNppVersion {
+            get { return "v7.3.2"; }
+        }
+
+        /// <summary>
+        /// To update when updating the version of datadigger
+        /// </summary>
         public static string EmbeddedDataDiggerVersion {
             get { return @"v22"; }
         }
@@ -661,7 +671,7 @@ namespace _3PA.MainFeatures {
         public static string FolderDataDigger {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }
-
+        
         // themes
         public static string FileSyntaxThemes {
             get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); }

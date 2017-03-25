@@ -179,11 +179,11 @@ DEFINE BUTTON btnCheckNow
 DEFINE VARIABLE cbUpdateChannel AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
      LABEL "Check" 
      VIEW-AS COMBO-BOX INNER-LINES 5
-     LIST-ITEM-PAIRS "Manually",0,
+     LIST-ITEM-PAIRS "Manually (stable)",0,
                      "Stable versions",1,
                      "Beta versions",2
      DROP-DOWN-LIST
-     SIZE-PIXELS 120 BY 21 NO-UNDO.
+     SIZE-PIXELS 135 BY 21 NO-UNDO.
 
 DEFINE VARIABLE fiCurrentBuild AS CHARACTER FORMAT "X(256)":U 
      LABEL "Your Build" 
@@ -254,10 +254,10 @@ DEFINE FRAME FRAME-U
          TITLE "1" WIDGET-ID 3000.
 
 DEFINE FRAME frUpdate
-     fiCurrentVersion AT Y 23 X 100 COLON-ALIGNED WIDGET-ID 188
      fiCurrentBuild AT Y 23 X 235 COLON-ALIGNED WIDGET-ID 186
-     cbUpdateChannel AT Y 50 X 100 COLON-ALIGNED WIDGET-ID 200
+     fiCurrentVersion AT Y 25 X 85 COLON-ALIGNED WIDGET-ID 188
      btnCheckNow AT Y 50 X 235 WIDGET-ID 180
+     cbUpdateChannel AT Y 52 X 85 COLON-ALIGNED WIDGET-ID 200
      "Check for updates" VIEW-AS TEXT
           SIZE-PIXELS 110 BY 13 AT Y 0 X 15 WIDGET-ID 184
      RECT-19 AT Y 7 X 5 WIDGET-ID 176
@@ -717,21 +717,9 @@ PROCEDURE btnCheckUpgrade :
 /* Check for an upgrade of DataDigger
  */
   DEFINE VARIABLE iChannel   AS INTEGER NO-UNDO.
-  DEFINE VARIABLE lAutoCheck AS LOGICAL NO-UNDO.
   
   iChannel = INTEGER(cbUpdateChannel:SCREEN-VALUE IN FRAME frUpdate).
-  
   RUN checkVersion.p(INPUT iChannel, INPUT TRUE). /* TRUE for manual check */
-
-  IF iChannel = {&CHECK-MANUAL} THEN
-  DO:
-    MESSAGE 'Do you want to enable automatic update checks?' VIEW-AS ALERT-BOX INFO BUTTONS YES-NO UPDATE lAutoCheck.
-    IF lAutoCheck THEN
-    DO:
-      setRegistry('DataDigger:Update','UpdateChannel', '{&CHECK-STABLE}').
-      cbUpdateChannel:SCREEN-VALUE = getRegistry('DataDigger:Update','UpdateChannel').
-    END.
-  END.
 
 END PROCEDURE. /* btnCheckUpgrade */
 
@@ -770,9 +758,9 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   VIEW FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
-  DISPLAY fiCurrentVersion fiCurrentBuild cbUpdateChannel 
+  DISPLAY fiCurrentBuild fiCurrentVersion cbUpdateChannel 
       WITH FRAME frUpdate IN WINDOW C-Win.
-  ENABLE RECT-19 fiCurrentVersion fiCurrentBuild cbUpdateChannel btnCheckNow 
+  ENABLE RECT-19 fiCurrentBuild fiCurrentVersion btnCheckNow cbUpdateChannel 
       WITH FRAME frUpdate IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frUpdate}
   DISPLAY tgAutoExpandQueryEditor 

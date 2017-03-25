@@ -69,12 +69,12 @@ DEFINE STREAM strDump.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS RECT-2 RECT-3 RECT-4 ficFileName ~
-btnChooseDumpFile cbDumpType cbCodePage cbSeparator cbNumericFormat ~
-tbUseCustomizedFormats cbiRecordSelection cbDateFormat cbiFieldSelection ~
-btnDump btnClose tbDumpReadyClose tbDumpReadyExplore tbDumpReadyView ~
+btnChooseDumpFile cbDumpType cbCodePage tbUseCustomizedFormats cbSeparator ~
+cbNumericFormat cbiRecordSelection cbDateFormat cbiFieldSelection btnDump ~
+btnClose tbDumpReadyClose tbDumpReadyExplore tbDumpReadyView ~
 tbDumpReadyClipboard 
 &Scoped-Define DISPLAYED-OBJECTS ficFileName cbDumpType cbCodePage ~
-cbSeparator cbNumericFormat tbUseCustomizedFormats tbExportSchema ~
+tbUseCustomizedFormats cbSeparator cbNumericFormat tbExportSchema ~
 cbiRecordSelection cbDateFormat tbMinimalSchema cbiFieldSelection ~
 ficMessageNow ficMessage tbDumpReadyClose tbDumpReadyExplore ~
 tbDumpReadyView tbDumpReadyClipboard 
@@ -160,17 +160,17 @@ DEFINE VARIABLE cbCodePage AS CHARACTER INITIAL "0"
      LABEL "Code &page" 
      VIEW-AS COMBO-BOX INNER-LINES 5
      SIMPLE
-     SIZE-PIXELS 130 BY 23 TOOLTIP "the code page used for dumping" NO-UNDO.
+     SIZE-PIXELS 150 BY 23 TOOLTIP "the code page used for dumping" NO-UNDO.
 
 DEFINE VARIABLE cbDateFormat AS CHARACTER FORMAT "X(256)":U 
      LABEL "D&ate Format" 
-     VIEW-AS COMBO-BOX INNER-LINES 7
+     VIEW-AS COMBO-BOX INNER-LINES 10
      DROP-DOWN-LIST
-     SIZE-PIXELS 130 BY 21 TOOLTIP "the date format used for the dump" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "the date format used for the dump" NO-UNDO.
 
 DEFINE VARIABLE cbDumpType AS CHARACTER FORMAT "X(32)":U 
      LABEL "&Export as" 
-     VIEW-AS COMBO-BOX INNER-LINES 7
+     VIEW-AS COMBO-BOX INNER-LINES 8
      LIST-ITEM-PAIRS "Comma Separated","CSV",
                      "Excel","XLS",
                      "HTML","HTML",
@@ -179,48 +179,48 @@ DEFINE VARIABLE cbDumpType AS CHARACTER FORMAT "X(32)":U
                      "XML","XML",
                      "4GL code","P"
      DROP-DOWN-LIST
-     SIZE-PIXELS 155 BY 21 TOOLTIP "type of format of the file" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "type of format of the file" NO-UNDO.
 
 DEFINE VARIABLE cbiFieldSelection AS INTEGER FORMAT "9":U INITIAL 0 
      LABEL "&Fields" 
-     VIEW-AS COMBO-BOX INNER-LINES 2
+     VIEW-AS COMBO-BOX INNER-LINES 3
      LIST-ITEM-PAIRS "All",1,
                      "Selected",2
      DROP-DOWN-LIST
-     SIZE-PIXELS 155 BY 21 TOOLTIP "the fieldset that will be exported" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "the fieldset that will be exported" NO-UNDO.
 
 DEFINE VARIABLE cbiRecordSelection AS INTEGER FORMAT "9":U INITIAL 0 
      LABEL "&Records" 
-     VIEW-AS COMBO-BOX INNER-LINES 3
+     VIEW-AS COMBO-BOX INNER-LINES 4
      LIST-ITEM-PAIRS "Table",1,
                      "Browse",2,
                      "Selection",3
      DROP-DOWN-LIST
-     SIZE-PIXELS 155 BY 21 TOOLTIP "the recordset that will be exported" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "the recordset that will be exported" NO-UNDO.
 
 DEFINE VARIABLE cbNumericFormat AS CHARACTER FORMAT "X(256)":U INITIAL "0" 
      LABEL "&Numeric Format" 
-     VIEW-AS COMBO-BOX INNER-LINES 5
+     VIEW-AS COMBO-BOX INNER-LINES 6
      DROP-DOWN-LIST
-     SIZE-PIXELS 130 BY 21 TOOLTIP "the numeric format used for dumping" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "the numeric format used for dumping" NO-UNDO.
 
 DEFINE VARIABLE cbSeparator AS INTEGER FORMAT "9":U INITIAL 1 
-     LABEL "Field &Separator" 
-     VIEW-AS COMBO-BOX INNER-LINES 3
+     LABEL "&Separator" 
+     VIEW-AS COMBO-BOX INNER-LINES 4
      LIST-ITEM-PAIRS "Comma",1,
                      "Pipe",2,
                      "Semicolon",3
      DROP-DOWN-LIST
-     SIZE-PIXELS 155 BY 21 TOOLTIP "character used to separate fields in a record" NO-UNDO.
+     SIZE-PIXELS 150 BY 21 TOOLTIP "character used to separate fields in a record" NO-UNDO.
 
 DEFINE VARIABLE ficFileName AS CHARACTER FORMAT "X(256)":U 
      LABEL "&Dumpfile" 
      VIEW-AS FILL-IN NATIVE 
-     SIZE-PIXELS 580 BY 21 TOOLTIP "the name and path of the resulting dumpfile" NO-UNDO.
+     SIZE-PIXELS 570 BY 21 TOOLTIP "the name and path of the resulting dumpfile" NO-UNDO.
 
 DEFINE VARIABLE ficMessage AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
-     SIZE-PIXELS 640 BY 22 NO-UNDO.
+     SIZE-PIXELS 735 BY 22 NO-UNDO.
 
 DEFINE VARIABLE ficMessageNow AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
@@ -228,50 +228,50 @@ DEFINE VARIABLE ficMessageNow AS CHARACTER FORMAT "X(256)":U
 
 DEFINE RECTANGLE RECT-2
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 710 BY 145.
+     SIZE-PIXELS 795 BY 145.
 
 DEFINE RECTANGLE RECT-3
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 710 BY 65.
+     SIZE-PIXELS 800 BY 65.
 
 DEFINE RECTANGLE RECT-4
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE-PIXELS 493 BY 40.
+     SIZE-PIXELS 580 BY 40.
 
 DEFINE VARIABLE tbDumpReadyClipboard AS LOGICAL INITIAL no 
      LABEL "Data to Clip&board" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 112 BY 17 NO-UNDO.
+     SIZE-PIXELS 137 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tbDumpReadyClose AS LOGICAL INITIAL no 
-     LABEL "C&lose this window" 
+     LABEL "C&lose window" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 123 BY 17 NO-UNDO.
+     SIZE-PIXELS 115 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tbDumpReadyExplore AS LOGICAL INITIAL no 
-     LABEL "E&xplore the dump dir" 
+     LABEL "E&xplore dump dir" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 127 BY 17 NO-UNDO.
+     SIZE-PIXELS 121 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tbDumpReadyView AS LOGICAL INITIAL no 
-     LABEL "&View the dump file" 
+     LABEL "&View dump file" 
      VIEW-AS TOGGLE-BOX
      SIZE-PIXELS 113 BY 17 NO-UNDO.
 
 DEFINE VARIABLE tbExportSchema AS LOGICAL INITIAL no 
      LABEL "Export &XML schema" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 185 BY 17 TOOLTIP "also export the schema to the XML file" NO-UNDO.
+     SIZE-PIXELS 205 BY 17 TOOLTIP "also export the schema to the XML file" NO-UNDO.
 
 DEFINE VARIABLE tbMinimalSchema AS LOGICAL INITIAL no 
      LABEL "&Minimal Schema" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 180 BY 17 TOOLTIP "use a minimal schema export" NO-UNDO.
+     SIZE-PIXELS 205 BY 17 TOOLTIP "use a minimal schema export" NO-UNDO.
 
 DEFINE VARIABLE tbUseCustomizedFormats AS LOGICAL INITIAL no 
      LABEL "&Use Customized Field Formats" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 180 BY 17 TOOLTIP "export with the customized field formats instead of dictionary formats" NO-UNDO.
+     SIZE-PIXELS 205 BY 17 TOOLTIP "export with the customized field formats instead of dictionary formats" NO-UNDO.
 
 DEFINE BUTTON btAbort 
      LABEL "Abort" 
@@ -294,39 +294,39 @@ DEFINE RECTANGLE rcBorder
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     ficFileName AT Y 15 X 85 COLON-ALIGNED WIDGET-ID 2
-     btnChooseDumpFile AT Y 15 X 680 WIDGET-ID 4
-     cbDumpType AT Y 45 X 85 COLON-ALIGNED WIDGET-ID 6
-     cbCodePage AT Y 45 X 355 COLON-ALIGNED WIDGET-ID 54
-     cbSeparator AT Y 70 X 85 COLON-ALIGNED WIDGET-ID 64
-     cbNumericFormat AT Y 70 X 355 COLON-ALIGNED WIDGET-ID 48
-     tbUseCustomizedFormats AT Y 70 X 510 WIDGET-ID 52
-     tbExportSchema AT Y 85 X 510 WIDGET-ID 20
-     cbiRecordSelection AT Y 95 X 85 COLON-ALIGNED WIDGET-ID 8
-     cbDateFormat AT Y 95 X 355 COLON-ALIGNED WIDGET-ID 50
-     tbMinimalSchema AT Y 100 X 510 WIDGET-ID 22
-     cbiFieldSelection AT Y 120 X 85 COLON-ALIGNED WIDGET-ID 30
+     ficFileName AT Y 15 X 97 COLON-ALIGNED WIDGET-ID 2
+     btnChooseDumpFile AT Y 15 X 682 WIDGET-ID 4
+     cbDumpType AT Y 45 X 97 COLON-ALIGNED WIDGET-ID 6
+     cbCodePage AT Y 45 X 384 COLON-ALIGNED WIDGET-ID 54
+     tbUseCustomizedFormats AT Y 66 X 576 WIDGET-ID 52
+     cbSeparator AT Y 70 X 97 COLON-ALIGNED WIDGET-ID 64
+     cbNumericFormat AT Y 70 X 384 COLON-ALIGNED WIDGET-ID 48
+     tbExportSchema AT Y 85 X 576 WIDGET-ID 20
+     cbiRecordSelection AT Y 95 X 97 COLON-ALIGNED WIDGET-ID 8
+     cbDateFormat AT Y 95 X 384 COLON-ALIGNED WIDGET-ID 50
+     tbMinimalSchema AT Y 104 X 576 WIDGET-ID 22
+     cbiFieldSelection AT Y 120 X 97 COLON-ALIGNED WIDGET-ID 30
      ficMessageNow AT Y 184 X 10 NO-LABEL WIDGET-ID 18
+     btnViewLastDump AT Y 200 X 750 WIDGET-ID 28
+     btnOpenLastDumpDir AT Y 200 X 773 WIDGET-ID 32
      ficMessage AT Y 203 X 10 NO-LABEL WIDGET-ID 16
-     btnViewLastDump AT Y 203 X 655 WIDGET-ID 28
-     btnOpenLastDumpDir AT Y 203 X 678 WIDGET-ID 32
-     btnDump AT Y 265 X 560 WIDGET-ID 62
-     btnClose AT Y 265 X 640 WIDGET-ID 60
+     btnDump AT Y 265 X 649 WIDGET-ID 62
+     btnClose AT Y 265 X 729 WIDGET-ID 60
      tbDumpReadyClose AT Y 270 X 15 WIDGET-ID 36
-     tbDumpReadyExplore AT Y 270 X 139 WIDGET-ID 38
-     tbDumpReadyView AT Y 270 X 269 WIDGET-ID 40
-     tbDumpReadyClipboard AT Y 270 X 383 WIDGET-ID 56
+     tbDumpReadyExplore AT Y 270 X 145 WIDGET-ID 38
+     tbDumpReadyView AT Y 270 X 282 WIDGET-ID 40
+     tbDumpReadyClipboard AT Y 270 X 406 WIDGET-ID 56
      "Last dump" VIEW-AS TEXT
-          SIZE-PIXELS 75 BY 13 AT Y 163 X 10 WIDGET-ID 26
+          SIZE-PIXELS 87 BY 13 AT Y 163 X 13 WIDGET-ID 26
      "After the dump ..." VIEW-AS TEXT
-          SIZE-PIXELS 95 BY 13 AT Y 248 X 10 WIDGET-ID 44
+          SIZE-PIXELS 103 BY 13 AT Y 248 X 12 WIDGET-ID 44
      RECT-2 AT Y 5 X 10 WIDGET-ID 14
      RECT-3 AT Y 169 X 5 WIDGET-ID 24
      RECT-4 AT Y 254 X 5 WIDGET-ID 34
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT X 0 Y 0
-         SIZE-PIXELS 720 BY 301
+         SIZE-PIXELS 810 BY 301
          DEFAULT-BUTTON btnDump WIDGET-ID 100.
 
 DEFINE FRAME infoFrame
@@ -358,7 +358,7 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Save as"
          HEIGHT-P           = 299
-         WIDTH-P            = 724
+         WIDTH-P            = 810
          MAX-HEIGHT-P       = 608
          MAX-WIDTH-P        = 958
          VIRTUAL-HEIGHT-P   = 608
@@ -607,7 +607,7 @@ END.
 
 &Scoped-define SELF-NAME cbSeparator
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL cbSeparator wDump
-ON VALUE-CHANGED OF cbSeparator IN FRAME DEFAULT-FRAME /* Field Separator */
+ON VALUE-CHANGED OF cbSeparator IN FRAME DEFAULT-FRAME /* Separator */
 DO:
   DO WITH FRAME {&FRAME-NAME}:
     ASSIGN cbSeparator.
@@ -632,7 +632,7 @@ END.
 
 &Scoped-define SELF-NAME tbDumpReadyClose
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tbDumpReadyClose wDump
-ON VALUE-CHANGED OF tbDumpReadyClose IN FRAME DEFAULT-FRAME /* Close this window */
+ON VALUE-CHANGED OF tbDumpReadyClose IN FRAME DEFAULT-FRAME /* Close window */
 , tbDumpReadyExplore, tbDumpReadyView, tbDumpReadyClipboard
 DO:
   DEFINE VARIABLE cDumpReadyAction AS CHARACTER   NO-UNDO.
@@ -1429,7 +1429,7 @@ PROCEDURE DumpData4GL :
     IF (ETIME - iTimeStarted) > 1000 THEN
     DO:
       iTimeStarted = ETIME.
-      RUN showProgressBar("Dumping records, please wait", iNumRecords / piNumRecords * 100).
+      RUN showProgressBar("Dumping, please wait", iNumRecords / piNumRecords * 100).
       PROCESS EVENTS.
       IF glAborted THEN LEAVE pumpDataLoop. 
     END.
@@ -2170,6 +2170,9 @@ PROCEDURE DumpDataXml :
       lMinSchema      = tbMinimalSchema:checked
       .
   
+    /* Fix XML Node Names for fields in the tt */
+    RUN setXmlNodeNames(INPUT pihTempTable:DEFAULT-BUFFER-HANDLE).
+
     pihTempTable:WRITE-XML
       ( cTargetType
       , cFile
@@ -2199,14 +2202,14 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY ficFileName cbDumpType cbCodePage cbSeparator cbNumericFormat 
-          tbUseCustomizedFormats tbExportSchema cbiRecordSelection cbDateFormat 
+  DISPLAY ficFileName cbDumpType cbCodePage tbUseCustomizedFormats cbSeparator 
+          cbNumericFormat tbExportSchema cbiRecordSelection cbDateFormat 
           tbMinimalSchema cbiFieldSelection ficMessageNow ficMessage 
           tbDumpReadyClose tbDumpReadyExplore tbDumpReadyView 
           tbDumpReadyClipboard 
       WITH FRAME DEFAULT-FRAME IN WINDOW wDump.
   ENABLE RECT-2 RECT-3 RECT-4 ficFileName btnChooseDumpFile cbDumpType 
-         cbCodePage cbSeparator cbNumericFormat tbUseCustomizedFormats 
+         cbCodePage tbUseCustomizedFormats cbSeparator cbNumericFormat 
          cbiRecordSelection cbDateFormat cbiFieldSelection btnDump btnClose 
          tbDumpReadyClose tbDumpReadyExplore tbDumpReadyView 
          tbDumpReadyClipboard 
@@ -2244,6 +2247,15 @@ PROCEDURE initializeObject :
     FRAME {&FRAME-NAME}:FONT = getFont('Default').
     FRAME infoFrame:FONT = getFont('Default').
 
+    RUN setLabelPosition(ficFileName:HANDLE).
+    RUN setLabelPosition(cbDumpType:HANDLE).
+    RUN setLabelPosition(cbSeparator:HANDLE).
+    RUN setLabelPosition(cbiRecordSelection:HANDLE).
+    RUN setLabelPosition(cbiFieldSelection:HANDLE).
+    RUN setLabelPosition(cbCodePage:HANDLE).
+    RUN setLabelPosition(cbNumericFormat:HANDLE).
+    RUN setLabelPosition(cbDateFormat:HANDLE).
+                                          
     btnViewLastDump:LOAD-IMAGE(getImagePath('View.gif')).
     btnOpenLastDumpDir:LOAD-IMAGE(getImagePath('OpenFolder.gif')).
 

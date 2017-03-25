@@ -181,7 +181,7 @@ DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U
 DEFINE VARIABLE tgWriteTrigger AS LOGICAL INITIAL yes 
      LABEL "Use &write trigger" 
      VIEW-AS TOGGLE-BOX
-     SIZE-PIXELS 120 BY 17 TOOLTIP "Enable write triggers or not" NO-UNDO.
+     SIZE-PIXELS 136 BY 17 TOOLTIP "Enable write triggers or not" NO-UNDO.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -212,11 +212,11 @@ DEFINE BROWSE brRecord
 
 DEFINE FRAME frMain
      brRecord AT Y 25 X 0 WIDGET-ID 200
-     fiNumRecords AT Y 425 X 95 COLON-ALIGNED WIDGET-ID 10
+     fiNumRecords AT Y 425 X 116 COLON-ALIGNED WIDGET-ID 10
      btnOk AT Y 425 X 505 WIDGET-ID 6
      btnDecrease AT Y 0 X 210 WIDGET-ID 26
      btnClose AT Y 425 X 585 WIDGET-ID 4
-     tgWriteTrigger AT Y 427 X 159 WIDGET-ID 16
+     tgWriteTrigger AT Y 427 X 183 WIDGET-ID 16
      btnIncrease AT Y 0 X 180 WIDGET-ID 24
      btnDatePicker AT Y 0 X 240 WIDGET-ID 34
      btnEditor AT Y 0 X 0 WIDGET-ID 36
@@ -1328,6 +1328,7 @@ PROCEDURE initializeObject :
   FRAME {&FRAME-NAME}:FONT = iDefaultFont.
   BROWSE brRecord:FONT = iDefaultFont.
   BROWSE brRecord:ROW-HEIGHT-PIXELS = font-table:GET-TEXT-HEIGHT-PIXELS(iDefaultFont).
+  RUN setLabelPosition(fiNumRecords:HANDLE).
 
   /* This program is called for both ADD and EDIT */
   lNewRecord = picMode = 'add'.
@@ -1456,9 +1457,6 @@ PROCEDURE initializeObject :
   APPLY 'window-resized' TO wEdit.
 
   /* Open the browse */
-  /*
-  run reopenFieldBrowse('iOrder',yes).
-  */
   {&OPEN-QUERY-brRecord}
    
   /* Restore sort */

@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Extensions.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -378,17 +375,32 @@ namespace _3PA.Lib {
         /// Must be STRICTLY superior
         /// </summary>
         public static bool IsHigherVersionThan(this string localVersion, string distantVersion) {
-            var splitLocal = (localVersion.StartsWith("v") ? localVersion.Remove(0, 1) : localVersion).Split('.');
-            var splitDistant = (distantVersion.StartsWith("v") ? distantVersion.Remove(0, 1) : distantVersion).Split('.');
+            return CompareVersions(localVersion, distantVersion, false);
+        }
+
+        /// <summary>
+        /// Compares two version string "1.0.0.0".IsHigherVersionThan("0.9") returns true
+        /// Must be STRICTLY superior
+        /// </summary>
+        public static bool IsHigherOrEqualVersionThan(this string localVersion, string distantVersion) {
+            return CompareVersions(localVersion, distantVersion, true);
+        }
+
+        private static bool CompareVersions(this string localVersion, string distantVersion, bool trueIfEqual) {
             try {
+                var splitLocal = localVersion.TrimStart('v').Split('.').Select(s => int.Parse(s.Trim())).ToList();
+                var splitDistant = distantVersion.TrimStart('v').Split('.').Select(s => int.Parse(s.Trim())).ToList();
                 var i = 0;
-                while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
-                    if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
+                while (i <= (splitLocal.Count - 1) && i <= (splitDistant.Count - 1)) {
+                    if (splitLocal[i] > splitDistant[i])
                         return true;
-                    if (int.Parse(splitLocal[i]) < int.Parse(splitDistant[i]))
+                    if (splitLocal[i] < splitDistant[i])
                         return false;
                     i++;
                 }
+                if (splitLocal.Sum() == splitDistant.Sum() && !trueIfEqual)
+                    return false;
+                return true;
             } catch (Exception) {
                 // would happen if the input strings are incorrect
             }

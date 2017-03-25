@@ -1,5 +1,4 @@
 #region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Plug.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -150,10 +147,10 @@ namespace _3PA {
                     }
                 }
 
-                // check Npp version, 3P requires version 6.8 or higher
-                if (!string.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherVersionThan("7.2")) {
+                // check if npp version is meeting current recommended version
+                if (!string.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherOrEqualVersionThan(Config.RequiredNppVersion)) {
                     if (!Config.Instance.NppOutdatedVersion) {
-                        UserCommunication.Notify("Dear user,<br><br>Your version of Notepad++ (" + Npp.SoftwareVersion + ") is outdated.<br>3P releases are always tested with the most updated major version of Notepad++.<br>Using an outdated version, you might encounter bugs that would not occur otherwise, <b>there are known issues with inferior versions</b>.<br><br>Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+                        UserCommunication.Notify("This version of 3P has been developed for Notepad++ " + Config.RequiredNppVersion + ", your version (" + Npp.SoftwareVersion + ") is outdated.<br><br>Using an outdated version, you might encounter bugs that would not occur otherwise.<br>Try to update your version of Notepad++ as soon as possible, or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the latest version of Notepad++ here</a>", MessageImg.MsgHighImportance, "Outdated version", "3P requirements are not met");
                         Config.Instance.NppOutdatedVersion = true;
                     }
                 } else
@@ -704,14 +701,15 @@ namespace _3PA {
             // for debug purposes, check if the document can be parsed
             if (Config.IsDevelopper) {
                 Task.Factory.StartNew(() => {
-                    var parserErrors = ParserHandler.GetLastParseErrorsInHtml();
+                    var parser = new Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
+                    var parserErrors = parser.ParseErrorsInHtml;
                     if (!string.IsNullOrEmpty(parserErrors))
                         UserCommunication.Notify("The parser found errors on this file:<br>" + parserErrors, MessageImg.MsgInfo, "Parser message", "Errors found", 3);
                 });
             }
 
             // update function prototypes
-            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+            ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion

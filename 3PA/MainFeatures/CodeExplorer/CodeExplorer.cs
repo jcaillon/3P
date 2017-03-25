@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorer.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System.Collections.Generic;
 using System.Linq;
 using YamuiFramework.Controls.YamuiList;
@@ -121,7 +118,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Form.SafeInvoke(form => form.UpdateTreeData(UpdateTreeData(_initialList)));
         }
 
-        public void OnParseEndParserItems(List<ParserError> arg1, Dictionary<int, LineInfo> lineInfo, List<ParsedItem> arg3) {
+        public void OnParseEndParserItems(List<ParserError> parserErrors, Dictionary<int, LineInfo> lineInfo, List<ParsedItem> parsedItems) {
             int curLine = Sci.Line.CurrentLine;
             UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
         }

@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DocumentLines.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -42,6 +39,7 @@ namespace _3PA.NppCore {
     /// on a 200Mo document sounds good enough to me...
     /// </remarks>
     internal class DocumentLines {
+
         #region Fields
 
         /// <summary>
@@ -53,7 +51,7 @@ namespace _3PA.NppCore {
         private GapBuffer<int> _linesList;
 
         private Encoding _lastEncoding;
-        private bool _oneByteCharEncoding;
+        private bool _singleByteCharEncoding;
 
         /// <summary>
         /// When we insert/delete 1 or x char in a given line, we don't want to immediately update the 
@@ -83,7 +81,7 @@ namespace _3PA.NppCore {
             _linesList = new GapBuffer<int> {0, 0};
             _holeLine = 0;
             _holeLenght = 0;
-            _oneByteCharEncoding = false;
+            _singleByteCharEncoding = false;
         }
 
         #endregion
@@ -135,11 +133,11 @@ namespace _3PA.NppCore {
         /// </summary>
         public void OnScnModified(SCNotification scn, bool isInsertion) {
             _lastEncoding = Sci.Encoding;
-            //_oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
-            _oneByteCharEncoding = false; // for 1.7.4
+            _singleByteCharEncoding = _lastEncoding.IsSingleByte;
+            _singleByteCharEncoding = false; // for 1.7.4
 
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return;
 
             if (isInsertion) {
@@ -251,7 +249,7 @@ namespace _3PA.NppCore {
         public int Count {
             get {
                 // bypass the hard work for simple encoding
-                if (_oneByteCharEncoding)
+                if (_singleByteCharEncoding)
                     return SciGetLineCount();
 
                 return _linesList.Count - 1;
@@ -264,7 +262,7 @@ namespace _3PA.NppCore {
         internal int TextLength {
             get {
                 // bypass the hard work for simple encoding
-                if (_oneByteCharEncoding)
+                if (_singleByteCharEncoding)
                     return SciGetLength();
 
                 // text lenght is the start pos of the last "phantom" line
@@ -281,7 +279,7 @@ namespace _3PA.NppCore {
                 return 0;
 
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return SciPositionFromLine(index);
 
             try {
@@ -293,7 +291,7 @@ namespace _3PA.NppCore {
                         index = index.Clamp(0, _linesList.Count - 1);
                     }
                     Reset();
-                    if (_oneByteCharEncoding)
+                    if (_singleByteCharEncoding)
                         return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
@@ -310,7 +308,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public int LineCharLength(int index) {
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return SciLineLength(index);
 
             return CharPositionFromLine(index + 1) - CharPositionFromLine(index);
@@ -321,7 +319,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public int LineFromCharPosition(int pos) {
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return SciLineFromPosition(pos);
 
             // Dichotomic algo to find the line containing the char pos
@@ -345,7 +343,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public int CharToBytePosition(int pos) {
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return pos;
 
             // nearest line start
@@ -371,7 +369,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public int ByteToCharPosition(int pos) {
             // bypass the hard work for simple encoding
-            if (_oneByteCharEncoding)
+            if (_singleByteCharEncoding)
                 return pos;
 
             var line = SciLineFromPosition(pos);

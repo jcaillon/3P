@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AppliMenu.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -204,13 +201,13 @@ namespace _3PA.MainFeatures {
             #region Generate code
 
             _generateCodeMenuList = new List<MenuItem> {
-                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, item => ProGenerateCode.InsertCode<ParsedProcedure>(), "Insert_new_procedure", "Alt+P"),
-                new MenuItem(this, "Insert new function", ImageResources.Function, item => ProGenerateCode.InsertCode<ParsedImplementation>(), "Insert_new_function", "Alt+F"),
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, item => ProGenerateCode.Factory.InsertCode<ParsedProcedure>(), "Insert_new_procedure", "Alt+P"),
+                new MenuItem(this, "Insert new function", ImageResources.Function, item => ProGenerateCode.Factory.InsertCode<ParsedImplementation>(), "Insert_new_function", "Alt+F"),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, item => ProGenerateCode.DeleteCode<ParsedProcedure>(), "Delete_procedure", ""),
-                new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, item => ProGenerateCode.DeleteCode<ParsedImplementation>(), "Delete_function", ""),
+                new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, item => ProGenerateCode.Factory.DeleteCode<ParsedProcedure>(), "Delete_procedure", ""),
+                new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, item => ProGenerateCode.Factory.DeleteCode<ParsedImplementation>(), "Delete_function", ""),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Synchronize function prototypes", ImageResources.Synchronize, item => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
+                new MenuItem(this, "Synchronize function prototypes", ImageResources.Synchronize, item => ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
             };
 
             #endregion
@@ -218,7 +215,7 @@ namespace _3PA.MainFeatures {
             #region Edit code
 
             _editCodeList = new List<MenuItem> {
-                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProGenerateCode.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
+                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProMisc.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
                 new MenuItem(this, "Correct document indentation", ImageResources.FormatCode, item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I")
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
             };
@@ -229,8 +226,8 @@ namespace _3PA.MainFeatures {
 
             _miscMenuList = new List<MenuItem> {
                 new MenuItem(this, "Edit current file info", ImageResources.FileInfo, item => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
-                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, item => ProGenerateCode.AddTitleBlockAtCaret(), "Insert_title_block", "Ctrl+Alt+M"),
-                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => ProGenerateCode.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M")
+                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, item => FileTag.AddTitleBlockAtCaret(), "Insert_title_block", "Ctrl+Alt+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => FileTag.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M")
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
             };
 

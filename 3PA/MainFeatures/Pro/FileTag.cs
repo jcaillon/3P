@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileTag.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +24,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
+using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class FileTag {
@@ -176,6 +175,79 @@ namespace _3PA.MainFeatures.Pro {
                 }
             }
             return output;
+        }
+        
+        /// <summary>
+        /// Allows the user to surround its selection with custom modification tags
+        /// </summary>
+        public static void SurroundSelectionWithTag() {
+            CommonTagAction(fileInfo => {
+                var output = new StringBuilder();
+
+                Sci.TargetFromSelection();
+                var indent = new String(' ', Sci.GetLine(Sci.LineFromPosition(Sci.TargetStart)).Indentation);
+
+                var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
+                var eol = Sci.GetEolString;
+                output.Append(opener);
+                output.Append(eol);
+                output.Append(indent);
+                output.Append(Sci.SelectedText);
+                output.Append(eol);
+                output.Append(indent);
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
+
+                Sci.TargetFromSelection();
+                Sci.ReplaceTarget(output.ToString());
+
+                Sci.SetSel(Sci.TargetStart + opener.Length + eol.Length);
+            });
+        }
+
+        /// <summary>
+        /// Allows the user to generate a title block at the caret location, using the current file info
+        /// </summary>
+        public static void AddTitleBlockAtCaret() {
+            CommonTagAction(fileInfo => {
+                var output = new StringBuilder();
+                var eol = Sci.GetEolString;
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
+                output.Append(eol);
+
+                // description
+                var regex = new Regex(@"({&de\s*})");
+                var match = regex.Match(Config.Instance.TagTitleBlock2);
+                if (match.Success && !String.IsNullOrEmpty(fileInfo.CorrectionDecription)) {
+                    var matchedStr = match.Groups[1].Value;
+                    foreach (var line in fileInfo.CorrectionDecription.BreakText(matchedStr.Length).Split('\n')) {
+                        output.Append(Config.Instance.TagTitleBlock2.Replace(matchedStr, String.Format("{0,-" + matchedStr.Length + @"}", line)));
+                        output.Append(eol);
+                    }
+                }
+
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
+                output.Append(eol);
+
+                Sci.SetTextByRange(Sci.CurrentPosition, Sci.CurrentPosition, output.ToString());
+                Sci.SetSel(Sci.CurrentPosition + output.Length);
+            });
+        }
+
+        #endregion
+
+        #region Private
+
+        private static void CommonTagAction(Action<FileTagObject> performAction) {
+            var filename = Npp.CurrentFile.FileName;
+            if (Contains(filename)) {
+                var fileInfo = GetLastFileTag(filename);
+                Sci.BeginUndoAction();
+                performAction(fileInfo);
+                Sci.EndUndoAction();
+            } else {
+                UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
+                Appli.Appli.GoToPage(PageNames.FileInfo);
+            }
         }
 
         #endregion

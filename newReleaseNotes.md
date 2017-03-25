@@ -4,7 +4,9 @@ Config.IsDevelopper in DocumentLines!
 
 **Improvements :**
 
-- Updated [DataDigger](https://datadigger.wordpress.com/2017/02/20/20170220/) to version 22, thanks [Patrick](https://github.com/patrickTingen/DataDigger)!
+- New options for the auto completion : 
+  - you can now choose to immediately show the auto completion after a `.` or `:` (this is true currently and by default)
+- Updated [DataDigger](https://datadigger.wordpress.com/2017/02/20/20170220/) to the latest beta version 20170324, thanks [Patrick](https://github.com/patrickTingen/DataDigger)!
 - Ftp connections now also work for servers with tge active transfer mode activated
 - 3P now correctly reads the Npp configuration from the cloud folder (if any)
 - Improvements to the parser, this should be its final form; it now parses include files exactly like the progress compiler, replacing the include call by the content of the file
