@@ -69,9 +69,7 @@ namespace _3PA.MainFeatures.Parser {
 
         private static AsapButDelayableAction ParseAction {
             get {
-                return _parseAction ?? (_parseAction = new AsapButDelayableAction("Error while parsing text", 800, DoParse) {
-                    MsToDoTimeout = 1500
-                });
+                return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse));
             }
         }
 
@@ -109,54 +107,58 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         private static void DoParse() {
-            if (OnStart != null)
-                OnStart();
+            try {
+                if (OnStart != null)
+                    OnStart();
 
-            DoInLock(() => {
+                DoInLock(() => {
 
-                // make sure to always parse the current file
-                Parser parser = null;
-                do {
-                    _lastFilePathParsed = Npp.CurrentFile.Path;
+                    // make sure to always parse the current file
+                    Parser parser = null;
+                    do {
+                        _lastFilePathParsed = Npp.CurrentFile.Path;
 
-                    if (Npp.CurrentFile.IsProgress) {
-                        parser = new Parser(Sci.Text, _lastFilePathParsed, null, true);
+                        if (Npp.CurrentFile.IsProgress) {
+                            parser = new Parser(Sci.Text, _lastFilePathParsed, null, true);
 
-                        // visitor
-                        var visitor = new ParserVisitor(true);
-                        parser.Accept(visitor);
+                            // visitor
+                            var visitor = new ParserVisitor(true);
+                            parser.Accept(visitor);
 
-                        // send completionItems
-                        if (OnEndSendCompletionItems != null)
-                            OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
+                            // send completionItems
+                            if (OnEndSendCompletionItems != null)
+                                OnEndSendCompletionItems(visitor.ParsedCompletionItemsList);
 
-                        // send codeExplorerItems
-                        if (OnEndSendCodeExplorerItems != null)
-                            OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+                            // send codeExplorerItems
+                            if (OnEndSendCodeExplorerItems != null)
+                                OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
 
-                    } else {
-                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null);
+                        } else {
+                            var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null, Config.Instance.NppAutoCompleteMinWordLengthRequired);
 
-                        // send completionItems
-                        if (OnEndSendCompletionItems != null)
-                            OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
-                    }
+                            // send completionItems
+                            if (OnEndSendCompletionItems != null)
+                                OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
+                        }
 
-                } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
+                    } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
 
-                if (parser != null) {
+                    if (parser != null) {
                     
-                }
+                    }
                 
-                // send parserItems
-                if (OnEndSendParserItems != null) {
-                    if (parser != null)
-                        OnEndSendParserItems(parser.ParserErrors, parser.LineInfo, parser.ParsedItemsList);
-                }
-            });
+                    // send parserItems
+                    if (OnEndSendParserItems != null) {
+                        if (parser != null)
+                            OnEndSendParserItems(parser.ParserErrors, parser.LineInfo, parser.ParsedItemsList);
+                    }
+                });
 
-            if (OnEnd != null)
-                OnEnd();
+                if (OnEnd != null)
+                    OnEnd();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while analyzing the current document");
+            }
         }
 
         /// <summary>

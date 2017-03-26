@@ -43,39 +43,19 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region event
-
-        /// <summary>
-        /// Event published when the parser starts doing its job
-        /// </summary>
-        public event Action BeforeAction;
-
-        /// <summary>
-        /// Event published when the parser has done its job and it's time to get the results
-        /// </summary>
-        public event Action AfterAction;
-
-        #endregion
-
         #region private
 
-        private object _lock = new object();
-        private object _timerLock = new object();
         private Timer _timer;
         private Action _toDo;
         private Task _task;
         private CancellationTokenSource _cancelSource;
-        private string _toDoDescription;
         private int _msDelay;
-        private int _msToDoTimeout = 2000;
-        private volatile bool _timerOnGoing;
 
         #endregion
 
         #region Constructor
 
-        public AsapButDelayableAction(string toDoDescription, int msDelay, Action toDo) {
-            _toDoDescription = toDoDescription;
+        public AsapButDelayableAction(int msDelay, Action toDo) {
             _msDelay = msDelay;
             _toDo = toDo;
             _cancelSource = new CancellationTokenSource();
@@ -87,71 +67,23 @@ namespace _3PA.Lib {
         #region Public
 
         /// <summary>
-        /// Max time to wait (in ms) when trying to do the action that has already been started
-        /// (this should be set roughly to the time needed to do the action)..
-        /// </summary>
-        public int MsToDoTimeout {
-            get { return _msToDoTimeout; }
-            set { _msToDoTimeout = value; }
-        }
-
-        /// <summary>
         /// Start the action with a delay, delay that can be extended if this method is called again within the
         /// delay
         /// </summary>
         public void DoDelayable() {
             // do on delay, can be delayed event more if this method is called again
-            if (Monitor.TryEnter(_timerLock, 50)) {
-                try {
-                    if (_timer == null) {
-                        _timer = new Timer {
-                            AutoReset = false,
-                            Interval = _msDelay
-                        };
-                        _timer.Elapsed += (sender, args) => TimerTick();
-                        _timer.Start();
-                    } else {
-                        // reset timer
-                        _timer.Stop();
-                        _timer.Start();
-                    }
-                    _timerOnGoing = true;
-                } finally {
-                    Monitor.Exit(_timerLock);
-                }
+            if (_timer == null) {
+                _timer = new Timer(_msDelay) {
+                    AutoReset = false
+                };
+                _timer.Elapsed += (sender, args) => TimerTick();
+                _timer.Start();
+            } else {
+                // reset timer
+                _timer.Stop();
+                _timer.Start();
             }
-        }
 
-        /// <summary>
-        /// Wait for the latest task to be completed (but for a max of ms)
-        /// If a timer was already set, it triggers the to do method immediately and returns true
-        /// </summary>
-        public bool WaitLatestTask(int maxMsWait = -1) {
-            if (maxMsWait == -1)
-                maxMsWait = MsToDoTimeout;
-            bool timerOnGoing = false;
-            if (Monitor.TryEnter(_timerLock, 50)) {
-                timerOnGoing = _timerOnGoing;
-                Monitor.Exit(_timerLock);
-            }
-            if (timerOnGoing) {
-                // a timer was set, trigger it now
-                TimerTick();
-                UserCommunication.Notify("timer was tciking, trigger now");
-            }
-            if (_task != null) {
-                _task.Wait(maxMsWait);
-                UserCommunication.Notify("was waiting for the task");
-            }
-            return timerOnGoing;
-        }
-
-        /// <summary>
-        /// Forces to do the action now, if one is already ongoing then we wait for the end and do another
-        /// </summary>
-        public void DoSync(int maxMsWait = -1) {
-            WaitLatestTask(maxMsWait);
-            ToDo();
         }
 
         /// <summary>
@@ -171,31 +103,19 @@ namespace _3PA.Lib {
         /// as well as the dynamic items found by the parser
         /// </summary>
         private void TimerTick() {
-            if (Monitor.TryEnter(_timerLock, 500)) {
-                if (_task != null && !_task.IsCompleted) {
-                    return;
-                }
-                _timerOnGoing = false;
-                _task = Task.Factory.StartNew(ToDo, _cancelSource.Token);
-                Monitor.Exit(_timerLock);
+            if (_timer != null) {
+                _timer.Stop();
+                _timer.Close();
+                _timer = null;
             }
+            if (_task != null && !_task.IsCompleted)
+                return;
+            _task = Task.Factory.StartNew(ToDo, _cancelSource.Token);
         }
 
         private void ToDo() {
-            if (Monitor.TryEnter(_lock, MsToDoTimeout)) {
-                try {
-                    if (BeforeAction != null)
-                        BeforeAction();
-                    if (!_cancelSource.IsCancellationRequested)
-                        _toDo();
-                    if (AfterAction != null)
-                        AfterAction();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, _toDoDescription);
-                } finally {
-                    Monitor.Exit(_lock);
-                }
-            }
+            if (!_cancelSource.IsCancellationRequested)
+                _toDo();
         }
 
         #endregion
@@ -213,6 +133,7 @@ namespace _3PA.Lib {
                 if (_timer != null) {
                     _timer.Stop();
                     _timer.Close();
+                    _timer = null;
                 }
             } catch (Exception) {
                 // clean up proc

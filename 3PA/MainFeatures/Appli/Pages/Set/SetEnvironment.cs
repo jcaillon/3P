@@ -411,12 +411,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btDbDownload.BackGrndImage = ImageResources.DownloadDbOk;
                 btDbDeleteDownload.Enabled = true;
                 btDbView.Enabled = true;
-                toolTip.SetToolTip(btDbDownload, "<i>The database information for this environment are available and in use in the auto-completion list</i><br><br>Click this button to <b>force a refresh of the database information</b> for this environment");
+                toolTip.SetToolTip(btDbDownload, "<i>The database information for this environment are available and in use in the autocompletion list</i><br><br>Click this button to <b>force a refresh of the database information</b> for this environment");
             } else {
                 btDbDownload.BackGrndImage = ImageResources.DownloadDbNok;
                 btDbDeleteDownload.Enabled = false;
                 btDbView.Enabled = false;
-                toolTip.SetToolTip(btDbDownload, "<i>No information available for this database!</i><br><br>Click this button to <b>fetch the database information</b> for this environment,<br>they will be used in the auto-completion list to suggest database names,<br>table names and field names.<br><br>By default, the auto-completion list uses the last environment <br>selected where database info were available.");
+                toolTip.SetToolTip(btDbDownload, "<i>No information available for this database!</i><br><br>Click this button to <b>fetch the database information</b> for this environment,<br>they will be used in the autocompletion list to suggest database names,<br>table names and field names.<br><br>By default, the autocompletion list uses the last environment <br>selected where database info were available.");
             }
         }
 

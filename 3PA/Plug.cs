@@ -303,7 +303,7 @@ namespace _3PA {
                 // (CTRL + ) Right click : show main menu
                 case WinApi.Messages.WM_RBUTTONUP:
                     if (KeyboardMonitor.GetModifiers.IsCtrl) {
-                        // we need the cursor to be in scintilla but not on the application or the auto-completion!
+                        // we need the cursor to be in scintilla but not on the application or the autocompletion!
                         if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
                             (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
                             (!AutoCompletion.IsVisible || !AutoCompletion.IsMouseIn())) {
@@ -666,6 +666,9 @@ namespace _3PA {
         /// </summary>
         public static void OnPageScrolled() {
             ClosePopups();
+            // parse the current part of the document
+            if (!Npp.CurrentFile.IsProgress)
+                ParserHandler.ParseDocumentAsap();
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ All 3P's features are accessible from this menu, this is the main entry point. O
 
 ## Setting an environment ##
 
-3P has a lot of features that are available immediately, like the auto-completion or the syntax highlighting. **However,** if you want to enable the **FULL POTENTIAL** of this software, like : 
+3P has a lot of features that are available immediately, like the autocompletion or the syntax highlighting. **However,** if you want to enable the **FULL POTENTIAL** of this software, like : 
 
 - auto-completing database tables/fields,
 - compiling, running your program from notepad++,

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with 3P. If not, see <http://www.gnu.org/licenses/>.
 # ========================================================================
-# Modify this file at your own risks, it allows to build the auto-completion list in 3P
+# Modify this file at your own risks, it allows to build the autocompletion list in 3P
 # each line contains tab separated info :
 # keyword_id	keyword	keyword_type	0/1_is_reserved	integer_initial_ranking
 # ========================================================================

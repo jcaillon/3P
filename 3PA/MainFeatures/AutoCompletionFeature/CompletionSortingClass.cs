@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region Life
 
         private CompletionSortingClass() {
-            _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), nameof(Config.ConfigObject.AutoCompleteItemPriorityList));
+            _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompleteItemPriorityList");
         }
 
         #endregion

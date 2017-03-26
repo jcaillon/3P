@@ -90,7 +90,7 @@ namespace _3PA._Resource {
         ///
         ///## Setting an environment ##
         ///
-        ///3P has a lot of features that are available immediately, like the auto-completion or the s [rest of string was truncated]&quot;;.
+        ///3P has a lot of features that are available immediately, like the autocompletion or the s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string getting_started {
             get {

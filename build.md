@@ -4,7 +4,6 @@
 
 - You might have a missing librairy/exe when compiling, install the [SDK for .net 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=8279)
 - If it still doesn't work, install [this](https://developer.microsoft.com/en-us/windows/downloads/windows-8-sdk))
-- The project targets the .net framework 4.0 but I used C# 7.0 features in the code, so you need the [4.6.2 developer pack](https://www.microsoft.com/en-us/download/details.aspx?id=53321) to build it
 
 ## When releasing (Note to myself) : ##
 

@@ -134,7 +134,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get { return _currentItems; }
             set {
                 _currentItems = value;
-                _currentItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
                 _needToSetItems = true;
             }
         }
@@ -166,7 +165,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     _childSeparators.Add(':');
                 } else {
 
-                    // Other files
+                    // Other files, get the keyword list and additional characters from the xml
                     if (Npp.CurrentFile.Lang == null) {
                         _staticItems = new List<CompletionItem>();
                     } else {
@@ -178,6 +177,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             }
                         }
                     }
+
+                    // add word char list from the config.xml
+                    if (!string.IsNullOrEmpty(Npp.ConfXml.WordCharList)) {
+                        foreach (var c in Npp.ConfXml.WordCharList) {
+                            if (!_additionalWordChar.Contains(c))
+                                _additionalWordChar.Add(c);
+                        }
+                    }
                 }
 
                 // make sure the additional chars contains at least '_'
@@ -187,7 +194,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // we sort the list, doing it now will reduce the time for the next sort()
                 _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
 
-                OnUpdateStaticItems?.Invoke(_staticItems);
+                if (OnUpdateStaticItems != null)
+                    OnUpdateStaticItems.Invoke(_staticItems);
             });
         }
 
@@ -269,13 +277,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (offset > 0 && strOnLeftLength > offset && IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - offset])) {
                     
                     // automatically insert selected keyword of the completion list?
-                    if (isVisible && Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd) {
+                    if (AutoCompleteInsertSelectedSuggestionOnWordEnd && isVisible) {
                         InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
                         textHasChanged = true;
                     } 
 
                     // automatically change the case of the keyword?
-                    else if (Config.Instance.AutoCompleteAutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
+                    else if (AutoCompleteAutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
                         var candidates = FindInCompletionData(strOnLeft.Substring(0, strOnLeftLength - offset), nppCurrentLine);
                         // we matched the word in the list, correct the case
                         if (candidates != null && candidates.Count > 0) {
@@ -386,6 +394,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     CurrentActiveTypes = ActiveTypes.Filtered;
                     DoInLock(() => {
                         CurrentItems = outList.ToList();
+                        CurrentItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
                     });
 
                     // we want to show the list no matter how long the filter keyword
@@ -722,7 +731,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Is the form currently visible?
         /// </summary>
-        public static bool IsVisible => !(_form == null || !_form.IsVisible);
+        public static bool IsVisible {get { return !(_form == null || !_form.IsVisible); } }
 
         /// <summary>
         /// Closes the form
@@ -826,7 +835,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 });
                 return outList;
             }
-            return outList?.Where(data => data.DisplayText.EqualsCi(firstKeyword)).ToList();
+            return outList == null ? null : outList.Where(data => data.DisplayText.EqualsCi(firstKeyword)).ToList();
         }
 
         /// <summary>
@@ -850,6 +859,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     }
                 }
                 return output;
+            }
+        }
+
+        private static bool AutoCompleteInsertSelectedSuggestionOnWordEnd {
+            get {
+                return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd : Config.Instance.NppAutoCompleteInsertSelectedSuggestionOnWordEnd;
+            }
+        }
+
+        private static bool AutoCompleteAutoCase {
+            get {
+                return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteAutoCase : Config.Instance.NppAutoCompleteAutoCase;
             }
         }
 

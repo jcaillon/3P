@@ -173,6 +173,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             foreach (var keyword in _keywords) {
                 keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.AutoCompleteKeywordCaseMode);
             }
+            if (OnImport != null)
+                OnImport();
         }
 
         /// <summary>

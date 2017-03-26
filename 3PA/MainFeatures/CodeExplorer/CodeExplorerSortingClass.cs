@@ -59,7 +59,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region Life
 
         private CodeExplorerSortingClass() {
-            _explorerBranchTypePriority = Config.GetPriorityList(typeof(CodeExplorerBranch), nameof(Config.ConfigObject.CodeExplorerItemPriorityList));
+            _explorerBranchTypePriority = Config.GetPriorityList(typeof(CodeExplorerBranch), "CodeExplorerItemPriorityList");
         }
 
         #endregion

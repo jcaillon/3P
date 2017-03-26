@@ -36,6 +36,7 @@ namespace _3PA.MainFeatures {
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
+
         #region config Object
 
         /// <summary>
@@ -163,106 +164,140 @@ namespace _3PA.MainFeatures {
             /// </summary>
             [Display(Name = "Show auto completion on key input",
                 Description = "Automatically show the auto completion list when you start entering characters",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnKeyInputShowSuggestions = true;
 
             [Display(Name = "Start showing after X char",
                 Description = "If you chose to display the list on key input,<br> you can set the minimum number of char necessary before showing the list ",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             [Range(1, 99)]
             public int AutoCompleteStartShowingListAfterXChar = 1;
 
             [Display(Name = "Hide auto completion if empty",
                 Description = "If the list was displayed automatically and there are no suggestions matching your input,<br>this option will automatically hide the list instead of showing it empty",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteOnKeyInputHideIfEmpty = true;
-            
+
             [Display(Name = "Show children on separator input",
                 Description = "Choose this option to immediately show the auto completion after a '.' or a ':'<br>Otherwise 3P waits for the set number of characters to show it",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteShowChildrenAfterSeparator = true;
 
-            [Display(Name = "Show list in comments and strings",
-                Description = "By default, the auto completion list is hidden in comments and strings<br>you can still show the completion list manually!",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteShowInCommentsAndStrings = false;
-
             [Display(Name = "Use TAB to accept a suggestion",
                 Description = "Whether or not to allow the TAB key to accept the suggestion",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteUseTabToAccept = true;
 
             [Display(Name = "User ENTER to accept a suggestion",
                 Description = "Whether or not to allow the ENTER key to accept the suggestion",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteUseEnterToAccept = true;
-
-            [Display(Name = "Insert current suggestion on word end",
-                Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
             
-            [Display(Name = "Auto-case as I'm typing",
-                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteAutoCase = true;
-
-            [Display(Name = "Keywords case",
-                Description = "Change the case of each word displayed in the auto completion to :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (0)",
-                GroupName = "Auto-completion",
-                AutoGenerateField = true)]
-            [Range(0, 3)]
-            public int AutoCompleteKeywordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
-
-            [Display(Name = "Database words case",
-                Description = "Change the case of each information extracted from the database (db name, tables, fields, sequences) to :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (0)",
-                GroupName = "Auto-completion",
-                AutoGenerateField = true)]
-            [Range(0, 3)]
-            public int AutoCompleteDatabaseWordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
-
-            [Display(Name = "Insert full word instead of abbreviations",
-                Description = "Automatically replaces abbreviations by their full length counterparts",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteReplaceAbbreviations = true;
-
-            [Display(Name = "Auto replace semicolon",
-                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteReplaceSemicolon = true;
-
-            [Display(Name = "Only show already defined variables",
-                Description = "By default, 3P filters the auto-completion list to only show you<br>the items that are available at the line where you activate<br>the auto-completion list.<br>You can set this option to false to show an item even if,<br>for the line where your cursor is, it is not yet defined.",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool AutoCompleteOnlyShowDefinedVar = true;
-
             [Display(Name = "Unfocused opacity",
                 Description = "The opacity of the list when unfocused",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = true)]
             [Range(0.1, 1)]
             public double AutoCompleteUnfocusedOpacity = 0.92;
 
             [Display(Name = "Focused opacity",
                 Description = "The opacity of the list when focused",
-                GroupName = "Auto-completion",
+                GroupName = "Autocompletion",
                 AutoGenerateField = true)]
             [Range(0.1, 1)]
             public double AutoCompleteFocusedOpacity = 0.92;
 
-            public string AutoCompleteItemPriorityList = "";
+            /// <summary>
+            /// NPP AUTOCOMPLETION
+            /// </summary>
+            [Display(Name = "Maximum length for the parser",
+                Description = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public int NppAutoCompleteMaxLengthToParse = 5000000;
+
+            [Display(Name = "Ignore numbers",
+                Description = "Should the autocompletion ignore numbers when parsing for words to suggest?",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public bool NppAutoCompleteIgnoreNumbers = true;
+
+            [Display(Name = "Insert current suggestion on word end",
+                Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public bool NppAutoCompleteInsertSelectedSuggestionOnWordEnd = false;
+
+            [Display(Name = "Auto-case as I'm typing",
+                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public bool NppAutoCompleteAutoCase = false;
+
+            [Display(Name = "Minimum length required for suggested words",
+                Description = "Words in your document that have a length strictly inferior to this value<br>will not appear in the autocompletion",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public int NppAutoCompleteMinWordLengthRequired = 2;
+
+            /// <summary>
+            /// PROGRESS AUTOCOMPLETION
+            /// </summary>
+            [Display(Name = "Show list in comments and strings",
+                Description = "By default, the auto completion list is hidden in comments and strings<br>you can still show the completion list manually!",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteShowInCommentsAndStrings = false;
+
+            [Display(Name = "Insert current suggestion on word end",
+                Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
+            
+            [Display(Name = "Auto-case as I'm typing",
+                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteAutoCase = true;
+
+            [Display(Name = "Keywords case",
+                Description = "Change the case of each word displayed in the auto completion to :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (0)",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = true)]
+            [Range(0, 3)]
+            public int AutoCompleteKeywordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+
+            [Display(Name = "Database words case",
+                Description = "Change the case of each information extracted from the database (db name, tables, fields, sequences) to :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (0)",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = true)]
+            [Range(0, 3)]
+            public int AutoCompleteDatabaseWordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+
+            [Display(Name = "Insert full word instead of abbreviations",
+                Description = "Automatically replaces abbreviations by their full length counterparts",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteReplaceAbbreviations = true;
+
+            [Display(Name = "Auto replace semicolon",
+                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteReplaceSemicolon = true;
+
+            [Display(Name = "Only show already defined variables",
+                Description = "By default, 3P filters the autocompletion list to only show you<br>the items that are available at the line where you activate<br>the autocompletion list.<br>You can set this option to false to show an item even if,<br>for the line where your cursor is, it is not yet defined.",
+                GroupName = "Progress autocompletion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteOnlyShowDefinedVar = true;
 
             // Height of the autocompletion form
             public int AutoCompleteShowListOfXSuggestions = 12;
@@ -271,18 +306,8 @@ namespace _3PA.MainFeatures {
             public int AutoCompleteWidth = 310;
 
             public bool AutoCompleteNeverAskToDisableDefault = false;
-
-            [Display(Name = "Maximum length for the parser",
-                Description = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
-                GroupName = "Auto-completion",
-                AutoGenerateField = true)]
-            public int AutoCompleteMaxLengthToParse = 5000000;
-
-            [Display(Name = "Ignore numbers",
-                Description = "Should the auto-completion ignore numbers when parsing for words to suggest?",
-                GroupName = "Default auto-completion replacement",
-                AutoGenerateField = false)]
-            public bool NppAutoCompleteIgnoreNumbers = true;
+            
+            public string AutoCompleteItemPriorityList = "";
 
             #endregion
 

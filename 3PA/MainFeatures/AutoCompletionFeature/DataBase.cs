@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, Path.GetFileName(lastExec.ExtractDbOutputPath) ?? ""))) {
                 // update info
                 UpdateDatabaseInfo();
-                UserCommunication.Notify("Database structure extracted with success!<br>The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
+                UserCommunication.Notify("Database structure extracted with success!<br>The autocompletion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
                 if (_onExtractionDone != null) {
                     _onExtractionDone();
                     _onExtractionDone = null;
@@ -304,6 +304,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public void ResetCompletionItems() {
             _dbItems = GetCompletionItems();
+            if (OnDatabaseUpdate != null)
+                OnDatabaseUpdate();
         }
 
         /// <summary>

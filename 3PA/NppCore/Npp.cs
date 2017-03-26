@@ -893,6 +893,8 @@ namespace _3PA.NppCore {
                 get { return Path.Combine(FolderBaseConf, @"langs.xml"); }
             }
 
+            public string WordCharList { get; set; }
+
             #endregion
 
             #region Life and death
@@ -927,6 +929,10 @@ namespace _3PA.NppCore {
                     var configs = new NanoXmlDocument(Utils.ReadAllText(FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
                     FileNppStylersXml = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
                     AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
+                    var wordCharListCfg = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("wordCharList"));
+                    if (wordCharListCfg.GetAttribute("useDefault").Value.EqualsCi("no")) {
+                        WordCharList = wordCharListCfg.GetAttribute("charsAdded").Value;
+                    }
                 } catch (Exception e) {
                     ErrorHandler.LogError(e, "Error parsing " + FileNppConfigXml);
                 }
@@ -942,7 +948,7 @@ namespace _3PA.NppCore {
                 if (AutocompletionMode == 0 || Config.Instance.AutoCompleteNeverAskToDisableDefault)
                     return;
 
-                var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default auto-completion</b> offered by Notepad++ by a much better version.<br><br>If the default auto-completion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default auto-completion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Auto-completion", "Deactivate default auto-completion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
+                var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default autocompletion</b> offered by Notepad++ by a much better version.<br><br>If the default autocompletion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default autocompletion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Autocompletion", "Deactivate default autocompletion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
                 if (answer == 1)
                     Config.Instance.AutoCompleteNeverAskToDisableDefault = true;
                 if (answer != 0)

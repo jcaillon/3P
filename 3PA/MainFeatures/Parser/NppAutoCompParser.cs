@@ -69,6 +69,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public HashSet<string> KnownWords { get; private set; }
 
+        /// <summary>
+        /// Words with a length strictly inferior to this will not appear in the autocompletion
+        /// </summary>
+        public int MinWordLengthRequired { get; private set; }
+
         #endregion
 
         #region public accessors
@@ -88,9 +93,10 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        public NppAutoCompParser(string data, HashSet<char> additionnalCharacters, bool ignoreNumbers, HashSet<string> knownWords) {
+        public NppAutoCompParser(string data, HashSet<char> additionnalCharacters, bool ignoreNumbers, HashSet<string> knownWords, int minWordLengthRequired) {
             if (data == null)
                 throw new ArgumentNullException("data");
+
             _data = data;
             _dataLength = _data.Length;
             _pos = 0;
@@ -98,6 +104,7 @@ namespace _3PA.MainFeatures.Parser {
             IgnoreNumbers = ignoreNumbers;
             AdditionnalCharacters = additionnalCharacters;
             KnownWords = knownWords;
+            MinWordLengthRequired = minWordLengthRequired;
 
             if (KnownWords == null)
                 KnownWords = new HashSet<string>();
@@ -220,7 +227,7 @@ namespace _3PA.MainFeatures.Parser {
 
                     if (!IgnoreNumbers) {
                         var valnum = GetTokenValue();
-                        if (!KnownWords.Contains(valnum)) {
+                        if (!KnownWords.Contains(valnum) && valnum.Length >= MinWordLengthRequired) {
                             KnownWords.Add(valnum);
                             _wordsList.Add(new WordCompletionItem {
                                 DisplayText = valnum
@@ -234,7 +241,7 @@ namespace _3PA.MainFeatures.Parser {
                     if (IsCharWord(ch)) {
                         ReadWord();
                         var val = GetTokenValue();
-                        if (!KnownWords.Contains(val)) {
+                        if (!KnownWords.Contains(val) && val.Length >= MinWordLengthRequired) {
                             KnownWords.Add(val);
                             _wordsList.Add(new WordCompletionItem {
                                 DisplayText = val

@@ -340,7 +340,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             CodeExplorer.CodeExplorer.Instance.ApplyColorSettings();
             FileExplorer.FileExplorer.Instance.ApplyColorSettings();
-            AutoCompletion.ApplyColorSettings();
+            AutoCompletion.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyOptionsForScintilla();
             Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;

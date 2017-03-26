@@ -24,6 +24,7 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
+using _3PA.MainFeatures;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
@@ -1144,7 +1145,7 @@ namespace _3PA.NppCore {
         public static string GetWord(HashSet<char> additionalWordChar = null, int curPos = -1) {
             if (curPos < 0)
                 curPos = CurrentPosition;
-            return ReadWord(GetTextOnLeftOfPos(curPos));
+            return ReadWord(GetTextOnLeftOfPos(curPos), additionalWordChar);
         }
 
         /// <summary>
