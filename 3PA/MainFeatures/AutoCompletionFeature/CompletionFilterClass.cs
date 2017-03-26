@@ -50,11 +50,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Returns true if the conditions have changed
         /// </summary>
-        public bool UpdateConditions(int currentLineNumber, bool dontCheckLine) {
+        public bool UpdateConditions(int currentLineNumber, bool checkLine = true) {
             if (currentLineNumber != _currentLineNumber) {
                 _currentLineNumber = currentLineNumber;
                 _currentScope = ParserHandler.GetScopeOfLine(currentLineNumber);
-                if (dontCheckLine || !Config.Instance.AutoCompleteOnlyShowDefinedVar)
+                if (!checkLine || !Config.Instance.AutoCompleteOnlyShowDefinedVar)
                     _currentLineNumber = -1;
                 return true;
             }

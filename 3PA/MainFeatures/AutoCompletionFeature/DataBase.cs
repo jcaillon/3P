@@ -316,14 +316,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private List<CompletionItem> GetCompletionItems() {
             // Sequences
             var output = _sequences.Select(item => new SequenceCompletionItem {
-                DisplayText = item.SeqName.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                DisplayText = item.SeqName.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode),
                 SubText = item.DbName
             }).Cast<CompletionItem>().ToList();
 
             // Databases
             foreach (var db in _dataBases) {
                 var curDb = new DatabaseCompletionItem {
-                    DisplayText = db.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                    DisplayText = db.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode),
                     ParsedBaseItem = db,
                     Ranking = 0,
                     Flags = 0,
@@ -335,7 +335,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // Tables
                 foreach (var table in db.Tables) {
                     var curTable = new TableCompletionItem() {
-                        DisplayText = table.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode),
+                        DisplayText = table.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode),
                         SubText = db.Name,
                         ParsedBaseItem = table,
                         Ranking = 0,
@@ -350,7 +350,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     // Fields
                     foreach (var field in table.Fields) {
                         CompletionItem curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
-                        curField.DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode);
+                        curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
                         curField.SubText = field.Type.ToString();
                         curField.ParsedBaseItem = field;
                         curField.Ranking = 0;

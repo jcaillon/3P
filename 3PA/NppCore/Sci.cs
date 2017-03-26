@@ -24,7 +24,6 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
@@ -1060,12 +1059,14 @@ namespace _3PA.NppCore {
         /// Use this method to modify the text around the caret, it's good because :<br></br>
         /// - it's wrapped around beginundo/endundo which allows the user to CTRL+Z all the actions as one<br></br>
         /// - it handles the modification around ALL the carets -> good for multiselection
+        /// returns the new position of the main caret
         /// </summary>
-        /// <param name="offsetStart">offset relative to the current carret position</param>
-        /// <param name="offsetEnd">offset relative to the current carret position</param>
+        /// <param name="offsetStart">offset relative to the current caret position</param>
+        /// <param name="offsetEnd">offset relative to the current caret position</param>
         /// <param name="text"></param>
-        public static void ModifyTextAroundCaret(int offsetStart, int offsetEnd, string text) {
+        public static int ModifyTextAroundCaret(int offsetStart, int offsetEnd, string text) {
             BeginUndoAction();
+            int newCaretPos = 0;
             // for each selection
             for (var i = 0; i < Selection.Count; i++) {
                 var selection = GetSelection(i);
@@ -1074,8 +1075,11 @@ namespace _3PA.NppCore {
                 // reposition carret
                 curPos = curPos - (offsetEnd - offsetStart) + text.Length;
                 selection.SetPosition(curPos);
+                if (i == 0)
+                    newCaretPos = curPos;
             }
             EndUndoAction();
+            return newCaretPos;
         }
 
         /// <summary>
@@ -1107,18 +1111,19 @@ namespace _3PA.NppCore {
         /// Replaces the left part of the keyword found at (CurrentPosition + offset) by
         /// the keyword given
         /// (all wrapped in an undo action + handles multiselection) 
+        /// returns the new position of the caret
         /// </summary>
-        public static void ReplaceWordWrapped(string keyword, char[] additionalWordChar, int offset) {
-            ModifyTextAroundCaret(offset - GetWord(additionalWordChar, CurrentPosition + offset).Length, offset, keyword);
+        public static int ReplaceWordWrapped(string keyword, HashSet<char> additionalWordChar, int offset) {
+            return ModifyTextAroundCaret(offset - GetWord(additionalWordChar, CurrentPosition + offset).Length, offset, keyword);
         }
 
         /// <summary>
         /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
         /// stopAtPoint or not, if not, output the nbPoints found
         /// </summary>
-        private static string ReadWord(string input, char[] additionalWordChar = null, bool readRightToLeft = true) {
+        private static string ReadWord(string input, HashSet<char> additionalWordChar = null, bool readRightToLeft = true) {
             if (additionalWordChar == null)
-                additionalWordChar = new[] {'_'};
+                additionalWordChar = new HashSet<char> {'_'};
             var max = input.Length - 1;
             int count = 0;
             while (count <= max) {
@@ -1136,7 +1141,7 @@ namespace _3PA.NppCore {
         /// <summary>
         /// Gets the keyword at given position (reading only on the left of the position)
         /// </summary>
-        public static string GetWord(char[] additionalWordChar = null, int curPos = -1) {
+        public static string GetWord(HashSet<char> additionalWordChar = null, int curPos = -1) {
             if (curPos < 0)
                 curPos = CurrentPosition;
             return ReadWord(GetTextOnLeftOfPos(curPos));
@@ -1145,14 +1150,14 @@ namespace _3PA.NppCore {
         /// <summary>
         /// Returns the ABL word at the given position (read on left and right)
         /// </summary>
-        public static string GetWordAtPosition(int position, char[] additionalWordChar) {
+        public static string GetWordAtPosition(int position, HashSet<char> additionalWordChar) {
             return ReadWord(GetTextOnLeftOfPos(position), additionalWordChar) + ReadWord(GetTextOnRightOfPos(position), additionalWordChar, false);
         }
 
         /// <summary>
         /// Returns the ABL word at the given position (read on left and right with different additional chars)
         /// </summary>
-        public static string GetWordAtPosition(int position, char[] leftPartadditionalWordChar, char[] rightPartadditionalWordChar) {
+        public static string GetWordAtPosition(int position, HashSet<char> leftPartadditionalWordChar, HashSet<char> rightPartadditionalWordChar) {
             return ReadWord(GetTextOnLeftOfPos(position), leftPartadditionalWordChar) + ReadWord(GetTextOnRightOfPos(position), rightPartadditionalWordChar, false);
         }
 
@@ -2495,7 +2500,7 @@ namespace _3PA.NppCore {
             /// </summary>
             /// <returns>A string representing the document line.</returns>
             /// <remarks>The returned text includes any end of line characters.</remarks>
-            public unsafe string Text {
+            public unsafe string LineText {
                 get {
                     var start = Api.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Index));
                     var length = Api.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Index));
@@ -3236,7 +3241,7 @@ namespace _3PA.NppCore {
             /// </summary>
             /// <returns>One of the IndicatorStyle enumeration values. The default varies.</returns>
             /// <remarks>Changing the Style property will reset the HoverStyle.</remarks>
-            public IndicatorStyle Style {
+            public IndicatorStyle IndicatorStyle {
                 get { return (IndicatorStyle) Api.Send(SciMsg.SCI_INDICGETSTYLE, new IntPtr(Index)); }
                 set {
                     var style = (int) value;

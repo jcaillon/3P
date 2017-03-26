@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
@@ -58,7 +57,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Additional characters that will count as a char from a word
         /// </summary>
-        public Char[] AdditionnalCharacters { get; private set; }
+        public HashSet<char> AdditionnalCharacters { get; private set; }
 
         /// <summary>
         /// False to add the number parsed to the output list
@@ -89,7 +88,7 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        public NppAutoCompParser(string data, char[] additionnalCharacters, bool ignoreNumbers, HashSet<string> knownWords) {
+        public NppAutoCompParser(string data, HashSet<char> additionnalCharacters, bool ignoreNumbers, HashSet<string> knownWords) {
             if (data == null)
                 throw new ArgumentNullException("data");
             _data = data;

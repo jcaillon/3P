@@ -35,6 +35,7 @@ using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using _3PA.Tests;
 using _3PA.WindowsCore;
 using _3PA._Resource;
 using MenuItem = _3PA.MainFeatures.MenuItem;
@@ -200,7 +201,7 @@ namespace _3PA {
             DataBase.Instance.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
             AutoCompletion.OnUpdateStaticItems += ParserHandler.UpdateKnownStaticItems;
 
-            ParserHandler.OnEndSendCompletionItems += AutoCompletion.OnParseEnded;
+            ParserHandler.OnEndSendCompletionItems += AutoCompletion.SetDynamicItems;
             ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
             ParserHandler.OnEndSendParserItems += CodeExplorer.Instance.OnParseEndParserItems;
             ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
@@ -254,7 +255,7 @@ namespace _3PA {
                 DataBase.Instance.OnDatabaseUpdate -= AutoCompletion.SetStaticItems;
                 AutoCompletion.OnUpdateStaticItems -= ParserHandler.UpdateKnownStaticItems;
 
-                ParserHandler.OnEndSendCompletionItems -= AutoCompletion.OnParseEnded;
+                ParserHandler.OnEndSendCompletionItems -= AutoCompletion.SetDynamicItems;
                 ParserHandler.OnStart -= CodeExplorer.Instance.OnStart;
                 ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
                 ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
@@ -554,16 +555,28 @@ namespace _3PA {
         #region On char typed
 
         /// <summary>
-        /// Called when the user is still typing a word
+        /// Called when a single char is added (in case of a new line in window format, this will be called but only with \r)
         /// Called after the UI has updated, allows to correctly read the text style, to correct 
         /// the indentation w/o it being erased and so on...
         /// </summary>
-        public static void OnCharAdded(char c) {
+        public static void OnCharAdded(char c, int position) {
             try {
                 // handles the autocompletion
-                AutoCompletion.UpdateAutocompletion(c);
+                AutoCompletion.UpdateAutocompletion(c, position);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAdded");
+            }
+        }
+
+        /// <summary>
+        /// Called when a single char is deleted
+        /// </summary>
+        public static void OnCharDeleted(char c, int position) {
+            try {
+                // handles the autocompletion
+                AutoCompletion.UpdateAutocompletion();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnCharDeleted");
             }
         }
 
@@ -584,28 +597,13 @@ namespace _3PA {
 
         #endregion
 
-        #region OnSciModified
+        #region OnTextModified
 
         /// <summary>
-        /// This notification is sent when the text or styling of the document changes or is about to change
-        /// </summary>
-        public static void OnSciModified(SCNotification nc) {
-            // the user pressed UNDO or REDO
-            if ((nc.modificationType & (int) SciModificationMod.SC_LASTSTEPINUNDOREDO) != 0) {
-                ClosePopups();
-            }
-        }
-
-        /// <summary>
-        /// Called when the text in scintilla is modified by the user
+        /// Called when the text in scintilla is modified (added/deleted) by the user
         /// </summary>
         public static void OnTextModified(SCNotification nc, bool insertedText, bool deletedText) {
             ParserHandler.ParseDocumentAsap();
-
-            // did the user supress 1 char? (or one line)
-            if (deletedText && (nc.length == 1 || (nc.length == 2 && nc.linesAdded == -1))) {
-                AutoCompletion.UpdateAutocompletion();
-            }
         }
 
         #endregion

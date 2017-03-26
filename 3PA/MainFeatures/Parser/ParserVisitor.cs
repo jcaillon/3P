@@ -698,7 +698,7 @@ namespace _3PA.MainFeatures.Parser {
             };
             parsedTable.Children = pars.Fields.Select(field => {
                 var curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
-                curField.DisplayText = field.Name.ConvertCase(Config.Instance.DatabaseChangeCaseMode);
+                curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
                 curField.ParsedBaseItem = field;
                 curField.FromParser = true;
                 curField.SubText = field.Type.ToString();

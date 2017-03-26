@@ -436,10 +436,8 @@ namespace _3PA.Lib {
                     return keyword.ToLower();
                 case 3:
                     return keyword.ToTitleCase();
-                case 4:
-                    return naturalCase ?? keyword;
                 default:
-                    return keyword;
+                    return naturalCase ?? keyword;
             }
         }
 

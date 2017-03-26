@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.Parser {
                             OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
 
                     } else {
-                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompletionMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompletionIgnoreNumbers, null);
+                        var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.AutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null);
 
                         // send completionItems
                         if (OnEndSendCompletionItems != null)

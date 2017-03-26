@@ -171,7 +171,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public void ResetCompletionItems() {
             _keywords = _keywordById.Values.ToList();
             foreach (var keyword in _keywords) {
-                keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.KeywordChangeCaseMode);
+                keyword.DisplayText = keyword.DisplayText.ConvertCase(Config.Instance.AutoCompleteKeywordCaseMode);
             }
         }
 

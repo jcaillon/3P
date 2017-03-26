@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures {
                     PrepareForIncertion(replacement, horizontalOffset, tokenPoints.X);
 
                     var indic = Sci.GetIndicator(SnippetContext.IndicatorId);
-                    indic.Style = IndicatorStyle.Box;
+                    indic.IndicatorStyle = IndicatorStyle.Box;
                     indic.ForeColor = Color.Blue;
 
                     foreach (var point in LocSnippetContext.Parameters) {
@@ -135,14 +135,14 @@ namespace _3PA.MainFeatures {
 
             //restore the indicator
             var indic = Sci.GetIndicator(SnippetContext.IndicatorId);
-            indic.Style = IndicatorStyle.Box;
+            indic.IndicatorStyle = IndicatorStyle.Box;
             indic.ForeColor = Color.Blue;
             indic.Add(indicatorRange.X, indicatorRange.X + text.Length);
         }
 
         static public bool NavigateToNextParam() {
             var indic = Sci.GetIndicator(SnippetContext.IndicatorId);
-            indic.Style = IndicatorStyle.Box;
+            indic.IndicatorStyle = IndicatorStyle.Box;
             indic.ForeColor = Color.Blue;
 
             var indicators = indic.FindRanges().ToArray();

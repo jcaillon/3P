@@ -111,7 +111,7 @@ namespace _3PA.NppCore {
                 length = SciGetLength()
             };
             scn.text = Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
-            OnScnModified(scn, true);
+            OnScnModified(scn, true, Sci.Encoding);
         }
 
         /// <summary>
@@ -131,8 +131,8 @@ namespace _3PA.NppCore {
         /// <summary>
         /// When receiving a modification notification by scintilla
         /// </summary>
-        public void OnScnModified(SCNotification scn, bool isInsertion) {
-            _lastEncoding = Sci.Encoding;
+        public void OnScnModified(SCNotification scn, bool isInsertion, Encoding encoding) {
+            _lastEncoding = encoding;
             _singleByteCharEncoding = _lastEncoding.IsSingleByte;
             _singleByteCharEncoding = false; // for 1.7.4
 

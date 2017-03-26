@@ -50,8 +50,10 @@ namespace _3PA.Tests {
         public static void DebugTest1() {
 
             MeasureIt(() => {
-
             }, "1 : ");
+
+            MeasureIt(() => {
+            }, "2 : ");
         }
 
         public static void DebugTest2() {}

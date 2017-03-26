@@ -131,7 +131,7 @@ namespace _3PA.MainFeatures.Pro {
             var curWord = Sci.GetWordAtPosition(position, AutoCompletion.CurrentLangAdditionalChars);
 
             // match a word in the autocompletion? go to definition
-            var listKeywords = AutoCompletion.FindInCompletionData(curWord, position, true);
+            var listKeywords = AutoCompletion.FindInCompletionData(curWord, Sci.LineFromPosition(position));
             if (listKeywords != null) {
                 var listItems = listKeywords.Where(item => item.FromParser && item.ParsedBaseItem is ParsedItem).ToList();
                 if (listItems.Count > 0) {

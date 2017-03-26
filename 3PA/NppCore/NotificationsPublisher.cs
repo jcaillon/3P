@@ -38,7 +38,9 @@ namespace _3PA.NppCore {
         public static bool PluginIsReady { get; private set; }
 
         /// <summary>
-        /// If true, the notification SCN_MODIFIED is disabled
+        /// If true, the notification SCN_MODIFIED is disabled, we use this to temporary disable the 
+        /// handling of modified notification when npp is loading a file, since we will reset the DocumentLines
+        /// after the loading anyway
         /// </summary>
         private static bool ScnModifiedDisabled { get; set; }
 
@@ -68,7 +70,7 @@ namespace _3PA.NppCore {
                             return;
 
                         case (uint) NppNotif.NPPN_READY:
-                            // notify plugins that all the procedures of launchment of notepad++ are done
+                            // notify plugins that all the procedures of launch of notepad++ are done
                             ActionsAfterUpdateUi = new Queue<Action>();
                             Npp.UpdateCurrentSci(); // init current scintilla
                             UiThread.Init();
@@ -104,7 +106,9 @@ namespace _3PA.NppCore {
                             // --------------------------------------------------------
                             case (uint) SciNotif.SCN_CHARADDED:
                                 // called each time the user add a char in the current scintilla
-                                ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded((char)nc.ch));
+                                // It's actually better to use the SCI_MODIFIED instead, this notification
+                                // is not always called when it should! (ex not called for /t)
+                                //ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded((char)nc.ch));
                                 return;
 
                             case (uint) SciNotif.SCN_UPDATEUI:
@@ -120,13 +124,37 @@ namespace _3PA.NppCore {
                                 // But it is sent when the user opens a NEW file)
                                 bool deletedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_DELETETEXT) != 0;
                                 bool insertedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0;
+                                bool undo = (nc.modificationType & (int) SciModificationMod.SC_PERFORMED_UNDO) != 0;
+                                bool redo = (nc.modificationType & (int) SciModificationMod.SC_PERFORMED_REDO) != 0;
+
                                 if ((insertedText || deletedText) && !ScnModifiedDisabled) {
                                     // if the text has changed
-                                    Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText); // register line modifications
+                                    var encoding = Sci.Encoding;
+                                    unsafe {
+                                        // only 1 char appears to be modified
+                                        if (nc.length <= 2 && !undo && !redo) {
+                                            // get the char
+                                            var bytes = (byte*) nc.text;
+                                            var arrbyte = new byte[nc.length];
+                                            int index;
+                                            for (index = 0; index < nc.length; index++)
+                                                arrbyte[index] = bytes[index];
+                                            var c = encoding.GetChars(arrbyte);
+                                            var cLength = c.Length;
+                                            // do we really have a 1 char input?
+                                            if (cLength == 1 || (cLength == 2 && c[0] == '\r')) {
+                                                if (insertedText) {
+                                                    ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded(c[0], nc.position));
+                                                } else {
+                                                    ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText, encoding); // register line modifications
                                     Plug.OnTextModified(nc, insertedText, deletedText);
                                 }
 
-                                Plug.OnSciModified(nc);
                                 return;
 
                             case (uint) SciNotif.SCN_STYLENEEDED:

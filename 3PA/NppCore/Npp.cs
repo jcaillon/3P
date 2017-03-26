@@ -939,12 +939,12 @@ namespace _3PA.NppCore {
             /// Ask the user to disable the default auto completion
             /// </summary>
             public void AskToDisableAutocompletion() {
-                if (AutocompletionMode == 0 || Config.Instance.NeverAskToDisableDefaultAutoComp)
+                if (AutocompletionMode == 0 || Config.Instance.AutoCompleteNeverAskToDisableDefault)
                     return;
 
                 var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default auto-completion</b> offered by Notepad++ by a much better version.<br><br>If the default auto-completion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default auto-completion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Auto-completion", "Deactivate default auto-completion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
                 if (answer == 1)
-                    Config.Instance.NeverAskToDisableDefaultAutoComp = true;
+                    Config.Instance.AutoCompleteNeverAskToDisableDefault = true;
                 if (answer != 0)
                     return;
 

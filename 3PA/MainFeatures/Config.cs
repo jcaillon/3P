@@ -209,6 +209,38 @@ namespace _3PA.MainFeatures {
                 GroupName = "Auto-completion",
                 AutoGenerateField = false)]
             public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
+            
+            [Display(Name = "Auto-case as I'm typing",
+                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteAutoCase = true;
+
+            [Display(Name = "Keywords case",
+                Description = "Change the case of each word displayed in the auto completion to :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (0)",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 3)]
+            public int AutoCompleteKeywordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+
+            [Display(Name = "Database words case",
+                Description = "Change the case of each information extracted from the database (db name, tables, fields, sequences) to :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (0)",
+                GroupName = "Auto-completion",
+                AutoGenerateField = true)]
+            [Range(0, 3)]
+            public int AutoCompleteDatabaseWordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+
+            [Display(Name = "Insert full word instead of abbreviations",
+                Description = "Automatically replaces abbreviations by their full length counterparts",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteReplaceAbbreviations = true;
+
+            [Display(Name = "Auto replace semicolon",
+                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+                GroupName = "Auto-completion",
+                AutoGenerateField = false)]
+            public bool AutoCompleteReplaceSemicolon = true;
 
             [Display(Name = "Only show already defined variables",
                 Description = "By default, 3P filters the auto-completion list to only show you<br>the items that are available at the line where you activate<br>the auto-completion list.<br>You can set this option to false to show an item even if,<br>for the line where your cursor is, it is not yet defined.",
@@ -230,7 +262,7 @@ namespace _3PA.MainFeatures {
             [Range(0.1, 1)]
             public double AutoCompleteFocusedOpacity = 0.92;
 
-            public string AutoCompletionItemPriorityList = "";
+            public string AutoCompleteItemPriorityList = "";
 
             // Height of the autocompletion form
             public int AutoCompleteShowListOfXSuggestions = 12;
@@ -238,45 +270,19 @@ namespace _3PA.MainFeatures {
             // Width of the autocompletion form
             public int AutoCompleteWidth = 310;
 
-            [Display(Name = "Keywords auto-case mode",
-                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
-                GroupName = "Auto-completion",
-                AutoGenerateField = true)]
-            [Range(0, 4)]
-            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Database info auto-case mode",
-                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
-                GroupName = "Auto-completion",
-                AutoGenerateField = true)]
-            [Range(0, 4)]
-            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
-
-            [Display(Name = "Auto replace abbreviations",
-                Description = "Automatically replaces abbreviations by their full lenght counterparts",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool CodeReplaceAbbreviations = true;
-
-            [Display(Name = "Auto replace semicolon",
-                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
-                GroupName = "Auto-completion",
-                AutoGenerateField = false)]
-            public bool CodeReplaceSemicolon = true;
-
-            public bool NeverAskToDisableDefaultAutoComp = false;
+            public bool AutoCompleteNeverAskToDisableDefault = false;
 
             [Display(Name = "Maximum length for the parser",
                 Description = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
                 GroupName = "Auto-completion",
                 AutoGenerateField = true)]
-            public int AutoCompletionMaxLengthToParse = 5000000;
+            public int AutoCompleteMaxLengthToParse = 5000000;
 
             [Display(Name = "Ignore numbers",
                 Description = "Should the auto-completion ignore numbers when parsing for words to suggest?",
                 GroupName = "Default auto-completion replacement",
                 AutoGenerateField = false)]
-            public bool NppAutoCompletionIgnoreNumbers = true;
+            public bool NppAutoCompleteIgnoreNumbers = true;
 
             #endregion
 
