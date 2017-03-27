@@ -150,6 +150,8 @@ namespace _3PA.Lib {
                 ErrorHandler.ShowErrors(e, "Error when checking for updates");
                 _isChecking = false;
             }
+
+            Config.Instance.TechnicalLastCheckUpdate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         /// <summary>

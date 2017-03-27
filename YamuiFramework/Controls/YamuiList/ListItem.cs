@@ -245,6 +245,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public virtual List<FilteredTypeTreeListItem> Children { get; set; }
 
+        /// <summary>
+        /// Should this item be hidden when in searching mode?
+        /// </summary>
+        public virtual bool HideWhileSearching { get; set; }
+
         #endregion
 
         #region internal mechanism
@@ -306,7 +311,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// does this item have children?
         /// </summary>
         public virtual bool CanExpand {
-            get { return Children != null; }
+            get { return Children != null && Children.Count > 0; }
         }
 
         /// <summary>

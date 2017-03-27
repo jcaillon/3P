@@ -85,6 +85,11 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         /// <summary>
+        /// Should this item be hidden when in searching mode?
+        /// </summary>
+        public override bool HideWhileSearching { get { return false; } }
+
+        /// <summary>
         /// return a string containing the subtext to display
         /// </summary>
         public override string SubText {

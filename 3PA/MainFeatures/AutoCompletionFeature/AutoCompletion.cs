@@ -535,7 +535,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _form.ResizeBegin += OnResizeBegin;
                 _needToSetItems = true;
                 _form.Show(Npp.Win32Handle);
-                Sci.GrabFocus();
             }
 
             // If this method has been invoked by the RefreshDynamicItems methods, we are on a different thread than

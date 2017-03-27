@@ -349,7 +349,7 @@ namespace _3PA {
         public static bool KeyDownHandler(KeyEventArgs e) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             bool handled = false;
-
+            
             MenuItem menuItem = null;
             try {
                 // Since it's a keydown message, we can receive this a lot if the user let a button pressed
@@ -377,7 +377,7 @@ namespace _3PA {
 
                 if (handled)
                     return true;
-
+                
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
                 // It only works "almost normally" if we ShowDialog() the form?!
@@ -396,10 +396,11 @@ namespace _3PA {
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
-
+                
                 // Close interfacePopups
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp || e.KeyCode == Keys.Next || e.KeyCode == Keys.Prior)
                     ClosePopups();
+                
             } catch (Exception ex) {
                 ErrorHandler.ShowErrors(ex, "Occurred in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
             }
@@ -685,7 +686,7 @@ namespace _3PA {
                 var explorerItemsList = CodeExplorer.Instance.ParsedExplorerItemsList;
                 if (explorerItemsList != null) {
                     foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flags.HasFlag(ParseFlag.IsTooLong)))
-                        warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
+                        warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Type + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
                     if (warningMessage.Length > 0) {
                         warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                         warningMessage.Append("<br><i>To prevent this, reduce the number of characters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");

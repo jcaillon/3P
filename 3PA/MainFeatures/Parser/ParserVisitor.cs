@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserVisitor.cs) is part of 3P.
@@ -16,10 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
@@ -55,11 +59,6 @@ namespace _3PA.MainFeatures.Parser {
         private const string BlockTooLongString = "> Appbuilder max length";
 
         /// <summary>
-        /// At least 1 prototype has been added
-        /// </summary>
-        private bool _prototypeAdded;
-
-        /// <summary>
         /// Are we currently visiting the current file opened in npp or
         /// is it a include?
         /// </summary>
@@ -84,14 +83,55 @@ namespace _3PA.MainFeatures.Parser {
         private List<CompletionItem> _parsedCompletionItemsList = new List<CompletionItem>();
 
         /// <summary>
+        /// Reference of the parser being visited
+        /// </summary>
+        private Parser _parser;
+
+        #endregion
+
+        #region Code explorer list
+
+        /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
         private List<CodeExplorerItem> _parsedExplorerItemsList = new List<CodeExplorerItem>();
 
+        private Dictionary<string, CodeExplorerItem> _nodeDictionary = new Dictionary<string, CodeExplorerItem>(StringComparer.CurrentCultureIgnoreCase);
+
         /// <summary>
-        /// Reference of the parser being visited
+        /// nodeId should be composed of the CodeItem.Type and CodeItem.DisplayText
         /// </summary>
-        private Parser _parser;
+        private CodeExplorerItem GetExplorerListNode(string nodeId, CodeExplorerIconType type, CodeExplorerItem parentNode = null) {
+            if (_nodeDictionary.ContainsKey(nodeId)) {
+                return _nodeDictionary[nodeId];
+            }
+            var newItem = new BranchCodeItem {
+                DisplayText = nodeId,
+                Type = type
+            };
+            _nodeDictionary.Add(nodeId, newItem);
+            PushToExplorerList(parentNode, newItem);
+            return newItem;
+        }
+
+        /// <summary>
+        /// Add an item as a child of "parent", parent can be null and it will be added to the root node
+        /// </summary>
+        private void PushToExplorerList(CodeExplorerItem parent, CodeExplorerItem newChild, bool addAsNode = false) {
+            if (parent == null) {
+                _parsedExplorerItemsList.Add(newChild);
+            } else {
+                if (parent.Children == null)
+                    parent.Children = new List<FilteredTypeTreeListItem>();
+                parent.Children.Add(newChild);
+            }
+            if (addAsNode) {
+                var nodeId = newChild.Type + newChild.DisplayText;
+                if (!_nodeDictionary.ContainsKey(nodeId)) {
+                    _nodeDictionary.Add(nodeId, newChild);
+                }
+            }
+        }
 
         #endregion
 
@@ -152,13 +192,6 @@ namespace _3PA.MainFeatures.Parser {
         /// To be executed after the visit ends
         /// </summary>
         public void PostVisit() {
-            if (_isBaseFile) {
-                // correct the internal/external type of run statements :
-                foreach (var item in _parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.RunExternal && _definedProcedures.Contains(item.DisplayText))) {
-                    item.Branch = CodeExplorerBranch.Run;
-                }
-            }
-
             // save the info for uses in an another file, where this file is run in persistent
             if (!SavedPersistent.ContainsKey(_currentParsedFilePath))
                 SavedPersistent.Add(_currentParsedFilePath, this);
@@ -200,16 +233,19 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.RunExternal,
-                IsNotBlock = true,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = pars.Scope.Name
+            var internalRun = _parser.ParsedItemsList.Exists(item => {
+                var proc = item as ParsedProcedure;
+                return proc != null && proc.Name.EqualsCi(pars.Name);
             });
+            var parentNode = internalRun ? GetExplorerListNode("Run internal routine", CodeExplorerIconType.RunInternal) : GetExplorerListNode("Run external procedure", CodeExplorerIconType.RunExternal);
+            var newNode = CodeExplorerItem.Factory.New(internalRun ? CodeExplorerIconType.RunInternal : CodeExplorerIconType.RunExternal);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = pars.Scope.Name;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToExplorerList(parentNode, newNode);
         }
 
         /// <summary>
@@ -218,16 +254,15 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedFunctionCall pars) {
             // To code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = pars.ExternalCall ? CodeExplorerBranch.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerBranch.StaticFunctionCall : CodeExplorerBranch.DynamicFunctionCall),
-                IsNotBlock = true,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = pars.Scope.Name
-            });
+            var parentNode = pars.ExternalCall ? GetExplorerListNode("External dynamic function calls", CodeExplorerIconType.DynamicFunctionCallExternal) : (pars.StaticCall ? GetExplorerListNode("Static function calls", CodeExplorerIconType.StaticFunctionCall) : GetExplorerListNode("Internal dynamic function calls", CodeExplorerIconType.DynamicFunctionCall));
+            var newNode = CodeExplorerItem.Factory.New(pars.ExternalCall ? CodeExplorerIconType.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerIconType.StaticFunctionCall : CodeExplorerIconType.DynamicFunctionCall));
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = pars.Scope.Name;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToExplorerList(parentNode, newNode);
         }
 
         /// <summary>
@@ -238,31 +273,28 @@ namespace _3PA.MainFeatures.Parser {
             bool missingDbName = pars.Name.IndexOf('.') < 0;
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = missingDbName ? pars.Name : pars.Name.Split('.')[1],
-                Branch = pars.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
-                IconType = pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
-                Flags = (missingDbName && !pars.IsTempTable ? ParseFlag.MissingDbName : 0) | pars.Flags,
-                IsNotBlock = true,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            var parentNode = pars.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
+            var newNode = CodeExplorerItem.Factory.New(pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+            newNode.DisplayText = missingDbName ? pars.Name : pars.Name.Split('.')[1];
+            newNode.Flags = (missingDbName && !pars.IsTempTable ? ParseFlag.MissingDbName : 0) | pars.Flags;
+            newNode.SubText = null;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToExplorerList(parentNode, newNode);
         }
 
         public void Visit(ParsedEvent pars) {
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = pars.Type == ParsedEventType.Subscribe ? CodeExplorerBranch.Subscribe : (pars.Type == ParsedEventType.Publish ? CodeExplorerBranch.Publish : CodeExplorerBranch.Unsubscribe),
-                Flags = pars.Flags,
-                IsNotBlock = true,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            var parentNode = pars.Type == ParsedEventType.Subscribe ? GetExplorerListNode("Subscribe", CodeExplorerIconType.Subscribe) : (pars.Type == ParsedEventType.Unsubscribe ? GetExplorerListNode("Unsubscribe", CodeExplorerIconType.Unsubscribe) : GetExplorerListNode("Publish", CodeExplorerIconType.Publish));
+            var newNode = CodeExplorerItem.Factory.New(pars.Type == ParsedEventType.Subscribe ? CodeExplorerIconType.Subscribe : (pars.Type == ParsedEventType.Unsubscribe ? CodeExplorerIconType.Unsubscribe : CodeExplorerIconType.Publish));
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = null;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToExplorerList(parentNode, newNode);
         }
 
         /// <summary>
@@ -271,16 +303,16 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedIncludeFile pars) {
             // To code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Include,
-                IsNotBlock = true,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            PushToExplorerList(
+                GetExplorerListNode("Includes", CodeExplorerIconType.Include),
+                new IncludeCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
         }
 
         /// <summary>
@@ -289,16 +321,15 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedFile pars) {
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Root,
-                IconType = CodeExplorerIconType.BranchIcon,
-                Flags = 0,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            PushToExplorerList(
+                null,
+                new RootCodeItem {
+                    DisplayText = "Root",
+                    SubText = null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
         }
 
         /// <summary>
@@ -309,19 +340,10 @@ namespace _3PA.MainFeatures.Parser {
             if (pars.Flags.HasFlag(ParseFlag.FromInclude))
                 return;
 
-            // add the prototype block only once, for the first proto
-            if (pars.Type == ParsedPreProcBlockType.FunctionForward) {
-                if (_prototypeAdded) return;
-                _prototypeAdded = true;
-            }
-
             CodeExplorerIconType type;
             switch (pars.Type) {
                 case ParsedPreProcBlockType.MainBlock:
-                    type = CodeExplorerIconType.BranchIcon;
-                    break;
-                case ParsedPreProcBlockType.FunctionForward:
-                    type = CodeExplorerIconType.Prototype;
+                    type = CodeExplorerIconType.MainBlock;
                     break;
                 case ParsedPreProcBlockType.Definitions:
                     type = CodeExplorerIconType.DefinitionBlock;
@@ -346,16 +368,18 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = pars.Type == ParsedPreProcBlockType.MainBlock ? CodeExplorerBranch.MainBlock : CodeExplorerBranch.Block,
-                IconType = type,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            CodeExplorerItem parentNode = type == CodeExplorerIconType.MainBlock ? null : GetExplorerListNode("AppBuilder blocks", CodeExplorerIconType.Block);
+            CodeExplorerItem newNode = CodeExplorerItem.Factory.New(type);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = null;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            if (type != CodeExplorerIconType.MainBlock) {
+                newNode.Type = type;
+            }
+            PushToExplorerList(parentNode, newNode);
         }
 
         /// <summary>
@@ -367,15 +391,16 @@ namespace _3PA.MainFeatures.Parser {
             CheckForTooMuchChar(pars);
 
             // To code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.OnEvent,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null
-            });
+            PushToExplorerList(
+                GetExplorerListNode("ON events", CodeExplorerIconType.OnEvent),
+                new OnEventCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
         }
 
         public void Visit(ParsedImplementation pars) {
@@ -383,15 +408,16 @@ namespace _3PA.MainFeatures.Parser {
             CheckForTooMuchChar(pars);
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Function,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null
-            });
+            PushToExplorerList(
+                GetExplorerListNode("Functions", CodeExplorerIconType.Function),
+                new FunctionCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
 
             // to completion data
             pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
@@ -411,15 +437,16 @@ namespace _3PA.MainFeatures.Parser {
                 return;
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.Function,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = null
-            });
+            PushToExplorerList(
+                GetExplorerListNode("Function prototypes", CodeExplorerIconType.Prototype),
+                new PrototypeCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
 
             // to completion data
             pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
@@ -445,26 +472,24 @@ namespace _3PA.MainFeatures.Parser {
                 _definedProcedures.Add(pars.Name);
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = pars.Flags.HasFlag(ParseFlag.External) ? CodeExplorerBranch.ExternalProcedure : CodeExplorerBranch.Procedure,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null
-            });
+            var parentNode = pars.Flags.HasFlag(ParseFlag.External) ? GetExplorerListNode("External procedures", CodeExplorerIconType.ExternalProcedure) : GetExplorerListNode("Procedures", CodeExplorerIconType.Procedure);
+            var newNode = CodeExplorerItem.Factory.New(pars.Flags.HasFlag(ParseFlag.External) ? CodeExplorerIconType.ExternalProcedure : CodeExplorerIconType.Procedure);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToExplorerList(parentNode, newNode);
 
             // to completion data
-            _parsedCompletionItemsList.Add(new ProcedureCompletionItem {
-                DisplayText = pars.Name,
-                ItemImage = pars.Flags.HasFlag(ParseFlag.External) ? Utils.GetImageFromStr(CodeExplorerBranch.ExternalProcedure.ToString()) : null,
-                Flags = pars.Flags,
-                Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name),
-                ParsedBaseItem = pars,
-                FromParser = true,
-                SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null
-            });
+            var proc = CompletionItem.Factory.New(pars.Flags.HasFlag(ParseFlag.External) ? CompletionType.ExternalProcedure : CompletionType.Procedure);
+            proc.DisplayText = pars.Name;
+            proc.ParsedBaseItem = pars;
+            proc.FromParser = true;
+            proc.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null;
+            proc.Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name);
+            proc.Flags = pars.Flags;
         }
 
         /// <summary>
@@ -538,7 +563,7 @@ namespace _3PA.MainFeatures.Parser {
                 type = CompletionType.TempTable;
 
                 // find the table or temp table that the buffer is FOR
-                var foundTable = FindAnyTableByName(pars.BufferFor, _parser.ParsedItemsList);
+                var foundTable = ParserUtils.FindAnyTableByName(pars.BufferFor, _parser.ParsedItemsList);
                 if (foundTable != null) {
                     subString = foundTable.Name;
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
@@ -547,17 +572,15 @@ namespace _3PA.MainFeatures.Parser {
                     pars.Flags |= !pars.BufferFor.Contains(".") && !foundTable.IsTempTable ? ParseFlag.MissingDbName : 0;
 
                     // To code explorer, list buffers and associated tables
-                    _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                        DisplayText = foundTable.Name,
-                        Branch = foundTable.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
-                        IconType = foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
-                        Flags = pars.Flags,
-                        IsNotBlock = true,
-                        DocumentOwner = pars.FilePath,
-                        GoToLine = pars.Line,
-                        GoToColumn = pars.Column,
-                        SubString = null
-                    });
+                    var parentNode = foundTable.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
+                    var newNode = CodeExplorerItem.Factory.New(foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+                    newNode.DisplayText = pars.Name;
+                    newNode.Flags = pars.Flags;
+                    newNode.SubText = null;
+                    newNode.DocumentOwner = pars.FilePath;
+                    newNode.GoToLine = pars.Line;
+                    newNode.GoToColumn = pars.Column;
+                    PushToExplorerList(parentNode, newNode);
                 }
             } else {
                 // match type for everything else
@@ -567,18 +590,18 @@ namespace _3PA.MainFeatures.Parser {
                         type = CompletionType.VariablePrimitive;
 
                         // To code explorer, program parameters
-                        if (_isBaseFile && pars.Scope is ParsedFile)
-                            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                                DisplayText = pars.Name,
-                                Branch = CodeExplorerBranch.ProgramParameter,
-                                IconType = CodeExplorerIconType.Parameter,
-                                IsNotBlock = true,
-                                Flags = pars.Flags,
-                                DocumentOwner = pars.FilePath,
-                                GoToLine = pars.Line,
-                                GoToColumn = pars.Column,
-                                SubString = subString
-                            });
+                        if (_isBaseFile && pars.Scope is ParsedFile) {
+                            PushToExplorerList(
+                                GetExplorerListNode("Program parameters", CodeExplorerIconType.ProgramParameter),
+                                new ParameterCodeItem {
+                                    DisplayText = pars.Name,
+                                    Flags = pars.Flags,
+                                    SubText = subString,
+                                    DocumentOwner = pars.FilePath,
+                                    GoToLine = pars.Line,
+                                    GoToColumn = pars.Column,
+                                });
+                        }
                         break;
                     case ParseDefineType.Variable:
                         if (!String.IsNullOrEmpty(pars.ViewAs))
@@ -605,15 +628,16 @@ namespace _3PA.MainFeatures.Parser {
 
             // To explorer code for browse
             if (pars.Type == ParseDefineType.Browse) {
-                _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                    DisplayText = pars.Name,
-                    Branch = CodeExplorerBranch.Browse,
-                    Flags = pars.Flags,
-                    DocumentOwner = pars.FilePath,
-                    GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
-                    SubString = subString
-                });
+                PushToExplorerList(
+                    GetExplorerListNode("Browse definitions", CodeExplorerIconType.Browse),
+                    new BrowseCodeItem {
+                        DisplayText = pars.Name,
+                        Flags = pars.Flags,
+                        SubText = subString,
+                        DocumentOwner = pars.FilePath,
+                        GoToLine = pars.Line,
+                        GoToColumn = pars.Column,
+                    });
             }
 
             // to completion data
@@ -640,7 +664,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // temp table is LIKE another table? copy fields
             if (!String.IsNullOrEmpty(pars.LcLikeTable)) {
-                var foundLikeTable = FindAnyTableByName(pars.LcLikeTable, _parser.ParsedItemsList);
+                var foundLikeTable = ParserUtils.FindAnyTableByName(pars.LcLikeTable, _parser.ParsedItemsList);
                 if (foundLikeTable != null) {
                     // add the fields of the found table (minus the primary information)
                     subStr = @"Like " + foundLikeTable.Name;
@@ -710,38 +734,21 @@ namespace _3PA.MainFeatures.Parser {
             _parsedCompletionItemsList.Add(parsedTable);
 
             // to code explorer
-            _parsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = CodeExplorerBranch.DefinedTempTable,
-                Flags = pars.Flags,
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = subStr
-            });
+            PushToExplorerList(
+                GetExplorerListNode("Defined temp-tables", CodeExplorerIconType.DefinedTempTable),
+                new TempTableCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = subStr,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                });
         }
 
         #endregion
 
         #region helper
-
-        /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
-        /// </summary>
-        public ParsedTable FindAnyTableByName(string name, List<ParsedItem> parsedItems) {
-            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
-        }
-
-        /// <summary>
-        /// Find a temptable by name
-        /// </summary>
-        private ParsedTable FindTempTableByName(string name, List<ParsedItem> parsedItems) {
-            return parsedItems.Find(item => {
-                var tt = item as ParsedTable;
-                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
-            }) as ParsedTable;
-        }
 
         /// <summary>
         /// Parses given file and load its function + procedures has persistent so they are
@@ -761,21 +768,12 @@ namespace _3PA.MainFeatures.Parser {
 
             // add info to the code explorer
             if (Config.Instance.CodeExplorerDisplayExternalItems) {
-                var listExpToAdd = parserVisitor._parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Procedure || item.Branch == CodeExplorerBranch.Function).ToList();
+                var listExpToAdd = parserVisitor._parsedExplorerItemsList.Where(item => item is FunctionCodeItem || item is ProcedureCodeItem).ToList();
                 foreach (var codeExplorerItem in listExpToAdd) {
                     codeExplorerItem.Flags = codeExplorerItem.Flags | ParseFlag.Persistent;
                 }
                 _parsedExplorerItemsList.AddRange(listExpToAdd);
             }
-        }
-
-        /// <summary>
-        /// Returns a parserVisitor for an existing object, or it create a new one
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static ParserVisitor GetParserVisitor(string filePath) {
-            return ParseFile(filePath, null);
         }
 
         /// <summary>
@@ -804,7 +802,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="pars"></param>
         private void CheckForTooMuchChar(ParsedScopeItem pars) {
-            // check lenght of block
+            // check length of block
             if (!pars.Flags.HasFlag(ParseFlag.FromInclude)) {
                 pars.TooLongForAppbuilder = NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) > 0;
                 if (pars.TooLongForAppbuilder)

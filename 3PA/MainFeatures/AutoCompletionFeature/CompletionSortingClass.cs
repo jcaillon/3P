@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region private
 
         // holds the display order of the CompletionType
-        private List<int> _completionTypePriority;
+        private Dictionary<int, int> _completionTypePriority;
 
         #endregion
 
@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         #region Life
 
         private CompletionSortingClass() {
-            _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompleteItemPriorityList");
+            _completionTypePriority = Config.GetPriorityList<CompletionType>("AutoCompleteItemPriorityList");
         }
 
         #endregion

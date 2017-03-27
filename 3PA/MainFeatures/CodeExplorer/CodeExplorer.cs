@@ -19,7 +19,6 @@
 #endregion
 using System.Collections.Generic;
 using System.Linq;
-using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
@@ -148,89 +147,91 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // get the list of items
             _initialList = codeExplorerItems.ToList();
 
+            _initialList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
+
+            return _initialList;
+        }
+
+        private void SortAndGroupConsecutiveItems() {
+            /*
             List<CodeExplorerItem> outList;
 
-            if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
-                outList = new List<CodeExplorerItem>();
+            outList = new List<CodeExplorerItem>();
 
-                // apply custom sorting
-                var sortedList = _initialList.ToList();
-                sortedList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
+            // apply custom sorting
+            var sortedList = _initialList.ToList();
+            sortedList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
 
-                HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
+            HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
 
-                // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
-                CodeExplorerItem currentLvl1Parent = null;
-                var iItem = 0;
-                while (iItem < sortedList.Count) {
-                    var item = sortedList[iItem];
+            // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
+            CodeExplorerItem currentLvl1Parent = null;
+            var iItem = 0;
+            while (iItem < sortedList.Count) {
+                var item = sortedList[iItem];
 
-                    // add an extra item that will be a new branch
-                    if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
-                        var branchDisplayText = item.Branch.GetDescription();
+                // add an extra item that will be a new branch
+                if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
+                    var branchDisplayText = item.Branch.GetDescription();
 
-                        currentLvl1Parent = new CodeExplorerItem {
-                            DisplayText = branchDisplayText,
-                            Branch = item.Branch,
-                            IsExpanded = true, // by default, expand lvl 1 branch
+                    currentLvl1Parent = new CodeExplorerItem {
+                        DisplayText = branchDisplayText,
+                        Branch = item.Branch,
+                        IsExpanded = true, // by default, expand lvl 1 branch
+                        Children = new List<FilteredTypeTreeListItem>()
+                    };
+                    foundBranches.Add(item.Branch);
+                    outList.Add(currentLvl1Parent);
+                }
+
+                // Add a child item to the current branch
+                if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
+                    // For each duplicated item (same Icon and same displayText), we create a new branch
+                    var iIdentical = iItem + 1;
+                    ParseFlag flags = 0;
+
+                    // while we match identical items
+                    while (iIdentical < sortedList.Count &&
+                           sortedList[iItem].Type == sortedList[iIdentical].Type &&
+                           sortedList[iItem].Branch == sortedList[iIdentical].Branch &&
+                           sortedList[iItem].DisplayText.EqualsCi(sortedList[iIdentical].DisplayText)) {
+                        flags = flags | sortedList[iIdentical].Flags;
+                        iIdentical++;
+                    }
+                    // if we found identical item
+                    if (iIdentical > iItem + 1) {
+                        // we create a branch for them
+                        var currentLvl2Parent = new CodeExplorerItem {
+                            DisplayText = sortedList[iItem].DisplayText,
+                            Branch = sortedList[iItem].Branch,
+                            Type = sortedList[iItem].Type,
+                            IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
+                            SubText = "x" + (iIdentical - iItem),
+                            IsNotBlock = sortedList[iItem].IsNotBlock,
+                            Flags = flags,
                             Children = new List<FilteredTypeTreeListItem>()
                         };
-                        foundBranches.Add(item.Branch);
-                        outList.Add(currentLvl1Parent);
-                    }
+                        currentLvl1Parent.Children.Add(currentLvl2Parent);
 
-                    // Add a child item to the current branch
-                    if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
-                        // For each duplicated item (same Icon and same displayText), we create a new branch
-                        var iIdentical = iItem + 1;
-                        ParseFlag flags = 0;
-
-                        // while we match identical items
-                        while (iIdentical < sortedList.Count &&
-                               sortedList[iItem].IconType == sortedList[iIdentical].IconType &&
-                               sortedList[iItem].Branch == sortedList[iIdentical].Branch &&
-                               sortedList[iItem].DisplayText.EqualsCi(sortedList[iIdentical].DisplayText)) {
-                            flags = flags | sortedList[iIdentical].Flags;
-                            iIdentical++;
-                        }
-                        // if we found identical item
-                        if (iIdentical > iItem + 1) {
-                            // we create a branch for them
-                            var currentLvl2Parent = new CodeExplorerItem {
-                                DisplayText = sortedList[iItem].DisplayText,
-                                Branch = sortedList[iItem].Branch,
-                                IconType = sortedList[iItem].IconType,
-                                IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
-                                SubString = "x" + (iIdentical - iItem),
-                                IsNotBlock = sortedList[iItem].IsNotBlock,
-                                Flags = flags,
-                                Children = new List<FilteredTypeTreeListItem>()
-                            };
-                            currentLvl1Parent.Children.Add(currentLvl2Parent);
-
-                            // add child items to the newly created lvl 2 branch
-                            for (int i = iItem; i < iIdentical; i++) {
-                                currentLvl2Parent.Children.Add(sortedList[i]);
-                            }
-
-                            iItem += (iIdentical - iItem);
-                            continue;
+                        // add child items to the newly created lvl 2 branch
+                        for (int i = iItem; i < iIdentical; i++) {
+                            currentLvl2Parent.Children.Add(sortedList[i]);
                         }
 
-                        // single item, add it normally
-                        currentLvl1Parent.Children.Add(item);
-                    } else {
-                        // add existing item as a root item
-                        outList.Add(item);
+                        iItem += (iIdentical - iItem);
+                        continue;
                     }
 
-                    iItem++;
+                    // single item, add it normally
+                    currentLvl1Parent.Children.Add(item);
+                } else {
+                    // add existing item as a root item
+                    outList.Add(item);
                 }
-            } else {
-                outList = _initialList;
-            }
 
-            return outList;
+                iItem++;
+            }
+            */
         }
 
         #endregion

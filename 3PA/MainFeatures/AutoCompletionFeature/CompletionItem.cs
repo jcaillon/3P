@@ -200,13 +200,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         return new FieldCompletionItem();
                     case CompletionType.FieldPk:
                         return new FieldPkCompletionItem();
+                    case CompletionType.Procedure:
+                        return new ProcedureCompletionItem();
+                    case CompletionType.ExternalProcedure:
+                        return new ExternalProcedureCompletionItem();
                     /*
                     case CompletionType.Snippet:
                         return new SnippetCompletionItem();
                     case CompletionType.Function:
                         return new FunctionCompletionItem();
-                    case CompletionType.Procedure:
-                        return new ProcedureCompletionItem();
                     case CompletionType.Database:
                         return new DatabaseCompletionItem();
                     case CompletionType.Sequence:
@@ -239,6 +241,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Widget,
         Function,
         Procedure,
+        ExternalProcedure,
         Database,
         TempTable,
         Table,
@@ -396,6 +399,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append("None");
             return toDisplay.ToString();
         }
+    }
+
+    internal class ExternalProcedureCompletionItem : ProcedureCompletionItem {
+        
+        public override Image ItemTypeImage { get { return ImageResources.ExternalProcedure; } }
+
     }
 
 

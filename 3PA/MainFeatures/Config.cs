@@ -808,24 +808,22 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Takes a list of priority like AutoCompletePriorityList and return the expected list
         /// </summary>
-        /// <param name="enumerationType"></param>
-        /// <param name="configPropertyName"></param>
-        /// <returns></returns>
-        public static List<int> GetPriorityList(Type enumerationType, string configPropertyName) {
+        public static Dictionary<int, int> GetPriorityList<T>(string configPropertyName) {
+            var enumerationType = typeof(T);
             var value = (string) Instance.GetValueOf(configPropertyName);
             int enumLength = Enum.GetNames(enumerationType).Length;
             if (enumLength != value.Split(',').Length) {
                 value = "";
-                for (int i = 0; i < enumLength; i++) {
-                    value += i + ",";
+                foreach (T val in Enum.GetValues(enumerationType)) {
+                    value += Convert.ToInt64(val) + ",";
                 }
                 value = value.TrimEnd(',');
                 Instance.SetValueOf(configPropertyName, value);
             }
-            var output = new List<int>();
+            var output = new Dictionary<int, int>();
             var temp = value.Split(',').Select(int.Parse).ToList();
             for (int i = 0; i < enumLength; i++)
-                output.Add(temp.IndexOf(i));
+                output.Add(temp[i], temp.IndexOf(i));
             return output;
         }
 

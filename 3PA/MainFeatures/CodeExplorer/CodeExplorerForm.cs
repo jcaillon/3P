@@ -69,12 +69,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             filterbox.Initialize(yamuiList);
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
+            filterbox.ExtraButtonsList[2].BackGrndImage =Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
 
             Refreshing = false;
-
-            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
-            yamuiList.SortingClass = CodeExplorerSortingClass<ListItem>.Instance;
+            
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
 
@@ -181,10 +179,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private void buttonSort_Click(YamuiButtonImage sender, EventArgs e) {
             Config.Instance.CodeExplorerSortingType++;
-            if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
+            if (Config.Instance.CodeExplorerSortingType > SortingType.Alphabetical)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             CodeExplorer.Instance.UpdateTreeData();
-            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.Clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting);
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
             Sci.GrabFocus();
         }
 

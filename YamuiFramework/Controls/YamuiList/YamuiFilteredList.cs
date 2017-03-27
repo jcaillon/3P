@@ -54,10 +54,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected string _filterString = string.Empty;
 
-        private Brush _fillBrush;
-
-        private Pen _framePen;
-
         protected const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
 
         #endregion
@@ -136,26 +132,6 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 }
             }
-        }
-
-        #endregion
-
-        #region Life and death
-
-        /// <summary>
-        /// Constructor to initialize stuff
-        /// </summary>
-        public YamuiFilteredList() {
-            _fillBrush = new SolidBrush(YamuiThemeManager.Current.AutoCompletionHighlightBack);
-            _framePen = new Pen(YamuiThemeManager.Current.AutoCompletionHighlightBorder);
-        }
-
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                _fillBrush.Dispose();
-                _framePen.Dispose();
-            }
-            base.Dispose(disposing);
         }
 
         #endregion
@@ -290,18 +266,18 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Draw an indication around the given letter(s) that shows a text match
         /// </summary>
         protected void DrawSubstringFrame(Graphics g, float x, float y, float width, float height, bool useRoundedRectangle = true) {
-            if (useRoundedRectangle) {
-                using (GraphicsPath path = Utilities.GetRoundedRect(x, y, width, height, 3.0f)) {
-                    if (_fillBrush != null)
-                        g.FillPath(_fillBrush, path);
-                    if (_framePen != null)
-                        g.DrawPath(_framePen, path);
+            using (var framePen = new Pen(YamuiThemeManager.Current.AutoCompletionHighlightBorder)) {
+                using (var fillBrush = new SolidBrush(YamuiThemeManager.Current.AutoCompletionHighlightBack)) {
+                    if (useRoundedRectangle) {
+                        using (GraphicsPath path = Utilities.GetRoundedRect(x, y, width, height, 3.0f)) {
+                            g.FillPath(fillBrush, path);
+                            g.DrawPath(framePen, path);
+                        }
+                    } else {
+                        g.FillRectangle(fillBrush, x, y, width, height);
+                        g.DrawRectangle(framePen, x, y, width, height);
+                    }
                 }
-            } else {
-                if (_fillBrush != null)
-                    g.FillRectangle(_fillBrush, x, y, width, height);
-                if (_framePen != null)
-                    g.DrawRectangle(_framePen, x, y, width, height);
             }
         }
 
@@ -334,5 +310,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
+
     }
 }

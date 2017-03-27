@@ -1038,7 +1038,7 @@ namespace YamuiFramework.Controls.YamuiList {
             // reposition top index if needed (also refresh buttons and thumb)
             TopIndex = TopIndex;
         }
-
+        
         #endregion
 
         #region YamuiMenuButton

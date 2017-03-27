@@ -17,30 +17,27 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
+
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
+using System;
 
 namespace _3PA.MainFeatures.CodeExplorer {
+
     /// <summary>
     /// base class
     /// </summary>
     internal class CodeExplorerItem : FilteredTypeTreeListItem {
-        /// <summary>
-        /// the branch to which this item belongs (if the item is not part of the "root")
-        /// </summary>
-        public CodeExplorerBranch Branch { get; set; }
 
         /// <summary>
         /// corresponds to the icon displayed next to DisplayText, if set to 0 (=BranchIcon) then the icon
         /// chosen for this item is the icon corresponding to the branch
         /// </summary>
-        public CodeExplorerIconType IconType { get; set; }
+        public virtual CodeExplorerIconType Type { get; set; }
 
         /// <summary>
         /// if the item has no children, clicking on it will make the caret move to this line
@@ -64,24 +61,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public ParseFlag Flags { get; set; }
 
         /// <summary>
-        /// The string to display right next to the Flags
-        /// </summary>
-        public string SubString { get; set; }
-
-        /// <summary>
-        /// Set this to true if the item doesn't represent a block and therefor should not have a "mouse" selection
-        /// image on the right
-        /// </summary>
-        public bool IsNotBlock { get; set; }
-
-        /// <summary>
-        /// This item should be on the root of the tree?
-        /// </summary>
-        public bool IsRoot {
-            get { return Branch == CodeExplorerBranch.Root || Branch == CodeExplorerBranch.MainBlock; }
-        }
-
-        /// <summary>
         /// The piece of text displayed in the list
         /// </summary>
         public override string DisplayText { get; set; }
@@ -90,9 +69,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// return the image to display for this item
         /// If null, the image corresponding to ItemTypeImage will be used instead
         /// </summary>
-        public override Image ItemImage {
-            get { return null; }
-        }
+        public override Image ItemImage { get; set; }
 
         /// <summary>
         /// return this item type (a unique int for each item type)
@@ -100,7 +77,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// on the bottom of list
         /// </summary>
         public override int ItemType {
-            get { return IconType > 0 ? (int) IconType : (int) Branch + 666; }
+            get { return (int) Type; }
         }
 
         /// <summary>
@@ -110,14 +87,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// bottom buttons will be that of the first item found for the given type
         /// </summary>
         public override Image ItemTypeImage {
-            get { return Utils.GetImageFromStr(IconType > 0 ? IconType.ToString() : Branch.ToString()); }
+            get { return Utils.GetImageFromStr(Type.ToString()); }
         }
 
         /// <summary>
         /// The text that describes this item type
         /// </summary>
         public override string ItemTypeText {
-            get { return "Category : <span class='SubTextColor'><b>" + IconType + "</b></span><br><br>"; }
+            get { return "Category : <span class='SubTextColor'><b>" + Type + "</b></span><br><br>"; }
         }
 
         /// <summary>
@@ -128,11 +105,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
+        /// Should this item be hidden when in searching mode?
+        /// </summary>
+        public override bool HideWhileSearching { get { return false; } }
+
+        /// <summary>
         /// return a string containing the subtext to display
         /// </summary>
-        public override string SubText {
-            get { return SubString; }
-        }
+        public override string SubText { get; set; }
 
         /// <summary>
         /// return a list of images to be displayed (in reverse order) for the item
@@ -155,96 +135,281 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// to override, that should return the list of the children for this item (if any) or null
         /// </summary>
         public override List<FilteredTypeTreeListItem> Children { get; set; }
+
+        #region Factory
+
+        public static class Factory {
+            public static CodeExplorerItem New(CodeExplorerIconType type) {
+                switch (type) {
+                    case CodeExplorerIconType.RunInternal:
+                        return new RunInternalCodeItem();
+                    case CodeExplorerIconType.RunExternal:
+                        return new RunExternalCodeItem();
+                    case CodeExplorerIconType.DynamicFunctionCallExternal:
+                        return new DynamicFunctionCallExternalCodeItem();
+                    case CodeExplorerIconType.DynamicFunctionCall:
+                        return new DynamicFunctionCallCodeItem();
+                    case CodeExplorerIconType.StaticFunctionCall:
+                        return new StaticFunctionCallCodeItem();
+                    case CodeExplorerIconType.TempTable:
+                        return new TempTableCodeItem();
+                    case CodeExplorerIconType.Table:
+                        return new TableCodeItem();
+
+                    case CodeExplorerIconType.Subscribe:
+                        return new SubscribeCodeItem();
+                    case CodeExplorerIconType.Publish:
+                        return new PublishCodeItem();
+                    case CodeExplorerIconType.Unsubscribe:
+                        return new UnsubscribeCodeItem();
+
+                    case CodeExplorerIconType.MainBlock:
+                        return new MainBlockCodeItem();
+                    case CodeExplorerIconType.Prototype:
+                        return new PrototypeCodeItem();
+
+                    case CodeExplorerIconType.DefinitionBlock:
+                    case CodeExplorerIconType.XtfrBlock:
+                    case CodeExplorerIconType.PreprocessorBlock:
+                    case CodeExplorerIconType.SettingsBlock:
+                    case CodeExplorerIconType.CreateWindowBlock:
+                    case CodeExplorerIconType.RuntimeBlock:
+                        return new AnonymousCodeItem();
+
+                    case CodeExplorerIconType.Procedure:
+                        return new ProcedureCodeItem();
+                    case CodeExplorerIconType.ExternalProcedure:
+                        return new ExternalProcedureCodeItem();
+
+                    default:
+                        throw new Exception("Missing type " + type + " for the factory!");
+                }
+            }
+        }
+
+        #endregion
+    }
+
+
+    /// <summary>
+    /// Anonymous code item for branches or other item that don't need a type button on the bottom
+    /// </summary>
+    internal class AnonymousCodeItem : CodeExplorerItem {
+
+        /// <summary>
+        /// don't display a type button for those
+        /// </summary>
+        public override int ItemType { get { return -1; } }
+
+        public override Image ItemImage {
+            get { return Utils.GetImageFromStr(Type.ToString()); }
+        }
     }
 
     /// <summary>
-    /// Defines the different types of explorerItems (is related to the image display in the code explorer)
-    /// The attribute is used for the text displayed for the branch
-    /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
+    /// Anonymous code item for branches or other item that don't need a type button on the bottom
     /// </summary>
-    internal enum CodeExplorerBranch {
-        [Description("Root")]
-        Root,
+    internal class BranchCodeItem : AnonymousCodeItem {
 
-        [Description("Appbuilder blocks")]
-        Block,
+        public BranchCodeItem() {
+            // expanded by default
+            IsExpanded = true;
+        }
 
-        [Description("Program parameters")]
-        ProgramParameter,
-
-        [Description("ON events")]
-        OnEvent,
-
-        [Description("Main block")]
-        MainBlock,
-
-        [Description("Includes")]
-        Include,
-
-        [Description("External procedures")]
-        ExternalProcedure,
-
-        [Description("Procedures")]
-        Procedure,
-
-        [Description("Functions")]
-        Function,
-
-        [Description("Subscribe")]
-        Subscribe,
-
-        [Description("Publish")]
-        Publish,
-
-        [Description("Unsubscribe")]
-        Unsubscribe,
-
-        [Description("Defined temp-tables")]
-        DefinedTempTable,
-
-        [Description("Run internal routine")]
-        Run,
-
-        [Description("Run external procedure")]
-        RunExternal,
-
-        [Description("Static function calls")]
-        StaticFunctionCall,
-
-        [Description("Internal dynamic function calls")]
-        DynamicFunctionCall,
-
-        [Description("External dynamic function calls")]
-        DynamicFunctionCallExternal,
-
-        [Description("Browse definitions")]
-        Browse,
-
-        [Description("Tables used")]
-        TableUsed,
-
-        [Description("Temp-tables used")]
-        TempTableUsed
+        /// <summary>
+        /// Should this item be hidden when in searching mode?
+        /// </summary>
+        public override bool HideWhileSearching { get { return true; } }
     }
 
     /// <summary>
     /// Corresponds to an image, displayed on the left of an item
     /// </summary>
     internal enum CodeExplorerIconType {
-        BranchIcon,
+        Root,
+
+        Block,
         DefinitionBlock,
         XtfrBlock,
         PreprocessorBlock,
         Prototype,
         SettingsBlock,
-        CreateWindowBlock,
+        CreateWindowBlock, 
         RuntimeBlock,
-        DynamicFunctionCall,
-        DynamicFunctionCallExternal,
-        RunInternal,
-        RunExternal,
+
+        ProgramParameter,
+        Parameter,
+
+        OnEvent,
+
+        MainBlock,
+
+        Include,
+
+        ExternalProcedure,
+        Procedure,
+        Function,
+
+        Subscribe,
+        Publish,
+        Unsubscribe,
+
+        DefinedTempTable,
         Table,
         TempTable,
-        Parameter
+
+        RunInternal,
+        RunExternal,
+
+        StaticFunctionCall,
+        DynamicFunctionCallExternal,
+        DynamicFunctionCall,
+
+        Browse,
+
+        TempTableUsed,
+        TableUsed,      
     }
+    
+
+    internal class RootCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Root; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Root; } }
+    }
+    
+    internal class BrowseCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Browse; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Browse; } }
+    }
+    
+    internal class ProcedureCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Procedure; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Procedure; } }
+    }
+    
+    internal class ExternalProcedureCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.ExternalProcedure; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.ExternalProcedure; } }
+    }
+    
+    internal class FunctionCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Function; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Function; } }
+    }
+
+    internal class OnEventCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.OnEvent; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.OnEvent; } }
+    }
+
+    internal class IncludeCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Include; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Include; } }
+    }
+    
+    internal class MainBlockCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.MainBlock; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.MainBlock; } }
+    }
+    
+    internal class UnsubscribeCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Unsubscribe; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Unsubscribe; } }
+    }
+    
+    internal class SubscribeCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Subscribe; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Subscribe; } }
+    }
+
+    internal class PublishCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Publish; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Publish; } }
+    }
+
+    internal class PrototypeCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Prototype; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Prototype; } }
+    }
+
+    internal class StaticFunctionCallCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.StaticFunctionCall; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.StaticFunctionCall; } }
+    }
+
+    internal class DynamicFunctionCallCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.DynamicFunctionCall; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.DynamicFunctionCall; } }
+    }
+
+    internal class DynamicFunctionCallExternalCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.DynamicFunctionCallExternal; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.DynamicFunctionCallExternal; } }
+    }
+
+    internal class RunInternalCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.RunInternal; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.RunInternal; } }
+    }
+
+    internal class RunExternalCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.RunExternal; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.RunExternal; } }
+    }
+
+    internal class TableCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Table; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Table; } }
+    }
+
+    internal class TempTableCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.TempTable; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.TempTable; } }
+    }
+
+    internal class ParameterCodeItem : CodeExplorerItem {
+
+        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Parameter; } }
+
+        public override Image ItemTypeImage { get { return ImageResources.Parameter; } }
+    }
+
 }

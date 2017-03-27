@@ -30,7 +30,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     internal class CodeExplorerSortingClass<T> : IComparer<T> where T : ListItem {
         #region private
 
-        private List<int> _explorerBranchTypePriority;
+        private Dictionary<int, int> _explorerBranchTypePriority;
 
         private SortingType _sortingType;
 
@@ -59,7 +59,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region Life
 
         private CodeExplorerSortingClass() {
-            _explorerBranchTypePriority = Config.GetPriorityList(typeof(CodeExplorerBranch), "CodeExplorerItemPriorityList");
+            _explorerBranchTypePriority = Config.GetPriorityList<CodeExplorerIconType>("CodeExplorerItemPriorityList");
         }
 
         #endregion
@@ -87,20 +87,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (x == null || y == null)
                 return 0;
 
-            // compare first by BranchType
-            int compare = _explorerBranchTypePriority[(int) x.Branch].CompareTo(_explorerBranchTypePriority[(int) y.Branch]);
-            if (compare != 0) return compare;
-
-            // compare by IconType
-            compare = x.IconType.CompareTo(y.IconType);
+            // compare first by CompletionType
+            var compare = _explorerBranchTypePriority[(int) x.Type].CompareTo(_explorerBranchTypePriority[(int) y.Type]);
             if (compare != 0) return compare;
 
             // sort by display text
             if (_sortingType == SortingType.Alphabetical) {
-                compare = String.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
-                if (compare != 0) return compare;
+                compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                if (compare != 0)
+                    return compare;
             }
 
+            // sort by line (code order)
             return x.GoToLine.CompareTo(y.GoToLine);
         }
 
@@ -111,8 +109,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
     internal enum SortingType {
         NaturalOrder = 0,
-        Alphabetical = 1,
-        Unsorted = 2
+        Alphabetical = 1
     }
 
     #endregion

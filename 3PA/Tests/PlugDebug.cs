@@ -50,6 +50,11 @@ namespace _3PA.Tests {
         public static void DebugTest1() {
 
             MeasureIt(() => {
+                for (int i = 0; i < 99999; i++) {
+                    using (new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack)) {
+                        
+                    }
+                }
             }, "1 : ");
 
             MeasureIt(() => {

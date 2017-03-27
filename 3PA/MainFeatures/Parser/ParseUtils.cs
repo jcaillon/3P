@@ -19,55 +19,20 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
+
+    /// <summary>
+    /// Static class that provide utilities to the parser
+    /// </summary>
     internal static class ParserUtils {
-        #region find table, buffer, temptable
-
-        /// <summary>
-        /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temptable, or a buffer name (in which case we return the associated table)
-        /// </summary>
-        public static ParsedTable FindAnyTableOrBufferByName(string name, List<ParsedItem> parsedItems) {
-            // temptable or table
-            var foundTable = FindAnyTableByName(name, parsedItems);
-            if (foundTable != null)
-                return foundTable;
-            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
-            var foundBuffer = parsedItems.Find(data => {
-                var def = data as ParsedDefine;
-                return def != null && def.Type == ParseDefineType.Buffer && def.Name.EqualsCi(name);
-            }) as ParsedDefine;
-            return foundBuffer != null ? FindAnyTableByName(foundBuffer.BufferFor, parsedItems) : null;
-        }
-
-        /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
-        /// </summary>
-        private static ParsedTable FindAnyTableByName(string name, List<ParsedItem> parsedItems) {
-            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
-        }
-
-        /// <summary>
-        /// Find a temptable by name
-        /// </summary>
-        private static ParsedTable FindTempTableByName(string name, List<ParsedItem> parsedItems) {
-            return parsedItems.Find(item => {
-                var tt = item as ParsedTable;
-                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
-            }) as ParsedTable;
-        }
-
-        #endregion
 
         #region find primitive type
 
         /// <summary>
-        /// convertion
+        /// conversion
         /// </summary>
         public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike, List<ParsedItem> parsedItems) {
             str = str.ToLower();
@@ -150,6 +115,45 @@ namespace _3PA.MainFeatures.Parser {
 
             var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
             return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
+        }
+
+        #endregion
+
+        #region find table, buffer, temptable
+
+        /// <summary>
+        /// finds a ParsedTable for the input name, it can either be a database table,
+        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// </summary>
+        private static ParsedTable FindAnyTableOrBufferByName(string name, List<ParsedItem> parsedItems) {
+            // temptable or table
+            var foundTable = FindAnyTableByName(name, parsedItems);
+            if (foundTable != null)
+                return foundTable;
+            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
+            var foundBuffer = parsedItems.Find(data => {
+                var def = data as ParsedDefine;
+                return def != null && def.Type == ParseDefineType.Buffer && def.Name.EqualsCi(name);
+            }) as ParsedDefine;
+            return foundBuffer != null ? FindAnyTableByName(foundBuffer.BufferFor, parsedItems) : null;
+        }
+
+        /// <summary>
+        /// Find the table referenced among database and defined temp tables; 
+        /// name is the table's name (can also be BASE.TABLE)
+        /// </summary>
+        public static ParsedTable FindAnyTableByName(string name, List<ParsedItem> parsedItems) {
+            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name, parsedItems);
+        }
+
+        /// <summary>
+        /// Find a temptable by name
+        /// </summary>
+        private static ParsedTable FindTempTableByName(string name, List<ParsedItem> parsedItems) {
+            return parsedItems.Find(item => {
+                var tt = item as ParsedTable;
+                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
+            }) as ParsedTable;
         }
 
         #endregion

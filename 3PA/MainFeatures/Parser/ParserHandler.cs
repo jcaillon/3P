@@ -144,7 +144,7 @@ namespace _3PA.MainFeatures.Parser {
                     } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
 
                     if (parser != null) {
-                    
+                        _lineInfo = new Dictionary<int, LineInfo>(parser.LineInfo);
                     }
                 
                     // send parserItems

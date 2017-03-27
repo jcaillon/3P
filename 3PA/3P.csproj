@@ -273,7 +273,6 @@
     <Content Include="_Resource\Images\Appli\Calendar.png" />
     <Content Include="_Resource\Images\Appli\Cancel.png" />
     <Content Include="_Resource\Images\Appli\ClearAll.png" />
-    <Content Include="_Resource\Images\Appli\Clear_filters.png" />
     <Content Include="_Resource\Images\Appli\Collapse.png" />
     <Content Include="_Resource\Images\Appli\Configuration.png" />
     <Content Include="_Resource\Images\Appli\Copy.png" />
@@ -466,7 +465,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\Prototype.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Publish.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Root.png" />
-    <Content Include="_Resource\Images\ParserItem\Type\Run.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\RunInternal.png" />
     <Content Include="_Resource\Images\ParserItem\Type\RunExternal.png" />
     <Content Include="_Resource\Images\ParserItem\Type\RuntimeBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Sequence.png" />

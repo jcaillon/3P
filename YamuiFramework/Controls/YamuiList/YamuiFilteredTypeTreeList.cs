@@ -403,12 +403,10 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
             // when searching, the tree must actually behave like a FilteredTypeList
             if (_isSearching) {
-                if (SortingClass != null) {
-                    var list = listItems.ToList();
-                    list.Sort(SortingClass); // make sure to sort the "initial" list here
-                    return base.GetFilteredAndSortedList(list);
-                }
-                return base.GetFilteredAndSortedList(listItems);
+                // sort alphabetically
+                var list = listItems.Where(item => !((FilteredTypeTreeListItem)item).HideWhileSearching).OrderBy(item => item.DisplayText, StringComparer.CurrentCultureIgnoreCase).ToList();
+                //list.Sort(SortingClass); // make sure to sort the "initial" list here
+                return base.GetFilteredAndSortedList(list);
             }
 
             var outList = new List<FilteredTypeTreeListItem>();

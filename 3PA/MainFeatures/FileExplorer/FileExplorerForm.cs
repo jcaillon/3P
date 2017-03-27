@@ -166,13 +166,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             };
             filterbox.Initialize(yamuiList);
 
-            //treeList.SortingClass = CompletionSortingClass<ListItem>.Instance;
-            //treeList.FilterPredicate = CompletionFilterClass.Instance.FilterPredicate;
             yamuiList.EmptyListString = @"No files!";
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
-
-            // allows to sort the list when we are in search mode (we then need to sort alphabetically again)
-            yamuiList.SortingClass = FileSortingClass<ListItem>.Instance;
 
             toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
