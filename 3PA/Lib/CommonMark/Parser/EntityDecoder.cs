@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (EntityDecoder.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -48,8 +51,8 @@ namespace _3PA.Lib.CommonMark.Parser {
 
             utf32 -= 65536;
             return new string(new[] {
-                (char) (utf32/1024 + 55296),
-                (char) (utf32%1024 + 56320)
+                (char) (utf32 / 1024 + 55296),
+                (char) (utf32 % 1024 + 56320)
             });
         }
 

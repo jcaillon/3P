@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (PlugDebug.cs) is part of 3P.
@@ -16,49 +17,35 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.AutoCompletionFeature;
-using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
-using _3PA._Resource;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
-
     /// <summary>
     /// This class is only for debug/dev purposes, it will not be used in production
     /// </summary>
     internal class PlugDebug {
         #region Debug test
-        
+
         public static void DebugTest1() {
+            MeasureIt(() => { }, "1 : ");
 
-            MeasureIt(() => {
-                for (int i = 0; i < 99999; i++) {
-                    using (new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack)) {
-                        
-                    }
-                }
-            }, "1 : ");
-
-            MeasureIt(() => {
-            }, "2 : ");
+            MeasureIt(() => { }, "2 : ");
         }
 
         public static void DebugTest2() {}

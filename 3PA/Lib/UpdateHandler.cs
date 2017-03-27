@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UpdateHandler.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -111,7 +114,7 @@ namespace _3PA.Lib {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(true);
-            }, 1000*60*120, 0, DateTime.Now.Subtract(lastCheck).TotalMinutes > Config.Instance.TechnicalCheckUpdateEveryXMin);
+            }, 1000 * 60 * 120, 0, DateTime.Now.Subtract(lastCheck).TotalMinutes > Config.Instance.TechnicalCheckUpdateEveryXMin);
         }
 
         /// <summary>

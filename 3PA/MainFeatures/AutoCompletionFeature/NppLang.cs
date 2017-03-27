@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppLang.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,7 +40,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
     internal class NppLangs {
-
         #region Singleton
 
         private static NppLangs _instance;
@@ -48,7 +50,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     //|| Utils.HasFileChanged(Config.FileNppLangsXml) 
                     || Utils.HasFileChanged(Npp.ConfXml.FileNppUserDefinedLang)
                     //|| Utils.HasFileChanged(Npp.Config.FileNppStylersPath)
-                    ) {
+                ) {
                     _instance = new NppLangs();
                 }
                 return _instance;
@@ -161,7 +163,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal class LangDescription {
-
             private List<CompletionItem> _keywords;
 
             /// <summary>
@@ -247,7 +248,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                         Params = parameters
                                     });
                                 }
-                                
+
                                 _keywords.Add(new LangWordCompletionItem {
                                     DisplayText = keyword,
                                     SubText = LangName + ".xml",

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (InfoToolTip.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -232,7 +235,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
-
             var popupMinWidth = 250;
             var toDisplay = new StringBuilder();
 
@@ -279,7 +281,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (item is TableCompletionItem) {
                 popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
             }
-            
+
             // the rest depends on the item type
             try {
                 toDisplay.Append(item);
@@ -325,8 +327,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         #region formatting functions
-
-
 
         #endregion
 

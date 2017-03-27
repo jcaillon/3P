@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerItem.cs) is part of 3P.
@@ -16,23 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA._Resource;
-using System;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-
     /// <summary>
     /// base class
     /// </summary>
-    internal class CodeExplorerItem : FilteredTypeTreeListItem {
-
+    internal class CodeItem : FilteredTypeTreeListItem {
         /// <summary>
         /// corresponds to the icon displayed next to DisplayText, if set to 0 (=BranchIcon) then the icon
         /// chosen for this item is the icon corresponding to the branch
@@ -107,7 +107,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Should this item be hidden when in searching mode?
         /// </summary>
-        public override bool HideWhileSearching { get { return false; } }
+        public override bool HideWhileSearching {
+            get { return false; }
+        }
 
         /// <summary>
         /// return a string containing the subtext to display
@@ -123,7 +125,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
                     if (l == 0 || !Flags.HasFlag((ParseFlag) l))
                         return;
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
                         outList.Add(tryImg);
                 });
@@ -139,7 +141,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #region Factory
 
         public static class Factory {
-            public static CodeExplorerItem New(CodeExplorerIconType type) {
+            public static CodeItem New(CodeExplorerIconType type) {
                 switch (type) {
                     case CodeExplorerIconType.RunInternal:
                         return new RunInternalCodeItem();
@@ -190,16 +192,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #endregion
     }
 
-
     /// <summary>
     /// Anonymous code item for branches or other item that don't need a type button on the bottom
     /// </summary>
-    internal class AnonymousCodeItem : CodeExplorerItem {
-
+    internal class AnonymousCodeItem : CodeItem {
         /// <summary>
         /// don't display a type button for those
         /// </summary>
-        public override int ItemType { get { return -1; } }
+        public override int ItemType {
+            get { return -1; }
+        }
 
         public override Image ItemImage {
             get { return Utils.GetImageFromStr(Type.ToString()); }
@@ -210,7 +212,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// Anonymous code item for branches or other item that don't need a type button on the bottom
     /// </summary>
     internal class BranchCodeItem : AnonymousCodeItem {
-
         public BranchCodeItem() {
             // expanded by default
             IsExpanded = true;
@@ -219,7 +220,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Should this item be hidden when in searching mode?
         /// </summary>
-        public override bool HideWhileSearching { get { return true; } }
+        public override bool HideWhileSearching {
+            get { return true; }
+        }
     }
 
     /// <summary>
@@ -234,7 +237,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         PreprocessorBlock,
         Prototype,
         SettingsBlock,
-        CreateWindowBlock, 
+        CreateWindowBlock,
         RuntimeBlock,
 
         ProgramParameter,
@@ -268,148 +271,206 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Browse,
 
         TempTableUsed,
-        TableUsed,      
-    }
-    
-
-    internal class RootCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Root; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Root; } }
-    }
-    
-    internal class BrowseCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Browse; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Browse; } }
-    }
-    
-    internal class ProcedureCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Procedure; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Procedure; } }
-    }
-    
-    internal class ExternalProcedureCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.ExternalProcedure; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.ExternalProcedure; } }
-    }
-    
-    internal class FunctionCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Function; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Function; } }
+        TableUsed
     }
 
-    internal class OnEventCodeItem : CodeExplorerItem {
+    internal class RootCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Root; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.OnEvent; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.OnEvent; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Root; }
+        }
     }
 
-    internal class IncludeCodeItem : CodeExplorerItem {
+    internal class BrowseCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Browse; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Include; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Include; } }
-    }
-    
-    internal class MainBlockCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.MainBlock; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.MainBlock; } }
-    }
-    
-    internal class UnsubscribeCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Unsubscribe; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Unsubscribe; } }
-    }
-    
-    internal class SubscribeCodeItem : CodeExplorerItem {
-
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Subscribe; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Subscribe; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Browse; }
+        }
     }
 
-    internal class PublishCodeItem : CodeExplorerItem {
+    internal class ProcedureCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Procedure; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Publish; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Publish; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Procedure; }
+        }
     }
 
-    internal class PrototypeCodeItem : CodeExplorerItem {
+    internal class ExternalProcedureCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.ExternalProcedure; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Prototype; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Prototype; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.ExternalProcedure; }
+        }
     }
 
-    internal class StaticFunctionCallCodeItem : CodeExplorerItem {
+    internal class FunctionCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Function; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.StaticFunctionCall; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.StaticFunctionCall; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Function; }
+        }
     }
 
-    internal class DynamicFunctionCallCodeItem : CodeExplorerItem {
+    internal class OnEventCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.OnEvent; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.DynamicFunctionCall; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.DynamicFunctionCall; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.OnEvent; }
+        }
     }
 
-    internal class DynamicFunctionCallExternalCodeItem : CodeExplorerItem {
+    internal class IncludeCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Include; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.DynamicFunctionCallExternal; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.DynamicFunctionCallExternal; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Include; }
+        }
     }
 
-    internal class RunInternalCodeItem : CodeExplorerItem {
+    internal class MainBlockCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.MainBlock; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.RunInternal; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.RunInternal; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.MainBlock; }
+        }
     }
 
-    internal class RunExternalCodeItem : CodeExplorerItem {
+    internal class UnsubscribeCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Unsubscribe; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.RunExternal; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.RunExternal; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Unsubscribe; }
+        }
     }
 
-    internal class TableCodeItem : CodeExplorerItem {
+    internal class SubscribeCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Subscribe; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Table; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Table; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Subscribe; }
+        }
     }
 
-    internal class TempTableCodeItem : CodeExplorerItem {
+    internal class PublishCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Publish; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.TempTable; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.TempTable; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Publish; }
+        }
     }
 
-    internal class ParameterCodeItem : CodeExplorerItem {
+    internal class PrototypeCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Prototype; }
+        }
 
-        public override CodeExplorerIconType Type { get { return CodeExplorerIconType.Parameter; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Parameter; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Prototype; }
+        }
     }
 
+    internal class StaticFunctionCallCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.StaticFunctionCall; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.StaticFunctionCall; }
+        }
+    }
+
+    internal class DynamicFunctionCallCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.DynamicFunctionCall; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.DynamicFunctionCall; }
+        }
+    }
+
+    internal class DynamicFunctionCallExternalCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.DynamicFunctionCallExternal; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.DynamicFunctionCallExternal; }
+        }
+    }
+
+    internal class RunInternalCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.RunInternal; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.RunInternal; }
+        }
+    }
+
+    internal class RunExternalCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.RunExternal; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.RunExternal; }
+        }
+    }
+
+    internal class TableCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Table; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.Table; }
+        }
+    }
+
+    internal class TempTableCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.TempTable; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.TempTable; }
+        }
+    }
+
+    internal class ParameterCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.Parameter; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.Parameter; }
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DataBase.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,7 +30,6 @@ using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal class DataBase {
-
         #region Singleton
 
         private static DataBase _instance;
@@ -37,7 +39,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
-        
+
         #region events
 
         /// <summary>
@@ -336,7 +338,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 // Tables
                 foreach (var table in db.Tables) {
-                    var curTable = new TableCompletionItem() {
+                    var curTable = new TableCompletionItem {
                         DisplayText = table.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode),
                         SubText = db.Name,
                         ParsedBaseItem = table,

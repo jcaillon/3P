@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProCodeFormat.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System.IO;
 using System.Text;
 using _3PA.Lib;
@@ -48,7 +51,7 @@ namespace _3PA.MainFeatures.Pro {
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
                 if (canIndent)
-                    Sci.GetLine(i).Indentation = dic[i].BlockDepth*indentWidth;
+                    Sci.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
                 else
                     x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;

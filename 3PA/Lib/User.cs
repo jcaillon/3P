@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (User.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Globalization;
 using System.IO;
@@ -116,7 +119,7 @@ namespace _3PA.Lib {
             wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
                                 "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.SoftwareVersion + " ####\r\n" +
                                 message
-                );
+            );
             wb.Execute();
 
             return false;

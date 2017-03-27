@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileTag.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,28 +49,28 @@ namespace _3PA.MainFeatures.Pro {
             _filesInfo.Clear();
 
             Utils.ForEachLine(Config.FileFilesInfo, new byte[0], (i, line) => {
-                var items = line.Split('\t');
-                if (items.Count() == 8) {
-                    var fileName = items[0].Trim();
-                    var fileInfo = new FileTagObject {
-                        CorrectionNumber = items[1],
-                        CorrectionDate = items[2],
-                        CorrectionDecription = items[3].Replace("~n", "\n"),
-                        ApplicationName = items[4],
-                        ApplicationVersion = items[5],
-                        WorkPackage = items[6],
-                        BugId = items[7]
-                    };
-                    // add to dictionnary
-                    if (_filesInfo.ContainsKey(fileName)) {
-                        _filesInfo[fileName].Add(fileInfo);
-                    } else {
-                        _filesInfo.Add(fileName, new List<FileTagObject> {
-                            fileInfo
-                        });
+                    var items = line.Split('\t');
+                    if (items.Count() == 8) {
+                        var fileName = items[0].Trim();
+                        var fileInfo = new FileTagObject {
+                            CorrectionNumber = items[1],
+                            CorrectionDate = items[2],
+                            CorrectionDecription = items[3].Replace("~n", "\n"),
+                            ApplicationName = items[4],
+                            ApplicationVersion = items[5],
+                            WorkPackage = items[6],
+                            BugId = items[7]
+                        };
+                        // add to dictionnary
+                        if (_filesInfo.ContainsKey(fileName)) {
+                            _filesInfo[fileName].Add(fileInfo);
+                        } else {
+                            _filesInfo.Add(fileName, new List<FileTagObject> {
+                                fileInfo
+                            });
+                        }
                     }
-                }
-            },
+                },
                 Encoding.Default);
 
             if (!_filesInfo.ContainsKey(DefaultTag))
@@ -176,7 +179,7 @@ namespace _3PA.MainFeatures.Pro {
             }
             return output;
         }
-        
+
         /// <summary>
         /// Allows the user to surround its selection with custom modification tags
         /// </summary>
@@ -187,7 +190,7 @@ namespace _3PA.MainFeatures.Pro {
                 Sci.TargetFromSelection();
                 var indent = new String(' ', Sci.GetLine(Sci.LineFromPosition(Sci.TargetStart)).Indentation);
 
-                var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
+                var opener = ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
                 var eol = Sci.GetEolString;
                 output.Append(opener);
                 output.Append(eol);
@@ -195,7 +198,7 @@ namespace _3PA.MainFeatures.Pro {
                 output.Append(Sci.SelectedText);
                 output.Append(eol);
                 output.Append(indent);
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
+                output.Append(ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
 
                 Sci.TargetFromSelection();
                 Sci.ReplaceTarget(output.ToString());
@@ -211,7 +214,7 @@ namespace _3PA.MainFeatures.Pro {
             CommonTagAction(fileInfo => {
                 var output = new StringBuilder();
                 var eol = Sci.GetEolString;
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
+                output.Append(ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
                 output.Append(eol);
 
                 // description
@@ -225,7 +228,7 @@ namespace _3PA.MainFeatures.Pro {
                     }
                 }
 
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
+                output.Append(ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
                 output.Append(eol);
 
                 Sci.SetTextByRange(Sci.CurrentPosition, Sci.CurrentPosition, output.ToString());

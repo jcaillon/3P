@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Utils.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -455,13 +458,13 @@ namespace _3PA.Lib {
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
 
-            var nPercentW = (size.Width/(float) sourceWidth);
-            var nPercentH = (size.Height/(float) sourceHeight);
+            var nPercentW = (size.Width / (float) sourceWidth);
+            var nPercentH = (size.Height / (float) sourceHeight);
 
             var nPercent = nPercentH < nPercentW ? nPercentH : nPercentW;
 
-            int destWidth = (int) (sourceWidth*nPercent);
-            int destHeight = (int) (sourceHeight*nPercent);
+            int destWidth = (int) (sourceWidth * nPercent);
+            int destHeight = (int) (sourceHeight * nPercent);
 
             Bitmap b = new Bitmap(destWidth, destHeight);
             Graphics g = Graphics.FromImage(b);
@@ -598,8 +601,8 @@ namespace _3PA.Lib {
             var container = root as ContainerControl;
             if (container != null)
                 foreach (Control c in container.Controls)
-                    foreach (var i in GetControlsOfType<T>(c))
-                        yield return i;
+                foreach (var i in GetControlsOfType<T>(c))
+                    yield return i;
         }
 
         /// <summary>
@@ -847,9 +850,7 @@ namespace _3PA.Lib {
                 credential = new NetworkCredential(userName, passWord);
 
             var modes = new List<EsslSupportMode>();
-            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => {
-                modes.Add((EsslSupportMode) l);
-            });
+            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add((EsslSupportMode) l); });
 
             ftp.DataConnectionMode = EDataConnectionMode.Passive;
             while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {

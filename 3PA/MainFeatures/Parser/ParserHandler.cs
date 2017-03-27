@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserHandler.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,9 +31,7 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
-
     internal static class ParserHandler {
-
         #region event
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Event published when the parser has done its job and it's time to get the results
         /// </summary>
-        public static event Action<List<CodeExplorerItem>> OnEndSendCodeExplorerItems;
+        public static event Action<List<CodeItem>> OnEndSendCodeExplorerItems;
 
         /// <summary>
         /// Event published when the parser has done its job and it's time to get the results
@@ -68,9 +69,7 @@ namespace _3PA.MainFeatures.Parser {
         private static AsapButDelayableAction _parseAction;
 
         private static AsapButDelayableAction ParseAction {
-            get {
-                return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse));
-            }
+            get { return _parseAction ?? (_parseAction = new AsapButDelayableAction(800, DoParse)); }
         }
 
         private static object _lock = new object();
@@ -85,9 +84,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static ParsedScopeItem GetScopeOfLine(int line) {
             ParsedScopeItem output = null;
-            DoInLock(() => {
-                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null;
-            });
+            DoInLock(() => { output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null; });
             return output;
         }
 
@@ -112,7 +109,6 @@ namespace _3PA.MainFeatures.Parser {
                     OnStart();
 
                 DoInLock(() => {
-
                     // make sure to always parse the current file
                     Parser parser = null;
                     do {
@@ -132,7 +128,6 @@ namespace _3PA.MainFeatures.Parser {
                             // send codeExplorerItems
                             if (OnEndSendCodeExplorerItems != null)
                                 OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
-
                         } else {
                             var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null, Config.Instance.NppAutoCompleteMinWordLengthRequired);
 
@@ -140,13 +135,12 @@ namespace _3PA.MainFeatures.Parser {
                             if (OnEndSendCompletionItems != null)
                                 OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
                         }
-
                     } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
 
                     if (parser != null) {
                         _lineInfo = new Dictionary<int, LineInfo>(parser.LineInfo);
                     }
-                
+
                     // send parserItems
                     if (OnEndSendParserItems != null) {
                         if (parser != null)
@@ -225,6 +219,5 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         #endregion
-
     }
 }

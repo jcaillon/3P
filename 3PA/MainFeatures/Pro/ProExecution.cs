@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProExecution.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -291,7 +294,7 @@ namespace _3PA.MainFeatures.Pro {
                 if ((lastDeployment.DeployType != DeployType.Move) ||
                     Config.Instance.CompileForceUseOfTemp ||
                     Path.GetExtension(fileToCompile.InputPath).Equals(".cls")
-                    ) {
+                ) {
                     var subTempDir = Path.Combine(LocalTempDir, count.ToString());
 
                     // if the deployment dir is not on the same disk as the temp folder, we create a temp dir

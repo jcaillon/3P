@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CompletionSortingClass.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using YamuiFramework.Controls.YamuiList;
@@ -91,7 +94,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var xk = x as KeywordCompletionItem;
             var yk = y as KeywordCompletionItem;
             if (xk != null && yk != null) {
-                compare = ((int)xk.KeywordType).CompareTo(((int) yk.KeywordType));
+                compare = ((int) xk.KeywordType).CompareTo(((int) yk.KeywordType));
                 if (compare != 0) return compare;
             }
 

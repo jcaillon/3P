@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (InfoToolTipForm.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -76,13 +79,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             var screen = Npp.NppScreen;
 
-            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width/2 - 20);
+            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width / 2 - 20);
 
             _panel.ContentPanel.Size = _labelContent.Size;
-            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height/2 - 10) + 10);
+            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
 
             // Too tall?
-            if (_labelContent.Height > (screen.WorkingArea.Height/2 - 10)) {
+            if (_labelContent.Height > (screen.WorkingArea.Height / 2 - 10)) {
                 Width = Width + 10; // add scrollbar width
             }
         }

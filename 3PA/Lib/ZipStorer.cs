@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ZipStorer.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 // ZipStorer, by Jaime Olivares
 // Website: http://github.com/jaime-olivares/zipstorer
 // Version: 2.35 (March 14, 2010)
@@ -654,7 +657,7 @@ namespace _3PA.Lib {
 
         private uint DateTimeToDosTime(DateTime dt) {
             return (uint) (
-                (dt.Second/2) | (dt.Minute << 5) | (dt.Hour << 11) |
+                (dt.Second / 2) | (dt.Minute << 5) | (dt.Hour << 11) |
                 (dt.Day << 16) | (dt.Month << 21) | ((dt.Year - 1980) << 25));
         }
 
@@ -665,7 +668,7 @@ namespace _3PA.Lib {
                 (int) (dt >> 16) & 31,
                 (int) (dt >> 11) & 31,
                 (int) (dt >> 5) & 63,
-                (int) (dt & 31)*2);
+                (int) (dt & 31) * 2);
         }
 
         /* CRC32 algorithm

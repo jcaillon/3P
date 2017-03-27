@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Extensions.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -165,10 +168,10 @@ namespace _3PA.Lib {
         public static void ForEach<T>(this Type curType, Action<string, long> actionForEachNameValue) {
             if (!curType.IsEnum)
                 return;
-            if (!_enumTypeNameValueKeyPairs.ContainsKey(curType)) { 
+            if (!_enumTypeNameValueKeyPairs.ContainsKey(curType)) {
                 var list = new List<Tuple<string, long>>();
                 foreach (var name in Enum.GetNames(curType)) {
-                    T val = (T)Enum.Parse(curType, name);
+                    T val = (T) Enum.Parse(curType, name);
                     list.Add(new Tuple<string, long>(name, Convert.ToInt64(val)));
                 }
                 _enumTypeNameValueKeyPairs.Add(curType, list);
@@ -365,7 +368,7 @@ namespace _3PA.Lib {
         public static string BreakText(this string text, int lineLength, string eolString = "\n") {
             var charCount = 0;
             var lines = text.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries)
-                .GroupBy(w => (charCount += w.Length + 1)/lineLength)
+                .GroupBy(w => (charCount += w.Length + 1) / lineLength)
                 .Select(g => String.Join(" ", g));
             return String.Join(eolString, lines.ToArray());
         }
@@ -448,7 +451,7 @@ namespace _3PA.Lib {
         /// <param name="needle"></param>
         /// <returns></returns>
         public static int CountOccurences(this string haystack, string needle) {
-            return (haystack.Length - haystack.Replace(needle, "").Length)/needle.Length;
+            return (haystack.Length - haystack.Replace(needle, "").Length) / needle.Length;
         }
 
         /// <summary>

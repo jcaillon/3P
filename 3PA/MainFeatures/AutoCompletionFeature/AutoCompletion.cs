@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletion.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +33,10 @@ using _3PA.NppCore;
 using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// This class handles the Auto Completion
     /// </summary>
     internal static class AutoCompletion {
-
         #region Events
 
         public static event Action<List<CompletionItem>> OnUpdateStaticItems;
@@ -79,7 +80,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// to avoid changing the case of a word we just inserted with TAB or ENTER
         /// </summary>
         private static int _positionOfLastInsertion = -1;
-        
+
         /// <summary>
         /// List of additional character that should be considered as a word (in addition to [a-Z0-9])
         /// </summary>
@@ -151,12 +152,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public static void SetStaticItems() {
             DoInLock(() => {
-
                 _additionalWordChar = new HashSet<char>();
                 _childSeparators = new HashSet<char>();
 
                 if (Npp.CurrentFile.IsProgress) {
-
                     // Progress files
                     _staticItems = Keywords.Instance.CompletionItems.ToList();
                     _staticItems.AddRange(DataBase.Instance.CompletionItems);
@@ -164,7 +163,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     _additionalWordChar.Add('-');
                     _childSeparators.Add(':');
                 } else {
-
                     // Other files, get the keyword list and additional characters from the xml
                     if (Npp.CurrentFile.Lang == null) {
                         _staticItems = new List<CompletionItem>();
@@ -214,7 +212,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // add all the distinct childSeparators if needed
                 foreach (var item in _savedAllItems) {
                     if (item.ChildSeparator != null) {
-                        var c = (char)item.ChildSeparator;
+                        var c = (char) item.ChildSeparator;
                         if (!_childSeparators.Contains(c))
                             _childSeparators.Add(c);
                     }
@@ -236,7 +234,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// (externally called when a new char is entered or when a char is deleted)
         /// </summary>
         public static void UpdateAutocompletion(char c = char.MinValue, int insertPosition = -1) {
-
             if (_insertingWord)
                 return;
 
@@ -260,7 +257,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             // we finished entering a word (we typed a char that is not part of a word, a space of new line or separator...)
             //----------------------
             if (c != char.MinValue && !typing && isNormalContext) {
-
                 strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
                 var strOnLeftLength = strOnLeft.Length;
 
@@ -275,12 +271,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // See if the char of the "word" we finished entering is actually part of a word
                 // (maybe not if, for instance, we just input 2 spaces consecutively)
                 if (offset > 0 && strOnLeftLength > offset && IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - offset])) {
-                    
                     // automatically insert selected keyword of the completion list?
                     if (AutoCompleteInsertSelectedSuggestionOnWordEnd && isVisible) {
                         InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
                         textHasChanged = true;
-                    } 
+                    }
 
                     // automatically change the case of the keyword?
                     else if (AutoCompleteAutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
@@ -329,7 +324,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     return;
                 }
             }
-            
+
             // get current word
             if (strOnLeft == null)
                 strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition, 61);
@@ -350,11 +345,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 if (CurrentActiveTypes != ActiveTypes.All) {
                     CurrentActiveTypes = ActiveTypes.All;
-                    DoInLock(() => {
-                        CurrentItems = _savedAllItems;
-                    });
+                    DoInLock(() => { CurrentItems = _savedAllItems; });
                 }
-
             } else {
                 // return the list of children that should be used in the auto completion, filtered by the previous keywords
                 List<CompletionItem> outList = null;
@@ -366,15 +358,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 // empty list?
                 if (outList == null || outList.Count == 0) {
-
                     // if the current word is directly preceded by a :, we are entering an object field/method
                     // for now, we then display the whole list of object keywords
                     if (firstSeparator == ':' && Npp.CurrentFile.IsProgress) {
                         if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
                             CurrentActiveTypes = ActiveTypes.KeywordObject;
-                            DoInLock(() => {
-                                CurrentItems = _savedAllItems;
-                            });
+                            DoInLock(() => { CurrentItems = _savedAllItems; });
                         }
                         ShowSuggestionList(firstKeyword);
                         return;
@@ -383,13 +372,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     // we should consider the first separator found not as a child separator, display the whole list
                     if (CurrentActiveTypes != ActiveTypes.All) {
                         CurrentActiveTypes = ActiveTypes.All;
-                        DoInLock(() => {
-                            CurrentItems = _savedAllItems;
-                        });
+                        DoInLock(() => { CurrentItems = _savedAllItems; });
                     }
-
                 } else {
-
                     // we will display the list filtered with all the needed children
                     CurrentActiveTypes = ActiveTypes.Filtered;
                     DoInLock(() => {
@@ -517,8 +502,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         private static IEnumerable<CompletionItem> GetAllChildrenItems(IEnumerable<CompletionItem> collection) {
             foreach (CompletionItem item in collection)
-                foreach (var completionItem in item.Children)
-                    yield return completionItem;
+            foreach (var completionItem in item.Children)
+                yield return completionItem;
         }
 
         /// <summary>
@@ -552,9 +537,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static void ShowSuggestionList(AutoCompletionForm form) {
             // we changed the list of items to display
             if (_needToSetItems) {
-                DoInLock(() => {
-                    form.SetItems(CurrentItems.Cast<ListItem>().ToList());
-                });
+                DoInLock(() => { form.SetItems(CurrentItems.Cast<ListItem>().ToList()); });
                 _needToSetItems = false;
             }
 
@@ -647,7 +630,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static void InsertSuggestion(CompletionItem data, int offset = 0) {
             try {
                 if (data != null) {
-
                     // in case of keyword, replace abbreviation if needed
                     var replacementText = data.DisplayText;
                     if (Config.Instance.AutoCompleteReplaceAbbreviations && data.Flags.HasFlag(ParseFlag.Abbreviation)) {
@@ -722,7 +704,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             else
                 _displayTextRankingParsedItems[displayText]++;
         }
-        
+
         #endregion
 
         #region _form handler
@@ -730,7 +712,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Is the form currently visible?
         /// </summary>
-        public static bool IsVisible {get { return !(_form == null || !_form.IsVisible); } }
+        public static bool IsVisible {
+            get { return !(_form == null || !_form.IsVisible); }
+        }
 
         /// <summary>
         /// Closes the form
@@ -862,18 +846,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         private static bool AutoCompleteInsertSelectedSuggestionOnWordEnd {
-            get {
-                return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd : Config.Instance.NppAutoCompleteInsertSelectedSuggestionOnWordEnd;
-            }
+            get { return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd : Config.Instance.NppAutoCompleteInsertSelectedSuggestionOnWordEnd; }
         }
 
         private static bool AutoCompleteAutoCase {
-            get {
-                return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteAutoCase : Config.Instance.NppAutoCompleteAutoCase;
-            }
+            get { return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteAutoCase : Config.Instance.NppAutoCompleteAutoCase; }
         }
 
         #endregion
-
     }
 }

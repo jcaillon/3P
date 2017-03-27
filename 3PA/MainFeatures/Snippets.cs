@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Snippets.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -71,16 +74,16 @@ namespace _3PA.MainFeatures {
             var currentTag = "";
 
             Utils.ForEachLine(file, null, (i, line) => {
-                if (line.EndsWith("=>") && !line.StartsWith(" ")) {
-                    if (currentTag != "") {
-                        Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));
-                        buffer.Clear();
-                    }
+                    if (line.EndsWith("=>") && !line.StartsWith(" ")) {
+                        if (currentTag != "") {
+                            Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));
+                            buffer.Clear();
+                        }
 
-                    currentTag = line.Replace("=>", "").Trim();
-                } else
-                    buffer.AppendLine(line);
-            },
+                        currentTag = line.Replace("=>", "").Trim();
+                    } else
+                        buffer.AppendLine(line);
+                },
                 Encoding.Default);
 
             if (currentTag != "")
@@ -164,11 +167,11 @@ namespace _3PA.MainFeatures {
                     indicators = indic.FindRanges().ToArray(); //needs refreshing as the document is modified
 
                     var paramsInfo = indicators.Select(p => new {
-                        Index = indicators.IndexOf(p),
-                        Text = Sci.GetTextBetween(p),
-                        Range = p,
-                        Pos = p.X
-                    })
+                            Index = indicators.IndexOf(p),
+                            Text = Sci.GetTextBetween(p),
+                            Range = p,
+                            Pos = p.X
+                        })
                         .OrderBy(x => x.Pos)
                         .ToArray();
 
@@ -217,9 +220,9 @@ namespace _3PA.MainFeatures {
                 indic.Clear(range.X, range.Y);
 
             var caretPoint = indicators.Where(point => {
-                string text = Sci.GetTextBetween(point);
-                return text == " " || text == "|";
-            })
+                    string text = Sci.GetTextBetween(point);
+                    return text == " " || text == "|";
+                })
                 .FirstOrDefault();
 
             if (caretPoint.X != caretPoint.Y) {

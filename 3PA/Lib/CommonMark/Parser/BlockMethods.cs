@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (BlockMethods.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System.Collections.Generic;
 using System.Globalization;
 using _3PA.Lib.CommonMark.Syntax;
@@ -321,7 +324,7 @@ namespace _3PA.Lib.CommonMark.Parser {
                     c = ln[++pos];
                     // We limit to 9 digits to avoid overflow, This also seems to be the limit for 'start' in some browsers. 
                     if (c >= '0' && c <= '9' && start < 100000000)
-                        start = start*10 + (c - '0');
+                        start = start * 10 + (c - '0');
                     else
                         break;
                 }
@@ -370,7 +373,7 @@ namespace _3PA.Lib.CommonMark.Parser {
             }
             if (c == '\t') {
                 offset++;
-                var chars_to_tab = 4 - (column%TabSize);
+                var chars_to_tab = 4 - (column % TabSize);
                 column += chars_to_tab;
                 remainingSpaces = chars_to_tab - 1;
                 return true;
@@ -395,7 +398,7 @@ namespace _3PA.Lib.CommonMark.Parser {
             char c;
             while (count > 0 && (c = line[offset]) != '\n') {
                 if (c == '\t') {
-                    var chars_to_tab = 4 - (column%TabSize);
+                    var chars_to_tab = 4 - (column % TabSize);
                     column += chars_to_tab;
                     offset += 1;
                     count -= columns ? chars_to_tab : 1;
@@ -585,7 +588,7 @@ namespace _3PA.Lib.CommonMark.Parser {
                 } else if (!indented && curChar == '<' &&
                            (0 != (matched = (int) Scanner.scan_html_block_start(ln, first_nonspace, ln.Length))
                             || (container.Tag != BlockTag.Paragraph && 0 != (matched = (int) Scanner.scan_html_block_start_7(ln, first_nonspace, ln.Length)))
-                               )) {
+                           )) {
                     container = CreateChildBlock(container, line, BlockTag.HtmlBlock, first_nonspace);
                     container.HtmlBlockType = (HtmlBlockType) matched;
                     // note, we don't adjust offset because the tag is part of the text
@@ -767,7 +770,7 @@ namespace _3PA.Lib.CommonMark.Parser {
 
         private static void FindFirstNonspace(string ln, int offset, int column, out int first_nonspace,
             out int first_nonspace_column, out char curChar) {
-            var chars_to_tab = TabSize - (column%TabSize);
+            var chars_to_tab = TabSize - (column % TabSize);
             first_nonspace = offset;
             first_nonspace_column = column;
             while ((curChar = ln[first_nonspace]) != '\n') {

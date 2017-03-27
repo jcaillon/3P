@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletionForm.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -84,11 +87,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             Controls.Add(_yamuiList);
 
             // Size the form
-            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*_yamuiList.RowHeight + _yamuiList.BottomHeight;
+            Height = BorderWidth * 2 + Config.Instance.AutoCompleteShowListOfXSuggestions * _yamuiList.RowHeight + _yamuiList.BottomHeight;
             Width = Config.Instance.AutoCompleteWidth;
 
             // Set minimum size
-            MinimumSize = new Size(200, BorderWidth*2 + 2*_yamuiList.RowHeight + _yamuiList.BottomHeight);
+            MinimumSize = new Size(200, BorderWidth * 2 + 2 * _yamuiList.RowHeight + _yamuiList.BottomHeight);
 
             // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
             KeyPreview = true;
@@ -171,9 +174,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         protected override void OnResizeEnd(EventArgs e) {
             Config.Instance.AutoCompleteWidth = Width;
-            var nbRows = (int) Math.Floor((float) (Height - BorderWidth*2 - _yamuiList.BottomHeight)/_yamuiList.RowHeight);
+            var nbRows = (int) Math.Floor((float) (Height - BorderWidth * 2 - _yamuiList.BottomHeight) / _yamuiList.RowHeight);
             Config.Instance.AutoCompleteShowListOfXSuggestions = nbRows;
-            Height = BorderWidth*2 + Config.Instance.AutoCompleteShowListOfXSuggestions*_yamuiList.RowHeight + _yamuiList.BottomHeight;
+            Height = BorderWidth * 2 + Config.Instance.AutoCompleteShowListOfXSuggestions * _yamuiList.RowHeight + _yamuiList.BottomHeight;
             base.OnResizeEnd(e);
         }
 

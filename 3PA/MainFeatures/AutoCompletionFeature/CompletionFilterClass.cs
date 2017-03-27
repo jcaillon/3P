@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CompletionFilterClass.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using YamuiFramework.Controls.YamuiList;
 using _3PA.MainFeatures.Parser;
 
@@ -26,7 +29,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// performances and handiness
     /// </summary>
     internal class CompletionFilterClass {
-
         #region private
 
         private int _currentLineNumber = -2;

@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Sci.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,11 +27,9 @@ using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.MainFeatures;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
-
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />
@@ -44,7 +45,6 @@ namespace _3PA.NppCore {
     /// It stays static also for performance reasons
     /// </summary>
     internal static class Sci {
-
         #region const
 
         public const int KeywordMaxLength = 60;
@@ -924,7 +924,7 @@ namespace _3PA.NppCore {
             int lgt = docLength;
             if (docLength > maxLenght) {
                 var firstVisPos = Api.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Api.Send(SciMsg.SCI_GETFIRSTVISIBLELINE).ToInt32())).ToInt32();
-                start = (firstVisPos - maxLenght/2).Clamp(0, firstVisPos);
+                start = (firstVisPos - maxLenght / 2).Clamp(0, firstVisPos);
                 if (start + maxLenght > docLength)
                     start = (docLength - maxLenght).Clamp(0, firstVisPos);
                 lgt = maxLenght;
@@ -3560,10 +3560,10 @@ namespace _3PA.NppCore {
             public float SizeF {
                 get {
                     var fraction = Api.Send(SciMsg.SCI_STYLEGETSIZEFRACTIONAL, new IntPtr(Index), IntPtr.Zero).ToInt32();
-                    return (float) fraction/(int) SciMsg.SC_FONT_SIZE_MULTIPLIER;
+                    return (float) fraction / (int) SciMsg.SC_FONT_SIZE_MULTIPLIER;
                 }
                 set {
-                    var fraction = (int) (value*(int) SciMsg.SC_FONT_SIZE_MULTIPLIER);
+                    var fraction = (int) (value * (int) SciMsg.SC_FONT_SIZE_MULTIPLIER);
                     Api.Send(SciMsg.SCI_STYLESETSIZEFRACTIONAL, new IntPtr(Index), new IntPtr(fraction));
                 }
             }
@@ -3681,7 +3681,7 @@ namespace _3PA.NppCore {
         }
 
         public static byte[] BitmapToArgb(Bitmap image) {
-            var bytes = new byte[4*image.Width*image.Height];
+            var bytes = new byte[4 * image.Width * image.Height];
             var i = 0;
             for (var y = 0; y < image.Height; y++) {
                 for (var x = 0; x < image.Width; x++) {

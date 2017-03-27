@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParseUtils.cs) is part of 3P.
@@ -16,19 +17,19 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
-
     /// <summary>
     /// Static class that provide utilities to the parser
     /// </summary>
     internal static class ParserUtils {
-
         #region find primitive type
 
         /// <summary>

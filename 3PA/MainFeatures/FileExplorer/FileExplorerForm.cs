@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileExplorerForm.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -387,12 +390,12 @@ namespace _3PA.MainFeatures.FileExplorer {
 
                 if (btStopExecution.Visible != (_currentOperation >= (int) CurrentOperation.Prolint)) {
                     btStopExecution.Visible = (_currentOperation >= (int) CurrentOperation.Prolint);
-                    lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1)*btStopExecution.Width;
+                    lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1) * btStopExecution.Width;
                 }
 
                 if (btBringProcessToFront.Visible != updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run)) {
                     btBringProcessToFront.Visible = updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run);
-                    lbStatus.Width = lbStatus.Width + (btBringProcessToFront.Visible ? -1 : 1)*btBringProcessToFront.Width;
+                    lbStatus.Width = lbStatus.Width + (btBringProcessToFront.Visible ? -1 : 1) * btBringProcessToFront.Width;
                 }
             });
         }

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CompletionItem.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,16 +32,16 @@ using _3PA.NppCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
-
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
     internal abstract class CompletionItem : FilteredTypeListItem {
-
         /// <summary>
         /// Type of completion
         /// </summary>
-        public virtual CompletionType Type { get { return 0; } }
+        public virtual CompletionType Type {
+            get { return 0; }
+        }
 
         /// <summary>
         /// Allows to display small "tag" picture on the left of a completionData in the auto comp list,
@@ -70,7 +73,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <param name="toApplyOnFlag"></param>
         public virtual void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
-                if (l == 0 || !Flags.HasFlag((ParseFlag)l))
+                if (l == 0 || !Flags.HasFlag((ParseFlag) l))
                     return;
                 toApplyOnFlag(s, (ParseFlag) l);
             });
@@ -85,7 +88,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// return the image to display for this item
         /// If null, the image corresponding to ItemTypeImage will be used instead
         /// </summary>
-        public override Image ItemImage { get { return null; } }
+        public override Image ItemImage {
+            get { return null; }
+        }
 
         /// <summary>
         /// return this item type (a unique int for each item type)
@@ -132,9 +137,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get {
                 var outList = new List<Image>();
                 typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
-                    if (l == 0 || !Flags.HasFlag((ParseFlag)l))
+                    if (l == 0 || !Flags.HasFlag((ParseFlag) l))
                         return;
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
                         outList.Add(tryImg);
                 });
@@ -253,27 +258,29 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         FieldPk,
         Field,
         Word,
-        LangWord,
+        LangWord
     }
-
 
     /// <summary>
     /// Snippets
     /// </summary>
     internal class SnippetCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Snippet; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Snippet; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Snippet; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Snippet; }
+        }
     }
-
 
     /// <summary>
     /// Variables (primitive, complex and widgets)
     /// </summary>
     internal abstract class VariableCompletionItem : CompletionItem {
-        
-        public ParsedDefine ParsedDefine { get { return ParsedBaseItem as ParsedDefine; } }
+        public ParsedDefine ParsedDefine {
+            get { return ParsedBaseItem as ParsedDefine; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -308,41 +315,51 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     internal class VariablePrimitiveCompletionItem : VariableCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.VariablePrimitive; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.VariablePrimitive; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.VariablePrimitive; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.VariablePrimitive; }
+        }
     }
-
 
     internal class VariableComplexCompletionItem : VariableCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.VariableComplex; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.VariableComplex; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.VariableComplex; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.VariableComplex; }
+        }
     }
-
 
     internal class WidgetCompletionItem : VariableCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Widget; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Widget; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Widget; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Widget; }
+        }
     }
-
 
     /// <summary>
     /// Function
     /// </summary>
     internal class FunctionCompletionItem : CompletionItem {
-        
-        public override CompletionType Type { get { return CompletionType.Function; } }
+        public override CompletionType Type {
+            get { return CompletionType.Function; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Function; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Function; }
+        }
 
-        public ParsedFunction ParsedFunction { get { return ParsedBaseItem as ParsedFunction; } }
+        public ParsedFunction ParsedFunction {
+            get { return ParsedBaseItem as ParsedFunction; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -375,17 +392,21 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     /// <summary>
     /// Procedure
     /// </summary>
     internal class ProcedureCompletionItem : CompletionItem {
-        
-        public override CompletionType Type { get { return CompletionType.Procedure; } }
+        public override CompletionType Type {
+            get { return CompletionType.Procedure; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Procedure; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Procedure; }
+        }
 
-        public ParsedProcedure ParsedProcedure { get { return ParsedBaseItem as ParsedProcedure; } }
+        public ParsedProcedure ParsedProcedure {
+            get { return ParsedBaseItem as ParsedProcedure; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -402,22 +423,26 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
     internal class ExternalProcedureCompletionItem : ProcedureCompletionItem {
-        
-        public override Image ItemTypeImage { get { return ImageResources.ExternalProcedure; } }
-
+        public override Image ItemTypeImage {
+            get { return ImageResources.ExternalProcedure; }
+        }
     }
-
 
     /// <summary>
     /// Database
     /// </summary>
     internal class DatabaseCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Database; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Database; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Database; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Database; } }
-
-        public ParsedDataBase ParsedDataBase { get { return ParsedBaseItem as ParsedDataBase; } }
+        public ParsedDataBase ParsedDataBase {
+            get { return ParsedBaseItem as ParsedDataBase; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -429,15 +454,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     /// <summary>
     /// Table
     /// </summary>
     internal class TableCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Table; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Table; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Table; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Table; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -448,7 +475,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     toDisplay.Append(HtmlHelper.FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + HtmlHelper.FormatSubString(SubText)));
                 }
                 if (ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(SubText)) {
-                    toDisplay.Append(HtmlHelper.FormatRow("Is like", (SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable)ParsedBaseItem).LcLikeTable + "]" : SubText.Replace("Like ", "")));
+                    toDisplay.Append(HtmlHelper.FormatRow("Is like", (SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable) ParsedBaseItem).LcLikeTable + "]" : SubText.Replace("Like ", "")));
                 }
             }
 
@@ -485,41 +512,49 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return toDisplay.ToString();
         }
     }
-    
 
     internal class TempTableCompletionItem : TableCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.TempTable; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.TempTable; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.TempTable; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.TempTable; }
+        }
     }
-
 
     /// <summary>
     /// Sequence
     /// </summary>
     internal class SequenceCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Sequence; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Sequence; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Sequence; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Sequence; }
+        }
 
         public override string ToString() {
             return HtmlHelper.FormatRow("Database logical name", SubText);
         }
     }
 
-
     /// <summary>
     /// Pre processed
     /// </summary>
     internal class PreprocessedCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Preprocessed; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Preprocessed; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Preprocessed; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Preprocessed; } }
-
-        public ParsedPreProcVariable ParsedPreProcVariable { get { return ParsedBaseItem as ParsedPreProcVariable; } }
+        public ParsedPreProcVariable ParsedPreProcVariable {
+            get { return ParsedBaseItem as ParsedPreProcVariable; }
+        }
 
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             var output = true;
@@ -544,14 +579,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     internal class LabelCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Label; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Label; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Label; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Label; } }
-        
-        public ParsedLabel ParsedLabel { get { return ParsedBaseItem as ParsedLabel; } }
+        public ParsedLabel ParsedLabel {
+            get { return ParsedBaseItem as ParsedLabel; }
+        }
 
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             // check for scope
@@ -572,19 +611,23 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-    
     /// <summary>
     /// Keyword
     /// </summary>
     internal class KeywordCompletionItem : CompletionItem {
-
         public KeywordType KeywordType { get; set; }
 
-        public override CompletionType Type { get { return CompletionType.Keyword; } }
+        public override CompletionType Type {
+            get { return CompletionType.Keyword; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Keyword; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Keyword; }
+        }
 
-        public override string SubText { get { return KeywordType.ToString(); } }
+        public override string SubText {
+            get { return KeywordType.ToString(); }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -597,12 +640,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 keyword = Keywords.Instance.GetFullKeyword(keyword);
                 toDisplay.Append(HtmlHelper.FormatRow("Abbreviation of", HtmlHelper.FormatSubString(keyword)));
             }
-            string keyToFind = string.Join(" ", DisplayText, KeywordType); ;
-            
+            string keyToFind = string.Join(" ", DisplayText, KeywordType);
+            ;
+
             // for the keywords define and create, we try to match the second keyword that goes with it
             if (KeywordType == KeywordType.Statement && (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
                 var lineStr = Sci.GetLine(Sci.LineFromPosition(Sci.GetPositionFromMouseLocation())).LineText;
-                var listOfSecWords = new List<string> { "ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF" };
+                var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
                 foreach (var word in listOfSecWords) {
                     if (lineStr.ContainsFast(word)) {
                         keyToFind = string.Join(" ", keyword, word, KeywordType);
@@ -640,7 +684,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     /// <summary>
     /// Keyword types enumeration
     /// </summary>
@@ -666,25 +709,31 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Method
     }
 
-
     internal class KeywordObjectCompletionItem : KeywordCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.KeywordObject; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.KeywordObject; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.KeywordObject; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.KeywordObject; }
+        }
     }
-
 
     /// <summary>
     /// Fields
     /// </summary>
     internal class FieldCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Field; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Field; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Field; }
+        }
 
-        public override Image ItemTypeImage { get { return ImageResources.Field; } }
-        
-        public ParsedField ParsedField { get { return ParsedBaseItem as ParsedField; } }
+        public ParsedField ParsedField {
+            get { return ParsedBaseItem as ParsedField; }
+        }
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
@@ -704,34 +753,39 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
     }
 
-
     internal class FieldPkCompletionItem : FieldCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.FieldPk; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.FieldPk; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.FieldPk; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.FieldPk; }
+        }
     }
-
 
     /// <summary>
     /// Word (parsed from the npp document)
     /// </summary>
     internal class WordCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Word; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.Word; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.Word; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.Word; }
+        }
     }
-
 
     /// <summary>
     /// Lang word (read from xml conf files)
     /// </summary>
     internal class LangWordCompletionItem : CompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.LangWord; }
+        }
 
-        public override CompletionType Type { get { return CompletionType.LangWord; } }
-
-        public override Image ItemTypeImage { get { return ImageResources.LangWord; } }
+        public override Image ItemTypeImage {
+            get { return ImageResources.LangWord; }
+        }
     }
-
 }

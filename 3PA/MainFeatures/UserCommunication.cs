@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (UserCommunication.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -97,9 +100,9 @@ namespace _3PA.MainFeatures {
                         HtmlHelper.FormatContent(htmlContent),
                         duration,
                         nppScreen,
-                        Math.Min(width, nppScreen.WorkingArea.Width/3),
-                        nppScreen.WorkingArea.Width/3,
-                        nppScreen.WorkingArea.Height/3,
+                        Math.Min(width, nppScreen.WorkingArea.Width / 3),
+                        nppScreen.WorkingArea.Width / 3,
+                        nppScreen.WorkingArea.Height / 3,
                         (sender, args) => {
                             if (clickHandler != null) clickHandler(args);
                             else Utils.OpenPathClickHandler(sender, args);
@@ -180,8 +183,8 @@ namespace _3PA.MainFeatures {
                     HtmlHelper.FormatContent(htmlContent),
                     buttonsList,
                     ref data,
-                    Npp.NppScreen.WorkingArea.Width*3/5,
-                    Npp.NppScreen.WorkingArea.Height*9/10,
+                    Npp.NppScreen.WorkingArea.Width * 3 / 5,
+                    Npp.NppScreen.WorkingArea.Height * 9 / 10,
                     minWidth,
                     (sender, args) => {
                         if (clickHandler != null)
@@ -199,8 +202,8 @@ namespace _3PA.MainFeatures {
                         HtmlHelper.FormatContent(htmlContent),
                         buttonsList,
                         ref nullObject,
-                        Npp.NppScreen.WorkingArea.Width*3/5,
-                        Npp.NppScreen.WorkingArea.Height*9/10,
+                        Npp.NppScreen.WorkingArea.Width * 3 / 5,
+                        Npp.NppScreen.WorkingArea.Height * 9 / 10,
                         minWidth,
                         (sender, args) => {
                             if (clickHandler != null)
@@ -221,8 +224,8 @@ namespace _3PA.MainFeatures {
                         buttonsList,
                         ref nullObject,
                         out form,
-                        Npp.NppScreen.WorkingArea.Width*3/5,
-                        Npp.NppScreen.WorkingArea.Height*9/10,
+                        Npp.NppScreen.WorkingArea.Width * 3 / 5,
+                        Npp.NppScreen.WorkingArea.Height * 9 / 10,
                         minWidth,
                         (sender, args) => {
                             if (clickHandler != null)

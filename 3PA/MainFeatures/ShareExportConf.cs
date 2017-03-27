@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ShareExportConf.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -178,7 +181,7 @@ namespace _3PA.MainFeatures {
         public static void StartCheckingForUpdates() {
             // check for updates every now and then (15min)
             // ReSharper disable once ObjectCreationAsStatement
-            RecurentAction.StartNew(() => { UpdateList(Config.Instance.SharedConfFolder); }, 1000*60*15);
+            RecurentAction.StartNew(() => { UpdateList(Config.Instance.SharedConfFolder); }, 1000 * 60 * 15);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (InlineMethods.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -302,7 +305,7 @@ namespace _3PA.Lib.CommonMark.Parser {
             else if (doubleCharTag == 0)
                 useDelims = 1;
             else
-                useDelims = closingDelimiterCount%2 == 0 ? 2 : 1;
+                useDelims = closingDelimiterCount % 2 == 0 ? 2 : 1;
 
             Inline inl = opener.StartingInline;
             InlineTag tag = useDelims == 1 ? singleCharTag : doubleCharTag;

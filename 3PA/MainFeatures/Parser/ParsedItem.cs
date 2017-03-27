@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParsedItem.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -266,7 +269,6 @@ namespace _3PA.MainFeatures.Parser {
     /// Procedure parsed item
     /// </summary>
     internal class ParsedProcedure : ParsedScopeItem {
-
         public string Left { get; private set; }
 
         public string ExternalDllName { get; private set; }
@@ -537,7 +539,6 @@ namespace _3PA.MainFeatures.Parser {
             UndefinedLine = undefinedLine;
             Value = value;
         }
-
     }
 
     /// <summary>

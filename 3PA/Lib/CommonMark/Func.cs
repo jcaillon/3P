@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Func.cs) is part of 3P.
@@ -16,10 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 namespace _3PA.Lib.CommonMark {
 #if v2_0
-    /// <summary>An alternative to <c>System.Func</c> which is not present in .NET 2.0.</summary>
+/// <summary>An alternative to <c>System.Func</c> which is not present in .NET 2.0.</summary>
     public delegate TResult Func<out TResult>();
 
     /// <summary>An alternative to <c>System.Func</c> which is not present in .NET 2.0.</summary>

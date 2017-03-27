@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppHeader.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -103,9 +106,9 @@ namespace _3PA.NppCore {
         static extern void RtlMoveMemory(IntPtr destination, IntPtr source, int length);
 
         public void Add(FuncItem funcItem) {
-            int oldSize = _funcItems.Count*_sizeFuncItem;
+            int oldSize = _funcItems.Count * _sizeFuncItem;
             _funcItems.Add(funcItem);
-            int newSize = _funcItems.Count*_sizeFuncItem;
+            int newSize = _funcItems.Count * _sizeFuncItem;
             IntPtr newPointer = Marshal.AllocHGlobal(newSize);
             if (_nativePointer != IntPtr.Zero) {
                 RtlMoveMemory(newPointer, _nativePointer, oldSize);

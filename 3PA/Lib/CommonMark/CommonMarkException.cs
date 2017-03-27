@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CommonMarkException.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using _3PA.Lib.CommonMark.Syntax;
 
@@ -69,9 +72,9 @@ namespace _3PA.Lib.CommonMark {
         }
 
 #if v2_0 || v3_5 || v4_0 || v4_5
-    /// <summary>Initializes a new instance of the <see cref="CommonMarkException" /> class from the specified instances of the <see cref="System.Runtime.Serialization.SerializationInfo" /> and <see cref="System.Runtime.Serialization.StreamingContext" /> classes.</summary>
-    /// <param name="serializationInfo">A <see cref="System.Runtime.Serialization.SerializationInfo" /> instance that contains the information required to deserialize the new <see cref="T:System.Security.Authentication.InvalidCredentialException" /> instance. </param>
-    /// <param name="streamingContext">A <see cref="System.Runtime.Serialization.StreamingContext" /> instance. </param>
+/// <summary>Initializes a new instance of the <see cref="CommonMarkException" /> class from the specified instances of the <see cref="System.Runtime.Serialization.SerializationInfo" /> and <see cref="System.Runtime.Serialization.StreamingContext" /> classes.</summary>
+/// <param name="serializationInfo">A <see cref="System.Runtime.Serialization.SerializationInfo" /> instance that contains the information required to deserialize the new <see cref="T:System.Security.Authentication.InvalidCredentialException" /> instance. </param>
+/// <param name="streamingContext">A <see cref="System.Runtime.Serialization.StreamingContext" /> instance. </param>
         [System.Security.SecuritySafeCritical]
         protected CommonMarkException(
           System.Runtime.Serialization.SerializationInfo serializationInfo,

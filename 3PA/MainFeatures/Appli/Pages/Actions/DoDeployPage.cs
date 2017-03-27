@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DoDeployPage.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -695,7 +698,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     progressBar.Text = @"Step 0 / " + _totalSteps + @" ~ " + (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + elapsedTime;
                     progressBar.Progress = progression;
                 } else {
-                    var neededStyle = _currentStep%2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
+                    var neededStyle = _currentStep % 2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
 
                     if (progressBar.Style != neededStyle) {
                         progressBar.Style = neededStyle;

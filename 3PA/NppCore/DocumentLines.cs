@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DocumentLines.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -39,7 +42,6 @@ namespace _3PA.NppCore {
     /// on a 200Mo document sounds good enough to me...
     /// </remarks>
     internal class DocumentLines {
-
         #region Fields
 
         /// <summary>
@@ -326,7 +328,7 @@ namespace _3PA.NppCore {
             var low = 0;
             var high = Count - 1;
             while (low <= high) {
-                var mid = low + ((high - low)/2);
+                var mid = low + ((high - low) / 2);
                 var start = CharPositionFromLine(mid);
                 if (pos == start)
                     return mid;

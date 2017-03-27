@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileListItem.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -87,7 +90,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Should this item be hidden when in searching mode?
         /// </summary>
-        public override bool HideWhileSearching { get { return false; } }
+        public override bool HideWhileSearching {
+            get { return false; }
+        }
 
         /// <summary>
         /// return a string containing the subtext to display
@@ -103,9 +108,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             get {
                 var outList = new List<Image>();
                 typeof(FileFlag).ForEach<FileFlag>((s, l) => {
-                    if (l == 0 || !Flags.HasFlag((FileFlag)l))
+                    if (l == 0 || !Flags.HasFlag((FileFlag) l))
                         return;
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(s);
+                    Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
                         outList.Add(tryImg);
                 });

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerForm.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -69,10 +72,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             filterbox.Initialize(yamuiList);
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
-            filterbox.ExtraButtonsList[2].BackGrndImage =Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
+            filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
 
             Refreshing = false;
-            
+
             yamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
             yamuiList.EmptyListString = @"Nothing to display";
 
@@ -113,7 +116,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// This method uses the items found by the parser to update the code explorer tree (async)
         /// </summary>
         /// <param name="codeExplorerItems"></param>
-        public void UpdateTreeData(List<CodeExplorerItem> codeExplorerItems) {
+        public void UpdateTreeData(List<CodeItem> codeExplorerItems) {
             yamuiList.SetItems(codeExplorerItems.Cast<ListItem>().ToList());
         }
 
@@ -142,7 +145,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Executed when the user double click an item or press enter
         /// </summary>
         private bool OnActivateItem() {
-            var curItem = yamuiList.SelectedItem as CodeExplorerItem;
+            var curItem = yamuiList.SelectedItem as CodeItem;
             if (curItem == null)
                 return false;
 
@@ -173,7 +176,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 return;
             ParserHandler.ClearStaticData();
             Npp.CurrentSci.Lines.Reset();
-            ParserHandler.ParseDocumentAsap();
+            ParserHandler.ParseDocumentNow();
             Sci.GrabFocus();
         }
 
@@ -181,8 +184,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Config.Instance.CodeExplorerSortingType++;
             if (Config.Instance.CodeExplorerSortingType > SortingType.Alphabetical)
                 Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
-            CodeExplorer.Instance.UpdateTreeData();
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
+            ParserHandler.ParseDocumentNow();
             Sci.GrabFocus();
         }
 
@@ -201,7 +204,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             // Parse the document
-            ParserHandler.ParseDocumentAsap();
+            ParserHandler.ParseDocumentNow();
             Sci.GrabFocus();
         }
 

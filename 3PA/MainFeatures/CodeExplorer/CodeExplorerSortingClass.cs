@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerSortingClass.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using YamuiFramework.Controls.YamuiList;
@@ -81,8 +84,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// x.compareTo(y) -> if x > y then return 1 if x < y then return -1;
         /// </summary>
         public int Compare(T x1, T y1) {
-            var x = x1 as CodeExplorerItem;
-            var y = y1 as CodeExplorerItem;
+            var x = x1 as CodeItem;
+            var y = y1 as CodeItem;
 
             if (x == null || y == null)
                 return 0;

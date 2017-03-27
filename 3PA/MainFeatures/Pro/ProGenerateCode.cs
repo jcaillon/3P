@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProGenerateCode.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,7 +34,6 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
-
         #region Factory
 
         /// <summary>
@@ -68,7 +70,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Call this method to insert a new piece of code
         /// </summary>
         public void InsertCode<T>() where T : ParsedScopeItem {
-
             IProCode codeCode;
             string insertText;
             string blockDescription;
@@ -76,7 +77,7 @@ namespace _3PA.MainFeatures.Pro {
             // in case of an incorrect document, warn the user
             var parserErrors = _parser.ParseErrorsInHtml;
             if (!string.IsNullOrEmpty(parserErrors)) {
-                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> {"Continue", "Abort"}) != 0)
                     return;
             }
 
@@ -84,23 +85,23 @@ namespace _3PA.MainFeatures.Pro {
                 object input = new ProCodeFunction();
                 if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
                     return;
-                codeCode = (IProCode)input;
+                codeCode = (IProCode) input;
 
                 codeCode.Name = codeCode.Name.MakeValidVariableName();
 
                 blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
                 insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
-                insertText = insertText.Replace("{&type}", ((ProCodeFunction)codeCode).Type);
-                insertText = insertText.Replace("{&private}", ((ProCodeFunction)codeCode).IsPrivate ? " PRIVATE" : "");
+                insertText = insertText.Replace("{&type}", ((ProCodeFunction) codeCode).Type);
+                insertText = insertText.Replace("{&private}", ((ProCodeFunction) codeCode).IsPrivate ? " PRIVATE" : "");
             } else if (typeof(ParsedProcedure) == typeof(T)) {
                 object input = new ProCodeProcedure();
                 if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
                     return;
-                codeCode = (IProCode)input;
+                codeCode = (IProCode) input;
 
                 blockDescription = @"_PROCEDURE " + codeCode.Name + " Procedure";
                 insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
-                insertText = insertText.Replace("{&private}", ((ProCodeProcedure)codeCode).IsPrivate ? " PRIVATE" : "");
+                insertText = insertText.Replace("{&private}", ((ProCodeProcedure) codeCode).IsPrivate ? " PRIVATE" : "");
             } else {
                 return;
             }
@@ -138,13 +139,12 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         public void DeleteCode<T>() where T : ParsedScopeItem {
-
             // make a list of existing items for this type
             var existingList = _parser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
 
-            object nameToDelete = new ProCodeDelete { Value = string.Join("|", existingList.Select(arg => arg.Name)) };
+            object nameToDelete = new ProCodeDelete {Value = string.Join("|", existingList.Select(arg => arg.Name))};
 
-            if (string.IsNullOrEmpty(((ProCodeDelete)nameToDelete).Value)) {
+            if (string.IsNullOrEmpty(((ProCodeDelete) nameToDelete).Value)) {
                 UserCommunication.Notify("Sorry, there was nothing to do!", MessageImg.MsgInfo, "Delete code", "Nothing to delete!", 5);
                 return;
             }
@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures.Pro {
             if (UserCommunication.Input(ref nameToDelete, "Please select which piece of code should be deleted", MessageImg.MsgQuestion, "Delete code", "Select the item to delete") != 0)
                 return;
 
-            var delete = (ProCodeDelete)nameToDelete;
+            var delete = (ProCodeDelete) nameToDelete;
 
             if (string.IsNullOrEmpty(delete.Value))
                 return;
@@ -168,7 +168,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         public void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
-
             if (_ignoredFiles.Contains(Npp.CurrentFile.Path) || Config.Instance.DisablePrototypeAutoUpdate) {
                 if (silent)
                     return;
@@ -188,7 +187,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         private void UpdateFunctionPrototypes(bool silent) {
-            
             List<ParsedImplementation> listOfOutDatedProto;
             List<ParsedImplementation> listOfSoloImplementation;
             List<ParsedPrototype> listOfUselessProto;
@@ -286,25 +284,24 @@ namespace _3PA.MainFeatures.Pro {
         /// Gets the list of functions/proto of interest
         /// </summary>
         private int GetPrototypesLists(out List<ParsedImplementation> listOfOutDatedProto, out List<ParsedImplementation> listOfSoloImplementation, out List<ParsedPrototype> listOfUselessProto) {
-
             // list the outdated proto
             listOfOutDatedProto = _parser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && funcItem.HasPrototype && !funcItem.PrototypeUpdated;
-            }).Select(item => (ParsedImplementation)item).ToList();
+            }).Select(item => (ParsedImplementation) item).ToList();
 
             // list the implementation w/o prototypes
             listOfSoloImplementation = _parser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedImplementation;
                 return funcItem != null && !funcItem.HasPrototype;
-            }).Select(item => (ParsedImplementation)item).ToList();
+            }).Select(item => (ParsedImplementation) item).ToList();
 
             // list the prototypes w/o implementation
             listOfUselessProto = _parser.ParsedItemsList.Where(item => {
                 // it's a prototype with no implementation
                 var proto = item as ParsedPrototype;
                 return proto != null && proto.SimpleForward && !_parser.ParsedItemsList.Exists(func => func is ParsedImplementation && func.Name.EqualsCi(item.Name));
-            }).Select(item => (ParsedPrototype)item).ToList();
+            }).Select(item => (ParsedPrototype) item).ToList();
 
             return listOfOutDatedProto.Count + listOfSoloImplementation.Count + listOfUselessProto.Count;
         }
@@ -365,7 +362,6 @@ namespace _3PA.MainFeatures.Pro {
         /// otherwise returns null
         /// </summary>
         private ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
-
             // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
             var protoPreProcBlock = _parser.ParsedItemsList.Where(item => {
                 var blockItem = item as ParsedPreProcBlock;
@@ -376,7 +372,7 @@ namespace _3PA.MainFeatures.Pro {
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
@@ -391,7 +387,7 @@ namespace _3PA.MainFeatures.Pro {
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
@@ -452,7 +448,6 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
         private int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
-
             insertBefore = false;
 
             // at caret position
@@ -503,7 +498,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
             } else {
                 // list of existing items of the same type
-                var existingList = _parser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Select(item => (T)item).ToList();
+                var existingList = _parser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Select(item => (T) item).ToList();
                 if (existingList.Count > 0) {
                     // alphabetical order
                     if (insertPos == ProInsertPosition.AlphabeticalOrder) {
@@ -580,10 +575,10 @@ namespace _3PA.MainFeatures.Pro {
             }
             if (typeof(ParsedPrototype) == typeof(T)) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
-                var preprocessorBlock = _parser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock)item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
+                var preprocessorBlock = _parser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
                 if (preprocessorBlock != null) {
                     insertBefore = false;
-                    return ((ParsedPreProcBlock)preprocessorBlock).EndBlockPosition;
+                    return ((ParsedPreProcBlock) preprocessorBlock).EndBlockPosition;
                 }
             }
             if (typeof(ParsedProcedure) == typeof(T)) {
@@ -672,6 +667,5 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
     }
 }

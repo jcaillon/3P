@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Deployer.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -613,7 +616,7 @@ namespace _3PA.MainFeatures.Pro {
                             fileToDeploy.ToTemp = Path.Combine(
                                 dicPlToTempFolder[fileToDeploy.ArchivePath],
                                 fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')
-                                );
+                            );
 
                             // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
                             var tempSubFolder = Path.GetDirectoryName(fileToDeploy.ToTemp);
@@ -624,7 +627,7 @@ namespace _3PA.MainFeatures.Pro {
                                         dicPlToTempFolder[fileToDeploy.ArchivePath], // path of the temp dir
                                         Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')), // relative path in .pl
                                         fileToDeploy.ArchivePath) // path to the .pl file
-                                    );
+                                );
 
                                 // also, create the folder
                                 Utils.CreateDirectory(tempSubFolder);
@@ -648,7 +651,7 @@ namespace _3PA.MainFeatures.Pro {
                             if (deploy.IsOk)
                                 nbFilesDone[0]++;
                             if (updateDeploymentPercentage != null)
-                                updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                                updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
                         });
 
                         // now we just need to add the content of temp folders into the .pl
@@ -694,14 +697,14 @@ namespace _3PA.MainFeatures.Pro {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                    updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
             });
             // don't use parallel for the other types
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                    updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
             }
 
             #region for zip, dispose of zipStorers

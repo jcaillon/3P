@@ -582,7 +582,7 @@
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletion.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
+    <Compile Include="MainFeatures\CodeExplorer\CodeItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\Keywords.cs" />
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />

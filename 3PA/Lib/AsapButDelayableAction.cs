@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AsapButDelayableAction.cs) is part of 3P.
@@ -16,18 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using _3PA.MainFeatures;
 using Timer = System.Timers.Timer;
 
 namespace _3PA.Lib {
     internal class AsapButDelayableAction : IDisposable {
-
         #region Static
 
         private static List<AsapButDelayableAction> _savedActions = new List<AsapButDelayableAction>();
@@ -83,7 +84,6 @@ namespace _3PA.Lib {
                 _timer.Stop();
                 _timer.Start();
             }
-
         }
 
         /// <summary>

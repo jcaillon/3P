@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (InlineStack.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using _3PA.Lib.CommonMark.Syntax;
 
@@ -110,7 +113,7 @@ namespace _3PA.Lib.CommonMark.Parser {
                     // for more details, see https://github.com/jgm/cmark/commit/c50197bab81d7105c9c790548821b61bcb97a62a
                     var oddMatch = (closerCanOpen || (istack.Flags & InlineStackFlags.CloserOriginally) > 0)
                                    && istack.DelimiterCount != closerDelimiterCount
-                                   && ((istack.DelimiterCount + closerDelimiterCount)%3 == 0);
+                                   && ((istack.DelimiterCount + closerDelimiterCount) % 3 == 0);
 
                     if (!oddMatch)
                         return istack;

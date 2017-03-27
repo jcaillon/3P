@@ -94,14 +94,14 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
-        private List<CodeExplorerItem> _parsedExplorerItemsList = new List<CodeExplorerItem>();
+        private List<CodeItem> _parsedExplorerItemsList = new List<CodeItem>();
 
-        private Dictionary<string, CodeExplorerItem> _nodeDictionary = new Dictionary<string, CodeExplorerItem>(StringComparer.CurrentCultureIgnoreCase);
+        private Dictionary<string, CodeItem> _nodeDictionary = new Dictionary<string, CodeItem>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// nodeId should be composed of the CodeItem.Type and CodeItem.DisplayText
         /// </summary>
-        private CodeExplorerItem GetExplorerListNode(string nodeId, CodeExplorerIconType type, CodeExplorerItem parentNode = null) {
+        private CodeItem GetExplorerListNode(string nodeId, CodeExplorerIconType type, CodeItem parentNode = null) {
             if (_nodeDictionary.ContainsKey(nodeId)) {
                 return _nodeDictionary[nodeId];
             }
@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Add an item as a child of "parent", parent can be null and it will be added to the root node
         /// </summary>
-        private void PushToExplorerList(CodeExplorerItem parent, CodeExplorerItem newChild, bool addAsNode = false) {
+        private void PushToExplorerList(CodeItem parent, CodeItem newChild, bool addAsNode = false) {
             if (parent == null) {
                 _parsedExplorerItemsList.Add(newChild);
             } else {
@@ -140,7 +140,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
-        public List<CodeExplorerItem> ParsedExplorerItemsList {
+        public List<CodeItem> ParsedExplorerItemsList {
             get { return _parsedExplorerItemsList; }
         }
 
@@ -238,7 +238,7 @@ namespace _3PA.MainFeatures.Parser {
                 return proc != null && proc.Name.EqualsCi(pars.Name);
             });
             var parentNode = internalRun ? GetExplorerListNode("Run internal routine", CodeExplorerIconType.RunInternal) : GetExplorerListNode("Run external procedure", CodeExplorerIconType.RunExternal);
-            var newNode = CodeExplorerItem.Factory.New(internalRun ? CodeExplorerIconType.RunInternal : CodeExplorerIconType.RunExternal);
+            var newNode = CodeItem.Factory.New(internalRun ? CodeExplorerIconType.RunInternal : CodeExplorerIconType.RunExternal);
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
             newNode.SubText = pars.Scope.Name;
@@ -255,7 +255,7 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedFunctionCall pars) {
             // To code explorer
             var parentNode = pars.ExternalCall ? GetExplorerListNode("External dynamic function calls", CodeExplorerIconType.DynamicFunctionCallExternal) : (pars.StaticCall ? GetExplorerListNode("Static function calls", CodeExplorerIconType.StaticFunctionCall) : GetExplorerListNode("Internal dynamic function calls", CodeExplorerIconType.DynamicFunctionCall));
-            var newNode = CodeExplorerItem.Factory.New(pars.ExternalCall ? CodeExplorerIconType.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerIconType.StaticFunctionCall : CodeExplorerIconType.DynamicFunctionCall));
+            var newNode = CodeItem.Factory.New(pars.ExternalCall ? CodeExplorerIconType.DynamicFunctionCallExternal : (pars.StaticCall ? CodeExplorerIconType.StaticFunctionCall : CodeExplorerIconType.DynamicFunctionCall));
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
             newNode.SubText = pars.Scope.Name;
@@ -274,7 +274,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // to code explorer
             var parentNode = pars.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
-            var newNode = CodeExplorerItem.Factory.New(pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+            var newNode = CodeItem.Factory.New(pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
             newNode.DisplayText = missingDbName ? pars.Name : pars.Name.Split('.')[1];
             newNode.Flags = (missingDbName && !pars.IsTempTable ? ParseFlag.MissingDbName : 0) | pars.Flags;
             newNode.SubText = null;
@@ -287,7 +287,7 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedEvent pars) {
             // to code explorer
             var parentNode = pars.Type == ParsedEventType.Subscribe ? GetExplorerListNode("Subscribe", CodeExplorerIconType.Subscribe) : (pars.Type == ParsedEventType.Unsubscribe ? GetExplorerListNode("Unsubscribe", CodeExplorerIconType.Unsubscribe) : GetExplorerListNode("Publish", CodeExplorerIconType.Publish));
-            var newNode = CodeExplorerItem.Factory.New(pars.Type == ParsedEventType.Subscribe ? CodeExplorerIconType.Subscribe : (pars.Type == ParsedEventType.Unsubscribe ? CodeExplorerIconType.Unsubscribe : CodeExplorerIconType.Publish));
+            var newNode = CodeItem.Factory.New(pars.Type == ParsedEventType.Subscribe ? CodeExplorerIconType.Subscribe : (pars.Type == ParsedEventType.Unsubscribe ? CodeExplorerIconType.Unsubscribe : CodeExplorerIconType.Publish));
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
             newNode.SubText = null;
@@ -311,7 +311,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
         }
 
@@ -328,7 +328,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
         }
 
@@ -368,8 +368,8 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to code explorer
-            CodeExplorerItem parentNode = type == CodeExplorerIconType.MainBlock ? null : GetExplorerListNode("AppBuilder blocks", CodeExplorerIconType.Block);
-            CodeExplorerItem newNode = CodeExplorerItem.Factory.New(type);
+            CodeItem parentNode = type == CodeExplorerIconType.MainBlock ? null : GetExplorerListNode("AppBuilder blocks", CodeExplorerIconType.Block);
+            CodeItem newNode = CodeItem.Factory.New(type);
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
             newNode.SubText = null;
@@ -399,7 +399,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
         }
 
@@ -416,7 +416,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
 
             // to completion data
@@ -445,7 +445,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
 
             // to completion data
@@ -473,7 +473,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // to code explorer
             var parentNode = pars.Flags.HasFlag(ParseFlag.External) ? GetExplorerListNode("External procedures", CodeExplorerIconType.ExternalProcedure) : GetExplorerListNode("Procedures", CodeExplorerIconType.Procedure);
-            var newNode = CodeExplorerItem.Factory.New(pars.Flags.HasFlag(ParseFlag.External) ? CodeExplorerIconType.ExternalProcedure : CodeExplorerIconType.Procedure);
+            var newNode = CodeItem.Factory.New(pars.Flags.HasFlag(ParseFlag.External) ? CodeExplorerIconType.ExternalProcedure : CodeExplorerIconType.Procedure);
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
             newNode.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null;
@@ -573,7 +573,7 @@ namespace _3PA.MainFeatures.Parser {
 
                     // To code explorer, list buffers and associated tables
                     var parentNode = foundTable.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
-                    var newNode = CodeExplorerItem.Factory.New(foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+                    var newNode = CodeItem.Factory.New(foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
                     newNode.DisplayText = pars.Name;
                     newNode.Flags = pars.Flags;
                     newNode.SubText = null;
@@ -599,7 +599,7 @@ namespace _3PA.MainFeatures.Parser {
                                     SubText = subString,
                                     DocumentOwner = pars.FilePath,
                                     GoToLine = pars.Line,
-                                    GoToColumn = pars.Column,
+                                    GoToColumn = pars.Column
                                 });
                         }
                         break;
@@ -636,7 +636,7 @@ namespace _3PA.MainFeatures.Parser {
                         SubText = subString,
                         DocumentOwner = pars.FilePath,
                         GoToLine = pars.Line,
-                        GoToColumn = pars.Column,
+                        GoToColumn = pars.Column
                     });
             }
 
@@ -742,7 +742,7 @@ namespace _3PA.MainFeatures.Parser {
                     SubText = subStr,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    GoToColumn = pars.Column,
+                    GoToColumn = pars.Column
                 });
         }
 
@@ -768,11 +768,10 @@ namespace _3PA.MainFeatures.Parser {
 
             // add info to the code explorer
             if (Config.Instance.CodeExplorerDisplayExternalItems) {
-                var listExpToAdd = parserVisitor._parsedExplorerItemsList.Where(item => item is FunctionCodeItem || item is ProcedureCodeItem).ToList();
-                foreach (var codeExplorerItem in listExpToAdd) {
+                foreach (var codeExplorerItem in parserVisitor._parsedExplorerItemsList.SelectMany(item => item.Children ?? new List<FilteredTypeTreeListItem>()).Cast<CodeItem>().Where(item => item is FunctionCodeItem || item is ProcedureCodeItem)) {
                     codeExplorerItem.Flags = codeExplorerItem.Flags | ParseFlag.Persistent;
+                    PushToExplorerList(codeExplorerItem is FunctionCodeItem ? GetExplorerListNode("Functions", CodeExplorerIconType.Function) : GetExplorerListNode("Procedures", CodeExplorerIconType.Procedure), codeExplorerItem);
                 }
-                _parsedExplorerItemsList.AddRange(listExpToAdd);
             }
         }
 

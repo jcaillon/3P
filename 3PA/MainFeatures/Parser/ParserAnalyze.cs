@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserAnalyze.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,9 +42,9 @@ namespace _3PA.MainFeatures.Parser {
 
             // starting a new statement, we need to remember its starting line
             if (_context.StatementFirstToken == null && (
-                token is TokenWord ||
-                token is TokenPreProcDirective ||
-                token is TokenInclude))
+                    token is TokenWord ||
+                    token is TokenPreProcDirective ||
+                    token is TokenInclude))
                 _context.StatementFirstToken = token;
 
             // matching a word
@@ -378,7 +381,7 @@ namespace _3PA.MainFeatures.Parser {
                                 state = 10;
                         } else if (token is TokenSymbol && token.Value.Equals("(")) {
                             AddTokenToStringBuilder(left, token);
-                            state ++;
+                            state++;
                         }
                         break;
                     case 2:

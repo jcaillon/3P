@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProMisc.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +34,6 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal static class ProMisc {
-        
         #region Toggle comment
 
         /// <summary>
@@ -105,7 +107,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-        
+
         #region Go to definition
 
         /// <summary>
@@ -419,8 +421,8 @@ namespace _3PA.MainFeatures.Pro {
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
                     (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
-                        ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
-                            "Syntax correct");
+                    ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
+                        "Syntax correct");
 
                 // build the error list
                 var errorsList = new List<FileError>();

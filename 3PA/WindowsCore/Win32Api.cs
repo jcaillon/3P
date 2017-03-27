@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Win32Api.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -279,25 +282,25 @@ namespace _3PA.WindowsCore {
             private bool _disposed;
 
             public UnmanagedStringArray(int num, int stringCapacity) {
-                _nativeArray = Marshal.AllocHGlobal((num + 1)*IntPtr.Size);
+                _nativeArray = Marshal.AllocHGlobal((num + 1) * IntPtr.Size);
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < num; i++) {
                     IntPtr item = Marshal.AllocHGlobal(stringCapacity);
-                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i*IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i * IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (num*IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (num * IntPtr.Size)), IntPtr.Zero);
             }
 
             public UnmanagedStringArray(List<string> lstStrings) {
-                _nativeArray = Marshal.AllocHGlobal((lstStrings.Count + 1)*IntPtr.Size);
+                _nativeArray = Marshal.AllocHGlobal((lstStrings.Count + 1) * IntPtr.Size);
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < lstStrings.Count; i++) {
                     IntPtr item = Marshal.StringToHGlobalUni(lstStrings[i]);
-                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i*IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i * IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (lstStrings.Count*IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (lstStrings.Count * IntPtr.Size)), IntPtr.Zero);
             }
 
             public IntPtr NativePointer {

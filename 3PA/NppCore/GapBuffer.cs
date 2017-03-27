@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (GapBuffer.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -511,7 +514,7 @@ namespace _3PA.NppCore {
         /// </summary>
         public void TrimExcess() {
             int size = Count;
-            int threshold = (int) (_buffer.Length*0.9);
+            int threshold = (int) (_buffer.Length * 0.9);
             if (size < threshold) {
                 Capacity = size;
             }
@@ -561,7 +564,7 @@ namespace _3PA.NppCore {
             // Is the available space in the gap?
             if (required > (_gapEnd - _gapStart)) {
                 // Calculate a new size (double the size necessary)
-                long newLgCapacity = (Count + required)*2;
+                long newLgCapacity = (Count + required) * 2;
                 if (newLgCapacity < MinCapacity)
                     newLgCapacity = MinCapacity;
                 if (newLgCapacity > int.MaxValue)

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NotificationsPublisher.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -295,7 +298,7 @@ namespace _3PA.NppCore {
                 Keys.Prior,
                 Keys.Home,
                 Keys.End
-                );
+            );
 
             // we also add the key that are used as shortcut for 3P functions
             AppliMenu.Instance = null; // make sure to recompute the menu

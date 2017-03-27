@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Scanner.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using _3PA.Lib.CommonMark.Syntax;
 
 namespace _3PA.Lib.CommonMark.Parser {
@@ -466,17 +469,17 @@ namespace _3PA.Lib.CommonMark.Parser {
                         c = s[i];
                         if (c >= '0' && c <= '9') {
                             if (++counter == 9) return 0;
-                            numericEntity = numericEntity*16 + (c - '0');
+                            numericEntity = numericEntity * 16 + (c - '0');
                             continue;
                         }
                         if (c >= 'A' && c <= 'F') {
                             if (++counter == 9) return 0;
-                            numericEntity = numericEntity*16 + (c - 'A' + 10);
+                            numericEntity = numericEntity * 16 + (c - 'A' + 10);
                             continue;
                         }
                         if (c >= 'a' && c <= 'f') {
                             if (++counter == 9) return 0;
-                            numericEntity = numericEntity*16 + (c - 'a' + 10);
+                            numericEntity = numericEntity * 16 + (c - 'a' + 10);
                             continue;
                         }
 
@@ -491,7 +494,7 @@ namespace _3PA.Lib.CommonMark.Parser {
                         c = s[i];
                         if (c >= '0' && c <= '9') {
                             if (++counter == 9) return 0;
-                            numericEntity = numericEntity*10 + (c - '0');
+                            numericEntity = numericEntity * 10 + (c - '0');
                             continue;
                         }
 

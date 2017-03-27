@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FtpsClient.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -295,7 +298,6 @@ namespace _3PA.Lib.Ftp {
         #endregion
 
         #region Public Properties
-
 
         public EDataConnectionMode DataConnectionMode {
             get { return _dataConnectionMode; }
@@ -1546,7 +1548,7 @@ namespace _3PA.Lib.Ftp {
             SslStream sslStream = new SslStream(s, leaveInnerStreamOpen,
                 ValidateServerCertificate,
                 null //new LocalCertificateSelectionCallback(ValidateClientCertificate)
-                );
+            );
 
             sslStream.ReadTimeout = _timeout;
             sslStream.WriteTimeout = _timeout;
@@ -1630,7 +1632,7 @@ namespace _3PA.Lib.Ftp {
             for (i = 0; i < addr.Length; i++)
                 addr[i] = byte.Parse(parts[i]);
 
-            int port = byte.Parse(parts[4])*256 + byte.Parse(parts[5]);
+            int port = byte.Parse(parts[4]) * 256 + byte.Parse(parts[5]);
 
             dataEndPoint = new IPEndPoint(new IPAddress(addr), port);
             return dataEndPoint;
@@ -1864,7 +1866,7 @@ namespace _3PA.Lib.Ftp {
             int port = SetupActiveDataConnectionStep1();
 
             byte[] addr = (_ctrlClient.Client.LocalEndPoint as IPEndPoint).Address.GetAddressBytes();
-            string portStr = string.Format("{0},{1},{2},{3},{4},{5}", addr[0], addr[1], addr[2], addr[3], port/256, port%256);
+            string portStr = string.Format("{0},{1},{2},{3},{4},{5}", addr[0], addr[1], addr[2], addr[3], port / 256, port % 256);
 
             FtpReply reply = HandleCmd("PORT " + portStr);
         }

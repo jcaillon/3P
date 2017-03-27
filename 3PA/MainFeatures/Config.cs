@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,7 +39,6 @@ namespace _3PA.MainFeatures {
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
-
         #region config Object
 
         /// <summary>
@@ -198,7 +200,7 @@ namespace _3PA.MainFeatures {
                 GroupName = "Autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteUseEnterToAccept = true;
-            
+
             [Display(Name = "Unfocused opacity",
                 Description = "The opacity of the list when unfocused",
                 GroupName = "Autocompletion",
@@ -260,7 +262,7 @@ namespace _3PA.MainFeatures {
                 GroupName = "Progress autocompletion",
                 AutoGenerateField = false)]
             public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
-            
+
             [Display(Name = "Auto-case as I'm typing",
                 Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
                 GroupName = "Progress autocompletion",
@@ -306,7 +308,7 @@ namespace _3PA.MainFeatures {
             public int AutoCompleteWidth = 310;
 
             public bool AutoCompleteNeverAskToDisableDefault = false;
-            
+
             public string AutoCompleteItemPriorityList = "";
 
             #endregion
@@ -464,11 +466,11 @@ namespace _3PA.MainFeatures {
             // last ping time
             public string TechnicalLastPing = "";
             public string TechnicalMyUuid = Guid.NewGuid().ToString();
-            public int TechnicalPingEveryXMin = 4*60;
+            public int TechnicalPingEveryXMin = 4 * 60;
 
             // last update check
             public string TechnicalLastCheckUpdate = "";
-            public int TechnicalCheckUpdateEveryXMin = 6*60;
+            public int TechnicalCheckUpdateEveryXMin = 6 * 60;
 
             // did the last update check went ok?
             public bool TechnicalLastCheckUpdateOk = true;
@@ -702,7 +704,7 @@ namespace _3PA.MainFeatures {
         public static string FolderDataDigger {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }
-        
+
         // themes
         public static string FileSyntaxThemes {
             get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); }

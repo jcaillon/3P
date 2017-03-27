@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (HtmlFormatterSlim.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -80,7 +83,7 @@ namespace _3PA.Lib.CommonMark.Formatters {
                     target.WriteConstant(buffer, lastPos, pos - lastPos);
                     lastPos = pos + 1;
 
-                    target.WriteConstant(new[] {'%', HexCharacters[c/16], HexCharacters[c%16]});
+                    target.WriteConstant(new[] {'%', HexCharacters[c / 16], HexCharacters[c % 16]});
                 } else if (c > 127) {
                     target.WriteConstant(buffer, lastPos, pos - lastPos);
                     lastPos = pos + 1;
@@ -95,7 +98,7 @@ namespace _3PA.Lib.CommonMark.Formatters {
                     }
 
                     for (var i = 0; i < bytes.Length; i++)
-                        target.WriteConstant(new[] {'%', HexCharacters[bytes[i]/16], HexCharacters[bytes[i]%16]});
+                        target.WriteConstant(new[] {'%', HexCharacters[bytes[i] / 16], HexCharacters[bytes[i] % 16]});
                 }
             }
 

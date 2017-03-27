@@ -1,4 +1,5 @@
 #region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Plug.cs) is part of 3P.
@@ -16,12 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -35,7 +36,6 @@ using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
-using _3PA.Tests;
 using _3PA.WindowsCore;
 using _3PA._Resource;
 using MenuItem = _3PA.MainFeatures.MenuItem;
@@ -165,7 +165,7 @@ namespace _3PA {
                 ShareExportConf.StartCheckingForUpdates();
 
                 // ReSharper disable once ObjectCreationAsStatement
-                RecurentAction.StartNew(User.Ping, 1000*60*120);
+                RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
@@ -196,7 +196,7 @@ namespace _3PA {
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.Instance.UpdateDatabaseInfo;
             ProEnvironment.OnEnvironmentChange += ParserHandler.ClearStaticData;
-            
+
             Keywords.Instance.OnImport += AutoCompletion.SetStaticItems;
             DataBase.Instance.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
             AutoCompletion.OnUpdateStaticItems += ParserHandler.UpdateKnownStaticItems;
@@ -244,7 +244,6 @@ namespace _3PA {
                 AppDomain.CurrentDomain.UnhandledException -= ErrorHandler.UnhandledErrorHandler;
                 Application.ThreadException -= ErrorHandler.ThreadErrorHandler;
                 TaskScheduler.UnobservedTaskException -= ErrorHandler.UnobservedErrorHandler;
-
 
                 // unsubscribe to static events
                 ProEnvironment.OnEnvironmentChange -= FileExplorer.Instance.RebuildFileList;
@@ -349,7 +348,7 @@ namespace _3PA {
         public static bool KeyDownHandler(KeyEventArgs e) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             bool handled = false;
-            
+
             MenuItem menuItem = null;
             try {
                 // Since it's a keydown message, we can receive this a lot if the user let a button pressed
@@ -377,7 +376,7 @@ namespace _3PA {
 
                 if (handled)
                     return true;
-                
+
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
                 // It only works "almost normally" if we ShowDialog() the form?!
@@ -396,11 +395,10 @@ namespace _3PA {
                     if (invokeResponse != null && (bool) invokeResponse)
                         return true;
                 }
-                
+
                 // Close interfacePopups
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp || e.KeyCode == Keys.Next || e.KeyCode == Keys.Prior)
                     ClosePopups();
-                
             } catch (Exception ex) {
                 ErrorHandler.ShowErrors(ex, "Occurred in : " + (menuItem == null ? new ShortcutKey(e.Control, e.Alt, e.Shift, e.KeyCode).ToString() : menuItem.ItemId));
             }
@@ -678,7 +676,7 @@ namespace _3PA {
         public static void OnNppFileBeforeSaved() {
             if (!Npp.CurrentFile.IsProgress)
                 return;
-
+            /*
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder && !FilesInfo.CurrentFileInfoObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
@@ -699,7 +697,7 @@ namespace _3PA {
                     }
                 }
             }
-
+            */
             // for debug purposes, check if the document can be parsed
             if (Config.IsDevelopper) {
                 Task.Factory.StartNew(() => {

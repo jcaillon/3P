@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Npp.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -250,7 +253,7 @@ namespace _3PA.NppCore {
             get {
                 Rectangle nppRect = WinApi.GetWindowRect(Handle);
                 var nppLoc = nppRect.Location;
-                nppLoc.Offset(nppRect.Width/2, nppRect.Height/2);
+                nppLoc.Offset(nppRect.Width / 2, nppRect.Height / 2);
                 return Screen.FromPoint(nppLoc);
             }
         }

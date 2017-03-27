@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProCompilation.cs) is part of 3P.
@@ -16,7 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -123,7 +126,7 @@ namespace _3PA.MainFeatures.Pro {
             sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
-            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore*Environment.ProcessorCount;
+            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
             _listOfCompilationProcesses.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
@@ -182,7 +185,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (File.Exists(compilationProcess.ProExecutionObject.ProgressionFilePath))
                     nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
             }
-            return (float) nbFilesDone/NbFilesToCompile*100;
+            return (float) nbFilesDone / NbFilesToCompile * 100;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorer.cs) is part of 3P.
@@ -16,9 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System.Collections.Generic;
 using System.Linq;
+using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
@@ -105,36 +109,32 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
-        /// Call this method to update the code explorer tree with the data from the Parser Handler
+        /// Called when the parser ends
         /// </summary>
-        public void OnParseEndCodeExplorerItems(List<CodeExplorerItem> codeExplorerItems) {
+        public void OnParseEndCodeExplorerItems(List<CodeItem> codeExplorerItems) {
             if (!IsVisible)
                 return;
-            Form.SafeInvoke(form => form.UpdateTreeData(UpdateTreeData(codeExplorerItems)));
-        }
-
-        public void UpdateTreeData() {
-            Form.SafeInvoke(form => form.UpdateTreeData(UpdateTreeData(_initialList)));
-        }
-
-        public void OnParseEndParserItems(List<ParserError> parserErrors, Dictionary<int, LineInfo> lineInfo, List<ParsedItem> parsedItems) {
-            int curLine = Sci.Line.CurrentLine;
-            UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
+            var list = SortAndGroupConsecutiveItems(codeExplorerItems.ToList());
+            Form.SafeInvoke(form => form.UpdateTreeData(list));
         }
 
         /// <summary>
-        /// Contains the list of explorer items for the current file, updated by the parser's visitor class
+        /// Called when the parser ends
         /// </summary>
-        public List<CodeExplorerItem> ParsedExplorerItemsList {
-            get { return _initialList.ToList(); }
+        public void OnParseEndParserItems(List<ParserError> parserErrors, Dictionary<int, LineInfo> lineInfo, List<ParsedItem> parsedItems) {
+            if (!IsVisible)
+                return;
+            int curLine = Sci.Line.CurrentLine;
+            UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
         }
 
         #endregion
 
         #region Private
 
-        private List<CodeExplorerItem> _initialList = new List<CodeExplorerItem>();
-
+        /// <summary>
+        /// Update the current scope in the form
+        /// </summary>
         private void UpdateCurrentScope(ParsedScopeItem currentScope) {
             if (currentScope != null) {
                 Form.SafeInvoke(form => form.UpdateCurrentScope(currentScope.Name, Utils.GetImageFromStr(currentScope.ScopeType.ToString())));
@@ -143,95 +143,63 @@ namespace _3PA.MainFeatures.CodeExplorer {
             }
         }
 
-        private List<CodeExplorerItem> UpdateTreeData(List<CodeExplorerItem> codeExplorerItems) {
-            // get the list of items
-            _initialList = codeExplorerItems.ToList();
-
-            _initialList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
-
-            return _initialList;
-        }
-
-        private void SortAndGroupConsecutiveItems() {
-            /*
-            List<CodeExplorerItem> outList;
-
-            outList = new List<CodeExplorerItem>();
+        /// <summary>
+        /// Sort the given list and group similar consecutive items into sub groups
+        /// </summary>
+        private List<CodeItem> SortAndGroupConsecutiveItems(List<CodeItem> list) {
+            var outList = new List<CodeItem>();
 
             // apply custom sorting
-            var sortedList = _initialList.ToList();
-            sortedList.Sort(CodeExplorerSortingClass<CodeExplorerItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
+            list.Sort(CodeExplorerSortingClass<CodeItem>.GetInstance(Config.Instance.CodeExplorerSortingType));
 
-            HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
-
-            // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
-            CodeExplorerItem currentLvl1Parent = null;
             var iItem = 0;
-            while (iItem < sortedList.Count) {
-                var item = sortedList[iItem];
+            while (iItem < list.Count) {
+                var item = list[iItem];
 
-                // add an extra item that will be a new branch
-                if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
-                    var branchDisplayText = item.Branch.GetDescription();
+                if (item.Children != null) {
+                    item.Children = SortAndGroupConsecutiveItems(item.Children.Cast<CodeItem>().ToList()).Cast<FilteredTypeTreeListItem>().ToList();
+                }
 
-                    currentLvl1Parent = new CodeExplorerItem {
-                        DisplayText = branchDisplayText,
-                        Branch = item.Branch,
-                        IsExpanded = true, // by default, expand lvl 1 branch
+                // For each duplicated item (same Icon and same displayText), we create a new branch
+                var iIdentical = iItem + 1;
+                ParseFlag flags = 0;
+
+                // while we match identical items
+                while (iIdentical < list.Count &&
+                       list[iItem].Type == list[iIdentical].Type &&
+                       list[iItem].DisplayText.EqualsCi(list[iIdentical].DisplayText)) {
+                    flags = flags | list[iIdentical].Flags;
+                    iIdentical++;
+                }
+                // if we found identical item
+                if (iIdentical > iItem + 1) {
+                    // we create a branch for them
+                    var group = new BranchCodeItem {
+                        DisplayText = list[iItem].DisplayText,
+                        Type = list[iItem].Type,
+                        IsExpanded = false, // by default, the group are NOT expanded
+                        SubText = "x" + (iIdentical - iItem),
+                        Flags = flags,
                         Children = new List<FilteredTypeTreeListItem>()
                     };
-                    foundBranches.Add(item.Branch);
-                    outList.Add(currentLvl1Parent);
-                }
+                    outList.Add(group);
 
-                // Add a child item to the current branch
-                if (foundBranches.Contains(item.Branch) && currentLvl1Parent != null) {
-                    // For each duplicated item (same Icon and same displayText), we create a new branch
-                    var iIdentical = iItem + 1;
-                    ParseFlag flags = 0;
-
-                    // while we match identical items
-                    while (iIdentical < sortedList.Count &&
-                           sortedList[iItem].Type == sortedList[iIdentical].Type &&
-                           sortedList[iItem].Branch == sortedList[iIdentical].Branch &&
-                           sortedList[iItem].DisplayText.EqualsCi(sortedList[iIdentical].DisplayText)) {
-                        flags = flags | sortedList[iIdentical].Flags;
-                        iIdentical++;
-                    }
-                    // if we found identical item
-                    if (iIdentical > iItem + 1) {
-                        // we create a branch for them
-                        var currentLvl2Parent = new CodeExplorerItem {
-                            DisplayText = sortedList[iItem].DisplayText,
-                            Branch = sortedList[iItem].Branch,
-                            Type = sortedList[iItem].Type,
-                            IsExpanded = false, // by default, the lvl 2 branches are NOT expanded
-                            SubText = "x" + (iIdentical - iItem),
-                            IsNotBlock = sortedList[iItem].IsNotBlock,
-                            Flags = flags,
-                            Children = new List<FilteredTypeTreeListItem>()
-                        };
-                        currentLvl1Parent.Children.Add(currentLvl2Parent);
-
-                        // add child items to the newly created lvl 2 branch
-                        for (int i = iItem; i < iIdentical; i++) {
-                            currentLvl2Parent.Children.Add(sortedList[i]);
-                        }
-
-                        iItem += (iIdentical - iItem);
-                        continue;
+                    // add child items to the newly created group branch
+                    for (int i = iItem; i < iIdentical; i++) {
+                        group.Children.Add(list[i]);
                     }
 
-                    // single item, add it normally
-                    currentLvl1Parent.Children.Add(item);
-                } else {
-                    // add existing item as a root item
-                    outList.Add(item);
+                    iItem += (iIdentical - iItem);
+                    continue;
                 }
+
+                // single item, add it normally
+                outList.Add(item);
 
                 iItem++;
             }
-            */
+
+            return outList;
         }
 
         #endregion
