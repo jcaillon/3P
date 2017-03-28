@@ -32,6 +32,7 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
     internal static class ParserHandler {
+
         #region event
 
         /// <summary>
@@ -128,12 +129,17 @@ namespace _3PA.MainFeatures.Parser {
                             // send codeExplorerItems
                             if (OnEndSendCodeExplorerItems != null)
                                 OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
+
                         } else {
                             var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null, Config.Instance.NppAutoCompleteMinWordLengthRequired);
 
                             // send completionItems
                             if (OnEndSendCompletionItems != null)
                                 OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
+
+                            // send codeExplorerItems
+                            if (OnEndSendCodeExplorerItems != null)
+                                OnEndSendCodeExplorerItems(new List<CodeItem>());
                         }
                     } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
 
@@ -145,6 +151,8 @@ namespace _3PA.MainFeatures.Parser {
                     if (OnEndSendParserItems != null) {
                         if (parser != null)
                             OnEndSendParserItems(parser.ParserErrors, parser.LineInfo, parser.ParsedItemsList);
+                        else
+                            OnEndSendParserItems(null, null, null);
                     }
                 });
 

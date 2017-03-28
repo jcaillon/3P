@@ -97,7 +97,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lib\AsapButDelayableAction.cs" />
-    <Compile Include="MainFeatures\Abl.cs" />
     <Compile Include="Lib\3pUpdater\3PUpdater.cs" />
     <Compile Include="Lib\CommonMark\CommonMarkAdditionalFeatures.cs" />
     <Compile Include="Lib\CommonMark\CommonMarkConverter.cs" />
@@ -363,6 +362,7 @@
     <Content Include="_Resource\Images\Menu\DeleteFunction.png" />
     <Content Include="_Resource\Images\Menu\DeleteProcedure.png" />
     <Content Include="_Resource\Images\Menu\Dictionary.png" />
+    <Content Include="_Resource\Images\Menu\DisplayParserResults.png" />
     <Content Include="_Resource\Images\Menu\EditCode.png" />
     <Content Include="_Resource\Images\Menu\Env.png" />
     <Content Include="_Resource\Images\Menu\EnvName.png" />
@@ -414,7 +414,6 @@
     <Content Include="_Resource\Images\ParserItem\Flags\Index.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Input.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\InputOutput.png" />
-    <Content Include="_Resource\Images\ParserItem\Flags\IsTooLong.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\LocalScope.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\Mandatory.png" />
     <Content Include="_Resource\Images\ParserItem\Flags\MissingDbName.png" />

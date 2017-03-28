@@ -400,7 +400,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         private string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
             var eol = Sci.GetEolString;
-            if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
+            if (!String.IsNullOrEmpty(blockDescription) && ProCodeFormat.IsCurrentFileFromAppBuilder) {
                 insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
                 insertText += eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME";
             }

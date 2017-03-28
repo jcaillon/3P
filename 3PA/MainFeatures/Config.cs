@@ -343,6 +343,12 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool DisablePrototypeAutoUpdate = false;
 
+            [Display(Name = "Display parser errors on save",
+                Description = "Each time you save a progress file, this will validate that it can be read by the AppBuilder.<br>It checks the length of each block and the syntax of AppBuilder pre-processed statements",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            public bool DisplayParserErrorsOnSave = true;
+
             #endregion
 
             #region FILE EXPLORER

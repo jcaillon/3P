@@ -297,7 +297,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append(ParsedDefine.Left);
                 toDisplay.Append(@"</div>");
             }
-            return base.ToString();
+            return toDisplay.ToString();
         }
 
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
@@ -575,7 +575,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
             toDisplay.Append(ParsedPreProcVariable.Value);
             toDisplay.Append(@"</div>");
-            return base.ToString();
+            return toDisplay.ToString();
         }
     }
 

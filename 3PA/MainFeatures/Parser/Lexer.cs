@@ -48,6 +48,7 @@ namespace _3PA.MainFeatures.Parser {
         private int _line = LineStartAt;
         private int _column = ColumnStartAt;
         private int _commentDepth;
+        private int _includeDepth;
 
         private int _startCol;
         private int _startLine;
@@ -91,7 +92,6 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        /// <param name="data"></param>
         public Lexer(string data) {
             if (data == null)
                 throw new ArgumentNullException("data");
@@ -109,16 +109,12 @@ namespace _3PA.MainFeatures.Parser {
         /// Use this when you wish to tokenize only a partial string in a longer string
         /// Allows you to start with a comment depth different of 0
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="pos"></param>
-        /// <param name="line"></param>
-        /// <param name="column"></param>
-        /// <param name="commentDepth"></param>
-        public Lexer(string data, int pos, int line, int column, int commentDepth) : this(data) {
+        public Lexer(string data, int pos, int line, int column, int commentDepth, int includeDepth) : this(data) {
             _pos = pos;
             _line = line;
             _column = column;
             _commentDepth = commentDepth;
+            _includeDepth = includeDepth;
         }
 
         #endregion
@@ -254,7 +250,14 @@ namespace _3PA.MainFeatures.Parser {
 
                 case '{':
                     // case of a preprocessed {&variable}/{1} or an include
+                    _includeDepth++;
                     return CreatePreprocessedToken();
+
+                case '}':
+                    // end of include
+                    if (_includeDepth > 0)
+                        _includeDepth--;
+                    return CreateSymbolToken();
 
                 case '&':
                     // pre-processed directive (i.e. &define, &analyse-suspend, &message)
@@ -271,7 +274,8 @@ namespace _3PA.MainFeatures.Parser {
                 case '-':
                 case '+':
                     // number
-                    if (!char.IsDigit(PeekAtChr(1))) return CreateSymbolToken();
+                    if (!char.IsDigit(PeekAtChr(1)))
+                        return CreateSymbolToken();
                     ReadChr();
                     return CreateNumberToken();
 
@@ -394,6 +398,7 @@ namespace _3PA.MainFeatures.Parser {
             ReadChr();
             return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
+        
 
         /// <summary>
         /// reads '{' for an include and '{&' for a preprocessed variable
@@ -401,7 +406,7 @@ namespace _3PA.MainFeatures.Parser {
         private Token CreatePreprocessedToken() {
             ReadChr();
             var ch = PeekAtChr(0);
-
+            
             // case of a preprocessed {&variable} or {1}
             if (ch == '&' || char.IsDigit(ch)) {
                 if (ch == '&')
@@ -535,7 +540,8 @@ namespace _3PA.MainFeatures.Parser {
                 // new line
                 if (ch == '\r' || ch == '\n') {
                     // a string continues at the next line... Except when it's on a &define line
-                    if (_definePreProcLastLine == _startLine)
+                    // BUT we don't want to do that when we are defining parameters for an include...
+                    if (_definePreProcLastLine == _startLine && _includeDepth == 0)
                         break;
 
                     ReadEol(ch);

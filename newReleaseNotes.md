@@ -3,6 +3,7 @@ Enjoy!
 
 **Improvements :**
 
+- New item in the main menu `Display parser errors` : this will validate your file using the parser of 3P, it can be used to know if your file can be read by the AppBuilder (for instance). You also have the opportunity to display the parser errors each time you save the file (it will only be displayed if there are errors), see `Options` > `Code edition`. This is enabled by default. Since I introduced this feature, i will stop displaying the number of extra characters in the code explorer, which already displays a lot of information.
 - New options for the auto completion : 
   - you can now choose to immediately show the auto completion after a `.` or `:` (this is true currently and by default)
   - you can now choose to not display the auto completion on each input but still correct the case of the words as you type

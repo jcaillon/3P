@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     ToolTip = "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order<br>-Uncategorized, unsorted"
                 },
                 new YamuiFilterBox.YamuiFilterBoxButton {
-                    Image = ImageResources.FromInclude,
+                    Image = ImageResources.Persistent,
                     OnClic = ButtonFromIncludeOnButtonPressed,
                     ToolTip = "Toggle on/off <b>the display</b>, in the explorer, the functions and procedures loaded in persistent in this file"
                 }

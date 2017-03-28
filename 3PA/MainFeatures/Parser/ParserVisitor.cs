@@ -387,16 +387,13 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedOnStatement pars) {
-            // check length of block
-            CheckForTooMuchChar(pars);
-
             // To code explorer
             PushToExplorerList(
                 GetExplorerListNode("ON events", CodeExplorerIconType.OnEvent),
                 new OnEventCodeItem {
                     DisplayText = pars.Name,
                     Flags = pars.Flags,
-                    SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
+                    SubText = null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
                     GoToColumn = pars.Column
@@ -404,16 +401,13 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         public void Visit(ParsedImplementation pars) {
-            // check length of block
-            CheckForTooMuchChar(pars);
-
             // to code explorer
             PushToExplorerList(
                 GetExplorerListNode("Functions", CodeExplorerIconType.Function),
                 new FunctionCodeItem {
                     DisplayText = pars.Name,
                     Flags = pars.Flags,
-                    SubText = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null,
+                    SubText = null,
                     DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
                     GoToColumn = pars.Column
@@ -464,9 +458,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Procedures
         /// </summary>
         public void Visit(ParsedProcedure pars) {
-            // check lenght of block
-            CheckForTooMuchChar(pars);
-
             // fill dictionary containing the name of all procedures defined
             if (!_definedProcedures.Contains(pars.Name))
                 _definedProcedures.Add(pars.Name);
@@ -476,7 +467,7 @@ namespace _3PA.MainFeatures.Parser {
             var newNode = CodeItem.Factory.New(pars.Flags.HasFlag(ParseFlag.External) ? CodeExplorerIconType.ExternalProcedure : CodeExplorerIconType.Procedure);
             newNode.DisplayText = pars.Name;
             newNode.Flags = pars.Flags;
-            newNode.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null;
+            newNode.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null;
             newNode.DocumentOwner = pars.FilePath;
             newNode.GoToLine = pars.Line;
             newNode.GoToColumn = pars.Column;
@@ -794,26 +785,6 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             return parserVisitor;
-        }
-
-        /// <summary>
-        /// Check the parse scope has too much char to allow it to be displayed in the appbuilder
-        /// </summary>
-        /// <param name="pars"></param>
-        private void CheckForTooMuchChar(ParsedScopeItem pars) {
-            // check length of block
-            if (!pars.Flags.HasFlag(ParseFlag.FromInclude)) {
-                pars.TooLongForAppbuilder = NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) > 0;
-                if (pars.TooLongForAppbuilder)
-                    pars.Flags |= ParseFlag.IsTooLong;
-            }
-        }
-
-        /// <summary>
-        /// returns the number of chars between two lines in the current document
-        /// </summary>
-        private static int NbExtraCharBetweenLines(int startLine, int endLine) {
-            return (Sci.StartBytePosOfLine(endLine) - Sci.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
         }
 
         #endregion

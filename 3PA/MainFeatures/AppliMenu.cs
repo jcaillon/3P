@@ -218,6 +218,7 @@ namespace _3PA.MainFeatures {
             #region Edit code
 
             _editCodeList = new List<MenuItem> {
+                new MenuItem(this, "Display parser errors", ImageResources.DisplayParserResults, item => ProCodeFormat.DisplayParserErrors(), "Check_parser_errors", null),
                 new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProMisc.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
                 new MenuItem(this, "Correct document indentation", ImageResources.FormatCode, item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I")
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),

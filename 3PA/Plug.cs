@@ -676,36 +676,10 @@ namespace _3PA {
         public static void OnNppFileBeforeSaved() {
             if (!Npp.CurrentFile.IsProgress)
                 return;
-            /*
-            // check for block that are too long and display a warning
-            if (Abl.IsCurrentFileFromAppBuilder && !FilesInfo.CurrentFileInfoObject.WarnedTooLong) {
-                var warningMessage = new StringBuilder();
 
-                var explorerItemsList = CodeExplorer.Instance.ParsedExplorerItemsList;
-                if (explorerItemsList != null) {
-                    foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flags.HasFlag(ParseFlag.IsTooLong)))
-                        warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Type + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
-                    if (warningMessage.Length > 0) {
-                        warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
-                        warningMessage.Append("<br><i>To prevent this, reduce the number of characters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
-                        var curPath = Npp.CurrentFile.Path;
-                        UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
-                            Npp.Goto(curPath, int.Parse(args.Link));
-                            UserCommunication.CloseUniqueNotif("AppBuilderLimit");
-                        }, 20);
-                        FilesInfo.CurrentFileInfoObject.WarnedTooLong = true;
-                    }
-                }
-            }
-            */
-            // for debug purposes, check if the document can be parsed
-            if (Config.IsDevelopper) {
-                Task.Factory.StartNew(() => {
-                    var parser = new Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
-                    var parserErrors = parser.ParseErrorsInHtml;
-                    if (!string.IsNullOrEmpty(parserErrors))
-                        UserCommunication.Notify("The parser found errors on this file:<br>" + parserErrors, MessageImg.MsgInfo, "Parser message", "Errors found", 3);
-                });
+            // Display parser errors if any
+            if (Config.Instance.DisplayParserErrorsOnSave) {
+                ProCodeFormat.DisplayParserErrors(true);
             }
 
             // update function prototypes

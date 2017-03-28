@@ -104,8 +104,10 @@ namespace _3PA.MainFeatures {
                         nppScreen.WorkingArea.Width / 3,
                         nppScreen.WorkingArea.Height / 3,
                         (sender, args) => {
-                            if (clickHandler != null) clickHandler(args);
-                            else Utils.OpenPathClickHandler(sender, args);
+                            if (clickHandler != null)
+                                clickHandler(args);
+                            if (!args.Handled)
+                                Utils.OpenPathClickHandler(sender, args);
                         });
 
                     if (id != null) {

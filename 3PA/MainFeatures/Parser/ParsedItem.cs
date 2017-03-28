@@ -187,7 +187,7 @@ namespace _3PA.MainFeatures.Parser {
         Persistent = 65536,
 
         // the block has too much characters and the program will not be open-able in the appbuilder
-        IsTooLong = 131072,
+        //IsTooLong = 131072, <- USE THIS IT'S FREE
         // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
         Uncertain = 262144,
         // if a table found w/o the database name before it

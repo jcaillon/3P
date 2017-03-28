@@ -52,6 +52,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Can either be a single (//) or multiline comment (/* */)
     /// </summary>
     internal class TokenComment : Token {
+
         public bool IsSingleLine { get; private set; }
 
         public TokenComment(string value, int line, int column, int startPosition, int endPosition, bool isSingleLine) : base(value, line, column, startPosition, endPosition) {
@@ -75,7 +76,7 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// Its value is '{', indicates the beggining of an include
+    /// Its value is '{', indicates the beginning of an include
     /// </summary>
     internal class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}

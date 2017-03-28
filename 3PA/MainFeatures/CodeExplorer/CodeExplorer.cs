@@ -114,7 +114,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void OnParseEndCodeExplorerItems(List<CodeItem> codeExplorerItems) {
             if (!IsVisible)
                 return;
-            var list = SortAndGroupConsecutiveItems(codeExplorerItems.ToList());
+            var list = codeExplorerItems != null ? SortAndGroupConsecutiveItems(codeExplorerItems.ToList()) : new List<CodeItem>();
             Form.SafeInvoke(form => form.UpdateTreeData(list));
         }
 
@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (!IsVisible)
                 return;
             int curLine = Sci.Line.CurrentLine;
-            UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
+            UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
         }
 
         #endregion
