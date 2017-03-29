@@ -105,8 +105,16 @@ namespace _3PA.MainFeatures.Parser {
             _dataLength = _data.Length;
             _pos = 0;
 
+            if (KnownWords == null)
+                KnownWords = new HashSet<string>();
+            if (AdditionnalCharacters == null)
+                AdditionnalCharacters = new HashSet<char>();
+
             // create the list of keywords
             Parse();
+
+            // clean
+            _data = null;
         }
 
         #endregion
@@ -117,16 +125,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Call this method to actually parse the string
         /// </summary>
         private void Parse() {
-
-            if (KnownWords == null)
-                KnownWords = new HashSet<string>();
-            if (AdditionnalCharacters == null)
-                AdditionnalCharacters = new HashSet<char>();
-
             while (GetNextCompItem()) {}
-
-            // clean
-            _data = null;
         }
 
         /// <summary>
