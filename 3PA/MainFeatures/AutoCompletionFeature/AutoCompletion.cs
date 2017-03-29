@@ -37,6 +37,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// This class handles the Auto Completion
     /// </summary>
     internal static class AutoCompletion {
+
         #region Events
 
         public static event Action<List<CompletionItem>> OnUpdateStaticItems;
@@ -152,42 +153,20 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         public static void SetStaticItems() {
             DoInLock(() => {
-                _additionalWordChar = new HashSet<char>();
-                _childSeparators = new HashSet<char>();
+                SetLangContext();
 
                 if (Npp.CurrentFile.IsProgress) {
                     // Progress files
                     _staticItems = Keywords.Instance.CompletionItems.ToList();
                     _staticItems.AddRange(DataBase.Instance.CompletionItems);
-                    _additionalWordChar.Add('&');
-                    _additionalWordChar.Add('-');
-                    _childSeparators.Add(':');
                 } else {
-                    // Other files, get the keyword list and additional characters from the xml
+                    // Other files, get the keyword list from the xml
                     if (Npp.CurrentFile.Lang == null) {
                         _staticItems = new List<CompletionItem>();
                     } else {
                         _staticItems = Npp.CurrentFile.Lang.Keywords;
-                        if (Npp.CurrentFile.Lang.AdditionalWordChar != null) {
-                            foreach (var c in Npp.CurrentFile.Lang.AdditionalWordChar) {
-                                if (!_additionalWordChar.Contains(c))
-                                    _additionalWordChar.Add(c);
-                            }
-                        }
-                    }
-
-                    // add word char list from the config.xml
-                    if (!string.IsNullOrEmpty(Npp.ConfXml.WordCharList)) {
-                        foreach (var c in Npp.ConfXml.WordCharList) {
-                            if (!_additionalWordChar.Contains(c))
-                                _additionalWordChar.Add(c);
-                        }
                     }
                 }
-
-                // make sure the additional chars contains at least '_'
-                if (!_additionalWordChar.Contains('_'))
-                    _additionalWordChar.Add('_');
 
                 // we sort the list, doing it now will reduce the time for the next sort()
                 _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
@@ -195,6 +174,58 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (OnUpdateStaticItems != null)
                     OnUpdateStaticItems.Invoke(_staticItems);
             });
+        }
+
+        /// <summary>
+        /// Set the context for the current language (options, additional characters and so on...)
+        /// </summary>
+        private static void SetLangContext() {
+
+            _additionalWordChar = new HashSet<char>();
+            _childSeparators = new HashSet<char>();
+
+            if (Npp.CurrentFile.IsProgress) {
+                // Progress files
+                _additionalWordChar.Add('&');
+                _additionalWordChar.Add('-');
+                _childSeparators.Add(':');
+
+            } else if (Npp.CurrentFile.Lang != null)  {
+
+                // Other files, get the keyword list and additional characters from the xml
+                if (Npp.CurrentFile.Lang.AdditionalWordChar != null) {
+                    foreach (var c in Npp.CurrentFile.Lang.AdditionalWordChar) {
+                        if (!_additionalWordChar.Contains(c))
+                            _additionalWordChar.Add(c);
+                    }
+                }
+
+                // add word char list from the config.xml
+                if (!string.IsNullOrEmpty(Npp.ConfXml.WordCharList)) {
+                    foreach (var c in Npp.ConfXml.WordCharList) {
+                        if (!_additionalWordChar.Contains(c))
+                            _additionalWordChar.Add(c);
+                    }
+                }
+            }
+
+            // make sure the additional chars contains at least '_'
+            if (!_additionalWordChar.Contains('_'))
+                _additionalWordChar.Add('_');
+
+            // Set options for this language
+            if (Npp.CurrentFile.IsProgress) {
+                InsertSelectedSuggestionOnWordEnd = Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd;
+                AutoCase = Config.Instance.AutoCompleteAutoCase;
+                FilterCaseMode = CaseMode.Insensitive;
+                ParserCaseMode = CaseMode.Insensitive;
+            } else {
+                InsertSelectedSuggestionOnWordEnd = Config.Instance.NppAutoCompleteInsertSelectedSuggestionOnWordEnd;
+                AutoCase = Config.Instance.NppAutoCompleteAutoCase;
+                FilterCaseMode = Config.Instance.NppAutoCompleteFilterCaseMode;
+                ParserCaseMode = Config.Instance.NppAutoCompleteParserCaseMode;
+            }
+            CompletionSortingClass<CompletionItem>.Instance.StringComparison = FilterStringComparison;
         }
 
         /// <summary>
@@ -264,6 +295,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 int offset = 1;
                 if (c == '\r' || c == '\n') {
                     offset = nppCurrentPosition - insertPosition;
+                    if (offset > 40) {
+                        // case of an extremely hard tabbed line
+                        strOnLeft = Sci.GetTextOnLeftOfPos(nppCurrentPosition - offset, 61);
+                    }
                 }
 
                 bool textHasChanged = false;
@@ -272,13 +307,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // (maybe not if, for instance, we just input 2 spaces consecutively)
                 if (offset > 0 && strOnLeftLength > offset && IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - offset])) {
                     // automatically insert selected keyword of the completion list?
-                    if (AutoCompleteInsertSelectedSuggestionOnWordEnd && isVisible) {
+                    if (InsertSelectedSuggestionOnWordEnd && isVisible) {
                         InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
                         textHasChanged = true;
                     }
 
                     // automatically change the case of the keyword?
-                    else if (AutoCompleteAutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
+                    else if (AutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
                         var candidates = FindInCompletionData(strOnLeft.Substring(0, strOnLeftLength - offset), nppCurrentLine);
                         // we matched the word in the list, correct the case
                         if (candidates != null && candidates.Count > 0) {
@@ -492,7 +527,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         private static IEnumerable<CompletionItem> GetFilteredItems(IEnumerable<CompletionItem> collection, string keyword, char? childSeparator) {
             foreach (CompletionItem item in collection)
-                if (item.ChildSeparator == childSeparator && item.DisplayText.EqualsCi(keyword)) {
+                if (item.ChildSeparator == childSeparator && item.DisplayText.Equals(keyword, FilterStringComparison)) {
                     yield return item;
                 }
         }
@@ -537,7 +572,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         private static void ShowSuggestionList(AutoCompletionForm form) {
             // we changed the list of items to display
             if (_needToSetItems) {
-                DoInLock(() => { form.SetItems(CurrentItems.Cast<ListItem>().ToList()); });
+                DoInLock(() => {
+                    form.SetItems(CurrentItems.Cast<ListItem>().ToList());
+                });
                 _needToSetItems = false;
             }
 
@@ -585,6 +622,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             form.SetPosition(point, lineHeight + 2);
             form.UnCloak();
             form.SetSelectedIndex(0);
+            form.SetCaseMode(FilterCaseMode);
 
             _shownPosition = Sci.CurrentPosition;
         }
@@ -664,7 +702,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <param name="item"></param>
         private static void RememberUseOf(CompletionItem item) {
             // handles unwanted rank progression (when the user enter several times the same keyword)
-            if (item.DisplayText.Equals(_lastRememberedKeyword))
+            if (item.DisplayText.Equals(_lastRememberedKeyword, FilterStringComparison))
                 return;
             _lastRememberedKeyword = item.DisplayText;
 
@@ -672,17 +710,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (_form != null)
                 _form.SafeInvoke(form => form.SortInitialList()); // sort the list of items since the ranking has changed
 
-            if (item.FromParser)
-                RememberUseOfParsedItem(item.DisplayText);
+            if (item.FromParser) {
+                if (!_displayTextRankingParsedItems.ContainsKey(item.DisplayText))
+                    _displayTextRankingParsedItems.Add(item.DisplayText, 1);
+                else
+                    _displayTextRankingParsedItems[item.DisplayText]++;
+            }
         }
-
-        /// <summary>
-        /// This dictionary is what is used to remember the ranking of each word for the current session
-        /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
-        /// </summary>
-        private static Dictionary<string, int> _displayTextRankingParsedItems = new Dictionary<string, int>();
-
-        private static string _lastRememberedKeyword = "";
 
         /// <summary>
         /// Find ranking of a parsed item
@@ -694,16 +728,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
-        /// remember the use of a particular item in the completion list
-        /// (for dynamic items = parsed items)
+        /// This dictionary is what is used to remember the ranking of each word for the current session
+        /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
         /// </summary>
-        /// <param name="displayText"></param>
-        public static void RememberUseOfParsedItem(string displayText) {
-            if (!_displayTextRankingParsedItems.ContainsKey(displayText))
-                _displayTextRankingParsedItems.Add(displayText, 1);
-            else
-                _displayTextRankingParsedItems[displayText]++;
-        }
+        private static Dictionary<string, int> _displayTextRankingParsedItems = new Dictionary<string, int>(StringComparer.CurrentCulture);
+
+        private static string _lastRememberedKeyword = "";
 
         #endregion
 
@@ -759,7 +789,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
-        /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
+        /// Passes the OnKey input to the auto completion form
         /// </summary>
         public static bool PerformKeyDown(KeyEventArgs e) {
             return IsVisible && (bool) _form.SafeSyncInvoke(form => form.PerformKeyDown(e));
@@ -782,7 +812,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Called from CTRL + Space shortcut
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
-            ParserHandler.ParseDocumentAsap();
+            ParserHandler.ParseDocumentNow();
             _openedFromShortCut = true;
             _openedFromShortcutLine = Sci.Line.CurrentLine;
             _shownPosition = Sci.CurrentPosition;
@@ -804,13 +834,19 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     filterClass.UpdateConditions(line);
                     outList = GetWordsList(_savedAllItems.Where(filterClass.FilterPredicate), keyword, charPos, firstSeparator).ToList();
                 });
+                // special case for methods while we don't have a perfect system
+                if (firstSeparator == ':' && (outList == null || outList.Count == 0)) {
+                    DoInLock(() => {
+                        outList = _savedAllItems.Where(item => item.DisplayText.Equals(firstKeyword, FilterStringComparison)).ToList();
+                    });
+                }
             } else {
                 outList = new List<CompletionItem>();
                 DoInLock(() => {
                     var filterClass = new CompletionFilterClass();
                     filterClass.UpdateConditions(line);
                     foreach (var item in _savedAllItems) {
-                        if (filterClass.FilterPredicate(item) && item.DisplayText.EqualsCi(firstKeyword)) {
+                        if (filterClass.FilterPredicate(item) && item.DisplayText.Equals(firstKeyword, FilterStringComparison)) {
                             outList.Add(item);
                             return;
                         }
@@ -818,7 +854,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 });
                 return outList;
             }
-            return outList == null ? null : outList.Where(data => data.DisplayText.EqualsCi(firstKeyword)).ToList();
+            return outList == null ? null : outList.Where(data => data.DisplayText.Equals(firstKeyword, FilterStringComparison)).ToList();
         }
 
         /// <summary>
@@ -845,12 +881,47 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
         }
 
-        private static bool AutoCompleteInsertSelectedSuggestionOnWordEnd {
-            get { return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd : Config.Instance.NppAutoCompleteInsertSelectedSuggestionOnWordEnd; }
+        /// <summary>
+        /// Get string comparer to use for this list
+        /// </summary>
+        public static StringComparer ParserStringComparer {
+            get { return ParserCaseMode == CaseMode.Sensitive ? StringComparer.CurrentCulture : StringComparer.CurrentCultureIgnoreCase; }
         }
 
-        private static bool AutoCompleteAutoCase {
-            get { return Npp.CurrentFile.IsProgress ? Config.Instance.AutoCompleteAutoCase : Config.Instance.NppAutoCompleteAutoCase; }
+        /// <summary>
+        /// Case sensitivity for the parser, to add two identical keywords with different cases of not
+        /// </summary>
+        private static CaseMode ParserCaseMode { get; set; }
+
+        /// <summary>
+        /// Get string comparison to use for this list
+        /// </summary>
+        private static StringComparison FilterStringComparison {
+            get { return FilterCaseMode == CaseMode.Sensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase; }
+        }
+        
+        /// <summary>
+        /// Case sensitivity for the filter, to know if the item "BABAR" will be found when the user enters "b"
+        /// </summary>
+        private static CaseMode FilterCaseMode { get; set; }
+
+        /// <summary>
+        /// Automatically correct the case of a keyword when we finished typing it (useless if FilterCaseMode is sensitive)
+        /// </summary>
+        private static bool AutoCase { get; set; }
+
+        /// <summary>
+        /// Insert the currently selected word when we finish typing a word
+        /// </summary>
+        private static bool InsertSelectedSuggestionOnWordEnd { get; set; }
+
+        #endregion
+
+        #region Enums
+
+        internal enum CaseMode {
+            Insensitive,
+            Sensitive
         }
 
         #endregion

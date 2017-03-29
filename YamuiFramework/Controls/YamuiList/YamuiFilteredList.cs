@@ -54,6 +54,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected string _filterString = string.Empty;
 
+        private FilterCaseType _filterCase = FilterCaseType.Insensitive;
+
         protected const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
 
         #endregion
@@ -76,12 +78,12 @@ namespace YamuiFramework.Controls.YamuiList {
         public virtual string FilterString {
             get { return _filterString; }
             set {
-                _filterString = value.ToLower().Trim();
+                _filterString = value.Trim();
                 if (_nbInitialItems > 0) {
                     // apply the filter on each item to compute internal properties
                     if (_initItemsLock.TryEnterReadLock(-1)) {
                         try {
-                            _initialItems.ForEach(data => data.InternalFilterApply(_filterString));
+                            _initialItems.ForEach(data => data.InternalFilterApply(_filterString, FilterCase));
                         } finally {
                             _initItemsLock.ExitReadLock();
                         }
@@ -101,10 +103,20 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
+        /// Case sensitivity to use for filtering and searching through this list
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public FilterCaseType FilterCase {
+            get { return _filterCase; }
+            set { _filterCase = value; }
+        }
+
+        /// <summary>
         /// Set a class implementing a comparer to sort the initial list of items,
         /// When you use SetItems() you should already have sorted the list, the later sorts
         /// are manual, call SortInitialList()
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IComparer<ListItem> SortingClass { get; set; }
 
         /// <summary>
@@ -132,6 +144,32 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region Filter case
+
+        /// <summary>
+        /// Type of case sensitivity to use for this list (for filtering and searching)
+        /// </summary>
+        public enum FilterCaseType {
+            Insensitive,
+            Sensitive
+        }
+        
+        /// <summary>
+        /// Get string comparison to use for this list
+        /// </summary>
+        public StringComparison StringComparison {
+            get { return FilterCase == FilterCaseType.Sensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase; }
+        }
+
+        /// <summary>
+        /// Get string comparer to use for this list
+        /// </summary>
+        public StringComparer StringComparer {
+            get { return FilterCase == FilterCaseType.Sensitive ? StringComparer.CurrentCulture : StringComparer.CurrentCultureIgnoreCase; }
         }
 
         #endregion

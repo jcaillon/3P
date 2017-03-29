@@ -169,7 +169,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (_parserErrors != null && _parserErrors.Count > 0) {
                     foreach (var parserError in _parserErrors) {
                         error.AppendLine("<div>");
-                        error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
+                        error.AppendLine(" - " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
                         error.AppendLine("</div>");
                     }
                 }

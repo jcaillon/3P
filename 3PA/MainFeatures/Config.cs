@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.NppCore;
 
@@ -247,6 +248,18 @@ namespace _3PA.MainFeatures {
                 GroupName = "Default autocompletion replacement",
                 AutoGenerateField = false)]
             public int NppAutoCompleteMinWordLengthRequired = 2;
+
+            [Display(Name = "Filter case sensitivity",
+                Description = "As you type, the autocompletion list will be filtered to the best matches,<br>this option let you chose the behavior of the filter",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public AutoCompletion.CaseMode NppAutoCompleteFilterCaseMode = AutoCompletion.CaseMode.Insensitive;
+
+            [Display(Name = "Keywords list case sensitivity",
+                Description = "Chose how keywords are added to the autocompletion list :<br>- a word can appear several times with different cases (sensitive)<br>- or only once no matter its case (insensitive)",
+                GroupName = "Default autocompletion replacement",
+                AutoGenerateField = false)]
+            public AutoCompletion.CaseMode NppAutoCompleteParserCaseMode = AutoCompletion.CaseMode.Sensitive;
 
             /// <summary>
             /// PROGRESS AUTOCOMPLETION

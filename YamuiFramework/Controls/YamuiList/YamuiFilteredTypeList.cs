@@ -161,7 +161,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Stores a correspondance between type number and image to use for the button
+        /// Stores a correspondence between type number and image to use for the button
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<int, Image> TypeImages {
@@ -170,7 +170,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Stores a correspondance between type number and text to use for the tooltip of the button
+        /// Stores a correspondence between type number and text to use for the tooltip of the button
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<int, string> TypeText {

@@ -75,19 +75,19 @@ namespace YamuiFramework.Controls.YamuiList {
         #region internal filter mechanism
 
         /// <summary>
-        /// The dispertion level with which the lowerCaseFilterString matches the DisplayText
+        /// The dispersion level with which the filterString matches the DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
         public int InternalFilterDispertionLevel { get; private set; }
 
         /// <summary>
-        /// True of the lowerCaseFilterString fully matches DisplayText
+        /// True of the filterString fully matches DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
         public bool InternalFilterFullyMatch { get; private set; }
 
         /// <summary>
-        /// The way lowerCaseFilterString matches DisplayText
+        /// The way filterString matches DisplayText
         /// </summary>
         /// <remarks>Internal use only!</remarks>
         public List<CharacterRange> InternalFilterMatchedRanges { get; private set; }
@@ -97,13 +97,14 @@ namespace YamuiFramework.Controls.YamuiList {
         /// FilterDispertionLevel, FilterFullyMatch, FilterMatchedRanges
         /// </summary>
         /// <remarks>Internal use only!</remarks>
-        public void InternalFilterApply(string lowerCaseFilterString) {
+        public void InternalFilterApply(string filterString, YamuiFilteredList.FilterCaseType caseType) {
+
             InternalFilterMatchedRanges = new List<CharacterRange>();
             InternalFilterFullyMatch = true;
             InternalFilterDispertionLevel = 0;
 
             // not filtering, everything should be included
-            if (string.IsNullOrEmpty(lowerCaseFilterString))
+            if (string.IsNullOrEmpty(filterString))
                 return;
 
             // exclude the separator items and empty text from a match when searching
@@ -112,9 +113,14 @@ namespace YamuiFramework.Controls.YamuiList {
                 return;
             }
 
-            var lcText = DisplayText.ToLower();
+            var lcText = DisplayText;
             var textLenght = lcText.Length;
-            var filterLenght = lowerCaseFilterString.Length;
+            var filterLenght = filterString.Length;
+
+            if (caseType == YamuiFilteredList.FilterCaseType.Insensitive) {
+                lcText = lcText.ToLower();
+                filterString = filterString.ToLower();
+            }
 
             int pos = 0;
             int posFilter = 0;
@@ -122,10 +128,12 @@ namespace YamuiFramework.Controls.YamuiList {
             int startMatch = 0;
 
             while (pos < textLenght) {
+
                 // remember matching state at the beginning of the loop
                 bool wasMatching = matching;
+
                 // we match the current char of the filter
-                if (lcText[pos] == lowerCaseFilterString[posFilter]) {
+                if (lcText[pos] == filterString[posFilter]) {
                     if (!matching) {
                         matching = true;
                         startMatch = pos;

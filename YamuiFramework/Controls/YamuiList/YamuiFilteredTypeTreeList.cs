@@ -93,8 +93,8 @@ namespace YamuiFramework.Controls.YamuiList {
         public override string FilterString {
             get { return _filterString; }
             set {
-                _filterString = value.ToLower().Trim();
-                if (SetIsSearching(value, SearchMode))
+                _filterString = value.Trim();
+                if (SetIsSearching(_filterString, SearchMode))
                     // base.FilterString = value; is done in SetIsSearching
                     return;
                 base.FilterString = value;
@@ -404,7 +404,7 @@ namespace YamuiFramework.Controls.YamuiList {
             // when searching, the tree must actually behave like a FilteredTypeList
             if (_isSearching) {
                 // sort alphabetically
-                var list = listItems.Where(item => !((FilteredTypeTreeListItem)item).HideWhileSearching).OrderBy(item => item.DisplayText, StringComparer.CurrentCultureIgnoreCase).ToList();
+                var list = listItems.Where(item => !((FilteredTypeTreeListItem)item).HideWhileSearching).OrderBy(item => item.DisplayText, StringComparer).ToList();
                 //list.Sort(SortingClass); // make sure to sort the "initial" list here
                 return base.GetFilteredAndSortedList(list);
             }
@@ -442,7 +442,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// a tree view to a flat list where we applied the classic filter from the filteredtypelist
         /// </summary>
         private bool SetIsSearching(string stringFilter, SearchModeOption searchMode) {
-            var newIsSearching = !string.IsNullOrEmpty(stringFilter.ToLower().Trim()) && searchMode == SearchModeOption.SearchSortWithNoParent;
+            var newIsSearching = !string.IsNullOrEmpty(stringFilter) && searchMode == SearchModeOption.SearchSortWithNoParent;
             if (newIsSearching != _isSearching) {
                 _isSearching = newIsSearching;
 

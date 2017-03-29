@@ -158,6 +158,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _yamuiList.SortInitialList();
         }
 
+        public void SetCaseMode(AutoCompletion.CaseMode mode) {
+            _yamuiList.FilterCase = mode == AutoCompletion.CaseMode.Insensitive ? YamuiFilteredList.FilterCaseType.Insensitive : YamuiFilteredList.FilterCaseType.Sensitive;
+        }
+
         /// <summary>
         /// Passes the OnKey input of the CharAdded or w/e event to the auto completion form
         /// </summary>

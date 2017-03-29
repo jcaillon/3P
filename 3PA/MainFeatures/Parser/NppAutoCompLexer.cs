@@ -22,8 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
 
@@ -31,11 +29,13 @@ namespace _3PA.MainFeatures.Parser {
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
-    internal class NppAutoCompParser {
+    internal class NppAutoCompLexer {
 
         #region private const
 
-        private const char Eof = (char) 0;
+        private const int LineStartAt = 0;
+        private const int ColumnStartAt = 0;
+        private const char Eof = (char)0;
 
         #endregion
 
@@ -44,19 +44,19 @@ namespace _3PA.MainFeatures.Parser {
         private string _data;
         private int _dataLength;
         private int _pos;
-        //private int _line = 0;
-        //private int _column = 0;
+        private int _line = LineStartAt;
+        private int _column = ColumnStartAt;
 
-        //private int _startCol;
-        //private int _startLine;
+        private int _startCol;
+        private int _startLine;
         private int _startPos;
-
-        // we could use a List here, but this GapBuffer class is more appropriate to do insertions
-        private List<CompletionItem> _wordsList = new List<CompletionItem>();
+        
+        // we could use a List here, but this List class is more appropriate to do insertions
+        private List<Token> _tokenList = new List<Token>();
 
         #endregion
 
-        #region Public properties
+        #region public accessor
 
         /// <summary>
         /// Additional characters that will count as a char from a word
@@ -64,29 +64,17 @@ namespace _3PA.MainFeatures.Parser {
         public HashSet<char> AdditionnalCharacters { get; set; }
 
         /// <summary>
-        /// False to add the number parsed to the output list
+        /// returns the last line number found, must be called after Tokenize() method
         /// </summary>
-        public bool IgnoreNumbers { get; set; }
-
-        /// <summary>
-        /// Allows to have a unique list of words and not add twice the same
-        /// </summary>
-        public HashSet<string> KnownWords { get; set; }
-
-        /// <summary>
-        /// Words with a length strictly inferior to this will not appear in the autocompletion
-        /// </summary>
-        public int MinWordLengthRequired { get; set; }
-
-        #endregion
-
-        #region public accessors
+        public int MaxLine {
+            get { return _line; }
+        }
 
         /// <summary>
         /// Returns the tokens list
         /// </summary>
-        public List<CompletionItem> ParsedCompletionItemsList {
-            get { return _wordsList; }
+        public List<Token> GetTokensList {
+            get { return _tokenList; }
         }
 
         #endregion
@@ -97,43 +85,32 @@ namespace _3PA.MainFeatures.Parser {
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        public NppAutoCompParser(string data) {
+        public NppAutoCompLexer(string data) {
             if (data == null)
                 throw new ArgumentNullException("data");
-
             _data = data;
             _dataLength = _data.Length;
-            _pos = 0;
 
-            // create the list of keywords
-            Parse();
-        }
-
-        #endregion
-
-        #region Parse
-
-        /// <summary>
-        /// Call this method to actually parse the string
-        /// </summary>
-        private void Parse() {
-
-            if (KnownWords == null)
-                KnownWords = new HashSet<string>();
-            if (AdditionnalCharacters == null)
-                AdditionnalCharacters = new HashSet<char>();
-
-            while (GetNextCompItem()) {}
+            // create the list of tokens
+            Tokenize();
 
             // clean
             _data = null;
         }
 
+        #endregion
+
+        #region Tokenize
+
         /// <summary>
-        /// Is the char valid for a word
+        /// Call this method to actually tokenize the string
         /// </summary>
-        private bool IsCharWord(char ch) {
-            return char.IsLetter(ch) || ch == '_' || AdditionnalCharacters != null && AdditionnalCharacters.Contains(ch);
+        private void Tokenize() {
+            Token token;
+            do {
+                token = GetNextToken();
+                _tokenList.Add(token);
+            } while (!(token is TokenEof));
         }
 
         /// <summary>
@@ -149,9 +126,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private void ReadChr() {
             _pos++;
-            if (_pos < 0)
-                Debug.Assert(false);
-            //_column++;
+            _column++;
         }
 
         /// <summary>
@@ -162,19 +137,8 @@ namespace _3PA.MainFeatures.Parser {
             ReadChr();
             if (eol == '\r' && PeekAtChr(0) == '\n')
                 ReadChr();
-            //_line++;
-            //_column = ColumnStartAt;
-        }
-
-        private void ReadWhiteSpace() {
-            ReadChr();
-            while (true) {
-                var ch = PeekAtChr(0);
-                if (ch == '\t' || ch == ' ')
-                    ReadChr();
-                else
-                    break;
-            }
+            _line++;
+            _column = ColumnStartAt;
         }
 
         /// <summary>
@@ -186,32 +150,37 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
+        /// Is the char valid for a word
+        /// </summary>
+        private bool IsCharWord(char ch) {
+            return char.IsLetterOrDigit(ch) || ch == '_' || AdditionnalCharacters != null && AdditionnalCharacters.Contains(ch);
+        }
+
+        /// <summary>
         /// returns the next token of the string
         /// </summary>
         /// <returns></returns>
-        private bool GetNextCompItem() {
-            //_startLine = _line;
-            //_startCol = _column;
+        private Token GetNextToken() {
+            _startLine = _line;
+            _startCol = _column;
             _startPos = _pos;
 
             var ch = PeekAtChr(0);
 
             // END OF FILE reached
             if (ch == Eof)
-                return false;
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
 
             switch (ch) {
                 case ' ':
                 case '\t':
                     // whitespaces or tab
-                    ReadWhiteSpace();
-                    return true;
+                    return CreateWhitespaceToken();
 
                 case '\r':
                 case '\n':
                     // end of line
-                    ReadEol(ch);
-                    return true;
+                    return CreateEolToken(ch);
 
                 case '0':
                 case '1':
@@ -224,36 +193,23 @@ namespace _3PA.MainFeatures.Parser {
                 case '8':
                 case '9':
                     // number
-                    ReadNumber();
-
-                    if (!IgnoreNumbers) {
-                        var valnum = GetTokenValue();
-                        if (!KnownWords.Contains(valnum) && valnum.Length >= MinWordLengthRequired) {
-                            KnownWords.Add(valnum);
-                            _wordsList.Add(new WordCompletionItem {
-                                DisplayText = valnum
-                            });
-                        }
-                    }
-                    return true;
+                    return CreateNumberToken();
 
                 default:
                     // keyword = [a-Z_~]+[\w_-]*
                     if (IsCharWord(ch)) {
                         ReadWord();
-                        var val = GetTokenValue();
-                        if (!KnownWords.Contains(val) && val.Length >= MinWordLengthRequired) {
-                            KnownWords.Add(val);
-                            _wordsList.Add(new WordCompletionItem {
-                                DisplayText = val
-                            });
-                        }
-                        return true;
+                        return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
                     }
                     // unknown char
                     ReadChr();
-                    return true;
+                    return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
             }
+        }
+
+        private Token CreateEolToken(char ch) {
+            ReadEol(ch);
+            return new TokenEol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -273,12 +229,28 @@ namespace _3PA.MainFeatures.Parser {
                 break;
             }
         }
+        
+        /// <summary>
+        /// create a whitespace token (successions of either ' ' or '\t')
+        /// </summary>
+        /// <returns></returns>
+        private Token CreateWhitespaceToken() {
+            ReadChr();
+            while (true) {
+                var ch = PeekAtChr(0);
+                if (ch == '\t' || ch == ' ')
+                    ReadChr();
+                else
+                    break;
+            }
+            return new TokenWhiteSpace(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
 
         /// <summary>
         /// create a number token, accepts decimal value with a '.' and hexadecimal notation 0xNNN
         /// </summary>
         /// <returns></returns>
-        private void ReadNumber() {
+        private Token CreateNumberToken() {
             var hasPoint = false;
             var isHexa = false;
 
@@ -303,8 +275,10 @@ namespace _3PA.MainFeatures.Parser {
                 } else
                     break;
             }
+            return new TokenNumber(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
-
+        
         #endregion
+    
     }
 }

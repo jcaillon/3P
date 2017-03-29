@@ -211,7 +211,7 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedRun pars) {
             // try to find the file in the propath
             if (pars.Flags.HasFlag(ParseFlag.Persistent) && !pars.Flags.HasFlag(ParseFlag.Uncertain)) {
-                string procName = pars.Name;
+                string procName = pars.Name.ToLower();
                 string fullFilePath;
                 if (!procName.EndsWith(".p") && !procName.EndsWith(".w")) {
                     fullFilePath = ProEnvironment.Current.FindFirstFileInEnv(pars.Name + ".p");

@@ -31,10 +31,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Class used in objectlist.Sort method
     /// </summary>
     internal class CompletionSortingClass<T> : IComparer<T> where T : ListItem {
+
         #region private
 
         // holds the display order of the CompletionType
         private Dictionary<int, int> _completionTypePriority;
+        private StringComparison _stringComparison = StringComparison.CurrentCultureIgnoreCase;
 
         #endregion
 
@@ -45,6 +47,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public static CompletionSortingClass<T> Instance {
             get { return _instance ?? (_instance = new CompletionSortingClass<T>()); }
             set { _instance = value; }
+        }
+
+        #endregion
+
+        #region Properties
+
+        public StringComparison StringComparison {
+            get { return _stringComparison; }
+            set { _stringComparison = value; }
         }
 
         #endregion
@@ -94,12 +105,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var xk = x as KeywordCompletionItem;
             var yk = y as KeywordCompletionItem;
             if (xk != null && yk != null) {
-                compare = ((int) xk.KeywordType).CompareTo(((int) yk.KeywordType));
+                compare = ((int) xk.KeywordType).CompareTo((int) yk.KeywordType);
                 if (compare != 0) return compare;
             }
 
             // sort by display text in last
-            return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+            return string.Compare(x.DisplayText, y.DisplayText, _stringComparison);
         }
 
         #endregion

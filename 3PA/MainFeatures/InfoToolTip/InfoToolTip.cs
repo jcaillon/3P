@@ -36,6 +36,7 @@ using _3PA.WindowsCore;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     internal static class InfoToolTip {
+
         #region fields
 
         // The tooltip form
@@ -325,10 +326,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             _form.SetText(toDisplay.ToString(), popupMinWidth);
         }
-
-        #region formatting functions
-
-        #endregion
 
         #endregion
 

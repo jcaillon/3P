@@ -30,7 +30,9 @@ using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.InfoToolTip {
+
     internal sealed class InfoToolTipForm : NppInterfaceForm {
+
         #region fields
 
         private YamuiScrollPanel _panel;
@@ -71,8 +73,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <summary>
         /// set the html of the label, resize the tooltip
         /// </summary>
-        /// <param name="content"></param>
-        /// <param name="minimumWidth"></param>
         public void SetText(string content, int minimumWidth = 200) {
             if (Visible)
                 Cloak();
@@ -99,5 +99,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         #endregion
+
     }
 }

@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.Parser {
 
                             // send codeExplorerItems
                             if (OnEndSendCodeExplorerItems != null)
-                                OnEndSendCodeExplorerItems(new List<CodeItem>());
+                                OnEndSendCodeExplorerItems(null);
                         }
                     } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
 

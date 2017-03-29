@@ -43,7 +43,11 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            MeasureIt(() => { }, "1 : ");
+            UserCommunication.Notify(File.Exists(@"D:\cnaf\SVN\xsac_17.05\baosias\clientserveur\proc_edt\os99tiesp.p").ToString());
+            UserCommunication.Notify(File.Exists(@"D:\cnaf\SVN\xsac_17.05\baosias\clientserveur\proc_edt\os99TIEsp.p").ToString());
+            MeasureIt(() => {
+                
+            }, "1 : ");
 
             MeasureIt(() => { }, "2 : ");
         }

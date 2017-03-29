@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.Pro {
                     foreach (var scope in parser.ParsedItemsList.Where(item => item is ParsedImplementation || item is ParsedProcedure || item is ParsedOnStatement).Cast<ParsedScopeItem>()) {
                         if (CheckForTooMuchChar(scope)) {
                             blockTooLong.AppendLine("<div>");
-                            blockTooLong.AppendLine("- " + (scope.FilePath + "|" + scope.Line).ToHtmlLink("Line " + (scope.Line + 1) + " : <b>" + scope.Name + "</b>") + " (" + NbExtraCharBetweenLines(scope.Line, scope.EndBlockLine) + " extra chars)");
+                            blockTooLong.AppendLine(" - " + (scope.FilePath + "|" + scope.Line).ToHtmlLink("Line " + (scope.Line + 1) + " : <b>" + scope.Name + "</b>") + " (" + NbExtraCharBetweenLines(scope.Line, scope.EndBlockLine) + " extra chars)");
                             blockTooLong.AppendLine("</div>");
                         }
                     }

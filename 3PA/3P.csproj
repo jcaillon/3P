@@ -153,6 +153,7 @@
     <Compile Include="Lib\RecurentAction.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
+    <Compile Include="MainFeatures\Parser\NppAutoCompLexer.cs" />
     <Compile Include="MainFeatures\Parser\ParseUtils.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
