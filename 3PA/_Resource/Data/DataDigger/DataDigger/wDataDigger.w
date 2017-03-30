@@ -173,21 +173,21 @@ DEFINE VARIABLE glUseEvenRowColorSet       AS LOGICAL     NO-UNDO. /* used in Da
     ~{&OPEN-QUERY-brIndexes}
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS rctQuery btnFavourite rctEdit fiTableFilter ~
+&Scoped-Define ENABLED-OBJECTS rctQuery btnTools rctEdit fiTableFilter ~
 cbDatabaseFilter btnClearTableFilter btnTableFilter tgSelAll ~
 btnClearFieldFilter fiIndexNameFilter fiFlagsFilter fiFieldsFilter ~
 btnClearIndexFilter tgDebugMode brTables brFields btnMoveTop brIndexes ~
 btnMoveUp btnReset btnMoveDown btnMoveBottom fiTableDesc btnWhere btnClear ~
-btnQueries btnClipboard ficWhere btnNextQuery btnPrevQuery btnDump btnLoad ~
-btnTabFavourites btnTabFields btnTabIndexes btnTabTables btnTools btnDelete ~
-btnResizeVer btnClone btnView btnAdd btnEdit fiFeedback 
+btnQueries btnClipboard ficWhere btnFavourite btnNextQuery btnPrevQuery ~
+btnDump btnLoad btnTabFavourites btnTabFields btnTabIndexes btnTabTables ~
+btnDelete btnResizeVer btnClone btnView btnAdd btnEdit fiFeedback 
 &Scoped-Define DISPLAYED-OBJECTS fiTableFilter cbDatabaseFilter tgSelAll ~
 fiIndexNameFilter fiFlagsFilter fiFieldsFilter fiTableDesc ficWhere ~
 fiFeedback 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
-&Scoped-define List-1 rctQueryButtons btnBegins cbAndOr cbFields cbOperator ~
+&Scoped-define List-1 btnBegins rctQueryButtons cbAndOr cbFields cbOperator ~
 ficValue btnInsert btnOr btnAnd btnBracket btnContains btnEq btnGT btnLT ~
 btnMatches btnNE btnQt btnToday 
 &Scoped-define List-2 rcFieldFilter tgSelAll btnClearFieldFilter brFields ~
@@ -360,7 +360,7 @@ DEFINE BUTTON btnClearDataFilter
 
 DEFINE BUTTON btnDataSort 
      LABEL "S" 
-     SIZE-PIXELS 16 BY 21 TOOLTIP "set sorting".
+     SIZE-PIXELS 15 BY 21 TOOLTIP "set sorting".
 
 DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U 
       VIEW-AS TEXT 
@@ -506,7 +506,7 @@ DEFINE BUTTON btnTabTables  NO-FOCUS FLAT-BUTTON
 
 DEFINE BUTTON btnTools  NO-FOCUS FLAT-BUTTON
      LABEL "Tools" 
-     SIZE-PIXELS 21 BY 21 TOOLTIP "tools and settings".
+     SIZE-PIXELS 21 BY 21 TOOLTIP "tools and settings #(CTRL-T)".
 
 DEFINE BUTTON btnView  NO-FOCUS FLAT-BUTTON
      LABEL "&View" 
@@ -680,11 +680,11 @@ DEFINE BUTTON btnQueryTester-txt  NO-FOCUS FLAT-BUTTON
 
 DEFINE BUTTON btnSettings 
      LABEL "&Set" 
-     SIZE-PIXELS 30 BY 30 TOOLTIP "edit your settings file #(ALT-S)".
+     SIZE-PIXELS 30 BY 30 TOOLTIP "edit your settings file #(CTRL-ALT-S)".
 
 DEFINE BUTTON btnSettings-txt  NO-FOCUS FLAT-BUTTON
      LABEL "&Settings" 
-     SIZE-PIXELS 155 BY 30 TOOLTIP "edit your settings file #(ALT-S)".
+     SIZE-PIXELS 155 BY 30 TOOLTIP "edit your settings file #(CTRL-ALT-S)".
 
 DEFINE BUTTON btnAnd  NO-FOCUS
      LABEL "and" 
@@ -791,7 +791,7 @@ DEFINE VARIABLE cbAndOr AS CHARACTER FORMAT "X(256)":U
      VIEW-AS COMBO-BOX INNER-LINES 5
      LIST-ITEMS "","AND","OR" 
      DROP-DOWN-LIST
-     SIZE-PIXELS 55 BY 21 TOOLTIP "preceding AND or OR for the expression" NO-UNDO.
+     SIZE-PIXELS 50 BY 21 TOOLTIP "preceding AND or OR for the expression" NO-UNDO.
 
 DEFINE VARIABLE cbFields AS CHARACTER FORMAT "X(256)":U 
      CONTEXT-HELP-ID 1050
@@ -895,14 +895,14 @@ ttTable.iNumQueries
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS
           &IF '{&WINDOW-SYSTEM}' = 'TTY':U &THEN SIZE 44 BY 10
-          &ELSE SIZE-PIXELS 220 BY 211 &ENDIF FIT-LAST-COLUMN TOOLTIP "(F) to set/unset as favourite#(CTRL-T) or (CTRL-F) to switch view"
+          &ELSE SIZE-PIXELS 220 BY 211 &ENDIF FIT-LAST-COLUMN TOOLTIP "(F) to set/unset as favourite"
          CONTEXT-HELP-ID 70.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME frMain
-     btnFavourite AT Y 239 X 238 WIDGET-ID 310
+     btnTools AT Y 4 X 2 WIDGET-ID 264
      fiTableFilter AT Y 4 X 38 NO-LABEL
      cbDatabaseFilter AT Y 4 X 99 COLON-ALIGNED NO-LABEL
      btnClearTableFilter AT Y 4 X 219 WIDGET-ID 222
@@ -930,6 +930,7 @@ DEFINE FRAME frMain
      btnClipboard AT Y 265 X 735 WIDGET-ID 178
      ficWhere AT Y 266 X 50 NO-LABEL
      fiWarning AT Y 520 X 450 COLON-ALIGNED NO-LABEL WIDGET-ID 172
+     btnFavourite AT Y 239 X 238 WIDGET-ID 310
      btnNextQuery AT Y 265 X 27 WIDGET-ID 314
      btnPrevQuery AT Y 265 X 6 WIDGET-ID 312
      btnDump AT Y 520 X 145
@@ -938,7 +939,6 @@ DEFINE FRAME frMain
      btnTabFields AT Y 45 X 271 WIDGET-ID 156
      btnTabIndexes AT Y 122 X 271 WIDGET-ID 158
      btnTabTables AT Y 45 X 13 WIDGET-ID 300
-     btnTools AT Y 4 X 2 WIDGET-ID 264
      btnDelete AT Y 520 X 250
      btnResizeVer AT ROW 13.38 COL 1.6 WIDGET-ID 274
      btnClone AT Y 520 X 50 WIDGET-ID 276
@@ -958,7 +958,7 @@ DEFINE FRAME frMain
 
 DEFINE FRAME frWhere
      btnBegins AT Y 123 X 17 WIDGET-ID 74
-     cbAndOr AT Y 5 X 40 COLON-ALIGNED WIDGET-ID 10
+     cbAndOr AT Y 5 X 46 COLON-ALIGNED WIDGET-ID 10
      cbFields AT Y 5 X 100 COLON-ALIGNED NO-LABEL WIDGET-ID 12
      cbOperator AT Y 5 X 286 COLON-ALIGNED NO-LABEL WIDGET-ID 14
      ficValue AT Y 5 X 371 COLON-ALIGNED NO-LABEL WIDGET-ID 16
@@ -981,6 +981,9 @@ DEFINE FRAME frWhere
      btnNE AT Y 35 X 57 WIDGET-ID 68
      btnQt AT Y 79 X 57 WIDGET-ID 72
      btnToday AT Y 189 X 17 WIDGET-ID 122
+     "CTRL-ALT-W also opens this window" VIEW-AS TEXT
+          SIZE-PIXELS 250 BY 20 AT Y 235 X 10 WIDGET-ID 218
+          FGCOLOR 7 
      rctQueryButtons AT Y 30 X 5 WIDGET-ID 128
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
@@ -1012,8 +1015,8 @@ DEFINE FRAME frData
          SIZE 158 BY 10.24 WIDGET-ID 700.
 
 DEFINE FRAME frSettings
+     btnSettings-txt AT Y 32 X 30 WIDGET-ID 200
      btnDataDigger AT Y 0 X 0 WIDGET-ID 126
-     btnAbout-txt AT Y 128 X 216 WIDGET-ID 208
      btnConnections AT Y 0 X 186 WIDGET-ID 212
      btnSettings AT Y 32 X 0 WIDGET-ID 210
      btnProcEdit AT Y 32 X 186 WIDGET-ID 228
@@ -1023,6 +1026,7 @@ DEFINE FRAME frSettings
      btnQueryTester AT Y 96 X 186 WIDGET-ID 232
      btnHelp AT Y 128 X 0 WIDGET-ID 260
      btnAbout AT Y 128 X 186 WIDGET-ID 196
+     btnAbout-txt AT Y 128 X 216 WIDGET-ID 208
      btnConnections-txt AT Y 0 X 216 WIDGET-ID 202
      btnDataAdmin-txt AT Y 64 X 216 WIDGET-ID 206
      btnDataDigger-txt AT Y 0 X 30 WIDGET-ID 236
@@ -1031,10 +1035,9 @@ DEFINE FRAME frSettings
      btnProcEdit-txt AT Y 32 X 216 WIDGET-ID 230
      btnQueries-txt AT Y 96 X 30 WIDGET-ID 204
      btnQueryTester-txt AT Y 96 X 216 WIDGET-ID 234
-     btnSettings-txt AT Y 32 X 30 WIDGET-ID 200
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 160.6 ROW 10.67 SCROLLABLE 
+         AT COL 160.6 ROW 9.48 SCROLLABLE 
          BGCOLOR 15  WIDGET-ID 500.
 
 
@@ -1394,28 +1397,6 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON CTRL-F OF C-Win /* DataDigger */
-ANYWHERE
-DO:
-  RUN setPage({&PAGE-FAVOURITES}).
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON CTRL-T OF C-Win /* DataDigger */
-ANYWHERE
-DO:
-  RUN setPage({&PAGE-TABLES}).
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON END-ERROR OF C-Win /* DataDigger */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE
 DO:
@@ -1660,6 +1641,16 @@ END.
 
 
 &Scoped-define SELF-NAME frWhere
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL frWhere C-Win
+ON ALT-W OF FRAME frWhere /* Query Editor */
+ANYWHERE DO:
+  APPLY 'entry' TO cbAndOr.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL frWhere C-Win
 ON LEAVE OF FRAME frWhere /* Query Editor */
 DO:
@@ -2434,6 +2425,7 @@ DO:
   setFilterFieldColor(cbDatabaseFilter:HANDLE).
 
   RUN getTablesFiltered(INPUT TABLE ttTableFilter, OUTPUT TABLE ttTable).
+  RUN setWindowTitle. 
 
   /* Get table properties from the INI file */
   RUN getTableStats(INPUT-OUTPUT TABLE ttTable).
@@ -2557,7 +2549,7 @@ END.
 &Scoped-define SELF-NAME btnDataSort
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataSort C-Win
 ON CHOOSE OF btnDataSort IN FRAME frData /* S */
-OR 'ALT-S', 'CTRL-ALT-S' OF c-win ANYWHERE
+OR 'ALT-S' OF c-win ANYWHERE
 DO:
   PUBLISH "setUsage" ("SortData"). /* user behaviour */
   RUN btnDataSortChoose.
@@ -2895,6 +2887,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSettings C-Win
 ON CHOOSE OF btnSettings IN FRAME frSettings /* Set */
 , btnSettings-txt
+OR 'CTRL-ALT-S' OF FRAME frMain ANYWHERE 
 DO:
   PUBLISH "setUsage" ("Settings"). /* user behaviour */
   HIDE FRAME frSettings.
@@ -3136,7 +3129,7 @@ ON CHOOSE OF btnTools IN FRAME frMain /* Tools */
 OR "CTRL-T" OF FRAME frMain ANYWHERE
 DO:
   PUBLISH "setUsage" ("showTools"). /* user behaviour */
-
+  
   IF FRAME frSettings:VISIBLE THEN
   DO:
     RUN hideSettingsFrame.
@@ -3149,7 +3142,7 @@ DO:
   VIEW FRAME frSettings.
 
   /* Try to hide it every 2 seconds */
-  IF KEYLABEL(LASTKEY) <> "CTRL-T" THEN
+  IF KEYLABEL(LASTKEY) <> "CTRL-T" AND glUseTimer THEN
     RUN setTimer("hideSettingsFrame",3000).
 
   APPLY 'entry' TO btnDataDigger IN FRAME frSettings.
@@ -4419,9 +4412,6 @@ PROCEDURE btnLoadChoose :
 
   /* Keep track of user behaviour */
   PUBLISH "setUsage" ("LoadData").
-
-/*   /* In read-only mode, return */  */
-/*   IF plReadOnlyDigger THEN RETURN. */
 
   RUN VALUE(getProgramDir() + 'wImportSel.w')
     ( INPUT plReadOnlyDigger
@@ -6135,21 +6125,21 @@ PROCEDURE enable_UI :
   DISPLAY fiTableFilter cbDatabaseFilter tgSelAll fiIndexNameFilter 
           fiFlagsFilter fiFieldsFilter fiTableDesc ficWhere fiFeedback 
       WITH FRAME frMain IN WINDOW C-Win.
-  ENABLE rctQuery btnFavourite rctEdit fiTableFilter cbDatabaseFilter 
+  ENABLE rctQuery btnTools rctEdit fiTableFilter cbDatabaseFilter 
          btnClearTableFilter btnTableFilter tgSelAll btnClearFieldFilter 
          fiIndexNameFilter fiFlagsFilter fiFieldsFilter btnClearIndexFilter 
          tgDebugMode brTables brFields btnMoveTop brIndexes btnMoveUp btnReset 
          btnMoveDown btnMoveBottom fiTableDesc btnWhere btnClear btnQueries 
-         btnClipboard ficWhere btnNextQuery btnPrevQuery btnDump btnLoad 
-         btnTabFavourites btnTabFields btnTabIndexes btnTabTables btnTools 
+         btnClipboard ficWhere btnFavourite btnNextQuery btnPrevQuery btnDump 
+         btnLoad btnTabFavourites btnTabFields btnTabIndexes btnTabTables 
          btnDelete btnResizeVer btnClone btnView btnAdd btnEdit fiFeedback 
       WITH FRAME frMain IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frMain}
-  ENABLE btnDataDigger btnAbout-txt btnConnections btnSettings btnProcEdit 
+  ENABLE btnSettings-txt btnDataDigger btnConnections btnSettings btnProcEdit 
          btnDict btnDataAdmin btnQueries-3 btnQueryTester btnHelp btnAbout 
-         btnConnections-txt btnDataAdmin-txt btnDataDigger-txt btnDict-txt 
-         btnHelp-txt btnProcEdit-txt btnQueries-txt btnQueryTester-txt 
-         btnSettings-txt 
+         btnAbout-txt btnConnections-txt btnDataAdmin-txt btnDataDigger-txt 
+         btnDict-txt btnHelp-txt btnProcEdit-txt btnQueries-txt 
+         btnQueryTester-txt 
       WITH FRAME frSettings IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frSettings}
   DISPLAY edHint 
@@ -6164,7 +6154,7 @@ PROCEDURE enable_UI :
   {&OPEN-BROWSERS-IN-QUERY-frData}
   DISPLAY cbAndOr cbFields cbOperator ficValue ficWhere2 
       WITH FRAME frWhere IN WINDOW C-Win.
-  ENABLE rctQueryButtons btnBegins cbAndOr cbFields cbOperator ficValue 
+  ENABLE btnBegins rctQueryButtons cbAndOr cbFields cbOperator ficValue 
          btnInsert ficWhere2 btnClear-2 btnQueries-2 btnClipboard-2 btnOK 
          btnCancel-2 btnOr btnAnd btnBracket btnContains btnEq btnGT btnLT 
          btnMatches btnNE btnQt btnToday 
@@ -7323,10 +7313,12 @@ PROCEDURE initializeObjects :
       /* Disable these WHEN plReadOnlyDigger */
       IF plReadOnlyDigger THEN
         ASSIGN
-          btnDict        :SENSITIVE = FALSE
-          btnDict-txt    :SENSITIVE = FALSE
-          btnProcEdit    :SENSITIVE = FALSE
-          btnProcEdit-txt:SENSITIVE = FALSE
+          btnDict         :SENSITIVE = FALSE
+          btnDict-txt     :SENSITIVE = FALSE
+          btnDataAdmin    :SENSITIVE = FALSE
+          btnDataAdmin-txt:SENSITIVE = FALSE
+          btnProcEdit     :SENSITIVE = FALSE
+          btnProcEdit-txt :SENSITIVE = FALSE
         .
     END.
 
@@ -7728,14 +7720,12 @@ END PROCEDURE. /* initializeSettingsFile */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeUi C-Win 
 PROCEDURE initializeUi :
-/*------------------------------------------------------------------------------
-  Purpose:     ENABLE the User Interface
-  Parameters:  <none>
-------------------------------------------------------------------------------*/
+/* Enable the user interface
+ */
   DEFINE VARIABLE UIB_S    AS LOGICAL    NO-UNDO.
   DEFINE VARIABLE OCXFile  AS CHARACTER  NO-UNDO.
 
-  /* Load wrx file */
+  /* Load wrx file if possible */
   OCXFile = SEARCH( "wDataDigger.wrx":U ).
   IF OCXFile = ? THEN
     OCXFile = SEARCH(SUBSTRING(THIS-PROCEDURE:FILE-NAME, 1,
@@ -7781,6 +7771,7 @@ PROCEDURE initializeUi :
     WITH FRAME frHint IN WINDOW C-Win.
 
   /* FRAME frWhere */
+  FRAME frWhere:FONT = giDefaultFont.
   DISPLAY
     cbAndOr cbFields cbOperator ficValue ficWhere2
     WITH FRAME frWhere IN WINDOW C-Win.
@@ -7869,7 +7860,7 @@ PROCEDURE initializeVisuals :
     FRAME frWhere:FONT = giDefaultFont.
 
     BROWSE brTables:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
-    BROWSE BRFIELDS:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
+    BROWSE brFields:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
     BROWSE brIndexes:ROW-HEIGHT-PIXELS = FONT-TABLE:GET-TEXT-HEIGHT-PIXELS(giDefaultFont).
 
     cbAnDOr:FONT     = giFixedFont.
@@ -7909,9 +7900,10 @@ PROCEDURE initializeVisuals :
     /* Additional tooltips */
     ficValue     :TOOLTIP = ficValue:TOOLTIP + "~n~n(CTRL-ENTER) execute".
     ficWhere     :TOOLTIP = ficWhere:TOOLTIP + "~n~n(CTRL-ENTER) execute".
-    brFields     :TOOLTIP = brFields:TOOLTIP + "~n~n(RIGHT-CLICK) insert field+value".
+    brFields     :TOOLTIP = "fields of selected table" + "~n~n(RIGHT-CLICK) insert field+value".
     brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-RIGHT-CLICK) insert field".
     brFields     :TOOLTIP = brFields:TOOLTIP + "~n(CTRL-ENTER) execute".
+    brIndexes    :TOOLTIP = "indexes of the table" + "~n~n(RIGHT CLICK) use-index" + "~n(DOUBLE CLICK) use index in WHERE".
 
     /* Filter box around tables, fields and indexes */
     rcTableFilter:BGCOLOR = getColor("FilterBox:bg").
@@ -10556,9 +10548,37 @@ END PROCEDURE. /* setViewType */
 PROCEDURE setWindowTitle :
 /* Set the title of the DataDigger window
  */
-  DEFINE VARIABLE cTitle       AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE hParent      AS INTEGER   NO-UNDO.
-  DEFINE VARIABLE hOwner       AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE cTitle  AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE hParent AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hOwner  AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE cFilter AS CHARACTER   NO-UNDO.
+
+  DEFINE VARIABLE cNameShow  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cNameHide  AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cFieldShow AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cFieldHide AS CHARACTER   NO-UNDO.
+
+  FIND ttTableFilter.
+  ASSIGN
+    cNameShow  = ttTableFilter.cTableNameShow
+    cNameHide  = ttTableFilter.cTableNameHide 
+    cFieldShow = ttTableFilter.cTableFieldShow
+    cFieldHide = ttTableFilter.cTableFieldHide.
+
+  /* Reset the filters to sane values if needed */
+  IF cNameShow  = '*' OR cNameShow  = ? THEN cNameShow  = ''.
+  IF cNameHide  = '*' OR cNameHide  = ? THEN cNameHide  = '' .
+  IF cFieldShow = '*' OR cFieldShow = ? THEN cFieldShow = ''.
+  IF cFieldHide = '*' OR cFieldHide = ? THEN cFieldHide = ''.
+
+  /* Move elements starting with "!" from pos-list to neg-list */
+  RUN correctFilterList(INPUT-OUTPUT cNameShow, INPUT-OUTPUT cNameHide).
+  RUN correctFilterList(INPUT-OUTPUT cFieldShow, INPUT-OUTPUT cFieldHide).
+
+  IF cNameShow  <> '' THEN cFilter = SUBSTITUTE('Show tables: &1', cNameShow).
+  IF cNameHide  <> '' THEN cFilter = TRIM(SUBSTITUTE('&1 |  Hide tables: &2', cFilter, cNameHide),' |').
+  IF cFieldShow <> '' THEN cFilter = TRIM(SUBSTITUTE('&1 |  Has fields: &2', cFilter, cFieldShow),' |').
+  IF cFieldHide <> '' THEN cFilter = TRIM(SUBSTITUTE('&1 |  Has not fields: &2', cFilter, cFieldHide),' |').
 
   /*
   ** Display the current database and table name in the windowtitle
@@ -10571,7 +10591,7 @@ PROCEDURE setWindowTitle :
                      , (IF SESSION:PARAMETER <> '' THEN '- ' + SESSION:PARAMETER ELSE '')
                      , gcCurrentDatabase
                      , gcCurrentTable
-                     , (IF gcFieldFilterList <> '' THEN '(' + gcFieldFilterList + ')'  ELSE '')
+                     , (IF cFilter <> '' THEN '(' + cFilter + ')'  ELSE '')
                      ).
 
   /* Add warning for read-only mode */
@@ -11220,6 +11240,7 @@ PROCEDURE startDiggerLib :
     SESSION:ADD-SUPER-PROCEDURE(hDiggerLib, SEARCH-TARGET).
 
     SUBSCRIBE PROCEDURE hDiggerLib TO "customDump"   ANYWHERE.
+    SUBSCRIBE PROCEDURE hDiggerLib TO "customFormat" ANYWHERE.
     SUBSCRIBE PROCEDURE hDiggerLib TO "customQuery"  ANYWHERE.
     SUBSCRIBE PROCEDURE hDiggerLib TO "customShowField" ANYWHERE.
     SUBSCRIBE PROCEDURE hDiggerLib TO "CustomGetFilterValue" ANYWHERE.
@@ -11344,6 +11365,9 @@ PROCEDURE startTool :
 
   /* Return if no db connected */
   IF NUM-DBS = 0 THEN RETURN.
+  
+  /* Don't allow in read only mode */
+  IF plReadOnlyDigger THEN RETURN.
 
   HIDE FRAME frSettings.
   CREATE ALIAS dictdb FOR DATABASE VALUE(gcCurrentDatabase).
@@ -12049,3 +12073,4 @@ END FUNCTION. /* trimList */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+

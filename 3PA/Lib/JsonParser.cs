@@ -22,21 +22,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.Lib {
+
     /// <summary>
-    /// TODO: This class is too spcific and must be refactored later... for now it will do
+    /// Quick and dirty class to read json
     /// </summary>
-    internal class JsonParser {
-        private const char Eof = (char) 0;
-        private string _data;
-        private int _pos;
-        private int _startPos;
-        private int _tokenPos;
+    internal class JsonParser : Lexer {
+
         private char[] _symbolChars;
-        private List<Token> _tokenList = new List<Token>();
 
         /// <summary>
         /// constructor, data is the input string to tokenize
@@ -44,25 +39,12 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="data"></param>
         public JsonParser(string data) {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            _data = data;
             _pos = 0;
             _tokenPos = 0;
             _symbolChars = new[] {'[', ']', '{', '}', ',', ':'};
+            Construct(data);
         }
-
-        /// <summary>
-        /// Call this method to actually tokenize the string
-        /// </summary>
-        public void Tokenize() {
-            Token token;
-            do {
-                token = GetNext();
-                _tokenList.Add(token);
-            } while (!(token is TokenEof));
-        }
-
+        
         /// <summary>
         /// Returns a List of list of key/value pairs...
         /// </summary>
@@ -112,54 +94,31 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// To use this lexer as an enumerator,
-        /// peek at the current pos + x token of the list, returns a new TokenEof if can't find
+        /// Is the char valid for a word
         /// </summary>
-        /// <returns></returns>
-        public Token PeekAtToken(int x) {
-            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", 0, 0, 0, 0) : _tokenList[_tokenPos + x];
-        }
-
-        /// <summary>
-        /// Peek forward x chars
-        /// </summary>
-        private char PeekAt(int x) {
-            return _pos + x >= _data.Length ? Eof : _data[_pos + x];
-        }
-
-        /// <summary>
-        /// Read to the next char,
-        /// indirectly adding the current char (_data[_pos]) to the current token
-        /// </summary>
-        private void Read() {
-            _pos++;
-        }
-
-        /// <summary>
-        /// Returns the current value of the token
-        /// </summary>
-        /// <returns></returns>
-        private string GetTokenValue() {
-            return _data.Substring(_startPos, _pos - _startPos);
+        protected override bool IsCharWord(char ch) {
+            return char.IsLetterOrDigit(ch) || ch == '_' || ch == '-';
         }
 
         /// <summary>
         /// returns the next token of the string
         /// </summary>
         /// <returns></returns>
-        private Token GetNext() {
+        protected override Token GetNextToken() {
+            _startLine = _line;
+            _startCol = _column;
             _startPos = _pos;
 
-            var ch = PeekAt(0);
+            var ch = PeekAtChr(0);
 
             // END OF FILE reached
             if (ch == Eof)
-                return new TokenEof(GetTokenValue(), 0, 0, _startPos, _pos);
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
 
             switch (ch) {
                 case '"':
                     ReadString(ch);
-                    return new TokenWord(GetTokenValue(), 0, 0, _startPos, _pos);
+                    return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
 
                 case ' ':
                 case '\t':
@@ -170,62 +129,35 @@ namespace _3PA.Lib {
 
                 default:
                     // keyword
-                    if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-') {
+                    if (IsCharWord(ch)) {
                         ReadWord();
-                        return new TokenWord(GetTokenValue(), 0, 0, _startPos, _pos);
+                        return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
                     }
 
                     // symbol
-                    if (_symbolChars.Any(t => t == ch))
+                    if (_symbolChars.Contains(ch))
                         return CreateSymbolToken();
+
                     // unknown char
-                    Read();
-                    return new TokenUnknown(GetTokenValue(), 0, 0, _startPos, _pos);
+                    ReadChr();
+                    return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
             }
         }
-
-        private Token CreateSymbolToken() {
-            Read();
-            return new TokenSymbol(GetTokenValue(), 0, 0, _startPos, _pos);
-        }
-
-        /// <summary>
-        /// create a whitespace token (successions of either ' ' or '\t')
-        /// </summary>
-        /// <returns></returns>
-        private Token CreateWhitespaceToken() {
-            Read();
-            while (true) {
-                var ch = PeekAt(0);
-                if (ch == '\t' || ch == ' ' || ch == '\r' || ch == '\n')
-                    Read();
-                else
-                    break;
-            }
-            return new TokenWhiteSpace(GetTokenValue(), 0, 0, _startPos, _pos);
-        }
-
+        
         /// <summary>
         /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
         /// </summary>
         private void ReadWord() {
-            Read();
+            ReadChr();
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
+
                 // normal word
-                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-')
-                    Read();
-                else {
-                    // reads a base.table.field as a single word
-                    if (ch == '.') {
-                        var car = PeekAt(1);
-                        if (char.IsLetterOrDigit(car) || car == '_' || car == '-') {
-                            Read();
-                            continue;
-                        }
-                    }
-                    break;
+                if (IsCharWord(ch)) {
+                    ReadChr();
+                    continue;
                 }
+                break;
             }
         }
 
@@ -234,20 +166,20 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="strChar"></param>
         private void ReadString(char strChar) {
-            Read();
+            ReadChr();
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == Eof)
                     break;
                 // quote char
                 if (ch == strChar) {
-                    Read();
+                    ReadChr();
                     break; // done reading
                 }
                 // escape char (read anything as part of the string after that)
                 if (ch == '\\')
-                    Read();
-                Read();
+                    ReadChr();
+                ReadChr();
             }
         }
     }

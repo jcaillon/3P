@@ -112,6 +112,7 @@ namespace _3PA.Lib {
                         strValue = Convert.ChangeType(property.GetValue(item), typeof(long)).ToString();
                     else
                         strValue = TypeDescriptor.GetConverter(property.FieldType).ConvertToInvariantString(property.GetValue(item));
+
                     if (valueInAttribute)
                         fieldElement.Add(new XAttribute(ValueString, strValue ?? string.Empty));
                     else

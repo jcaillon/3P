@@ -81,8 +81,8 @@ end procedure.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS rcSettings ficSettingsFile btnRawEdit ~
-btnSettings fiSearch btPage1 btPage2 btPage3 BtnCancel-2 BtnOK 
+&Scoped-Define ENABLED-OBJECTS rcSettings btnSettings ficSettingsFile ~
+btnRawEdit fiSearch btPage1 btPage2 btPage3 BtnCancel-2 BtnOK 
 &Scoped-Define DISPLAYED-OBJECTS ficSettingsFile fiSearch 
 
 /* Custom List Definitions                                              */
@@ -147,15 +147,18 @@ DEFINE RECTANGLE rcSettings
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
+     btnSettings AT Y 10 X 20 WIDGET-ID 24
      ficSettingsFile AT Y 15 X 215 COLON-ALIGNED WIDGET-ID 54 NO-TAB-STOP 
      btnRawEdit AT Y 15 X 690 WIDGET-ID 90
-     btnSettings AT Y 10 X 20 WIDGET-ID 24
      fiSearch AT Y 64 X 10 COLON-ALIGNED NO-LABEL WIDGET-ID 16
      btPage1 AT Y 104 X 20 WIDGET-ID 8
      btPage2 AT Y 139 X 20 WIDGET-ID 14
      btPage3 AT Y 174 X 20 WIDGET-ID 10
      BtnCancel-2 AT Y 470 X 575 WIDGET-ID 98
      BtnOK AT Y 470 X 660 WIDGET-ID 94
+     "CTRL-ALT-S also opens this window" VIEW-AS TEXT
+          SIZE-PIXELS 240 BY 20 AT Y 475 X 15 WIDGET-ID 100
+          FGCOLOR 7 
      rcSettings AT Y 60 X 150 WIDGET-ID 92
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
@@ -166,7 +169,7 @@ DEFINE FRAME DEFAULT-FRAME
 DEFINE FRAME frSettings
     WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT X 155 Y 65
+         AT X 154 Y 65
          SCROLLABLE SIZE-PIXELS 1600 BY 3900
          TITLE "" WIDGET-ID 200.
 
@@ -482,7 +485,7 @@ END.
 
 /* **********************  Internal Procedures  *********************** */
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE collectFrames wSettings
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE collectFrames wSettings 
 PROCEDURE collectFrames :
 /*------------------------------------------------------------------------
   Name         : collectFrames
@@ -557,7 +560,7 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   DISPLAY ficSettingsFile fiSearch 
       WITH FRAME DEFAULT-FRAME IN WINDOW wSettings.
-  ENABLE rcSettings ficSettingsFile btnRawEdit btnSettings fiSearch btPage1 
+  ENABLE rcSettings btnSettings ficSettingsFile btnRawEdit fiSearch btPage1 
          btPage2 btPage3 BtnCancel-2 BtnOK 
       WITH FRAME DEFAULT-FRAME IN WINDOW wSettings.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
@@ -932,3 +935,4 @@ END PROCEDURE. /* ShowScrollbars */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+

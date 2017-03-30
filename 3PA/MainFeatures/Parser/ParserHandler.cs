@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserHandler.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +28,7 @@ using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
+
     internal static class ParserHandler {
 
         #region event
@@ -131,12 +129,17 @@ namespace _3PA.MainFeatures.Parser {
                                 OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
 
                         } else {
-                            var normalDocParser = new NppAutoCompParser(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse));
-                            //, AutoCompletion.CurrentLangAdditionalChars, Config.Instance.NppAutoCompleteIgnoreNumbers, null, Config.Instance.NppAutoCompleteMinWordLengthRequired
+                            var textLexer = new TextLexer(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars);
+                            var textVisitor = new TextLexerVisitor() {
+                                IgnoreNumbers = Config.Instance.NppAutoCompleteIgnoreNumbers,
+                                MinWordLengthRequired = Config.Instance.NppAutoCompleteMinWordLengthRequired,
+                                KnownWords = KnownWords != null ? new HashSet<string>(KnownWords, AutoCompletion.ParserStringComparer) : new HashSet<string>(AutoCompletion.ParserStringComparer)
+                            };
+                            textLexer.Accept(textVisitor);
 
                             // send completionItems
                             if (OnEndSendCompletionItems != null)
-                                OnEndSendCompletionItems(normalDocParser.ParsedCompletionItemsList);
+                                OnEndSendCompletionItems(textVisitor.ParsedCompletionItemsList);
 
                             // send codeExplorerItems
                             if (OnEndSendCodeExplorerItems != null)
@@ -189,7 +192,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
         /// </summary>
-        public static Dictionary<string, Lexer> SavedLexerInclude = new Dictionary<string, Lexer>(StringComparer.CurrentCultureIgnoreCase);
+        public static Dictionary<string, ProLexer> SavedLexerInclude = new Dictionary<string, ProLexer>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// A dictionary of known keywords and database info
@@ -207,6 +210,11 @@ namespace _3PA.MainFeatures.Parser {
         public static Dictionary<string, ParserVisitor> SavedPersistent = new Dictionary<string, ParserVisitor>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
+        /// List of known words for the current language
+        /// </summary>
+        public static HashSet<string> KnownWords;
+
+        /// <summary>
         /// Clear the static data to save up some memory
         /// </summary>
         public static void ClearStaticData() {
@@ -220,9 +228,18 @@ namespace _3PA.MainFeatures.Parser {
         public static void UpdateKnownStaticItems(List<CompletionItem> staticItems) {
             DoInLock(() => {
                 // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
-                KnownStaticItems = DataBase.Instance.GetDbDictionary();
+                KnownStaticItems = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
+                KnownStaticItems = DataBase.Instance.GetDbDictionary(KnownStaticItems);
                 foreach (var keyword in Keywords.Instance.CompletionItems.Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
-                    KnownStaticItems[keyword.DisplayText] = keyword.Type;
+                    KnownStaticItems.Add(keyword.DisplayText, keyword.Type);
+                }
+
+                // Non progress files, known words
+                if (staticItems != null) {
+                    KnownWords = new HashSet<string>(AutoCompletion.ParserStringComparer);
+                    foreach (var item in staticItems.Where(item => !KnownWords.Contains(item.DisplayText))) {
+                        KnownWords.Add(item.DisplayText);
+                    }
                 }
             });
         }

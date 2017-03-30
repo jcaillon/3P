@@ -1624,21 +1624,21 @@ namespace _3PA.MainFeatures.Parser {
 
                 // Parse the include file ?
                 if (!string.IsNullOrEmpty(fullFilePath)) {
-                    Lexer lexer;
+                    ProLexer proLexer;
 
                     // did we already parsed this file in a previous parse session?
                     if (SavedLexerInclude.ContainsKey(fullFilePath)) {
-                        lexer = SavedLexerInclude[fullFilePath];
+                        proLexer = SavedLexerInclude[fullFilePath];
                     } else {
                         // Parse it
-                        lexer = new Lexer(Utils.ReadAllText(fullFilePath));
-                        SavedLexerInclude.Add(fullFilePath, lexer);
+                        proLexer = new ProLexer(Utils.ReadAllText(fullFilePath));
+                        SavedLexerInclude.Add(fullFilePath, proLexer);
                     }
 
                     // add this include to the references and modify each token
                     _parsedIncludes.Add(newInclude);
                     var includeNumber = (ushort) (_parsedIncludes.Count - 1);
-                    var tokens = lexer.GetTokensList.ToList().GetRange(0, lexer.GetTokensList.Count - 1);
+                    var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1);
                     tokens.ForEach(token => token.OwnerNumber = includeNumber);
 
                     // replace the tokens

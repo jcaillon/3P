@@ -97,5 +97,11 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenPreProcDirective tok) {}
+
+        public void PreVisit(Lexer lexer) {
+        }
+
+        public void PostVisit() {
+        }
     }
 }

@@ -28,7 +28,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
@@ -163,7 +162,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal class LangDescription {
-            private List<CompletionItem> _keywords;
+
+            private List<CompletionItem> _autoCompletionItems;
+
+            private List<NppKeyword> _keywords;
 
             /// <summary>
             /// Language name
@@ -189,21 +191,35 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             /// <summary>
             /// A list of keywords for the language
             /// </summary>
-            public List<CompletionItem> Keywords {
-                get { return _keywords; }
+            public List<CompletionItem> AutoCompletionItems {
+                get {
+                    if (_autoCompletionItems == null) {
+                        _autoCompletionItems = _keywords.Select(keyword => {
+                            var item = CompletionItem.Factory.New(keyword.Overloads != null ? CompletionType.LangFunction : CompletionType.LangWord) as LangCompletionItem;
+                            if (item != null) {
+                                item.DisplayText = keyword.Value;
+                                item.NppKeyword = keyword;
+                            }
+                            return (CompletionItem) item;
+                        }).ToList();
+                    }
+                    return _autoCompletionItems;
+                }
             }
 
             /// <summary>
             /// Returns this after checking if we need to read the Api xml file for this language
             /// </summary>
             public LangDescription ReadApiFileIfNeeded() {
+
                 var apiFilePath = Path.Combine(Npp.FolderNppAutocompApis, LangName + ".xml");
                 if (_keywords != null
                     && !Utils.HasFileChanged(apiFilePath)
                     && (!IsUserLang || !Utils.HasFileChanged(Npp.ConfXml.FileNppUserDefinedLang)))
                     return this;
 
-                _keywords = new List<CompletionItem>();
+                _autoCompletionItems = null;
+                _keywords = new List<NppKeyword>();
                 var uniqueKeywords = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
                 // get keywords from plugins/Apis/
@@ -249,13 +265,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     });
                                 }
 
-                                _keywords.Add(new LangWordCompletionItem {
-                                    DisplayText = keyword,
-                                    SubText = LangName + ".xml",
-                                    ParsedBaseItem = new NppKeyword(keyword) {
-                                        Overloads = overloads,
-                                        Origin = NppKeywordOrigin.AutoCompApiXml
-                                    }
+                                _keywords.Add(new NppKeyword(keyword) {
+                                    Overloads = overloads,
+                                    Origin = NppKeywordOrigin.AutoCompApiXml
                                 });
                             }
                         }
@@ -285,12 +297,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
-                                            _keywords.Add(new LangWordCompletionItem {
-                                                DisplayText = keyword,
-                                                SubText = "userDefinedLang.xml",
-                                                ParsedBaseItem = new NppKeyword(keyword) {
-                                                    Origin = NppKeywordOrigin.UserLangXml
-                                                }
+                                            _keywords.Add(new NppKeyword(keyword) {
+                                                Origin = NppKeywordOrigin.UserLangXml
                                             });
                                         }
                                     }
@@ -309,12 +317,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                 foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
                                     if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                         uniqueKeywords.Add(keyword);
-                                        _keywords.Add(new LangWordCompletionItem {
-                                            DisplayText = keyword,
-                                            SubText = "langs.xml",
-                                            ParsedBaseItem = new NppKeyword(keyword) {
-                                                Origin = NppKeywordOrigin.LangsXml
-                                            }
+                                        _keywords.Add(new NppKeyword(keyword) {
+                                            Origin = NppKeywordOrigin.LangsXml
                                         });
                                     }
                                 }
@@ -354,7 +358,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// As described in the plugins/APIs/ files
         /// </summary>
-        internal class NppKeyword : ParsedBaseItem {
+        internal class NppKeyword {
+
+            public string Value { get; set; }
+
             public NppKeywordOrigin Origin { get; set; }
             public List<NppOverload> Overloads { get; set; }
 
@@ -364,8 +371,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 public List<string> Params { get; set; }
             }
 
-            public NppKeyword(string name)
-                : base(name) {}
+            public NppKeyword(string value) {
+                Value = value;
+            }
         }
 
         internal enum NppKeywordOrigin {

@@ -27,6 +27,14 @@ Fixed on beta 20170320:
 - Solved: Obsolete images of v18 and older were not cleaned up
 - Solved: Version upgrade logic does not run on new beta version
 
+Fixed in beta 20170330
+- Solved: Custom hook customFormat did not fire
+- Solved: Data Administration accessible in readonly mode (Curtis Schroer)
+- Solved: About-window not accessible without timer (Frans Hoekstra)
+- Solved: Several shortcuts conflicted (Frans Hoekstra)
+- Solved: Window title not cleared after resetting filter (Dirk Vreken)
+
+
 =====================================================================================
 
 DataDigger version 22 - 20 feb 2017 (Titanium)

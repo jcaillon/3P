@@ -22,6 +22,7 @@
 
 namespace _3PA.MainFeatures.Parser {
     internal interface ILexerVisitor {
+        void PreVisit(Lexer lexer);
         void Visit(TokenComment tok);
         void Visit(TokenEol tok);
         void Visit(TokenEos tok);
@@ -36,5 +37,6 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(TokenEof tok);
         void Visit(TokenUnknown tok);
         void Visit(TokenPreProcDirective tok);
+        void PostVisit();
     }
 }

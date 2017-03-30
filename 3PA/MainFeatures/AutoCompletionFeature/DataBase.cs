@@ -290,15 +290,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, CompletionType> GetDbDictionary() {
-            var output = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
+        public Dictionary<string, CompletionType> GetDbDictionary(Dictionary<string, CompletionType> list) {
             _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
-                if (!output.ContainsKey(table.Name))
-                    output.Add(table.Name, CompletionType.Table);
-                if (!output.ContainsKey(string.Join(".", @base.Name, table.Name)))
-                    output.Add(string.Join(".", @base.Name, table.Name), CompletionType.Table);
+                if (!list.ContainsKey(table.Name))
+                    list.Add(table.Name, CompletionType.Table);
+                if (!list.ContainsKey(string.Join(".", @base.Name, table.Name)))
+                    list.Add(string.Join(".", @base.Name, table.Name), CompletionType.Table);
             }));
-            return output;
+            return list;
         }
 
         /// <summary>

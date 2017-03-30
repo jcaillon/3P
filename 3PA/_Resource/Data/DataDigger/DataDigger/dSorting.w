@@ -48,11 +48,12 @@ DEFINE VARIABLE ghDescending AS HANDLE EXTENT 9 NO-UNDO.
 &Scoped-define FRAME-NAME frSorting
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS cbSortField-1 btnOk Btn_Cancel btnClearAll 
-&Scoped-Define DISPLAYED-OBJECTS cbSortField-1 tgDescending-1 cbSortField-2 ~
+&Scoped-Define ENABLED-OBJECTS btnOk Btn_Cancel btnClearAll cbSortField-1 
+&Scoped-Define DISPLAYED-OBJECTS tgDescending-1 cbSortField-2 ~
 tgDescending-2 cbSortField-3 tgDescending-3 cbSortField-4 tgDescending-4 ~
 cbSortField-5 tgDescending-5 cbSortField-6 tgDescending-6 cbSortField-7 ~
-tgDescending-7 cbSortField-8 tgDescending-8 cbSortField-9 tgDescending-9 
+tgDescending-7 cbSortField-8 tgDescending-8 cbSortField-9 tgDescending-9 ~
+cbSortField-1 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -193,7 +194,6 @@ DEFINE VARIABLE tgDescending-9 AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME frSorting
-     cbSortField-1 AT Y 10 X 80 COLON-ALIGNED WIDGET-ID 2
      tgDescending-1 AT Y 10 X 269 WIDGET-ID 16
      cbSortField-2 AT Y 36 X 80 COLON-ALIGNED WIDGET-ID 78
      tgDescending-2 AT Y 36 X 269 WIDGET-ID 80
@@ -214,9 +214,13 @@ DEFINE FRAME frSorting
      tgDescending-9 AT Y 211 X 269 WIDGET-ID 108
      Btn_Cancel AT Y 211 X 405
      btnClearAll AT Y 100 X 405 WIDGET-ID 110
+     cbSortField-1 AT Y 10 X 80 COLON-ALIGNED WIDGET-ID 2
+     "ALT-S also opens this screen" VIEW-AS TEXT
+          SIZE-PIXELS 205 BY 18 AT Y 247 X 155 WIDGET-ID 112
+          FGCOLOR 7 
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D 
-         SIZE-PIXELS 504 BY 279
+         SIZE-PIXELS 504 BY 300
          TITLE "Set Sorting"
          DEFAULT-BUTTON btnOk CANCEL-BUTTON Btn_Cancel WIDGET-ID 100.
 
@@ -417,7 +421,6 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
 
   RUN enable_UI.
   RUN initializeObject.
-  RUN showHelp('DataSortShortCut', '').
 
   WAIT-FOR GO OF FRAME {&FRAME-NAME}.
 END.
@@ -502,13 +505,13 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY cbSortField-1 tgDescending-1 cbSortField-2 tgDescending-2 
-          cbSortField-3 tgDescending-3 cbSortField-4 tgDescending-4 
-          cbSortField-5 tgDescending-5 cbSortField-6 tgDescending-6 
-          cbSortField-7 tgDescending-7 cbSortField-8 tgDescending-8 
-          cbSortField-9 tgDescending-9 
+  DISPLAY tgDescending-1 cbSortField-2 tgDescending-2 cbSortField-3 
+          tgDescending-3 cbSortField-4 tgDescending-4 cbSortField-5 
+          tgDescending-5 cbSortField-6 tgDescending-6 cbSortField-7 
+          tgDescending-7 cbSortField-8 tgDescending-8 cbSortField-9 
+          tgDescending-9 cbSortField-1 
       WITH FRAME frSorting.
-  ENABLE cbSortField-1 btnOk Btn_Cancel btnClearAll 
+  ENABLE btnOk Btn_Cancel btnClearAll cbSortField-1 
       WITH FRAME frSorting.
   VIEW FRAME frSorting.
   {&OPEN-BROWSERS-IN-QUERY-frSorting}

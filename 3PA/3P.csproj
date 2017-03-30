@@ -153,7 +153,9 @@
     <Compile Include="Lib\RecurentAction.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
-    <Compile Include="MainFeatures\Parser\NppAutoCompLexer.cs" />
+    <Compile Include="MainFeatures\Parser\Lexer.cs" />
+    <Compile Include="MainFeatures\Parser\TextLexer.cs" />
+    <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ParseUtils.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
@@ -236,7 +238,6 @@
     <Compile Include="NppCore\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Parser\NppAutoCompParser.cs" />
     <Compile Include="MainFeatures\Parser\ParserAnalyze.cs" />
     <Compile Include="MainFeatures\Pro\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
@@ -453,10 +454,12 @@
     <Content Include="_Resource\Images\ParserItem\Type\Keyword.png" />
     <Content Include="_Resource\Images\ParserItem\Type\KeywordObject.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Label.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\LangFunction.png" />
     <Content Include="_Resource\Images\ParserItem\Type\LangWord.png" />
     <Content Include="_Resource\Images\ParserItem\Type\MainBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Method.png" />
     <Content Include="_Resource\Images\ParserItem\Type\NotApplicable.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Numbers.png" />
     <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Preprocessed.png" />
     <Content Include="_Resource\Images\ParserItem\Type\PreprocessorBlock.png" />
@@ -544,7 +547,7 @@
     <Compile Include="MainFeatures\Pro\ProMisc.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\Lexer.cs" />
+    <Compile Include="MainFeatures\Parser\ProLexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
     <Compile Include="MainFeatures\Pro\ProEnvironment.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">

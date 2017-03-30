@@ -37,7 +37,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             // redefine the styles
             SetGeneralStyles();
 
-            Lexer tok = new Lexer(Npp.GetDocumentText());
+            ProLexer tok = new ProLexer(Npp.GetDocumentText());
             tok.Tokenize();
             SynthaxHighlightVisitor vis = new SynthaxHighlightVisitor {
                 FromLine = Npp.LineFromPosition(startPos),

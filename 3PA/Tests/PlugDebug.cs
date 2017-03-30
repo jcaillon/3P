@@ -33,7 +33,6 @@ using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
-using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
     /// <summary>
@@ -103,10 +102,10 @@ namespace _3PA.Tests {
 
                     var watch = Stopwatch.StartNew();
 
-                    Lexer lexer = new Lexer(Utils.ReadAllText(file));
-                    outStr += "Lexer (" + watch.ElapsedMilliseconds + " ms), ";
+                    ProLexer proLexer = new ProLexer(Utils.ReadAllText(file));
+                    outStr += "ProLexer (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    Parser parser = new Parser(lexer, "", null, true);
+                    Parser parser = new Parser(proLexer, "", null, true);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
                     if (parser.ParserErrors != null && parser.ParserErrors.Count > 0)
@@ -187,14 +186,14 @@ namespace _3PA.Tests {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Lexer lexer = new Lexer(content);
+            ProLexer proLexer = new ProLexer(content);
 
             //--------------
             watch.Stop();
             //--------------
 
             OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
-            lexer.Accept(lexerVisitor);
+            proLexer.Accept(lexerVisitor);
             Utils.FileWriteAllText(outLocation, lexerVisitor.Output.ToString());
             File.AppendAllText(perfFile, @"LEXER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
 
@@ -207,7 +206,7 @@ namespace _3PA.Tests {
             watch = Stopwatch.StartNew();
             //------------
 
-            Parser parser = new Parser(lexer, "", null, true);
+            Parser parser = new Parser(proLexer, "", null, true);
 
             //--------------
             watch.Stop();
@@ -413,6 +412,12 @@ namespace _3PA.Tests {
         public void Visit(TokenPreProcDirective tok) {
             AppendEverything(tok);
             NbItems++;
+        }
+
+        public void PreVisit(MainFeatures.Parser.Lexer lexer) {
+        }
+
+        public void PostVisit() {
         }
     }
 

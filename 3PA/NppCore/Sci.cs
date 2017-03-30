@@ -1662,7 +1662,7 @@ namespace _3PA.NppCore {
 
         #endregion
 
-        #region Lexer stuff
+        #region ProLexer stuff
 
         // Set style 
         private static int _stylingPosition;
@@ -1671,7 +1671,7 @@ namespace _3PA.NppCore {
         /// <summary>
         /// Gets or sets the current lexer.
         /// </summary>
-        /// <returns>One of the Lexer enumeration values. The default is Container.</returns>
+        /// <returns>One of the ProLexer enumeration values. The default is Container.</returns>
         public static Lexer Lexer {
             get { return (Lexer) Api.Send(SciMsg.SCI_GETLEXER); }
             set {
@@ -1684,7 +1684,7 @@ namespace _3PA.NppCore {
         /// Gets or sets the current lexer by name.
         /// </summary>
         /// <returns>A String representing the current lexer.</returns>
-        /// <remarks>Lexer names are case-sensitive.</remarks>
+        /// <remarks>ProLexer names are case-sensitive.</remarks>
         public static unsafe string LexerLanguage {
             get {
                 var length = Api.Send(SciMsg.SCI_GETLEXERLANGUAGE).ToInt32();

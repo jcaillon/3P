@@ -112,7 +112,7 @@ DEFINE VARIABLE fcFilename AS CHARACTER FORMAT "X(256)":U
 
 DEFINE VARIABLE fiText AS CHARACTER FORMAT "X(256)":U INITIAL "Select the files you want to load or drag them onto this window" 
       VIEW-AS TEXT 
-     SIZE-PIXELS 380 BY 13 NO-UNDO.
+     SIZE-PIXELS 380 BY 19 NO-UNDO.
 
 
 /* ************************  Frame Definitions  *********************** */
@@ -407,6 +407,9 @@ PAUSE 0 BEFORE-HIDE.
 MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
+
+  /* Get fonts */
+  FRAME {&FRAME-NAME}:FONT = getFont('Default').
 
   RUN enable_UI.
   RUN initializeObject.

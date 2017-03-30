@@ -609,6 +609,10 @@ namespace _3PA {
 
         #region Other
 
+        public static void OnUndoRedo(bool undo, bool redo) {
+            ClosePopups();
+        }
+
         /// <summary>
         /// When the user click on the margin
         /// </summary>
@@ -796,5 +800,6 @@ namespace _3PA {
         }
 
         #endregion
+
     }
 }

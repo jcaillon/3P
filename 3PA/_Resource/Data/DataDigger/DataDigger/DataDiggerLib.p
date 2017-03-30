@@ -3477,6 +3477,9 @@ PROCEDURE updateFields :
     /* Customization option for the user to show/hide certain fields */
     PUBLISH 'customShowField' (pcDatabase, pcTableName, bField.cFieldName, INPUT-OUTPUT bField.lShow).
 
+    /* Customization option for the user to adjust the format */
+    PUBLISH 'customFormat' (pcDatabase, pcTableName, bField.cFieldName, bField.cDatatype, INPUT-OUTPUT bField.cFormat).
+    
     /* Restore changed field format. */
     cCustomFormat = getRegistry( SUBSTITUTE("DB:&1",pcDatabase)
                                , SUBSTITUTE("&1.&2:format",pcTableName,bField.cFieldName) ).

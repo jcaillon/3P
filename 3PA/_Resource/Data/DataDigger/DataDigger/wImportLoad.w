@@ -336,8 +336,8 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
 
-/*   TEMP-TABLE ttField:WRITE-XML('file', 'c:\temp\ttField.xml',YES,'utf-8', ?).   */
-/*   TEMP-TABLE ttColumn:WRITE-XML('file', 'c:\temp\ttColumn.xml',YES,'utf-8', ?). */
+  /* Get fonts */
+  FRAME {&FRAME-NAME}:FONT = getFont('Default').
 
   RUN enable_UI.
   RUN initializeObject.

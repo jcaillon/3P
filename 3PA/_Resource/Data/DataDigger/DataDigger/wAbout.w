@@ -91,7 +91,8 @@ DEFINE VARIABLE giOldMouseX   AS INTEGER   NO-UNDO.
 DEFINE VARIABLE gcGameStatus  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE glDebugRun    AS LOGICAL   NO-UNDO INITIAL NO.
 DEFINE VARIABLE giNumLives    AS INTEGER   NO-UNDO INITIAL 3.
-DEFINE VARIABLE giNumTicks    AS INTEGER     NO-UNDO.
+DEFINE VARIABLE giNumTicks    AS INTEGER   NO-UNDO.
+DEFINE VARIABLE glUseTimer    AS LOGICAL   NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -384,7 +385,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnDataDigger wAbout
 ON CHOOSE OF btnDataDigger IN FRAME DEFAULT-FRAME /* D */
 DO:
-  RUN showLog.
+  IF glUseTimer THEN RUN showLog.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -461,7 +462,8 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
 
   FRAME {&FRAME-NAME}:HIDDEN = YES.
-  RUN enable_UI.
+  RUN initializeUi.
+
   RUN initializeObject.
   FRAME {&FRAME-NAME}:HIDDEN = NO.
   RUN blinkLogo. 
@@ -487,7 +489,7 @@ PROCEDURE blinkLogo :
   DEFINE VARIABLE grav AS DECIMAL NO-UNDO INIT .2. /* gravity acceleration */
 
   /* debug */
-  IF glDebugRun THEN
+  IF glDebugRun OR NOT glUseTimer THEN
   DO WITH FRAME {&FRAME-NAME}:
     btnDataDigger:X = 5.
     btnDataDigger:Y = 5.
@@ -761,7 +763,8 @@ PROCEDURE initializeObject :
     imgTitle:VISIBLE = FALSE.
     
     /* Disable ball mover */
-    chCtrlFrame:BallTimer:ENABLED = TRUE.  
+    IF glUseTimer THEN
+      chCtrlFrame:BallTimer:ENABLED = TRUE.  
 
     /* Set version name */
     fiDataDigger-1:SCREEN-VALUE = "DataDigger {&version} - {&edition}".
@@ -784,17 +787,64 @@ END PROCEDURE. /* initializeObject. */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeUi wAbout 
+PROCEDURE initializeUi :
+/* Enable the user interface
+ */
+  DEFINE VARIABLE UIB_S    AS LOGICAL    NO-UNDO.
+  DEFINE VARIABLE OCXFile  AS CHARACTER  NO-UNDO.
+
+  /* Load wrx file if possible */
+  OCXFile = SEARCH( "wAbout.wrx":U ).
+  IF OCXFile = ? THEN
+    OCXFile = SEARCH(SUBSTRING(THIS-PROCEDURE:FILE-NAME, 1,
+                       R-INDEX(THIS-PROCEDURE:FILE-NAME, ".":U), "CHARACTER":U) + "wrx":U).
+
+  IF OCXFile <> ? THEN
+  DO:
+    ASSIGN
+      chCtrlFrame    = CtrlFrame:COM-HANDLE
+      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
+      CtrlFrame:NAME = "CtrlFrame":U
+    .
+    glUseTimer = TRUE.
+  END.
+
+  /* From enable_ui */
+  DISPLAY edChangelog fiDataDigger-1 fiDataDigger-2 fiWebsite 
+      WITH FRAME DEFAULT-FRAME IN WINDOW wAbout.
+
+  ENABLE btnDataDigger BtnOK edChangelog fiWebsite 
+      WITH FRAME DEFAULT-FRAME IN WINDOW wAbout.
+
+  VIEW FRAME DEFAULT-FRAME IN WINDOW wAbout.
+  {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
+
+END PROCEDURE. /* initializeUi */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE justWait wAbout 
 PROCEDURE justWait :
 /* Wait a few miliseconds 
  */
   DEFINE INPUT  PARAMETER piWait AS INTEGER NO-UNDO.
-  DEFINE VARIABLE iStart AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iStart    AS INTEGER NO-UNDO.
+  DEFINE VARIABLE lUseTimer AS LOGICAL NO-UNDO.
    
   iStart = ETIME.
+  
+  /* For the duration of the wait, switch off 
+   * the timer to avoid deep loops */
+  lUseTimer = chCtrlFrame:BallTimer:ENABLED.
+  chCtrlFrame:BallTimer:ENABLED = FALSE.
+
   DO WHILE ETIME < iStart + piWait: 
     PROCESS EVENTS.
   END. 
+
+  chCtrlFrame:BallTimer:ENABLED = lUseTimer.
 
 END PROCEDURE. /* justWait */
 

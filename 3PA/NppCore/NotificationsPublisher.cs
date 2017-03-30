@@ -131,28 +131,32 @@ namespace _3PA.NppCore {
                                 bool redo = (nc.modificationType & (int) SciModificationMod.SC_PERFORMED_REDO) != 0;
 
                                 if ((insertedText || deletedText) && !ScnModifiedDisabled) {
-                                    // if the text has changed
                                     var encoding = Sci.Encoding;
-                                    unsafe {
-                                        // only 1 char appears to be modified
-                                        if (nc.length <= 2 && !undo && !redo) {
-                                            // get the char
-                                            var bytes = (byte*) nc.text;
-                                            var arrbyte = new byte[nc.length];
-                                            int index;
-                                            for (index = 0; index < nc.length; index++)
-                                                arrbyte[index] = bytes[index];
-                                            var c = encoding.GetChars(arrbyte);
-                                            var cLength = c.Length;
-                                            // do we really have a 1 char input?
-                                            if (cLength == 1 || (cLength == 2 && c[0] == '\r')) {
-                                                if (insertedText) {
-                                                    ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded(c[0], nc.position));
-                                                } else {
-                                                    ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position));
+                                    if (!undo && !redo) {
+                                        // if the text has changed
+                                        unsafe {
+                                            // only 1 char appears to be modified
+                                            if (nc.length <= 2) {
+                                                // get the char
+                                                var bytes = (byte*) nc.text;
+                                                var arrbyte = new byte[nc.length];
+                                                int index;
+                                                for (index = 0; index < nc.length; index++)
+                                                    arrbyte[index] = bytes[index];
+                                                var c = encoding.GetChars(arrbyte);
+                                                var cLength = c.Length;
+                                                // do we really have a 1 char input?
+                                                if (cLength == 1 || (cLength == 2 && c[0] == '\r')) {
+                                                    if (insertedText) {
+                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded(c[0], nc.position));
+                                                    } else {
+                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position));
+                                                    }
                                                 }
                                             }
                                         }
+                                    } else {
+                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnUndoRedo(undo, redo));
                                     }
                                     Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText, encoding); // register line modifications
                                     Plug.OnTextModified(nc, insertedText, deletedText);

@@ -164,7 +164,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     if (Npp.CurrentFile.Lang == null) {
                         _staticItems = new List<CompletionItem>();
                     } else {
-                        _staticItems = Npp.CurrentFile.Lang.Keywords;
+                        _staticItems = Npp.CurrentFile.Lang.AutoCompletionItems;
                     }
                 }
 
@@ -172,7 +172,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
 
                 if (OnUpdateStaticItems != null)
-                    OnUpdateStaticItems.Invoke(_staticItems);
+                    OnUpdateStaticItems.Invoke(Npp.CurrentFile.IsProgress ? null : _staticItems);
             });
         }
 

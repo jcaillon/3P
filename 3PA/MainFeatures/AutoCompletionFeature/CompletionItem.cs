@@ -209,6 +209,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         return new ProcedureCompletionItem();
                     case CompletionType.ExternalProcedure:
                         return new ExternalProcedureCompletionItem();
+
+                    case CompletionType.LangWord:
+                        return new LangWordCompletionItem();
+                    case CompletionType.LangFunction:
+                        return new LangFunctionCompletionItem();
                     /*
                     case CompletionType.Snippet:
                         return new SnippetCompletionItem();
@@ -257,8 +262,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         KeywordObject,
         FieldPk,
         Field,
+
+        LangWord,
+        LangFunction,
         Word,
-        LangWord
+        Number,
     }
 
     /// <summary>
@@ -764,9 +772,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
     /// <summary>
+    /// Completion items that were extracted from a text (non progress document)
+    /// </summary>
+    internal abstract class TextCompletionItem : CompletionItem {
+        
+        public Token OriginToken { get; set; }
+
+    }
+
+    /// <summary>
     /// Word (parsed from the npp document)
     /// </summary>
-    internal class WordCompletionItem : CompletionItem {
+    internal class WordCompletionItem : TextCompletionItem {
         public override CompletionType Type {
             get { return CompletionType.Word; }
         }
@@ -777,9 +794,43 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     }
 
     /// <summary>
+    /// Number (parsed from the npp document)
+    /// </summary>
+    internal class NumberCompletionItem : TextCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.Number; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.Numbers; }
+        }
+    }
+
+    /// <summary>
+    /// Class for Completion items that were read from a .xml configuration file
+    /// </summary>
+    internal abstract class LangCompletionItem : CompletionItem {
+
+        public NppLangs.NppKeyword NppKeyword { get; set; }
+    }
+
+    /// <summary>
+    /// Lang fucntion (read from xml conf files)
+    /// </summary>
+    internal class LangFunctionCompletionItem : LangCompletionItem {
+        public override CompletionType Type {
+            get { return CompletionType.LangFunction; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.LangFunction; }
+        }
+    }
+
+    /// <summary>
     /// Lang word (read from xml conf files)
     /// </summary>
-    internal class LangWordCompletionItem : CompletionItem {
+    internal class LangWordCompletionItem : LangCompletionItem {
         public override CompletionType Type {
             get { return CompletionType.LangWord; }
         }

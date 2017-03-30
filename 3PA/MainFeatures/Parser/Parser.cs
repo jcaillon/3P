@@ -33,7 +33,7 @@ using _3PA.NppCore;
 namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// This class is not actually a parser "per say" but it extracts important information
-    /// from the tokens created by the lexer
+    /// from the tokens created by the proLexer
     /// </summary>
     internal partial class Parser {
         #region static
@@ -53,14 +53,14 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
+        /// Instead of parsing the include files each time we store the results of the proLexer to use them when we need it
         /// </summary>
-        private Dictionary<string, Lexer> SavedLexerInclude {
+        private Dictionary<string, ProLexer> SavedLexerInclude {
             get { return ParserHandler.SavedLexerInclude; }
         }
 
-        private static Lexer NewLexerFromData(string data) {
-            return new Lexer(data);
+        private static ProLexer NewLexerFromData(string data) {
+            return new ProLexer(data);
         }
 
         #endregion
@@ -88,7 +88,7 @@ namespace _3PA.MainFeatures.Parser {
         private ParsedScopeItem _rootScope;
 
         /// <summary>
-        /// Result of the lexer, list of tokens
+        /// Result of the proLexer, list of tokens
         /// </summary>
         private GapBuffer<Token> _tokenList;
 
@@ -191,14 +191,14 @@ namespace _3PA.MainFeatures.Parser {
         public Parser() {}
 
         /// <summary>
-        /// Constructor with a string instead of a lexer
+        /// Constructor with a string instead of a proLexer
         /// </summary>
         public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) {}
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
-        public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) {
+        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) {
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && KnownStaticItems != null;
@@ -232,7 +232,7 @@ namespace _3PA.MainFeatures.Parser {
             _context.Scope = _rootScope;
 
             // Analyze
-            _tokenList = lexer.GetTokensList;
+            _tokenList = proLexer.GetTokensList;
             _tokenCount = _tokenList.Count;
             ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
             ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
@@ -246,7 +246,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // add missing values to the line dictionary
             var current = new LineInfo(GetCurrentDepth(), _rootScope);
-            for (int i = lexer.MaxLine; i >= 0; i--) {
+            for (int i = proLexer.MaxLine; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
                 else
@@ -357,7 +357,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Returns a list of tokens for a given string
         /// </summary>
         public List<Token> TokenizeString(string data) {
-            var lexer = new Lexer(data);
+            var lexer = new ProLexer(data);
             var outList = lexer.GetTokensList.ToList();
             outList.RemoveAt(outList.Count - 1);
             return outList;

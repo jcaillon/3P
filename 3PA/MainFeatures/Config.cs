@@ -229,7 +229,7 @@ namespace _3PA.MainFeatures {
                 Description = "Should the autocompletion ignore numbers when parsing for words to suggest?",
                 GroupName = "Default autocompletion replacement",
                 AutoGenerateField = false)]
-            public bool NppAutoCompleteIgnoreNumbers = true;
+            public bool NppAutoCompleteIgnoreNumbers = false;
 
             [Display(Name = "Insert current suggestion on word end",
                 Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
@@ -250,15 +250,15 @@ namespace _3PA.MainFeatures {
             public int NppAutoCompleteMinWordLengthRequired = 2;
 
             [Display(Name = "Filter case sensitivity",
-                Description = "As you type, the autocompletion list will be filtered to the best matches,<br>this option let you chose the behavior of the filter",
+                Description = "As you type, the autocompletion list will be filtered to the best matches,<br>this option let you chose the behavior of the filter.<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
                 GroupName = "Default autocompletion replacement",
                 AutoGenerateField = false)]
             public AutoCompletion.CaseMode NppAutoCompleteFilterCaseMode = AutoCompletion.CaseMode.Insensitive;
 
             [Display(Name = "Keywords list case sensitivity",
-                Description = "Chose how keywords are added to the autocompletion list :<br>- a word can appear several times with different cases (sensitive)<br>- or only once no matter its case (insensitive)",
+                Description = "Chose how keywords are added to the autocompletion list :<br>- a word can appear several times with different cases (sensitive)<br>- or only once no matter its case (insensitive)<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
                 GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
+                AutoGenerateField = true)]
             public AutoCompletion.CaseMode NppAutoCompleteParserCaseMode = AutoCompletion.CaseMode.Sensitive;
 
             /// <summary>

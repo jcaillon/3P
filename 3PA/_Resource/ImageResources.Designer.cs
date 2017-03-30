@@ -1103,6 +1103,16 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap LangFunction {
+            get {
+                object obj = ResourceManager.GetObject("LangFunction", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LangWord {
             get {
                 object obj = ResourceManager.GetObject("LangWord", resourceCulture);
@@ -1406,6 +1416,16 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap NotSaved {
             get {
                 object obj = ResourceManager.GetObject("NotSaved", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Numbers {
+            get {
+                object obj = ResourceManager.GetObject("Numbers", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
