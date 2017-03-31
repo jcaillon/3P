@@ -619,7 +619,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             var point = Sci.GetCaretScreenLocation();
             point.Y += lineHeight;
 
-            form.SetPosition(point, lineHeight + 2);
+            form.SetPosition(point, lineHeight + 2, WinApi.GetWindowRect(Npp.CurrentSci.Handle));
             form.UnCloak();
             form.SetSelectedIndex(0);
             form.SetCaseMode(FilterCaseMode);

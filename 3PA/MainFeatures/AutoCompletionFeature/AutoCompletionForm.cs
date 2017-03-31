@@ -113,10 +113,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Position the window in a smart way according to the Point in input
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="lineHeight"></param>
-        public void SetPosition(Point position, int lineHeight) {
-            Location = GetBestAutocompPosition(position, lineHeight);
+        public void SetPosition(Point position, int lineHeight, Rectangle winRect) {
+            Location = GetBestAutocompPosition(position, lineHeight, winRect);
             ResizeFormToFitScreen();
         }
 

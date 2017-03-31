@@ -231,13 +231,21 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public Point GetBestAutocompPosition(Point spawnLocation, int lineHeight) {
             var screen = Screen.FromPoint(spawnLocation);
+            return GetBestAutocompPosition(spawnLocation, lineHeight, screen.WorkingArea);
+        }
+
+        /// <summary>
+        /// Returns the best position (for the starting position of the form) given the spawn location
+        /// (spawn location being the mouse location for a menu for instance) for an autocompletion form
+        /// </summary>
+        public Point GetBestAutocompPosition(Point spawnLocation, int lineHeight, Rectangle winRect) {
             // position the window smartly
-            if (spawnLocation.X + Width > screen.WorkingArea.X + screen.WorkingArea.Width) {
-                spawnLocation.X -= (spawnLocation.X + Width) - (screen.WorkingArea.X + screen.WorkingArea.Width);
+            if (spawnLocation.X + Width > winRect.X + winRect.Width) {
+                spawnLocation.X -= (spawnLocation.X + Width) - (winRect.X + winRect.Width);
                 _reverseX = true;
             } else
                 _reverseX = false;
-            if (spawnLocation.Y + Height > screen.WorkingArea.Y + screen.WorkingArea.Height) {
+            if (spawnLocation.Y + Height > winRect.Y + winRect.Height) {
                 spawnLocation.Y = spawnLocation.Y - Height - lineHeight;
                 _reverseY = true;
             } else

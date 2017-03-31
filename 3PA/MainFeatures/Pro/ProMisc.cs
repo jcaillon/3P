@@ -245,40 +245,29 @@ namespace _3PA.MainFeatures.Pro {
         /// Opens the current file in the appbuilder
         /// </summary>
         public static void OpenCurrentInAppbuilder() {
-            new ProExecution {
-                ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Npp.CurrentFile.Path)
-                },
-                OnExecutionOk = execution => {
-                    try {
-                        if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && Utils.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
-                            UserCommunication.Notify("Failed to start the appbuilder, the following commands both failed :<br><div class='ToolTipcodeSnippet'>RUN adeuib/_uibmain.p.<br>RUN _ab.p.</div><br>Your version of progress might be uncompatible with those statements? If this problem looks anormal to you, please open a new issue on github.", MessageImg.MsgRip, "Start Appbuilder", "The command failed");
-                        }
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Failed to start the appbuilder");
-                    }
-                }
-            }.Do(ExecutionType.Appbuilder);
+            new ProExecutionAppbuilder {
+                CurrentFile = Npp.CurrentFile.Path
+            }.Do();
         }
 
         public static void OpenProDesktop() {
-            new ProExecution().Do(ExecutionType.ProDesktop);
+            new ProExecutionProDesktop().Do();
         }
 
         public static void OpenDictionary() {
-            new ProExecution().Do(ExecutionType.Dictionary);
+            new ProExecutionDictionary().Do();
         }
 
         public static void OpenDbAdmin() {
-            new ProExecution().Do(ExecutionType.DbAdmin);
+            new ProExecutionDbAdmin().Do();
         }
 
         public static void OpenDataDigger() {
-            new ProExecution().Do(ExecutionType.DataDigger);
+            new ProExecutionDataDigger().Do();
         }
 
         public static void OpenDataReader() {
-            new ProExecution().Do(ExecutionType.DataReader);
+            new ProExecutionDataReader().Do();
         }
 
         #endregion
@@ -326,14 +315,13 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // launch the compile process for the current file
-            FilesInfo.CurrentFileInfoObject.ProgressExecution = new ProExecution {
-                ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Npp.CurrentFile.Path)
-                },
-                OnExecutionEnd = OnSingleExecutionEnd,
-                OnExecutionOk = OnSingleExecutionOk
+            FilesInfo.CurrentFileInfoObject.ProgressExecution = (ProExecutionHandleCompilation) ProExecutionBasic.Factory(executionType);
+            FilesInfo.CurrentFileInfoObject.ProgressExecution.Files = new List<FileToCompile> {
+                new FileToCompile(Npp.CurrentFile.Path)
             };
-            if (!FilesInfo.CurrentFileInfoObject.ProgressExecution.Do(executionType))
+            FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionEnd = OnSingleExecutionEnd;
+            FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionOk = OnSingleExecutionOk;
+            if (!FilesInfo.CurrentFileInfoObject.ProgressExecution.Do())
                 return;
 
             // change file object current operation, set flag
@@ -358,11 +346,12 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
         /// </summary>
-        public static void OnSingleExecutionEnd(ProExecution lastExec) {
+        public static void OnSingleExecutionEnd(ProExecutionBasic lastExec) {
             try {
-                var treatedFile = lastExec.ListToCompile.First();
+                var exec = (ProExecutionHandleCompilation) lastExec;
+                var treatedFile = exec.Files.First();
                 CurrentOperation currentOperation;
-                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                if (!Enum.TryParse(exec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
 
                 // Clear flag or we can't do any other actions on this file
@@ -378,9 +367,10 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint
         /// </summary>
-        public static void OnSingleExecutionOk(ProExecution lastExec) {
+        public static void OnSingleExecutionOk(ProExecutionBasic lastExec) {
             try {
-                var treatedFile = lastExec.ListToCompile.First();
+                var exec = (ProExecutionHandleCompilation)lastExec;
+                var treatedFile = exec.Files.First();
                 CurrentOperation currentOperation;
                 if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
@@ -391,20 +381,9 @@ namespace _3PA.MainFeatures.Pro {
                 int nbErrors = 0;
 
                 // Read log info
-                var errorList = lastExec.LoadErrorLog();
+                var errorList = exec.LoadErrorLog();
 
-                if (!errorList.Any()) {
-                    // the compiler messages are empty
-                    var fileInfo = new FileInfo(lastExec.LogPath);
-                    if (fileInfo.Length > 0) {
-                        // the .log is not empty, maybe something went wrong in the runner, display errors
-                        UserCommunication.Notify(
-                            "Something went wrong while " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
-                            Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
-                            "Critical error", "Action failed");
-                        return;
-                    }
-                } else {
+                if (errorList.Any()) {
                     // count number of warnings/errors, loop through files > loop through errors in each file
                     foreach (var keyValue in errorList) {
                         foreach (var fileError in keyValue.Value) {
@@ -433,8 +412,8 @@ namespace _3PA.MainFeatures.Pro {
                 // when compiling, transfering .r/.lst to compilation dir
                 var listTransferFiles = new List<FileToDeploy>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
-                    listTransferFiles = lastExec.CreateListOfFilesToDeploy();
-                    listTransferFiles = lastExec.ProEnv.Deployer.DeployFiles(listTransferFiles);
+                    listTransferFiles = exec.CreateListOfFilesToDeploy();
+                    listTransferFiles = exec.ProEnv.Deployer.DeployFiles(listTransferFiles);
                 }
 
                 // Notify the user, or not

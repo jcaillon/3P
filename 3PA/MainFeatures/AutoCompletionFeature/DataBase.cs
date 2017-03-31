@@ -137,14 +137,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 // save the filename of the output database info file for this environment
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
-                var exec = new ProExecution {
+                var exec = new ProExecutionDatabase {
                     OnExecutionEnd = execution => _isExtracting = false,
                     OnExecutionOk = ExtractionDoneOk,
-                    NeedDatabaseConnection = true,
-                    ExtractDbOutputPath = GetOutputName
+                    NeedDatabaseConnection = true
                 };
                 _onExtractionDone = onExtractionDone;
-                _isExtracting = exec.Do(ExecutionType.Database);
+                _isExtracting = exec.Do();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
@@ -153,9 +152,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private void ExtractionDoneOk(ProExecution lastExec) {
+        private void ExtractionDoneOk(ProExecutionBasic lastExec) {
             // copy the dump to the folder database
-            if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, Path.GetFileName(lastExec.ExtractDbOutputPath) ?? ""))) {
+            if (Utils.CopyFile(((ProExecutionDatabase) lastExec).ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, GetOutputName))) {
                 // update info
                 UpdateDatabaseInfo();
                 UserCommunication.Notify("Database structure extracted with success!<br>The autocompletion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);

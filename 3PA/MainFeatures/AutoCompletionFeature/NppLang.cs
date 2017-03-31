@@ -39,6 +39,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
     internal class NppLangs {
+
         #region Singleton
 
         private static NppLangs _instance;

@@ -522,7 +522,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public List<FileError> FileErrors { get; set; }
         public bool WarnedTooLong { get; set; }
-        public ProExecution ProgressExecution { get; set; }
+        public ProExecutionHandleCompilation ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
         public string FileFullPath { get; set; }
 

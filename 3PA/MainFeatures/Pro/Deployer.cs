@@ -33,6 +33,7 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
     internal class Deployer {
+
         #region Static
 
         #region public event
@@ -44,7 +45,7 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region public fields
+        #region public Properties
 
         /// <summary>
         /// Get the compilation path list
@@ -82,6 +83,7 @@ namespace _3PA.MainFeatures.Pro {
         /// if the file is present in the Config dir, use it
         /// </summary>
         public static void Import() {
+
             var outputMessage = new StringBuilder();
 
             // get all the rules
@@ -91,7 +93,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 int step = 0;
                 if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
-                    step = 0;
+                    return;
 
                 // new transfer rule
                 if (items.Length == 7) {
@@ -131,6 +133,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _fullDeployRulesList.Add(obj);
+
                 } else if (items.Length == 5) {
                     // new filter rule
 
@@ -145,6 +148,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern))
                         _fullDeployRulesList.Add(obj);
+
                 } else if (items.Length == 4) {
                     // new variable
 
@@ -512,6 +516,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy a given list of files (can reduce the list if there are duplicated items so it returns it)
         /// </summary>
         public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage = null) {
+
             int[] totalFile = {0};
             int[] nbFilesDone = {0};
 
@@ -580,6 +585,7 @@ namespace _3PA.MainFeatures.Pro {
                 .ToNonNullList();
 
             if (plDeployments.Count > 0) {
+
                 // then we create a unique temporary folder for each .pl
                 var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var pathPl in plDeployments.Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath)).Select(deploy => deploy.ArchivePath).Distinct()) {
@@ -758,7 +764,10 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region private /utils
-
+        
+        /// <summary>
+        /// Replace the variables &lt;XXX&gt; in the string
+        /// </summary>
         private string ReplaceVariablesIn(string input) {
             if (input.ContainsFast("<")) {
                 foreach (var variableRule in _deployVarList) {
@@ -776,6 +785,7 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #endregion
+
     }
 
     #region DeployRule
@@ -795,6 +805,35 @@ namespace _3PA.MainFeatures.Pro {
         /// This compilation path applies to a given Env letter (can be empty)
         /// </summary>
         public string SuffixFilter { get; set; }
+    }
+    
+    public class DeployVariableRule : DeployRule {
+        /// <summary>
+        /// the name of the variable, format &lt;XXX&gt;
+        /// </summary>
+        public string VariableName { get; set; }
+
+        /// <summary>
+        /// The path that should replace the variable &lt;XXX&gt;
+        /// </summary>
+        public string Path { get; set; }
+    }
+
+    public class DeployFilterRule : DeployRule {
+        /// <summary>
+        /// true if the rule is about including a file (+) false if about excluding (-)
+        /// </summary>
+        public bool Include { get; set; }
+
+        /// <summary>
+        /// Pattern to match in the source path
+        /// </summary>
+        public string SourcePattern { get; set; }
+
+        /// <summary>
+        /// Pattern to match in the source (as a regular expression)
+        /// </summary>
+        public string RegexSourcePattern { get; set; }
     }
 
     public class DeployTransferRule : DeployRule {
@@ -827,35 +866,6 @@ namespace _3PA.MainFeatures.Pro {
         /// The line from which we read this info, allows to sort by line
         /// </summary>
         public int Line { get; set; }
-    }
-
-    public class DeployFilterRule : DeployRule {
-        /// <summary>
-        /// true if the rule is about including a file (+) false if about excluding (-)
-        /// </summary>
-        public bool Include { get; set; }
-
-        /// <summary>
-        /// Pattern to match in the source path
-        /// </summary>
-        public string SourcePattern { get; set; }
-
-        /// <summary>
-        /// Pattern to match in the source (as a regular expression)
-        /// </summary>
-        public string RegexSourcePattern { get; set; }
-    }
-
-    public class DeployVariableRule : DeployRule {
-        /// <summary>
-        /// the name of the variable, format &lt;XXX&gt;
-        /// </summary>
-        public string VariableName { get; set; }
-
-        /// <summary>
-        /// The path that should replace the variable &lt;XXX&gt;
-        /// </summary>
-        public string Path { get; set; }
     }
 
     #endregion

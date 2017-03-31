@@ -466,6 +466,7 @@ namespace _3PA.MainFeatures.Parser {
             proc.SubText = pars.Flags.HasFlag(ParseFlag.External) ? pars.ExternalDllName : null;
             proc.Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name);
             proc.Flags = pars.Flags;
+            PushToAutoCompletion(proc, pars);
         }
 
         /// <summary>
