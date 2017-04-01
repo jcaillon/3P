@@ -132,6 +132,9 @@ namespace _3PA.MainFeatures.Pro {
                 return;
             var curWord = Sci.GetWordAtPosition(position, AutoCompletion.CurrentLangAdditionalChars);
 
+            if (string.IsNullOrEmpty(curWord))
+                return;
+
             // match a word in the autocompletion? go to definition
             var listKeywords = AutoCompletion.FindInCompletionData(curWord, Sci.LineFromPosition(position));
             if (listKeywords != null) {
