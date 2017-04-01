@@ -29,10 +29,12 @@ using System.Threading;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
+
     /// <summary>
     /// Class used for the mass compiler
     /// </summary>
     internal class ProCompilation {
+
         #region public fields
 
         #region options
@@ -43,7 +45,7 @@ namespace _3PA.MainFeatures.Pro {
         public bool MonoProcess { get; set; }
 
         /// <summary>
-        /// Set the nmber of process to be used for each core
+        /// Set the number of process to be used for each core
         /// </summary>
         public int NumberOfProcessesPerCore { get; set; }
 
@@ -56,9 +58,6 @@ namespace _3PA.MainFeatures.Pro {
 
         // total number of files being compiled
         public long NbFilesToCompile { get; private set; }
-
-        // total number of processes used
-        public int NumberOfProcesses { get; private set; }
 
         // total number of processes finished ok
         public int NumberOfProcessesEndedOk { get; private set; }
@@ -97,14 +96,14 @@ namespace _3PA.MainFeatures.Pro {
 
         #region private fields
 
+        private static object _lock = new object();
+
         // list of all the started processes
         private List<CompilationProcess> _listOfCompilationProcesses = new List<CompilationProcess>();
 
         // total number of processes still running
         private int _processesRunning;
-
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-
+        
         private float _deployPercentage;
 
         private bool _hasBeenKilled;
@@ -117,16 +116,21 @@ namespace _3PA.MainFeatures.Pro {
         /// Compiles the list of files given
         /// </summary>
         public bool CompileFiles(HashSet<string> filesToCompile) {
+
             // now we do a list of those files, sorted from the biggest (in size) to the smallest file
             var sizeFileList = new List<ProCompilationFile>();
             foreach (var filePath in filesToCompile) {
                 var fileInfo = new FileInfo(filePath);
-                sizeFileList.Add(new ProCompilationFile {Path = filePath, Size = fileInfo.Length});
+                sizeFileList.Add(new ProCompilationFile {
+                    Path = filePath,
+                    Size = fileInfo.Length
+                });
             }
             sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
-            // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
-            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
+            // we want to dispatch all those files in a fair way among the Prowin processes we will create...
+            var numberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
+
             _listOfCompilationProcesses.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
@@ -139,7 +143,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // we will assign the next file to the next process...
                 currentProcess++;
-                if (currentProcess == NumberOfProcesses)
+                if (currentProcess == numberOfProcesses)
                     currentProcess = 0;
             }
 
@@ -147,43 +151,48 @@ namespace _3PA.MainFeatures.Pro {
             NbFilesToCompile = filesToCompile.Count;
             StartingTime = DateTime.Now;
             _processesRunning = _listOfCompilationProcesses.Count;
-            NumberOfProcesses = _listOfCompilationProcesses.Count;
             NumberOfProcessesEndedOk = 0;
             TransferedFiles = new List<FileToDeploy>();
             ErrorsList = new List<FileError>();
 
-            // lets start the compilation on each process
+            // init the compilation on each process
             foreach (var compilationProcess in _listOfCompilationProcesses) {
-                // launch the compile process
-                compilationProcess.ProExecutionObject = new ProExecution {
-                    ListToCompile = compilationProcess.FilesToCompile,
+                compilationProcess.ProExecutionObject = new ProExecutionCompile {
+                    Files = compilationProcess.FilesToCompile,
                     NeedDatabaseConnection = true,
                     NoBatch = true,
                     OnExecutionEnd = OnExecutionEnd,
                     OnExecutionOk = OnExecutionOk,
                     OnExecutionFailed = OnExecutionFailed
                 };
+
                 if (RFilesOnly)
-                    compilationProcess.ProExecutionObject.ProEnv.CompileWithListing = false;
-                if (!compilationProcess.ProExecutionObject.Do(ExecutionType.Compile))
-                    return false;
+                    compilationProcess.ProExecutionObject.CompileWithDebugList = false;
             }
-            return true;
+
+            // launch the compile process
+            return _listOfCompilationProcesses.All(compilationProcess => compilationProcess.ProExecutionObject.Do());
+        }
+
+        /// <summary>
+        /// total number of processes used
+        /// </summary>
+        public int NumberOfProcesses {
+            get { return _listOfCompilationProcesses != null ? _listOfCompilationProcesses.Count : 0; }
         }
 
         /// <summary>
         /// Use this method to get the overall progression of the compilation (from 0 to 100)
         /// </summary>
         public float GetOverallProgression() {
-            // if the compilation is over, we need to dipslay the progression of the files being moved...
+            // if the compilation is over, we need to display the progression of the files being moved...
             if (CompilationDone)
                 return _deployPercentage;
 
             // else we find the total of files that have already been compiled by ready the size of compilation.progress files...
             long nbFilesDone = 0;
             foreach (var compilationProcess in _listOfCompilationProcesses) {
-                if (File.Exists(compilationProcess.ProExecutionObject.ProgressionFilePath))
-                    nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
+                nbFilesDone += compilationProcess.ProExecutionObject.NbFilesTreated;
             }
             return (float) nbFilesDone / NbFilesToCompile * 100;
         }
@@ -216,17 +225,17 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the list of the processes that have been started
         /// </summary>
         public List<FileToCompile> GetListOfFileToCompile {
-            get { return (_listOfCompilationProcesses ?? new List<CompilationProcess>()).SelectMany(compProcess => compProcess.ProExecutionObject.ListToCompile).ToList(); }
+            get { return (_listOfCompilationProcesses ?? new List<CompilationProcess>()).SelectMany(compProcess => compProcess.ProExecutionObject.Files).ToList(); }
         }
 
         /// <summary>
         /// Returns true if at least one process failed because of a failed database connection
-        /// and one of the error was the error number 748 (lack of ressources) 
+        /// and one of the error was the error number 748 (lack of resources) 
         /// this error is caused by too much connection on the same database (too much processes started!)
         /// </summary>
         /// <returns></returns>
         public bool CompilationFailedOnMaxUser() {
-            return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && Utils.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog).Contains("(748)"));
+            return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && compilationProcess.ProExecutionObject.DbConnectionFailedOnMaxUser);
         }
 
         /// <summary>
@@ -272,6 +281,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // everything ended ok, we do postprocess actions
             if (NumberOfProcesses == NumberOfProcessesEndedOk) {
+
                 // we need to transfer all the files... (keep only distinct target files)
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
                     TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToDeploy());
@@ -299,39 +309,37 @@ namespace _3PA.MainFeatures.Pro {
         /// Called when a process has finished
         /// </summary>
         private void OnExecutionEnd(ProExecution lastExecution) {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    _processesRunning--;
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
+            DoInLock(() => {
+                _processesRunning--;
+            });
         }
 
         /// <summary>
         /// Called when a process has finished successfully
         /// </summary>
         private void OnExecutionOk(ProExecution obj) {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    NumberOfProcessesEndedOk++;
-                    EndOfCompilation(obj);
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
+            DoInLock(() => {
+                NumberOfProcessesEndedOk++;
+                EndOfCompilation(obj);
+            });
         }
 
         /// <summary>
         /// Called when a process has finished UNsuccessfully
         /// </summary>
         private void OnExecutionFailed(ProExecution obj) {
-            if (_lock.TryEnterWriteLock(500)) {
+            DoInLock(KillProcesses);
+        }
+
+        /// <summary>
+        /// Execute the action behind the lock
+        /// </summary>
+        private static void DoInLock(Action toDo) {
+            if (Monitor.TryEnter(_lock)) {
                 try {
-                    // we kill all the processes we don't want to do anything more...
-                    KillProcesses();
+                    toDo();
                 } finally {
-                    _lock.ExitWriteLock();
+                    Monitor.Exit(_lock);
                 }
             }
         }
@@ -347,7 +355,7 @@ namespace _3PA.MainFeatures.Pro {
 
         internal class CompilationProcess {
             public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
-            public ProExecution ProExecutionObject;
+            public ProExecutionCompile ProExecutionObject;
         }
 
         #endregion

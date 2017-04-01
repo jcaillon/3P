@@ -67,13 +67,13 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.cls,*.lst,*.df";
+            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.cls,*.dbg,*.df";
 
             [Display(Name = "Npp files patterns",
                 Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string NppFilesPattern = "*.txt,*.boi,*.sh,*.cmd";
+            public string NppFilesPattern = "*.txt,*.boi,*.sh,*.cmd,*.xrf,*.lis";
 
             [Display(Name = "Path to the help file",
                 Description = "Should point to the progress documentation file (lgrfeng.chm)",
@@ -480,7 +480,6 @@ namespace _3PA.MainFeatures {
             public string EnvLastDbInfoUsed = "";
             public string EnvName = "";
             public string EnvSuffix = "";
-            public string EnvDatabase = "";
 
             // last ping time
             public string TechnicalLastPing = "";

@@ -40,3 +40,4 @@ See the example below for a better understanding
 - Correction of various bugs related to document encoding
 - Fixed an issue with the type buttons of the file explorer that would show the tooltip content of the autocompetion type buttons
 - 3P now correctly reads the Npp configuration from the cloud folder (if any)
+- #76 : correctly retain the current database for each environment

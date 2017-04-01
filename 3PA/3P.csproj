@@ -331,12 +331,13 @@
     <Content Include="_Resource\Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="_Resource\Images\Backgrounds\bg_oss.png" />
     <Content Include="_Resource\Images\FileTypes\ClsType.png" />
+    <Content Include="_Resource\Images\FileTypes\DbgType.png" />
     <Content Include="_Resource\Images\FileTypes\DfType.png" />
     <Content Include="_Resource\Images\FileTypes\DType.png" />
     <Content Include="_Resource\Images\FileTypes\FolderType.png" />
     <Content Include="_Resource\Images\FileTypes\FtpType.png" />
     <Content Include="_Resource\Images\FileTypes\IType.png" />
-    <Content Include="_Resource\Images\FileTypes\LstType.png" />
+    <Content Include="_Resource\Images\FileTypes\LisType.png" />
     <Content Include="_Resource\Images\FileTypes\PlType.png" />
     <Content Include="_Resource\Images\FileTypes\PType.png" />
     <Content Include="_Resource\Images\FileTypes\RType.png" />
@@ -344,7 +345,7 @@
     <Content Include="_Resource\Images\FileTypes\UnknowType.png" />
     <Content Include="_Resource\Images\FileTypes\WType.png" />
     <Content Include="_Resource\Images\FileTypes\XmlType.png" />
-    <Content Include="_Resource\Images\FileTypes\XrefType.png" />
+    <Content Include="_Resource\Images\FileTypes\XrfType.png" />
     <Content Include="_Resource\Images\FileTypes\ZipType.png" />
     <Content Include="_Resource\Images\Html\getting-started-0.png" />
     <Content Include="_Resource\Images\Html\getting-started-1.png" />

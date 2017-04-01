@@ -118,7 +118,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(textbox6, "Path to your server.log file, for a quick access");
 
             toolTip.SetToolTip(tgCompLocally, "By default (toggle on), your files will be compiled next to the source code<br>You can also chose to automatically deploy your r-code/.lst automatically when they are compiled (toggle off)<br><br><i>Check the deployment screen to learn how to configure your deployment!</i>");
-            toolTip.SetToolTip(tgCompWithLst, "Toggle on to <b>compile your code with the debug-list option</b>, generating a .lst file<br><br><i>See the DEBUG-LIST option of the Progress compiler for more info</i>");
 
             toolTip.SetToolTip(btEdit, "Click to <b>modify</b> the information for the current environment");
             toolTip.SetToolTip(btAdd, "Click to <b>add a new</b> environment<br>");
@@ -162,7 +161,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbView.ButtonPressed += BtDbViewOnButtonPressed;
 
             tgCompLocally.ButtonPressed += TgCompLocallyOnCheckedChanged;
-            tgCompWithLst.ButtonPressed += TgCompWithLstOnButtonPressed;
 
             cbName.SelectedIndexChangedByUser += cbName_SelectedIndexChanged;
             cbSuffix.SelectedIndexChangedByUser += cbSuffix_SelectedIndexChanged;
@@ -228,8 +226,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         LogFilePath = textbox6.Text,
                         CmdLineParameters = flCmdLine.Text,
                         DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo,
-                        CompileLocally = tgCompLocally.Checked,
-                        CompileWithListing = tgCompWithLst.Checked
+                        CompileLocally = tgCompLocally.Checked
                     };
 
                     if (_currentMode != ViewMode.Edit && (ProEnvironment.GetList.Exists(env => env.Name.EqualsCi(newEnv.Name) && env.Suffix.EqualsCi(newEnv.Suffix)))) {
@@ -304,7 +301,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                                     var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
                                     if (databaseList.Count > 0) {
                                         cbDatabase.DataSource = databaseList;
-                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvDatabase));
+                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.CurrentDb));
                                         cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
                                     }
                                 }
@@ -351,9 +348,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     btSave.Visible = btCancel.Visible = isAddOrEdit;
                     btDelete.Enabled = ProEnvironment.GetList.Count > 1;
 
-                    // Compilation toggle
-                    tgCompWithLst.Enabled = tgCompLocally.Enabled = isSelect;
-
                     if (mode == ViewMode.Add) {
                         // reset fields when adding a new env
                         foreach (var control in scrollPanel.ContentPanel.Controls) {
@@ -363,7 +357,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         cbDatabase.DataSource = new List<string>();
                         var defaultEnv = new ProEnvironment.ProEnvironmentObject();
                         tgCompLocally.Checked = defaultEnv.CompileLocally;
-                        tgCompWithLst.Checked = defaultEnv.CompileWithListing;
                     } else if (mode == ViewMode.DbAdd) {
                         // reset fields when adding a new pf
                         flDatabase.Text = string.Empty;
@@ -376,7 +369,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         flExtraPf.Text = ProEnvironment.Current.ExtraPf;
                         flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                         flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
-                        flDatabase.Text = Config.Instance.EnvDatabase;
+                        flDatabase.Text = ProEnvironment.Current.CurrentDb;
                         textbox1.Text = ProEnvironment.Current.GetPfPath();
                         textbox2.Text = ProEnvironment.Current.IniPath;
                         textbox3.Text = ProEnvironment.Current.BaseLocalPath;
@@ -385,7 +378,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         textbox6.Text = ProEnvironment.Current.LogFilePath;
 
                         tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
-                        tgCompWithLst.Checked = ProEnvironment.Current.CompileWithListing;
                     }
 
                     // blink when changing mode
@@ -444,11 +436,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void TgCompLocallyOnCheckedChanged(object sender, EventArgs eventArgs) {
             ProEnvironment.Current.CompileLocally = tgCompLocally.Checked;
-            ProEnvironment.SaveList();
-        }
-
-        private void TgCompWithLstOnButtonPressed(object sender, EventArgs eventArgs) {
-            ProEnvironment.Current.CompileWithListing = tgCompWithLst.Checked;
             ProEnvironment.SaveList();
         }
 
@@ -552,10 +539,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         /// <param name="sender"></param>
         private void cbDatabase_SelectedIndexChanged(YamuiComboBox sender) {
-            if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
+            if (ProEnvironment.Current.CurrentDb.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
             textbox1.Text = ProEnvironment.Current.GetPfPath();
+            ProEnvironment.SaveList();
         }
 
         #endregion

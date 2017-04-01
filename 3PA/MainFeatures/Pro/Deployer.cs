@@ -32,6 +32,7 @@ using _3PA.NppCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
+
     internal class Deployer {
 
         #region Static
@@ -83,94 +84,11 @@ namespace _3PA.MainFeatures.Pro {
         /// if the file is present in the Config dir, use it
         /// </summary>
         public static void Import() {
-
-            var outputMessage = new StringBuilder();
-
-            // get all the rules
-            _fullDeployRulesList = new List<DeployRule>();
-            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], (lineNb, lineString) => {
-                var items = lineString.Split('\t');
-
-                int step = 0;
-                if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
-                    return;
-
-                // new transfer rule
-                if (items.Length == 7) {
-                    DeployType type;
-                    if (!Enum.TryParse(items[3].Trim(), true, out type))
-                        type = DeployType.Copy;
-
-                    var obj = new DeployTransferRule {
-                        Step = step,
-                        NameFilter = items[1].Trim(),
-                        SuffixFilter = items[2].Trim(),
-                        Type = type,
-                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true"),
-                        Line = lineNb + 1,
-                        SourcePattern = items[5].Trim(),
-                        DeployTarget = items[6].Trim().Replace('/', '\\')
-                    };
-
-                    obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
-                    if (obj.ShouldDeployTargetReplaceDollar)
-                        obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
-
-                    if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
-                        outputMessage.Append("- The FTP rule line n°" + obj.Line + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
-                        return;
-                    }
-
-                    if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
-                        outputMessage.Append("- The ZIP rule line n°" + obj.Line + " has an incorrect deployment target, a .zip should be found<br>");
-                        return;
-                    }
-
-                    if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
-                        outputMessage.Append("- The Prolib rule line n°" + obj.Line + " has an incorrect deployment target, a .pl should be found<br>");
-                        return;
-                    }
-
-                    if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
-                        _fullDeployRulesList.Add(obj);
-
-                } else if (items.Length == 5) {
-                    // new filter rule
-
-                    var obj = new DeployFilterRule {
-                        Step = step,
-                        NameFilter = items[1].Trim(),
-                        SuffixFilter = items[2].Trim(),
-                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
-                        SourcePattern = items[4].Trim()
-                    };
-                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
-
-                    if (!string.IsNullOrEmpty(obj.SourcePattern))
-                        _fullDeployRulesList.Add(obj);
-
-                } else if (items.Length == 4) {
-                    // new variable
-
-                    var obj = new DeployVariableRule {
-                        NameFilter = items[0].Trim(),
-                        SuffixFilter = items[1].Trim(),
-                        VariableName = items[2].Trim(),
-                        Path = items[3].Trim()
-                    };
-
-                    if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
-                        outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
-                        return;
-                    }
-
-                    if (!string.IsNullOrEmpty(obj.Path))
-                        _fullDeployRulesList.Add(obj);
-                }
-            }, Encoding.Default);
+            string outputMessage;
+            _fullDeployRulesList = ReadConfigurationFile(Config.FileDeploymentRules, out outputMessage);
 
             if (outputMessage.Length > 0)
-                UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect :<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Error(s) reading rules file", "Rules incorrect", args => {
+                UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect :<br><br>" + outputMessage + "<br><br>They have been ignored, please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Error(s) reading rules file", "Rules incorrect", args => {
                     EditRules();
                     args.Handled = true;
                 });
@@ -180,7 +98,7 @@ namespace _3PA.MainFeatures.Pro {
             if (OnDeployConfigurationUpdate != null)
                 OnDeployConfigurationUpdate();
         }
-
+        
         #endregion
 
         #region BuildHtmlTableForRules
@@ -241,6 +159,106 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
+        
+        #region Private ReadConfigurationFile
+
+        /// <summary>
+        /// Reads the given rule file
+        /// </summary>
+        private static List<DeployRule> ReadConfigurationFile(string path, out string readingErrorsHtml) {
+
+            var outputMessage = new StringBuilder();
+
+            // get all the rules
+            var list = new List<DeployRule>();
+            Utils.ForEachLine(path, new byte[0], (lineNb, lineString) => {
+                var items = lineString.Split('\t');
+
+                int step = 0;
+                if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
+                    return;
+
+                // new transfer rule
+                if (items.Length == 7) {
+                    DeployType type;
+                    if (!Enum.TryParse(items[3].Trim(), true, out type))
+                        type = DeployType.Copy;
+
+                    var obj = new DeployTransferRule {
+                        Step = step,
+                        NameFilter = items[1].Trim(),
+                        SuffixFilter = items[2].Trim(),
+                        Type = type,
+                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true"),
+                        Line = lineNb + 1,
+                        SourcePattern = items[5].Trim(),
+                        DeployTarget = items[6].Trim().Replace('/', '\\')
+                    };
+
+                    obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
+                    if (obj.ShouldDeployTargetReplaceDollar)
+                        obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+
+                    if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
+                        outputMessage.Append("- The FTP rule line n°" + obj.Line + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
+                        return;
+                    }
+
+                    if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
+                        outputMessage.Append("- The ZIP rule line n°" + obj.Line + " has an incorrect deployment target, a .zip should be found<br>");
+                        return;
+                    }
+
+                    if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
+                        outputMessage.Append("- The Prolib rule line n°" + obj.Line + " has an incorrect deployment target, a .pl should be found<br>");
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
+                        list.Add(obj);
+
+                } else if (items.Length == 5) {
+                    // new filter rule
+
+                    var obj = new DeployFilterRule {
+                        Step = step,
+                        NameFilter = items[1].Trim(),
+                        SuffixFilter = items[2].Trim(),
+                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
+                        SourcePattern = items[4].Trim()
+                    };
+                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
+
+                    if (!string.IsNullOrEmpty(obj.SourcePattern))
+                        list.Add(obj);
+
+                } else if (items.Length == 4) {
+                    // new variable
+
+                    var obj = new DeployVariableRule {
+                        NameFilter = items[0].Trim(),
+                        SuffixFilter = items[1].Trim(),
+                        VariableName = items[2].Trim(),
+                        Path = items[3].Trim()
+                    };
+
+                    if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
+                        outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(obj.Path))
+                        list.Add(obj);
+                }
+            }, Encoding.Default);
+
+            readingErrorsHtml = outputMessage.ToString();
+
+            return list;
+        }
+
+
+        #endregion
 
         #endregion
 
@@ -249,21 +267,15 @@ namespace _3PA.MainFeatures.Pro {
         #region Fields
 
         /// <summary>
-        /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
-        /// </summary>
-        private List<DeployRule> _deployRulesList;
-
-        private List<DeployVariableRule> _deployVarList;
-
-        /// <summary>
         /// Allows us to keep track of the opened zip needed for this deployment
         /// </summary>
         private Dictionary<string, ZipStorer> _openedZip = new Dictionary<string, ZipStorer>();
 
-        /// <summary>
-        /// Allows us to know which file to remove in which zip when they are not freshly created
-        /// </summary>
-        private Dictionary<string, HashSet<string>> _filesToRemoveFromZip = new Dictionary<string, HashSet<string>>();
+        private string _envName;
+        private string _envSuffix;
+        private bool _compileLocally;
+        private string _deploymentDirectory;
+        private string _prolibPath;
 
         #endregion
 
@@ -272,19 +284,75 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        public Deployer(ProEnvironment.ProEnvironmentObject proEnv) {
-            ProEnv = proEnv;
+        public Deployer(string confFilePath, ProEnvironment.ProEnvironmentObject proEnv) {
+            _envName = proEnv.Name;
+            _envSuffix = proEnv.Suffix;
+            _compileLocally = proEnv.CompileLocally;
+            _deploymentDirectory = proEnv.BaseCompilationPath;
+            _prolibPath = proEnv.ProlibPath;
 
-            // we need to filter/sort the list of computation path when it changes
-            OnDeployConfigurationUpdate += () => _deployRulesList = null;
+            Init(confFilePath);
         }
 
-        /// <summary>
-        /// Hard copy
-        /// </summary>
-        public Deployer(ProEnvironment.ProEnvironmentObject proEnv, Deployer deployer) : this(proEnv) {
-            _deployRulesList = deployer.DeployRules;
-            _deployVarList = deployer._deployVarList;
+        private void Init(string confFilePath) {
+
+            string outputMessage;
+            var rulesList = ReadConfigurationFile(confFilePath, out outputMessage);
+
+            // Need to match the application name / suffix filter with the current env
+            DeployRules = rulesList.Where(item => _envName.RegexMatch(item.NameFilter.WildCardToRegex()) && _envSuffix.RegexMatch(item.SuffixFilter.WildCardToRegex())).ToNonNullList();
+
+            // sort the rules
+            DeployRules.Sort((item1, item2) => {
+                // exact name match first
+                int compare = item2.NameFilter.EqualsCi(_envName).CompareTo(item1.NameFilter.EqualsCi(_envName));
+                if (compare != 0)
+                    return compare;
+
+                // longer name filter first
+                compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
+                if (compare != 0)
+                    return compare;
+
+                // exact suffix match first
+                compare = item2.SuffixFilter.EqualsCi(_envSuffix).CompareTo(item1.SuffixFilter.EqualsCi(_envSuffix));
+                if (compare != 0)
+                    return compare;
+
+                // longer suffix filter first
+                compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
+                if (compare != 0)
+                    return compare;
+
+
+                // lower step first
+                compare = item1.Step.CompareTo(item2.Step);
+                if (compare != 0)
+                    return compare;
+
+                var itemTransfer1 = item1 as DeployTransferRule;
+                var itemTransfer2 = item2 as DeployTransferRule;
+
+                if (itemTransfer1 != null && itemTransfer2 != null) {
+                    // continue first
+                    compare = itemTransfer2.ContinueAfterThisRule.CompareTo(itemTransfer1.ContinueAfterThisRule);
+                    if (compare != 0)
+                        return compare;
+
+                    // copy last
+                    compare = itemTransfer1.Type.CompareTo(itemTransfer2.Type);
+                    if (compare != 0)
+                        return compare;
+
+                    // first line in first in
+                    return itemTransfer1.Line.CompareTo(itemTransfer2.Line);
+                }
+
+                // filter before transfer
+                return itemTransfer1 == null ? 1 : -1;
+            });
+
+            DeployVarList = DeployRules.OfType<DeployVariableRule>().ToList();
         }
 
         #endregion
@@ -292,74 +360,14 @@ namespace _3PA.MainFeatures.Pro {
         #region Properties
 
         /// <summary>
-        /// The deployer works for a specific environment
-        /// </summary>
-        private ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
-
-        /// <summary>
         /// List of deployment rules filtered + sorted for this env
         /// </summary>
-        public List<DeployRule> DeployRules {
-            get {
-                if (_deployRulesList == null) {
-                    // Need to match the application name / suffix filter with the current env
-                    _deployRulesList = GetFullDeployRulesList.Where(item => ProEnv.Name.RegexMatch(item.NameFilter.WildCardToRegex()) && ProEnv.Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())).ToNonNullList();
+        public List<DeployRule> DeployRules { get; set; }
 
-                    // sort the rules
-                    _deployRulesList.Sort((item1, item2) => {
-                        // exact name match first
-                        int compare = item2.NameFilter.EqualsCi(ProEnv.Name).CompareTo(item1.NameFilter.EqualsCi(ProEnv.Name));
-                        if (compare != 0)
-                            return compare;
-
-                        // longer name filter first
-                        compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
-                        if (compare != 0)
-                            return compare;
-
-                        // exact suffix match first
-                        compare = item2.SuffixFilter.EqualsCi(ProEnv.Suffix).CompareTo(item1.SuffixFilter.EqualsCi(ProEnv.Suffix));
-                        if (compare != 0)
-                            return compare;
-
-                        // longer suffix filter first
-                        compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
-                        if (compare != 0)
-                            return compare;
-
-                        // lower step first
-                        compare = item1.Step.CompareTo(item2.Step);
-                        if (compare != 0)
-                            return compare;
-
-                        var itemTransfer1 = item1 as DeployTransferRule;
-                        var itemTransfer2 = item2 as DeployTransferRule;
-
-                        if (itemTransfer1 != null && itemTransfer2 != null) {
-                            // continue first
-                            compare = itemTransfer2.ContinueAfterThisRule.CompareTo(itemTransfer1.ContinueAfterThisRule);
-                            if (compare != 0)
-                                return compare;
-
-                            // copy last
-                            compare = itemTransfer1.Type.CompareTo(itemTransfer2.Type);
-                            if (compare != 0)
-                                return compare;
-
-                            // first line in first in
-                            return itemTransfer1.Line.CompareTo(itemTransfer2.Line);
-                        }
-
-                        // filter before transfer
-                        return itemTransfer1 == null ? 1 : -1;
-                    });
-
-                    _deployVarList = _deployRulesList.OfType<DeployVariableRule>().ToList();
-                }
-                return _deployRulesList;
-            }
-            set { _deployRulesList = value; }
-        }
+        /// <summary>
+        /// List of var rules filtered + sorted for this env
+        /// </summary>
+        public List<DeployVariableRule> DeployVarList { get; set; }
 
         /// <summary>
         /// List of deployment rules filtered + sorted for this env
@@ -385,8 +393,9 @@ namespace _3PA.MainFeatures.Pro {
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
         /// </summary>
         public List<FileToDeploy> GetTargetDirsNeededForFile(string sourcePath, int step) {
+
             // local compilation? return only one path, MOVE next to the source
-            if (step == 0 && ProEnv.CompileLocally)
+            if (step == 0 && _compileLocally)
                 return new List<FileToDeploy> {new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true)};
 
             var outList = new List<FileToDeploy>();
@@ -404,7 +413,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(deployTarget)) {
-                    outPath = Path.Combine(ProEnv.BaseCompilationPath, outPath);
+                    outPath = Path.Combine(_deploymentDirectory, outPath);
                 }
 
                 if (!outList.Exists(needed => needed.TargetDir.EqualsCi(outPath)))
@@ -419,7 +428,7 @@ namespace _3PA.MainFeatures.Pro {
             if (outList.Count == 0) {
                 // for the compilation, move to deployment directory
                 if (step == 0)
-                    outList.Add(new FileToDeploy(ProEnv.BaseCompilationPath, DeployType.Move, true));
+                    outList.Add(new FileToDeploy(_deploymentDirectory, DeployType.Move, true));
             } else {
                 var lastDeploy = outList.LastOrDefault();
                 if (lastDeploy != null) {
@@ -441,7 +450,7 @@ namespace _3PA.MainFeatures.Pro {
         public List<FileToDeploy> GetTransfersNeededForFile(string file, int step) {
             var fileName = Path.GetFileName(file);
             if (fileName != null)
-                return ProEnv.Deployer.GetTargetDirsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
+                return GetTargetDirsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
             return new List<FileToDeploy>();
         }
 
@@ -537,7 +546,11 @@ namespace _3PA.MainFeatures.Pro {
                 .ToNonNullList()
                 .ForEach(deploy => Utils.CreateDirectory(Path.GetDirectoryName(deploy.To)));
 
-            #region for archives (zip/pl)
+            #region preparation for archives (zip/pl)
+
+            // if we add a file in a zip and said file already exists in the zip, then it will appear twice!
+            // so we remove any existing file before adding the new ones
+            var filesToRemoveFromZip = new Dictionary<string, HashSet<string>>();
 
             // for archives, compute the path to the archive file (+ make sure the directory of the archive exists)
             deployToDo.Where(deploy => deploy.DeployType <= DeployType.Archive).ToNonNullList().ForEach(deploy => {
@@ -559,7 +572,7 @@ namespace _3PA.MainFeatures.Pro {
                                     _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
                                 } else {
                                     _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
-                                    _filesToRemoveFromZip.Add(deploy.ArchivePath, new HashSet<string>());
+                                    filesToRemoveFromZip.Add(deploy.ArchivePath, new HashSet<string>());
                                 }
                             } catch (Exception e) {
                                 ErrorHandler.ShowErrors(e, "Couldn't create/open the .zip file");
@@ -567,11 +580,24 @@ namespace _3PA.MainFeatures.Pro {
                         }
 
                         // we didn't create the zip? then we need to remove this file if it exists
-                        if (_filesToRemoveFromZip.ContainsKey(deploy.ArchivePath))
-                            _filesToRemoveFromZip[deploy.ArchivePath].Add(deploy.RelativePathInArchive.Replace('\\', '/'));
+                        if (filesToRemoveFromZip.ContainsKey(deploy.ArchivePath))
+                            filesToRemoveFromZip[deploy.ArchivePath].Add(deploy.RelativePathInArchive.Replace('\\', '/'));
                     }
                 }
             });
+
+            #region for zip
+
+            // remove the files that are already in the zip file or they will appear twice when we add them
+            foreach (var kpv in filesToRemoveFromZip) {
+                ZipStorer zip = _openedZip[kpv.Key];
+                var filesToDelete = zip.ReadCentralDir().Where(zipFileEntry => kpv.Value.Contains(zipFileEntry.FilenameInZip)).ToList();
+                _openedZip.Remove(kpv.Key);
+                ZipStorer.RemoveEntries(ref zip, filesToDelete);
+                _openedZip.Add(kpv.Key, zip);
+            }
+
+            #endregion
 
             #endregion
 
@@ -641,7 +667,7 @@ namespace _3PA.MainFeatures.Pro {
                         }
                     }
 
-                    var prolibExe = new ProcessIo(ProEnv.ProlibPath);
+                    var prolibExe = new ProcessIo(_prolibPath);
 
                     // for each subfolder in the .pl
                     foreach (var plSubFolder in dicTempFolderToPl) {
@@ -685,19 +711,6 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            #region for zip
-
-            // remove the files that are already in the zip file or they will appear twice when we add them
-            foreach (var kpv in _filesToRemoveFromZip) {
-                ZipStorer zip = _openedZip[kpv.Key];
-                var filesToDelete = zip.ReadCentralDir().Where(zipFileEntry => kpv.Value.Contains(zipFileEntry.FilenameInZip)).ToList();
-                _openedZip.Remove(kpv.Key);
-                ZipStorer.RemoveEntries(ref zip, filesToDelete);
-                _openedZip.Add(kpv.Key, zip);
-            }
-
-            #endregion
-
             // do a deployment action for each file (parallel for MOVE and COPY)
             Parallel.ForEach(deployToDo.Where(deploy => deploy.DeployType >= DeployType.Copy), file => {
                 if (DeploySingleFile(file))
@@ -705,6 +718,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (updateDeploymentPercentage != null)
                     updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
             });
+
             // don't use parallel for the other types
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
                 if (DeploySingleFile(file))
@@ -770,7 +784,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         private string ReplaceVariablesIn(string input) {
             if (input.ContainsFast("<")) {
-                foreach (var variableRule in _deployVarList) {
+                foreach (var variableRule in DeployVarList) {
                     input = input.Replace(variableRule.VariableName, variableRule.Path);
                 }
             }

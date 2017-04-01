@@ -104,24 +104,23 @@ namespace _3PA.Tests {
                     Parser parser = new Parser(proLexer, "", null, true);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    if (parser.ParserErrors != null && parser.ParserErrors.Count > 0)
+                    if (parser.ParserErrors != null && parser.ParserErrors.Count > 0) {
                         outNotif += file.ToHtmlLink() + "<br>";
-
+                        parserErrors += file + "<br>" + parser.ParseErrorsInHtml + "<br>";
+                    }
+                    /*
                     var parserVisitor = new ParserVisitor(true);
                     parser.Accept(parserVisitor);
                     outStr += "Visitor (" + watch.ElapsedMilliseconds + " ms)\r\n";
-
-                    if (parser.ParserErrors.Count > 0) {
-                        parserErrors = file + "<br>" + GetParserErrorDescription(parser.ParserErrors) + "<br>";
-                    }
+                    */
 
                     watch.Stop();
 
-                    Utils.FileAppendAllText(outFile, outStr);
+                    Utils.FileAppendAllText(outFile, outStr + "\r\n");
                 }
             }
 
-            Utils.FileAppendAllText(outFile, parserErrors);
+            Utils.FileAppendAllText(outFile, "\r\n\r\n" + parserErrors);
 
             watch2.Stop();
 
@@ -129,19 +128,7 @@ namespace _3PA.Tests {
 
             UserCommunication.Notify(outNotif + "<br>Done :<br>" + outFile.ToHtmlLink(), 0);
         }
-
-        public static string GetParserErrorDescription(List<ParserError> listErrors) {
-            if (listErrors == null || listErrors.Count == 0)
-                return string.Empty;
-            var error = new StringBuilder();
-            foreach (var parserError in listErrors) {
-                error.AppendLine("<div>");
-                error.AppendLine("- " + (parserError.FullFilePath + "|" + parserError.TriggerLine).ToHtmlLink("Line " + (parserError.TriggerLine + 1)) + ", " + parserError.Type.GetDescription());
-                error.AppendLine("</div>");
-            }
-            return error.ToString();
-        }
-
+        
         #endregion
 
         #region tests and dev

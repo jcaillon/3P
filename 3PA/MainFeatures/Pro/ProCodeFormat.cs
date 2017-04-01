@@ -21,6 +21,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -37,16 +38,22 @@ namespace _3PA.MainFeatures.Pro {
         /// Tries to re-indent the code of the whole document
         /// </summary>
         public static void CorrectCodeIndentation() {
-            // handle spam (2s min between 2 indent)
+
+            // handle spam (1s min between 2 indent)
             if (Utils.IsSpamming("CorrectCodeIndentation", 1000))
                 return;
 
             var parser = new Parser.Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
 
-            // make sure to parse the current document before doing anything
+            // in case of an incorrect document, warn the user
+            var parserErrors = parser.ParseErrorsInHtml;
+            if (!string.IsNullOrEmpty(parserErrors)) {
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still try to format your code but the result is not guaranteed (worst case scenario you can press CTRL+Z).<br>Please confirm that you want to proceed", MessageImg.MsgQuestion, "Correct indentation", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
+                    return;
+            }
+
             var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
-            var parseErrors = parser.ParseErrorsInHtml;
-            var canIndent = string.IsNullOrEmpty(parseErrors);
+            var canIndentSafely = string.IsNullOrEmpty(parserErrors);
 
             // start indenting
             Sci.BeginUndoAction();
@@ -56,19 +63,17 @@ namespace _3PA.MainFeatures.Pro {
             var i = 0;
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
-                if (canIndent)
-                    Sci.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
-                else
+                Sci.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
+                if (!canIndentSafely)
                     x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;
             }
-            Utils.FileWriteAllText(linesLogFile, x.ToString());
-
             Sci.EndUndoAction();
 
-            // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
-            if (!canIndent) {
-                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles successfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() + "<br><br>" + parseErrors : ""), MessageImg.MsgRip, "Correct document indentation", "Incorrect grammar", null, 10);
+            // if we didn't parse the code correctly or if there are grammar errors
+            if (!canIndentSafely) {
+                Utils.FileWriteAllText(linesLogFile, x.ToString());
+                UserCommunication.Notify("If the code compiles successfully and the document is incorrectly formatted, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() : ""), MessageImg.MsgRip, "Correct indentation", "Incorrect grammar", null, 10);
             }
         }
 

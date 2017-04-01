@@ -22,7 +22,7 @@
 
 /* if ExecutionType not already defined */
 &IF DEFINED(LogPath) = 0 &THEN
-    &SCOPED-DEFINE ExecutionType "DICTIONNARY"  
+    &SCOPED-DEFINE ExecutionType "DICTIONNARY"
     &SCOPED-DEFINE LogPath "run.log"
     &SCOPED-DEFINE PropathToUse ""
     &SCOPED-DEFINE DbConnectString ""
@@ -36,7 +36,6 @@
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
     &SCOPED-DEFINE CompilationLogPath "compil.log"
-    &SCOPED-DEFINE CompileWithDebugList FALSE
 
     &SCOPED-DEFINE ExtractDbOutputPath ""
 &ENDIF
@@ -97,14 +96,15 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
 
     CASE {&ExecutionType} :
         WHEN "CHECKSYNTAX" OR
-        WHEN "RUN" OR
-        WHEN "COMPILE" THEN DO:
+        WHEN "COMPILE" OR
+        WHEN "GENERATEDEBUGFILE" OR
+        WHEN "RUN" THEN DO:
             OUTPUT STREAM str_wcplog TO VALUE({&CompilationLogPath}) BINARY.
             PUT STREAM str_wcplog UNFORMATTED "".
-            
+
             RUN pi_compileList NO-ERROR.
             fi_output_last_error().
-            
+
             OUTPUT STREAM str_wcplog CLOSE.
         END.
         WHEN "DEPLOYMENTHOOK" OR
@@ -264,7 +264,9 @@ PROCEDURE pi_compileList PRIVATE:
 
     DEFINE VARIABLE lc_from AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_to AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_lst AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_lis AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_xrf AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_dgb AS CHARACTER NO-UNDO.
 
     ASSIGN FILE-INFO:FILE-NAME = {&ToCompileListFile}.
     IF FILE-INFO:FILE-TYPE = ? OR NOT FILE-INFO:FILE-TYPE MATCHES("*R*") OR NOT FILE-INFO:FILE-TYPE MATCHES("*F*") THEN
@@ -273,40 +275,60 @@ PROCEDURE pi_compileList PRIVATE:
     /* loop through all the files to compile */
     INPUT STREAM str_rlist FROM VALUE({&ToCompileListFile}) NO-ECHO.
     REPEAT:
-        IMPORT STREAM str_rlist lc_from lc_to lc_lst.
+        IMPORT STREAM str_rlist lc_from lc_to lc_lis lc_xrf lc_dgb.
         IF lc_from > "" THEN DO:
-           
-            IF {&ExecutionType} = "RUN" THEN DO:
+
+            &IF {&ExecutionType} = "RUN" &THEN
                 DO  ON STOP   UNDO, LEAVE
                     ON ERROR  UNDO, LEAVE
                     ON ENDKEY UNDO, LEAVE
                     ON QUIT   UNDO, LEAVE:
                     RUN VALUE(lc_from) NO-ERROR.
                 END.
-                fi_output_last_error().
-                RUN pi_handleCompilErrors (INPUT {&CurrentFilePath}) NO-ERROR.
-                fi_output_last_error().
-            END.
-            ELSE DO:
-                IF {&ExecutionType} = "CHECKSYNTAX" THEN
-                    ASSIGN lc_to = ENTRY(1, {&PropathToUse}, ",").
+            &ELSE
+                &IF {&ExecutionType} = "CHECKSYNTAX" &THEN
+                    COMPILE VALUE(lc_from)
+                        SAVE = FALSE
+                        NO-ERROR.
+                &ELSE
+                    /* COMPILE / GENERATEDEBUGFILE */
+                    IF lc_lis = "?" THEN ASSIGN lc_lis = ?.
+                    IF lc_xrf = "?" THEN ASSIGN lc_xrf = ?.
+                    IF lc_dgb = "?" THEN ASSIGN lc_dgb = ?.
+                    IF lc_xrf = ? OR NOT lc_xrf MATCHES "~~.xml" THEN
+                        COMPILE VALUE(lc_from)
+                            &IF {&ExecutionType} = "GENERATEDEBUGFILE" &THEN
+                                SAVE = FALSE                            
+                            &ELSE
+                                SAVE INTO VALUE(lc_to)
+                            &ENDIF
+                            LISTING VALUE(lc_lis)
+                            XREF VALUE(lc_xrf)
+                            DEBUG-LIST VALUE(lc_dgb)
+                            NO-ERROR.
+                    ELSE
+                        COMPILE VALUE(lc_from)
+                            &IF {&ExecutionType} = "GENERATEDEBUGFILE" &THEN
+                                SAVE = FALSE                            
+                            &ELSE
+                                SAVE INTO VALUE(lc_to)
+                            &ENDIF
+                            LISTING VALUE(lc_lis)
+                            XREF-XML VALUE(lc_xrf)
+                            DEBUG-LIST VALUE(lc_dgb)
+                            NO-ERROR.            
+                &ENDIF
+            &ENDIF
             
-                COMPILE VALUE(lc_from)
-                    SAVE INTO VALUE(lc_to)
-                    &IF {&CompileWithDebugList} &THEN
-                    DEBUG-LIST VALUE(lc_lst)
-                    &ENDIF
-                    NO-ERROR.
-                fi_output_last_error().
-                RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
-                fi_output_last_error().
+            fi_output_last_error().
+            RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
+            fi_output_last_error().
 
-                /* the following stream / file is used to inform the C# side of the progression of the compilation */
-                OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
-                PUT STREAM str_w UNFORMATTED "x".
-                OUTPUT STREAM str_w CLOSE.
-            END.
-            
+            /* the following stream / file is used to inform the C# side of the progression */
+            OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
+            PUT STREAM str_w UNFORMATTED "x".
+            OUTPUT STREAM str_w CLOSE.
+
         END.
     END.
     INPUT STREAM str_rlist CLOSE.

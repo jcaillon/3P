@@ -461,16 +461,18 @@ namespace _3PA.MainFeatures.Parser {
             if (_context.StatementFirstToken != null && _context.StatementFirstToken.OwnerNumber == 0) {
                 var statementStartLine = _context.StatementFirstToken.Line;
 
+                var currentScope = _context.Scope.ScopeType == ParsedScopeType.Root && _context.UibBlockStack.Count > 0 ? _context.UibBlockStack.Peek() : _context.Scope;
+
                 // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
                 var depth = GetCurrentDepth();
                 if (!_lineInfo.ContainsKey(statementStartLine))
-                    _lineInfo.Add(statementStartLine, new LineInfo(depth, _context.Scope));
+                    _lineInfo.Add(statementStartLine, new LineInfo(depth, currentScope));
 
                 // add missing values to the line dictionary (lines from start statement + 1 to end of statement have a depth + 1)
                 if (statementStartLine > -1 && token.Line > statementStartLine) {
                     for (int i = statementStartLine + 1; i <= token.Line; i++)
                         if (!_lineInfo.ContainsKey(i))
-                            _lineInfo.Add(i, new LineInfo(depth + 1, _context.Scope));
+                            _lineInfo.Add(i, new LineInfo(depth + 1, currentScope));
                 }
             }
 

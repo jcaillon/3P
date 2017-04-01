@@ -72,8 +72,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         private bool _executingHook;
 
-        private StringBuilder _hookProcedureErrors = new StringBuilder();
-
         #endregion
 
         #region constructor
@@ -214,7 +212,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // subscribe
             ProEnvironment.OnEnvironmentChange += OnShow;
-            Deployer.OnDeployConfigurationUpdate += () => ProEnvironment.Current.Deployer.DeployRules = null;
             Deployer.OnDeployConfigurationUpdate += OnShow;
 
             // dynamically reorder the controls for a correct tab order on notepad++
@@ -241,7 +238,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             lbl_deployDir.Text = string.Format("The deployment directory is <a href='{0}'>{0}</a>", ProEnvironment.Current.BaseCompilationPath);
 
             // update the rules for the current env
-            lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 2), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step >= 3));
+            var currentDeployer = ProEnvironment.Current.Deployer;
+            lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", currentDeployer.DeployRules.Count(rule => rule.Step == 0), currentDeployer.DeployRules.Count(rule => rule.Step == 1), currentDeployer.DeployRules.Count(rule => rule.Step == 2), currentDeployer.DeployRules.Count(rule => rule.Step >= 3));
 
             if (DeployProfile.Current.AutoUpdateSourceDir)
                 fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
@@ -381,12 +379,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     }
                 }
 
-                // hook procedure errors
-                if (_hookProcedureErrors.Length > 0) {
-                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment hook procedures errors :</h3>");
-                    currentReport.Append(_hookProcedureErrors);
-                }
-
                 // deployment steps
                 foreach (var listLinesKpv in listLinesByStep) {
                     currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " :</h3>");
@@ -463,7 +455,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 _currentStep = 0;
                 _totalSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
                 _filesToDeployPerStep.Clear();
-                _hookProcedureErrors.Clear();
 
                 if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
                     UpdateReport("");
@@ -652,22 +643,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 _executingHook = true;
 
                 try {
-                    var hookExec = new ProExecution {
+                    var hookExec = new ProExecutionDeploymentHook {
                         DeploymentStep = _currentStep,
                         DeploymentSourcePath = _currentProfile.SourceDirectory
                     };
-                    if (hookExec.Do(ExecutionType.DeploymentHook)) {
-                        hookExec.Process.WaitForExit();
-
-                        var fileInfo = new FileInfo(hookExec.LogPath);
-                        if (fileInfo.Length > 0) {
-                            // the .log is not empty, maybe something went wrong in the runner, display errors
-                            UserCommunication.Notify(
-                                "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
-                                Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
-                                "Deployment hook procedure", "Execution failed");
-                            _hookProcedureErrors.Append("The execution for step " + _currentStep + " returned the following errors :" + Utils.ReadAndFormatLogToHtml(hookExec.LogPath));
-                        }
+                    if (hookExec.Do()) {
+                        hookExec.WaitForProcessExit(-1);
                     }
                 } finally {
                     _executingHook = false;

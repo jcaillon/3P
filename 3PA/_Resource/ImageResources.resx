@@ -427,9 +427,6 @@
   <data name="Logo30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\logo\logo30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="LstType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\lsttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="MainBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\mainblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -739,9 +736,6 @@
   <data name="XmlType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\filetypes\xmltype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="XrefType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\xreftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="XtfrBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\xtfrblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -786,5 +780,14 @@
   </data>
   <data name="LangFunction" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\langfunction.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DbgType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filetypes\dbgtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LisType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filetypes\listype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="XrfType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filetypes\xrftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

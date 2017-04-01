@@ -31,10 +31,12 @@ using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
     internal class ProEnvironment {
+
         #region ProEnvironmentObject
 
         [Serializable]
         internal class ProEnvironmentObject {
+
             #region Exported fields
 
             /// <summary>
@@ -45,12 +47,13 @@ namespace _3PA.MainFeatures.Pro {
             public string Name = "";
 
             public string Suffix = "";
-
+            
             // label
             public string Label = "";
 
             // pf
             public Dictionary<string, string> DbConnectionInfo = new Dictionary<string, string>();
+            public string CurrentDb = "";
             public string ExtraPf = "";
 
             // propath
@@ -73,7 +76,6 @@ namespace _3PA.MainFeatures.Pro {
             public string LogFilePath = "";
 
             public bool CompileLocally = true;
-            public bool CompileWithListing = true;
 
             #endregion
 
@@ -107,6 +109,7 @@ namespace _3PA.MainFeatures.Pro {
                 Suffix = toCopy.Suffix;
                 Label = toCopy.Label;
                 DbConnectionInfo = toCopy.DbConnectionInfo;
+                CurrentDb = toCopy.CurrentDb;
                 ExtraPf = toCopy.ExtraPf;
                 IniPath = toCopy.IniPath;
                 ExtraProPath = toCopy.ExtraProPath;
@@ -119,12 +122,11 @@ namespace _3PA.MainFeatures.Pro {
                 LogFilePath = toCopy.LogFilePath;
 
                 CompileLocally = toCopy.CompileLocally;
-                CompileWithListing = toCopy.CompileWithListing;
 
                 _currentProPathDirList = toCopy._currentProPathDirList;
 
                 // deployer copy
-                _deployer = new Deployer(this, toCopy.Deployer);
+                _deployer = toCopy.Deployer;
             }
 
             #endregion
@@ -135,14 +137,13 @@ namespace _3PA.MainFeatures.Pro {
             /// Returns the currently selected database's .pf for the current environment
             /// </summary>
             public string GetPfPath() {
-                return (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) ?
-                    DbConnectionInfo[Config.Instance.EnvDatabase] :
+                return (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) ? DbConnectionInfo[CurrentDb] :
                     string.Empty;
             }
 
             public bool RemoveCurrentPfPath() {
-                if (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
-                    DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
+                if (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) {
+                    DbConnectionInfo.Remove(CurrentDb);
                     SetCurrent(null, null, null);
                     return true;
                 }
@@ -159,8 +160,8 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             public bool ModifyPfPath(string name, string path) {
-                if (!string.IsNullOrEmpty(name) && (!DbConnectionInfo.ContainsKey(name) || name.Equals(Config.Instance.EnvDatabase))) {
-                    DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
+                if (!string.IsNullOrEmpty(name) && (!DbConnectionInfo.ContainsKey(name) || name.Equals(CurrentDb))) {
+                    DbConnectionInfo.Remove(CurrentDb);
                     DbConnectionInfo.Add(name, path);
                     SetCurrent(null, null, name);
                     return true;
@@ -326,11 +327,7 @@ namespace _3PA.MainFeatures.Pro {
             /// The deployer for this environment
             /// </summary>
             public Deployer Deployer {
-                get {
-                    if (_deployer == null)
-                        _deployer = new Deployer(this);
-                    return _deployer;
-                }
+                get { return _deployer != null ? _deployer : new Deployer(Config.FileDeploymentRules, this); }
             }
 
             #endregion
@@ -496,9 +493,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // set database
             if (!string.IsNullOrEmpty(database) && _currentEnv.DbConnectionInfo.ContainsKey(database))
-                Config.Instance.EnvDatabase = database;
-            else
-                Config.Instance.EnvDatabase = (_currentEnv.DbConnectionInfo.Count > 0) ? _currentEnv.DbConnectionInfo.First().Key : String.Empty;
+                _currentEnv.CurrentDb = database;
 
             if (OnEnvironmentChange != null)
                 OnEnvironmentChange();

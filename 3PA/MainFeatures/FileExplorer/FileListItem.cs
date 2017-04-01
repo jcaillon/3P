@@ -141,14 +141,15 @@ namespace _3PA.MainFeatures.FileExplorer {
         D,
         Folder,
         I,
-        Lst,
+        Dbg,
+        Lis,
         P,
         Pl,
         R,
         T,
         W,
         Xml,
-        Xref,
+        Xrf,
         Zip
     }
 

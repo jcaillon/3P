@@ -132,8 +132,9 @@ namespace _3PA.MainFeatures.Pro {
             Sci.GoToLine(Sci.LineFromPosition(insertPos));
             Sci.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
 
-            // in the case of a new function, create the prototype if needed
+            // in the case of a new function, update the prototype if needed
             if (typeof(ParsedImplementation) == typeof(T)) {
+                ParseNow();
                 UpdateFunctionPrototypes(true);
             }
         }
@@ -160,6 +161,12 @@ namespace _3PA.MainFeatures.Pro {
             var toDelete = existingList.FirstOrDefault(item => item.Name.Equals(delete.Value));
             if (toDelete != null)
                 DeleteCode(toDelete);
+
+            // in the case of a new function, update the prototype if needed
+            if (typeof(ParsedImplementation) == typeof(T)) {
+                ParseNow();
+                UpdateFunctionPrototypes(true);
+            }
         }
 
         /// <summary>
@@ -187,13 +194,13 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         private void UpdateFunctionPrototypes(bool silent) {
+
             List<ParsedImplementation> listOfOutDatedProto;
             List<ParsedImplementation> listOfSoloImplementation;
             List<ParsedPrototype> listOfUselessProto;
 
             StringBuilder outputMessage = new StringBuilder();
 
-            // make sure to wait for the latest parse
             var nbLoop = 0;
             var nbNotCreated = 0;
             var nbThingsDone = 0;
@@ -204,7 +211,7 @@ namespace _3PA.MainFeatures.Pro {
                 Sci.BeginUndoAction();
 
                 // Add proto
-                if (listOfSoloImplementation.Count > 0) {
+                if (listOfSoloImplementation.Count > 0 && string.IsNullOrEmpty(_parser.ParseErrorsInHtml)) {
                     var tempMes = new StringBuilder("The following function prototypes have been created :");
 
                     while (listOfSoloImplementation.Count > nbNotCreated && nbLoop < nbToDo) {
@@ -255,7 +262,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (nbThingsDone == 0) {
                 if (!silent) {
-                    if (nbNotCreated == 0)
+                    if (nbToDo == 0)
                         UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
                     else
                         UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + _parser.ParseErrorsInHtml, MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
@@ -284,6 +291,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Gets the list of functions/proto of interest
         /// </summary>
         private int GetPrototypesLists(out List<ParsedImplementation> listOfOutDatedProto, out List<ParsedImplementation> listOfSoloImplementation, out List<ParsedPrototype> listOfUselessProto) {
+
             // list the outdated proto
             listOfOutDatedProto = _parser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedImplementation;
@@ -436,11 +444,6 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 // if not found, we just delete the proto statement
                 Sci.DeleteTextByRange(toDelete.Position, endPosition);
-            }
-
-            // in the case of a new function, create the prototype if needed
-            if (typeof(ParsedImplementation) == typeof(T)) {
-                UpdateFunctionPrototypes(true);
             }
         }
 

@@ -315,7 +315,7 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // launch the compile process for the current file
-            FilesInfo.CurrentFileInfoObject.ProgressExecution = (ProExecutionHandleCompilation) ProExecutionBasic.Factory(executionType);
+            FilesInfo.CurrentFileInfoObject.ProgressExecution = (ProExecutionHandleCompilation) ProExecution.Factory(executionType);
             FilesInfo.CurrentFileInfoObject.ProgressExecution.Files = new List<FileToCompile> {
                 new FileToCompile(Npp.CurrentFile.Path)
             };
@@ -346,7 +346,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
         /// </summary>
-        public static void OnSingleExecutionEnd(ProExecutionBasic lastExec) {
+        public static void OnSingleExecutionEnd(ProExecution lastExec) {
             try {
                 var exec = (ProExecutionHandleCompilation) lastExec;
                 var treatedFile = exec.Files.First();
@@ -367,7 +367,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint
         /// </summary>
-        public static void OnSingleExecutionOk(ProExecutionBasic lastExec) {
+        public static void OnSingleExecutionOk(ProExecution lastExec) {
             try {
                 var exec = (ProExecutionHandleCompilation)lastExec;
                 var treatedFile = exec.Files.First();
@@ -409,7 +409,7 @@ namespace _3PA.MainFeatures.Pro {
                     errorsList.AddRange(keyValue.Value);
                 }
 
-                // when compiling, transfering .r/.lst to compilation dir
+                // when compiling, transferring .r/.lst to compilation dir
                 var listTransferFiles = new List<FileToDeploy>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
                     listTransferFiles = exec.CreateListOfFilesToDeploy();
@@ -438,12 +438,13 @@ namespace _3PA.MainFeatures.Pro {
 
                 UserCommunication.Notify("Deploying a compilable file is strictly equal as compiling it<br>The deployment rules for step 0 are applied in both case!", MessageImg.MsgInfo, "Deploy a file", "Bypass to compilation", 2);
             } else {
-                if (ProEnvironment.Current.Deployer.IsFilePassingFilters(
+                var currentDeployer = ProEnvironment.Current.Deployer;
+                if (currentDeployer.IsFilePassingFilters(
                     Npp.CurrentFile.Path,
-                    ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
-                    ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
+                    currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
+                    currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
                     // deploy the file for STEP 1
-                    var deployedFiles = ProEnvironment.Current.Deployer.DeployFiles(ProEnvironment.Current.Deployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1));
+                    var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1));
                     if (deployedFiles == null || deployedFiles.Count == 0) {
                         UserCommunication.Notify("The current file doesn't match any transfer rules for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "No transfer rules", args => {
                             Deployer.EditRules();

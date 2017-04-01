@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private void ExtractionDoneOk(ProExecutionBasic lastExec) {
+        private void ExtractionDoneOk(ProExecution lastExec) {
             // copy the dump to the folder database
             if (Utils.CopyFile(((ProExecutionDatabase) lastExec).ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, GetOutputName))) {
                 // update info
@@ -174,7 +174,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         private string GetOutputName {
-            get { return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump"; }
+            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.CurrentDb).ToValidFileName().ToLower() + ".dump"; }
         }
 
         /// <summary>

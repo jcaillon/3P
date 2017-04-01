@@ -109,10 +109,12 @@ namespace _3PA.Lib {
             return false;
         }
 
+        /// <summary>
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
         /// Apply the action toApplyOnEachLine(int lineNumber, string lineString) to each line
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
         /// Uses the char # as a comment in the file (must be the first char of a line)
+        /// </summary>
         public static void ForEachLine(string filePath, byte[] dataResources, Action<int, string> toApplyOnEachLine, Encoding encoding = null) {
             try {
                 Exception ex = new Exception("Undetermined");

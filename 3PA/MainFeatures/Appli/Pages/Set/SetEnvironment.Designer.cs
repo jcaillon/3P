@@ -64,9 +64,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright4 = new YamuiFramework.Controls.YamuiButtonImage();
             this.tgCompLocally = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.tgCompWithLst = new YamuiFramework.Controls.YamuiButtonToggle();
             this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btleft5 = new YamuiFramework.Controls.YamuiButtonImage();
             this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
@@ -150,9 +148,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox4);
             this.scrollPanel.ContentPanel.Controls.Add(this.btright4);
             this.scrollPanel.ContentPanel.Controls.Add(this.tgCompLocally);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompWithLst);
             this.scrollPanel.ContentPanel.Controls.Add(this.lblLocally);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel5);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
             this.scrollPanel.ContentPanel.Controls.Add(this.btleft5);
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox5);
@@ -238,6 +234,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDbView.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbView.BackGrndImage = null;
+            this.btDbView.GreyScaleBackGrndImage = null;
+            this.btDbView.IsFocused = false;
+            this.btDbView.IsHovered = false;
+            this.btDbView.IsPressed = false;
             this.btDbView.Location = new System.Drawing.Point(812, 159);
             this.btDbView.Name = "btDbView";
             this.btDbView.SetImgSize = new System.Drawing.Size(20, 20);
@@ -250,6 +250,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDbDeleteDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbDeleteDownload.BackGrndImage = null;
+            this.btDbDeleteDownload.GreyScaleBackGrndImage = null;
+            this.btDbDeleteDownload.IsFocused = false;
+            this.btDbDeleteDownload.IsHovered = false;
+            this.btDbDeleteDownload.IsPressed = false;
             this.btDbDeleteDownload.Location = new System.Drawing.Point(737, 159);
             this.btDbDeleteDownload.Name = "btDbDeleteDownload";
             this.btDbDeleteDownload.SetImgSize = new System.Drawing.Size(20, 20);
@@ -262,6 +266,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDbDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbDownload.BackGrndImage = null;
+            this.btDbDownload.GreyScaleBackGrndImage = null;
+            this.btDbDownload.IsFocused = false;
+            this.btDbDownload.IsHovered = false;
+            this.btDbDownload.IsPressed = false;
             this.btDbDownload.Location = new System.Drawing.Point(679, 159);
             this.btDbDownload.Name = "btDbDownload";
             this.btDbDownload.SetImgSize = new System.Drawing.Size(20, 20);
@@ -294,6 +302,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flSuffix
             // 
+            this.flSuffix.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flSuffix.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flSuffix.CustomBackColor = System.Drawing.Color.Empty;
+            this.flSuffix.CustomForeColor = System.Drawing.Color.Empty;
+            this.flSuffix.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flSuffix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flSuffix.Location = new System.Drawing.Point(173, 48);
             this.flSuffix.Name = "flSuffix";
             this.flSuffix.Size = new System.Drawing.Size(133, 21);
@@ -304,6 +318,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.flLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flLabel.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flLabel.CustomBackColor = System.Drawing.Color.Empty;
+            this.flLabel.CustomForeColor = System.Drawing.Color.Empty;
+            this.flLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flLabel.Location = new System.Drawing.Point(312, 48);
             this.flLabel.Name = "flLabel";
             this.flLabel.Size = new System.Drawing.Size(566, 21);
@@ -350,6 +370,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flDatabase
             // 
+            this.flDatabase.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flDatabase.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flDatabase.CustomBackColor = System.Drawing.Color.Empty;
+            this.flDatabase.CustomForeColor = System.Drawing.Color.Empty;
+            this.flDatabase.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flDatabase.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flDatabase.Location = new System.Drawing.Point(193, 113);
             this.flDatabase.Name = "flDatabase";
             this.flDatabase.Size = new System.Drawing.Size(273, 21);
@@ -358,8 +384,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbDatabase
             // 
+            this.cbDatabase.BackGrndImage = null;
+            this.cbDatabase.GreyScaleBackGrndImage = null;
+            this.cbDatabase.IsFocused = false;
+            this.cbDatabase.IsHovered = false;
+            this.cbDatabase.IsPressed = false;
             this.cbDatabase.Location = new System.Drawing.Point(193, 113);
             this.cbDatabase.Name = "cbDatabase";
+            this.cbDatabase.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbDatabase.Size = new System.Drawing.Size(273, 21);
             this.cbDatabase.TabIndex = 139;
             // 
@@ -367,6 +399,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft1.BackColor = System.Drawing.Color.Transparent;
             this.btleft1.BackGrndImage = null;
+            this.btleft1.GreyScaleBackGrndImage = null;
+            this.btleft1.IsFocused = false;
+            this.btleft1.IsHovered = false;
+            this.btleft1.IsPressed = false;
             this.btleft1.Location = new System.Drawing.Point(170, 136);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
@@ -380,6 +416,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox1.Location = new System.Drawing.Point(193, 136);
             this.textbox1.Name = "textbox1";
             this.textbox1.Size = new System.Drawing.Size(678, 20);
@@ -392,6 +434,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
+            this.btright1.GreyScaleBackGrndImage = null;
+            this.btright1.IsFocused = false;
+            this.btright1.IsHovered = false;
+            this.btright1.IsPressed = false;
             this.btright1.Location = new System.Drawing.Point(874, 136);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
@@ -431,8 +477,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flExtraPf
             // 
+            this.flExtraPf.AcceptsReturn = true;
             this.flExtraPf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.flExtraPf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flExtraPf.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flExtraPf.CustomBackColor = System.Drawing.Color.Empty;
+            this.flExtraPf.CustomForeColor = System.Drawing.Color.Empty;
+            this.flExtraPf.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flExtraPf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flExtraPf.Location = new System.Drawing.Point(193, 187);
             this.flExtraPf.Margin = new System.Windows.Forms.Padding(1);
             this.flExtraPf.Multiline = true;
@@ -460,6 +513,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
+            this.btleft2.GreyScaleBackGrndImage = null;
+            this.btleft2.IsFocused = false;
+            this.btleft2.IsHovered = false;
+            this.btleft2.IsPressed = false;
             this.btleft2.Location = new System.Drawing.Point(170, 252);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
@@ -474,6 +531,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
+            this.btright2.GreyScaleBackGrndImage = null;
+            this.btright2.IsFocused = false;
+            this.btright2.IsHovered = false;
+            this.btright2.IsPressed = false;
             this.btright2.Location = new System.Drawing.Point(874, 252);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
@@ -487,6 +548,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox2.Location = new System.Drawing.Point(193, 253);
             this.textbox2.Name = "textbox2";
             this.textbox2.Size = new System.Drawing.Size(678, 20);
@@ -496,8 +563,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flExtraProPath
             // 
+            this.flExtraProPath.AcceptsReturn = true;
             this.flExtraProPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.flExtraProPath.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flExtraProPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flExtraProPath.CustomBackColor = System.Drawing.Color.Empty;
+            this.flExtraProPath.CustomForeColor = System.Drawing.Color.Empty;
+            this.flExtraProPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flExtraProPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flExtraProPath.Location = new System.Drawing.Point(193, 279);
             this.flExtraProPath.Multiline = true;
             this.flExtraProPath.Name = "flExtraProPath";
@@ -523,6 +597,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
+            this.btleft3.GreyScaleBackGrndImage = null;
+            this.btleft3.IsFocused = false;
+            this.btleft3.IsHovered = false;
+            this.btleft3.IsPressed = false;
             this.btleft3.Location = new System.Drawing.Point(170, 335);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
@@ -536,6 +614,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox3.Location = new System.Drawing.Point(193, 335);
             this.textbox3.Name = "textbox3";
             this.textbox3.Size = new System.Drawing.Size(678, 20);
@@ -548,6 +632,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
+            this.btright3.GreyScaleBackGrndImage = null;
+            this.btright3.IsFocused = false;
+            this.btright3.IsHovered = false;
+            this.btright3.IsPressed = false;
             this.btright3.Location = new System.Drawing.Point(874, 335);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
@@ -576,6 +664,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
+            this.btleft4.GreyScaleBackGrndImage = null;
+            this.btleft4.IsFocused = false;
+            this.btleft4.IsHovered = false;
+            this.btleft4.IsPressed = false;
             this.btleft4.Location = new System.Drawing.Point(170, 387);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
@@ -589,6 +681,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox4.Location = new System.Drawing.Point(193, 387);
             this.textbox4.Name = "textbox4";
             this.textbox4.Size = new System.Drawing.Size(678, 20);
@@ -601,6 +699,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
+            this.btright4.GreyScaleBackGrndImage = null;
+            this.btright4.IsFocused = false;
+            this.btright4.IsHovered = false;
+            this.btright4.IsPressed = false;
             this.btright4.Location = new System.Drawing.Point(874, 387);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
@@ -614,22 +716,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // tgCompLocally
             // 
             this.tgCompLocally.BackGrndImage = null;
+            this.tgCompLocally.GreyScaleBackGrndImage = null;
+            this.tgCompLocally.IsFocused = false;
+            this.tgCompLocally.IsHovered = false;
+            this.tgCompLocally.IsPressed = false;
             this.tgCompLocally.Location = new System.Drawing.Point(298, 363);
             this.tgCompLocally.Name = "tgCompLocally";
             this.tgCompLocally.SetImgSize = new System.Drawing.Size(0, 0);
             this.tgCompLocally.Size = new System.Drawing.Size(35, 16);
             this.tgCompLocally.TabIndex = 137;
             this.tgCompLocally.ToggleSize = 30;
-            // 
-            // tgCompWithLst
-            // 
-            this.tgCompWithLst.BackGrndImage = null;
-            this.tgCompWithLst.Location = new System.Drawing.Point(481, 363);
-            this.tgCompWithLst.Name = "tgCompWithLst";
-            this.tgCompWithLst.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompWithLst.Size = new System.Drawing.Size(35, 16);
-            this.tgCompWithLst.TabIndex = 155;
-            this.tgCompWithLst.ToggleSize = 30;
             // 
             // lblLocally
             // 
@@ -642,18 +738,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lblLocally.TabIndex = 138;
             this.lblLocally.Text = "Compile near source?";
             this.lblLocally.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // yamuiLabel5
-            // 
-            this.yamuiLabel5.AutoSize = true;
-            this.yamuiLabel5.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel5.Location = new System.Drawing.Point(343, 364);
-            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3);
-            this.yamuiLabel5.Name = "yamuiLabel5";
-            this.yamuiLabel5.Size = new System.Drawing.Size(132, 12);
-            this.yamuiLabel5.TabIndex = 154;
-            this.yamuiLabel5.Text = "Compile with debug list (.lst)?";
-            this.yamuiLabel5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // htmlLabel5
             // 
@@ -673,6 +757,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
+            this.btleft5.GreyScaleBackGrndImage = null;
+            this.btleft5.IsFocused = false;
+            this.btleft5.IsHovered = false;
+            this.btleft5.IsPressed = false;
             this.btleft5.Location = new System.Drawing.Point(170, 413);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
@@ -686,6 +774,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox5.Location = new System.Drawing.Point(193, 413);
             this.textbox5.Name = "textbox5";
             this.textbox5.Size = new System.Drawing.Size(678, 20);
@@ -698,6 +792,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
+            this.btright5.GreyScaleBackGrndImage = null;
+            this.btright5.IsFocused = false;
+            this.btright5.IsHovered = false;
+            this.btright5.IsPressed = false;
             this.btright5.Location = new System.Drawing.Point(874, 413);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
@@ -725,6 +823,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.flCmdLine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.flCmdLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flCmdLine.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flCmdLine.CustomBackColor = System.Drawing.Color.Empty;
+            this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
+            this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flCmdLine.Location = new System.Drawing.Point(193, 439);
             this.flCmdLine.Name = "flCmdLine";
             this.flCmdLine.Size = new System.Drawing.Size(678, 20);
@@ -749,6 +853,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
+            this.btleft6.GreyScaleBackGrndImage = null;
+            this.btleft6.IsFocused = false;
+            this.btleft6.IsHovered = false;
+            this.btleft6.IsPressed = false;
             this.btleft6.Location = new System.Drawing.Point(170, 465);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
@@ -762,6 +870,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.textbox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox6.Location = new System.Drawing.Point(193, 465);
             this.textbox6.Name = "textbox6";
             this.textbox6.Size = new System.Drawing.Size(678, 20);
@@ -774,6 +888,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
+            this.btright6.GreyScaleBackGrndImage = null;
+            this.btright6.IsFocused = false;
+            this.btright6.IsHovered = false;
+            this.btright6.IsPressed = false;
             this.btright6.Location = new System.Drawing.Point(874, 465);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
@@ -787,6 +905,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btDelete.BackGrndImage = null;
+            this.btDelete.GreyScaleBackGrndImage = null;
+            this.btDelete.IsFocused = false;
+            this.btDelete.IsHovered = false;
+            this.btDelete.IsPressed = false;
             this.btDelete.Location = new System.Drawing.Point(394, 491);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
@@ -797,6 +919,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flName
             // 
+            this.flName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flName.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flName.CustomBackColor = System.Drawing.Color.Empty;
+            this.flName.CustomForeColor = System.Drawing.Color.Empty;
+            this.flName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flName.Location = new System.Drawing.Point(30, 48);
             this.flName.Name = "flName";
             this.flName.Size = new System.Drawing.Size(137, 21);
@@ -807,6 +935,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btEdit.BackGrndImage = null;
+            this.btEdit.GreyScaleBackGrndImage = null;
+            this.btEdit.IsFocused = false;
+            this.btEdit.IsHovered = false;
+            this.btEdit.IsPressed = false;
             this.btEdit.Location = new System.Drawing.Point(193, 491);
             this.btEdit.Name = "btEdit";
             this.btEdit.SetImgSize = new System.Drawing.Size(20, 20);
@@ -819,6 +951,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btAdd.BackGrndImage = null;
+            this.btAdd.GreyScaleBackGrndImage = null;
+            this.btAdd.IsFocused = false;
+            this.btAdd.IsHovered = false;
+            this.btAdd.IsPressed = false;
             this.btAdd.Location = new System.Drawing.Point(256, 491);
             this.btAdd.Name = "btAdd";
             this.btAdd.SetImgSize = new System.Drawing.Size(20, 20);
@@ -831,6 +967,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btCopy.BackGrndImage = null;
+            this.btCopy.GreyScaleBackGrndImage = null;
+            this.btCopy.IsFocused = false;
+            this.btCopy.IsHovered = false;
+            this.btCopy.IsPressed = false;
             this.btCopy.Location = new System.Drawing.Point(321, 491);
             this.btCopy.Name = "btCopy";
             this.btCopy.SetImgSize = new System.Drawing.Size(20, 20);
@@ -842,6 +982,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDbEdit
             // 
             this.btDbEdit.BackGrndImage = null;
+            this.btDbEdit.GreyScaleBackGrndImage = null;
+            this.btDbEdit.IsFocused = false;
+            this.btDbEdit.IsHovered = false;
+            this.btDbEdit.IsPressed = false;
             this.btDbEdit.Location = new System.Drawing.Point(193, 159);
             this.btDbEdit.Name = "btDbEdit";
             this.btDbEdit.SetImgSize = new System.Drawing.Size(20, 20);
@@ -853,6 +997,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDbAdd
             // 
             this.btDbAdd.BackGrndImage = null;
+            this.btDbAdd.GreyScaleBackGrndImage = null;
+            this.btDbAdd.IsFocused = false;
+            this.btDbAdd.IsHovered = false;
+            this.btDbAdd.IsPressed = false;
             this.btDbAdd.Location = new System.Drawing.Point(256, 159);
             this.btDbAdd.Name = "btDbAdd";
             this.btDbAdd.SetImgSize = new System.Drawing.Size(20, 20);
@@ -864,6 +1012,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDbDelete
             // 
             this.btDbDelete.BackGrndImage = null;
+            this.btDbDelete.GreyScaleBackGrndImage = null;
+            this.btDbDelete.IsFocused = false;
+            this.btDbDelete.IsHovered = false;
+            this.btDbDelete.IsPressed = false;
             this.btDbDelete.Location = new System.Drawing.Point(321, 159);
             this.btDbDelete.Name = "btDbDelete";
             this.btDbDelete.SetImgSize = new System.Drawing.Size(20, 20);
@@ -876,6 +1028,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btSave.BackGrndImage = null;
+            this.btSave.GreyScaleBackGrndImage = null;
+            this.btSave.IsFocused = false;
+            this.btSave.IsHovered = false;
+            this.btSave.IsPressed = false;
             this.btSave.Location = new System.Drawing.Point(193, 491);
             this.btSave.Name = "btSave";
             this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
@@ -888,6 +1044,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btCancel.BackGrndImage = null;
+            this.btCancel.GreyScaleBackGrndImage = null;
+            this.btCancel.IsFocused = false;
+            this.btCancel.IsHovered = false;
+            this.btCancel.IsPressed = false;
             this.btCancel.Location = new System.Drawing.Point(261, 491);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
@@ -899,6 +1059,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDbCancel
             // 
             this.btDbCancel.BackGrndImage = null;
+            this.btDbCancel.GreyScaleBackGrndImage = null;
+            this.btDbCancel.IsFocused = false;
+            this.btDbCancel.IsHovered = false;
+            this.btDbCancel.IsPressed = false;
             this.btDbCancel.Location = new System.Drawing.Point(261, 159);
             this.btDbCancel.Name = "btDbCancel";
             this.btDbCancel.SetImgSize = new System.Drawing.Size(20, 20);
@@ -910,6 +1074,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDbSave
             // 
             this.btDbSave.BackGrndImage = null;
+            this.btDbSave.GreyScaleBackGrndImage = null;
+            this.btDbSave.IsFocused = false;
+            this.btDbSave.IsHovered = false;
+            this.btDbSave.IsPressed = false;
             this.btDbSave.Location = new System.Drawing.Point(193, 159);
             this.btDbSave.Name = "btDbSave";
             this.btDbSave.SetImgSize = new System.Drawing.Size(20, 20);
@@ -931,15 +1099,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbSuffix
             // 
+            this.cbSuffix.BackGrndImage = null;
+            this.cbSuffix.GreyScaleBackGrndImage = null;
+            this.cbSuffix.IsFocused = false;
+            this.cbSuffix.IsHovered = false;
+            this.cbSuffix.IsPressed = false;
             this.cbSuffix.Location = new System.Drawing.Point(173, 48);
             this.cbSuffix.Name = "cbSuffix";
+            this.cbSuffix.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbSuffix.Size = new System.Drawing.Size(133, 21);
             this.cbSuffix.TabIndex = 140;
             // 
             // cbName
             // 
+            this.cbName.BackGrndImage = null;
+            this.cbName.GreyScaleBackGrndImage = null;
+            this.cbName.IsFocused = false;
+            this.cbName.IsHovered = false;
+            this.cbName.IsPressed = false;
             this.cbName.Location = new System.Drawing.Point(30, 48);
             this.cbName.Name = "cbName";
+            this.cbName.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbName.Size = new System.Drawing.Size(137, 21);
             this.cbName.TabIndex = 141;
             // 
@@ -1042,8 +1222,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel linkurl;
         private YamuiButton btCopy;
         private YamuiLabel yamuiLabel3;
-        private YamuiLabel yamuiLabel5;
-        private YamuiButtonToggle tgCompWithLst;
         private YamuiButton btDbDelete;
         private YamuiButton btDbAdd;
         private YamuiButton btDbEdit;

@@ -1039,7 +1039,7 @@ namespace _3PA.MainFeatures.Parser {
                     if (directiveToken.OwnerNumber > 0)
                         return false;
 
-                    // it marks the beggining of an appbuilder block, it can only be at a root/File level, otherwise flag error
+                    // it marks the beginning of an appbuilder block, it can only be at a root/File level, otherwise flag error
                     if (!(_context.Scope is ParsedFile)) {
                         _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockStart, directiveToken, 0, _parsedIncludes));
                         _context.Scope = _rootScope;

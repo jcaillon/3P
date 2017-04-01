@@ -129,9 +129,11 @@ namespace _3PA.NppCore {
                                 bool insertedText = (nc.modificationType & (int) SciModificationMod.SC_MOD_INSERTTEXT) != 0;
                                 bool undo = (nc.modificationType & (int) SciModificationMod.SC_PERFORMED_UNDO) != 0;
                                 bool redo = (nc.modificationType & (int) SciModificationMod.SC_PERFORMED_REDO) != 0;
+                                bool singleCharModification = false;
 
                                 if ((insertedText || deletedText) && !ScnModifiedDisabled) {
                                     var encoding = Sci.Encoding;
+                                    Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText, encoding); // register line modifications
                                     if (!undo && !redo) {
                                         // if the text has changed
                                         unsafe {
@@ -152,14 +154,12 @@ namespace _3PA.NppCore {
                                                     } else {
                                                         ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position));
                                                     }
+                                                    singleCharModification = true;
                                                 }
                                             }
                                         }
-                                    } else {
-                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnUndoRedo(undo, redo));
                                     }
-                                    Npp.CurrentSci.Lines.OnScnModified(nc, !deletedText, encoding); // register line modifications
-                                    Plug.OnTextModified(nc, insertedText, deletedText);
+                                    ActionsAfterUpdateUi.Enqueue(() => Plug.OnTextModified(nc, insertedText, deletedText, singleCharModification, undo, redo));
                                 }
 
                                 return;

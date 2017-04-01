@@ -599,19 +599,18 @@ namespace _3PA {
         #region OnTextModified
 
         /// <summary>
-        /// Called when the text in scintilla is modified (added/deleted) by the user
+        /// Called when the text in scintilla is modified (added/deleted) by the user (called after UI update)
         /// </summary>
-        public static void OnTextModified(SCNotification nc, bool insertedText, bool deletedText) {
+        public static void OnTextModified(SCNotification nc, bool insertedText, bool deletedText, bool singleCharModification, bool undo, bool redo) {
             ParserHandler.ParseDocumentAsap();
+            if (!singleCharModification) {
+                ClosePopups();
+            }
         }
 
         #endregion
 
         #region Other
-
-        public static void OnUndoRedo(bool undo, bool redo) {
-            ClosePopups();
-        }
 
         /// <summary>
         /// When the user click on the margin
@@ -800,6 +799,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }
