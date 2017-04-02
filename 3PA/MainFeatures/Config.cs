@@ -67,13 +67,13 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.cls,*.dbg,*.df";
+            public string FilesPatternProgress = "*.p,*.i,*.w,*.t,*.cls,*.dbg,*.df";
 
             [Display(Name = "Npp files patterns",
                 Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string NppFilesPattern = "*.txt,*.boi,*.sh,*.cmd,*.xrf,*.lis";
+            public string FilesPatternNppOpenable = "*.txt,*.boi,*.sh,*.cmd,*.xrf,*.lis,*.xml";
 
             [Display(Name = "Path to the help file",
                 Description = "Should point to the progress documentation file (lgrfeng.chm)",
@@ -124,13 +124,37 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of patterns that identify a compilable Progress file<br>It is used to check if you can compile / check syntax / execute the current file<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-            public string CompilableFilesPattern = "*.p,*.w,*.t,*.cls";
+            public string FilesPatternCompilable = "*.p,*.w,*.t,*.cls";
 
             [Display(Name = "Always use a temp directory to compile",
                 Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
             public bool CompileForceUseOfTemp = false;
+
+            [Display(Name = "Compile with debug-list",
+                Description = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileWithDebugList = false;
+
+            [Display(Name = "Compile with xref",
+                Description = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileWithXref = false;
+
+            [Display(Name = "Compile with listing",
+                Description = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileWithListing = false;
+
+            [Display(Name = "Get xref in xml format",
+                Description = "Compile with the XREF-XML option instead of XREF",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileUseXmlXref = false;
 
             public string CompileDirectoriesHistoric = "";
 

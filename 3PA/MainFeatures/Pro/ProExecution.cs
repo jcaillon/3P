@@ -37,6 +37,8 @@ using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
 
+    #region ProExecution
+
     internal abstract class ProExecution {
 
         #region Factory
@@ -51,6 +53,8 @@ namespace _3PA.MainFeatures.Pro {
                     return new ProExecutionRun();
                 case ExecutionType.Prolint:
                     return new ProExecutionProlint();
+                case ExecutionType.GenerateDebugfile:
+                    return new ProExecutionGenerateDebugfile();
                 default:
                     throw new Exception("Factory : the type " + executionType + " does not exist");
             }
@@ -513,7 +517,11 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
         
     }
-    
+
+    #endregion
+
+    #region ProExecutionHandleCompilation
+
     internal abstract class ProExecutionHandleCompilation : ProExecution {
 
         #region Properties
@@ -561,6 +569,14 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region constructors and destructor
+
+        public ProExecutionHandleCompilation() {
+            // set some options
+            CompileWithDebugList = Config.Instance.CompileWithDebugList;
+            CompileWithListing = Config.Instance.CompileWithListing;
+            CompileWithXref = Config.Instance.CompileWithXref;
+            UseXmlXref = Config.Instance.CompileUseXmlXref;
+        }
 
         /// <summary>
         /// Deletes temp directory and everything in it
@@ -795,12 +811,33 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
     }
     
+    #endregion
+
     internal class ProExecutionGenerateDebugfile : ProExecutionHandleCompilation {
+
         public override ExecutionType ExecutionType { get { return ExecutionType.GenerateDebugfile; } }
+
+        public string GeneratedFilePath {
+            get {
+                if (CompileWithListing)
+                    return Files.First().CompOutputLis;
+                if (CompileWithXref)
+                    return Files.First().CompOutputXrf;
+                return Files.First().CompOutputDbg;
+            }
+        }
+
+        public ProExecutionGenerateDebugfile() {
+            CompileWithDebugList = false;
+            CompileWithXref = false;
+            CompileWithListing = false;
+            UseXmlXref = false;
+        }
 
         protected override bool CanUseBatchMode() {
             return true;
         }
+
     }
     
     internal class ProExecutionCheckSyntax : ProExecutionHandleCompilation {

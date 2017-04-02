@@ -37,7 +37,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public DateTime ModifieDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }
         public long Size { get; set; }
-        public FileType Type { get; set; }
+        public FileExt Type { get; set; }
         public FileFlag Flags { get; set; }
         public string SubString { get; set; }
 
@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// The text that describes this item type
         /// </summary>
         public override string ItemTypeText {
-            get { return "Category : <span class='SubTextColor'><b>." + ((FileType) ItemType).ToString().ToLower() + " file</b></span><br><br>"; }
+            get { return "Category : <span class='SubTextColor'><b>." + ((FileExt) ItemType).ToString().ToLower() + " file</b></span><br><br>"; }
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// corresponds to an icon that appends "Type" to the enum name,
     /// for example the icon for R files is named RType.png
     /// </summary>
-    internal enum FileType {
+    internal enum FileExt {
         Unknow,
         Cls,
         Df,

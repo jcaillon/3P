@@ -253,16 +253,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ClsType {
-            get {
-                object obj = ResourceManager.GetObject("ClsType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap CodeExplorer16x16 {
             get {
                 object obj = ResourceManager.GetObject("CodeExplorer16x16", resourceCulture);
@@ -296,6 +286,16 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap CompileCode {
             get {
                 object obj = ResourceManager.GetObject("CompileCode", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CompileOptions {
+            get {
+                object obj = ResourceManager.GetObject("CompileOptions", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -393,16 +393,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DbgType {
-            get {
-                object obj = ResourceManager.GetObject("DbgType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Default {
             get {
                 object obj = ResourceManager.GetObject("Default", resourceCulture);
@@ -483,16 +473,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DfType {
-            get {
-                object obj = ResourceManager.GetObject("DfType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Dictionary {
             get {
                 object obj = ResourceManager.GetObject("Dictionary", resourceCulture);
@@ -536,16 +516,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap DownloadDbOk {
             get {
                 object obj = ResourceManager.GetObject("DownloadDbOk", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DType {
-            get {
-                object obj = ResourceManager.GetObject("DType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -723,6 +693,46 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ExtCls {
+            get {
+                object obj = ResourceManager.GetObject("ExtCls", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtD {
+            get {
+                object obj = ResourceManager.GetObject("ExtD", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtDbg {
+            get {
+                object obj = ResourceManager.GetObject("ExtDbg", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtDf {
+            get {
+                object obj = ResourceManager.GetObject("ExtDf", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Extent {
             get {
                 object obj = ResourceManager.GetObject("Extent", resourceCulture);
@@ -746,6 +756,136 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap ExternalProcedure {
             get {
                 object obj = ResourceManager.GetObject("ExternalProcedure", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtFolder {
+            get {
+                object obj = ResourceManager.GetObject("ExtFolder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtFtp {
+            get {
+                object obj = ResourceManager.GetObject("ExtFtp", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtI {
+            get {
+                object obj = ResourceManager.GetObject("ExtI", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtLis {
+            get {
+                object obj = ResourceManager.GetObject("ExtLis", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtP {
+            get {
+                object obj = ResourceManager.GetObject("ExtP", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtPl {
+            get {
+                object obj = ResourceManager.GetObject("ExtPl", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtR {
+            get {
+                object obj = ResourceManager.GetObject("ExtR", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtT {
+            get {
+                object obj = ResourceManager.GetObject("ExtT", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtUnknow {
+            get {
+                object obj = ResourceManager.GetObject("ExtUnknow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtW {
+            get {
+                object obj = ResourceManager.GetObject("ExtW", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtXml {
+            get {
+                object obj = ResourceManager.GetObject("ExtXml", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtXrf {
+            get {
+                object obj = ResourceManager.GetObject("ExtXrf", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExtZip {
+            get {
+                object obj = ResourceManager.GetObject("ExtZip", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -843,39 +983,9 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FolderType {
-            get {
-                object obj = ResourceManager.GetObject("FolderType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FormatCode {
-            get {
-                object obj = ResourceManager.GetObject("FormatCode", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap FromInclude {
             get {
                 object obj = ResourceManager.GetObject("FromInclude", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FtpType {
-            get {
-                object obj = ResourceManager.GetObject("FtpType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1033,6 +1143,16 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap IndentCode {
+            get {
+                object obj = ResourceManager.GetObject("IndentCode", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Index {
             get {
                 object obj = ResourceManager.GetObject("Index", resourceCulture);
@@ -1066,16 +1186,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap InsertMark {
             get {
                 object obj = ResourceManager.GetObject("InsertMark", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap IType {
-            get {
-                object obj = ResourceManager.GetObject("IType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1126,16 +1236,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap LangWord {
             get {
                 object obj = ResourceManager.GetObject("LangWord", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap LisType {
-            get {
-                object obj = ResourceManager.GetObject("LisType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1543,16 +1643,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap PlType {
-            get {
-                object obj = ResourceManager.GetObject("PlType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Preprocessed {
             get {
                 object obj = ResourceManager.GetObject("Preprocessed", resourceCulture);
@@ -1643,6 +1733,16 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ProgressTools {
+            get {
+                object obj = ResourceManager.GetObject("ProgressTools", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ProlintCode {
             get {
                 object obj = ResourceManager.GetObject("ProlintCode", resourceCulture);
@@ -1666,16 +1766,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap Prototype {
             get {
                 object obj = ResourceManager.GetObject("Prototype", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap PType {
-            get {
-                object obj = ResourceManager.GetObject("PType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1796,16 +1886,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap Root {
             get {
                 object obj = ResourceManager.GetObject("Root", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap RType {
-            get {
-                object obj = ResourceManager.GetObject("RType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2113,16 +2193,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap TType {
-            get {
-                object obj = ResourceManager.GetObject("TType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Turtle {
             get {
                 object obj = ResourceManager.GetObject("Turtle", resourceCulture);
@@ -2146,16 +2216,6 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap UndoUserAction {
             get {
                 object obj = ResourceManager.GetObject("UndoUserAction", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap UnknowType {
-            get {
-                object obj = ResourceManager.GetObject("UnknowType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2243,49 +2303,9 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap WType {
-            get {
-                object obj = ResourceManager.GetObject("WType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap XmlType {
-            get {
-                object obj = ResourceManager.GetObject("XmlType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap XrfType {
-            get {
-                object obj = ResourceManager.GetObject("XrfType", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap XtfrBlock {
             get {
                 object obj = ResourceManager.GetObject("XtfrBlock", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ZipType {
-            get {
-                object obj = ResourceManager.GetObject("ZipType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -472,13 +472,14 @@ namespace YamuiFramework.Controls.YamuiList {
             // handles node expansion
             if (!_isSearching) {
                 var curItem = SelectedItem as FilteredTypeTreeListItem;
-                if (curItem != null && curItem.CanExpand && eventArgs.Button == MouseButtons.Left && eventArgs.Clicks == 1) {
+                if (curItem != null && curItem.CanExpand && eventArgs.Button == MouseButtons.Left) {
                     var widthOfArrow = TreeWidth + NodeExpandClickMargin;
                     for (int i = 0; i <= curItem.Level; i++) {
                         widthOfArrow += TreeWidth;
                     }
                     if (eventArgs.X <= widthOfArrow) {
-                        ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+                        if (eventArgs.Clicks == 1)
+                            ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
                         return;
                     }
                 }

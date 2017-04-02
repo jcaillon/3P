@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 
             // switch link
-            lblCurEnv.LinkClicked += (sender, args) => { AppliMenu.ShowEnvMenuAtCursor(); };
+            lblCurEnv.LinkClicked += (sender, args) => { AppliMenu.ShowEnvMenu(); };
 
             // save
             tooltip.SetToolTip(btSave, "Save the settings for the currently selected profile");
@@ -471,7 +471,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     });
                 } else {
                     if (filesToCompile.Count == 0) {
-                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompilableFilesPattern, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
+                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.FilesPatternCompilable, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
                     }
 
                     // nothing started
@@ -555,7 +555,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             foreach (var path in Config.Instance.CompileDirectoriesHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
                     itemList.Add(new YamuiMenuItem {
-                        ItemImage = ImageResources.FolderType, DisplayText = path, OnClic = item => {
+                        ItemImage = ImageResources.ExtFolder, DisplayText = path, OnClic = item => {
                             if (IsHandleCreated) {
                                 BeginInvoke((Action) delegate {
                                     fl_directory.Text = path;

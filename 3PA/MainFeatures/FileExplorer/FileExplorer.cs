@@ -126,9 +126,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // for each file in the dir
             try {
                 foreach (var fileInfo in dirInfo.GetFiles()) {
-                    FileType fileType;
-                    if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileType))
-                        fileType = FileType.Unknow;
+                    FileExt fileExt;
+                    if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileExt))
+                        fileExt = FileExt.Unknow;
                     output.Add(new FileListItem {
                         DisplayText = fileInfo.Name,
                         BasePath = fileInfo.DirectoryName,
@@ -137,7 +137,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                         Size = fileInfo.Length,
                         CreateDateTime = fileInfo.CreationTime,
                         ModifieDateTime = fileInfo.LastWriteTime,
-                        Type = fileType
+                        Type = fileExt
                     });
                 }
             } catch (Exception e) {
@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                                 FullPath = directoryInfo.FullName,
                                 CreateDateTime = directoryInfo.CreationTime,
                                 ModifieDateTime = directoryInfo.LastWriteTime,
-                                Type = FileType.Folder
+                                Type = FileExt.Folder
                             };
                             output.Add(folderItem);
                             // recursive

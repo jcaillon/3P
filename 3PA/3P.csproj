@@ -257,17 +257,34 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HtmlResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="_Resource\ImageResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ImageResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="_Resource\DependenciesResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>DependenciesResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="_Resource\ImageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ImageResources.resx</DependentUpon>
+    </Compile>
     <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
+    <Content Include="_Resource\Images\FilesExt\ExtCls.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtD.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtDbg.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtDf.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtFolder.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtFtp.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtI.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtLis.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtP.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtPl.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtR.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtT.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtUnknow.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtW.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtXml.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtXrf.png" />
+    <Content Include="_Resource\Images\FilesExt\ExtZip.png" />
     <Content Include="_Resource\Images\Appli\Add.png" />
     <Content Include="_Resource\Images\Appli\Alphabetical_sorting.png" />
     <Content Include="_Resource\Images\Appli\BringToFront.png" />
@@ -330,23 +347,6 @@
     <Content Include="_Resource\Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="_Resource\Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="_Resource\Images\Backgrounds\bg_oss.png" />
-    <Content Include="_Resource\Images\FileTypes\ClsType.png" />
-    <Content Include="_Resource\Images\FileTypes\DbgType.png" />
-    <Content Include="_Resource\Images\FileTypes\DfType.png" />
-    <Content Include="_Resource\Images\FileTypes\DType.png" />
-    <Content Include="_Resource\Images\FileTypes\FolderType.png" />
-    <Content Include="_Resource\Images\FileTypes\FtpType.png" />
-    <Content Include="_Resource\Images\FileTypes\IType.png" />
-    <Content Include="_Resource\Images\FileTypes\LisType.png" />
-    <Content Include="_Resource\Images\FileTypes\PlType.png" />
-    <Content Include="_Resource\Images\FileTypes\PType.png" />
-    <Content Include="_Resource\Images\FileTypes\RType.png" />
-    <Content Include="_Resource\Images\FileTypes\TType.png" />
-    <Content Include="_Resource\Images\FileTypes\UnknowType.png" />
-    <Content Include="_Resource\Images\FileTypes\WType.png" />
-    <Content Include="_Resource\Images\FileTypes\XmlType.png" />
-    <Content Include="_Resource\Images\FileTypes\XrfType.png" />
-    <Content Include="_Resource\Images\FileTypes\ZipType.png" />
     <Content Include="_Resource\Images\Html\getting-started-0.png" />
     <Content Include="_Resource\Images\Html\getting-started-1.png" />
     <Content Include="_Resource\Images\Html\getting-started-2.png" />
@@ -358,6 +358,7 @@
     <Content Include="_Resource\Images\Menu\Autocompletion.png" />
     <Content Include="_Resource\Images\Menu\CheckCode.png" />
     <Content Include="_Resource\Images\Menu\CompileCode.png" />
+    <Content Include="_Resource\Images\Menu\CompileOptions.png" />
     <Content Include="_Resource\Images\Menu\DataAdmin.png" />
     <Content Include="_Resource\Images\Menu\DatabaseTools.png" />
     <Content Include="_Resource\Images\Menu\DataDigger.png" />
@@ -371,7 +372,7 @@
     <Content Include="_Resource\Images\Menu\EnvName.png" />
     <Content Include="_Resource\Images\Menu\EnvSuffix.png" />
     <Content Include="_Resource\Images\Menu\FileInfo.png" />
-    <Content Include="_Resource\Images\Menu\FormatCode.png" />
+    <Content Include="_Resource\Images\Menu\IndentCode.png" />
     <Content Include="_Resource\Images\Menu\GenerateCode.png" />
     <Content Include="_Resource\Images\Menu\Git.png" />
     <Content Include="_Resource\Images\Menu\GoBackward.png" />
@@ -382,6 +383,7 @@
     <Content Include="_Resource\Images\Menu\ModificationTag.png" />
     <Content Include="_Resource\Images\Menu\ProDesktop.png" />
     <Content Include="_Resource\Images\Menu\ProgressHelp.png" />
+    <Content Include="_Resource\Images\Menu\ProgressTools.png" />
     <Content Include="_Resource\Images\Menu\ProlintCode.png" />
     <Content Include="_Resource\Images\Menu\RunCode.png" />
     <Content Include="_Resource\Images\Menu\Search.png" />

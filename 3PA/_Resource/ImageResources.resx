@@ -172,9 +172,6 @@
   <data name="ClearAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\clearall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ClsType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\clstype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Collapse" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\collapse.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -232,9 +229,6 @@
   <data name="Deploy" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\deploy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DfType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\dftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Dictionary" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\menu\dictionary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -246,9 +240,6 @@
   </data>
   <data name="DownloadDbOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\downloaddbok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\dtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Dynamic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\flags\dynamic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -331,17 +322,8 @@
   <data name="Final" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\flags\final.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FolderType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\foldertype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="FormatCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\menu\formatcode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="FromInclude" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\flags\frominclude.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="FtpType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\ftptype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Function" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\function.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -399,9 +381,6 @@
   </data>
   <data name="InsertMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\menu\insertmark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Keyword" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\keyword.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -529,9 +508,6 @@
   <data name="Persistent" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\flags\persistent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PlType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\pltype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Preprocessed" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\preprocessed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -568,9 +544,6 @@
   <data name="Prototype" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\prototype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\ptype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Publish" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\publish.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -603,9 +576,6 @@
   </data>
   <data name="Root" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\root.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\rtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Rules" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\rules.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -694,9 +664,6 @@
   <data name="ToggleComment" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\menu\togglecomment.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="TType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\ttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Turtle" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\menu\turtle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -705,9 +672,6 @@
   </data>
   <data name="UndoUserAction" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\undouseraction.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UnknowType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\unknowtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Unsubscribe" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\unsubscribe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -730,17 +694,8 @@
   <data name="Widget" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\widget.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="WType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\wtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="XmlType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\xmltype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="XtfrBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\xtfrblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ZipType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\ziptype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ZoomIn" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\appli\zoomin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -781,13 +736,64 @@
   <data name="LangFunction" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\parseritem\type\langfunction.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DbgType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\dbgtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ExtCls" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extcls.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="LisType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\listype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ExtD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="XrfType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\filetypes\xrftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ExtDbg" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extdbg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtDf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extdf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extfolder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtFtp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extftp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtI" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\exti.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtLis" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extlis.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtPl" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extpl.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtR" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extr.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extt.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtUnknow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extunknow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtW" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtXml" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extxml.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtXrf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extxrf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExtZip" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\filesext\extzip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IndentCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\menu\indentcode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProgressTools" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\menu\progresstools.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CompileOptions" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\menu\compileoptions.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

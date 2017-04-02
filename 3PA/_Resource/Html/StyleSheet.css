@@ -18,6 +18,10 @@ a:link {
     text-decoration: underline;
 }
 
+.linkSeparator {
+    color: @SubTextFore;
+}
+
 pre {
     background-color: @FormAltBack;
     Font: 12px "Consolas";

@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YamuiFramework.Forms;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
@@ -175,7 +176,7 @@ namespace _3PA.MainFeatures.Pro {
             // try to read all the . and \
 
             // first look in the propath
-            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.ProgressFilesPattern);
+            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.FilesPatternProgress);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one :<br>");
@@ -242,6 +243,43 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
+        #region OpenCompilationOptions
+
+        /// <summary>
+        /// Allow the user to modify the compilation options
+        /// </summary>
+        public static void OpenCompilationOptions() {
+            object input = new CompilationOptions();
+            var res = (CompilationOptions)input;
+            res.CompileWithDebugList = Config.Instance.CompileWithDebugList;
+            res.CompileWithXref = Config.Instance.CompileWithXref;
+            res.CompileWithListing = Config.Instance.CompileWithListing;
+            res.UseXrefXml = Config.Instance.CompileUseXmlXref; 
+            if (UserCommunication.Input(ref input, "Choose the compilation options below", MessageImg.MsgQuestion, "Compilation options", "Set new options") != 0)
+                return;
+            res = (CompilationOptions) input;
+            Config.Instance.CompileWithDebugList = res.CompileWithDebugList;
+            Config.Instance.CompileWithXref = res.CompileWithXref;
+            Config.Instance.CompileWithListing = res.CompileWithListing;
+            Config.Instance.CompileUseXmlXref = res.UseXrefXml;
+        }
+
+        internal class CompilationOptions {
+            [YamuiInput("Compile with DEBUG-LIST option", Order = 0)]
+            public bool CompileWithDebugList{ get; set; }
+
+            [YamuiInput("Compile with LISTING option", Order = 1)]
+            public bool CompileWithListing { get; set; }
+
+            [YamuiInput("Compile with XREF option", Order = 2)]
+            public bool CompileWithXref { get; set; }
+
+            [YamuiInput("Use XREF-XML instead of XREF", Order = 3)]
+            public bool UseXrefXml { get; set; }
+        }
+
+        #endregion
+
         #region Open appbuilder / dictionary / Datadigger etc...
 
         /// <summary>
@@ -274,13 +312,13 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
+        
         #region Single : Compilation, Check syntax, Run, Prolint
 
         /// <summary>
         /// Called to run/compile/check/prolint the current program
         /// </summary>
-        public static void StartProgressExec(ExecutionType executionType) {
+        public static void StartProgressExec(ExecutionType executionType, Action<ProExecutionHandleCompilation> execSetter = null) {
             CurrentOperation currentOperation;
             if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
                 currentOperation = CurrentOperation.Run;
@@ -323,7 +361,12 @@ namespace _3PA.MainFeatures.Pro {
                 new FileToCompile(Npp.CurrentFile.Path)
             };
             FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionEnd = OnSingleExecutionEnd;
-            FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionOk = OnSingleExecutionOk;
+            if (execSetter != null) {
+                execSetter(FilesInfo.CurrentFileInfoObject.ProgressExecution);
+                FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionOk = OnGenerateDebugFileEnd;
+            } else {
+                FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionOk = OnSingleExecutionOk;
+            }
             if (!FilesInfo.CurrentFileInfoObject.ProgressExecution.Do())
                 return;
 
@@ -334,7 +377,7 @@ namespace _3PA.MainFeatures.Pro {
             // clear current errors (updates the current file info)
             FilesInfo.ClearAllErrors(Npp.CurrentFile.Path, true);
         }
-
+        
         /// <summary>
         /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
         /// </summary>
@@ -365,6 +408,23 @@ namespace _3PA.MainFeatures.Pro {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
             }
+        }
+
+
+        private static void OnGenerateDebugFileEnd(ProExecution lastExec) {
+            var exec = (ProExecutionGenerateDebugfile) lastExec;
+            if (!string.IsNullOrEmpty(exec.GeneratedFilePath) && File.Exists(exec.GeneratedFilePath)) {
+                if (exec.CompileWithDebugList) {
+                    //make the .dbg file more readable
+                    var output = new StringBuilder();
+                    Utils.ForEachLine(exec.GeneratedFilePath, new byte[0], (i, line) => {
+                        output.AppendLine(line.Length > 12 ? line.Substring(12) : string.Empty);
+                    });
+                    Utils.FileWriteAllText(exec.GeneratedFilePath, output.ToString());
+                }
+                Npp.Goto(exec.GeneratedFilePath);
+            }
+            OnSingleExecutionOk(lastExec);
         }
 
         /// <summary>

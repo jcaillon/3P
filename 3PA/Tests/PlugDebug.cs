@@ -93,7 +93,7 @@ namespace _3PA.Tests {
             var watch2 = Stopwatch.StartNew();
 
             foreach (var file in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
-                if (file.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) {
+                if (file.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress)) {
                     string outStr = file + " >>> ";
 
                     var watch = Stopwatch.StartNew();

@@ -348,8 +348,10 @@ namespace _3PA.Lib {
         public static bool OpenFileInFolder(string filePath) {
             if (!File.Exists(filePath))
                 return false;
-            string argument = "/select, \"" + filePath + "\"";
-            Process.Start("explorer.exe", argument);
+            if (!Win32Api.OpenFolderAndSelectItem(Path.GetDirectoryName(filePath), filePath)) {
+                string argument = "/select, \"" + filePath + "\"";
+                Process.Start("explorer.exe", argument);
+            }
             return true;
         }
 
@@ -360,8 +362,7 @@ namespace _3PA.Lib {
         public static bool OpenFolder(string folderPath) {
             if (!Directory.Exists(folderPath))
                 return false;
-            string argument = "\"" + folderPath + "\"";
-            Process.Start("explorer.exe", argument);
+            Process.Start(folderPath);
             return true;
         }
 
@@ -376,7 +377,7 @@ namespace _3PA.Lib {
             if (string.IsNullOrEmpty(link)) return false;
             try {
                 // open the file if it has a progress extension or Known extension
-                if ((link.TestAgainstListOfPatterns(Config.Instance.NppFilesPattern) || link.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern)) && File.Exists(link)) {
+                if ((link.TestAgainstListOfPatterns(Config.Instance.FilesPatternNppOpenable) || link.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress)) && File.Exists(link)) {
                     Npp.Goto(link);
                     return true;
                 }
@@ -485,17 +486,17 @@ namespace _3PA.Lib {
         /// <summary>
         /// Allows to know how many files of each file type there is
         /// </summary>
-        public static Dictionary<FileType, int> GetNbFilesPerType(List<string> files) {
-            Dictionary<FileType, int> output = new Dictionary<FileType, int>();
+        public static Dictionary<FileExt, int> GetNbFilesPerType(List<string> files) {
+            Dictionary<FileExt, int> output = new Dictionary<FileExt, int>();
 
             foreach (var file in files) {
-                FileType fileType;
-                if (!Enum.TryParse((Path.GetExtension(file) ?? "").Replace(".", ""), true, out fileType))
-                    fileType = FileType.Unknow;
-                if (output.ContainsKey(fileType))
-                    output[fileType]++;
+                FileExt fileExt;
+                if (!Enum.TryParse((Path.GetExtension(file) ?? "").Replace(".", ""), true, out fileExt))
+                    fileExt = FileExt.Unknow;
+                if (output.ContainsKey(fileExt))
+                    output[fileExt]++;
                 else
-                    output.Add(fileType, 1);
+                    output.Add(fileExt, 1);
             }
 
             return output;
@@ -640,11 +641,11 @@ namespace _3PA.Lib {
         /// </summary>
         public static string GetExtensionImage(string ext, bool exist = false) {
             if (exist)
-                return ext + "Type";
-            FileType fileType;
-            if (!Enum.TryParse(ext, true, out fileType))
-                fileType = FileType.Unknow;
-            return fileType + "Type";
+                return "Ext" + ext;
+            FileExt fileExt;
+            if (!Enum.TryParse(ext, true, out fileExt))
+                fileExt = FileExt.Unknow;
+            return "Ext" + fileExt;
         }
 
         /// <summary>

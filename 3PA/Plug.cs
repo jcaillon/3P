@@ -109,7 +109,7 @@ namespace _3PA {
         internal static void DoFuncItemsNeeded() {
             var cmdIndex = 0;
             AppliMenu.MainMenuCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
+            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", () => AppliMenu.ShowMainMenu(true));
             CodeExplorer.Instance.DockableCommandIndex = cmdIndex;
             Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Instance.Toggle);
             FileExplorer.Instance.DockableCommandIndex = cmdIndex;
@@ -169,14 +169,14 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    CodeExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress));
                 } else if (Config.Instance.CodeExplorerVisible) {
                     CodeExplorer.Instance.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern));
+                    FileExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress));
                 } else if (Config.Instance.FileExplorerVisible) {
                     FileExplorer.Instance.Toggle();
                 }
@@ -306,7 +306,7 @@ namespace _3PA {
                         if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
                             (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
                             (!AutoCompletion.IsVisible || !AutoCompletion.IsMouseIn())) {
-                            AppliMenu.ShowMainMenuAtCursor();
+                            AppliMenu.ShowMainMenu(true);
                             return true;
                         }
                     }

@@ -295,7 +295,7 @@ PROCEDURE pi_compileList PRIVATE:
                     IF lc_lis = "?" THEN ASSIGN lc_lis = ?.
                     IF lc_xrf = "?" THEN ASSIGN lc_xrf = ?.
                     IF lc_dgb = "?" THEN ASSIGN lc_dgb = ?.
-                    IF lc_xrf = ? OR NOT lc_xrf MATCHES "~~.xml" THEN
+                    IF lc_xrf = ? OR NOT lc_xrf MATCHES "*~~.xml" THEN
                         COMPILE VALUE(lc_from)
                             &IF {&ExecutionType} = "GENERATEDEBUGFILE" &THEN
                                 SAVE = FALSE                            

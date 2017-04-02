@@ -71,6 +71,11 @@ namespace YamuiFramework.Forms {
         public int AutocompletionLineHeight { get; set; }
 
         /// <summary>
+        /// If width > 0 then this menu will be centered in this rectangle
+        /// </summary>
+        public Rectangle ParentWindowRectangle { get; set; }
+
+        /// <summary>
         /// List of the item to display in the menu
         /// </summary>
         public List<YamuiMenuItem> MenuList { get; set; }
@@ -244,7 +249,7 @@ namespace YamuiFramework.Forms {
             Size = new Size(maxWidth, height);
 
             // position / size
-            Location = AutocompletionLineHeight != 0 ? GetBestAutocompPosition(SpawnLocation, AutocompletionLineHeight) : GetBestMenuPosition(SpawnLocation);
+            Location = ParentWindowRectangle.Width > 0 ? GetBestCenteredPosition(ParentWindowRectangle) : (AutocompletionLineHeight != 0 ? GetBestAutocompPosition(SpawnLocation, AutocompletionLineHeight) : GetBestMenuPosition(SpawnLocation));
             ResizeFormToFitScreen();
             MinimumSize = Size;
 

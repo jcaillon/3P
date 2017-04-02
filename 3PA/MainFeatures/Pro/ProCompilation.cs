@@ -166,8 +166,11 @@ namespace _3PA.MainFeatures.Pro {
                     OnExecutionFailed = OnExecutionFailed
                 };
 
-                if (RFilesOnly)
+                if (RFilesOnly) {
                     compilationProcess.ProExecutionObject.CompileWithDebugList = false;
+                    compilationProcess.ProExecutionObject.CompileWithXref = false;
+                    compilationProcess.ProExecutionObject.CompileWithListing = false;
+                }
             }
 
             // launch the compile process
@@ -258,7 +261,7 @@ namespace _3PA.MainFeatures.Pro {
                     var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
                     var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
                     if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
-                        line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
+                        line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + file.To.ToHtmlLink() + "</div>");
                     } else if (nbErrors == 0) {
                         line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + Path.GetDirectoryName(file.To).ToHtmlLink(file.To) + "</div>");
                     }

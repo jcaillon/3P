@@ -565,7 +565,10 @@ namespace _3PA.MainFeatures.Pro {
         Compile = 216,
 
         [CurrentOperationAttr(Name = "Executing", ActionText = "executing")]
-        Run = 512
+        Run = 512,
+
+        [CurrentOperationAttr(Name = "Generating file", ActionText = "generating debug files for")]
+        GenerateDebugfile = 1024
     }
 
     /// <summary>

@@ -124,7 +124,7 @@ namespace _3PA.NppCore {
                 set {
                     _path = value;
                     var currentInternalLang = CurrentInternalLangName;
-                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern) || currentInternalLang.Equals("openedgeabl");
+                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress) || currentInternalLang.Equals("openedgeabl");
                     _lang = null;
                 }
             }
@@ -150,7 +150,7 @@ namespace _3PA.NppCore {
             /// Is the file a progress + compilable file?
             /// </summary>
             public bool IsCompilable {
-                get { return Path.TestAgainstListOfPatterns(Config.Instance.CompilableFilesPattern); }
+                get { return Path.TestAgainstListOfPatterns(Config.Instance.FilesPatternCompilable); }
             }
 
             /// <summary>

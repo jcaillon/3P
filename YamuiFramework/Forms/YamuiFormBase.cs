@@ -204,6 +204,13 @@ namespace YamuiFramework.Forms {
         #region Methods
 
         /// <summary>
+        /// Returns the best position for a window centered in another one
+        /// </summary>
+        public Point GetBestCenteredPosition(Rectangle winRect) {
+            return new Point(winRect.X + (winRect.Width / 2 - Width / 2), winRect.Y + (winRect.Height / 2 - Height / 2));
+        }
+
+        /// <summary>
         /// Returns the best position (for the starting position of the form) given the spawn location
         /// (spawn location being the mouse location for a menu for instance)
         /// Example:

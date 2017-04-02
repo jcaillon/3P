@@ -463,7 +463,7 @@ namespace _3PA.MainFeatures.Pro {
             var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
             // case of step 0 (compilation) we list only compilable files
-            var fileExtensionFilter = step == 0 ? Config.Instance.CompilableFilesPattern : "*";
+            var fileExtensionFilter = step == 0 ? Config.Instance.FilesPatternCompilable : "*";
 
             // construct the filters list
             var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();

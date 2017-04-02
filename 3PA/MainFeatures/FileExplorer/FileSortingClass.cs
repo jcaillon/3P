@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (compare != 0) return compare;
 
             // then the folders
-            compare = y.Type.Equals(FileType.Folder).CompareTo(x.Type.Equals(FileType.Folder));
+            compare = y.Type.Equals(FileExt.Folder).CompareTo(x.Type.Equals(FileExt.Folder));
             if (compare != 0) return compare;
 
             // then the non read only

@@ -296,7 +296,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Utils.OpenFileInFolder(curItem.FullPath);
                 else
                     Utils.OpenAnyLink(curItem.FullPath);
-            } else if (e.Clicks >= 2 && !curItem.CanExpand)
+            } else if (e.Clicks >= 2)
                 Utils.OpenAnyLink(curItem.FullPath);
         }
 
@@ -470,7 +470,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtEnvListOnButtonPressed(object sender, EventArgs eventArgs) {
-            AppliMenu.ShowEnvMenuAtCursor();
+            AppliMenu.ShowEnvMenu();
         }
 
         #endregion

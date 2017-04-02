@@ -327,7 +327,22 @@ namespace _3PA.Lib {
         /// <param name="urlName"></param>
         /// <returns></returns>
         public static string ToHtmlLink(this string url, string urlName = null) {
-            return String.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
+            try {
+                if (urlName == null && (File.Exists(url) || Directory.Exists(url))) {
+                    var output = new StringBuilder();
+                    var path = new StringBuilder();
+                    var splitted = url.Split('\\');
+                    for (int i = 0; i < splitted.Length; i++) {
+                        path.Append(splitted[i]);
+                        output.Append(string.Format("<a href='{0}'>{1}</a>{2}", path, splitted[i], i < splitted.Length - 1 ? "<span class='linkSeparator'>\\</span>" : ""));
+                        path.Append("\\");
+                    }
+                    return output.ToString();
+                }
+            } catch (Exception) {
+                // ignored invalid char path
+            }
+            return string.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
         }
 
         /// <summary>

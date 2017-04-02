@@ -27,6 +27,7 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
@@ -39,7 +40,7 @@ using _3PA._Resource;
 namespace _3PA.MainFeatures {
     /// <summary>
     /// This class handle the Main context menu (and its children)
-    /// It also has knownledge of the shortcuts for each item in the menu
+    /// It also has knowledge of the shortcuts for each item in the menu
     /// </summary>
     internal class AppliMenu {
         #region Core
@@ -82,7 +83,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Show a given menu
         /// </summary>
-        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = null, int minWidth = 250) {
+        public static void ShowMenu(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo, bool showAtCursor = false, int minWidth = 250) {
             try {
                 // Close any already opened menu
                 ForceClose();
@@ -99,6 +100,9 @@ namespace _3PA.MainFeatures {
                     DisplayFilterBox = true,
                     FormMinSize = new Size(minWidth, 0)
                 };
+                if (!showAtCursor) {
+                    _popup.ParentWindowRectangle = WinApi.GetWindowRect(Npp.CurrentSci.Handle);
+                }
                 _popup.YamuiList.ShowTreeBranches = Config.Instance.ShowTreeBranches;
                 _popup.ClicItemWrapper = item => {
                     if (item.OnClic != null) {
@@ -119,29 +123,33 @@ namespace _3PA.MainFeatures {
 
         #region Show menus
 
-        public static void ShowMainMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance.MainMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
+        public static void ShowMainMenu(bool showAtCursor = false) {
+            ShowMenu(DisableItemIfNeeded(Instance.MainMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Main menu", null, showAtCursor);
         }
 
-        public static void ShowGenerateCodeMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._generateCodeMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
+        public static void ShowGenerateCodeMenu() {
+            ShowMenu(DisableItemIfNeeded(Instance._generateCodeMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
         }
 
-        public static void ShowDatabaseToolsMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem) item).ToList(), "Database tools", "DatabaseTools");
+        public static void ShowDatabaseToolsMenu() {
+            ShowMenu(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem) item).ToList(), "Database tools", "DatabaseTools");
         }
 
-        public static void ShowEnvMenuAtCursor() {
+        public static void ShowEnvMenu() {
             Instance.RebuildSwitchEnvMenu();
-            ShowMenuAtCursor(Instance._envMenuList.Cast<YamuiMenuItem>().ToList(), "Switch environment", "Env");
+            ShowMenu(Instance._envMenuList.Cast<YamuiMenuItem>().ToList(), "Switch environment", "Env");
         }
 
-        public static void ShowMiscMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Miscellaneous", "Miscellaneous");
+        public static void ShowMiscMenu() {
+            ShowMenu(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Miscellaneous", "Miscellaneous");
         }
 
-        public static void ShowEditCodeMenuAtCursor() {
-            ShowMenuAtCursor(DisableItemIfNeeded(Instance._editCodeList).Select(item => (YamuiMenuItem) item).ToList(), "Edit code", "EditCode");
+        public static void ShowEditCodeMenu() {
+            ShowMenu(DisableItemIfNeeded(Instance._editCodeList).Select(item => (YamuiMenuItem) item).ToList(), "Edit code", "EditCode");
+        }
+
+        public static void ShowProgressToolsMenu() {
+            ShowMenu(DisableItemIfNeeded(Instance._progressTools).Select(item => (YamuiMenuItem) item).ToList(), "Progress tools", "ProgressTools");
         }
 
         /// <summary>
@@ -184,6 +192,8 @@ namespace _3PA.MainFeatures {
 
         private List<MenuItem> _editCodeList;
 
+        private List<MenuItem> _progressTools;
+
         private List<MenuItem> _databaseTools;
 
         private List<MenuItem> _envMenuList;
@@ -196,10 +206,29 @@ namespace _3PA.MainFeatures {
             // List of item that can be assigned to a shortcut
             ShortcutableItemList = new List<MenuItem> {
                 // add the main menu here, so it can appear in the list of shortcut to set
-                new MenuItem(null, "Open main menu", ImageResources.Logo20x20, item => ShowMainMenuAtCursor(), "Show_main_menu_", "Alt+C") {
+                new MenuItem(null, "Open main menu", ImageResources.Logo20x20, item => ShowMainMenu(), "Show_main_menu_", "Alt+C") {
                     Generic = true
                 }
             };
+
+            #region Progress tools
+
+            _progressTools = new List<MenuItem> {
+                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") {Generic = true},
+                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, item => ProMisc.OpenCurrentInAppbuilder(), "Send_appbuilder", "Alt+O"),
+                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(this, "PROLINT code", ImageResources.ProlintCode, item => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Deploy current file", ImageResources.Deploy, item => ProMisc.DeployCurrentFile(), "Deploy", "Ctrl+Alt+Prior") {Generic = true},
+                new MenuItem(this, "Generate DEBUG-LIST", ImageResources.ExtDbg, item => ProMisc.StartProgressExec(ExecutionType.GenerateDebugfile, compilation => compilation.CompileWithDebugList = true), "Generate_debug-list", null),
+                new MenuItem(this, "Generate LISTING", ImageResources.ExtLis, item => ProMisc.StartProgressExec(ExecutionType.GenerateDebugfile, compilation => compilation.CompileWithListing = true), "Generate_listing", null),
+                new MenuItem(this, "Generate XREF", ImageResources.ExtXrf, item => ProMisc.StartProgressExec(ExecutionType.GenerateDebugfile, compilation => compilation.CompileWithXref = true), "Generate_xref", null),
+                new MenuItem(this, "Generate XREF-XML", ImageResources.ExtXml, item => ProMisc.StartProgressExec(ExecutionType.GenerateDebugfile, compilation => {
+                    compilation.CompileWithXref = true;
+                    compilation.UseXmlXref = true;
+                }), "Generate_xrefxml", null),
+            };
+
+            #endregion
 
             #region Generate code
 
@@ -220,7 +249,7 @@ namespace _3PA.MainFeatures {
             _editCodeList = new List<MenuItem> {
                 new MenuItem(this, "Display parser errors", ImageResources.DisplayParserResults, item => ProCodeFormat.DisplayParserErrors(), "Check_parser_errors", null),
                 new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, item => ProMisc.ToggleComment(), "Toggle_Comment", "Ctrl+Q"),
-                new MenuItem(this, "Correct document indentation", ImageResources.FormatCode, item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I")
+                new MenuItem(this, "Correct document indentation", ImageResources.IndentCode, item => ProCodeFormat.CorrectCodeIndentation(), "Reindent_document", "Ctrl+I")
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
             };
 
@@ -264,13 +293,13 @@ namespace _3PA.MainFeatures {
                 new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") {Generic = true},
                 new MenuItem(this, "Check syntax", ImageResources.CheckCode, item => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
-                new MenuItem(this, "Compile", ImageResources.CompileCode, item => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
                 new MenuItem(this, "Run program", ImageResources.RunCode, item => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
-                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, item => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
-                new MenuItem(this, "Deploy current file", ImageResources.Deploy, item => ProMisc.DeployCurrentFile(), "Deploy", "Ctrl+Alt+Prior") {Generic = true},
-                new MenuItem(true) {Generic = true}, // --------------------------
-                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, item => ProMisc.OpenProDesktop(), "Pro_desktop", "") {Generic = true},
-                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, item => ProMisc.OpenCurrentInAppbuilder(), "Send_appbuilder", "Alt+O"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, item => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Compile options", ImageResources.CompileOptions, item => ProMisc.OpenCompilationOptions(), "Compile_options", null),
+                new MenuItem(this, "Progress tools", ImageResources.ProgressTools, item => ShowProgressToolsMenu(), "Progress_tools", "Alt+T") {
+                    Generic = true,
+                    Children = _progressTools.Cast<FilteredTypeTreeListItem>().ToList()
+                },
                 new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Start searching files", ImageResources.Search, item => FileExplorer.FileExplorer.Instance.StartSearch(), "Search_file", "Alt+Q") {Generic = true},
                 goToDefItem,
@@ -279,22 +308,22 @@ namespace _3PA.MainFeatures {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
                 new MenuItem(true) {Generic = true}, // --------------------------
-                new MenuItem(this, "Switch environment", ImageResources.Env, item => ShowEnvMenuAtCursor(), "Switch_env", "Ctrl+E") {
+                new MenuItem(this, "Switch environment", ImageResources.Env, item => ShowEnvMenu(), "Switch_env", "Ctrl+E") {
                     Generic = true
                 },
-                new MenuItem(this, "Database tools", ImageResources.DatabaseTools, item => ShowDatabaseToolsMenuAtCursor(), "DatabaseTools", "Alt+D") {
+                new MenuItem(this, "Database tools", ImageResources.DatabaseTools, item => ShowDatabaseToolsMenu(), "DatabaseTools", "Alt+D") {
                     Generic = true,
                     Children = _databaseTools.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, item => ShowGenerateCodeMenuAtCursor(), "Generate_code", "Alt+Insert") {
+                new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, item => ShowGenerateCodeMenu(), "Generate_code", "Alt+Insert") {
                     Generic = true,
                     Children = _generateCodeMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(this, "Edit code", ImageResources.EditCode, item => ShowEditCodeMenuAtCursor(), "Edit_code", "Alt+E") {
+                new MenuItem(this, "Edit code", ImageResources.EditCode, item => ShowEditCodeMenu(), "Edit_code", "Alt+E") {
                     Generic = true,
                     Children = _editCodeList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, item => ShowMiscMenuAtCursor(), "Miscellaneous", "Alt+M") {
+                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, item => ShowMiscMenu(), "Miscellaneous", "Alt+M") {
                     Generic = true,
                     Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
