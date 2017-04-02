@@ -117,6 +117,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flCmdLine, @"This field can be used if you have special needs when you compile or run a progress program<br>For instance, you can activate the logs when you run a program by setting those parameters :<br><div class='ToolTipcodeSnippet'>-clientlog ""client.log"" - logginglevel ""3"" - logentrytypes ""4GLMessages,4GLTrace,FileID""</div>");
             toolTip.SetToolTip(textbox6, "Path to your server.log file, for a quick access");
 
+            textTool = "The path to a progress program that should be executed before any progress execution<br>(compilation, check syntax and so on...)<br>It can either be an absolute path or a relative path from your PROPATH<br><br><i>You can, for instance, use this program to dynamically connect a database</i>";
+            toolTip.SetToolTip(textbox7, textTool);
+            toolTip.SetToolTip(htmlLabel11, textTool);
+
+            textTool = "The path to a progress program that should be executed after any progress execution<br>(compilation, check syntax and so on...)<br>It can either be an absolute path or a relative path from your PROPATH<br><br><i>You can, for instance, use this program to dynamically disconnect a database</i>";
+            toolTip.SetToolTip(textbox8, textTool);
+            toolTip.SetToolTip(htmlLabel12, textTool);
+
             toolTip.SetToolTip(tgCompLocally, "By default (toggle on), your files will be compiled next to the source code<br>You can also chose to automatically deploy your r-code/.lst automatically when they are compiled (toggle off)<br><br><i>Check the deployment screen to learn how to configure your deployment!</i>");
 
             toolTip.SetToolTip(btEdit, "Click to <b>modify</b> the information for the current environment");
@@ -224,6 +232,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         BaseCompilationPath = textbox4.Text,
                         ProwinPath = textbox5.Text,
                         LogFilePath = textbox6.Text,
+                        PreExecutionProgram = textbox7.Text,
+                        PostExecutionProgram = textbox8.Text,
                         CmdLineParameters = flCmdLine.Text,
                         DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo,
                         CompileLocally = tgCompLocally.Checked
@@ -376,6 +386,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
                         textbox5.Text = ProEnvironment.Current.ProwinPath;
                         textbox6.Text = ProEnvironment.Current.LogFilePath;
+                        textbox7.Text = ProEnvironment.Current.PreExecutionProgram;
+                        textbox8.Text = ProEnvironment.Current.PostExecutionProgram;
 
                         tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
                     }
@@ -639,5 +651,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         #endregion
+        
     }
 }

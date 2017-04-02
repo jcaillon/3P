@@ -3,6 +3,9 @@ Enjoy!
 
 **Improvements :**
 
+- New options for each environment :
+  - You can now choose a progress program that will be executed before each progress execution (like a compilation for instance); this will be useful for users that prefer to dynamically connect databases instead of using a .pf or extra connection info
+  - You can also choose a progress program executer *after* any execution
 - New compilation options (available through a new item in the main menu) : 
   - Generate debug-list
   - Generate xref file

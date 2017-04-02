@@ -30,6 +30,7 @@
     &SCOPED-DEFINE DbConnectionMandatory FALSE
     &SCOPED-DEFINE NotificationOutputPath "postExecution.notif"
     &SCOPED-DEFINE PreExecutionProgram ""
+    &SCOPED-DEFINE PostExecutionProgram ""
 
     &SCOPED-DEFINE CurrentFilePath ""
 
@@ -85,7 +86,12 @@ ASSIGN PROPATH = TRIM({&PropathToUse} + "," + PROPATH, ",").
     IF SEARCH({&PreExecutionProgram}) = ? THEN
         PUT STREAM str_wlog UNFORMATTED "Couldn't find the pre-execution program : " + QUOTER({&PreExecutionProgram}) SKIP.
     ELSE DO:
-        RUN VALUE({&PreExecutionProgram}) NO-ERROR.
+        DO  ON STOP   UNDO, LEAVE
+            ON ERROR  UNDO, LEAVE
+            ON ENDKEY UNDO, LEAVE
+            ON QUIT   UNDO, LEAVE:
+            RUN VALUE({&PreExecutionProgram}) NO-ERROR.
+        END.
         fi_output_last_error().
     END.
 &ENDIF
@@ -164,6 +170,21 @@ OUTPUT STREAM str_wdblog CLOSE.
 
 IF NOT gl_dbKo THEN
     OS-DELETE VALUE({&DbLogPath}).
+
+/* post execution program */
+&IF {&PostExecutionProgram} > "" &THEN
+    IF SEARCH({&PostExecutionProgram}) = ? THEN
+        PUT STREAM str_wlog UNFORMATTED "Couldn't find the post-execution program : " + QUOTER({&PostExecutionProgram}) SKIP.
+    ELSE DO:
+        DO  ON STOP   UNDO, LEAVE
+            ON ERROR  UNDO, LEAVE
+            ON ENDKEY UNDO, LEAVE
+            ON QUIT   UNDO, LEAVE:
+            RUN VALUE({&PostExecutionProgram}) NO-ERROR.
+        END.
+        fi_output_last_error().
+    END.
+&ENDIF
 
 /* Must be QUIT or prowin32.exe opens an empty editor! */
 QUIT.

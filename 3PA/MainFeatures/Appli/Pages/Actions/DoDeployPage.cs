@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 
             // switch link
-            lblCurEnv.LinkClicked += (sender, args) => { AppliMenu.ShowEnvMenu(); };
+            lblCurEnv.LinkClicked += (sender, args) => { AppliMenu.ShowEnvMenu(true); };
 
             // save
             tooltip.SetToolTip(btSave, "Save the settings for the currently selected profile");

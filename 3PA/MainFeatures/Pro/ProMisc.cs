@@ -405,6 +405,8 @@ namespace _3PA.MainFeatures.Pro {
                 var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
+
+                FilesInfo.CurrentFileInfoObject.ProgressExecution = null;
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
             }

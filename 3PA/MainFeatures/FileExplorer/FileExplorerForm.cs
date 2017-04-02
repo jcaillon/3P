@@ -470,7 +470,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtEnvListOnButtonPressed(object sender, EventArgs eventArgs) {
-            AppliMenu.ShowEnvMenu();
+            AppliMenu.ShowEnvMenu(true);
         }
 
         #endregion

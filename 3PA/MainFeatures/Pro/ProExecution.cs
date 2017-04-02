@@ -198,6 +198,7 @@ namespace _3PA.MainFeatures.Pro {
                 {"DbConnectionMandatory", "false"},
                 {"NotificationOutputPath", "\"\""},
                 {"PreExecutionProgram", "\"\""},
+                {"PostExecutionProgram", "\"\""},
                 {"CompilationLogPath", "\"\""},
             };
         }
@@ -281,7 +282,8 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("DbLogPath", _dbLogPath.ProQuoter());
             SetPreprocessedVar("DbConnectionMandatory", NeedDatabaseConnection.ToString());
             SetPreprocessedVar("NotificationOutputPath", _notifPath.ProQuoter());
-            //SetPreprocessedVar("PreExecutionProgram", ""); // TODO: do -------------------------------------
+            SetPreprocessedVar("PreExecutionProgram", ProEnv.PreExecutionProgram.Trim().ProQuoter());
+            SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().ProQuoter());
 
             // prepare the .p runner
             var runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");

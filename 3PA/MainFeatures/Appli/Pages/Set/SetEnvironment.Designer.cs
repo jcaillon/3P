@@ -29,6 +29,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.htmlLabel12 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.btleft8 = new YamuiFramework.Controls.YamuiButtonImage();
+            this.textbox8 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright8 = new YamuiFramework.Controls.YamuiButtonImage();
+            this.htmlLabel11 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.btleft7 = new YamuiFramework.Controls.YamuiButtonImage();
+            this.textbox7 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright7 = new YamuiFramework.Controls.YamuiButtonImage();
             this.htmlLabel10 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -113,6 +121,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel12);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btleft8);
+            this.scrollPanel.ContentPanel.Controls.Add(this.textbox8);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btright8);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel11);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btleft7);
+            this.scrollPanel.ContentPanel.Controls.Add(this.textbox7);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btright7);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel10);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel9);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
@@ -187,6 +203,138 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Name = "scrollPanel";
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
+            // 
+            // htmlLabel12
+            // 
+            this.htmlLabel12.AutoSize = false;
+            this.htmlLabel12.AutoSizeHeightOnly = true;
+            this.htmlLabel12.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel12.BaseStylesheet = null;
+            this.htmlLabel12.IsSelectionEnabled = false;
+            this.htmlLabel12.Location = new System.Drawing.Point(30, 517);
+            this.htmlLabel12.Name = "htmlLabel12";
+            this.htmlLabel12.Size = new System.Drawing.Size(137, 15);
+            this.htmlLabel12.TabIndex = 178;
+            this.htmlLabel12.TabStop = false;
+            this.htmlLabel12.Text = "<b>Post execution program</b>";
+            // 
+            // btleft8
+            // 
+            this.btleft8.BackColor = System.Drawing.Color.Transparent;
+            this.btleft8.BackGrndImage = null;
+            this.btleft8.GreyScaleBackGrndImage = null;
+            this.btleft8.IsFocused = false;
+            this.btleft8.IsHovered = false;
+            this.btleft8.IsPressed = false;
+            this.btleft8.Location = new System.Drawing.Point(170, 517);
+            this.btleft8.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft8.Name = "btleft8";
+            this.btleft8.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btleft8.Size = new System.Drawing.Size(20, 20);
+            this.btleft8.TabIndex = 176;
+            this.btleft8.TabStop = false;
+            this.btleft8.Text = "yamuiImageButton12";
+            // 
+            // textbox8
+            // 
+            this.textbox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox8.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox8.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox8.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox8.Location = new System.Drawing.Point(193, 517);
+            this.textbox8.Name = "textbox8";
+            this.textbox8.Size = new System.Drawing.Size(678, 20);
+            this.textbox8.TabIndex = 179;
+            this.textbox8.Tag = "program file (*.p)|*.p";
+            this.textbox8.WaterMark = null;
+            // 
+            // btright8
+            // 
+            this.btright8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btright8.BackColor = System.Drawing.Color.Transparent;
+            this.btright8.BackGrndImage = null;
+            this.btright8.GreyScaleBackGrndImage = null;
+            this.btright8.IsFocused = false;
+            this.btright8.IsHovered = false;
+            this.btright8.IsPressed = false;
+            this.btright8.Location = new System.Drawing.Point(874, 517);
+            this.btright8.Margin = new System.Windows.Forms.Padding(0);
+            this.btright8.Name = "btright8";
+            this.btright8.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btright8.Size = new System.Drawing.Size(20, 20);
+            this.btright8.TabIndex = 177;
+            this.btright8.TabStop = false;
+            this.btright8.Text = "yamuiImageButton11";
+            // 
+            // htmlLabel11
+            // 
+            this.htmlLabel11.AutoSize = false;
+            this.htmlLabel11.AutoSizeHeightOnly = true;
+            this.htmlLabel11.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel11.BaseStylesheet = null;
+            this.htmlLabel11.IsSelectionEnabled = false;
+            this.htmlLabel11.Location = new System.Drawing.Point(30, 491);
+            this.htmlLabel11.Name = "htmlLabel11";
+            this.htmlLabel11.Size = new System.Drawing.Size(137, 15);
+            this.htmlLabel11.TabIndex = 174;
+            this.htmlLabel11.TabStop = false;
+            this.htmlLabel11.Text = "<b>Pre-execution program</b>";
+            // 
+            // btleft7
+            // 
+            this.btleft7.BackColor = System.Drawing.Color.Transparent;
+            this.btleft7.BackGrndImage = null;
+            this.btleft7.GreyScaleBackGrndImage = null;
+            this.btleft7.IsFocused = false;
+            this.btleft7.IsHovered = false;
+            this.btleft7.IsPressed = false;
+            this.btleft7.Location = new System.Drawing.Point(170, 491);
+            this.btleft7.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft7.Name = "btleft7";
+            this.btleft7.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btleft7.Size = new System.Drawing.Size(20, 20);
+            this.btleft7.TabIndex = 172;
+            this.btleft7.TabStop = false;
+            this.btleft7.Text = "yamuiImageButton12";
+            // 
+            // textbox7
+            // 
+            this.textbox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textbox7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox7.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox7.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox7.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox7.Location = new System.Drawing.Point(193, 491);
+            this.textbox7.Name = "textbox7";
+            this.textbox7.Size = new System.Drawing.Size(678, 20);
+            this.textbox7.TabIndex = 175;
+            this.textbox7.Tag = "program file (*.p)|*.p";
+            this.textbox7.WaterMark = null;
+            // 
+            // btright7
+            // 
+            this.btright7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btright7.BackColor = System.Drawing.Color.Transparent;
+            this.btright7.BackGrndImage = null;
+            this.btright7.GreyScaleBackGrndImage = null;
+            this.btright7.IsFocused = false;
+            this.btright7.IsHovered = false;
+            this.btright7.IsPressed = false;
+            this.btright7.Location = new System.Drawing.Point(874, 491);
+            this.btright7.Margin = new System.Windows.Forms.Padding(0);
+            this.btright7.Name = "btright7";
+            this.btright7.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btright7.Size = new System.Drawing.Size(20, 20);
+            this.btright7.TabIndex = 173;
+            this.btright7.TabStop = false;
+            this.btright7.Text = "yamuiImageButton11";
             // 
             // htmlLabel10
             // 
@@ -909,7 +1057,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDelete.IsFocused = false;
             this.btDelete.IsHovered = false;
             this.btDelete.IsPressed = false;
-            this.btDelete.Location = new System.Drawing.Point(394, 491);
+            this.btDelete.Location = new System.Drawing.Point(394, 543);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDelete.Size = new System.Drawing.Size(70, 24);
@@ -939,7 +1087,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btEdit.IsFocused = false;
             this.btEdit.IsHovered = false;
             this.btEdit.IsPressed = false;
-            this.btEdit.Location = new System.Drawing.Point(193, 491);
+            this.btEdit.Location = new System.Drawing.Point(193, 543);
             this.btEdit.Name = "btEdit";
             this.btEdit.SetImgSize = new System.Drawing.Size(20, 20);
             this.btEdit.Size = new System.Drawing.Size(57, 24);
@@ -955,7 +1103,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btAdd.IsFocused = false;
             this.btAdd.IsHovered = false;
             this.btAdd.IsPressed = false;
-            this.btAdd.Location = new System.Drawing.Point(256, 491);
+            this.btAdd.Location = new System.Drawing.Point(256, 543);
             this.btAdd.Name = "btAdd";
             this.btAdd.SetImgSize = new System.Drawing.Size(20, 20);
             this.btAdd.Size = new System.Drawing.Size(59, 24);
@@ -971,7 +1119,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btCopy.IsFocused = false;
             this.btCopy.IsHovered = false;
             this.btCopy.IsPressed = false;
-            this.btCopy.Location = new System.Drawing.Point(321, 491);
+            this.btCopy.Location = new System.Drawing.Point(321, 543);
             this.btCopy.Name = "btCopy";
             this.btCopy.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCopy.Size = new System.Drawing.Size(67, 24);
@@ -1032,7 +1180,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btSave.IsFocused = false;
             this.btSave.IsHovered = false;
             this.btSave.IsPressed = false;
-            this.btSave.Location = new System.Drawing.Point(193, 491);
+            this.btSave.Location = new System.Drawing.Point(193, 543);
             this.btSave.Name = "btSave";
             this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
             this.btSave.Size = new System.Drawing.Size(62, 24);
@@ -1048,7 +1196,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btCancel.IsFocused = false;
             this.btCancel.IsHovered = false;
             this.btCancel.IsPressed = false;
-            this.btCancel.Location = new System.Drawing.Point(261, 491);
+            this.btCancel.Location = new System.Drawing.Point(261, 543);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCancel.Size = new System.Drawing.Size(71, 24);
@@ -1129,7 +1277,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaLeftButtons.Enabled = false;
             this.areaLeftButtons.Location = new System.Drawing.Point(166, 133);
             this.areaLeftButtons.Name = "areaLeftButtons";
-            this.areaLeftButtons.Size = new System.Drawing.Size(16, 347);
+            this.areaLeftButtons.Size = new System.Drawing.Size(18, 399);
             this.areaLeftButtons.TabIndex = 168;
             this.areaLeftButtons.Visible = false;
             // 
@@ -1141,7 +1289,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaEnv.Enabled = false;
             this.areaEnv.Location = new System.Drawing.Point(3, 185);
             this.areaEnv.Name = "areaEnv";
-            this.areaEnv.Size = new System.Drawing.Size(897, 290);
+            this.areaEnv.Size = new System.Drawing.Size(897, 347);
             this.areaEnv.TabIndex = 165;
             this.areaEnv.Visible = false;
             // 
@@ -1239,5 +1387,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel1;
         private HtmlLabel htmlLabel10;
         private HtmlLabel htmlLabel9;
+        private HtmlLabel htmlLabel12;
+        private YamuiButtonImage btleft8;
+        private YamuiTextBox textbox8;
+        private YamuiButtonImage btright8;
+        private HtmlLabel htmlLabel11;
+        private YamuiButtonImage btleft7;
+        private YamuiTextBox textbox7;
+        private YamuiButtonImage btright7;
     }
 }

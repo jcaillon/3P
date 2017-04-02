@@ -256,7 +256,7 @@ namespace YamuiFramework.Controls.YamuiList {
         #region DrawButtons
 
         /// <summary>
-        /// Overring DrawButtons to add the Type selector buttons
+        /// Overriding DrawButtons to add the Type selector buttons
         /// </summary>
         protected override void DrawButtons() {
             base.DrawButtons();
@@ -316,34 +316,33 @@ namespace YamuiFramework.Controls.YamuiList {
             }
             _typeButtons = tmpDic;
 
-            if (nBut > 0) {
-                // if we have enough space to display the last button, hide the more button
-                if (buttonsToDisplay == _nbDisplayableTypeButton) {
-                    // remove the more button if it exists
-                    if (_moreButton != null) {
-                        if (Controls.Contains(_moreButton))
-                            Controls.Remove(_moreButton);
-                    }
-                } else {
-                    // otherwise, we display a "more button" that opens a small interface to show the extra buttons
-                    if (_moreButton == null) {
-                        _moreButton = new SelectorButton {
-                            BackGrndImage = MoreTypesImage ?? Resources.Resources.More,
-                            Activated = true,
-                            Size = new Size(TypeButtonWidth, DefaultBottomHeight),
-                            TabStop = false,
-                            Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-                            HideFocusedIndicator = true
-                        };
-                        _moreButton.ButtonPressed += HandleMoreTypeClick;
-                        _tooltip.SetToolTip(_moreButton, MoreButtonTooltipText);
-                    }
+            if (nBut > 0 && buttonsToDisplay > _nbDisplayableTypeButton) {
+                // we display a "more button" that opens a small interface to show the extra buttons
+                if (_moreButton == null) {
+                    _moreButton = new SelectorButton {
+                        BackGrndImage = MoreTypesImage ?? Resources.Resources.More,
+                        Activated = true,
+                        Size = new Size(TypeButtonWidth, DefaultBottomHeight),
+                        TabStop = false,
+                        Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                        HideFocusedIndicator = true
+                    };
+                    _moreButton.ButtonPressed += HandleMoreTypeClick;
+                    _tooltip.SetToolTip(_moreButton, MoreButtonTooltipText);
+                }
 
-                    _moreButton.Location = new Point(xPos, Height - BottomHeight/2 - _moreButton.Height/2);
-                    if (!Controls.Contains(_moreButton))
-                        Controls.Add(_moreButton);
+                _moreButton.Location = new Point(xPos, Height - BottomHeight / 2 - _moreButton.Height / 2);
+                if (!Controls.Contains(_moreButton))
+                    Controls.Add(_moreButton);
+            } else {
+                // if we have enough space to display the last button, hide the more button
+                // remove the more button if it exists
+                if (_moreButton != null) {
+                    if (Controls.Contains(_moreButton))
+                        Controls.Remove(_moreButton);
                 }
             }
+        
         }
 
         #endregion

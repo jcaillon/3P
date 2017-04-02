@@ -135,9 +135,9 @@ namespace _3PA.MainFeatures {
             ShowMenu(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem) item).ToList(), "Database tools", "DatabaseTools");
         }
 
-        public static void ShowEnvMenu() {
+        public static void ShowEnvMenu(bool showAtCursor = false) {
             Instance.RebuildSwitchEnvMenu();
-            ShowMenu(Instance._envMenuList.Cast<YamuiMenuItem>().ToList(), "Switch environment", "Env");
+            ShowMenu(Instance._envMenuList.Cast<YamuiMenuItem>().ToList(), "Switch environment", "Env", showAtCursor);
         }
 
         public static void ShowMiscMenu() {

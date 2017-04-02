@@ -77,6 +77,9 @@ namespace _3PA.MainFeatures.Pro {
 
             public bool CompileLocally = true;
 
+            public string PreExecutionProgram = "";
+            public string PostExecutionProgram = "";
+
             #endregion
 
             #region private fields
@@ -122,6 +125,9 @@ namespace _3PA.MainFeatures.Pro {
                 LogFilePath = toCopy.LogFilePath;
 
                 CompileLocally = toCopy.CompileLocally;
+
+                PostExecutionProgram = toCopy.PostExecutionProgram;
+                PreExecutionProgram = toCopy.PreExecutionProgram;
 
                 _currentProPathDirList = toCopy._currentProPathDirList;
 
