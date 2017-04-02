@@ -43,7 +43,7 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            
+            UserCommunication.Notify("fuck");
             MeasureIt(() => { }, "2 : ");
         }
 

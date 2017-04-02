@@ -26,7 +26,7 @@ Enjoy!
   - new option to display (or not) the branches of the tree for the file/code explorer
   - the click to collapse/expand a node now only works on the small arrow area (instead of all the node previously)
   - you can now expand/collapse the file explorer tree view as well as the main menu
-- new options for the deployment :
+- New options for the deployment :
 
 ```
 You can define variables on a line with info separated by tabulations; the format is :

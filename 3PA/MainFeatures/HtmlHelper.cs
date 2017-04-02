@@ -42,16 +42,11 @@ namespace _3PA.MainFeatures {
         /// Returns a formatted html message with a title, subtitle and icon
         /// </summary>
         public static string FormatTitle(MessageImg image, string title, string subtitle, bool forMessageBox = false) {
-            return @"
-            <table style='width: 100%'>
-                <tr>
-                    <td rowspan='2' style='width: 70px'><img src='" + image + @"' width='64' height='64' /></td>
-                    <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
-                </tr>
-                <tr>
-                    <td class='NotificationSubTitle'>" + subtitle + @"</td>
-                </tr>
-            </table>";
+            return 
+                "<div style=\"background-repeat: no-repeat; background-position: left center; background-image: url('" + image + "'); padding-left: 70px; padding-top: 6px; padding-bottom: 6px;\">" + @"
+                    <div class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</div>
+                    <div class='NotificationSubTitle'>" + subtitle + @"</div>
+                </div>";
         }
 
         public static string FormatRow(string describe, string result) {

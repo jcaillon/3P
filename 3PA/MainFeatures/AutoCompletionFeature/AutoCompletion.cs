@@ -848,7 +848,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     foreach (var item in _savedAllItems) {
                         if (filterClass.FilterPredicate(item) && item.DisplayText.Equals(firstKeyword, FilterStringComparison)) {
                             outList.Add(item);
-                            return;
                         }
                     }
                 });

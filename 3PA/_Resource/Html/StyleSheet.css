@@ -76,6 +76,7 @@ code {
 /* ==================================== */
 /* TOOL TIPS */
 
+
 .InfoToolTip {
     background-color: @FormBack;
     color: @FormFore;
@@ -87,6 +88,14 @@ code {
     font-size: 13px;
     background-color: @FormAltBack;
     margin-bottom: 5px;
+}
+.ToolTipCount {
+    background-color: @FormAltBack;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 11px;
+    text-align: right;
+    padding-right: 3px;
 }
 .ToolTipDisplayText {
     font-weight: bold;
@@ -118,14 +127,6 @@ code {
     text-decoration: underline;
     margin-top: 6px;
     margin-bottom: 6px;
-}
-.ToolTipCount {
-    width: 33px;
-    font-weight: bold;
-    font-style: italic;
-    font-size: 11px;
-    text-align: right;
-    padding-right: 3px;
 }
 .ToolTipcodeSnippet {
     background-color: @FormAltBack;

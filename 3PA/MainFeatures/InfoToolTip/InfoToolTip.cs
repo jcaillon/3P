@@ -250,34 +250,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
-            toDisplay.Append(@"
-                <table width='100%' class='ToolTipName'>
-                    <tr style='vertical-align: top;'>
-                    <td>
-                        <table width='100%' style='margin: 0; padding: 0;'>
-                            <tr>
-                                <td rowspan='2' style='width: 25px;'>
-                                    <img src='" + item.Type + @"'>
-                                </td>
-                                <td>
-                                    " + item.DisplayText + @"
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class='ToolTipSubString'>" + item.Type + @"</span>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>");
-            if (_currentCompletionList.Count > 1)
-                toDisplay.Append(@"
-                        <td class='ToolTipCount'>" +
-                                 (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
-                        </td>");
-            toDisplay.Append(@"
-                    </tr>
-                </table>");
+            toDisplay.Append(
+                "<div class='ToolTipName' style=\"background-repeat: no-repeat; background-position: left center; background-image: url('" + item.Type + "'); padding-left: 25px; padding-top: 6px; padding-bottom: 6px;\">" + @"
+                    <div>" + item.DisplayText + @"</div>
+                    <div class='ToolTipSubString'>" + item.Type + @"</div>
+                </div>");
 
             if (item is TableCompletionItem) {
                 popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
@@ -321,6 +298,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (_currentCompletionList.Count > 1)
                 toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char) 242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
             toDisplay.Append("</div>");
+            toDisplay.Append(_currentCompletionList.Count > 1 ? @"<div class='ToolTipCount'>" + (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"</div>" : "");
 
             toDisplay.Append("</div>");
 

@@ -158,6 +158,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// Should return true when the completion item survives the filter
         /// </summary>
         public virtual bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            // check for scope
+            if (ParsedBaseItem != null) {
+                var parsedItem = ParsedBaseItem as ParsedItem;
+                if (parsedItem != null && parsedItem.Scope != null && currentScope != null && !(parsedItem.Scope is ParsedFile)) {
+                    // must be in the right scope!
+                    return parsedItem.Scope.ScopeType == currentScope.ScopeType && parsedItem.Scope.Name.Equals(currentScope.Name);
+                }
+            }
             return true;
         }
 
@@ -310,16 +318,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             // check for scope
-            var output = true;
-            if (currentScope != null && !(ParsedDefine.Scope is ParsedFile)) {
-                output = ParsedDefine.Scope.ScopeType == currentScope.ScopeType;
-                output = output && ParsedDefine.Scope.Name.Equals(currentScope.Name);
-            }
+            if (!base.SurvivesFilter(currentLine, currentScope))
+                return false;
+
             // check for the definition line
             if (currentLine >= 0) {
-                output = output && currentLine >= (ParsedDefine.IncludeLine >= 0 ? ParsedDefine.IncludeLine : ParsedDefine.Line);
+                return currentLine >= (ParsedDefine.IncludeLine >= 0 ? ParsedDefine.IncludeLine : ParsedDefine.Line);
             }
-            return output;
+            return true;
         }
     }
 
@@ -602,15 +608,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             // check for scope
-            var output = true;
-            if (currentScope != null && !(ParsedLabel.Scope is ParsedFile)) {
-                output = ParsedLabel.Scope.ScopeType == currentScope.ScopeType;
-                output = output && ParsedLabel.Scope.Name.Equals(currentScope.Name);
-            }
+            if (!base.SurvivesFilter(currentLine, currentScope))
+                return false;
 
             // check for the definition line
+            var output = true;
             if (currentLine >= 0) {
-                output = output && currentLine >= (ParsedLabel.IncludeLine >= 0 ? ParsedLabel.IncludeLine : ParsedLabel.Line);
+                output = currentLine >= (ParsedLabel.IncludeLine >= 0 ? ParsedLabel.IncludeLine : ParsedLabel.Line);
 
                 // for labels, only display them in the block which they label
                 output = output && currentLine <= ParsedLabel.UndefinedLine;
@@ -649,7 +653,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append(HtmlHelper.FormatRow("Abbreviation of", HtmlHelper.FormatSubString(keyword)));
             }
             string keyToFind = string.Join(" ", DisplayText, KeywordType);
-            ;
 
             // for the keywords define and create, we try to match the second keyword that goes with it
             if (KeywordType == KeywordType.Statement && (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
@@ -690,6 +693,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             return toDisplay.ToString();
         }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
+        }
     }
 
     /// <summary>
@@ -724,6 +731,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override Image ItemTypeImage {
             get { return ImageResources.KeywordObject; }
+        }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
         }
     }
 
@@ -778,6 +789,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         
         public Token OriginToken { get; set; }
 
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
+        }
     }
 
     /// <summary>
@@ -791,6 +805,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override Image ItemTypeImage {
             get { return ImageResources.Word; }
         }
+
     }
 
     /// <summary>
@@ -812,6 +827,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     internal abstract class LangCompletionItem : CompletionItem {
 
         public NppLangs.NppKeyword NppKeyword { get; set; }
+
+        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+            return true;
+        }
     }
 
     /// <summary>
