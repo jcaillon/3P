@@ -138,12 +138,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
                 var exec = new ProExecutionDatabase {
-                    OnExecutionEnd = execution => _isExtracting = false,
-                    OnExecutionOk = ExtractionDoneOk,
                     NeedDatabaseConnection = true
                 };
+                exec.OnExecutionEnd += execution => _isExtracting = false;
+                exec.OnExecutionOk += ExtractionDoneOk;
                 _onExtractionDone = onExtractionDone;
-                _isExtracting = exec.Do();
+                _isExtracting = exec.Start();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }

@@ -408,69 +408,19 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// Reads an error log file, format :
-        /// filepath \t ErrorLevel \t line \t column \t error number \t message \t help
-        /// (column and line can be equals to "?" in that case, they will be forced to 0)
-        /// fromProlint = true allows to set FromProlint to true in the object,
-        /// permutePaths allows to replace a path with another, useful when we compiled from a tempdir but we want the errors
-        /// to appear for the "real" file
+        /// Each time progress files are compiled, we update their respective error list to display them in notepad++ 
         /// </summary>
-        public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fullPath, bool fromProlint, Dictionary<string, string> permutePaths) {
-            var output = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
+        public static void ProExecutionHandleCompilationOnEachCompilationOk(ProExecutionHandleCompilation proExecutionHandleCompilation, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> errorsList, List<FileToDeploy> filesToDeploy) {
 
-            if (!File.Exists(fullPath))
-                return output;
+            // clear errors on each compiled file
+            foreach (var fileToCompile in fileToCompiles) {
+                ClearAllErrors(fileToCompile.InputPath, true);
+            }
 
-            var lastLineNbCouple = new[] {-10, -10};
-
-            Utils.ForEachLine(fullPath, null, (i, line) => {
-                var fields = line.Split('\t').ToList();
-                if (fields.Count == 8) {
-                    // new file
-                    // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
-                    var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
-                    var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
-                    if (!output.ContainsKey(filePath)) {
-                        output.Add(filePath, new List<FileError>());
-                        lastLineNbCouple = new[] {-10, -10};
-                    }
-
-                    ErrorLevel errorLevel;
-                    if (!Enum.TryParse(fields[2], true, out errorLevel))
-                        errorLevel = ErrorLevel.Error;
-
-                    // we store the line/error number couple because we don't want two identical messages to appear
-                    var thisLineNbCouple = new[] {(int) fields[3].ConvertFromStr(typeof(int)), (int) fields[5].ConvertFromStr(typeof(int))};
-
-                    if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
-                        // same line/error number as previously
-                        if (output[filePath].Count > 0) {
-                            var lastFileError = output[filePath].Last();
-                            if (lastFileError != null)
-                                lastFileError.Times = (lastFileError.Times == 0) ? 2 : lastFileError.Times + 1;
-                        }
-                        return;
-                    }
-                    lastLineNbCouple = thisLineNbCouple;
-
-                    var baseFileName = Path.GetFileName(filePath);
-
-                    // add error
-                    output[filePath].Add(new FileError {
-                        SourcePath = filePath,
-                        Level = errorLevel,
-                        Line = Math.Max(0, lastLineNbCouple[0] - 1),
-                        Column = Math.Max(0, (int) fields[4].ConvertFromStr(typeof(int)) - 1),
-                        ErrorNumber = lastLineNbCouple[1],
-                        Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
-                        Help = fields[7].Replace("<br>", "\n").Trim(),
-                        FromProlint = fromProlint,
-                        CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])
-                    });
-                }
-            });
-
-            return output;
+            // update the errors
+            foreach (var keyValue in errorsList) {
+                UpdateFileErrors(keyValue.Key, keyValue.Value);
+            }
         }
 
         #endregion
@@ -487,6 +437,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
+
     }
 
     #region FileInfoObject
@@ -572,28 +523,6 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     /// <summary>
-    /// Errors found for this file, either from compilation or from prolint
-    /// </summary>
-    internal class FileError {
-        public string SourcePath { get; set; }
-        public ErrorLevel Level { get; set; }
-        public int Line { get; set; }
-        public int Column { get; set; }
-        public int ErrorNumber { get; set; }
-        public string Message { get; set; }
-        public string Help { get; set; }
-        public bool FromProlint { get; set; }
-
-        /// <summary>
-        /// indicates if the error appears several times
-        /// </summary>
-        public int Times { get; set; }
-
-        // the path to the file that was compiled to generate this error
-        public string CompiledFilePath { get; set; }
-    }
-
-    /// <summary>
     /// Sort FileError
     /// </summary>
     internal class FileErrorSortingClass : IComparer<FileError> {
@@ -613,30 +542,6 @@ namespace _3PA.MainFeatures.Pro {
             // compare Column
             return y.ErrorNumber.CompareTo(x.ErrorNumber);
         }
-    }
-
-    /// <summary>
-    /// Describes the error level, the num is also used for MARKERS in scintilla
-    /// and thus must start at 0
-    /// </summary>
-    internal enum ErrorLevel {
-        [Description("Error(s), good!")]
-        NoErrors,
-
-        [Description("Info")]
-        Information,
-
-        [Description("Warning(s)")]
-        Warning,
-
-        [Description("Huge warning(s)")]
-        StrongWarning,
-
-        [Description("Error(s)")]
-        Error,
-
-        [Description("Critical error(s)!")]
-        Critical
     }
 
     internal enum ErrorFontWeight {
@@ -668,4 +573,5 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     #endregion
+
 }

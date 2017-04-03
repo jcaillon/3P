@@ -43,34 +43,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
     /// This page is built programatically
     /// </summary>
     internal partial class DoDeployPage : YamuiPage {
+
         #region fields
 
         // Timer that ticks every seconds to update the progress bar
         private Timer _progressTimer;
 
-        // keep track of the current step of the deployment
-        private int _currentStep;
-
-        private int _totalSteps;
-
-        private float _deploymentPercentage;
-
         // proenv copied when clicking on the start button
-        private ProEnvironment.ProEnvironmentObject _proEnv;
-
-        private DeployProfile _currentProfile;
-
-        private Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
-
-        // Stores the current compilation info
-        private ProCompilation _currentCompil;
+        private ProDeployment _proDeployment;
 
         private string _reportExportPath;
 
         // true if the interface has been shown at least once
         private bool _shownOnce;
-
-        private bool _executingHook;
 
         #endregion
 
@@ -247,174 +232,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         #endregion
 
-        #region Build the report
-
-        private void BuildReport() {
-            StringBuilder currentReport = new StringBuilder();
-
-            currentReport.Append(@"<h2 style='margin-top: 8px; margin-bottom: 8px;'>Results :</h2>");
-
-            // the execution ended successfully
-            if (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk) {
-                var listLinesByStep = new Dictionary<int, List<Tuple<int, string>>> {
-                    {0, new List<Tuple<int, string>>()}
-                };
-                var listLinesCompilation = new List<Tuple<int, string>>();
-                StringBuilder line = new StringBuilder();
-
-                var totalDeployedFiles = 0;
-                var nbDeploymentError = 0;
-                var nbCompilationError = 0;
-                var nbCompilationWarning = 0;
-
-                // compiled files
-                foreach (var fileToCompile in _currentCompil.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
-                    var toCompile = fileToCompile;
-                    var errorsOfTheFile = _currentCompil.ErrorsList.Where(error => error.CompiledFilePath.Equals(toCompile.InputPath)).ToList();
-                    bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
-                    bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
-
-                    if (hasError || hasWarning) {
-                        // only add compilation errors
-                        line.Clear();
-                        line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                        line.Append(ProCompilation.FormatCompilationResult(fileToCompile.InputPath, errorsOfTheFile, null));
-                        line.Append("</div>");
-                        listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
-                    }
-
-                    if (hasError) {
-                        nbCompilationError++;
-                        // if compilation errors, delete all transfer records for this file since they obviously didn't happen
-                        _filesToDeployPerStep[0].RemoveAll(move => move.Origin.Equals(toCompile.InputPath));
-                    } else if (hasWarning)
-                        nbCompilationWarning++;
-                }
-
-                // for each deploy step
-                foreach (var kpv in _filesToDeployPerStep) {
-                    // group by transfer type
-                    foreach (var groupType in kpv.Value.GroupBy(deploy => deploy.DeployType).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().DeployType)) {
-                        // group either by directory name or by archive name
-                        var groupDirectory = groupType.First().DeployType <= DeployType.Zip ?
-                            groupType.GroupBy(deploy => deploy.ArchivePath).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().ArchivePath) :
-                            groupType.GroupBy(deploy => Path.GetDirectoryName(deploy.To)).Select(deploys => deploys.ToList()).ToList().OrderBy(list => Path.GetDirectoryName(list.First().To));
-
-                        foreach (var group in groupDirectory) {
-                            var deployFailed = group.Exists(deploy => !deploy.IsOk);
-                            var first = group.First();
-
-                            line.Clear();
-                            line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-
-                            string groupBase;
-                            if (first.DeployType < DeployType.Archive) {
-                                groupBase = first.ArchivePath;
-                                var dirPath = Path.GetDirectoryName(first.TargetDir);
-                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl" : "Zip", true) + "' height='15px'><b>" + groupBase.ToHtmlLink(Path.GetFileName(groupBase)) + "</b> in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", dirPath, dirPath) + "</div>");
-                            } else {
-                                groupBase = Path.GetDirectoryName(first.To);
-                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Ftp ? "Ftp" : "Folder", true) + "' height='15px'><b>" + groupBase.ToHtmlLink() + "</div>");
-                            }
-
-                            foreach (var file in group.OrderBy(deploy => deploy.To)) {
-                                var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
-                                var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
-                                line.Append("<div style='padding-left: 10px'>");
-                                if (file.IsOk) {
-                                    line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + file.To.ToHtmlLink(file.To.Replace(groupBase, "").TrimStart('\\')));
-                                } else {
-                                    line.Append("<img src='Error30x30' height='15px'>Transfer error for " + transferMsg + file.To.Replace(_proEnv.BaseCompilationPath, ""));
-                                }
-                                line.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", Path.GetDirectoryName(file.Origin), file.Origin.Replace(kpv.Key <= 1 ? _proEnv.BaseLocalPath : _proEnv.BaseCompilationPath, "").TrimStart('\\')));
-                                line.Append("</div>");
-                            }
-
-                            line.Append("</div>");
-
-                            if (!listLinesByStep.ContainsKey(kpv.Key))
-                                listLinesByStep.Add(kpv.Key, new List<Tuple<int, string>>());
-
-                            listLinesByStep[kpv.Key].Add(new Tuple<int, string>(deployFailed ? 3 : 1, line.ToString()));
-
-                            if (deployFailed)
-                                nbDeploymentError += group.Count(deploy => !deploy.IsOk);
-                            else
-                                totalDeployedFiles += group.Count;
-                        }
-                    }
-                }
-
-                // compilation
-                currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Compiling <b>" + _currentCompil.NbFilesToCompile + "</b> files : <b>" + Utils.GetNbFilesPerType(_currentCompil.GetListOfFileToCompile.Select(compile => compile.InputPath).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
-
-                // compilation time
-                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
-
-                if (nbCompilationError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
-                if (nbCompilationWarning > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
-                if (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
-
-                // deploy
-                currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Deploying <b>" + totalDeployedFiles + "</b> files : <b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
-
-                // deployment time
-                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the deployment : <b>" + _currentCompil.GetElapsedTime() + @"</b></div>");
-
-                if (nbDeploymentError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>" + nbDeploymentError + " files not deployed</div>");
-                if (totalDeployedFiles - nbDeploymentError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
-
-                // compilation
-                if (listLinesCompilation.Count > 0) {
-                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Compilation error details :</h3>");
-                    var boolAlternate = false;
-                    foreach (var listLine in listLinesCompilation.OrderByDescending(tuple => tuple.Item1)) {
-                        currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
-                        boolAlternate = !boolAlternate;
-                    }
-                }
-
-                // deployment steps
-                foreach (var listLinesKpv in listLinesByStep) {
-                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " :</h3>");
-
-                    var boolAlternate2 = false;
-                    foreach (var listLine in listLinesKpv.Value.OrderByDescending(tuple => tuple.Item1)) {
-                        currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate2 ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
-                        boolAlternate2 = !boolAlternate2;
-                    }
-                }
-            } else {
-                if (_currentCompil.HasBeenCancelled) {
-                    // the process has been cancelled
-                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>The compilation has been cancelled by the user</div>");
-                } else {
-                    // provide info on the possible error!
-                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>At least one process has ended in error, the compilation has been cancelled</div>");
-
-                    if (_currentCompil.CompilationFailedOnMaxUser()) {
-                        currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Help' height='15px'>One or more processes started for this compilation tried to connect to the database and failed because the maximum number of connection has been reached (error 748). To correct this problem, you can either :<br><li>reduce the number of processes to use for each core of your computer</li><li>or increase the maximum of connections for your database (-n parameter in the proserve command)</li></div>");
-                    }
-                    currentReport.Append(@"<div></div>");
-                }
-            }
-
-            UpdateReport(currentReport.ToString());
-        }
-
-        #endregion
-
         #region events
 
         /// <summary>
         /// Start the deployment!
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
+
             SetDataFromFields();
             SaveProfilesList();
 
@@ -436,32 +260,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // start the deployment
             Task.Factory.StartNew(() => {
-                _proEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
-                _currentProfile = new DeployProfile(DeployProfile.Current);
-
-                // new mass compilation
-                _currentCompil = new ProCompilation {
-                    // check if we need to force the compiler to only use 1 process 
-                    // (either because the user want to, or because we have a single user mode database)
-                    MonoProcess = _currentProfile.ForceSingleProcess || _proEnv.IsDatabaseSingleUser(),
-                    NumberOfProcessesPerCore = _currentProfile.NumberProcessPerCore,
-                    RFilesOnly = _currentProfile.OnlyGenerateRcode
+                _proDeployment = new ProDeployment(ProEnvironment.Current, DeployProfile.Current) {
+                    IsTestMode = false,
+                    OnExecutionEnd = OnCompilationEnd
                 };
-                _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
-                var filesToCompile = _proEnv.Deployer.GetFilesList(new List<string> {_currentProfile.SourceDirectory}, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 0);
+                UpdateProgressBar();
 
-                _deploymentPercentage = 0;
-                _currentStep = 0;
-                _totalSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
-                _filesToDeployPerStep.Clear();
+                btCancel.SafeInvoke(button => button.Visible = true);
 
-                if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
-                    UpdateReport("");
-                    UpdateProgressBar();
-
-                    btCancel.SafeInvoke(button => button.Visible = true);
-
+                if (_proDeployment.Start()) {
                     this.SafeInvoke(page => {
                         // start a recurrent event (every second) to update the progression of the compilation
                         _progressTimer = new Timer();
@@ -470,68 +278,33 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         _progressTimer.Start();
                     });
                 } else {
-                    if (filesToCompile.Count == 0) {
-                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.FilesPatternCompilable, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
-                    }
-
                     // nothing started
                     ResetScreen();
                 }
+
             });
         }
 
         // called when the compilation ended
-        private void OnCompilationEnd() {
+        private void OnCompilationEnd(ProDeployment proDeployment) {
             Task.Factory.StartNew(() => {
-                _filesToDeployPerStep.Add(0, _currentCompil.TransferedFiles);
-
-                // if it went ok, move on to deploying files
-                if (_currentCompil.DeploymentDone) {
-                    // hook
-                    ExecuteDeploymentHook();
-
-                    _currentStep++; // move on to step 1
-
-                    // Update the progress bar
-                    UpdateProgressBar();
-
-                    // transfer rules found for this step?
-                    while (_proEnv.Deployer.DeployTransferRules.Exists(rule => rule.Step == _currentStep)) {
-                        _filesToDeployPerStep.Add(_currentStep,
-                            _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> {_currentStep == 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath}, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
-
-                        // hook
-                        ExecuteDeploymentHook();
-
-                        _currentStep++;
-                    }
-                }
-
                 this.SafeInvoke(page => {
-                    // Update the progress bar
-                    progressBar.Progress = 100;
-                    progressBar.Text = @"Generating the report, please wait...";
-
                     // get rid of the timer
                     if (_progressTimer != null) {
                         _progressTimer.Stop();
                         _progressTimer.Dispose();
                         _progressTimer = null;
                     }
-
-                    // create the report and display it
-                    BuildReport();
-
                     ResetScreen();
+                    UpdateReport(_proDeployment.FormatDeploymentReport());
 
                     // notify the user
-                    if (!_currentCompil.HasBeenCancelled)
+                    if (!_proDeployment.HasBeenCancelled) {
                         UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
                             Appli.GoToPage(PageNames.MassCompiler);
                             UserCommunication.CloseUniqueNotif("ReportAvailable");
                         }, Appli.IsFocused() ? 10 : 0);
-
-                    btReport.Visible = true;
+                    }
                 });
             });
         }
@@ -540,11 +313,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// Cancel the current compilation
         /// </summary>
         private void BtCancelOnButtonPressed(object sender, EventArgs eventArgs) {
-            // we can only cancel the compilation part, when the file start to be moved to their destination it's done...
-            if (!_currentCompil.CompilationDone) {
-                btCancel.Visible = false;
-                _currentCompil.CancelCompilation();
-            }
+            btCancel.Visible = false;
         }
 
         /// <summary>
@@ -592,6 +361,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void BtReportOnButtonPressed(object sender, EventArgs eventArgs) {
+
             // report already generated
             if (!string.IsNullOrEmpty(_reportExportPath)) {
                 Utils.OpenAnyLink(_reportExportPath);
@@ -636,92 +406,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
 
         #region private methods
-
-        private void ExecuteDeploymentHook() {
-            // launch the compile process for the current file
-            if (File.Exists(Config.FileDeploymentHook)) {
-                _executingHook = true;
-
-                try {
-                    var hookExec = new ProExecutionDeploymentHook {
-                        DeploymentStep = _currentStep,
-                        DeploymentSourcePath = _currentProfile.SourceDirectory
-                    };
-                    if (hookExec.Do()) {
-                        hookExec.WaitForProcessExit(-1);
-                    }
-                } finally {
-                    _executingHook = false;
-                }
-            }
-        }
-
+        
         // allows to update the progression bar
         private void UpdateProgressBar() {
-            this.SafeInvoke(page => {
-                var elapsedTime = @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
-
-                if (_executingHook) {
-                    progressBar.Progress = 100;
-                    progressBar.Text = @"Executing deployment hook procedure for step " + _currentStep + @"..." + elapsedTime;
-                } else if (_currentStep == 0) {
-                    var progression = _currentCompil.GetOverallProgression();
-
-                    // we represent the progression of the files being moved to the compilation folder in reverse
-                    if (_currentCompil.CompilationDone) {
-                        if (progressBar.Style != ProgressStyle.Reversed) {
-                            progressBar.Style = ProgressStyle.Reversed;
-                            btCancel.Visible = false;
-                        }
-                    } else if (progressBar.Style != ProgressStyle.Normal)
-                        progressBar.Style = ProgressStyle.Normal;
-
-                    progressBar.Text = @"Step 0 / " + _totalSteps + @" ~ " + (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + elapsedTime;
-                    progressBar.Progress = progression;
-                } else {
-                    var neededStyle = _currentStep % 2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
-
-                    if (progressBar.Style != neededStyle) {
-                        progressBar.Style = neededStyle;
-                    }
-
-                    progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + (_deploymentPercentage > 0.01 ? @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" : "Enumerating files to deploy...") + elapsedTime;
-                    progressBar.Progress = _deploymentPercentage;
-                }
+            progressBar.SafeInvoke(bar => {
+                bar.Text = @"Step " + _proDeployment.CurrentStep + @" / " + _proDeployment.TotalNumberOfSteps + @" ~ " + Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (elapsed time = " + _proDeployment.GetElapsedTime() + @")";
+                bar.Progress = _proDeployment.ProgressionPercentage;
             });
         }
 
         // update the report, activates the scroll bars when needed
-        private void UpdateReport(string htmlContent) {
+        private void UpdateReport(string text) {
             this.SafeInvoke(page => {
                 // ensure it's visible 
                 lbl_report.Visible = true;
 
-                lbl_report.Text = @"
-                    <div class='NormalBackColor'>
-                        <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
-                            <tr>
-                                <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report_64x64' width='64' height='64' /></td>
-                                <td class='NotificationTitle'>Deployment report</td>
-                            </tr>
-                            <tr>
-                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='Ok30x30' height='25px'>Done!" : "<img style='padding-right: 2px;' src='Error30x30' height='25px'>An error has occured..."))) + @"</td>
-                            </tr>
-                        </table>         
-                        <h2 style='margin-top: 8px; margin-bottom: 8px;'>Parameters :</h2>       
-                        <div style='margin-left: 8px; margin-right: 8px;'>
-                            <table style='width: 100%' class='NormalBackColor'>
-                                <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (_proEnv.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
-                                <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
-                                <tr><td style='width: 40%; padding-right: 20px'>Source directory :</td><td><b>" + _currentProfile.SourceDirectory.ToHtmlLink() + @"</b></td></tr>
-                                <tr><td style='width: 40%; padding-right: 20px'>Target deployment directory :</td><td><b>" + _proEnv.BaseCompilationPath.ToHtmlLink() + @"</b></td></tr>
-                            </table>           
-                        </div>
-                        " + htmlContent + @"
-                    </div>";
+                lbl_report.Text = text;
 
                 // Activate scrollbars if needed
                 scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;

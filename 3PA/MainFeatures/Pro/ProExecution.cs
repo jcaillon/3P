@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,12 +34,13 @@ using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
 using _3PA._Resource;
 
-// ReSharper disable LocalizableElement
-
 namespace _3PA.MainFeatures.Pro {
-
+    
     #region ProExecution
 
+    /// <summary>
+    /// Base class for all the progress execution (i.e. when we need to start a prowin process and do something)
+    /// </summary>
     internal abstract class ProExecution {
 
         #region Factory
@@ -67,21 +69,40 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// The action to execute just after the end of a prowin process
         /// </summary>
-        public Action<ProExecution> OnExecutionEnd { private get; set; }
+        public event Action<ProExecution> OnExecutionEnd;
 
         /// <summary>
         /// The action to execute at the end of the process if it went well = we found a .log and the database is connected or is not mandatory
         /// </summary>
-        public Action<ProExecution> OnExecutionOk { private get; set; }
+        public event Action<ProExecution> OnExecutionOk;
 
         /// <summary>
         /// The action to execute at the end of the process if something went wrong (no .log or database down)
         /// </summary>
-        public Action<ProExecution> OnExecutionFailed { private get; set; }
+        public event Action<ProExecution> OnExecutionFailed;
+
+        #endregion
+        
+        #region Options
+
+        /// <summary>
+        /// set to true if a valid database connection is mandatory (the compilation will not be done if a db can't be connected
+        /// </summary>
+        public bool NeedDatabaseConnection { get; set; }
+
+        /// <summary>
+        /// Set to true to not use the batch mode
+        /// </summary>
+        public bool NoBatch { get; set; }
 
         #endregion
 
         #region Properties
+        
+        /// <summary>
+        /// Copy of the pro env to use
+        /// </summary>
+        public ProEnvironment.ProEnvironmentObject ProEnv { get; private set; }
 
         /// <summary>
         /// set to true if a the execution process has been killed
@@ -97,16 +118,11 @@ namespace _3PA.MainFeatures.Pro {
         /// Set to true after the process is over if the database connection has failed
         /// </summary>
         public bool ConnectionFailed { get; private set; }
-        
-        /// <summary>
-        /// set to true if a valid database connection is mandatory
-        /// </summary>
-        public bool NeedDatabaseConnection { get; set; }
 
         /// <summary>
-        /// Set to true to not use the batch mode
+        /// Execution type of the current class
         /// </summary>
-        public bool NoBatch { get; set; }
+        public virtual ExecutionType ExecutionType { get { return ExecutionType.CheckSyntax; } }
 
         #endregion
 
@@ -150,18 +166,11 @@ namespace _3PA.MainFeatures.Pro {
 
         protected Process _process;
 
-        /// <summary>
-        /// The pro environment used at the moment the execution was created
-        /// </summary>
-        public ProEnvironment.ProEnvironmentObject ProEnv;
-
         protected bool _useBatchMode;
-
-        public virtual ExecutionType ExecutionType { get { return ExecutionType.CheckSyntax; } }
 
         #endregion
 
-        #region constructors and destructor
+        #region Life and death
 
         /// <summary>
         /// Deletes temp directory and everything in it
@@ -180,10 +189,14 @@ namespace _3PA.MainFeatures.Pro {
             }
         }
 
-        public ProExecution() {
+        /// <summary>
+        /// Construct with the current env
+        /// </summary>
+        public ProExecution() : this (null) {}
 
-            // create a copy of the current environment
-            ProEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
+        public ProExecution(ProEnvironment.ProEnvironmentObject proEnv) {
+
+            ProEnv = proEnv == null ? new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current) : proEnv;
 
             _preprocessedVars = new Dictionary<string, string> {
                 {"LogPath", "\"\""},
@@ -213,7 +226,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Then execute the progress program
         /// </summary>
         /// <returns></returns>
-        public bool Do() {
+        public bool Start() {
 
             // check parameters
             var errorString = CheckParameters();
@@ -246,24 +259,6 @@ namespace _3PA.MainFeatures.Pro {
                 Utils.FileWriteAllText(_tempInifilePath, fileContent, encoding);
             }
 
-            // read .pf file
-            var dbConnectionString = "";
-            if (File.Exists(ProEnv.GetPfPath())) {
-                var connectionString = "";
-                Utils.ForEachLine(ProEnv.GetPfPath(), new byte[0], (nb, line) => {
-                    var commentPos = line.IndexOf("#", StringComparison.CurrentCultureIgnoreCase);
-                    if (commentPos == 0)
-                        return;
-                    if (commentPos > 0)
-                        line = line.Substring(0, commentPos);
-                    line = line.Trim();
-                    if (!string.IsNullOrEmpty(line))
-                        connectionString += " " + line;
-                });
-                dbConnectionString = connectionString;
-            }
-            dbConnectionString += " " + ProEnv.ExtraPf.Trim();
-
             // set common info on the execution
             _processStartDir = _localTempDir;
             _logPath = Path.Combine(_localTempDir, "run.log");
@@ -278,7 +273,7 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("ExecutionType", ExecutionType.ToString().ToUpper().ProQuoter());
             SetPreprocessedVar("LogPath", _logPath.ProQuoter());
             SetPreprocessedVar("propathToUse", _propath.ProQuoter());
-            SetPreprocessedVar("DbConnectString", dbConnectionString.ProQuoter());
+            SetPreprocessedVar("DbConnectString", ProEnv.ConnectionString.ProQuoter());
             SetPreprocessedVar("DbLogPath", _dbLogPath.ProQuoter());
             SetPreprocessedVar("DbConnectionMandatory", NeedDatabaseConnection.ToString());
             SetPreprocessedVar("NotificationOutputPath", _notifPath.ProQuoter());
@@ -417,7 +412,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Start the prowin process with the options defined in this object
         /// </summary>
-        private void StartProcess() {
+        protected virtual void StartProcess() {
             var pInfo = new ProcessStartInfo {
                 FileName = ProEnv.ProwinPath,
                 Arguments = _exeParameters.ToString(),
@@ -439,43 +434,56 @@ namespace _3PA.MainFeatures.Pro {
         /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
-            // end of execution action
-            if (OnExecutionEnd != null) {
-                OnExecutionEnd(this);
-            }
+            try {
 
-            // if log not found then something is messed up!
-            if (string.IsNullOrEmpty(_logPath) || !File.Exists(_logPath)) {
-                UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + " " + _exeParameters + "</div><b>Temporary directory :</b><br>" + _localTempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Progress execution", "Critical error", args => {
-                    if (args.Link.Equals("go")) {
-                        Appli.Appli.GoToPage(PageNames.SetEnvironment);
-                        UserCommunication.CloseUniqueNotif("ExecutionFailed");
-                        args.Handled = true;
-                    }
-                }, 0, 600);
+                // if log not found then something is messed up!
+                if (string.IsNullOrEmpty(_logPath) || !File.Exists(_logPath)) {
+                    UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + " " + _exeParameters + "</div><b>Temporary directory :</b><br>" + _localTempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Progress execution", "Critical error", args => {
+                        if (args.Link.Equals("go")) {
+                            Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                            UserCommunication.CloseUniqueNotif("ExecutionFailed");
+                            args.Handled = true;
+                        }
+                    }, 0, 600);
 
-                ExecutionFailed = true;
-
-            } else {
-                var logContent = Utils.ReadAllText(_logPath, Encoding.Default).Trim();
-                if (!string.IsNullOrEmpty(logContent)) {
-                    UserCommunication.NotifyUnique("ExecutionFailed", "An error occurred in the progress execution, details :<div class='ToolTipcodeSnippet'>" + logContent + "</div>", MessageImg.MsgError, "Progress execution", "Critical error", null, 0, 600);
                     ExecutionFailed = true;
-                }
-            }
 
-            // if this file exists, then the connect statement failed, warn the user
-            if (File.Exists(_dbLogPath) && new FileInfo(_dbLogPath).Length > 0) {
-                UserCommunication.NotifyUnique("ConnectFailed", "Failed to connect to the progress database!<br>Verify / correct the connection info <a href='go'>in the environment page</a> and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the error returned while trying to connect to the database : " + Utils.ReadAndFormatLogToHtml(_dbLogPath), MessageImg.MsgRip, "Database connection", "Connection failed", args => {
-                    if (args.Link.Equals("go")) {
-                        Appli.Appli.GoToPage(PageNames.SetEnvironment);
-                        UserCommunication.CloseUniqueNotif("ConnectFailed");
-                        args.Handled = true;
+                } else if (new FileInfo(_logPath).Length > 0) {
+                    // else if the log isn't empty, something went wrong
+
+                    var logContent = Utils.ReadAllText(_logPath, Encoding.Default).Trim();
+                    if (!string.IsNullOrEmpty(logContent)) {
+                        UserCommunication.NotifyUnique("ExecutionFailed", "An error occurred in the progress execution, details :<div class='ToolTipcodeSnippet'>" + logContent + "</div>", MessageImg.MsgError, "Progress execution", "Critical error", null, 0, 600);
+                        ExecutionFailed = true;
                     }
-                }, NeedDatabaseConnection ? 0 : 10, 600);
+                }
 
-                ConnectionFailed = true;
+                // if the db log file exists, then the connect statement failed, warn the user
+                if (File.Exists(_dbLogPath) && new FileInfo(_dbLogPath).Length > 0) {
+                    UserCommunication.NotifyUnique("ConnectFailed", "Failed to connect to the progress database!<br>Verify / correct the connection info <a href='go'>in the environment page</a> and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the error returned while trying to connect to the database : " + Utils.ReadAndFormatLogToHtml(_dbLogPath), MessageImg.MsgRip, "Database connection", "Connection failed", args => {
+                        if (args.Link.Equals("go")) {
+                            Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                            UserCommunication.CloseUniqueNotif("ConnectFailed");
+                            args.Handled = true;
+                        }
+                    }, NeedDatabaseConnection ? 0 : 10, 600);
+
+                    ConnectionFailed = true;
+                }
+
+                // display a custom post execution notification if needed
+                DisplayPostExecutionNotification();
+
+            } finally {
+
+                PublishExecutionEndEvents();
             }
+        }
+
+        /// <summary>
+        /// publish the end of execution events
+        /// </summary>
+        protected virtual void PublishExecutionEndEvents() {
 
             // end of successful/unsuccessful execution action
             if (ExecutionFailed || (ConnectionFailed && NeedDatabaseConnection)) {
@@ -486,9 +494,11 @@ namespace _3PA.MainFeatures.Pro {
                 if (OnExecutionOk != null) {
                     OnExecutionOk(this);
                 }
+            }
 
-                // display a custom post execution notification if needed
-                DisplayPostExecutionNotification();
+            // end of execution action
+            if (OnExecutionEnd != null) {
+                OnExecutionEnd(this);
             }
         }
 
@@ -526,18 +536,42 @@ namespace _3PA.MainFeatures.Pro {
 
     internal abstract class ProExecutionHandleCompilation : ProExecution {
 
-        #region Properties
+        #region Static events
 
         /// <summary>
-        /// Temp directory located in the deployment dir
+        /// The action to execute at the end of the compilation if it went well
+        /// - the list of all the files that needed to be compiled,
+        /// - the errors for each file compiled (if any)
+        /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
         /// </summary>
-        public string DistantTempDir { get; private set; }
+        public static event Action<ProExecutionHandleCompilation, List<FileToCompile>, Dictionary<string, List<FileError>>, List<FileToDeploy>> OnEachCompilationOk;
+
+        #endregion        
+
+        #region Events
+
+        /// <summary>
+        /// The action to execute at the end of the compilation if it went well. It sends :
+        /// - the list of all the files that needed to be compiled,
+        /// - the errors for each file compiled (if any)
+        /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
+        /// </summary>
+        public event Action<ProExecutionHandleCompilation, List<FileToCompile>, Dictionary<string, List<FileError>>, List<FileToDeploy>> OnCompilationOk;
+
+        #endregion
+
+        #region Options
 
         /// <summary>
         /// List of the files to compile / run / prolint
         /// </summary>
         public List<FileToCompile> Files { get; set; }
-        
+
+        /// <summary>
+        /// If true, don't actually do anything, just test it
+        /// </summary>
+        public bool IsTestMode { get; set; }
+
         public bool CompileWithDebugList { get; set; }
 
         public bool CompileWithListing { get; set; }
@@ -548,14 +582,27 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region private fields
+        #region Properties
 
-        private const string ExtR = ".r";
-        private const string ExtDbg = ".dbg";
-        private const string ExtLis = ".lis";
-        private const string ExtXrf = ".xrf";
-        private const string ExtXrfXml = ".xrf.xml";
-        private const string ExtCls = ".cls";
+        /// <summary>
+        /// Temp directory located in the deployment dir
+        /// </summary>
+        public string DistantTempDir { get; private set; }
+
+        #endregion
+
+        #region Constants
+
+        protected const string ExtR = ".r";
+        protected const string ExtDbg = ".dbg";
+        protected const string ExtLis = ".lis";
+        protected const string ExtXrf = ".xrf";
+        protected const string ExtXrfXml = ".xrf.xml";
+        protected const string ExtCls = ".cls";
+
+        #endregion
+
+        #region private fields
 
         /// <summary>
         /// Path to the file containing the COMPILE output
@@ -572,7 +619,12 @@ namespace _3PA.MainFeatures.Pro {
 
         #region constructors and destructor
 
-        public ProExecutionHandleCompilation() {
+        /// <summary>
+        /// Construct with the current env
+        /// </summary>
+        public ProExecutionHandleCompilation() : this(null) { }
+
+        public ProExecutionHandleCompilation(ProEnvironment.ProEnvironmentObject proEnv) : base(proEnv) {
             // set some options
             CompileWithDebugList = Config.Instance.CompileWithDebugList;
             CompileWithListing = Config.Instance.CompileWithListing;
@@ -598,7 +650,7 @@ namespace _3PA.MainFeatures.Pro {
 
         protected override string CheckParameters() {
             if (ExecutionType == ExecutionType.Compile && !ProEnv.CompileLocally && !Path.IsPathRooted(ProEnv.BaseCompilationPath)) {
-                return "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (string.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>";
+                return "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (String.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>";
             }
             return base.CheckParameters();
         }
@@ -629,7 +681,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // we set where the *.lst and *.r files will be generated by the COMPILE command
                 var baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.CompInputPath);
-                var lastDeployment = ProEnv.Deployer.GetTargetDirsNeededForFile(fileToCompile.InputPath, 0).Last();
+                var lastDeployment = ProEnv.Deployer.GetTargetsNeededForFile(fileToCompile.InputPath, 0).Last();
 
                 // for *.cls files, as many *.r files are generated, we need to compile in a temp directory
                 // we need to know which *.r files were generated for each input file
@@ -642,7 +694,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     // if the deployment dir is not on the same disk as the temp folder, we create a temp dir
                     // as close to the final deployment as possible (= in the deployment base dir!)
-                    if (lastDeployment.DeployType != DeployType.Ftp && !string.IsNullOrEmpty(ProEnv.BaseCompilationPath) && ProEnv.BaseCompilationPath.Length > 2 && !ProEnv.BaseCompilationPath.Substring(0, 2).EqualsCi(_localTempDir.Substring(0, 2))) {
+                    if (lastDeployment.DeployType != DeployType.Ftp && !String.IsNullOrEmpty(ProEnv.BaseCompilationPath) && ProEnv.BaseCompilationPath.Length > 2 && !ProEnv.BaseCompilationPath.Substring(0, 2).EqualsCi(_localTempDir.Substring(0, 2))) {
                         DistantTempDir = Path.Combine(ProEnv.BaseCompilationPath, "~3p-tmp-" + DateTime.Now.ToString("HHmmss") + "-" + Path.GetRandomFileName());
                         if (!Utils.CreateDirectory(DistantTempDir, FileAttributes.Hidden))
                             DistantTempDir = _localTempDir;
@@ -684,10 +736,38 @@ namespace _3PA.MainFeatures.Pro {
 
             return base.SetExecutionInfo();
         }
-
-        protected virtual Dictionary<string, List<FileError>> GetErrorsList(Dictionary<string, string> changePaths) {
-            return FilesInfo.ReadErrorsFromFile(_compilationLog, false, changePaths);
+        
+        /// <summary>
+        /// In test mode, we do as if everything went ok but we don't actually start the process
+        /// </summary>
+        protected override void StartProcess() {
+            if (IsTestMode) {
+                PublishExecutionEndEvents();
+            } else {
+                base.StartProcess();
+            }
         }
+
+        /// <summary>
+        /// Also publish the end of compilation events
+        /// </summary>
+        protected override void PublishExecutionEndEvents() {
+            
+            // end of successful/unsuccessful execution action
+            if (!ExecutionFailed && (!ConnectionFailed || !NeedDatabaseConnection)) {
+
+                if (OnCompilationOk != null) {
+                    OnCompilationOk(this, Files, LoadErrorLog(), ListFilesToDeploy());
+                }
+
+                if (OnEachCompilationOk != null) {
+                    OnEachCompilationOk(this, Files, LoadErrorLog(), ListFilesToDeploy());
+                }
+            }            
+
+            base.PublishExecutionEndEvents();
+        }
+
 
         #endregion
 
@@ -696,17 +776,30 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Number of files already treated
         /// </summary>
-        public long NbFilesTreated {
+        public int NbFilesTreated {
             get {
-                return File.Exists(_progressionFilePath) ? (new FileInfo(_progressionFilePath)).Length : 0;
+                return unchecked((int) (File.Exists(_progressionFilePath) ? (new FileInfo(_progressionFilePath)).Length : 0));
             }
+        }
+
+        #endregion
+
+        #region Private
+
+        /// <summary>
+        /// Creates a list of files to deploy after a compilation,
+        /// for each Origin file will correspond one (or more if it's a .cls) .r file,
+        /// and one .lst if the option has been checked
+        /// </summary>
+        protected virtual List<FileToDeploy> ListFilesToDeploy() {
+            return null;
         }
 
         /// <summary>
         /// Read the compilation/prolint errors of a given execution through its .log file
         /// update the FilesInfo accordingly so the user can see the errors in npp
         /// </summary>
-        public Dictionary<string, List<FileError>> LoadErrorLog() {
+        private Dictionary<string, List<FileError>> LoadErrorLog() {
 
             // we need to correct the files path in the log if needed
             var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
@@ -718,29 +811,237 @@ namespace _3PA.MainFeatures.Pro {
             // read the log file
             Dictionary<string, List<FileError>> errorsList = GetErrorsList(changePaths);
 
-            // clear errors on each compiled file
-            foreach (var fileToCompile in Files) {
-                FilesInfo.ClearAllErrors(fileToCompile.InputPath, true);
-            }
-
-            // update the errors
-            foreach (var keyValue in errorsList) {
-                FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
-            }
-
             return errorsList;
         }
 
-        #endregion
+        protected virtual Dictionary<string, List<FileError>> GetErrorsList(Dictionary<string, string> changePaths) {
+            return ReadErrorsFromFile(_compilationLog, false, changePaths);
+        }
 
-        #region CreateListOfFilesToDeploy
+        /// <summary>
+        /// Reads an error log file, format :
+        /// filepath \t ErrorLevel \t line \t column \t error number \t message \t help
+        /// (column and line can be equals to "?" in that case, they will be forced to 0)
+        /// fromProlint = true allows to set FromProlint to true in the object,
+        /// permutePaths allows to replace a path with another, useful when we compiled from a tempdir but we want the errors
+        /// to appear for the "real" file
+        /// </summary>
+        protected static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fullPath, bool fromProlint, Dictionary<string, string> permutePaths) {
+
+            var output = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
+
+            if (!File.Exists(fullPath))
+                return output;
+
+            var lastLineNbCouple = new[] { -10, -10 };
+
+            Utils.ForEachLine(fullPath, null, (i, line) => {
+                var fields = line.Split('\t').ToList();
+                if (fields.Count == 8) {
+                    // new file
+                    // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
+                    var compilerFailPath = String.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
+                    var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
+                    if (!output.ContainsKey(filePath)) {
+                        output.Add(filePath, new List<FileError>());
+                        lastLineNbCouple = new[] { -10, -10 };
+                    }
+
+                    ErrorLevel errorLevel;
+                    if (!Enum.TryParse(fields[2], true, out errorLevel))
+                        errorLevel = ErrorLevel.Error;
+
+                    // we store the line/error number couple because we don't want two identical messages to appear
+                    var thisLineNbCouple = new[] { (int)fields[3].ConvertFromStr(typeof(int)), (int)fields[5].ConvertFromStr(typeof(int)) };
+
+                    if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
+                        // same line/error number as previously
+                        if (output[filePath].Count > 0) {
+                            var lastFileError = output[filePath].Last();
+                            if (lastFileError != null)
+                                lastFileError.Times = (lastFileError.Times == 0) ? 2 : lastFileError.Times + 1;
+                        }
+                        return;
+                    }
+                    lastLineNbCouple = thisLineNbCouple;
+
+                    var baseFileName = Path.GetFileName(filePath);
+
+                    // add error
+                    output[filePath].Add(new FileError {
+                        SourcePath = filePath,
+                        Level = errorLevel,
+                        Line = Math.Max(0, lastLineNbCouple[0] - 1),
+                        Column = Math.Max(0, (int)fields[4].ConvertFromStr(typeof(int)) - 1),
+                        ErrorNumber = lastLineNbCouple[1],
+                        Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
+                        Help = fields[7].Replace("<br>", "\n").Trim(),
+                        FromProlint = fromProlint,
+                        CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])
+                    });
+                }
+            });
+
+            return output;
+        }
+
+        #endregion
+    }
+    
+    #region FileToCompile
+
+    internal class FileToCompile {
+        // stores the path
+        public string InputPath { get; set; }
+
+        // stores temporary path used during the compilation
+        public string CompInputPath { get; set; }
+        public string CompOutputDir { get; set; }
+        public string CompOutputR { get; set; }
+        public string CompOutputXrf { get; set; }
+        public string CompOutputLis { get; set; }
+        public string CompOutputDbg { get; set; }
+
+        public string BaseFileName { get; private set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public FileToCompile(string inputPath) {
+            InputPath = inputPath;
+            BaseFileName = Path.GetFileNameWithoutExtension(inputPath);
+        }
+    }
+
+    #endregion
+
+    #region FileError
+
+    /// <summary>
+    /// Errors found for this file, either from compilation or from prolint
+    /// </summary>
+    internal class FileError {
+
+        /// <summary>
+        /// Path of the file in which we found the error
+        /// </summary>
+        public string SourcePath { get; set; }
+        public ErrorLevel Level { get; set; }
+        public int Line { get; set; }
+        public int Column { get; set; }
+        public int ErrorNumber { get; set; }
+        public string Message { get; set; }
+        public string Help { get; set; }
+        public bool FromProlint { get; set; }
+
+        /// <summary>
+        /// indicates if the error appears several times
+        /// </summary>
+        public int Times { get; set; }
+
+        /// <summary>
+        /// The path to the file that was compiled to generate this error (you can compile a .p and have the error on a .i)
+        /// </summary>
+        public string CompiledFilePath { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the error level, the num is also used for MARKERS in scintilla
+    /// and thus must start at 0
+    /// </summary>
+    internal enum ErrorLevel {
+        [Description("Error(s), good!")]
+        NoErrors,
+        
+        [Description("Info")]
+        Information,
+
+        [Description("Warning(s)")]
+        Warning,
+
+        [Description("Huge warning(s)")]
+        StrongWarning,
+
+        [Description("Error(s)")]
+        Error,
+
+        [Description("Critical error(s)!")]
+        Critical
+    }
+
+    #endregion
+
+    #endregion
+
+    #region ProExecutionGenerateDebugfile
+
+    internal class ProExecutionGenerateDebugfile : ProExecutionHandleCompilation {
+
+        public override ExecutionType ExecutionType { get { return ExecutionType.GenerateDebugfile; } }
+
+        public string GeneratedFilePath {
+            get {
+                if (CompileWithListing)
+                    return Files.First().CompOutputLis;
+                if (CompileWithXref)
+                    return Files.First().CompOutputXrf;
+                return Files.First().CompOutputDbg;
+            }
+        }
+
+        public ProExecutionGenerateDebugfile() {
+            CompileWithDebugList = false;
+            CompileWithXref = false;
+            CompileWithListing = false;
+            UseXmlXref = false;
+        }
+
+        protected override bool CanUseBatchMode() {
+            return true;
+        }
+
+    }
+
+    #endregion
+
+    #region ProExecutionCheckSyntax
+
+    internal class ProExecutionCheckSyntax : ProExecutionHandleCompilation {
+        public override ExecutionType ExecutionType { get { return ExecutionType.CheckSyntax; } }
+
+        protected override bool CanUseBatchMode() {
+            return true;
+        }
+    }
+
+    #endregion
+
+    #region ProExecutionCompile
+
+    internal class ProExecutionCompile : ProExecutionHandleCompilation {
+
+        /// <summary>
+        /// Construct with the current env
+        /// </summary>
+        public ProExecutionCompile() : this(null) {}
+
+        public ProExecutionCompile(ProEnvironment.ProEnvironmentObject proEnv) : base(proEnv) {}
+
+        public override ExecutionType ExecutionType { get { return ExecutionType.Compile; } }
+
+        protected override string CheckParameters() {
+            if (!ProEnv.CompileLocally && !Path.IsPathRooted(ProEnv.BaseCompilationPath)) {
+                return "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (string.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>";
+            }
+            return base.CheckParameters();
+        }
 
         /// <summary>
         /// Creates a list of files to deploy after a compilation,
         /// for each Origin file will correspond one (or more if it's a .cls) .r file,
         /// and one .lst if the option has been checked
         /// </summary>
-        public List<FileToDeploy> CreateListOfFilesToDeploy() {
+        protected override List<FileToDeploy> ListFilesToDeploy() {
 
             var outputList = new List<FileToDeploy>();
             var clsNotFound = new StringBuilder();
@@ -757,10 +1058,10 @@ namespace _3PA.MainFeatures.Pro {
                             var relativePath = rCodeFile.Replace(compiledFile.CompOutputDir, "").TrimStart('\\');
                             var sourcePath = ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ExtCls));
 
-                            if (string.IsNullOrEmpty(sourcePath)) {
+                            if (String.IsNullOrEmpty(sourcePath)) {
                                 clsNotFound.Append("<div>" + relativePath + "</div>");
                             } else {
-                                foreach (var deployNeeded in ProEnv.Deployer.GetTargetDirsNeededForFile(sourcePath, 0)) {
+                                foreach (var deployNeeded in ProEnv.Deployer.GetTargetsNeededForFile(sourcePath, 0)) {
                                     string outputRPath;
 
                                     if (ProEnv.CompileLocally) {
@@ -789,7 +1090,7 @@ namespace _3PA.MainFeatures.Pro {
                         ErrorHandler.LogError(e);
                     }
                 } else {
-                    foreach (var deployNeeded in ProEnv.Deployer.GetTargetDirsNeededForFile(compiledFile.InputPath, 0)) {
+                    foreach (var deployNeeded in ProEnv.Deployer.GetTargetsNeededForFile(compiledFile.InputPath, 0)) {
 
                         // add .r and .lst (if needed) to the list of files to deploy
                         outputList.Add(deployNeeded.Set(compiledFile.InputPath, compiledFile.CompOutputR, Path.Combine(deployNeeded.TargetDir, compiledFile.BaseFileName + ExtR)));
@@ -810,61 +1111,14 @@ namespace _3PA.MainFeatures.Pro {
             return outputList;
         }
 
-        #endregion
+        protected override bool CanUseBatchMode() {
+            return true;
+        }
     }
-    
+
     #endregion
 
-    internal class ProExecutionGenerateDebugfile : ProExecutionHandleCompilation {
-
-        public override ExecutionType ExecutionType { get { return ExecutionType.GenerateDebugfile; } }
-
-        public string GeneratedFilePath {
-            get {
-                if (CompileWithListing)
-                    return Files.First().CompOutputLis;
-                if (CompileWithXref)
-                    return Files.First().CompOutputXrf;
-                return Files.First().CompOutputDbg;
-            }
-        }
-
-        public ProExecutionGenerateDebugfile() {
-            CompileWithDebugList = false;
-            CompileWithXref = false;
-            CompileWithListing = false;
-            UseXmlXref = false;
-        }
-
-        protected override bool CanUseBatchMode() {
-            return true;
-        }
-
-    }
-    
-    internal class ProExecutionCheckSyntax : ProExecutionHandleCompilation {
-        public override ExecutionType ExecutionType { get { return ExecutionType.CheckSyntax; } }
-
-        protected override bool CanUseBatchMode() {
-            return true;
-        }
-    }
-    
-    internal class ProExecutionCompile : ProExecutionHandleCompilation {
-
-        public override ExecutionType ExecutionType { get { return ExecutionType.Compile; } }
-
-        protected override string CheckParameters() {
-            if (!ProEnv.CompileLocally && !Path.IsPathRooted(ProEnv.BaseCompilationPath)) {
-                return "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (string.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>";
-            }
-            return base.CheckParameters();
-        }
-
-        protected override bool CanUseBatchMode() {
-            return true;
-        }
-    }
+    #region ProExecutionRun
 
     internal class ProExecutionRun : ProExecutionHandleCompilation {
 
@@ -893,6 +1147,10 @@ namespace _3PA.MainFeatures.Pro {
         }
 
     }
+
+    #endregion
+
+    #region ProExecutionProlint
 
     internal class ProExecutionProlint : ProExecutionHandleCompilation {
 
@@ -937,9 +1195,13 @@ namespace _3PA.MainFeatures.Pro {
             var treatedFile = Files.First();
             if (!changePaths.ContainsKey(treatedFile.CompInputPath))
                 changePaths.Add(treatedFile.CompInputPath, treatedFile.InputPath);
-            return FilesInfo.ReadErrorsFromFile(_prolintOutputPath, true, changePaths);
+            return ReadErrorsFromFile(_prolintOutputPath, true, changePaths);
         }
     }
+
+    #endregion
+
+    #region ProExecutionDatabase
 
     internal class ProExecutionDatabase : ProExecution {
 
@@ -965,6 +1227,10 @@ namespace _3PA.MainFeatures.Pro {
         }
     }
 
+    #endregion
+
+    #region ProExecutionAppbuilder
+
     internal class ProExecutionAppbuilder : ProExecution {
 
         public override ExecutionType ExecutionType { get { return ExecutionType.Appbuilder; } }
@@ -979,9 +1245,17 @@ namespace _3PA.MainFeatures.Pro {
         }
     }
 
+    #endregion
+
+    #region ProExecutionDictionary
+
     internal class ProExecutionDictionary : ProExecution {
         public override ExecutionType ExecutionType { get { return ExecutionType.Dictionary; } }
     }
+
+    #endregion
+
+    #region ProExecutionDataDigger
 
     internal class ProExecutionDataDigger : ProExecution {
         public override ExecutionType ExecutionType { get { return ExecutionType.DataDigger; } }
@@ -1023,19 +1297,42 @@ namespace _3PA.MainFeatures.Pro {
         }
     }
 
+    #endregion
+
+    #region ProExecutionDataReader
+
     internal class ProExecutionDataReader : ProExecutionDataDigger {
         public override ExecutionType ExecutionType { get { return ExecutionType.DataReader; } }
     }
+
+    #endregion
+
+    #region ProExecutionDbAdmin
 
     internal class ProExecutionDbAdmin : ProExecution {
         public override ExecutionType ExecutionType { get { return ExecutionType.DbAdmin; } }
     }
 
+    #endregion
+
+    #region ProExecutionProDesktop
+
     internal class ProExecutionProDesktop : ProExecution {
         public override ExecutionType ExecutionType { get { return ExecutionType.ProDesktop; } }
     }
 
+    #endregion
+
+    #region ProExecutionDeploymentHook
+
     internal class ProExecutionDeploymentHook : ProExecution {
+
+        /// <summary>
+        /// Construct with the current env
+        /// </summary>
+        public ProExecutionDeploymentHook() : this(null) { }
+
+        public ProExecutionDeploymentHook(ProEnvironment.ProEnvironmentObject proEnv) : base(proEnv) { }
 
         public override ExecutionType ExecutionType { get { return ExecutionType.DeploymentHook; } }
 
@@ -1061,6 +1358,10 @@ namespace _3PA.MainFeatures.Pro {
         public int DeploymentStep { get; set; }
     }
 
+    #endregion
+
+    #region ExecutionType
+
     internal enum ExecutionType {
         CheckSyntax = 0,
         Compile = 1,
@@ -1078,26 +1379,6 @@ namespace _3PA.MainFeatures.Pro {
         DeploymentHook = 17
     }
 
-    internal class FileToCompile {
-        // stores the path
-        public string InputPath { get; set; }
+    #endregion
 
-        // stores temporary path used during the compilation
-        public string CompInputPath { get; set; }
-        public string CompOutputDir { get; set; }
-        public string CompOutputR { get; set; }
-        public string CompOutputXrf { get; set; }
-        public string CompOutputLis { get; set; }
-        public string CompOutputDbg { get; set; }
-
-        public string BaseFileName { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public FileToCompile(string inputPath) {
-            InputPath = inputPath;
-            BaseFileName = Path.GetFileNameWithoutExtension(inputPath);
-        }
-    }
 }

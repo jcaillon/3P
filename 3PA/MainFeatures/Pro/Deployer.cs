@@ -388,11 +388,11 @@ namespace _3PA.MainFeatures.Pro {
         #region public methods
 
         /// <summary>
-        /// This method returns the transfer directories for the given source path, for each :
+        /// This method returns the target directories (or pl, zip or ftp) for the given source path, for each :
         /// If CompileLocally, returns the directory of the source
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
         /// </summary>
-        public List<FileToDeploy> GetTargetDirsNeededForFile(string sourcePath, int step) {
+        public List<FileToDeploy> GetTargetsNeededForFile(string sourcePath, int step) {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && _compileLocally)
@@ -426,10 +426,13 @@ namespace _3PA.MainFeatures.Pro {
 
             // nothing matched?
             if (outList.Count == 0) {
+
                 // for the compilation, move to deployment directory
                 if (step == 0)
                     outList.Add(new FileToDeploy(_deploymentDirectory, DeployType.Move, true));
+
             } else {
+
                 var lastDeploy = outList.LastOrDefault();
                 if (lastDeploy != null) {
                     // flag last deploy
@@ -450,7 +453,7 @@ namespace _3PA.MainFeatures.Pro {
         public List<FileToDeploy> GetTransfersNeededForFile(string file, int step) {
             var fileName = Path.GetFileName(file);
             if (fileName != null)
-                return GetTargetDirsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
+                return GetTargetsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
             return new List<FileToDeploy>();
         }
 

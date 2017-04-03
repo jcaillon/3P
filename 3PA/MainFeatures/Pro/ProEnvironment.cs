@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using _3PA.Lib;
@@ -137,7 +138,7 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            #region Handle pf
+            #region Handle connection string
 
             /// <summary>
             /// Returns the currently selected database's .pf for the current environment
@@ -173,6 +174,41 @@ namespace _3PA.MainFeatures.Pro {
                     return true;
                 }
                 return false;
+            }
+
+            /// <summary>
+            /// Returns the database connection string (complete with .pf + extra)
+            /// </summary>
+            public string ConnectionString {
+                get {
+                    var connectionString = new StringBuilder();
+                    if (File.Exists(GetPfPath())) {
+                        Utils.ForEachLine(GetPfPath(), new byte[0], (nb, line) => {
+                            var commentPos = line.IndexOf("#", StringComparison.CurrentCultureIgnoreCase);
+                            if (commentPos == 0)
+                                return;
+                            if (commentPos > 0)
+                                line = line.Substring(0, commentPos);
+                            line = line.Trim();
+                            if (!string.IsNullOrEmpty(line)) {
+                                connectionString.Append(" ");
+                                connectionString.Append(line);
+                            }
+                        });
+                        connectionString.Append(" ");
+                    }
+                    connectionString.Append(ExtraPf.Trim());
+                    return connectionString.ToString().Replace("\n", " ").Replace("\r", "");
+                }
+            }
+            
+            /// <summary>
+            /// Use this method to know if the CONNECT define for the current environment connects the database in
+            /// single user mode (returns false if not or if no database connection is set)
+            /// </summary>
+            /// <returns></returns>
+            public bool IsDatabaseSingleUser {
+                get { return ConnectionString.RegexMatch(@"\s-1", RegexOptions.Singleline); }
             }
 
             #endregion
@@ -329,11 +365,15 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Deploy
 
+            public string DeploymentRulesFilePath {
+                get { return Config.FileDeploymentRules; }
+            }
+
             /// <summary>
-            /// The deployer for this environment
+            /// The deployer for this environment (can either be a new one, or a copy of this proenv is, itself, a copy)
             /// </summary>
             public Deployer Deployer {
-                get { return _deployer != null ? _deployer : new Deployer(Config.FileDeploymentRules, this); }
+                get { return _deployer != null ? _deployer : new Deployer(DeploymentRulesFilePath, this); }
             }
 
             #endregion
@@ -347,31 +387,12 @@ namespace _3PA.MainFeatures.Pro {
                 get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
 
-            /// <summary>
-            /// Use this method to know if the CONNECT define for the current environment connects the database in
-            /// single user mode (returns false if not or if no database connection is set)
-            /// </summary>
-            /// <returns></returns>
-            public bool IsDatabaseSingleUser() {
-                bool singleUserMode = false;
-
-                if (!string.IsNullOrEmpty(ExtraPf)) {
-                    if (ExtraPf.RegexMatch(@"\s-1", RegexOptions.Singleline))
-                        singleUserMode = true;
-                }
-
-                if (!string.IsNullOrEmpty(GetPfPath()) && File.Exists(GetPfPath())) {
-                    if (Utils.ReadAllText(GetPfPath()).RegexMatch(@"\s-1", RegexOptions.Singleline))
-                        singleUserMode = true;
-                }
-
-                return singleUserMode;
-            }
-
             #endregion
         }
 
         #endregion
+
+        #region Static
 
         #region events
 
@@ -506,5 +527,8 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
+
+        #endregion
+
     }
 }

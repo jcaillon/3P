@@ -41,6 +41,7 @@ using _3PA._Resource;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
+
     /// <summary>
     /// The entry points for this plugin are the following :<br></br>
     /// - Main (through UnmanagedExports)<br></br>
@@ -49,6 +50,7 @@ namespace _3PA {
     /// - OnKeyDown<br></br>
     /// </summary>
     internal static class Plug {
+
         #region events
 
         /// <summary>
@@ -207,6 +209,8 @@ namespace _3PA {
             ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
             ParserHandler.OnEnd += CodeExplorer.Instance.OnParseEnd;
 
+            ProExecutionHandleCompilation.OnEachCompilationOk += FilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
+
             // Clear the %temp% directory if we didn't do it properly last time
             Utils.DeleteDirectory(Config.FolderTemp, true);
 
@@ -259,6 +263,8 @@ namespace _3PA {
                 ParserHandler.OnEndSendParserItems -= CodeExplorer.Instance.OnParseEndParserItems;
                 ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
                 ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
+
+                ProExecutionHandleCompilation.OnEachCompilationOk -= FilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
 
                 // export modified conf
                 FileTag.Export();
@@ -799,5 +805,6 @@ namespace _3PA {
         }
 
         #endregion
+
     }
 }
