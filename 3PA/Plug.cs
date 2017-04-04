@@ -159,16 +159,6 @@ namespace _3PA {
                 } else
                     Config.Instance.NppOutdatedVersion = false;
 
-                // Check if an update has been done and start checking for new updates
-                UpdateHandler.CheckForUpdateDone();
-                UpdateHandler.StartCheckingForUpdate(); // async
-
-                // Try to update the configuration from the distant shared folder
-                ShareExportConf.StartCheckingForUpdates();
-
-                // ReSharper disable once ObjectCreationAsStatement
-                RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
-
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress));
@@ -217,11 +207,26 @@ namespace _3PA {
             //Snippets.Init();
             FileTag.Import();
 
+            // ask to disable the default autocompletion
+            DelayedAction.StartNew(100, () => {
+                Npp.ConfXml.AskToDisableAutocompletion();
+
+                // check if an update was done 
+                UpdateHandler.CheckForUpdateDone();
+            });
+
+            // start checking for new updates
+            UpdateHandler.StartCheckingForUpdate(); // async
+
+            // Try to update the configuration from the distant shared folder
+            ShareExportConf.StartCheckingForUpdates();
+
+            // ReSharper disable once ObjectCreationAsStatement
+            RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
+
             // Make sure to give the focus to scintilla on startup
             Sci.GrabFocus();
 
-            // ask to disable the default autocompletion
-            DelayedAction.StartNew(100, Npp.ConfXml.AskToDisableAutocompletion);
         }
 
         #endregion
