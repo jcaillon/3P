@@ -219,6 +219,17 @@ namespace _3PA.MainFeatures.Parser {
     #region procedural classes
 
     /// <summary>
+    /// A simple word parsed in the file
+    /// </summary>
+    internal class ParsedWord : ParsedScopeItem {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedWord(string name, Token token) : base(name, token, ParsedScopeType.Root) { }
+    }
+
+    /// <summary>
     /// The "root" scope of a file
     /// </summary>
     internal class ParsedFile : ParsedScopeItem {

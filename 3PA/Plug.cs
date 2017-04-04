@@ -639,9 +639,6 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnSciDwellStart() {
-            if (!Npp.CurrentFile.IsProgress)
-                return;
-
             if (WinApi.GetForegroundWindow() == Npp.Handle)
                 InfoToolTip.ShowToolTipFromDwell();
         }

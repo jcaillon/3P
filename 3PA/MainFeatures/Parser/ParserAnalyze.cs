@@ -1558,8 +1558,8 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         // read the file name
-                        if (token is TokenWord) {
-                            fileName += token.Value;
+                        if (token is TokenWord || token is TokenString) {
+                            fileName += GetTokenStrippedValue(token);
                             state++;
                         }
                         break;

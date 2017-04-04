@@ -266,9 +266,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     });
                                 }
 
-                                _keywords.Add(new NppKeyword(keyword) {
+                                _keywords.Add(new NppKeywordApis(keyword, this) {
                                     Overloads = overloads,
-                                    Origin = NppKeywordOrigin.AutoCompApiXml
+                                    Origin = NppKeywordOrigin.Api
                                 });
                             }
                         }
@@ -298,8 +298,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                     foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
-                                            _keywords.Add(new NppKeyword(keyword) {
-                                                Origin = NppKeywordOrigin.UserLangXml
+                                            _keywords.Add(new NppKeywordUserLangs(keyword, this) {
+                                                Origin = NppKeywordOrigin.UserLangs
                                             });
                                         }
                                     }
@@ -318,8 +318,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                                 foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
                                     if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                         uniqueKeywords.Add(keyword);
-                                        _keywords.Add(new NppKeyword(keyword) {
-                                            Origin = NppKeywordOrigin.LangsXml
+                                        _keywords.Add(new NppKeywordLangs(keyword, this) {
+                                            Origin = NppKeywordOrigin.Langs
                                         });
                                     }
                                 }
@@ -364,7 +364,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             public string Value { get; set; }
 
             public NppKeywordOrigin Origin { get; set; }
+
             public List<NppOverload> Overloads { get; set; }
+
+            public LangDescription Lang { get; private set; }
 
             internal class NppOverload {
                 public string Description { get; set; }
@@ -372,15 +375,44 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 public List<string> Params { get; set; }
             }
 
-            public NppKeyword(string value) {
+            public NppKeyword(string value, LangDescription langDescription) {
                 Value = value;
+                Lang = langDescription;
+            }
+
+            public virtual string OriginFile {
+                get { return ""; }
+            }
+        }
+
+        internal class NppKeywordLangs : NppKeyword {
+            public NppKeywordLangs(string value, LangDescription langDescription) : base(value, langDescription) {}
+
+            public override string OriginFile {
+                get { return Npp.ConfXml.FileNppLangsXml; }
+            }
+        }
+
+        internal class NppKeywordUserLangs : NppKeyword {
+            public NppKeywordUserLangs(string value, LangDescription langDescription) : base(value, langDescription) { }
+
+            public override string OriginFile {
+                get { return Npp.ConfXml.FileNppUserDefinedLang; }
+            }
+        }
+
+        internal class NppKeywordApis : NppKeyword {
+            public NppKeywordApis(string value, LangDescription langDescription) : base(value, langDescription) { }
+
+            public override string OriginFile {
+                get { return Path.Combine(Npp.FolderNppAutocompApis, Lang.LangName + ".xml"); }
             }
         }
 
         internal enum NppKeywordOrigin {
-            LangsXml,
-            UserLangXml,
-            AutoCompApiXml
+            Langs,
+            UserLangs,
+            Api
         }
 
         #endregion

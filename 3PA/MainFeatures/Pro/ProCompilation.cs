@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures.Pro {
         /// total number of processes used
         /// </summary>
         public int TotalNumberOfProcesses {
-            get { return _processes != null ? _processes.Count : 0; }
+            get { return _processes.Count; }
         }
 
         /// <summary>
@@ -162,6 +162,27 @@ namespace _3PA.MainFeatures.Pro {
             }
         }
 
+        /// <summary>
+        /// List of all the files that needed to be compiled (should be used after the execution)
+        /// </summary>
+        public List<FileToCompile> ListFilesToCompile {
+            get { return _listFilesToCompile; }
+        }
+
+        /// <summary>
+        /// List of all the compilation errors found (should be used after the execution)
+        /// </summary>
+        public Dictionary<string, List<FileError>> ListErrors {
+            get { return _listErrors; }
+        }
+
+        /// <summary>
+        /// List of all the files that need to be deployed after the compilation (should be used after the execution)
+        /// </summary>
+        public List<FileToDeploy> ListFilesToDeploy {
+            get { return _listFilesToDeploy; }
+        }
+
         #endregion
 
         #region private fields
@@ -202,35 +223,32 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Compiles the list of files given
         /// </summary>
-        public bool CompileFiles(HashSet<string> filesToCompile) {
+        public bool CompileFiles(List<FileToCompile> filesToCompile) {
+
+            if (filesToCompile == null || filesToCompile.Count == 0) {
+                EndOfCompilation();
+                return true;
+            }
 
             // init
             StartingTime = DateTime.Now;
             NbFilesToCompile = filesToCompile.Count;
 
             // now we do a list of those files, sorted from the biggest (in size) to the smallest file
-            var sizeFileList = new List<ProCompilationFile>();
-            foreach (var filePath in filesToCompile) {
-                var fileInfo = new FileInfo(filePath);
-                sizeFileList.Add(new ProCompilationFile {
-                    Path = filePath,
-                    Size = fileInfo.Length
-                });
-            }
-            sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
+            filesToCompile.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all those files in a fair way among the Prowin processes we will create...
             var numberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
 
             var fileLists = new List<List<FileToCompile>>();
             var currentProcess = 0;
-            foreach (var file in sizeFileList) {
+            foreach (var file in filesToCompile) {
                 // create a new process when needed
                 if (currentProcess >= fileLists.Count)
                     fileLists.Add(new List<FileToCompile>());
 
                 // assign the file to the current process
-                fileLists[currentProcess].Add(new FileToCompile(file.Path));
+                fileLists[currentProcess].Add(file);
 
                 // we will assign the next file to the next process...
                 currentProcess++;
@@ -386,13 +404,5 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region internal structure
-
-        private struct ProCompilationFile {
-            public string Path { get; set; }
-            public long Size { get; set; }
-        }
-
-        #endregion
     }
 }

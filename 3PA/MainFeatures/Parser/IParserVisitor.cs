@@ -23,6 +23,7 @@
 namespace _3PA.MainFeatures.Parser {
     internal interface IParserVisitor {
         void PreVisit(Parser parser);
+        void Visit(ParsedWord pars);
         void Visit(ParsedFile pars);
         void Visit(ParsedPreProcBlock pars);
         void Visit(ParsedImplementation pars);

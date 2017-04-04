@@ -244,7 +244,6 @@ namespace _3PA.NppCore {
                             case (uint) NppNotif.NPPN_LANGCHANGED:
                                 // on lang type changed
                                 NppBufferActivated();
-                                UserCommunication.Notify("lang changed " + Npp.CurrentInternalLangName);
                                 return;
 
                             case (uint) NppNotif.NPPN_WORDSTYLESUPDATED:

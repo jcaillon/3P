@@ -782,10 +782,12 @@ namespace YamuiFramework.HtmlRenderer.Core.Core {
                     }
                 } else {
                     if (!string.IsNullOrEmpty(link.HrefLink) && Directory.Exists(link.HrefLink)) {
-                        Process.Start("explorer.exe", "\"" + link.HrefLink + "\"");
+                        Process.Start(link.HrefLink);
                     } else {
                         if (!string.IsNullOrEmpty(link.HrefLink) && File.Exists(link.HrefLink)) {
-                            var process = new ProcessStartInfo(link.HrefLink) {UseShellExecute = true};
+                            var process = new ProcessStartInfo(link.HrefLink) {
+                                UseShellExecute = true
+                            };
                             Process.Start(process);
                         } else {
                             if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link.HrefLink).Success) {

@@ -130,7 +130,7 @@ namespace _3PA.MainFeatures.Parser {
 
                         } else {
                             var textLexer = new TextLexer(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars);
-                            var textVisitor = new TextLexerVisitor() {
+                            var textVisitor = new TextLexerVisitor(_lastFilePathParsed) {
                                 IgnoreNumbers = Config.Instance.NppAutoCompleteIgnoreNumbers,
                                 MinWordLengthRequired = Config.Instance.NppAutoCompleteMinWordLengthRequired,
                                 KnownWords = KnownWords != null ? new HashSet<string>(KnownWords, AutoCompletion.ParserStringComparer) : new HashSet<string>(AutoCompletion.ParserStringComparer)

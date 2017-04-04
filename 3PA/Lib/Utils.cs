@@ -28,7 +28,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Cryptography;
@@ -37,7 +36,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.FileExplorer;
@@ -183,7 +181,7 @@ namespace _3PA.Lib {
             try {
                 if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                     return true;
-                Directory.Delete(path, true);
+                Directory.Delete(path, recursive);
             } catch (Exception e) {
                 UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink() + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
                 return false;
@@ -770,128 +768,5 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region Wrapper around FtpsClient
-
-        private static Dictionary<string, FtpsClient> _ftpClients = new Dictionary<string, FtpsClient>();
-
-        /// <summary>
-        /// Sends a file to a ftp(s) server : EASY MODE, connects, create the directories...
-        /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
-        /// </summary>
-        public static bool SendFileToFtp(string localFilePath, string ftpUri) {
-            if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
-                return false;
-
-            try {
-                // parse our uri
-                var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
-                var match = regex.Match(ftpUri.Replace("\\", "/"));
-                if (!match.Success)
-                    return false;
-
-                var serverUri = match.Groups[1].Value;
-                var distantPath = match.Groups[6].Value;
-                string userName = null;
-                string passWord = null;
-                string server;
-                int port;
-                if (!string.IsNullOrEmpty(match.Groups[4].Value)) {
-                    userName = match.Groups[2].Value;
-                    passWord = match.Groups[3].Value.Trim(':');
-                    server = match.Groups[4].Value.Trim('@');
-                    if (!int.TryParse(match.Groups[5].Value.Trim(':'), out port))
-                        port = -1;
-                } else {
-                    server = match.Groups[2].Value;
-                    if (!int.TryParse(match.Groups[3].Value.Trim(':'), out port))
-                        port = -1;
-                }
-
-                FtpsClient ftp;
-                if (!_ftpClients.ContainsKey(serverUri))
-                    _ftpClients.Add(serverUri, new FtpsClient());
-                ftp = _ftpClients[serverUri];
-
-                // try to connect!
-                if (!ftp.Connected) {
-                    if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
-                        return false;
-                }
-
-                // dispose of the ftp on shutdown
-                Plug.OnShutDown += DisconnectFtp;
-
-                try {
-                    ftp.PutFile(localFilePath, distantPath);
-                } catch (Exception) {
-                    // might be disconnected??
-                    try {
-                        ftp.GetCurrentDirectory();
-                    } catch (Exception) {
-                        if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
-                            return false;
-                    }
-                    try {
-                        // try to create the directory and then push the file again
-                        ftp.MakeDir((Path.GetDirectoryName(distantPath) ?? "").Replace('\\', '/'), true);
-                        ftp.PutFile(localFilePath, distantPath);
-                    } catch (Exception e) {
-                        if (!IsSpamming(serverUri, 2000, true))
-                            ErrorHandler.ShowErrors(e, "Error sending a file! " + e.Message);
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error sending a file to FTP");
-            }
-
-            return true;
-        }
-
-        public static bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port, string serverUri) {
-            NetworkCredential credential = null;
-            if (!string.IsNullOrEmpty(userName))
-                credential = new NetworkCredential(userName, passWord);
-
-            var modes = new List<EsslSupportMode>();
-            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add((EsslSupportMode) l); });
-
-            ftp.DataConnectionMode = EDataConnectionMode.Passive;
-            while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {
-                foreach (var mode in modes.OrderByDescending(mode => mode)) {
-                    try {
-                        var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
-                        ftp.Connect(server, curPort, credential, mode, 1800);
-                        ftp.Connected = true;
-                        break;
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-                ftp.DataConnectionMode = EDataConnectionMode.Active;
-            }
-
-            // failed?
-            if (!ftp.Connected) {
-                if (!IsSpamming(serverUri, 2000, true)) {
-                    UserCommunication.Notify(string.Format(@"Failed to connect to the FTP server!<br><br>The connexion used was:
-                            <br>- Username : {0}
-                            <br>- Password : {1}
-                            <br>- Host : {2}
-                            <br>- Port : {3}
-                            ", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port), MessageImg.MsgError, "Ftp connexion", "Failed");
-                }
-                return false;
-            }
-            return true;
-        }
-
-        private static void DisconnectFtp() {
-            foreach (var ftpsClient in _ftpClients) {
-                ftpsClient.Value.Close();
-            }
-            _ftpClients.Clear();
-        }
-
-        #endregion
     }
 }

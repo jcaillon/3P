@@ -117,6 +117,7 @@ namespace _3PA.MainFeatures.Pro {
         /// caret. At last, it tries to find a file in the propath
         /// </summary>
         public static void GoToDefinition(bool fromMouseClick) {
+
             // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
             if (InfoToolTip.InfoToolTip.IsVisible) {
                 if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
@@ -194,10 +195,6 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             UserCommunication.Notify("Sorry, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "Information", "Failed to find an origin", 5);
-        }
-
-        public static void GoToDefinition() {
-            GoToDefinition(false);
         }
 
         #endregion
@@ -312,8 +309,10 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-        
+
         #region Single : Compilation, Check syntax, Run, Prolint
+
+        private static bool _dontWarnAboutRCode;
 
         /// <summary>
         /// Called to run/compile/check/prolint the current program
@@ -343,6 +342,16 @@ namespace _3PA.MainFeatures.Pro {
             if (!Npp.CurrentFile.IsCompilable) {
                 UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Npp.CurrentFile.Path).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
+            }
+                    
+            // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
+            if (executionType == ExecutionType.Run && !_dontWarnAboutRCode) {
+                if (File.Exists(Path.ChangeExtension(Npp.CurrentFile.Path, ".r"))) {
+                    UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Progress execution", "An Rcode hides the program", args => {
+                        _dontWarnAboutRCode = true;
+                        UserCommunication.CloseUniqueNotif("rcodehide");
+                    }, 5);
+                }
             }
 
             // update function prototypes

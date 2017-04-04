@@ -144,8 +144,13 @@ namespace _3PA.MainFeatures.Pro {
             /// Returns the currently selected database's .pf for the current environment
             /// </summary>
             public string GetPfPath() {
-                return (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) ? DbConnectionInfo[CurrentDb] :
-                    string.Empty;
+                if (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) {
+                    return DbConnectionInfo[CurrentDb];
+                }
+                if (DbConnectionInfo.Count > 0) {
+                    CurrentDb = DbConnectionInfo.First().Key;
+                }
+                return string.Empty;
             }
 
             public bool RemoveCurrentPfPath() {

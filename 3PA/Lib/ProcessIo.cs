@@ -98,6 +98,9 @@ namespace _3PA.Lib {
         /// Start the process synchronously
         /// </summary>
         public bool DoWait(bool hidden = false) {
+            StandardOutput.Clear();
+            ErrorOutput.Clear();
+
             if (hidden) {
                 StartInfo.CreateNoWindow = true;
                 StartInfo.WindowStyle = ProcessWindowStyle.Hidden;

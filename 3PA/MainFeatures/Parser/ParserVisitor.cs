@@ -197,6 +197,11 @@ namespace _3PA.MainFeatures.Parser {
             _parser = null;
         }
 
+
+        public void Visit(ParsedWord pars) {
+
+        }
+
         /// <summary>
         /// Run statement,
         /// a second pass will be done after the visit is over to determine if a run is

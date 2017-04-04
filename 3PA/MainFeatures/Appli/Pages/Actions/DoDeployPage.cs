@@ -220,7 +220,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // cur env
             lblCurEnv.Text = string.Format("{0} <a href='#'>(switch)</a>", ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : ""));
-            lbl_deployDir.Text = string.Format("The deployment directory is <a href='{0}'>{0}</a>", ProEnvironment.Current.BaseCompilationPath);
+            lbl_deployDir.Text = @"The deployment directory is " + ProEnvironment.Current.BaseCompilationPath.ToHtmlLink();
 
             // update the rules for the current env
             var currentDeployer = ProEnvironment.Current.Deployer;
@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 UpdateProgressBar();
 
-                btCancel.SafeInvoke(button => button.Visible = true);
+                //btCancel.SafeInvoke(button => button.Visible = true);
 
                 if (_proDeployment.Start()) {
                     this.SafeInvoke(page => {
@@ -297,10 +297,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     }
                     ResetScreen();
                     UpdateReport(_proDeployment.FormatDeploymentReport());
+                    btReport.Visible = true;
 
                     // notify the user
                     if (!_proDeployment.HasBeenCancelled) {
-                        UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
+                        UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Click here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
                             Appli.GoToPage(PageNames.MassCompiler);
                             UserCommunication.CloseUniqueNotif("ReportAvailable");
                         }, Appli.IsFocused() ? 10 : 0);
@@ -410,7 +411,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // allows to update the progression bar
         private void UpdateProgressBar() {
             progressBar.SafeInvoke(bar => {
-                bar.Text = @"Step " + _proDeployment.CurrentStep + @" / " + _proDeployment.TotalNumberOfSteps + @" ~ " + Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (elapsed time = " + _proDeployment.GetElapsedTime() + @")";
+                if (_proDeployment.ProgressionPercentage < 0.1)
+                    bar.Text = @"Initializing, please wait...";
+                else
+                    bar.Text = Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (in " + _proDeployment.GetElapsedTime() + @", step " + _proDeployment.CurrentStep + @"/" + _proDeployment.MaxStep + @")";
                 bar.Progress = _proDeployment.ProgressionPercentage;
             });
         }

@@ -280,7 +280,7 @@ namespace _3PA.MainFeatures {
 
             #region Main menu
 
-            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, item => ProMisc.GoToDefinition(), "Go_To_Definition", "Ctrl+B");
+            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, item => ProMisc.GoToDefinition(false), "Go_To_Definition", "Ctrl+B") { Generic = true };
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
             var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, item => Npp.GoBackFromDefinition(), "Go_Backwards", "Ctrl+Shift+B") {
                 Generic = true

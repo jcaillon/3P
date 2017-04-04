@@ -373,7 +373,7 @@ namespace _3PA.NppCore {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
             }
-            if (saveHistoric && CurrentFile.IsProgress) {
+            if (saveHistoric) {
                 _goToHistory.Push(new Tuple<string, int, Point>(CurrentFile.Path, Sci.FirstVisibleLine, Sci.CurrentPoint));
             }
 

@@ -275,7 +275,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (clearForCompil) {
                 // for each file info that has an error generated when compiling the "filePath"
-                foreach (var kpv in _sessionInfo.Where(pair => pair.Value.FileErrors != null && pair.Value.FileErrors.Exists(error => error.CompiledFilePath.EqualsCi(filePath)))) {
+                foreach (var kpv in _sessionInfo.Where(pair => pair.Value.FileErrors != null && pair.Value.FileErrors.Exists(error => error.CompiledFilePath != null && error.CompiledFilePath.EqualsCi(filePath)))) {
                     kpv.Value.FileErrors.Clear();
                     jobDone = true;
 
@@ -413,13 +413,17 @@ namespace _3PA.MainFeatures.Pro {
         public static void ProExecutionHandleCompilationOnEachCompilationOk(ProExecutionHandleCompilation proExecutionHandleCompilation, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> errorsList, List<FileToDeploy> filesToDeploy) {
 
             // clear errors on each compiled file
-            foreach (var fileToCompile in fileToCompiles) {
-                ClearAllErrors(fileToCompile.InputPath, true);
+            if (fileToCompiles != null) {
+                foreach (var fileToCompile in fileToCompiles) {
+                    ClearAllErrors(fileToCompile.InputPath, true);
+                }
             }
 
             // update the errors
-            foreach (var keyValue in errorsList) {
-                UpdateFileErrors(keyValue.Key, keyValue.Value);
+            if (errorsList != null) {
+                foreach (var keyValue in errorsList) {
+                    UpdateFileErrors(keyValue.Key, keyValue.Value);
+                }
             }
         }
 

@@ -31,11 +31,6 @@ namespace _3PA.MainFeatures.Pro {
         #region Options
 
         /// <summary>
-        /// If null, we list the files to compile from the source directory considering the filter rules
-        /// </summary>
-        public HashSet<string> FilesToCompile { get; set; }
-
-        /// <summary>
         /// If true, don't actually do anything, just test it
         /// </summary>
         public bool IsTestMode { get; set; }
@@ -45,9 +40,14 @@ namespace _3PA.MainFeatures.Pro {
         #region Public properties
 
         /// <summary>
+        /// max step composing this deployment
+        /// </summary>
+        public int MaxStep { get; private set; }
+
+        /// <summary>
         /// Total number of steps composing this deployment
         /// </summary>
-        public int TotalNumberOfSteps { get; private set; }
+        public int TotalNumberOfSteps { get { return MaxStep + 2; } }
 
         /// <summary>
         /// Current deployment step
@@ -59,10 +59,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public float ProgressionPercentage {
             get {
-                float totalPerc = 0;
-                if (_proCompilation != null) {
-                    totalPerc += _proCompilation.CompilationProgression;
-                }
+                float totalPerc = _proCompilation == null ? 0 : _proCompilation.CompilationProgression;
                 if (CurrentStep > 0) {
                     totalPerc += CurrentStep * 100;
                 }
@@ -90,8 +87,6 @@ namespace _3PA.MainFeatures.Pro {
         #region Private fields
 
         private Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
-
-        private Dictionary<string, List<FileError>> _compilationErrors;
 
         private DeployProfile _currentProfile;
 
@@ -124,7 +119,7 @@ namespace _3PA.MainFeatures.Pro {
         public bool Start() {
 
             StartingTime = DateTime.Now;
-            TotalNumberOfSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
+            MaxStep = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
             _filesToDeployPerStep.Clear();
 
             // new mass compilation
@@ -138,16 +133,8 @@ namespace _3PA.MainFeatures.Pro {
 
             _proCompilation.OnCompilationOk += OnCompilationOk;
             _proCompilation.OnCompilationFailed += OnCompilationFailed;
-            
-            // list all the files to compile
-            if (FilesToCompile == null) {
-                FilesToCompile = _proEnv.Deployer.GetFilesList(
-                    new List<string> {_currentProfile.SourceDirectory}, 
-                    _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 
-                    0);
-            }
-            
-            return FilesToCompile.Count == 0 || _proCompilation.CompileFiles(FilesToCompile);
+
+            return _proCompilation.CompileFiles(GetFilesToCompileInStepZero());
         }
 
         /// <summary>
@@ -166,12 +153,34 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
+        /// <summary>
+        /// List all the compilable files in the source directory
+        /// </summary>
+        protected virtual List<FileToCompile> GetFilesToCompileInStepZero() {
+            return 
+                _proEnv.Deployer.GetFilesList(
+                    new List<string> { _currentProfile.SourceDirectory },
+                    _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly,
+                    0,
+                    Config.Instance.FilesPatternCompilable
+                ).Select(s => new FileToCompile(s)).ToList();
+        }
+
+        /// <summary>
+        /// List all the files that should be deployed from the source directory
+        /// </summary>
+        protected virtual List<FileToDeploy> GetFilesToDeployInStepOne() {
+            return _proEnv.Deployer.GetFilesToDeployForStep(1,
+                new List<string> { _currentProfile.SourceDirectory },
+                _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
+            );
+        }
+
         #region Private
 
         /// <summary>
         /// Called when the compilation step 0 failed
         /// </summary>
-        /// <param name="proCompilation"></param>
         private void OnCompilationFailed(ProCompilation proCompilation) {
             CompilationHasFailed = true;
             EndOfDeployment();
@@ -181,8 +190,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Called when the compilation step 0 ended correctly
         /// </summary>
         private void OnCompilationOk(ProCompilation comp, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> compilationErrors, List<FileToDeploy> filesToDeploy) {
-
-            _compilationErrors = compilationErrors;
 
             // Make the deployment for the compilation step (0)
             _filesToDeployPerStep.Add(0, _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f));
@@ -200,16 +207,20 @@ namespace _3PA.MainFeatures.Pro {
             _currentStepDeployPercentage = 0;
             CurrentStep = currentStep;
 
-            if (currentStep <= TotalNumberOfSteps) {
-                
-                _filesToDeployPerStep.Add(currentStep, 
-                    _proEnv.Deployer.DeployFilesForStep(
-                        currentStep, 
-                        new List<string> { currentStep == 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath }, 
-                        _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 
-                        f => _currentStepDeployPercentage = f
-                    )
-                );
+            if (currentStep <= MaxStep) {
+
+                List<FileToDeploy> filesToDeploy;
+
+                if (currentStep == 1) {
+                    filesToDeploy = GetFilesToDeployInStepOne();
+                } else {
+                    filesToDeploy = _proEnv.Deployer.GetFilesToDeployForStep(currentStep,
+                        new List<string> {_proEnv.BaseCompilationPath},
+                        _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
+                    );
+                }
+
+                _filesToDeployPerStep.Add(currentStep, _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f));
 
                 // hook
                 ExecuteDeploymentHook(currentStep);
@@ -267,6 +278,9 @@ namespace _3PA.MainFeatures.Pro {
         
         #region FormatDeploymentReport
 
+        /// <summary>
+        /// Generate an html report for the current deployment
+        /// </summary>
         public string FormatDeploymentReport() {
 
             StringBuilder currentReport = new StringBuilder();
@@ -327,7 +341,7 @@ namespace _3PA.MainFeatures.Pro {
             foreach (var fileToCompile in _proCompilation.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
 
                 var toCompile = fileToCompile;
-                var errorsOfTheFile = _compilationErrors.ContainsKey(toCompile.InputPath) ? _compilationErrors[toCompile.InputPath] : new List<FileError>();
+                var errorsOfTheFile = _proCompilation.ListErrors.ContainsKey(toCompile.InputPath) ? _proCompilation.ListErrors[toCompile.InputPath] : new List<FileError>();
                 bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
                 bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
 
@@ -384,11 +398,15 @@ namespace _3PA.MainFeatures.Pro {
                             var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
                             line.Append("<div style='padding-left: 10px'>");
                             if (file.IsOk) {
-                                line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + file.To.ToHtmlLink(file.To.Replace(groupBase, "").TrimStart('\\')));
+                                line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>");
                             } else {
-                                line.Append("<img src='Error30x30' height='15px'>Transfer error for " + transferMsg + file.To.Replace(_proEnv.BaseCompilationPath, ""));
+                                line.Append("<img src='Error30x30' height='15px'>Transfer failed for ");
                             }
+                            line.Append(transferMsg + file.To.ToHtmlLink(file.To.Replace(groupBase, "").TrimStart('\\')));
                             line.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", Path.GetDirectoryName(file.Origin), file.Origin.Replace(kpv.Key <= 1 ? _proEnv.BaseLocalPath : _proEnv.BaseCompilationPath, "").TrimStart('\\')));
+                            if (!file.IsOk) {
+                                line.Append("<br>Reason : " + file.DeployError);
+                            }
                             line.Append("</div>");
                         }
 

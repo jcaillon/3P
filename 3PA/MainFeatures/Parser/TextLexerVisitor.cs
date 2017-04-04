@@ -44,6 +44,23 @@ namespace _3PA.MainFeatures.Parser {
 
         public List<CompletionItem> ParsedCompletionItemsList { get; private set; }
 
+        public string FilePath { get; private set; }
+
+        #endregion
+
+        #region Private fields
+
+        private ParsedFile _rootScope;
+
+        #endregion
+
+        #region Life and death
+
+        public TextLexerVisitor(string filePath) {
+            FilePath = filePath;
+            _rootScope = new ParsedFile("Root", new TokenEos(null, 0, 0, 0, 0));
+        }
+
         #endregion
 
         #region Visits
@@ -66,7 +83,7 @@ namespace _3PA.MainFeatures.Parser {
             if (!IgnoreNumbers) {
                 if (!KnownWords.Contains(tok.Value) && tok.EndPosition - tok.StartPosition >= MinWordLengthRequired) {
                     KnownWords.Add(tok.Value);
-                    PushToAutoCompletion(new NumberCompletionItem (), tok);
+                    PushToAutoCompletion(new NumberCompletionItem(), tok);
                 }
             }
         }
@@ -84,7 +101,11 @@ namespace _3PA.MainFeatures.Parser {
 
         private void PushToAutoCompletion(TextCompletionItem item, Token origin) {
             item.DisplayText = origin.Value;
-            item.OriginToken = origin;
+            item.FromParser = true;
+            item.ParsedBaseItem = new ParsedWord(origin.Value, origin) {
+                FilePath = FilePath,
+                Scope = _rootScope
+            };
             item.Ranking = AutoCompletion.FindRankingOfParsedItem(item.DisplayText);
             ParsedCompletionItemsList.Add(item);
         }

@@ -28,6 +28,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -43,8 +44,61 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            UserCommunication.Notify("fuck");
-            MeasureIt(() => { }, "2 : ");
+
+            FindIncludes2();
+            
+            MeasureIt(() => {
+            }, "1 : ");
+        }
+
+        private static void FindIncludes2() {
+            Utils.ForEachLine(@"d:\Profiles\jcaillon\Desktop\test.xrf", new byte[0], (i, line) => {
+                var startIdx = 0;
+                do {
+                    var incIdx = line.IndexOf("INCLUDE ", startIdx, StringComparison.CurrentCulture);
+                    if (incIdx > 0) {
+                        // the line format should be 999 INCLUDE inc.i, we test the presence of the number
+                        if (incIdx - 2 < 0 || !char.IsDigit(line[incIdx - 2])) {
+                            startIdx = incIdx + 1;
+                            continue;
+                        }
+                        // position at the start of inc.i
+                        incIdx += 8;
+                        if (incIdx < line.Length - 1) {
+                            // skip a first "
+                            if (line[incIdx] == '"') {
+                                incIdx++;
+                            }
+                            // skip all the whitespaces
+                            while (incIdx < line.Length && char.IsWhiteSpace(line[incIdx])) {
+                                incIdx++;
+                            }
+                            // now match until the next whitespace
+                            var maxIdx = incIdx;
+                            while (maxIdx < line.Length && !char.IsWhiteSpace(line[maxIdx])) {
+                                maxIdx++;
+                            }
+                            // extract the .i name
+                            if (maxIdx > incIdx) {
+                                var yoyo = line.Substring(incIdx, maxIdx - incIdx).Trim().TrimEnd('"');
+                                UserCommunication.Notify(yoyo);
+                            }
+                        }
+                    }
+                    break;
+                } while (true);
+            }, Encoding.Default);
+        }
+
+        private static void FindIncludes() {
+            var source = Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\test.xrf", Encoding.Default);
+
+            var regex = new Regex("\\s[0-9]+\\sINCLUDE\\s([^\"][^\\s]*)");
+            foreach (Match match in regex.Matches(source)) {
+                if (match.Groups.Count > 0) {
+                    //UserCommunication.Notify(match.Groups[1].Value);
+                }
+            }
         }
 
         public static void DebugTest2() {}
@@ -242,6 +296,10 @@ namespace _3PA.Tests {
             }
 
             Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedWord pars) {
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFile pars) {

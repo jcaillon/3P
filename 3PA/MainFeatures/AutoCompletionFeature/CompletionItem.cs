@@ -787,10 +787,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// </summary>
     internal abstract class TextCompletionItem : CompletionItem {
         
-        public Token OriginToken { get; set; }
-
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             return true;
+        }
+
+        public override string ToString() {
+            return "This is a piece of text extracted from your current file";
         }
     }
 
@@ -817,7 +819,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         public override Image ItemTypeImage {
-            get { return ImageResources.Numbers; }
+            get { return ImageResources.Number; }
         }
     }
 
@@ -831,6 +833,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
             return true;
         }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder();
+            toDisplay.Append(HtmlHelper.FormatSubtitle("DEFINITION"));
+            toDisplay.Append(HtmlHelper.FormatRow("Defined for the language", NppKeyword.Lang.LangName));
+            toDisplay.Append(HtmlHelper.FormatRow("Extracted from", NppKeyword.OriginFile.ToHtmlLink()));
+            return toDisplay.ToString();
+        }
     }
 
     /// <summary>
@@ -843,6 +853,23 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override Image ItemTypeImage {
             get { return ImageResources.LangFunction; }
+        }
+
+        public override string ToString() {
+            var toDisplay = new StringBuilder(base.ToString());
+            if (NppKeyword.Overloads != null) {
+                toDisplay.Append(HtmlHelper.FormatSubtitle("OVERLOADS"));
+                foreach (var overload in NppKeyword.Overloads) {
+                    toDisplay.Append("<div>" + overload.Description + "</div>");
+                    toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+                    toDisplay.Append("<b>" + DisplayText + "</b> (");
+                    toDisplay.Append(string.Join(", ", overload.Params));
+                    toDisplay.Append(")<br>");
+                    toDisplay.Append("<b>returns</b> " + overload.ReturnValue);
+                    toDisplay.Append(@"</div>");
+                }
+            }
+            return toDisplay.ToString();
         }
     }
 

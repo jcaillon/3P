@@ -648,13 +648,6 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Override
 
-        protected override string CheckParameters() {
-            if (ExecutionType == ExecutionType.Compile && !ProEnv.CompileLocally && !Path.IsPathRooted(ProEnv.BaseCompilationPath)) {
-                return "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (String.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>";
-            }
-            return base.CheckParameters();
-        }
-
         protected override bool SetExecutionInfo() {
 
             if (Files == null)
@@ -891,8 +884,15 @@ namespace _3PA.MainFeatures.Pro {
     #region FileToCompile
 
     internal class FileToCompile {
-        // stores the path
+        /// <summary>
+        /// The path to the source that needs to be compiled
+        /// </summary>
         public string InputPath { get; set; }
+
+        /// <summary>
+        /// Size of the file to compile (set in constructor)
+        /// </summary>
+        public long Size { get; private set; }
 
         // stores temporary path used during the compilation
         public string CompInputPath { get; set; }
@@ -902,6 +902,9 @@ namespace _3PA.MainFeatures.Pro {
         public string CompOutputLis { get; set; }
         public string CompOutputDbg { get; set; }
 
+        /// <summary>
+        /// Returns the base file name (set in constructor)
+        /// </summary>
         public string BaseFileName { get; private set; }
 
         /// <summary>
@@ -910,6 +913,11 @@ namespace _3PA.MainFeatures.Pro {
         public FileToCompile(string inputPath) {
             InputPath = inputPath;
             BaseFileName = Path.GetFileNameWithoutExtension(inputPath);
+            try {
+                Size = new FileInfo(inputPath).Length;
+            } catch (Exception) {
+                Size = 0;
+            }
         }
     }
 
@@ -1124,24 +1132,12 @@ namespace _3PA.MainFeatures.Pro {
 
         public override ExecutionType ExecutionType { get { return ExecutionType.Run; } }
 
-        private static bool _dontWarnAboutRCode;
-
         protected override bool SetExecutionInfo() {
 
             if (!base.SetExecutionInfo())
                 return false;
 
             _processStartDir = Path.GetDirectoryName(Files.First().InputPath) ?? _localTempDir;
-
-            // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
-            if (!_dontWarnAboutRCode) {
-                if (File.Exists(Path.ChangeExtension(Files.First().InputPath, ".r"))) {
-                    UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Progress execution", "An Rcode hides the program", args => {
-                        _dontWarnAboutRCode = true;
-                        UserCommunication.CloseUniqueNotif("rcodehide");
-                    }, 5);
-                }
-            }
 
             return true;
         }

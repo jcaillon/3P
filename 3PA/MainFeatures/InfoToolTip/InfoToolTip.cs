@@ -215,7 +215,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     }
                     break;
                 case "gotodefinition":
-                    ProMisc.GoToDefinition();
+                    ProMisc.GoToDefinition(false);
                     break;
                 case "nexttooltip":
                     IndexToShow++;

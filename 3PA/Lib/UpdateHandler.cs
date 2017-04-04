@@ -334,7 +334,6 @@ namespace _3PA.Lib {
         /// </summary>
         private static void UpdateDoneFromVersion(string fromVersion) {
             if (!fromVersion.IsHigherVersionThan("1.7.3")) {
-                UserCommunication.Notify("Cleaning libraries...");
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
             }
         }

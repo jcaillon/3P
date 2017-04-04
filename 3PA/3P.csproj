@@ -463,7 +463,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\MainBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Method.png" />
     <Content Include="_Resource\Images\ParserItem\Type\NotApplicable.png" />
-    <Content Include="_Resource\Images\ParserItem\Type\Numbers.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Number.png" />
     <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Preprocessed.png" />
     <Content Include="_Resource\Images\ParserItem\Type\PreprocessorBlock.png" />

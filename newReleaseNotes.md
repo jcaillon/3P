@@ -1,23 +1,28 @@
-Enjoy!
+Once again, massive changes all across the board. The most important being the auto completion : try typing something in a non progress file!
 
+More info on that [here - an alternative auto completion for notepad++](http://jcaillon.github.io/3P/#/alternative-autocompletion)
+
+For this beta version, I've temporary disable the `cancel` button in the deployment page, it will be back in the next release. If I also waited to correct that, I would have delayed this beta release for another month; but there are already too many new features to be tested, couldn't wait any longer.
+
+Enough talking. Enjoy!
 
 **Improvements :**
 
 - New options for each environment :
   - You can now choose a progress program that will be executed before each progress execution (like a compilation for instance); this will be useful for users that prefer to dynamically connect databases instead of using a .pf or extra connection info
-  - You can also choose a progress program executer *after* any execution
+  - You can also choose a progress program that will be executed *after* any execution
 - New compilation options (available through a new item in the main menu) : 
   - Generate debug-list
   - Generate xref file
   - Generate xref xml file
   - Generate listing file
-  - You can also choose to immediatly generate + show one of this files in the new *Progress tools* menu
+  - You can also choose to immediately generate + show one of these files in the new *Progress tools* menu
 - New feature : **Correct code indentation**
 - New item in the main menu **Display parser errors** : this will validate your file using the parser of 3P, it can be used to know if your file can be read by the AppBuilder (for instance). You also have the opportunity to display the parser errors each time you save the file (it will only be displayed if there are errors), see `Options` > `Code edition`. This is enabled by default. Since I introduced this feature, i will stop displaying the number of extra characters in the code explorer, which already displays a lot of information.
 - New options for the auto completion : 
   - you can now choose to immediately show the auto completion after a `.` or `:` (this is true currently and by default)
   - you can now choose to not display the auto completion on each input but still correct the case of the words as you type
-  - options are now splitted between : general options / progress specific options / default auto completion replacement options
+  - options are now dispatched between : general options / progress specific options / default auto completion replacement options
 - Updated [DataDigger](https://datadigger.wordpress.com/2017/02/20/20170220/) to the latest beta version 20170324, thanks [Patrick](https://github.com/patrickTingen/DataDigger)!
 - Ftp connections now also work for servers with the active transfer mode activated
 - Improvements to the parser, this should be its final form; it now parses include files exactly like the progress compiler, replacing the include call by the content of the file
@@ -46,7 +51,7 @@ See the example below for a better understanding
 **Fixed issues :**
 
 - Replaced the old mechanism to hide the progress splashscreen during a prowin execution, now simply uses `-nosplash`
-- 3P no longers catches errors from other .net plugins (like CSScriptNpp)
+- 3P no longer catches errors from other .net plugins (like CSScriptNpp)
 - Correction of various bugs related to document encoding
 - Fixed an issue with the type buttons of the file explorer that would show the tooltip content of the autocompetion type buttons
 - 3P now correctly reads the Npp configuration from the cloud folder (if any)
