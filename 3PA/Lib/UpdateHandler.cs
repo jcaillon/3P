@@ -77,7 +77,7 @@ namespace _3PA.Lib {
                         Thank you for your patience!</div>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                     return;
                 }
-
+                
                 UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Config.FileVersionLog, Encoding.Default)).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
@@ -86,10 +86,12 @@ namespace _3PA.Lib {
                     false);
 
                 // Special actions to take depending on the previous version?
-                UpdateDoneFromVersion(Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default));
+                if (File.Exists(Config.FilePreviousVersion))
+                    UpdateDoneFromVersion(Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default));
 
                 // delete update related files/folders
                 Utils.DeleteDirectory(Config.FolderUpdate, true);
+                Utils.DeleteFile(Config.FileVersionLog);
 
                 // reset the log files
                 Utils.DeleteDirectory(Config.FolderLog, true);

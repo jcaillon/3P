@@ -813,7 +813,7 @@ namespace _3PA.MainFeatures {
 
         // updates related
         public static string FileVersionLog {
-            get { return Path.Combine(FolderUpdate, "version.log"); }
+            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
         }
 
         public static string FilePreviousVersion {
