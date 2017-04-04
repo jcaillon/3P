@@ -209,10 +209,11 @@ namespace _3PA {
 
             // ask to disable the default autocompletion
             DelayedAction.StartNew(100, () => {
-                Npp.ConfXml.AskToDisableAutocompletion();
+                if (!Npp.ConfXml.AskToDisableAutocompletionAndRestart()) {
 
-                // check if an update was done 
-                UpdateHandler.CheckForUpdateDone();
+                    // check if an update was done 
+                    UpdateHandler.CheckForUpdateDone();
+                }
             });
 
             // start checking for new updates

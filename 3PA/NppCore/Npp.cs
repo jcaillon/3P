@@ -947,27 +947,28 @@ namespace _3PA.NppCore {
             /// <summary>
             /// Ask the user to disable the default auto completion
             /// </summary>
-            public void AskToDisableAutocompletion() {
+            public bool AskToDisableAutocompletionAndRestart() {
                 if (AutocompletionMode == 0 || Config.Instance.AutoCompleteNeverAskToDisableDefault)
-                    return;
+                    return false;
 
                 var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default autocompletion</b> offered by Notepad++ by a much better version.<br><br>If the default autocompletion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default autocompletion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Autocompletion", "Deactivate default autocompletion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
                 if (answer == 1)
                     Config.Instance.AutoCompleteNeverAskToDisableDefault = true;
                 if (answer != 0)
-                    return;
+                    return false;
 
                 var encoding = TextEncodingDetect.GetFileEncoding(FileNppConfigXml);
                 var fileContent = Utils.ReadAllText(FileNppConfigXml, encoding);
                 fileContent = fileContent.Replace("autoCAction=\"3\"", "autoCAction=\"0\"");
                 var configCopyPath = Path.Combine(Config.FolderUpdate, "config.xml");
                 if (!Utils.FileWriteAllText(configCopyPath, fileContent, encoding))
-                    return;
+                    return false;
 
                 // replace default config by its copy on npp shutdown
                 _3PUpdater.Instance.AddFileToMove(configCopyPath, FileNppConfigXml);
 
                 Restart();
+                return true;
             }
 
             #endregion
