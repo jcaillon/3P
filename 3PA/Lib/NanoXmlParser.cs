@@ -108,6 +108,11 @@ namespace _3PA.Lib {
         public NanoXmlDocument(string xmlString) {
             int i = 0;
 
+            if (string.IsNullOrEmpty(xmlString)) {
+                _rootNode = new NanoXmlNode("", ref i);
+                return;
+            }
+
             while (true) {
                 SkipSpaces(xmlString, ref i);
 

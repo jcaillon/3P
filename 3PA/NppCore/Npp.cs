@@ -928,16 +928,21 @@ namespace _3PA.NppCore {
 
                 // Get info from the config.xml
                 FileNppStylersXml = null;
-                try {
-                    var configs = new NanoXmlDocument(Utils.ReadAllText(FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
-                    FileNppStylersXml = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
-                    AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
-                    var wordCharListCfg = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("wordCharList"));
-                    if (wordCharListCfg.GetAttribute("useDefault").Value.EqualsCi("no")) {
-                        WordCharList = wordCharListCfg.GetAttribute("charsAdded").Value;
+
+                if (File.Exists(FileNppConfigXml)) {
+                    try {
+                        var configs = new NanoXmlDocument(Utils.ReadAllText(FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
+                        FileNppStylersXml = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
+                        AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
+                        var wordCharListCfg = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("wordCharList"));
+                        if (wordCharListCfg != null && wordCharListCfg.GetAttribute("useDefault").Value.EqualsCi("no")) {
+                            WordCharList = wordCharListCfg.GetAttribute("charsAdded").Value;
+                        }
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e, "Error parsing " + FileNppConfigXml);
                     }
-                } catch (Exception e) {
-                    ErrorHandler.LogError(e, "Error parsing " + FileNppConfigXml);
+                } else {
+                    UserCommunication.Notify("Couldn't find the config.xml file.<br>If this is not your first use of notepad++, please consider opening an issue on 3P", MessageImg.MsgInfo, "Reading config.xml", "File not found");
                 }
 
                 if (!string.IsNullOrEmpty(FileNppStylersXml) && !File.Exists(FileNppStylersXml))

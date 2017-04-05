@@ -437,7 +437,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #region misc
 
         private void BtDownloadOnButtonPressed(object sender, EventArgs e) {
-            DataBase.Instance.FetchCurrentDbInfo(UpdateDownloadButton);
+            DataBase.Instance.FetchCurrentDbInfo(UpdateDownloadButton, DataBase.Instance.GetCurrentDumpPath);
         }
 
         private void BtDeleteDownloadOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {

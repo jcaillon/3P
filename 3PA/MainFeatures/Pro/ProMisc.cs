@@ -481,7 +481,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // when compiling, transferring .r/.lst to compilation dir
                 if (filesToDeploy != null) {
-                    filesToDeploy = lastExec.ProEnv.Deployer.DeployFiles(filesToDeploy);
+                    filesToDeploy = lastExec.ProEnv.Deployer.DeployFiles(filesToDeploy, null, null);
                 }
 
                 // Notify the user, or not
@@ -512,7 +512,7 @@ namespace _3PA.MainFeatures.Pro {
                     currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
                     currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
                     // deploy the file for STEP 1
-                    var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1));
+                    var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1), null, null);
                     if (deployedFiles == null || deployedFiles.Count == 0) {
                         UserCommunication.Notify("The current file doesn't match any transfer rules for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "No transfer rules", args => {
                             Deployer.EditRules();

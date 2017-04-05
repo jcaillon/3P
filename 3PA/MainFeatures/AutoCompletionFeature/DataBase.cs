@@ -67,13 +67,6 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         private List<CompletionItem> _dbItems;
 
-        private bool _isExtracting;
-
-        /// <summary>
-        /// Action called when an extraction is done
-        /// </summary>
-        private Action _onExtractionDone;
-
         #endregion
 
         #region public methods
@@ -101,6 +94,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <returns></returns>
         public void UpdateDatabaseInfo() {
             _dbItems = null;
+
             if (IsDbInfoAvailable) {
                 // read file, extract info
                 Read(GetCurrentDumpPath);
@@ -126,42 +120,28 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Should be called to extract the database info from the current environnement
         /// </summary>
-        public void FetchCurrentDbInfo(Action onExtractionDone) {
+        public void FetchCurrentDbInfo(Action onExtractionDone, string outDumpFilePath) {
             try {
-                // dont extract 2 db at once
-                if (_isExtracting) {
-                    UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarning, "Database info", "Extracting database structure", 5);
-                    return;
-                }
-
                 // save the filename of the output database info file for this environment
-                UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
+                UserCommunication.Notify("Now fetching info on all the connected databases for the current environment.<br>You will be warned when the process is over.", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
                 var exec = new ProExecutionDatabase {
                     NeedDatabaseConnection = true
                 };
-                exec.OnExecutionEnd += execution => _isExtracting = false;
-                exec.OnExecutionOk += ExtractionDoneOk;
-                _onExtractionDone = onExtractionDone;
-                _isExtracting = exec.Start();
+                exec.OnExecutionOk += execution => {
+                    // copy the dump to the folder database
+                    if (Utils.CopyFile(((ProExecutionDatabase) execution).OutputPath, outDumpFilePath)) {
+                        // update info
+                        UpdateDatabaseInfo();
+                        UserCommunication.Notify("A database structure has been extracted successfully.<br>The auto-completion has been updated!", MessageImg.MsgOk, "Database info", "Extraction done", 10);
+                        if (onExtractionDone != null) {
+                            onExtractionDone();
+                        }
+                    }
+                };
+                exec.Start();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
-            }
-        }
-
-        /// <summary>
-        /// Method called after the execution of the program extracting the db info
-        /// </summary>
-        private void ExtractionDoneOk(ProExecution lastExec) {
-            // copy the dump to the folder database
-            if (Utils.CopyFile(((ProExecutionDatabase) lastExec).ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, GetOutputName))) {
-                // update info
-                UpdateDatabaseInfo();
-                UserCommunication.Notify("Database structure extracted with success!<br>The autocompletion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
-                if (_onExtractionDone != null) {
-                    _onExtractionDone();
-                    _onExtractionDone = null;
-                }
             }
         }
 

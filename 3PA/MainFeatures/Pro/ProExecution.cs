@@ -168,6 +168,8 @@ namespace _3PA.MainFeatures.Pro {
 
         protected bool _useBatchMode;
 
+        protected string _runnerPath;
+
         #endregion
 
         #region Life and death
@@ -210,14 +212,13 @@ namespace _3PA.MainFeatures.Pro {
                 {"DbConnectString", "\"\""},
                 {"ExecutionType", "\"\""},
                 {"CurrentFilePath", "\"\""},
-                {"ExtractDbOutputPath", "\"\""},
+                {"OutputPath", "\"\""},
                 {"ToCompileListFile", "\"\""},
                 {"CompileProgressionFile", "\"\""},
                 {"DbConnectionMandatory", "false"},
                 {"NotificationOutputPath", "\"\""},
                 {"PreExecutionProgram", "\"\""},
                 {"PostExecutionProgram", "\"\""},
-                {"CompilationLogPath", "\"\""},
             };
         }
 
@@ -286,20 +287,19 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().ProQuoter());
 
             // prepare the .p runner
-            var runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");
+            _runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");
             StringBuilder runnerProgram = new StringBuilder();
             foreach (var @var in _preprocessedVars) {
                 runnerProgram.AppendLine("&SCOPED-DEFINE " + @var.Key + " " + @var.Value);
             }
             runnerProgram.Append(Encoding.Default.GetString(DataResources.ProgressRun));
-            Utils.FileWriteAllText(runnerPath, runnerProgram.ToString(), Encoding.Default);
+            Utils.FileWriteAllText(_runnerPath, runnerProgram.ToString(), Encoding.Default);
             
             // no batch mode option?
             _useBatchMode = !Config.Instance.NeverUseProwinInBatchMode && !NoBatch && CanUseBatchMode();
 
             // Parameters
             _exeParameters = new StringBuilder();
-            AppendProgressParameters(_exeParameters);
            if (_useBatchMode) {
                 _exeParameters.Append(" -b");
             } else {
@@ -310,9 +310,10 @@ namespace _3PA.MainFeatures.Pro {
                     MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"));
                 }
             }
-            _exeParameters.Append(" -p " + runnerPath.ProQuoter());
+            _exeParameters.Append(" -p " + _runnerPath.ProQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
                 _exeParameters.Append(" " + ProEnv.CmdLineParameters.Trim());
+            AppendProgressParameters(_exeParameters);
 
             // start the process
             try {
@@ -752,7 +753,7 @@ namespace _3PA.MainFeatures.Pro {
 
             SetPreprocessedVar("ToCompileListFile", filesListPath.ProQuoter());
             SetPreprocessedVar("CompileProgressionFile", _progressionFilePath.ProQuoter());
-            SetPreprocessedVar("CompilationLogPath", _compilationLog.ProQuoter());
+            SetPreprocessedVar("OutputPath", _compilationLog.ProQuoter());
 
             return base.SetExecutionInfo();
         }
@@ -1224,18 +1225,48 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region ProExecutionProVersion
+
+    internal class ProExecutionProVersion : ProExecution {
+
+        public override ExecutionType ExecutionType { get { return ExecutionType.ProVersion; } }
+
+        public string ProVersion { get { return Utils.ReadAllText(_outputPath, Encoding.Default); } }
+
+        private string _outputPath;
+
+        protected override bool SetExecutionInfo() {
+
+            _outputPath = Path.Combine(_localTempDir, "pro.version");
+            SetPreprocessedVar("OutputPath", _outputPath.ProQuoter());
+
+            return true;
+        }
+
+        protected override void AppendProgressParameters(StringBuilder sb) {
+            sb.Clear();
+            _exeParameters.Append(" -b -p " + _runnerPath.ProQuoter());
+        }
+
+        protected override bool CanUseBatchMode() {
+            return true;
+        }
+    }
+
+    #endregion
+
     #region ProExecutionDatabase
 
     internal class ProExecutionDatabase : ProExecution {
 
         public override ExecutionType ExecutionType { get { return ExecutionType.Database; } }
 
-        public string ExtractDbOutputPath { get; set; }
+        public string OutputPath { get; set; }
 
         protected override bool SetExecutionInfo() {
 
-            ExtractDbOutputPath = Path.Combine(_localTempDir, "db.extract");
-            SetPreprocessedVar("ExtractDbOutputPath", ExtractDbOutputPath.ProQuoter());
+            OutputPath = Path.Combine(_localTempDir, "db.extract");
+            SetPreprocessedVar("OutputPath", OutputPath.ProQuoter());
 
             var fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             if (!Utils.FileWriteAllBytes(Path.Combine(_localTempDir, fileToExecute), DataResources.DumpDatabase))
@@ -1304,9 +1335,18 @@ namespace _3PA.MainFeatures.Pro {
                 if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
                     return false;
                 if (needUpdate) {
-                    if (string.IsNullOrEmpty(Config.Instance.InstalledDataDiggerVersion))
+                    if (string.IsNullOrEmpty(Config.Instance.InstalledDataDiggerVersion)) {
                         UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
+                    }
                     Config.Instance.InstalledDataDiggerVersion = Config.EmbeddedDataDiggerVersion;
+                    try {
+                        // delete all previous r code
+                        foreach (FileInfo file in new DirectoryInfo(Config.FolderDataDigger).GetFiles("*.r", SearchOption.TopDirectoryOnly)) {
+                            File.Delete(file.FullName);
+                        }
+                    } catch(Exception) {
+                        // ignored
+                    }
                 }
             }
             // add the datadigger folder to the propath
@@ -1401,7 +1441,8 @@ namespace _3PA.MainFeatures.Pro {
         DataReader = 14,
         DbAdmin = 15,
         ProDesktop = 16,
-        DeploymentHook = 17
+        DeploymentHook = 17,
+        ProVersion = 18,
     }
 
     #endregion

@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private CodeExplorer() {
             _dialogDescription = "Code explorer";
-            _formDefaultPos = NppTbMsg.CONT_RIGHT;
+            _formDefaultPos = NppTbMsg.DWS_DF_CONT_RIGHT;
             _iconImage = ImageResources.CodeExplorerLogo;
         }
 

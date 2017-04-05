@@ -32,7 +32,7 @@ namespace _3PA.NppCore.NppInterfaceForm {
 
         protected string _dialogDescription = "?";
 
-        protected NppTbMsg _formDefaultPos = NppTbMsg.CONT_LEFT;
+        protected NppTbMsg _formDefaultPos = NppTbMsg.DWS_DF_CONT_LEFT;
 
         protected Image _iconImage = ImageResources.FileExplorerLogo;
 

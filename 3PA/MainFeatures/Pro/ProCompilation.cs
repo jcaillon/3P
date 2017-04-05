@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
@@ -203,6 +202,13 @@ namespace _3PA.MainFeatures.Pro {
 
         private List<FileToDeploy> _listFilesToDeploy = new List<FileToDeploy>();
 
+        /// <summary>
+        /// Get the time elapsed since the beginning of the compilation in a human readable format
+        /// </summary>
+        private string ElapsedTime {
+            get { return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds)); }
+        }
+
         #endregion
 
         #region Life and death
@@ -214,6 +220,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public ProCompilation(ProEnvironment.ProEnvironmentObject proEnv) {
             ProEnv = proEnv == null ? new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current) : proEnv;
+            StartingTime = DateTime.Now;
         }
 
         #endregion
@@ -296,12 +303,13 @@ namespace _3PA.MainFeatures.Pro {
         /// Kill all the processes that were started
         /// </summary>
         public void KillProcesses() {
-            foreach (var proc in _processes.Where(proc => proc != null)) {
-                proc.KillProcess();
-            }
             _hasBeenKilled = true;
+            if (_processesRunning > 0) {
+                foreach (var proc in _processes.Where(proc => proc != null)) {
+                    proc.KillProcess();
+                }
+            }
             _processesRunning = 0;
-            EndOfCompilation();
         }
 
         /// <summary>
@@ -327,7 +335,7 @@ namespace _3PA.MainFeatures.Pro {
             if (_processesRunning != 0)
                 return;
 
-            TotalCompilationTime = GetElapsedTime();
+            TotalCompilationTime = ElapsedTime;
 
             if (!_hasBeenKilled) {
                 if (OnCompilationOk != null)
@@ -379,6 +387,7 @@ namespace _3PA.MainFeatures.Pro {
         private void OnExecutionFailed(ProExecution obj) {
             DoInLock(() => {
                 KillProcesses();
+                EndOfCompilation();
             });
         }
 
@@ -393,13 +402,6 @@ namespace _3PA.MainFeatures.Pro {
                     Monitor.Exit(_lock);
                 }
             }
-        }
-
-        /// <summary>
-        /// Get the time elapsed since the beginning of the compilation in a human readable format
-        /// </summary>
-        private string GetElapsedTime() {
-            return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds));
         }
 
         #endregion

@@ -33,12 +33,10 @@
     &SCOPED-DEFINE PostExecutionProgram ""
 
     &SCOPED-DEFINE CurrentFilePath ""
+    &SCOPED-DEFINE OutputPath ""
 
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
-    &SCOPED-DEFINE CompilationLogPath "compil.log"
-
-    &SCOPED-DEFINE ExtractDbOutputPath ""
 &ENDIF
 
 
@@ -48,8 +46,8 @@ DEFINE STREAM str_w.
 DEFINE STREAM str_r.
 DEFINE STREAM str_rlist.
 DEFINE STREAM str_wlog.
-DEFINE STREAM str_wcplog.
 DEFINE STREAM str_wdblog.
+DEFINE STREAM str_wout.
 
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
@@ -105,13 +103,13 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
         WHEN "COMPILE" OR
         WHEN "GENERATEDEBUGFILE" OR
         WHEN "RUN" THEN DO:
-            OUTPUT STREAM str_wcplog TO VALUE({&CompilationLogPath}) BINARY.
-            PUT STREAM str_wcplog UNFORMATTED "".
+            OUTPUT STREAM str_wout TO VALUE({&OutputPath}) BINARY.
+            PUT STREAM str_wout UNFORMATTED "".
 
             RUN pi_compileList NO-ERROR.
             fi_output_last_error().
 
-            OUTPUT STREAM str_wcplog CLOSE.
+            OUTPUT STREAM str_wout CLOSE.
         END.
         WHEN "DEPLOYMENTHOOK" OR
         WHEN "PROLINT" THEN DO:
@@ -126,10 +124,15 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             /* for each connected db */
             REPEAT gi_db = 1 TO NUM-DBS:
                 CREATE ALIAS "DICTDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
-                RUN {&CurrentFilePath} (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)) NO-ERROR.
+                RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)) NO-ERROR.
                 fi_output_last_error().
                 DELETE ALIAS "DICTDB".
             END.
+        END.
+        WHEN "PROVERSION" THEN DO:
+            OUTPUT STREAM str_wout TO VALUE({&OutputPath}) BINARY.
+            PUT STREAM str_wout UNFORMATTED PROVERSION(0).
+            OUTPUT STREAM str_wout CLOSE.
         END.
         WHEN "DATADIGGER" THEN DO:
             RUN DataDigger.p NO-ERROR.
@@ -205,7 +208,7 @@ QUIT.
 
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
             DO li_i = 1 TO COMPILER:NUM-MESSAGES:
-                PUT STREAM str_wcplog UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+                PUT STREAM str_wout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
                 lc_from,
                 COMPILER:GET-FILE-NAME(li_i),
                 IF COMPILER:GET-MESSAGE-TYPE(li_i) = 1 THEN "Critical" ELSE "Warning",
@@ -220,7 +223,7 @@ QUIT.
 
         IF ERROR-STATUS:ERROR THEN DO:
             DO li_i = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_wcplog UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+                PUT STREAM str_wout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
                 lc_from,
                 lc_from,
                 "Critical",
@@ -241,7 +244,7 @@ QUIT.
 &ELSE
     PROCEDURE pi_handleCompilErrors PRIVATE:
     /*------------------------------------------------------------------------------
-      Purpose: save any compilation error into a log file (using global stream str_wcplog)
+      Purpose: save any compilation error into a log file (using global stream str_wout)
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
@@ -267,7 +270,7 @@ QUIT.
                 REPLACE(lc_msg, "~n", "<br>"),
                 ""
                 ).
-            PUT STREAM str_wcplog UNFORMATTED lc_msg SKIP.
+            PUT STREAM str_wout UNFORMATTED lc_msg SKIP.
         END.
 
         ERROR-STATUS:ERROR = NO.

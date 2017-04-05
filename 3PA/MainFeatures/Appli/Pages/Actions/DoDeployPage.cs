@@ -266,8 +266,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 };
 
                 UpdateProgressBar();
-
-                //btCancel.SafeInvoke(button => button.Visible = true);
+                btCancel.SafeInvoke(button => button.Visible = true);
 
                 if (_proDeployment.Start()) {
                     this.SafeInvoke(page => {
@@ -315,6 +314,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// </summary>
         private void BtCancelOnButtonPressed(object sender, EventArgs eventArgs) {
             btCancel.Visible = false;
+            _proDeployment.Cancel();
         }
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (_proDeployment.ProgressionPercentage < 0.1)
                     bar.Text = @"Initializing, please wait...";
                 else
-                    bar.Text = Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (in " + _proDeployment.GetElapsedTime() + @", step " + _proDeployment.CurrentStep + @"/" + _proDeployment.MaxStep + @")";
+                    bar.Text = Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (in " + _proDeployment.ElapsedTime +  @", step " + _proDeployment.CurrentStep + @"/" + _proDeployment.MaxStep + @")";
                 bar.Progress = _proDeployment.ProgressionPercentage;
             });
         }

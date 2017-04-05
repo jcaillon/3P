@@ -26,7 +26,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
@@ -45,10 +47,37 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            FindIncludes2();
-            
+            List<FileCoo> fuck = null;
             MeasureIt(() => {
+                fuck = ListStuff();
             }, "1 : ");
+
+            foreach (var coo in fuck) {
+                Utils.FileAppendAllText(@"d:\Profiles\jcaillon\Desktop\client.log", coo.Path + "\t" + coo.Md5 + "\r\n");
+            }
+
+
+        }
+
+        private static List<FileCoo> ListStuff() {
+            var output = new List<FileCoo>();
+            using (var md5 = MD5.Create()) {
+                foreach (var filePath in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
+                    using (var stream = File.OpenRead(filePath)) {
+                        output.Add(new FileCoo {
+                            Path = filePath,
+                            Md5 = Encoding.Default.GetString(md5.ComputeHash(stream))
+                    });
+                    }
+                    
+                }
+            }
+            return output;
+        }
+
+        internal class FileCoo {
+            public string Path;
+            public string Md5;
         }
 
         private static void FindIncludes2() {
@@ -88,17 +117,6 @@ namespace _3PA.Tests {
                     break;
                 } while (true);
             }, Encoding.Default);
-        }
-
-        private static void FindIncludes() {
-            var source = Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\test.xrf", Encoding.Default);
-
-            var regex = new Regex("\\s[0-9]+\\sINCLUDE\\s([^\"][^\\s]*)");
-            foreach (Match match in regex.Matches(source)) {
-                if (match.Groups.Count > 0) {
-                    //UserCommunication.Notify(match.Groups[1].Value);
-                }
-            }
         }
 
         public static void DebugTest2() {}

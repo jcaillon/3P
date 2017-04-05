@@ -539,7 +539,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private void AddParsedItem(ParsedItem item, ushort ownerNumber) {
             // add external flag + include line if needed
-            if (ownerNumber > 0) {
+            if (ownerNumber > 0 && ownerNumber < _parsedIncludes.Count) {
                 item.FilePath = _parsedIncludes[ownerNumber].FullFilePath;
                 item.IncludeLine = _parsedIncludes[ownerNumber].Line;
                 item.Flags |= ParseFlag.FromInclude;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
@@ -40,12 +41,13 @@ namespace _3PA.MainFeatures.Pro {
         #region Public properties
 
         /// <summary>
-        /// max step composing this deployment
+        /// max step number composing this deployment
         /// </summary>
         public int MaxStep { get; private set; }
 
         /// <summary>
         /// Total number of steps composing this deployment
+        /// 1 compil, 2 deploy compil r code, 3 step 1...
         /// </summary>
         public int TotalNumberOfSteps { get { return MaxStep + 2; } }
 
@@ -64,7 +66,7 @@ namespace _3PA.MainFeatures.Pro {
                     totalPerc += CurrentStep * 100;
                 }
                 totalPerc += _currentStepDeployPercentage;
-                return totalPerc / (TotalNumberOfSteps + 1);
+                return totalPerc / TotalNumberOfSteps;
             }
         }
 
@@ -80,7 +82,16 @@ namespace _3PA.MainFeatures.Pro {
 
         public bool CompilationHasFailed { get; private set; }
 
-        public bool HasBeenCancelled { get; private set; }
+        public bool HasBeenCancelled {
+            get { return _cancelSource.IsCancellationRequested; }
+        }
+
+        /// <summary>
+        /// Get the time elapsed since the beginning of the compilation in a human readable format
+        /// </summary>
+        public string ElapsedTime {
+            get { return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds)); }
+        }
 
         #endregion
 
@@ -96,7 +107,11 @@ namespace _3PA.MainFeatures.Pro {
 
         // Stores the current compilation info
         private ProCompilation _proCompilation;
-        
+
+        CancellationTokenSource _cancelSource = new CancellationTokenSource();
+
+        private ProExecutionDeploymentHook _hookExecution;
+
         #endregion
 
         #region Life and death
@@ -107,6 +122,7 @@ namespace _3PA.MainFeatures.Pro {
         public ProDeployment(ProEnvironment.ProEnvironmentObject proEnv, DeployProfile currentProfile) {
             _proEnv = new ProEnvironment.ProEnvironmentObject(proEnv);
             _currentProfile = new DeployProfile(currentProfile);
+            StartingTime = DateTime.Now;
         }
 
         #endregion
@@ -141,17 +157,17 @@ namespace _3PA.MainFeatures.Pro {
         /// Call this method to cancel the execution of this deployment
         /// </summary>
         public void Cancel() {
-            HasBeenCancelled = true;
-        }
-
-        /// <summary>
-        /// Get the time elapsed since the beginning of the compilation in a human readable format
-        /// </summary>
-        public string GetElapsedTime() {
-            return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds));
+            _cancelSource.Cancel();
+            if (_proCompilation != null)
+                _proCompilation.CancelCompilation();
+            if (_hookExecution != null)
+                _hookExecution.KillProcess();
+            EndOfDeployment();
         }
 
         #endregion
+
+        #region To override
 
         /// <summary>
         /// List all the compilable files in the source directory
@@ -176,12 +192,31 @@ namespace _3PA.MainFeatures.Pro {
             );
         }
 
+        /// <summary>
+        /// List all the files that should be deployed from the source directory
+        /// </summary>
+        protected virtual List<FileToDeploy> GetFilesToDeployInStepTwoAndMore(int currentStep) {
+            return _proEnv.Deployer.GetFilesToDeployForStep(currentStep,
+                new List<string> { _proEnv.BaseCompilationPath },
+                _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
+            );
+        }
+
+        protected virtual List<FileToDeploy> Deployfiles(List<FileToDeploy> filesToDeploy) {
+            return _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f, _cancelSource);
+        }
+
+        #endregion
+
         #region Private
 
         /// <summary>
         /// Called when the compilation step 0 failed
         /// </summary>
         private void OnCompilationFailed(ProCompilation proCompilation) {
+            if (HasBeenCancelled)
+                return;
+
             CompilationHasFailed = true;
             EndOfDeployment();
         }
@@ -190,43 +225,37 @@ namespace _3PA.MainFeatures.Pro {
         /// Called when the compilation step 0 ended correctly
         /// </summary>
         private void OnCompilationOk(ProCompilation comp, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> compilationErrors, List<FileToDeploy> filesToDeploy) {
+            if (HasBeenCancelled)
+                return;
 
             // Make the deployment for the compilation step (0)
-            _filesToDeployPerStep.Add(0, _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f));
+            _filesToDeployPerStep.Add(0, Deployfiles(filesToDeploy));
 
             // Make the deployment for the step 1 and >=
             ExecuteDeploymentHook(0);
         }
-
-
+        
         /// <summary>
         /// Deployment for the step 1 and >=
         /// </summary>
         private void DeployStepOneAndMore(int currentStep) {
+            if (HasBeenCancelled)
+                return;
 
             _currentStepDeployPercentage = 0;
             CurrentStep = currentStep;
 
             if (currentStep <= MaxStep) {
 
-                List<FileToDeploy> filesToDeploy;
-
-                if (currentStep == 1) {
-                    filesToDeploy = GetFilesToDeployInStepOne();
-                } else {
-                    filesToDeploy = _proEnv.Deployer.GetFilesToDeployForStep(currentStep,
-                        new List<string> {_proEnv.BaseCompilationPath},
-                        _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
-                    );
-                }
-
-                _filesToDeployPerStep.Add(currentStep, _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f));
+                List<FileToDeploy> filesToDeploy = currentStep == 1 ? GetFilesToDeployInStepOne() : GetFilesToDeployInStepTwoAndMore(currentStep);
+                _filesToDeployPerStep.Add(currentStep, Deployfiles(filesToDeploy));
 
                 // hook
                 ExecuteDeploymentHook(currentStep);
 
             } else {
                 
+                // end of the overall deployment
                 EndOfDeployment();
             }
         }
@@ -235,23 +264,27 @@ namespace _3PA.MainFeatures.Pro {
         /// Execute the hook procedure for the step 0+
         /// </summary>
         private void ExecuteDeploymentHook(int currentStep) {
+            if (HasBeenCancelled)
+                return;
+
+            currentStep++;
+
             // launch the compile process for the current file
             if (File.Exists(Config.FileDeploymentHook)) {
-                var hookExec = new ProExecutionDeploymentHook(_proEnv) {
-                    DeploymentStep = currentStep,
+                _hookExecution = new ProExecutionDeploymentHook(_proEnv) {
+                    DeploymentStep = currentStep - 1,
                     DeploymentSourcePath = _currentProfile.SourceDirectory,
                     NoBatch = true,
                     NeedDatabaseConnection = true
                 };
-                currentStep++;
-                hookExec.OnExecutionEnd += execution => {
+                _hookExecution.OnExecutionEnd += execution => {
                     DeployStepOneAndMore(currentStep);
                 };
-                if (!hookExec.Start()) {
+                if (!_hookExecution.Start()) {
                     DeployStepOneAndMore(currentStep);
                 }
             } else {
-                DeployStepOneAndMore(++currentStep);
+                DeployStepOneAndMore(currentStep);
             }
         }
 
@@ -260,7 +293,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         private void EndOfDeployment() {
 
-            TotalDeploymentTime = GetElapsedTime();
+            TotalDeploymentTime = ElapsedTime;
 
             if (!HasBeenCancelled && !CompilationHasFailed) {
                 if (OnExecutionOk != null)
@@ -337,11 +370,11 @@ namespace _3PA.MainFeatures.Pro {
             var nbCompilationError = 0;
             var nbCompilationWarning = 0;
 
-            // compiled files
-            foreach (var fileToCompile in _proCompilation.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
+            // compilation errors
+            foreach (var kpv in _proCompilation.ListErrors) {
+                var filePath = kpv.Key;
+                var errorsOfTheFile = kpv.Value;
 
-                var toCompile = fileToCompile;
-                var errorsOfTheFile = _proCompilation.ListErrors.ContainsKey(toCompile.InputPath) ? _proCompilation.ListErrors[toCompile.InputPath] : new List<FileError>();
                 bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
                 bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
 
@@ -349,7 +382,7 @@ namespace _3PA.MainFeatures.Pro {
                     // only add compilation errors
                     line.Clear();
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                    line.Append(ProDeploymentHtml.FormatCompilationResultForSingleFile(fileToCompile.InputPath, errorsOfTheFile, null));
+                    line.Append(ProDeploymentHtml.FormatCompilationResultForSingleFile(filePath, errorsOfTheFile, null));
                     line.Append("</div>");
                     listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
                 }
@@ -357,17 +390,18 @@ namespace _3PA.MainFeatures.Pro {
                 if (hasError) {
                     nbCompilationError++;
                     // if compilation errors, delete all transfer records for this file since they obviously didn't happen
-                    _filesToDeployPerStep[0].RemoveAll(move => move.Origin.Equals(toCompile.InputPath));
+                    if (_filesToDeployPerStep.ContainsKey(0)) {
+                        _filesToDeployPerStep[0].RemoveAll(move => move.Origin.Equals(filePath));
+                    }
                 } else if (hasWarning)
                     nbCompilationWarning++;
             }
 
 
+            // for each deploy step
             var listLinesByStep = new Dictionary<int, List<Tuple<int, string>>> {
                     {0, new List<Tuple<int, string>>()}
                 };
-
-            // for each deploy step
             foreach (var kpv in _filesToDeployPerStep) {
                 // group by transfer type
                 foreach (var groupType in kpv.Value.GroupBy(deploy => deploy.DeployType).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().DeployType)) {
@@ -435,8 +469,8 @@ namespace _3PA.MainFeatures.Pro {
                 currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
             if (nbCompilationWarning > 0)
                 currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
-            if (_proCompilation.NbFilesToCompile - nbCompilationError - nbCompilationWarning > 0)
-                currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (_proCompilation.NbFilesToCompile - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
+            if (_proCompilation.NumberOfFilesTreated - nbCompilationError - nbCompilationWarning > 0)
+                currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (_proCompilation.NumberOfFilesTreated - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
 
             // deploy
             currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Deploying <b>" + totalDeployedFiles + "</b> files : <b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
