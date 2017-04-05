@@ -184,6 +184,11 @@ namespace _3PA.MainFeatures.Pro {
                 if (_localTempDir != null)
                     Utils.DeleteDirectory(_localTempDir, true);
 
+                // restore splashscreen
+                if (!string.IsNullOrEmpty(ProEnv.ProwinPath))
+                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"));
+
+
             } catch (Exception) {
                 // dont care
             }
@@ -295,7 +300,16 @@ namespace _3PA.MainFeatures.Pro {
             // Parameters
             _exeParameters = new StringBuilder();
             AppendProgressParameters(_exeParameters);
-            _exeParameters.Append(_useBatchMode ? " -b" : " -nosplash");
+           if (_useBatchMode) {
+                _exeParameters.Append(" -b");
+            } else {
+                // we suppress the splashscreen
+                if (ProEnv.CanProwinUseNoSplash) {
+                    _exeParameters.Append(" -nosplash");
+                } else {
+                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"));
+                }
+            }
             _exeParameters.Append(" -p " + runnerPath.ProQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
                 _exeParameters.Append(" " + ProEnv.CmdLineParameters.Trim());
@@ -311,7 +325,7 @@ namespace _3PA.MainFeatures.Pro {
                 }, 10);
             }
 
-            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnv.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
+            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnv.ProwinPath + "<br><br><b>Parameters :</b><br>" + _exeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + _localTempDir + "'>" + _localTempDir + "</a>");
 
             return true;
         }
@@ -526,8 +540,21 @@ namespace _3PA.MainFeatures.Pro {
             });
         }
 
+        /// <summary>
+        /// move a file, catch the errors
+        /// </summary>
+        private void MoveSplashScreenNoError(string from, string to) {
+            if (File.Exists(from)) {
+                try {
+                    File.Move(from, to);
+                } catch (Exception) {
+                    // if it fails it is not really a problem
+                }
+            }
+        }
+
         #endregion
-        
+
     }
 
     #endregion
@@ -1284,12 +1311,14 @@ namespace _3PA.MainFeatures.Pro {
             }
             // add the datadigger folder to the propath
             _propath = Config.FolderDataDigger + "," + _propath;
-            
+            _processStartDir = Config.FolderDataDigger;
+
             return true;
         }
 
         protected override void AppendProgressParameters(StringBuilder sb) {
             sb.Append(" -basekey \"INI\" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8 ");
+            sb.Append(" -T " + _localTempDir.Trim('\\').ProQuoter());
         }
     }
 

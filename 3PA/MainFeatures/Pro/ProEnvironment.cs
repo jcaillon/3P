@@ -392,6 +392,10 @@ namespace _3PA.MainFeatures.Pro {
                 get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
 
+            public bool CanProwinUseNoSplash {
+                get { return (ProwinPath ?? "").Contains("1160"); }
+            }
+
             #endregion
         }
 
