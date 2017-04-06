@@ -318,9 +318,9 @@ namespace _3PA.MainFeatures.Pro {
 
             /// <summary>
             /// Returns the fullpath of all the files with the name fileName present either
-            /// in the propath (they would be on top of the list) or in the environnement local
+            /// in the propath (they would be on top of the list) or in the environment local
             /// base path
-            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
+            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specify an extension-less
             /// fileName to match several files
             /// </summary>
             public List<string> FindFiles(string fileName, string extensions = null) {
@@ -346,7 +346,7 @@ namespace _3PA.MainFeatures.Pro {
 
             /// <summary>
             /// Returns the fullpath of all files named fileName in the dirPath
-            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
+            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specify an extension-less
             /// fileName to match several files
             /// </summary>
             public List<string> FindAllFiles(string dirPath, string fileName, string extensions = null) {

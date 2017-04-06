@@ -410,8 +410,8 @@ namespace _3PA.MainFeatures.Pro {
                     currentOperation = CurrentOperation.Run;
 
                 // Clear flag or we can't do any other actions on this file
-                FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
+                FilesInfo.GetFileInfo(treatedFile.SourcePath).CurrentOperation &= ~currentOperation;
+                var isCurrentFile = treatedFile.SourcePath.EqualsCi(Npp.CurrentFile.Path);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
 
@@ -448,7 +448,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
 
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Npp.CurrentFile.Path);
+                var isCurrentFile = treatedFile.SourcePath.EqualsCi(Npp.CurrentFile.Path);
                 var otherFilesInError = false;
                 int nbWarnings = 0;
                 int nbErrors = 0;
@@ -460,7 +460,7 @@ namespace _3PA.MainFeatures.Pro {
                             if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
                             else nbErrors++;
                         }
-                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
+                        otherFilesInError = otherFilesInError || !treatedFile.SourcePath.EqualsCi(keyValue.Key);
                     }
                 }
 
@@ -486,7 +486,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Sci.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProDeploymentHtml.FormatCompilationResultForSingleFile(treatedFile.InputPath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProDeploymentHtml.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }

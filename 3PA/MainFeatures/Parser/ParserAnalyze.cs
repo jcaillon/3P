@@ -1624,6 +1624,16 @@ namespace _3PA.MainFeatures.Parser {
 
                 // Parse the include file ?
                 if (!string.IsNullOrEmpty(fullFilePath)) {
+
+                    var fileOwnerOfThisInclude = _parsedIncludes[bracketToken.OwnerNumber];
+                    while (fileOwnerOfThisInclude != null) {
+                        if (fileOwnerOfThisInclude.FullFilePath.Equals(fullFilePath)) {
+                            // we are in a bad case of recursive include, stop here before we go out of memory
+                            return;
+                        }
+                        fileOwnerOfThisInclude = fileOwnerOfThisInclude.Parent;
+                    } 
+
                     ProLexer proLexer;
 
                     // did we already parsed this file in a previous parse session?

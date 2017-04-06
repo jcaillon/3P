@@ -415,7 +415,7 @@ namespace _3PA.MainFeatures.Pro {
             // clear errors on each compiled file
             if (fileToCompiles != null) {
                 foreach (var fileToCompile in fileToCompiles) {
-                    ClearAllErrors(fileToCompile.InputPath, true);
+                    ClearAllErrors(fileToCompile.SourcePath, true);
                 }
             }
 

@@ -281,6 +281,7 @@ namespace _3PA.MainFeatures.Pro {
                         if (!_ignoredFiles.Contains(args.Link)) {
                             _ignoredFiles.Add(args.Link);
                             UserCommunication.NotifyUnique("Prototype_synchro", "Automatic prototype updates stopped for the file :<br>" + Npp.CurrentFile.Path + "<br><br><i>This is effective until you restart Notepad++<br>You can also trigger an update manually to restart the auto-update</i>", MessageImg.MsgInfo, "Function prototypes", "Synchronization stopped", null, 5);
+                            args.Handled = true;
                         }
                     }
                 }, 5);
