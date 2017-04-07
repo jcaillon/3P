@@ -29,6 +29,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using WixToolset.Dtf.Compression;
+using WixToolset.Dtf.Compression.Zip;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.NppCore;
@@ -257,16 +259,12 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Fields
 
-        /// <summary>
-        /// Allows us to keep track of the opened zip needed for this deployment
-        /// </summary>
-        private Dictionary<string, ZipStorer> _openedZip = new Dictionary<string, ZipStorer>();
-
         private string _envName;
         private string _envSuffix;
         private bool _compileLocally;
         private string _deploymentDirectory;
-        ProcessIo _prolibExe;
+        private int _totalNbFilesToDeploy;
+        private int _nbFilesDeployed;
 
         #endregion
 
@@ -280,7 +278,7 @@ namespace _3PA.MainFeatures.Pro {
             _envSuffix = proEnv.Suffix;
             _compileLocally = proEnv.CompileLocally;
             _deploymentDirectory = proEnv.BaseCompilationPath;
-            _prolibExe = new ProcessIo(proEnv.ProlibPath);
+            ProlibPath = proEnv.ProlibPath;
 
             Init(confFilePath);
         }
@@ -374,10 +372,12 @@ namespace _3PA.MainFeatures.Pro {
             get { return DeployRules.OfType<DeployFilterRule>().ToNonNullList(); }
         }
 
+        public string ProlibPath { get; set; }
+
         #endregion
 
         #region public methods
-        
+
         /// <summary>
         /// Creates a list of files to deploy for the given step
         /// </summary>
@@ -594,7 +594,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage, CancellationTokenSource cancelToken) {
 
-            Dictionary<string, string> dicPlToTempFolder = null;
             try {
                 if (cancelToken == null) {
                     cancelToken = new CancellationTokenSource();
@@ -603,10 +602,7 @@ namespace _3PA.MainFeatures.Pro {
                     CancellationToken = cancelToken.Token,
                     MaxDegreeOfParallelism = Environment.ProcessorCount
                 };
-                
-                int[] totalFile = {0};
-                int[] nbFilesDone = {0};
-
+               
                 // make sure to transfer a given file only once at the same place (happens with .cls file since a source
                 // can have several .r files generated if it is used in another classes)
                 deployToDo = deployToDo
@@ -614,251 +610,98 @@ namespace _3PA.MainFeatures.Pro {
                     .Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First())
                     .ToList();
 
-                totalFile[0] = deployToDo.Count;
+                _totalNbFilesToDeploy = deployToDo.Count;
 
-                // check that every target dir exist (for copy/move deployments)
+                #region for archive types we do everything here
+
+                // Create the list of each archive + each file in each archive
+                // path of archive -> (ArchiveInfo, Dictionary<relativeArchivePath, sourcePath>, FileToDeploy)
+                var archives = new Dictionary<string, Tuple<IArchiveInfo, Dictionary<string, string>, Dictionary<string, FileToDeployArchive>>>();
                 deployToDo
-                    .Where(deploy => deploy.DeployType == DeployType.Copy || deploy.DeployType == DeployType.Move)
-                    .GroupBy(deploy => Path.GetDirectoryName(deploy.To))
-                    .Select(group => group.First())
-                    .ToNonNullList()
-                    .ForEach(deploy => CreateDirectory(Path.GetDirectoryName(deploy.To), deploy));
-
-                // Special preparation for archives, we compute the archive path and the relative path of the file in the archive
-                var archiveDeployList = deployToDo
                     .Where(deploy => deploy is FileToDeployArchive)
                     .Cast<FileToDeployArchive>()
-                    .ToNonNullList();
-                archiveDeployList.ForEach(toArchiveFile => toArchiveFile.PreDeployment());
-
-                // also make sure that the folder to the archive file exists
-                archiveDeployList
-                    .GroupBy(deploy => deploy.ArchivePath)
-                    .Select(group => group.First())
                     .ToNonNullList()
-                    .ForEach(deploy => CreateDirectory(Path.GetDirectoryName(deploy.ArchivePath), deploy));
+                    .ForEach(deployArchive => {
+                        if (deployArchive.IfFromFileExists()) {
 
-                // canceled?
-                cancelToken.Token.ThrowIfCancellationRequested();
-
-                #region for .zip we do everything here
-
-                var zipDeployments = archiveDeployList
-                    .Where(deploy => deploy is FileToDeployZip)
-                    .Cast<FileToDeployZip>()
-                    .ToNonNullList();
-
-                if (zipDeployments.Count > 0) {
-
-                    // if we add a file in a zip and said file already exists in the zip, then it will appear twice!
-                    // so we remove any existing file before adding the new ones
-                    var filesToRemoveFromZip = new Dictionary<string, HashSet<string>>();
-
-                    foreach (var file in zipDeployments) {
-                        // for .zip, open the zip stream
-                        if (!_openedZip.ContainsKey(file.ArchivePath)) {
-                            try {
-                                if (!File.Exists(file.ArchivePath)) {
-                                    _openedZip.Add(file.ArchivePath, ZipStorer.Create(file.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
-                                } else {
-                                    _openedZip.Add(file.ArchivePath, ZipStorer.Open(file.ArchivePath, FileAccess.Write));
-                                    filesToRemoveFromZip.Add(file.ArchivePath, new HashSet<string>());
-                                }
-                            } catch (Exception e) {
-                                ErrorHandler.ShowErrors(e, "Couldn't create/open the .zip file");
-                            }
-                        }
-
-                        // we didn't create the zip? then we need to remove this file if it exists
-                        if (filesToRemoveFromZip.ContainsKey(file.ArchivePath))
-                            filesToRemoveFromZip[file.ArchivePath].Add(file.RelativePathInArchive.Replace('\\', '/'));
-                    }
-                    
-                    // if we add a file in a zip that already exists in said zip, it will appear twice, here we delete existing file
-                    // that will be replaced during the deployment
-                    // remove the files that are already in the zip file or they will appear twice when we add them
-                    foreach (var kpv in filesToRemoveFromZip) {
-                        ZipStorer zip = _openedZip[kpv.Key];
-                        var filesToDelete = zip.ReadCentralDir().Where(zipFileEntry => kpv.Value.Contains(zipFileEntry.FilenameInZip)).ToList();
-                        _openedZip.Remove(kpv.Key);
-                        ZipStorer.RemoveEntries(ref zip, filesToDelete);
-                        _openedZip.Add(kpv.Key, zip);
-                    }
-
-                    foreach (var file in zipDeployments) {
-                        // canceled?
-                        cancelToken.Token.ThrowIfCancellationRequested();
-
-                        if (file.DeploySelf(_openedZip[file.ArchivePath]))
-                            nbFilesDone[0]++;
-                        if (updateDeploymentPercentage != null)
-                        updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
-                    }
-                }
-
-                #endregion
-
-                // canceled?
-                cancelToken.Token.ThrowIfCancellationRequested();
-
-                #region for .pl deployments, we treat them before anything else
-
-                // for PL, we need to MOVE each file into a temporary folder with the internal structure of the .pl file,
-                // then move it back where it was for further deploys...
-
-                var plDeployments = archiveDeployList
-                    .Where(deploy => deploy is FileToDeployProlib)
-                    .Cast<FileToDeployProlib>()
-                    .ToNonNullList();
-
-                if (plDeployments.Count > 0) {
-
-                    // then we create a unique temporary folder for each .pl
-                    dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-                    foreach (var pathPl in plDeployments.Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath)).Select(deploy => deploy.ArchivePath).Distinct()) {
-                        // create a unique temp folder for this .pl
-                        if (!dicPlToTempFolder.ContainsKey(pathPl)) {
-                            var plDirPath = Path.GetDirectoryName(pathPl);
-                            if (plDirPath != null) {
-                                var uniqueTempFolder = Path.Combine(plDirPath, Path.GetFileName(pathPl) + "~" + Path.GetRandomFileName());
-                                dicPlToTempFolder.Add(pathPl, uniqueTempFolder);
-                                CreateDirectory(uniqueTempFolder, plDeployments.Find(deploy => !string.IsNullOrEmpty(deploy.ArchivePath) && deploy.ArchivePath.Equals(pathPl)), FileAttributes.Hidden);
-                            }
-                        }
-                    }
-
-                    // for each .pl that needs to be created...
-                    foreach (var pl in dicPlToTempFolder) {
-                        var pl1 = pl;
-                        var onePlDeployments = plDeployments
-                            .Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath) && deploy.ArchivePath.Equals(pl1.Key))
-                            .ToNonNullList();
-                        if (onePlDeployments.Count == 0)
-                            continue;
-
-                        //  we set the temporary folder on which each file will be copied..
-                        // Tuple : <(base) temp directory, relative path in pl, path to .pl>
-                        var dicTempFolderToPl = new Dictionary<string, Tuple<string, string, string>>(StringComparer.CurrentCultureIgnoreCase);
-                        foreach (var fileToDeploy in onePlDeployments) {
-                            if (string.IsNullOrEmpty(fileToDeploy.ArchivePath))
-                                continue;
-
-                            if (dicPlToTempFolder.ContainsKey(fileToDeploy.ArchivePath)) {
-                                fileToDeploy.ToTemp = Path.Combine(
-                                    dicPlToTempFolder[fileToDeploy.ArchivePath],
-                                    fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')
+                            // add new archive
+                            if (!archives.ContainsKey(deployArchive.ArchivePath)) {
+                                archives.Add(
+                                    deployArchive.ArchivePath,
+                                    new Tuple<IArchiveInfo, Dictionary<string, string>, Dictionary<string, FileToDeployArchive>>(deployArchive.NewArchive(this), new Dictionary<string, string>(), new Dictionary<string, FileToDeployArchive>())
                                 );
+                            }
 
-                                // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
-                                var tempSubFolder = Path.GetDirectoryName(fileToDeploy.ToTemp);
-                                if (!string.IsNullOrEmpty(tempSubFolder) && !dicTempFolderToPl.ContainsKey(tempSubFolder)) {
-                                    dicTempFolderToPl.Add(
-                                        tempSubFolder,
-                                        new Tuple<string, string, string>(
-                                            dicPlToTempFolder[fileToDeploy.ArchivePath], // path of the temp dir
-                                            Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')), // relative path in .pl
-                                            fileToDeploy.ArchivePath) // path to the .pl file
-                                    );
-
-                                    // also, create the folder
-                                    CreateDirectory(tempSubFolder, fileToDeploy);
-                                }
+                            // add new file in archive
+                            if (!archives[deployArchive.ArchivePath].Item2.ContainsKey(deployArchive.From)) {
+                                archives[deployArchive.ArchivePath].Item2.Add(deployArchive.RelativePathInArchive, deployArchive.From);
+                                archives[deployArchive.ArchivePath].Item3.Add(deployArchive.RelativePathInArchive, deployArchive);
                             }
                         }
-                        
-                        // for each subfolder in the .pl
-                        foreach (var plSubFolder in dicTempFolderToPl) {
-                            var onePlSubFolderDeployments = onePlDeployments
-                                .Where(deploy => plSubFolder.Key.Equals(Path.GetDirectoryName(deploy.ToTemp)))
-                                .ToNonNullList();
-                            if (onePlSubFolderDeployments.Count == 0)
-                                continue;
+                    });
 
-                            // move files to the temp subfolder
-                            Parallel.ForEach(onePlSubFolderDeployments, parallelOptions, deploy => {
-                                // canceled?
-                                parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+                // pack each archive
+                foreach (var archive in archives) {
+                    // canceled?
+                    cancelToken.Token.ThrowIfCancellationRequested();
+                    try {
+                        var currentArchive = archive;
+                        archive.Value.Item1.PackFileSet(archive.Value.Item2, CompressionLevel.None, (sender, args) => {
+                            // canceled?
+                            if (!args.CannotCancel)
+                                cancelToken.Token.ThrowIfCancellationRequested();
 
-                                deploy.IsOk = MoveFile(deploy.From, deploy.ToTemp, deploy);
-                                if (updateDeploymentPercentage != null)
-                                    updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
-                            });
-
-                            // now we just need to add the content of temp folders into the .pl
-                            _prolibExe.StartInfo.WorkingDirectory = plSubFolder.Value.Item1; // base temp dir
-                            _prolibExe.Arguments = plSubFolder.Value.Item3.ProQuoter() + " -create -nowarn -add " + Path.Combine(plSubFolder.Value.Item2, "*").ProQuoter();
-                            var prolibOk = _prolibExe.TryDoWait(true);
-
-                            // move files from the temp subfolder
-                            Parallel.ForEach(onePlSubFolderDeployments, parallelOptions, deploy => {
-                                // canceled?
-                                parallelOptions.CancellationToken.ThrowIfCancellationRequested();
-
-                                deploy.IsOk = deploy.IsOk && MoveFile(deploy.ToTemp, deploy.From, deploy);
-                                if (!prolibOk) {
-                                    deploy.DeployError = _prolibExe.ErrorOutput.ToString();
-                                    deploy.IsOk = false;
+                            if (args.ProgressType == ArchiveProgressType.FinishFile) {
+                                // set the FileToDeploy state
+                                if (currentArchive.Value.Item3.ContainsKey(args.CurrentFileName)) {
+                                    if (args.TreatmentException != null) {
+                                        currentArchive.Value.Item3[args.CurrentFileName].RegisterArchiveException(args.TreatmentException);
+                                    } else {
+                                        currentArchive.Value.Item3[args.CurrentFileName].IsOk = true;
+                                    }
                                 }
-                                if (deploy.IsOk)
-                                    nbFilesDone[0]++;
-                            });
-                        }
 
-                        // compress .pl
-                        _prolibExe.StartInfo.WorkingDirectory = Path.GetDirectoryName(pl.Key) ?? "";
-                        _prolibExe.Arguments = pl.Key.ProQuoter() + " -compress -nowarn";
-                        _prolibExe.TryDoWait(true);
+                                _nbFilesDeployed++;
+                                if (updateDeploymentPercentage != null)
+                                    updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                            }
+                        });
+                    } catch (OperationCanceledException) {
+                        throw;
+                    } catch (Exception e) {
+                        // set the deploy error for each file
+                        foreach (var kpv in archive.Value.Item3) {
+                            kpv.Value.RegisterArchiveException(e);
+                        }
                     }
                 }
 
                 #endregion
 
                 // do a deployment action for each file
-                Parallel.ForEach(deployToDo.Where(deploy => deploy.CanParallelizeDeploy && !deploy.IsOk), parallelOptions, file => {
+                Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployArchive) && deploy.CanParallelizeDeploy), parallelOptions, file => {
                     // canceled?
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 
                     if (file.DeploySelf())
-                        nbFilesDone[0]++;
+                        _nbFilesDeployed++;
                     if (updateDeploymentPercentage != null)
-                        updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
+                        updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
                 });
 
                 // don't use parallel for the others
-                foreach (var file in deployToDo.Where(deploy => !deploy.CanParallelizeDeploy && !deploy.IsOk)) {
+                foreach (var file in deployToDo.Where(deploy => !(deploy is FileToDeployArchive) && !deploy.CanParallelizeDeploy)) {
                     // canceled?
                     cancelToken.Token.ThrowIfCancellationRequested();
 
                     if (file.DeploySelf())
-                        nbFilesDone[0]++;
+                        _nbFilesDeployed++;
                     if (updateDeploymentPercentage != null)
-                        updateDeploymentPercentage((float) nbFilesDone[0] / totalFile[0] * 100);
+                        updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
                 }
 
             } catch (OperationCanceledException) {
                 // we expect this exception if the task has been canceled
-            } finally {
-
-                #region dispose .zip resources
-
-                // need to dispose of the object/stream here
-                foreach (var zipStorer in _openedZip)
-                    zipStorer.Value.Close();
-                _openedZip.Clear();
-
-                #endregion
-
-                #region Delete temp directories for .pl
-
-                if (dicPlToTempFolder != null) {
-                    // for each .pl that needs to be created...
-                    foreach (var pl in dicPlToTempFolder) {
-                        // delete temp folder
-                        DeleteDirectory(pl.Value, null, true);
-                    }
-                }
-
-                #endregion
             }
 
             return deployToDo;
@@ -884,60 +727,7 @@ namespace _3PA.MainFeatures.Pro {
             input = ReplaceVariablesIn(input);
             return input.StartsWith(":") ? input.Remove(0, 1) : input.Replace('/', '\\').WildCardToRegex();
         }
-        
-        /// <summary>
-        /// Creates the directory, can apply attributes
-        /// </summary>
-        private bool CreateDirectory(string path, FileToDeploy file, FileAttributes attributes = FileAttributes.Directory) {
-            try {
-                if (Directory.Exists(path))
-                    return true;
-                var dirInfo = Directory.CreateDirectory(path);
-                dirInfo.Attributes |= attributes;
-            } catch (Exception e) {
-                if (file != null)
-                    file.DeployError = "Couldn't create directory " + path.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
 
-        /// <summary>
-        /// Delete a dir, recursively
-        /// </summary>
-        private bool DeleteDirectory(string path, FileToDeploy file, bool recursive) {
-            try {
-                if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
-                    return true;
-                Directory.Delete(path, recursive);
-            } catch (Exception e) {
-                if (file != null)
-                    file.DeployError = "Couldn't delete the directory " + path.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Move a file, return true if ok, false otherwise
-        /// </summary>
-        private bool MoveFile(string sourceFile, string targetFile, FileToDeploy file) {
-            try {
-                if (sourceFile.Equals(targetFile))
-                    return true;
-                if (!File.Exists(sourceFile)) {
-                    file.DeployError = "The source file " + sourceFile.ProQuoter() + " doesn't exist";
-                    return false;
-                }
-                File.Delete(targetFile);
-                File.Move(sourceFile, targetFile);
-            } catch (Exception e) {
-                file.DeployError = "Couldn't move " + sourceFile.ProQuoter() + " to  " + targetFile.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-        
         #endregion
 
         #endregion
@@ -1055,7 +845,8 @@ namespace _3PA.MainFeatures.Pro {
             switch (type) {
                 case DeployType.Prolib:
                     return new DeployTransferRuleProlib();
-                case DeployType.Archive:
+                case DeployType.Cab:
+                    return new DeployTransferRuleCab();
                 case DeployType.Zip:
                     return new DeployTransferRuleZip();
                 case DeployType.DeleteInProlib:
@@ -1076,46 +867,64 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
     }
 
-    #region DeployTransferRuleProlib
+    #region DeployTransferRuleArchive
 
-    public class DeployTransferRuleProlib : DeployTransferRule {
+    public abstract class DeployTransferRuleArchive : DeployTransferRule {
 
-        public override DeployType Type { get { return DeployType.Prolib; } }
+        public virtual string ArchiveExt { get { return ".arc"; } }
 
         public override bool IsValid(out string error) {
-            if (!DeployTarget.ContainsFast(".pl")) {
-                error = "Line " + Line + " : The PROLIB rule has an incorrect deployment target, a .pl should be found";
+            if (!DeployTarget.ContainsFast(ArchiveExt)) {
+                error = "Line " + Line + " : The rule has an incorrect deployment target, a " + ArchiveExt + " should be found";
                 return false;
             }
             return base.IsValid(out error);
         }
+    }
+
+    #region DeployTransferRuleProlib
+
+    public class DeployTransferRuleProlib : DeployTransferRuleArchive {
+
+        public override DeployType Type { get { return DeployType.Prolib; } }
+
+        public override string ArchiveExt { get { return ".pl"; } }
     }
 
     #endregion
 
     #region DeployTransferRuleZip
 
-    public class DeployTransferRuleZip : DeployTransferRule {
+    public class DeployTransferRuleZip : DeployTransferRuleArchive {
 
         public override DeployType Type { get { return DeployType.Zip; } }
 
-        public override bool IsValid(out string error) {
-            if (!DeployTarget.ContainsFast(".zip")) {
-                error = "Line " + Line + " : The ZIP rule has an incorrect deployment target, a .zip should be found";
-                return false;
-            }
-            return base.IsValid(out error);
-        }
+        public override string ArchiveExt { get { return ".zip"; } }
+    }
+
+    #endregion
+
+    #region DeployTransferRuleCab
+
+    public class DeployTransferRuleCab : DeployTransferRuleArchive {
+
+        public override DeployType Type { get { return DeployType.Cab; } }
+
+        public override string ArchiveExt { get { return ".cab"; } }
     }
 
     #endregion
 
     #region DeployTransferRuleDeleteInProlib
 
-    public class DeployTransferRuleDeleteInProlib : DeployTransferRule {
+    public class DeployTransferRuleDeleteInProlib : DeployTransferRuleArchive {
 
         public override DeployType Type { get { return DeployType.DeleteInProlib; } }
+
+        public override string ArchiveExt { get { return ".pl"; } }
     }
+
+    #endregion
 
     #endregion
 
@@ -1170,8 +979,9 @@ namespace _3PA.MainFeatures.Pro {
     public enum DeployType {
         Prolib = 1,
         Zip = 2,
-        DeleteInProlib = 3,
-        Archive = 10, // all types <= Archive have ArchivePath set after the deployment
+        Cab = 3,
+        DeleteInProlib = 4,
+        Archive = 10,
 
         Ftp = 15,
         Delete = 16,
@@ -1183,483 +993,5 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
-    #region FileToDeploy
-
-    /// <summary>
-    /// Represents a file that needs to be deployed
-    /// </summary>
-    public class FileToDeploy {
-
-        #region Properties
-
-        /// <summary>
-        /// The path of input file that was originally compiled to trigger this move
-        /// </summary>
-        public string Origin { get; set; }
-
-        /// <summary>
-        /// Need to move this file FROM this path
-        /// </summary>
-        public string From { get; set; }
-
-        /// <summary>
-        /// Need to move this file TO this path
-        /// </summary>
-        public string To { get; set; }
-
-        /// <summary>
-        /// true if the transfer went fine
-        /// </summary>
-        public bool IsOk { get; set; }
-
-        /// <summary>
-        /// target directory for the deployment
-        /// </summary>
-        public string TargetPath { get; set; }
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public virtual DeployType DeployType { get { return DeployType.Copy; } }
-
-        /// <summary>
-        /// Null if no errors, otherwise it contains the description of the error that occurred for this file
-        /// </summary>
-        public string DeployError { get; set; }
-
-        /// <summary>
-        /// Return true if the deployment type can be parallelized
-        /// </summary>
-        public virtual bool CanParallelizeDeploy { get { return false; } }
-
-        /// <summary>
-        /// Directory name of To or path of the archive file
-        /// </summary>
-        public virtual string DestinationBasePath { get { return Path.GetDirectoryName(To); } }
-
-        #endregion
-
-        #region Life and death
-
-        public FileToDeploy(string targetPath) {
-            TargetPath = targetPath;
-        }
-
-        #endregion
-
-        #region Methods
-
-        public FileToDeploy Set(string origin, string from, string to) {
-            Origin = origin;
-            From = from;
-            To = to;
-            return this;
-        }
-
-        /// <summary>
-        /// Returns a copy if this object, setting properties in the meantime
-        /// </summary>
-        public FileToDeploy Copy(string origin, string from, string to) {
-            return new FileToDeploy(TargetPath) {
-                Origin = origin,
-                From = from,
-                To = to
-            };
-        }
-
-        /// <summary>
-        /// Deploy this file
-        /// </summary>
-        public virtual bool DeploySelf() {
-            if (IsOk)
-                return false;
-            IsOk = TryDeploy();
-            return IsOk;
-        }
-
-        /// <summary>
-        /// Deploy this file
-        /// </summary>
-        public virtual bool TryDeploy() {
-            return true;
-        }
-
-        #endregion
-
-        #region Factory
-
-        public static FileToDeploy New(DeployType deployType, string targetPath) {
-            switch (deployType) {
-                case DeployType.Prolib:
-                    return new FileToDeployProlib(targetPath);
-                case DeployType.Zip:
-                case DeployType.Archive:
-                    return new FileToDeployZip(targetPath);
-                case DeployType.DeleteInProlib:
-                    return new FileToDeployDeleteInProlib(targetPath);
-                case DeployType.Ftp:
-                    return new FileToDeployFtp(targetPath);
-                case DeployType.Delete:
-                    return new FileToDeployDelete(targetPath);
-                case DeployType.Copy:
-                    return new FileToDeployCopy(targetPath);
-                case DeployType.Move:
-                    return new FileToDeployMove(targetPath);
-                default:
-                    throw new ArgumentOutOfRangeException("deployType", deployType, null);
-            }
-        }
-
-        #endregion
-    }
-
-    #endregion
-
-    #region FileToDeployArchive
-
-    internal abstract class FileToDeployArchive : FileToDeploy {
-
-        /// <summary>
-        /// Path to the .pl or .zip file in which we need to include this file
-        /// </summary>
-        public string ArchivePath { get; set; }
-
-        /// <summary>
-        /// The relative path of the file within the archive
-        /// </summary>
-        public string RelativePathInArchive { get; set; }
-
-        /// <summary>
-        /// Path to the archive file
-        /// </summary>
-        public override string DestinationBasePath { get { return ArchivePath ?? To; } }
-
-        public virtual string ArchiveExt { get { return ".zip"; } }
-
-        protected FileToDeployArchive(string targetPath) : base(targetPath) {}
-
-        public virtual void PreDeployment() {
-            var pos = To.LastIndexOf(ArchiveExt, StringComparison.CurrentCultureIgnoreCase);
-            if (pos >= 0) {
-                var posEnd = pos + ArchiveExt.Length;
-                ArchivePath = To.Substring(0, posEnd);
-                RelativePathInArchive = To.Substring(posEnd + 1);
-            }
-        }
-
-    }
-
-    #endregion
-
-    #region FileToDeployProlib
-
-    internal class FileToDeployProlib : FileToDeployArchive {
-
-
-        /// <summary>
-        /// Temporary folder in which to copy the file before including it into a .pl
-        /// </summary>
-        public string ToTemp { get; set; }
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Prolib; } }
-
-        public override string ArchiveExt { get { return ".pl"; } }
-
-        public FileToDeployProlib(string targetPath) : base(targetPath) {}
-    }
-
-    #endregion
-
-    #region FileToDeployZip
-
-    internal class FileToDeployZip : FileToDeployArchive {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Zip; } }
-
-        public override string ArchiveExt { get { return ".zip"; } }
-
-        public FileToDeployZip(string targetPath) : base(targetPath) {}
-
-        public bool DeploySelf(ZipStorer zip) {
-            try {
-                zip.AddFile(ZipStorer.Compression.Deflate, From, RelativePathInArchive, "Added @ " + DateTime.Now);
-                IsOk = true;
-            } catch (Exception e) {
-                DeployError = "Couldn't zip " + From.ProQuoter() + " to " + ArchivePath.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-        
-    }
-
-    #endregion
-
-    #region FileToDeployDeleteInProlib
-
-    internal class FileToDeployDeleteInProlib : FileToDeployProlib {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.DeleteInProlib; } }
-
-        public FileToDeployDeleteInProlib(string targetPath) : base(targetPath) {}
-    }
-
-    #endregion
-
-    #region FileToDeployDelete
-
-    internal class FileToDeployDelete : FileToDeploy {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Delete; } }
-
-        public FileToDeployDelete(string targetPath) : base(targetPath) { }
-
-        public override bool TryDeploy() {
-            try {
-                if (string.IsNullOrEmpty(To) || !File.Exists(To))
-                    return true;
-                File.Delete(To);
-            } catch (Exception e) {
-                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-
-    }
-
-    #endregion
-
-    #region FileToDeployCopy
-
-    internal class FileToDeployCopy : FileToDeploy {
-
-        /// <summary>
-        /// Return true if the deployment type can be parallelized
-        /// </summary>
-        public override bool CanParallelizeDeploy { get { return true; } }
-
-        /// <summary>
-        /// This can be set to true for a file deployed during step 0 (compilation), if the last 
-        /// deployment is a Copy, we make it a Move because this allows us to directly compile were
-        /// we need to finally move it instead of compiling then copying...
-        /// </summary>
-        public bool FinalDeploy { get; set; }
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return FinalDeploy ? DeployType.Move : DeployType.Copy; } }
-
-        public FileToDeployCopy(string targetPath) : base(targetPath) {}
-
-        public override bool TryDeploy() {
-            try {
-                if (From.Equals(To))
-                    return true;
-                if (!File.Exists(From)) {
-                    DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
-                    return false;
-                }
-                File.Delete(To);
-                File.Copy(From, To);
-            } catch (Exception e) {
-                DeployError = "Couldn't copy " + From.ProQuoter() + " to  " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-    }
-
-    #endregion
-
-    #region FileToDeployMove
-
-    internal class FileToDeployMove : FileToDeploy {
-
-        /// <summary>
-        /// Return true if the deployment type can be parallelized
-        /// </summary>
-        public override bool CanParallelizeDeploy { get { return true; } }
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Move; } }
-
-        public FileToDeployMove(string targetPath) : base(targetPath) {}
-        
-        public override bool TryDeploy() {
-            try {
-                if (From.Equals(To))
-                    return true;
-                if (!File.Exists(From)) {
-                    DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
-                    return false;
-                }
-                File.Delete(To);
-                File.Move(From, To);
-            } catch (Exception e) {
-                DeployError = "Couldn't move " + From.ProQuoter() + " to  " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-    }
-
-    #endregion
-
-    #region FileToDeployFtp
-
-    internal class FileToDeployFtp : FileToDeploy {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Ftp; } }
-
-        /// <summary>
-        /// Path to the archive file
-        /// </summary>
-        public override string DestinationBasePath { get { return _serverUri ?? To; } }
-
-        private string _serverUri;
-
-        public FileToDeployFtp(string targetPath) : base(targetPath) { }
-
-        /// <summary>
-        /// Sends a file to a ftp(s) server : EASY MODE, connects, create the directories...
-        /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
-        /// </summary>
-        public override bool TryDeploy() {
-            if (string.IsNullOrEmpty(From) || !File.Exists(From)) {
-                DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
-                return false;
-            }
-            try {
-                // parse our uri
-                var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
-                var match = regex.Match(To.Replace("\\", "/"));
-                if (!match.Success) {
-                    DeployError = "Invalid URI for the targeted FTP : " + To.ProQuoter();
-                    return false;
-                }
-
-                _serverUri = match.Groups[1].Value;
-                var distantPath = match.Groups[6].Value;
-                string userName = null;
-                string passWord = null;
-                string server;
-                int port;
-                if (!string.IsNullOrEmpty(match.Groups[4].Value)) {
-                    userName = match.Groups[2].Value;
-                    passWord = match.Groups[3].Value.Trim(':');
-                    server = match.Groups[4].Value.Trim('@');
-                    if (!int.TryParse(match.Groups[5].Value.Trim(':'), out port))
-                        port = -1;
-                } else {
-                    server = match.Groups[2].Value;
-                    if (!int.TryParse(match.Groups[3].Value.Trim(':'), out port))
-                        port = -1;
-                }
-
-                FtpsClient ftp;
-                if (!_ftpClients.ContainsKey(_serverUri))
-                    _ftpClients.Add(_serverUri, new FtpsClient());
-                ftp = _ftpClients[_serverUri];
-
-                // try to connect!
-                if (!ftp.Connected) {
-                    if (!ConnectFtp(ftp, userName, passWord, server, port))
-                        return false;
-                }
-
-                // dispose of the ftp on shutdown
-                Plug.OnShutDown += DisconnectFtp;
-
-                try {
-                    ftp.PutFile(From, distantPath);
-                } catch (Exception) {
-
-                    // might be disconnected??
-                    try {
-                        ftp.GetCurrentDirectory();
-                    } catch (Exception) {
-                        if (!ConnectFtp(ftp, userName, passWord, server, port))
-                            return false;
-                    }
-
-                    // try to create the directory and then push the file again
-                    ftp.MakeDir((Path.GetDirectoryName(distantPath) ?? "").Replace('\\', '/'), true);
-                    ftp.PutFile(From, distantPath);
-                }
-            } catch (Exception e) {
-                DeployError = "Error sending " + From.ProQuoter() + " to FTP " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port) {
-            NetworkCredential credential = null;
-            if (!string.IsNullOrEmpty(userName))
-                credential = new NetworkCredential(userName, passWord);
-
-            var modes = new List<EsslSupportMode>();
-            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add((EsslSupportMode)l); });
-
-            ftp.DataConnectionMode = EDataConnectionMode.Passive;
-            while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {
-                foreach (var mode in modes.OrderByDescending(mode => mode)) {
-                    try {
-                        var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
-                        ftp.Connect(server, curPort, credential, mode, 1800);
-                        ftp.Connected = true;
-                        break;
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-                ftp.DataConnectionMode = EDataConnectionMode.Active;
-            }
-
-            // failed?
-            if (!ftp.Connected) {
-                DeployError = "Failed to connect to a FTP server with : " + string.Format(@"Username : {0}, Password : {1}, Host : {2}, Port : {3}", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port);
-                return false;
-            }
-
-            return true;
-        }
-
-        #region Static for FTP
-
-        private static Dictionary<string, FtpsClient> _ftpClients = new Dictionary<string, FtpsClient>();
-
-        private static void DisconnectFtp() {
-            foreach (var ftpsClient in _ftpClients) {
-                ftpsClient.Value.Close();
-            }
-            _ftpClients.Clear();
-        }
-
-        #endregion
-
-    }
-
-    #endregion
 
 }

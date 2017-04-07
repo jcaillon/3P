@@ -486,7 +486,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Sci.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProDeploymentHtml.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecutionCompile.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }
@@ -520,7 +520,7 @@ namespace _3PA.MainFeatures.Pro {
                         }, 5);
                     } else {
                         var hasError = deployedFiles.Exists(deploy => !deploy.IsOk);
-                        UserCommunication.NotifyUnique(Npp.CurrentFile.Path, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProDeploymentHtml.FormatCompilationResultForSingleFile(Npp.CurrentFile.Path, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
+                        UserCommunication.NotifyUnique(Npp.CurrentFile.Path, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProExecutionCompile.FormatCompilationResultForSingleFile(Npp.CurrentFile.Path, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
                     }
                 } else {
                     UserCommunication.Notify("The current file didn't pass the deployment filters for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "Filtered by deployment rules", args => {

@@ -50,7 +50,8 @@
 # - Move
 # - Copy
 # - Prolib : the deployment target must then contain a .pl file, you can adopt the syntax `file.pl\mysubfolder\` to put the file into a special path inside the .pl
-# - Zip : the deployment target must then contain a .zip file, you can adopt the syntax `file.zip\mysubfolder\` to put the file into a special path inside the .pl
+# - Zip : Same as Prolib, for zip files
+# - Cab : Same as Prolib, for cab files
 # - Ftp : the deployment target must follow the syntax `ftp://username:password@server:port/distant/path/` with username, password and port being optionnal; `/distant/path/` represents the path on the ftp server on which to put the deployed file
 # 
 #

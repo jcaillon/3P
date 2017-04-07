@@ -323,10 +323,8 @@ namespace _3PA.Lib {
         /// <summary>
         /// Returns the html link representation from a url
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="urlName"></param>
         /// <returns></returns>
-        public static string ToHtmlLink(this string url, string urlName = null) {
+        public static string ToHtmlLink(this string url, string urlName = null, bool accentuate = false) {
             try {
                 if (urlName == null && (File.Exists(url) || Directory.Exists(url))) {
                     var output = new StringBuilder();
@@ -334,7 +332,7 @@ namespace _3PA.Lib {
                     var splitted = url.Split('\\');
                     for (int i = 0; i < splitted.Length; i++) {
                         path.Append(splitted[i]);
-                        output.Append(string.Format("<a href='{0}'>{1}</a>{2}", path, splitted[i], i < splitted.Length - 1 ? "<span class='linkSeparator'>\\</span>" : ""));
+                        output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitted[i], i < splitted.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitted.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
                         path.Append("\\");
                     }
                     return output.ToString();
@@ -342,7 +340,7 @@ namespace _3PA.Lib {
             } catch (Exception) {
                 // ignored invalid char path
             }
-            return string.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
+            return string.Format("<a {2}href='{0}'>{1}</a>", url, urlName ?? url, accentuate ? "class='SubTextColor' " : "");
         }
 
         /// <summary>

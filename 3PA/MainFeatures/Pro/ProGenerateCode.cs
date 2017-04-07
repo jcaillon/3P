@@ -195,96 +195,101 @@ namespace _3PA.MainFeatures.Pro {
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         private void UpdateFunctionPrototypes(bool silent) {
 
-            List<ParsedImplementation> listOfOutDatedProto;
-            List<ParsedImplementation> listOfSoloImplementation;
-            List<ParsedPrototype> listOfUselessProto;
+            try {
+                List<ParsedImplementation> listOfOutDatedProto;
+                List<ParsedImplementation> listOfSoloImplementation;
+                List<ParsedPrototype> listOfUselessProto;
 
-            StringBuilder outputMessage = new StringBuilder();
+                StringBuilder outputMessage = new StringBuilder();
 
-            var nbLoop = 0;
-            var nbNotCreated = 0;
-            var nbThingsDone = 0;
-            var nbToDo = GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                var nbLoop = 0;
+                var nbNotCreated = 0;
+                var nbThingsDone = 0;
+                var nbToDo = GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
 
-            // if there is at least 1 thing to do
-            if (nbToDo > 0) {
-                Sci.BeginUndoAction();
+                // if there is at least 1 thing to do
+                if (nbToDo > 0) {
+                    Sci.BeginUndoAction();
 
-                // Add proto
-                if (listOfSoloImplementation.Count > 0 && string.IsNullOrEmpty(_parser.ParseErrorsInHtml)) {
-                    var tempMes = new StringBuilder("The following function prototypes have been created :");
+                    // Add proto
+                    if (listOfSoloImplementation.Count > 0 && string.IsNullOrEmpty(_parser.ParseErrorsInHtml)) {
+                        var tempMes = new StringBuilder("The following function prototypes have been created :");
 
-                    while (listOfSoloImplementation.Count > nbNotCreated && nbLoop < nbToDo) {
-                        if (AddPrototypes(ref tempMes, listOfSoloImplementation[nbNotCreated]))
-                            nbThingsDone++;
-                        else
-                            nbNotCreated++;
+                        while (listOfSoloImplementation.Count > nbNotCreated && nbLoop < nbToDo) {
+                            if (AddPrototypes(ref tempMes, listOfSoloImplementation[nbNotCreated]))
+                                nbThingsDone++;
+                            else
+                                nbNotCreated++;
 
-                        ParseNow();
-                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
-                        nbLoop++;
-                    }
-                    tempMes.Append("<br><br>");
-                    if (nbThingsDone > 0)
-                        outputMessage.Append(tempMes);
-                }
-
-                // delete proto
-                if (listOfUselessProto.Count > 0) {
-                    outputMessage.Append("The following prototypes have been deleted :");
-                    while (listOfUselessProto.Count > 0 && nbLoop < nbToDo) {
-                        if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
-                            nbThingsDone++;
-
-                        ParseNow();
-                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
-                        nbLoop++;
-                    }
-                    outputMessage.Append("<br><br>");
-                }
-
-                // update proto
-                if (listOfOutDatedProto.Count > 0) {
-                    outputMessage.Append("The following functions have had their prototype synchronized :");
-                    while (listOfOutDatedProto.Count > 0 && nbLoop < nbToDo) {
-                        if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
-                            nbThingsDone++;
-
-                        ParseNow();
-                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
-                        nbLoop++;
-                    }
-                    outputMessage.Append("<br><br>");
-                }
-
-                Sci.EndUndoAction();
-            }
-
-            if (nbThingsDone == 0) {
-                if (!silent) {
-                    if (nbToDo == 0)
-                        UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
-                    else
-                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + _parser.ParseErrorsInHtml, MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
-                }
-            } else {
-                outputMessage.Append("<i>");
-                outputMessage.Append("CTRL + Z will cancel the above-mentioned modifications<br>");
-                outputMessage.Append(Npp.CurrentFile.Path.ToHtmlLink("Click here to stop auto-updating the prototypes for this file"));
-                outputMessage.Append("</i>");
-                UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
-                    var split = args.Link.Split('#');
-                    if (split.Length == 2) {
-                        Npp.GotoPos(split[0], int.Parse(split[1]));
-                        args.Handled = true;
-                    } else {
-                        if (!_ignoredFiles.Contains(args.Link)) {
-                            _ignoredFiles.Add(args.Link);
-                            UserCommunication.NotifyUnique("Prototype_synchro", "Automatic prototype updates stopped for the file :<br>" + Npp.CurrentFile.Path + "<br><br><i>This is effective until you restart Notepad++<br>You can also trigger an update manually to restart the auto-update</i>", MessageImg.MsgInfo, "Function prototypes", "Synchronization stopped", null, 5);
-                            args.Handled = true;
+                            ParseNow();
+                            GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                            nbLoop++;
                         }
+                        tempMes.Append("<br><br>");
+                        if (nbThingsDone > 0)
+                            outputMessage.Append(tempMes);
                     }
-                }, 5);
+
+                    // delete proto
+                    if (listOfUselessProto.Count > 0) {
+                        outputMessage.Append("The following prototypes have been deleted :");
+                        while (listOfUselessProto.Count > 0 && nbLoop < nbToDo) {
+                            if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
+                                nbThingsDone++;
+
+                            ParseNow();
+                            GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                            nbLoop++;
+                        }
+                        outputMessage.Append("<br><br>");
+                    }
+
+                    // update proto
+                    if (listOfOutDatedProto.Count > 0) {
+                        outputMessage.Append("The following functions have had their prototype synchronized :");
+                        while (listOfOutDatedProto.Count > 0 && nbLoop < nbToDo) {
+                            if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
+                                nbThingsDone++;
+
+                            ParseNow();
+                            GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                            nbLoop++;
+                        }
+                        outputMessage.Append("<br><br>");
+                    }
+
+                    Sci.EndUndoAction();
+                }
+
+                if (nbThingsDone == 0) {
+                    if (!silent) {
+                        if (nbToDo == 0)
+                            UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
+                        else
+                            UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + _parser.ParseErrorsInHtml, MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
+                    }
+                } else {
+                    outputMessage.Append("<i>");
+                    outputMessage.Append("CTRL + Z will cancel the above-mentioned modifications<br>");
+                    outputMessage.Append(Npp.CurrentFile.Path.ToHtmlLink("Click here to stop auto-updating the prototypes for this file"));
+                    outputMessage.Append("</i>");
+                    UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
+                        var split = args.Link.Split('#');
+                        if (split.Length == 2) {
+                            Npp.GotoPos(split[0], int.Parse(split[1]));
+                            args.Handled = true;
+                        } else {
+                            if (!_ignoredFiles.Contains(args.Link)) {
+                                _ignoredFiles.Add(args.Link);
+                                UserCommunication.NotifyUnique("Prototype_synchro", "Automatic prototype updates stopped for the file :<br>" + Npp.CurrentFile.Path + "<br><br><i>This is effective until you restart Notepad++<br>You can also trigger an update manually to restart the auto-update</i>", MessageImg.MsgInfo, "Function prototypes", "Synchronization stopped", null, 5);
+                                args.Handled = true;
+                            }
+                        }
+                    }, 5);
+                }
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error updating prototypes");
             }
         }
 
@@ -339,7 +344,7 @@ namespace _3PA.MainFeatures.Pro {
             int insertPos = GetCaretPositionForInsertion<ParsedPrototype>(function.Name, ProInsertPosition.Last, out insertBefore);
 
             // if we didn't find a good position, then let's assume the user doesn't need one
-            if (insertPos > 0) {
+            if (insertPos > 0 && protoStr.Length > 1) {
                 // replace the end ":" or "." by a " FOWARD."
                 protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
 

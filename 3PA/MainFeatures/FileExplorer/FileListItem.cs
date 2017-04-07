@@ -136,6 +136,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// </summary>
     internal enum FileExt {
         Unknow,
+        Cab,
         Cls,
         Df,
         D,

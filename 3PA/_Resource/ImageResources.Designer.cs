@@ -693,6 +693,16 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ExtCab {
+            get {
+                object obj = ResourceManager.GetObject("ExtCab", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ExtCls {
             get {
                 object obj = ResourceManager.GetObject("ExtCls", resourceCulture);

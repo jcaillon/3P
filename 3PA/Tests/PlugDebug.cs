@@ -21,6 +21,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -31,6 +32,9 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using WixToolset.Dtf.Compression;
+using WixToolset.Dtf.Compression.Cab;
+using WixToolset.Dtf.Compression.Zip;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -47,14 +51,33 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            List<FileCoo> fuck = null;
-            MeasureIt(() => {
-                fuck = ListStuff();
-            }, "1 : ");
+            // CREATING ZIP FILE BY ADDING LIST OF FILES
+            var zip = new ZipInfo(@"D:\testarchive1.zip");
+            var files = new List<string>();
+            files.Add(@"D:\outils\defraggler x86.exe");
+            files.Add(@"C:\Windows\Notepad.exe");
+            zip.PackFiles(null, files, null);
 
-            foreach (var coo in fuck) {
-                Utils.FileAppendAllText(@"d:\Profiles\jcaillon\Desktop\client.log", coo.Path + "\t" + coo.Md5 + "\r\n");
-            }
+            CabInfo cab;
+
+            // CREATING ZIP FILE BY ADDING FOLDER (WITH SUB-FOLDERS) USING MAXIMUM COMPRESSION
+            cab = new CabInfo(@"D:\cnafexe\tests_webclient\webclient_locator\0002\diffs\clt5to6.cab");
+            cab.Pack(@"D:\cnafexe\tests_webclient\webclient_locator\0002\diffs\clt5to6", true, CompressionLevel.Max, null);
+
+            // CREATING CAB FILE BY ADDING LIST OF FILES
+            cab = new CabInfo(@"D:\testarchive1.cab");
+            files.Clear();
+            files.Add(@"C:\Windows\Explorer.exe");
+            files.Add(@"C:\Windows\Notepad.exe");
+            cab.PackFiles(null, files, null);
+
+            // CREATING CAB FILE BY ADDING FOLDER (WITH SUB-FOLDERS) USING MINIMUM COMPRESSION
+            //cab = new CabInfo(@"D:\testarchive2.cab");
+            //cab.Pack(@"C:\Balaji", true, Microsoft.Deployment.Compression.CompressionLevel.Min, null);
+
+            MeasureIt(() => {
+                //fuck = ListStuff();
+            }, "1 : ");
 
 
         }

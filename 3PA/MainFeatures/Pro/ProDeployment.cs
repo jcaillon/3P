@@ -371,28 +371,24 @@ namespace _3PA.MainFeatures.Pro {
             var nbCompilationWarning = 0;
 
             // compilation errors
-            foreach (var kpv in _proCompilation.ListErrors) {
+            foreach (var kpv in _proCompilation.ListErrors.Where(pair => pair.Value != null)) {
                 var filePath = kpv.Key;
                 var errorsOfTheFile = kpv.Value;
 
-                bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
-                bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
+                bool hasError = errorsOfTheFile.Exists(error => error.Level >= ErrorLevel.Error);
+                bool hasWarning = errorsOfTheFile.Exists(error => error.Level < ErrorLevel.Error);
 
                 if (hasError || hasWarning) {
                     // only add compilation errors
                     line.Clear();
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                    line.Append(ProDeploymentHtml.FormatCompilationResultForSingleFile(filePath, errorsOfTheFile, null));
+                    line.Append(ProExecutionCompile.FormatCompilationResultForSingleFile(filePath, errorsOfTheFile, null));
                     line.Append("</div>");
                     listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
                 }
 
                 if (hasError) {
                     nbCompilationError++;
-                    // if compilation errors, delete all transfer records for this file since they obviously didn't happen
-                    if (_filesToDeployPerStep.ContainsKey(0)) {
-                        _filesToDeployPerStep[0].RemoveAll(move => move.Origin.Equals(filePath));
-                    }
                 } else if (hasWarning)
                     nbCompilationWarning++;
             }
@@ -404,37 +400,18 @@ namespace _3PA.MainFeatures.Pro {
                 };
             foreach (var kpv in _filesToDeployPerStep) {
                 // group either by directory name or by archive name
-                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.DestinationBasePath).Select(deploys => deploys.ToList()).ToList();
+                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.ToBasePath).Select(deploys => deploys.ToList()).ToList();
 
-                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().DestinationBasePath)) {
+                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().ToBasePath)) {
                     var deployFailed = group.Exists(deploy => !deploy.IsOk);
                     var first = group.First();
 
                     line.Clear();
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-
-                    if (first.DeployType < DeployType.Archive) {
-                        line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl" : "Zip", true) + "' height='15px'><b>" + first.DestinationBasePath.ToHtmlLink(Path.GetFileName(first.DestinationBasePath)) + "</b> in " + Path.GetDirectoryName(first.DestinationBasePath).ToHtmlLink() + "</div>");
-                    } else {
-                        line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Ftp ? "Ftp" : "Folder", true) + "' height='15px'><b>" + first.DestinationBasePath.ToHtmlLink() + "</div>");
-                    }
-
+                    line.Append(first.GroupHeaderToString());
                     foreach (var fileToDeploy in group.OrderBy(deploy => deploy.To)) {
-                        var ext = (Path.GetExtension(fileToDeploy.To) ?? "").Replace(".", "");
-                        line.Append("<div style='padding-left: 10px'>");
-                        if (fileToDeploy.IsOk) {
-                            line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>");
-                        } else {
-                            line.Append("<img src='Error30x30' height='15px'>Transfer failed for ");
-                        }
-                        line.Append("(" + fileToDeploy.DeployType + ") " + fileToDeploy.To.ToHtmlLink(fileToDeploy.To.Replace(first.DestinationBasePath ?? "", "").TrimStart('\\')));
-                        line.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", Path.GetDirectoryName(fileToDeploy.Origin), fileToDeploy.Origin.Replace(kpv.Key <= 1 ? _proEnv.BaseLocalPath : _proEnv.BaseCompilationPath, "").TrimStart('\\')));
-                        if (!fileToDeploy.IsOk) {
-                            line.Append("<br>Reason : " + fileToDeploy.DeployError);
-                        }
-                        line.Append("</div>");
+                        line.Append(fileToDeploy);
                     }
-
                     line.Append("</div>");
 
                     if (!listLinesByStep.ContainsKey(kpv.Key))
@@ -475,7 +452,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // compilation
             if (listLinesCompilation.Count > 0) {
-                currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Compilation error details :</h3>");
+                currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Compilation details :</h3>");
                 var boolAlternate = false;
                 foreach (var listLine in listLinesCompilation.OrderByDescending(tuple => tuple.Item1)) {
                     currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
@@ -485,8 +462,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // deployment steps
             foreach (var listLinesKpv in listLinesByStep) {
-                currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " :</h3>");
-
+                currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " details :</h3>");
                 var boolAlternate2 = false;
                 foreach (var listLine in listLinesKpv.Value.OrderByDescending(tuple => tuple.Item1)) {
                     currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate2 ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
@@ -502,46 +478,5 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
     }
-
-    internal static class ProDeploymentHtml {
-
-        /// <summary>
-        /// Allows to format a small text to explain the errors found in a file and the generated files...
-        /// </summary>
-        public static string FormatCompilationResultForSingleFile(string sourceFilePath, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
-            var line = new StringBuilder();
-
-            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", sourceFilePath, Path.GetFileName(sourceFilePath)) + "</b> in " + Path.GetDirectoryName(sourceFilePath).ToHtmlLink() + "</div>");
-
-            if (listErrorFiles != null) {
-                foreach (var fileError in listErrorFiles) {
-                    line.Append("<div style='padding-left: 10px'>");
-                    line.Append("<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>");
-                    line.Append((!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? " in " + fileError.SourcePath.ToHtmlLink(Path.GetFileName(fileError.SourcePath)) + ", " : ""));
-                    line.Append((fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message);
-                    line.Append("</div>");
-                }
-            }
-
-            if (listDeployedFiles != null) {
-                foreach (var fileToDeploy in listDeployedFiles) {
-                    var ext = (Path.GetExtension(fileToDeploy.To) ?? "").Replace(".", "");
-                    line.Append("<div style='padding-left: 10px'>");
-                    if (fileToDeploy.IsOk) {
-                        line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>");
-                    } else {
-                        line.Append("<img src='Error30x30' height='15px'>Transfer failed for ");
-                    }
-                    line.Append("(" + fileToDeploy.DeployType + ") " + fileToDeploy.To.ToHtmlLink());
-                    if (!fileToDeploy.IsOk) {
-                        line.Append("<br>Reason : " + fileToDeploy.DeployError);
-                    }
-                    line.Append("</div>");
-                }
-            }
-
-            return line.ToString();
-        }
-
-    }
+    
 }

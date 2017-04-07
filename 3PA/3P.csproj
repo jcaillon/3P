@@ -140,6 +140,42 @@
     <Compile Include="Lib\CommonMark\Syntax\StringContent.cs" />
     <Compile Include="Lib\CommonMark\Syntax\StringContentPart.cs" />
     <Compile Include="Lib\CommonMark\Utilities.cs" />
+    <Compile Include="Lib\Compression\ArchiveException.cs" />
+    <Compile Include="Lib\Compression\ArchiveFileInfo.cs" />
+    <Compile Include="Lib\Compression\ArchiveFileStreamContext.cs" />
+    <Compile Include="Lib\Compression\ArchiveInfo.cs" />
+    <Compile Include="Lib\Compression\ArchiveProgressEventArgs.cs" />
+    <Compile Include="Lib\Compression\ArchiveProgressType.cs" />
+    <Compile Include="Lib\Compression\BasicUnpackStreamContext.cs" />
+    <Compile Include="Lib\Compression\Cab\CabEngine.cs" />
+    <Compile Include="Lib\Compression\Cab\CabException.cs" />
+    <Compile Include="Lib\Compression\Cab\CabFileInfo.cs" />
+    <Compile Include="Lib\Compression\Cab\CabInfo.cs" />
+    <Compile Include="Lib\Compression\Cab\CabPacker.cs" />
+    <Compile Include="Lib\Compression\Cab\CabUnpacker.cs" />
+    <Compile Include="Lib\Compression\Cab\CabWorker.cs" />
+    <Compile Include="Lib\Compression\Cab\HandleManager.cs" />
+    <Compile Include="Lib\Compression\Cab\NativeMethods.cs" />
+    <Compile Include="Lib\Compression\CargoStream.cs" />
+    <Compile Include="Lib\Compression\CompressionEngine.cs" />
+    <Compile Include="Lib\Compression\CompressionLevel.cs" />
+    <Compile Include="Lib\Compression\DuplicateStream.cs" />
+    <Compile Include="Lib\Compression\IArchiveInfo.cs" />
+    <Compile Include="Lib\Compression\IPackStreamContext.cs" />
+    <Compile Include="Lib\Compression\IUnpackStreamContext.cs" />
+    <Compile Include="Lib\Compression\OffsetStream.cs" />
+    <Compile Include="Lib\Compression\Pl\PlInfo.cs" />
+    <Compile Include="Lib\Compression\SafeNativeMethods.cs" />
+    <Compile Include="Lib\Compression\Zip\ConcatStream.cs" />
+    <Compile Include="Lib\Compression\Zip\CrcStream.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipCompressionMethod.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipEngine.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipException.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipFileInfo.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipFormat.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipInfo.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipPacker.cs" />
+    <Compile Include="Lib\Compression\Zip\ZipUnpacker.cs" />
     <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
@@ -157,6 +193,7 @@
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ParseUtils.cs" />
+    <Compile Include="MainFeatures\Pro\FileToDeploy.cs" />
     <Compile Include="MainFeatures\Pro\ProDeployment.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
@@ -170,7 +207,6 @@
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
     <Compile Include="Lib\WebServiceJson.cs" />
-    <Compile Include="Lib\ZipStorer.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -269,6 +305,7 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
+    <Content Include="_Resource\Images\FilesExt\ExtCab.png" />
     <Content Include="_Resource\Images\FilesExt\ExtCls.png" />
     <Content Include="_Resource\Images\FilesExt\ExtD.png" />
     <Content Include="_Resource\Images\FilesExt\ExtDbg.png" />
@@ -715,6 +752,7 @@
       <Name>YamuiFramework</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for 3P

@@ -34,6 +34,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using WixToolset.Dtf.Compression.Zip;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.MainFeatures;
@@ -668,7 +669,7 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region ZipStorer wrapper
+        #region Zip Wrapper
 
         /// <summary>
         /// This methods extract a zip file in the given directory
@@ -680,90 +681,14 @@ namespace _3PA.Lib {
                 return false;
             if (!CreateDirectory(targetDir))
                 return false;
-
-            bool result = true;
-
             try {
-                // Opens existing zip file
-                using (ZipStorer zip = ZipStorer.Open(filePath, FileAccess.Read)) {
-                    // Extract all files in target directory
-                    foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
-                        var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
-                        if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
-                            return false;
-                        result = result && zip.ExtractFile(entry, outputPath);
-                    }
-                }
+                ZipInfo zip = new ZipInfo(filePath);
+                zip.Unpack(targetDir);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Unzipping " + Path.GetFileName(filePath));
-                result = false;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// This methods pushes a file into a new/existing zip file
-        /// </summary>
-        public static bool ZipFile(string zipPath, string filePath, string filePathInZip, ZipStorer.Compression compressionMethod) {
-            if (string.IsNullOrEmpty(zipPath))
                 return false;
-
-            bool result = true;
-
-            try {
-                ZipStorer zip;
-                if (!File.Exists(zipPath)) {
-                    var zipFolder = Path.GetDirectoryName(zipPath);
-                    if (!CreateDirectory(zipFolder))
-                        return false;
-
-                    zip = ZipStorer.Create(zipPath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite);
-                } else {
-                    zip = ZipStorer.Open(zipPath, FileAccess.Write);
-                }
-                zip.AddFile(compressionMethod, filePath, filePathInZip, "Added @ " + DateTime.Now);
-                zip.Close();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error zipping " + filePath + " to " + zipPath);
-                result = false;
             }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Zip the given folder
-        /// </summary>
-        public static bool ZipFolder(string zipPath, string folderPath, ZipStorer.Compression compressionMethod) {
-            if (string.IsNullOrEmpty(zipPath) || string.IsNullOrEmpty(folderPath))
-                return false;
-
-            if (!Directory.Exists(folderPath))
-                return false;
-
-            bool result = true;
-
-            try {
-                ZipStorer zip;
-                if (!File.Exists(zipPath)) {
-                    var zipFolder = Path.GetDirectoryName(zipPath);
-                    if (!CreateDirectory(zipFolder))
-                        return false;
-                    zip = ZipStorer.Create(zipPath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite);
-                } else {
-                    zip = ZipStorer.Open(zipPath, FileAccess.Write);
-                }
-                foreach (var file in Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories)) {
-                    zip.AddFile(compressionMethod, file, file.Replace(folderPath, "").TrimStart('\\'), "Added @ " + DateTime.Now);
-                }
-                zip.Close();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error zipping " + folderPath);
-                result = false;
-            }
-
-            return result;
+            return true;
         }
 
         #endregion

@@ -392,7 +392,7 @@ namespace _3PA.MainFeatures.Pro {
                 get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
 
-            // use C:\progress\client\v1160_dv\dlc\version to know the version?
+            // use C:\progress\client\v1160_dv\dlc\version to know the version? -> MESSAGE PROVERSION
             public bool CanProwinUseNoSplash {
                 get { return (ProwinPath ?? "").Contains("1160"); }
             }
