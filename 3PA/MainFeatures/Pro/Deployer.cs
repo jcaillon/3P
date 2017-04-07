@@ -26,13 +26,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WixToolset.Dtf.Compression;
-using WixToolset.Dtf.Compression.Zip;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -654,16 +651,19 @@ namespace _3PA.MainFeatures.Pro {
                             if (args.ProgressType == ArchiveProgressType.FinishFile) {
                                 // set the FileToDeploy state
                                 if (currentArchive.Value.Item3.ContainsKey(args.CurrentFileName)) {
+
+                                    if (!currentArchive.Value.Item3[args.CurrentFileName].IsOk) {
+                                        _nbFilesDeployed++;
+                                        if (updateDeploymentPercentage != null)
+                                            updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                                    }
+
                                     if (args.TreatmentException != null) {
                                         currentArchive.Value.Item3[args.CurrentFileName].RegisterArchiveException(args.TreatmentException);
                                     } else {
                                         currentArchive.Value.Item3[args.CurrentFileName].IsOk = true;
                                     }
                                 }
-
-                                _nbFilesDeployed++;
-                                if (updateDeploymentPercentage != null)
-                                    updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
                             }
                         });
                     } catch (OperationCanceledException) {
