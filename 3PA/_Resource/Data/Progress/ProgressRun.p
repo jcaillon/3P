@@ -312,7 +312,9 @@ PROCEDURE pi_compileList PRIVATE:
             &ELSE
                 &IF {&ExecutionType} = "CHECKSYNTAX" &THEN
                     COMPILE VALUE(lc_from)
-                        SAVE = FALSE
+                        /* we still save into because if we compile a file and a .r exists next to said file, it 
+                           doesn't compile... */
+                        SAVE INTO VALUE(lc_to)
                         NO-ERROR.
                 &ELSE
                     /* COMPILE / GENERATEDEBUGFILE */

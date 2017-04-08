@@ -140,15 +140,24 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Handle connection string
 
+            public string GetCurrentDb() {
+                if (string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.Count > 0) {
+                    CurrentDb = DbConnectionInfo.First().Key;
+                }
+                return CurrentDb;
+            }
+
             /// <summary>
             /// Returns the currently selected database's .pf for the current environment
             /// </summary>
             public string GetPfPath() {
-                if (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) {
-                    return DbConnectionInfo[CurrentDb];
-                }
-                if (DbConnectionInfo.Count > 0) {
+                CurrentDb = GetCurrentDb();
+                if (!string.IsNullOrEmpty(CurrentDb)) {
+                    if (DbConnectionInfo.ContainsKey(CurrentDb))
+                        return DbConnectionInfo[CurrentDb];
+
                     CurrentDb = DbConnectionInfo.First().Key;
+                    return DbConnectionInfo[CurrentDb];
                 }
                 return string.Empty;
             }

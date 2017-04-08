@@ -30,7 +30,9 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.MainFeatures.Parser {
+
     internal partial class Parser {
+
         #region Analyze
 
         private void Analyze() {
@@ -344,7 +346,7 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                 }
             } while (MoveNext());
-            if (!string.IsNullOrEmpty(eventName))
+            if (!String.IsNullOrEmpty(eventName))
                 AddParsedItem(new ParsedEvent(tokenSub.Value.EqualsCi("subscribe") ? ParsedEventType.Subscribe : ParsedEventType.Unsubscribe, eventName, tokenSub, subscriberHandle, publisherHandler, runProcedure, null), tokenSub.OwnerNumber);
         }
 
@@ -396,7 +398,7 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                 }
             } while (MoveNext());
-            if (!string.IsNullOrEmpty(eventName))
+            if (!String.IsNullOrEmpty(eventName))
                 AddParsedItem(new ParsedEvent(ParsedEventType.Publish, eventName, tokenPub, null, publisherHandler, null, left.ToString()), tokenPub.OwnerNumber);
         }
 
@@ -851,6 +853,7 @@ namespace _3PA.MainFeatures.Parser {
                         // define temp-table : match a primitive type or a field in db
                         if (!(token is TokenWord)) break;
                         currentField.TempType = token.Value;
+                        currentField.Type = ConvertStringToParsedPrimitiveType(token.Value, currentField.AsLike == ParsedAsLike.Like);
                         // push the field to the fields list
                         fields.Add(currentField);
                         state = 20;
@@ -891,7 +894,7 @@ namespace _3PA.MainFeatures.Parser {
                             }
                         } else if (lowerToken.Equals("index")) {
                             // matching a new index
-                            if (!string.IsNullOrEmpty(indexName))
+                            if (!String.IsNullOrEmpty(indexName))
                                 indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields.ToList()));
 
                             indexName = "";
@@ -945,6 +948,7 @@ namespace _3PA.MainFeatures.Parser {
                         name = token.Value;
                         state++;
                         break;
+
                     case 81:
                         // match the table/dataset name that the buffer or handle is FOR
                         if (!(token is TokenWord)) break;
@@ -961,22 +965,72 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
 
-            if (state <= 1) return;
+            if (state <= 1)
+                return;
             if (isTempTable) {
-                if (!string.IsNullOrEmpty(indexName))
+
+                if (!String.IsNullOrEmpty(indexName))
                     indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields));
 
-                AddParsedItem(new ParsedTable(name, defineToken, "", "", name, "", likeTable, true, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString()) {
-                    // = end position of the EOS of the statement
-                    EndPosition = token.EndPosition,
-                    Flags = flags
-                }, defineToken.OwnerNumber);
-            } else {
-                var newDefine = new ParsedDefine(name, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor) {
+                ParsedTable likeTableMatch = null;
+                if (!String.IsNullOrEmpty(likeTable)) {
+                    likeTableMatch = FindAnyTableByName(likeTable);
+                }
+
+                var newTable = new ParsedTable(name, defineToken, "", "", name, "", likeTable, likeTableMatch, true, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString()) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition,
                     Flags = flags
                 };
+
+                // temp table is LIKE another table? copy fields
+                if (newTable.LikeTable != null) {
+                    // add the fields of the found table (minus the primary information)
+                    foreach (var field in newTable.LikeTable.Fields) {
+                        newTable.Fields.Add(
+                            new ParsedField(field.Name, field.TempType, field.Format, field.Order, 0, field.InitialValue, field.Description, field.AsLike) {
+                                Type = field.Type
+                            });
+                    }
+
+                    // handles the use-index
+                    if (!String.IsNullOrEmpty(newTable.UseIndex)) {
+                        // add only the indexes that are used
+                        foreach (var index in newTable.UseIndex.Split(',')) {
+                            var foundIndex = newTable.LikeTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
+                            if (foundIndex != null) {
+                                newTable.Indexes.Add(new ParsedIndex(foundIndex.Name, foundIndex.Flag, foundIndex.FieldsList.ToList()));
+                                // if one of the index used is marked as primary
+                                if (index.ContainsFast("!")) {
+                                    newTable.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
+                                }
+                                newTable.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
+                            }
+                        }
+                    } else {
+                        // if there is no "use index", the tt uses the same index as the original table
+                        newTable.Indexes = newTable.LikeTable.Indexes.ToList();
+                    }
+                }
+
+                // browse all the indexes and set the according flags to each field of the index
+                foreach (var index in newTable.Indexes) {
+                    foreach (var fieldName in index.FieldsList) {
+                        var foundfield = newTable.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
+                        if (foundfield != null) {
+                            if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
+                                foundfield.Flags |= ParseFlag.Primary;
+                            foundfield.Flags |= ParseFlag.Index;
+                        }
+                    }
+                }
+
+                AddParsedItem(newTable, defineToken.OwnerNumber);
+
+            } else {              
+                
+                var newDefine = NewParsedDefined(name, flags, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor);
+                newDefine.EndPosition = token.EndPosition;
                 AddParsedItem(newDefine, defineToken.OwnerNumber);
 
                 // case of a parameters, add it to the current scope (if procedure)
@@ -986,13 +1040,14 @@ namespace _3PA.MainFeatures.Parser {
                         currentScope.Parameters = new List<ParsedDefine>();
                     currentScope.Parameters.Add(newDefine);
                 }
+
             }
         }
 
         /// <summary>
         /// Analyse a preprocessed directive (analyses the whole statement)
         /// </summary>
-        private bool CreateParsedPreProcDirective(Token directiveToken) {
+        private void CreateParsedPreProcDirective(Token directiveToken) {
             // info we will extract from the current statement :
             string variableName = null;
             _lastTokenWasSpace = true;
@@ -1011,7 +1066,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (token is TokenEol) break;
 
                 // read the first word after the directive
-                if (string.IsNullOrEmpty(variableName) && token is TokenWord) {
+                if (String.IsNullOrEmpty(variableName) && token is TokenWord) {
                     variableName = token.Value;
                     continue;
                 }
@@ -1037,7 +1092,7 @@ namespace _3PA.MainFeatures.Parser {
                 case "&ANALYZE-SUSPEND":
                     // we don't care about the blocks of include files
                     if (directiveToken.OwnerNumber > 0)
-                        return false;
+                        return;
 
                     // it marks the beginning of an appbuilder block, it can only be at a root/File level, otherwise flag error
                     if (!(_context.Scope is ParsedFile)) {
@@ -1092,7 +1147,7 @@ namespace _3PA.MainFeatures.Parser {
                 case "&ANALYZE-RESUME":
                     // we don't care about the blocks of include files
                     if (directiveToken.OwnerNumber > 0)
-                        return false;
+                        return;
 
                     // it marks the end of an appbuilder block, it can only be at a root/File level
                     if (!(_context.Scope is ParsedFile)) {
@@ -1121,11 +1176,11 @@ namespace _3PA.MainFeatures.Parser {
                     break;
 
                 default:
-                    return false;
+                    return;
             }
 
             // We matched a new preprocessed variable?
-            if (flags > 0 && !string.IsNullOrEmpty(variableName)) {
+            if (flags > 0 && !String.IsNullOrEmpty(variableName)) {
                 AddParsedItem(new ParsedPreProcVariable(variableName, directiveToken, 0, definition.ToString().Trim()) {
                     Flags = flags
                 }, directiveToken.OwnerNumber);
@@ -1143,8 +1198,6 @@ namespace _3PA.MainFeatures.Parser {
                         _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
                 }
             }
-
-            return true;
         }
 
         /// <summary>
@@ -1161,7 +1214,7 @@ namespace _3PA.MainFeatures.Parser {
                 AddTokenToStringBuilder(expression, token);
             } while (MoveNext());
 
-            var newIf = new ParsedPreProcBlock(string.Empty, ifToken) {
+            var newIf = new ParsedPreProcBlock(String.Empty, ifToken) {
                 Type = ParsedPreProcBlockType.IfEndIf,
                 BlockDescription = expression.ToString()
             };
@@ -1245,7 +1298,7 @@ namespace _3PA.MainFeatures.Parser {
         private bool CreateParsedFunction(Token functionToken) {
             // info we will extract from the current statement :
             string name = null;
-            string returnType = null;
+            string parsedReturnType = null;
             string extend = null;
             ParseFlag flags = 0;
             StringBuilder parameters = new StringBuilder();
@@ -1272,7 +1325,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (token.Value.EqualsCi("returns") || token.Value.EqualsCi("class"))
                             continue;
 
-                        returnType = token.Value;
+                        parsedReturnType = token.Value;
 
                         state++;
                         break;
@@ -1310,12 +1363,14 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                 }
             } while (MoveNext());
-            if (name == null || returnType == null)
+            if (name == null || parsedReturnType == null)
                 return false;
 
             // otherwise it needs to ends with : or .
             if (!(token is TokenEos))
                 return false;
+
+            var returnType = ConvertStringToParsedPrimitiveType(parsedReturnType, false);
 
             // New prototype, we matched a forward or a IN
             if (state >= 99) {
@@ -1327,7 +1382,7 @@ namespace _3PA.MainFeatures.Parser {
                     EndBlockLine = token.Line,
                     EndBlockPosition = token.EndPosition,
                     Flags = flags,
-                    Extend = extend ?? string.Empty,
+                    Extend = extend ?? String.Empty,
                     ParametersString = parameters.ToString()
                 };
                 if (!_functionPrototype.ContainsKey(name))
@@ -1360,7 +1415,7 @@ namespace _3PA.MainFeatures.Parser {
             ParsedImplementation createdImp = new ParsedImplementation(name, functionToken, returnType) {
                 EndPosition = token.EndPosition,
                 Flags = flags,
-                Extend = extend ?? string.Empty,
+                Extend = extend ?? String.Empty,
                 ParametersString = parameters.ToString()
             };
 
@@ -1379,7 +1434,7 @@ namespace _3PA.MainFeatures.Parser {
                     createdImp.PrototypeUpdated = (
                         createdImp.Flags == proto.Flags &&
                         createdImp.Extend.Equals(proto.Extend) &&
-                        createdImp.ParsedReturnType.Equals(proto.ParsedReturnType) &&
+                        createdImp.ReturnType.Equals(proto.ReturnType) &&
                         createdImp.ParametersString.Equals(proto.ParametersString));
                 }
             } else {
@@ -1481,7 +1536,7 @@ namespace _3PA.MainFeatures.Parser {
                         // match the table/dataset name that the buffer is FOR
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
-                        if (token.Value.EqualsCi("for")) break;
+                        if (lowerToken.Equals("for")) break;
                         parameterFor = lowerToken;
                         state = 99;
                         break;
@@ -1499,10 +1554,9 @@ namespace _3PA.MainFeatures.Parser {
                             flags |= ParseFlag.Extent;
                         else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
                             // create a variable for this function scope
-                            if (!String.IsNullOrEmpty(paramName))
-                                parametersList.Add(new ParsedDefine(paramName, functionToken, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor) {
-                                    Flags = flags
-                                });
+                            if (!String.IsNullOrEmpty(paramName)) {
+                                parametersList.Add(NewParsedDefined(paramName, flags, functionToken, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor));
+                            }
                             paramName = "";
                             paramAsLike = ParsedAsLike.None;
                             paramPrimitiveType = "";
@@ -1608,7 +1662,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             // we matched the include file name
-            if (!string.IsNullOrEmpty(fileName)) {
+            if (!String.IsNullOrEmpty(fileName)) {
                 // try to find the file in the propath
                 var fullFilePath = FindIncludeFullPath(fileName);
 
@@ -1623,7 +1677,7 @@ namespace _3PA.MainFeatures.Parser {
                 AddParsedItem(newInclude, bracketToken.OwnerNumber);
 
                 // Parse the include file ?
-                if (!string.IsNullOrEmpty(fullFilePath)) {
+                if (!String.IsNullOrEmpty(fullFilePath)) {
 
                     var fileOwnerOfThisInclude = _parsedIncludes[bracketToken.OwnerNumber];
                     while (fileOwnerOfThisInclude != null) {

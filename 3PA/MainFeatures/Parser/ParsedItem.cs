@@ -302,12 +302,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Flag : private
     /// </summary>
     internal abstract class ParsedFunction : ParsedScopeItem {
-        public ParsedPrimitiveType ReturnType { get; set; }
 
-        /// <summary>
-        /// Parsed string for the return type, use ReturnType instead!
-        /// </summary>
-        public string ParsedReturnType { get; private set; }
+        public ParsedPrimitiveType ReturnType { get; private set; }
 
         /// <summary>
         /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
@@ -322,8 +318,8 @@ namespace _3PA.MainFeatures.Parser {
 
         public List<ParsedDefine> Parameters { get; set; }
 
-        protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
-            ParsedReturnType = parsedReturnType;
+        protected ParsedFunction(string name, Token token, ParsedPrimitiveType returnType) : base(name, token, ParsedScopeType.Function) {
+            ReturnType = returnType;
             Extend = String.Empty;
         }
     }
@@ -342,7 +338,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedPrototype(string name, Token token, string parsedReturnType) : base(name, token, parsedReturnType) {
+        public ParsedPrototype(string name, Token token, ParsedPrimitiveType returnType) : base(name, token, returnType) {
             Extend = String.Empty;
         }
     }
@@ -370,8 +366,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedImplementation(string name, Token token, string parsedReturnType)
-            : base(name, token, parsedReturnType) {
+        public ParsedImplementation(string name, Token token, ParsedPrimitiveType returnType)
+            : base(name, token, returnType) {
             Extend = String.Empty;
         }
     }
@@ -556,15 +552,11 @@ namespace _3PA.MainFeatures.Parser {
     /// Define parsed item
     /// </summary>
     internal class ParsedDefine : ParsedItem {
+
         /// <summary>
         /// contains as or like
         /// </summary>
         public ParsedAsLike AsLike { get; private set; }
-
-        /// <summary>
-        /// In case of a buffer, contains the references table (BUFFER name FOR xxx)
-        /// </summary>
-        public string BufferFor { get; private set; }
 
         public string Left { get; private set; }
 
@@ -582,7 +574,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// (Used for variables) contains the primitive type of the variable
         /// </summary>
-        public ParsedPrimitiveType PrimitiveType { get; set; }
+        public ParsedPrimitiveType PrimitiveType { get; private set; }
 
         /// <summary>
         /// first word after "view-as"
@@ -593,14 +585,14 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor)
+        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, ParsedPrimitiveType primitiveType)
             : base(name, token) {
             AsLike = asLike;
             Left = left;
             Type = type;
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
-            BufferFor = bufferFor;
+            PrimitiveType = primitiveType;
         }
     }
 
@@ -682,19 +674,22 @@ namespace _3PA.MainFeatures.Parser {
         Raw,
         Recid,
         Rowid,
+
         // Below are the types allowed for the parameters
         Buffer = 20,
         Table,
         TableHandle,
         Dataset,
         DatasetHandle,
+
         // below are the types that are not considered as primitive (they will appear in the VariableComplex category)
         Clob = 30,
         WidgetHandle,
         Blob,
         Widget,
         Unknow,
-        Class,
+        Class, // in that case the syntax is [CLASS] class-name
+
         // below, are the types for the .dll
         Long = 50,
         Short,
@@ -703,6 +698,30 @@ namespace _3PA.MainFeatures.Parser {
         Double,
         UnsignedShort,
         UnsignedLong
+    }
+
+    /// <summary>
+    /// Define parsed item
+    /// </summary>
+    internal class ParsedBuffer : ParsedDefine {
+
+        /// <summary>
+        /// In case of a buffer, contains the references table (BUFFER name FOR xxx)
+        /// </summary>
+        public string BufferFor { get; private set; }
+
+        /// <summary>
+        /// The table for which this buffer is defined
+        /// </summary>
+        public ParsedTable TargetTable { get; set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedBuffer(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, ParsedPrimitiveType primitiveType) : base(name, token, asLike, left, type, tempPrimitiveType, viewAs, primitiveType) {
+            BufferFor = bufferFor;
+        }
     }
 
     /// <summary>
@@ -725,6 +744,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Table or temp table parsed item
     /// </summary>
     internal class ParsedTable : ParsedItem {
+
         public string Id { get; private set; }
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
@@ -740,9 +760,11 @@ namespace _3PA.MainFeatures.Parser {
         public string Description { get; private set; }
 
         /// <summary>
-        /// contains the table "LIKE TABLE" name in lowercase
+        /// If this table is like another, link to said other
         /// </summary>
-        public string LcLikeTable { get; private set; }
+        public ParsedTable LikeTable { get; private set; }
+
+        public string StringLikeTable { get; private set; }
 
         /// <summary>
         /// if temptable and temptable is "like" another table, contains the USE-INDEX 
@@ -757,17 +779,18 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex) : base(name, token) {
+        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string strLikeTable, ParsedTable likeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex) : base(name, token) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
             Description = description;
-            LcLikeTable = lcLikeTable;
             IsTempTable = isTempTable;
             Fields = fields;
             Indexes = indexes;
             Triggers = triggers;
             UseIndex = useIndex;
+            LikeTable = likeTable;
+            StringLikeTable = strLikeTable;
         }
     }
 

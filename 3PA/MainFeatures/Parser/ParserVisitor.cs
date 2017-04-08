@@ -35,6 +35,7 @@ namespace _3PA.MainFeatures.Parser {
     /// by visiting the parser and creating new completionData
     /// </summary>
     internal class ParserVisitor : IParserVisitor {
+
         #region static
 
         /// <summary>
@@ -414,7 +415,6 @@ namespace _3PA.MainFeatures.Parser {
                 });
 
             // to completion data
-            pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
             PushToAutoCompletion(new FunctionCompletionItem {
                 DisplayText = pars.Name,
                 SubText = pars.ReturnType.ToString(),
@@ -440,7 +440,6 @@ namespace _3PA.MainFeatures.Parser {
                 });
 
             // to completion data
-            pars.ReturnType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false, _parser.ParsedItemsList);
             PushToAutoCompletion(new FunctionCompletionItem {
                 DisplayText = pars.Name,
                 Flags = pars.Flags,
@@ -519,101 +518,60 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedDefine pars) {
-            // set flags
-            pars.Flags |= pars.Scope is ParsedFile ? ParseFlag.FileScope : ParseFlag.LocalScope;
-            if (pars.Type == ParseDefineType.Parameter)
-                pars.Flags |= ParseFlag.Parameter;
-
-            // find primitive type
-            var hasPrimitive = !String.IsNullOrEmpty(pars.TempPrimitiveType);
-            if (hasPrimitive)
-                pars.PrimitiveType = ParserUtils.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like, _parser.ParsedItemsList);
-
-            // which completionData type is it?
+            var subString = pars.PrimitiveType == ParsedPrimitiveType.Unknow ? pars.Type.ToString() : pars.PrimitiveType.ToString();
             CompletionType type;
-            string subString;
-            // special case for buffers, they go into the temp-table or table section
-            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer) {
-                pars.Flags |= ParseFlag.Buffer;
-                subString = "?";
-                type = CompletionType.TempTable;
+            switch (pars.Type) {
+                case ParseDefineType.Parameter:
+                    type = CompletionType.VariablePrimitive;
 
-                // find the table or temp table that the buffer is FOR
-                var foundTable = ParserUtils.FindAnyTableByName(pars.BufferFor, _parser.ParsedItemsList);
-                if (foundTable != null) {
-                    subString = foundTable.Name;
-                    type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
-
-                    // extra flags
-                    pars.Flags |= !pars.BufferFor.Contains(".") && !foundTable.IsTempTable ? ParseFlag.MissingDbName : 0;
-
-                    // To code explorer, list buffers and associated tables
-                    var parentNode = foundTable.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
-                    var newNode = CodeItem.Factory.New(foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
-                    newNode.DisplayText = pars.Name;
-                    newNode.Flags = pars.Flags;
-                    newNode.SubText = null;
-                    newNode.DocumentOwner = pars.FilePath;
-                    newNode.GoToLine = pars.Line;
-                    newNode.GoToColumn = pars.Column;
-                    PushToCodeExplorer(parentNode, newNode);
-                }
-            } else {
-                // match type for everything else
-                subString = hasPrimitive ? pars.PrimitiveType.ToString() : pars.Type.ToString();
-                switch (pars.Type) {
-                    case ParseDefineType.Parameter:
-                        type = CompletionType.VariablePrimitive;
-
-                        // To code explorer, program parameters
-                        if (_isBaseFile && pars.Scope is ParsedFile) {
-                            PushToCodeExplorer(
-                                GetExplorerListNode("Program parameters", CodeExplorerIconType.ProgramParameter),
-                                new ParameterCodeItem {
-                                    DisplayText = pars.Name,
-                                    Flags = pars.Flags,
-                                    SubText = subString,
-                                    DocumentOwner = pars.FilePath,
-                                    GoToLine = pars.Line,
-                                    GoToColumn = pars.Column
-                                });
-                        }
-                        break;
-                    case ParseDefineType.Variable:
-                        if (!String.IsNullOrEmpty(pars.ViewAs))
-                            type = CompletionType.Widget;
-                        else if ((int) pars.PrimitiveType < 30)
-                            type = CompletionType.VariablePrimitive;
-                        else
-                            type = CompletionType.VariableComplex;
-                        break;
-                    case ParseDefineType.Button:
-                    case ParseDefineType.Browse:
-                    case ParseDefineType.Frame:
-                    case ParseDefineType.Image:
-                    case ParseDefineType.SubMenu:
-                    case ParseDefineType.Menu:
-                    case ParseDefineType.Rectangle:
+                    // To code explorer, program parameters
+                    if (_isBaseFile && pars.Scope is ParsedFile) {
+                        PushToCodeExplorer(
+                            GetExplorerListNode("Program parameters", CodeExplorerIconType.ProgramParameter),
+                            new ParameterCodeItem {
+                                DisplayText = pars.Name,
+                                Flags = pars.Flags,
+                                SubText = subString,
+                                DocumentOwner = pars.FilePath,
+                                GoToLine = pars.Line,
+                                GoToColumn = pars.Column
+                            });
+                    }
+                    break;
+                case ParseDefineType.Variable:
+                    if (!String.IsNullOrEmpty(pars.ViewAs))
                         type = CompletionType.Widget;
-                        break;
-                    default:
+                    else if ((int) pars.PrimitiveType < 30)
+                        type = CompletionType.VariablePrimitive;
+                    else
                         type = CompletionType.VariableComplex;
-                        break;
-                }
-            }
+                    break;
+                case ParseDefineType.Button:
+                case ParseDefineType.Frame:
+                case ParseDefineType.Image:
+                case ParseDefineType.SubMenu:
+                case ParseDefineType.Menu:
+                case ParseDefineType.Rectangle:
+                    type = CompletionType.Widget;
+                    break;
+                case ParseDefineType.Browse:
+                    type = CompletionType.Widget;
 
-            // To explorer code for browse
-            if (pars.Type == ParseDefineType.Browse) {
-                PushToCodeExplorer(
-                    GetExplorerListNode("Browse definitions", CodeExplorerIconType.Browse),
-                    new BrowseCodeItem {
-                        DisplayText = pars.Name,
-                        Flags = pars.Flags,
-                        SubText = subString,
-                        DocumentOwner = pars.FilePath,
-                        GoToLine = pars.Line,
-                        GoToColumn = pars.Column
-                    });
+                    // To explorer code for browse
+                    PushToCodeExplorer(
+                        GetExplorerListNode("Browse definitions", CodeExplorerIconType.Browse),
+                        new BrowseCodeItem {
+                            DisplayText = pars.Name,
+                            Flags = pars.Flags,
+                            SubText = subString,
+                            DocumentOwner = pars.FilePath,
+                            GoToLine = pars.Line,
+                            GoToColumn = pars.Column
+                        });
+                    break;
+                default:
+                    type = CompletionType.VariableComplex;
+                    break;
             }
 
             // to completion data
@@ -622,66 +580,51 @@ namespace _3PA.MainFeatures.Parser {
             curItem.Flags = pars.Flags;
             curItem.SubText = subString;
             PushToAutoCompletion(curItem, pars);
+
+        }
+
+        /// <summary>
+        /// Buffers
+        /// </summary>
+        public void Visit(ParsedBuffer pars) {
+            var subString = "?";
+            var type = CompletionType.TempTable;
+            
+            if (pars.TargetTable != null) {
+                subString = pars.TargetTable.Name;
+                type = pars.TargetTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
+
+                // To code explorer, list buffers and associated tables
+                var parentNode = pars.TargetTable.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
+                var newNode = CodeItem.Factory.New(pars.TargetTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+                newNode.DisplayText = pars.Name;
+                newNode.Flags = pars.Flags;
+                newNode.SubText = null;
+                newNode.DocumentOwner = pars.FilePath;
+                newNode.GoToLine = pars.Line;
+                newNode.GoToColumn = pars.Column;
+                PushToCodeExplorer(parentNode, newNode);
+            }
+
+            // to completion data
+            var curItem = CompletionItem.Factory.New(type) as TableCompletionItem;
+            if (curItem != null) {
+                if (pars.TargetTable != null) {
+                    curItem.ChildSeparator = '.';
+                    curItem.Children = GetTableCompletionItemChildren(curItem, pars.TargetTable.Fields);
+                }
+                curItem.DisplayText = pars.Name;
+                curItem.Flags = pars.Flags;
+                curItem.SubText = subString;
+                PushToAutoCompletion(curItem, pars);
+            }
         }
 
         /// <summary>
         /// Defined Temptables
         /// </summary>
-        /// <param name="pars"></param>
         public void Visit(ParsedTable pars) {
-            string subStr = "";
-
-            // find all primitive types
-            foreach (var parsedField in pars.Fields)
-                parsedField.Type = ParserUtils.ConvertStringToParsedPrimitiveType(parsedField.TempType, parsedField.AsLike == ParsedAsLike.Like, _parser.ParsedItemsList);
-
-            // temp table is LIKE another table? copy fields
-            if (!String.IsNullOrEmpty(pars.LcLikeTable)) {
-                var foundLikeTable = ParserUtils.FindAnyTableByName(pars.LcLikeTable, _parser.ParsedItemsList);
-                if (foundLikeTable != null) {
-                    // add the fields of the found table (minus the primary information)
-                    subStr = @"Like " + foundLikeTable.Name;
-                    foreach (var field in foundLikeTable.Fields) {
-                        pars.Fields.Add(
-                            new ParsedField(field.Name, "", field.Format, field.Order, 0, field.InitialValue, field.Description, field.AsLike) {
-                                Type = field.Type
-                            });
-                    }
-
-                    // handles the use-index
-                    if (!String.IsNullOrEmpty(pars.UseIndex)) {
-                        // add only the indexes that are used
-                        foreach (var index in pars.UseIndex.Split(',')) {
-                            var foundIndex = foundLikeTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
-                            if (foundIndex != null) {
-                                pars.Indexes.Add(new ParsedIndex(foundIndex.Name, foundIndex.Flag, foundIndex.FieldsList.ToList()));
-                                // if one of the index used is marked as primary
-                                if (index.ContainsFast("!")) {
-                                    pars.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
-                                }
-                                pars.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
-                            }
-                        }
-                    } else {
-                        // if there is no "use index", the tt uses the same index as the original table
-                        pars.Indexes = foundLikeTable.Indexes.ToList();
-                    }
-                } else {
-                    subStr = "Like ??";
-                }
-            }
-
-            // browse all the indexes and set the according flags to each field of the index
-            foreach (var index in pars.Indexes) {
-                foreach (var fieldName in index.FieldsList) {
-                    var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
-                    if (foundfield != null) {
-                        if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
-                            foundfield.Flags |= ParseFlag.Primary;
-                        foundfield.Flags |= ParseFlag.Index;
-                    }
-                }
-            }
+            string subStr = string.IsNullOrEmpty(pars.StringLikeTable) ? "" : (pars.LikeTable != null ? @"Like " + pars.LikeTable.Name : @"Like ??");
 
             // to auto completion
             var parsedTable = new TempTableCompletionItem {
@@ -719,6 +662,20 @@ namespace _3PA.MainFeatures.Parser {
         #endregion
 
         #region helper
+
+        private static List<CompletionItem> GetTableCompletionItemChildren(TableCompletionItem table, List<ParsedField> parsedFields) {
+            return parsedFields.Select(field => {
+                var curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
+                curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
+                curField.ParsedBaseItem = field;
+                curField.FromParser = true;
+                curField.SubText = field.Type.ToString();
+                curField.Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name);
+                curField.Flags = field.Flags & ~ParseFlag.Primary;
+                curField.ParentItem = table;
+                return curField;
+            }).ToList();
+        }
 
         /// <summary>
         /// Parses given file and load its function + procedures has persistent so they are

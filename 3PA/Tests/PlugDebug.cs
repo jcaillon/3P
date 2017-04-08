@@ -408,6 +408,10 @@ namespace _3PA.Tests {
         public void Visit(ParsedRun pars) {
             AppendEverything(pars);
         }
+
+        public void Visit(ParsedBuffer pars) {
+            AppendEverything(pars);
+        }
     }
 
     internal class OutputLexerVisitor : ILexerVisitor {

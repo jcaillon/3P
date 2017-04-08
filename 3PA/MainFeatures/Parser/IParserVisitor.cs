@@ -32,6 +32,7 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(ParsedIncludeFile pars);
         void Visit(ParsedPreProcVariable pars);
         void Visit(ParsedDefine pars);
+        void Visit(ParsedBuffer pars);
         void Visit(ParsedTable pars);
         void Visit(ParsedOnStatement pars);
         void Visit(ParsedRun pars);

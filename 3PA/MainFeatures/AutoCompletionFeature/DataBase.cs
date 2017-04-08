@@ -29,7 +29,9 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
+
     internal class DataBase {
+
         #region Singleton
 
         private static DataBase _instance;
@@ -154,7 +156,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         private string GetOutputName {
-            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.CurrentDb).ToValidFileName().ToLower() + ".dump"; }
+            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.GetCurrentDb()).ToValidFileName().ToLower() + ".dump"; }
         }
 
         /// <summary>
@@ -207,6 +209,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[4],
                             splitted[5],
                             "",
+                            null,
                             false,
                             new List<ParsedField>(),
                             new List<ParsedIndex>(),
@@ -253,7 +256,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
-                        curField.Type = ParserUtils.ConvertStringToParsedPrimitiveType(curField.TempType);
+                        curField.Type = Parser.Parser.ConvertStringToParsedPrimitiveType(curField.TempType);
                         currentTable.Fields.Add(curField);
                         break;
                 }

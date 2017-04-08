@@ -36,6 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// this class handles the static keywords of progress
     /// </summary>
     internal class Keywords {
+
         #region Singleton
 
         private static Keywords _instance;

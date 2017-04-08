@@ -21,6 +21,7 @@
 #endregion
 
 namespace _3PA.MainFeatures.Parser {
+
     /// <summary>
     /// Token object
     /// </summary>

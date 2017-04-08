@@ -192,7 +192,6 @@
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\ParseUtils.cs" />
     <Compile Include="MainFeatures\Pro\FileToDeploy.cs" />
     <Compile Include="MainFeatures\Pro\ProDeployment.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">

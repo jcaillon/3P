@@ -482,42 +482,45 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
+            var table = ParsedBaseItem as ParsedTable;
+            var buffer = ParsedBaseItem as ParsedBuffer;
 
             // buffer
-            if (FromParser) {
-                if (ParsedBaseItem is ParsedDefine) {
-                    toDisplay.Append(HtmlHelper.FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + HtmlHelper.FormatSubString(SubText)));
-                }
-                if (ParsedBaseItem is ParsedTable && !string.IsNullOrEmpty(SubText)) {
-                    toDisplay.Append(HtmlHelper.FormatRow("Is like", (SubText.Contains("?")) ? "Unknown table [" + ((ParsedTable) ParsedBaseItem).LcLikeTable + "]" : SubText.Replace("Like ", "")));
+            if (buffer != null) {
+                toDisplay.Append(HtmlHelper.FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + HtmlHelper.FormatSubString(buffer.TargetTable != null ? buffer.TargetTable.Name : buffer.BufferFor)));
+                if (buffer.TargetTable != null) {
+                    table = buffer.TargetTable;
                 }
             }
 
-            var tbItem = ParsedBaseItem as ParsedTable;
-            if (tbItem != null) {
-                if (!string.IsNullOrEmpty(tbItem.Description)) {
-                    toDisplay.Append(HtmlHelper.FormatRow("Description", tbItem.Description));
+            if (table != null) {
+                if (!string.IsNullOrEmpty(table.StringLikeTable)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Is like", table.LikeTable == null ? "Unknown table [" + table.StringLikeTable + "]" : table.LikeTable.Name));
                 }
 
-                if (tbItem.Fields.Count > 0) {
-                    toDisplay.Append(HtmlHelper.FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
+                if (!string.IsNullOrEmpty(table.Description)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Description", table.Description));
+                }
+
+                if (table.Fields.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("FIELDS [x" + table.Fields.Count + "]"));
                     toDisplay.Append("<table width='100%;'>");
-                    foreach (var parsedField in tbItem.Fields) {
+                    foreach (var parsedField in table.Fields) {
                         toDisplay.Append("<tr><td><img src='" + (parsedField.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flags.HasFlag(ParseFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (string.IsNullOrEmpty(parsedField.InitialValue) ? "DEFAULT" : parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
                     }
                     toDisplay.Append("</table>");
                 }
 
-                if (tbItem.Triggers.Count > 0) {
-                    toDisplay.Append(HtmlHelper.FormatSubtitle("TRIGGERS [x" + tbItem.Triggers.Count + "]"));
-                    foreach (var parsedTrigger in tbItem.Triggers) {
+                if (table.Triggers.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("TRIGGERS [x" + table.Triggers.Count + "]"));
+                    foreach (var parsedTrigger in table.Triggers) {
                         toDisplay.Append(HtmlHelper.FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='trigger#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
                     }
                 }
 
-                if (tbItem.Indexes.Count > 0) {
-                    toDisplay.Append(HtmlHelper.FormatSubtitle("INDEXES [x" + tbItem.Indexes.Count + "]"));
-                    foreach (var parsedIndex in tbItem.Indexes) {
+                if (table.Indexes.Count > 0) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("INDEXES [x" + table.Indexes.Count + "]"));
+                    foreach (var parsedIndex in table.Indexes) {
                         toDisplay.Append(HtmlHelper.FormatRow(parsedIndex.Name, (parsedIndex.Flag != ParsedIndexFlag.None ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
                     }
                 }
@@ -760,7 +763,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append(HtmlHelper.FormatRow("Is LIKE", ParsedField.TempType));
             }
             toDisplay.Append(HtmlHelper.FormatRow("Type", HtmlHelper.FormatSubString(SubText)));
-            toDisplay.Append(HtmlHelper.FormatRow("Owner table", ((ParsedTable) ParentItem.ParsedBaseItem).Name));
+            toDisplay.Append(HtmlHelper.FormatRow("Owner table", ((TableCompletionItem) ParentItem).DisplayText));
             if (!string.IsNullOrEmpty(ParsedField.Description))
                 toDisplay.Append(HtmlHelper.FormatRow("Description", ParsedField.Description));
             if (!string.IsNullOrEmpty(ParsedField.Format))

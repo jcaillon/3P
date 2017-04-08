@@ -312,7 +312,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                                     var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
                                     if (databaseList.Count > 0) {
                                         cbDatabase.DataSource = databaseList;
-                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.CurrentDb));
+                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.GetCurrentDb()));
                                         cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
                                     }
                                 }
@@ -380,7 +380,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         flExtraPf.Text = ProEnvironment.Current.ExtraPf;
                         flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                         flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
-                        flDatabase.Text = ProEnvironment.Current.CurrentDb;
+                        flDatabase.Text = ProEnvironment.Current.GetCurrentDb();
                         textbox1.Text = ProEnvironment.Current.GetPfPath();
                         textbox2.Text = ProEnvironment.Current.IniPath;
                         textbox3.Text = ProEnvironment.Current.BaseLocalPath;
@@ -554,7 +554,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         /// <param name="sender"></param>
         private void cbDatabase_SelectedIndexChanged(YamuiComboBox sender) {
-            if (ProEnvironment.Current.CurrentDb.Equals(cbDatabase.SelectedItem.ToString()))
+            if (ProEnvironment.Current.GetCurrentDb().Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
             textbox1.Text = ProEnvironment.Current.GetPfPath();
