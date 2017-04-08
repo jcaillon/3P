@@ -203,7 +203,8 @@ namespace _3PA.Lib.Ftp {
     /// <remarks>
     /// Requirements: MS Framework 2.0 and above or Mono 2.0 and above.
     /// </remarks>
-    public sealed class FtpsClient : IDisposable {
+    public sealed partial class FtpsClient : IDisposable {
+
         #region Private Enums
 
         enum EProtCode {

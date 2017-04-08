@@ -44,14 +44,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(bt_modify, "Click to modify the deployment rules through Notepad++");
 
             bt_import.ButtonPressed += (sender, args) => {
-                Deployer.Import();
+                DeploymentRules.Import();
                 UpdateList();
             };
-            bt_modify.ButtonPressed += (sender, args) => Deployer.EditRules();
+            bt_modify.ButtonPressed += (sender, args) => DeploymentRules.EditRules();
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeployRules + @"'>Learn more about this feature?</a>";
 
-            Deployer.OnDeployConfigurationUpdate += UpdateList;
+            DeploymentRules.OnDeployConfigurationUpdate += UpdateList;
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
@@ -71,7 +71,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateList() {
             // build the html
-            html_list.Text = Deployer.BuildHtmlTableForRules(Deployer.GetFullDeployRulesList);
+            html_list.Text = DeploymentRules.BuildHtmlTableForRules(DeploymentRules.GetFullDeployRulesList);
 
             scrollPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
             scrollPanel.OnResizedContentPanel();

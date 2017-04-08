@@ -6,4 +6,5 @@
 
 **Fixed issues :**
 
-- 
+- #160, #161 : problems with prototype synchronization in include files
+- #162 : no fields available on the autocompletion for buffers

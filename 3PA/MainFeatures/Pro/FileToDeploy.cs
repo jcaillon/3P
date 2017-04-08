@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using WixToolset.Dtf.Compression;
-using WixToolset.Dtf.Compression.Cab;
-using WixToolset.Dtf.Compression.Zip;
 using _3PA.Lib;
-using _3PA.Lib.Compression.Pl;
+using _3PA.Lib.Compression.Cab;
+using _3PA.Lib.Compression.Prolib;
+using _3PA.Lib.Compression.Zip;
 using _3PA.Lib.Ftp;
 
 namespace _3PA.MainFeatures.Pro {
-
-    #region FileToDeploy
 
     /// <summary>
     /// Represents a file that needs to be deployed
@@ -66,7 +60,12 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Directory name of To
         /// </summary>
-        public virtual string ToBasePath { get { return Path.GetDirectoryName(To); } }
+        public virtual string GroupBasePath { get { return Path.GetDirectoryName(To); } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public virtual string DirectoryThatMustExist { get { return Path.GetDirectoryName(To); } }
 
         #endregion
 
@@ -120,7 +119,9 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 sb.Append("<img height='15px' src='Error30x30'>Transfer failed for ");
             }
-            sb.Append("(" + DeployType + ") " + To.ToHtmlLink());
+            sb.Append("(" + DeployType + ") " + To.ToHtmlLink(To.Replace(GroupBasePath, "").TrimStart('\\')));
+            sb.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> ");
+            sb.Append(Origin.ToHtmlLink(null, true));
             if (!IsOk) {
                 sb.Append("<br>" + DeployError);
             }
@@ -133,7 +134,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <returns></returns>
         public virtual string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + ToBasePath.ToHtmlLink(null, true) + "</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
         }
 
         #endregion
@@ -144,23 +145,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy this file
         /// </summary>
         protected virtual bool TryDeploy() {
-            return true;
-        }
-
-        /// <summary>
-        /// Creates the directory, can apply attributes
-        /// </summary>
-        protected bool CreateDirectory(string path, FileAttributes attributes = FileAttributes.Directory) {
-            try {
-                if (Directory.Exists(path)) {
-                    return true;
-                }
-                var dirInfo = Directory.CreateDirectory(path);
-                dirInfo.Attributes |= attributes;
-            } catch (Exception e) {
-                DeployError = "Couldn't create directory " + path.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
             return true;
         }
 
@@ -194,31 +178,39 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
     }
 
-    #region FileToDeployArchive
+    #region FileToDeployInPack
 
-    internal abstract class FileToDeployArchive : FileToDeploy {
+    /// <summary>
+    /// A class for files that need to be deploy in "packs" (i.e. .zip, FTP)
+    /// </summary>
+    internal abstract class FileToDeployInPack : FileToDeploy {
 
         #region Properties
 
         /// <summary>
-        /// Path to the .pl or .zip file in which we need to include this file
+        /// Path to the pack in which we need to include this file
         /// </summary>
-        public string ArchivePath { get; set; }
+        public string PackPath { get; protected set; }
 
         /// <summary>
-        /// The relative path of the file within the archive
+        /// The relative path of the file within the pack
         /// </summary>
-        public string RelativePathInArchive { get; set; }
+        public string RelativePathInPack { get; set; }
 
         /// <summary>
-        /// Path to the archive file
+        /// A directory that must exist or be created for this deployment
         /// </summary>
-        public override string ToBasePath { get { return ArchivePath ?? To; } }
+        public override string DirectoryThatMustExist { get { return Path.GetDirectoryName(PackPath); } }
+
+        /// <summary>
+        /// Path to the pack file
+        /// </summary>
+        public override string GroupBasePath { get { return PackPath ?? To; } }
 
         /// <summary>
         /// Extension of the archive file
         /// </summary>
-        public virtual string ArchiveExt { get { return ".arc"; } }
+        public virtual string PackExt { get { return ".arc"; } }
 
         #endregion
 
@@ -227,18 +219,18 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        protected FileToDeployArchive(string targetPath) : base(targetPath) { }
+        protected FileToDeployInPack(string targetPath) : base(targetPath) { }
 
         #endregion
 
         #region Methods
 
         public override FileToDeploy Set(string origin, string @from, string to) {
-            var pos = to.LastIndexOf(ArchiveExt, StringComparison.CurrentCultureIgnoreCase);
+            var pos = to.LastIndexOf(PackExt, StringComparison.CurrentCultureIgnoreCase);
             if (pos >= 0) {
-                pos += ArchiveExt.Length;
-                ArchivePath = to.Substring(0, pos);
-                RelativePathInArchive = to.Substring(pos + 1);
+                pos += PackExt.Length;
+                PackPath = to.Substring(0, pos);
+                RelativePathInPack = to.Substring(pos + 1);
             }
             return base.Set(origin, @from, to);
         }
@@ -246,18 +238,21 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Returns a new archive info
         /// </summary>
-        public virtual IArchiveInfo NewArchive(Deployer deployer) {
+        public virtual IPackager NewArchive(Deployer deployer) {
             return null;
         }
 
         /// <summary>
         /// Saves an exception in the deploy error 
         /// </summary>
-        public void RegisterArchiveException(Exception e) {
+        public virtual void RegisterArchiveException(Exception e) {
             IsOk = false;
-            DeployError = "Problem with the target archive " + ArchivePath.ProQuoter() + " : \"" + e.Message + "\"";
+            DeployError = "Problem with the target pack " + PackPath.ProQuoter() + " : \"" + e.Message + "\"";
         }
 
+        /// <summary>
+        /// Allows to check the source file before putting this fileToDeploy in a pack
+        /// </summary>
         public bool IfFromFileExists() {
             if (!File.Exists(From)) {
                 DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
@@ -271,7 +266,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <returns></returns>
         public override string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(ArchiveExt.Replace(".", "")) + "' height='15px'><b>" + ToBasePath.ToHtmlLink(null, true) + "</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(PackExt.Replace(".", "")) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
         }
 
         #endregion
@@ -279,22 +274,22 @@ namespace _3PA.MainFeatures.Pro {
 
     #region FileToDeployCab
 
-    internal class FileToDeployCab : FileToDeployArchive {
+    internal class FileToDeployCab : FileToDeployInPack {
 
         /// <summary>
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Cab; } }
 
-        public override string ArchiveExt { get { return ".cab"; } }
+        public override string PackExt { get { return ".cab"; } }
 
         public FileToDeployCab(string targetPath) : base(targetPath) { }
 
         /// <summary>
         /// Returns a new archive info
         /// </summary>
-        public override IArchiveInfo NewArchive(Deployer deployer) {
-            return new CabInfo(ArchivePath);
+        public override IPackager NewArchive(Deployer deployer) {
+            return new CabPackager(PackPath);
         }
     }
 
@@ -302,22 +297,22 @@ namespace _3PA.MainFeatures.Pro {
 
     #region FileToDeployProlib
 
-    internal class FileToDeployProlib : FileToDeployArchive {
+    internal class FileToDeployProlib : FileToDeployInPack {
 
         /// <summary>
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Prolib; } }
 
-        public override string ArchiveExt { get { return ".pl"; } }
+        public override string PackExt { get { return ".pl"; } }
 
         public FileToDeployProlib(string targetPath) : base(targetPath) { }
 
         /// <summary>
         /// Returns a new archive info
         /// </summary>
-        public override IArchiveInfo NewArchive(Deployer deployer) {
-            return new PlInfo(ArchivePath, deployer.ProlibPath);
+        public override IPackager NewArchive(Deployer deployer) {
+            return new ProlibPackager(PackPath, deployer.ProlibPath);
         }
 
     }
@@ -326,22 +321,22 @@ namespace _3PA.MainFeatures.Pro {
 
     #region FileToDeployZip
 
-    internal class FileToDeployZip : FileToDeployArchive {
+    internal class FileToDeployZip : FileToDeployInPack {
 
         /// <summary>
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Zip; } }
 
-        public override string ArchiveExt { get { return ".zip"; } }
+        public override string PackExt { get { return ".zip"; } }
 
         public FileToDeployZip(string targetPath) : base(targetPath) { }
 
         /// <summary>
         /// Returns a new archive info
         /// </summary>
-        public override IArchiveInfo NewArchive(Deployer deployer) {
-            return new ZipInfo(ArchivePath);
+        public override IPackager NewArchive(Deployer deployer) {
+            return new ZipPackager(PackPath);
         }
     }
 
@@ -361,18 +356,119 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region FileToDeployFtp
+
+    internal class FileToDeployFtp : FileToDeployInPack {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.Ftp; } }
+
+        /// <summary>
+        /// Path to the pack file
+        /// </summary>
+        public override string GroupBasePath { get { return PackPath ?? To; } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
+        #endregion
+
+        #region Life and death
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public FileToDeployFtp(string targetPath) : base(targetPath) { }
+
+        #endregion
+
+        private string _host;
+        private int _port;
+        private string _userName;
+        private string _passWord;
+
+        #region Methods
+
+        public override FileToDeploy Set(string origin, string @from, string to) {
+            // parse our uri
+            var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
+            var match = regex.Match(to.Replace("\\", "/"));
+            if (match.Success) {
+                PackPath = match.Groups[1].Value;
+                RelativePathInPack = match.Groups[6].Value;
+                if (!string.IsNullOrEmpty(match.Groups[4].Value)) {
+                    _userName = match.Groups[2].Value;
+                    _passWord = match.Groups[3].Value.Trim(':');
+                    _host = match.Groups[4].Value.Trim('@');
+                    if (!int.TryParse(match.Groups[5].Value.Trim(':'), out _port))
+                        _port = -1;
+                } else {
+                    _host = match.Groups[2].Value;
+                    if (!int.TryParse(match.Groups[3].Value.Trim(':'), out _port))
+                        _port = -1;
+                }
+            }
+            return base.Set(origin, @from, to);
+        }
+
+        /// <summary>
+        /// Returns a new archive info
+        /// </summary>
+        public override IPackager NewArchive(Deployer deployer) {
+            return new FtpPackager(_host, _port, _userName, _passWord, PackPath);
+        }
+
+        /// <summary>
+        /// Saves an exception in the deploy error 
+        /// </summary>
+        public override void RegisterArchiveException(Exception e) {
+            IsOk = false;
+            DeployError = "Problem with the FTP " + PackPath.ProQuoter() + " : \"" + e.Message + "\"";
+        }
+
+        /// <summary>
+        /// Representation of a group of this type
+        /// </summary>
+        /// <returns></returns>
+        public override string GroupHeaderToString() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Ftp", true) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
+        }
+
+        #endregion
+        
+    }
+
+    #endregion
+
     #endregion
 
     #region FileToDeployDelete
 
     internal class FileToDeployDelete : FileToDeploy {
 
+        #region Properties
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
         /// <summary>
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Delete; } }
 
+        #endregion
+
         public FileToDeployDelete(string targetPath) : base(targetPath) { }
+
+        #region Methods
 
         protected override bool TryDeploy() {
             try {
@@ -385,6 +481,8 @@ namespace _3PA.MainFeatures.Pro {
             }
             return true;
         }
+
+        #endregion
 
     }
 
@@ -419,9 +517,6 @@ namespace _3PA.MainFeatures.Pro {
                     return true;
                 if (!File.Exists(From)) {
                     DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
-                    return false;
-                }
-                if (!CreateDirectory(ToBasePath)) {
                     return false;
                 }
                 File.Delete(To);
@@ -460,9 +555,6 @@ namespace _3PA.MainFeatures.Pro {
                     DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
                     return false;
                 }
-                if (!CreateDirectory(ToBasePath)) {
-                    return false;
-                }
                 File.Delete(To);
                 File.Move(From, To);
             } catch (Exception e) {
@@ -472,157 +564,6 @@ namespace _3PA.MainFeatures.Pro {
             return true;
         }
     }
-
-    #endregion
-
-    #region FileToDeployFtp
-
-    internal class FileToDeployFtp : FileToDeploy {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Ftp; } }
-
-        /// <summary>
-        /// Path to the archive file
-        /// </summary>
-        public override string ToBasePath { get { return _serverUri ?? To; } }
-
-        private string _serverUri;
-
-        public FileToDeployFtp(string targetPath) : base(targetPath) { }
-
-        /// <summary>
-        /// Representation of a group of this type
-        /// </summary>
-        /// <returns></returns>
-        public override string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Ftp", true) + "' height='15px'><b>" + ToBasePath.ToHtmlLink(null, true) + "</b></div>";
-        }
-
-        /// <summary>
-        /// Sends a file to a ftp(s) server : EASY MODE, connects, create the directories...
-        /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
-        /// </summary>
-        protected override bool TryDeploy() {
-            if (string.IsNullOrEmpty(From) || !File.Exists(From)) {
-                DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
-                return false;
-            }
-            try {
-                // parse our uri
-                var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
-                var match = regex.Match(To.Replace("\\", "/"));
-                if (!match.Success) {
-                    DeployError = "Invalid URI for the targeted FTP : " + To.ProQuoter();
-                    return false;
-                }
-
-                _serverUri = match.Groups[1].Value;
-                var distantPath = match.Groups[6].Value;
-                string userName = null;
-                string passWord = null;
-                string server;
-                int port;
-                if (!string.IsNullOrEmpty(match.Groups[4].Value)) {
-                    userName = match.Groups[2].Value;
-                    passWord = match.Groups[3].Value.Trim(':');
-                    server = match.Groups[4].Value.Trim('@');
-                    if (!int.TryParse(match.Groups[5].Value.Trim(':'), out port))
-                        port = -1;
-                } else {
-                    server = match.Groups[2].Value;
-                    if (!int.TryParse(match.Groups[3].Value.Trim(':'), out port))
-                        port = -1;
-                }
-
-                FtpsClient ftp;
-                if (!_ftpClients.ContainsKey(_serverUri))
-                    _ftpClients.Add(_serverUri, new FtpsClient());
-                ftp = _ftpClients[_serverUri];
-
-                // try to connect!
-                if (!ftp.Connected) {
-                    if (!ConnectFtp(ftp, userName, passWord, server, port))
-                        return false;
-                }
-
-                // dispose of the ftp on shutdown
-                Plug.OnShutDown += DisconnectFtp;
-
-                try {
-                    ftp.PutFile(From, distantPath);
-                } catch (Exception) {
-
-                    // might be disconnected??
-                    try {
-                        ftp.GetCurrentDirectory();
-                    } catch (Exception) {
-                        if (!ConnectFtp(ftp, userName, passWord, server, port))
-                            return false;
-                    }
-
-                    // try to create the directory and then push the file again
-                    ftp.MakeDir((Path.GetDirectoryName(distantPath) ?? "").Replace('\\', '/'), true);
-                    ftp.PutFile(From, distantPath);
-                }
-            } catch (Exception e) {
-                DeployError = "Error sending " + From.ProQuoter() + " to FTP " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port) {
-            NetworkCredential credential = null;
-            if (!string.IsNullOrEmpty(userName))
-                credential = new NetworkCredential(userName, passWord);
-
-            var modes = new List<EsslSupportMode>();
-            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add((EsslSupportMode)l); });
-
-            ftp.DataConnectionMode = EDataConnectionMode.Passive;
-            while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {
-                foreach (var mode in modes.OrderByDescending(mode => mode)) {
-                    try {
-                        var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
-                        ftp.Connect(server, curPort, credential, mode, 1800);
-                        ftp.Connected = true;
-                        break;
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-                ftp.DataConnectionMode = EDataConnectionMode.Active;
-            }
-
-            // failed?
-            if (!ftp.Connected) {
-                DeployError = "Failed to connect to a FTP server with : " + string.Format(@"Username : {0}, Password : {1}, Host : {2}, Port : {3}", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port);
-                return false;
-            }
-
-            return true;
-        }
-
-        #region Static for FTP
-
-        private static Dictionary<string, FtpsClient> _ftpClients = new Dictionary<string, FtpsClient>();
-
-        private static void DisconnectFtp() {
-            foreach (var ftpsClient in _ftpClients) {
-                ftpsClient.Value.Close();
-            }
-            _ftpClients.Clear();
-        }
-
-        #endregion
-
-    }
-
-    #endregion
 
     #endregion
 

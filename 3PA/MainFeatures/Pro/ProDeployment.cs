@@ -399,10 +399,10 @@ namespace _3PA.MainFeatures.Pro {
                     {0, new List<Tuple<int, string>>()}
                 };
             foreach (var kpv in _filesToDeployPerStep) {
-                // group either by directory name or by archive name
-                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.ToBasePath).Select(deploys => deploys.ToList()).ToList();
+                // group either by directory name or by pack name
+                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.GroupBasePath).Select(deploys => deploys.ToList()).ToList();
 
-                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().ToBasePath)) {
+                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().GroupBasePath)) {
                     var deployFailed = group.Exists(deploy => !deploy.IsOk);
                     var first = group.First();
 

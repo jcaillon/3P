@@ -515,7 +515,7 @@ namespace _3PA.MainFeatures.Pro {
                     var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1), null, null);
                     if (deployedFiles == null || deployedFiles.Count == 0) {
                         UserCommunication.Notify("The current file doesn't match any transfer rules for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "No transfer rules", args => {
-                            Deployer.EditRules();
+                            DeploymentRules.EditRules();
                             args.Handled = true;
                         }, 5);
                     } else {
@@ -524,7 +524,7 @@ namespace _3PA.MainFeatures.Pro {
                     }
                 } else {
                     UserCommunication.Notify("The current file didn't pass the deployment filters for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "Filtered by deployment rules", args => {
-                        Deployer.EditRules();
+                        DeploymentRules.EditRules();
                         args.Handled = true;
                     }, 5);
                 }

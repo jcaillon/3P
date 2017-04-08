@@ -3,20 +3,34 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using WixToolset.Dtf.Compression;
+using _3PA.MainFeatures.Pro;
 
-namespace _3PA.Lib.Compression.Pl {
+namespace _3PA.Lib.Compression.Prolib {
 
-    internal class PlInfo : IArchiveInfo {
+    /// <summary>
+    /// Allows to pack files into a prolib file
+    /// </summary>
+    internal class ProlibPackager : IPackager {
 
-        ProcessIo _prolibExe;
+        #region Private
+
+        private ProcessIo _prolibExe;
         private string _archivePath;
 
-        public PlInfo(string archivePath, string prolibPath) {
+        #endregion
+
+        #region Life and death
+
+        public ProlibPackager(string archivePath, string prolibPath) {
             _archivePath = archivePath;
             _prolibExe = new ProcessIo(prolibPath);
         }
 
-        public void PackFileSet(IDictionary<string, string> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
+        #endregion
+
+        #region Methods
+
+        public void PackFileSet(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
 
             // check that the folder to the archive exists
             var archiveFolder = Path.GetDirectoryName(_archivePath);
@@ -43,7 +57,7 @@ namespace _3PA.Lib.Compression.Pl {
                             Directory.CreateDirectory(subFolderPath);
                         }
                     }
-                    subFolders[subFolderPath].Add(new FilesToMove(file.Value, Path.Combine(uniqueTempFolder, file.Key), file.Key));
+                    subFolders[subFolderPath].Add(new FilesToMove(file.Value.From, Path.Combine(uniqueTempFolder, file.Key), file.Key));
                 }
             }
 
@@ -95,6 +109,10 @@ namespace _3PA.Lib.Compression.Pl {
             Directory.Delete(uniqueTempFolder, true);
         }
 
+        #endregion
+
+        #region FilesToMove
+
         private class FilesToMove {
             public string Origin { get; private set; }
             public string Temp { get; private set; }
@@ -107,6 +125,8 @@ namespace _3PA.Lib.Compression.Pl {
                 Move = origin.Length > 2 && temp.Length > 2 && origin.Substring(0, 2).EqualsCi(temp.Substring(0, 2));
             }
         }
+
+        #endregion
         
     }
 }

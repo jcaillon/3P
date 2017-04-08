@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using _3PA.MainFeatures.Pro;
 
 namespace WixToolset.Dtf.Compression {
     /// <summary>
@@ -14,7 +15,7 @@ namespace WixToolset.Dtf.Compression {
     /// provides access to file-based operations on the archive.
     /// </summary>
     [Serializable]
-    public abstract class ArchiveInfo : FileSystemInfo, IArchiveInfo {
+    public abstract class ArchiveInfo : FileSystemInfo {
         /// <summary>
         /// Creates a new ArchiveInfo object representing an archive in a
         /// specified path.
@@ -518,24 +519,6 @@ namespace WixToolset.Dtf.Compression {
                 compressionEngine.CompressionLevel = compLevel;
                 compressionEngine.Pack(streamContext, fileNames);
             }
-        }
-
-        /// <summary>
-        /// Compresses files into the archive, specifying the names used
-        /// to store the files in the archive.
-        /// </summary>
-        /// <param name="sourceDirectory">This parameter may be null, but if
-        /// specified it is the root directory
-        /// for any relative paths in <paramref name="fileNames"/>.</param>
-        /// <param name="fileNames">A mapping from internal file paths to
-        /// external file paths.</param>
-        /// <remarks>
-        /// Uses maximum compression level.
-        /// </remarks>
-        public void PackFileSet(
-            string sourceDirectory,
-            IDictionary<string, string> fileNames) {
-            PackFileSet(sourceDirectory, fileNames, CompressionLevel.Max, null);
         }
 
         /// <summary>

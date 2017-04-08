@@ -17,6 +17,7 @@
 <!--- What actually happend -->
 
 ### Debug Information
-<!--- Please specify the version of 3P as well as the version of Notepad++ you are using -->
+<!--- Please specify the version of 3P you are using -->
+<!--- The content of Notepad++ > Menu "?" > "Debug info..." can also be useful to see incompatibilities with other plugins -->
 
-<!--- Screenshots and other information are welcome! -->
+<!--- Screen-shots and other information are welcome! -->

@@ -182,12 +182,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // modify rules
             tooltip.SetToolTip(btRules, "Click to modify the rules");
             btRules.BackGrndImage = ImageResources.Rules;
-            btRules.ButtonPressed += (sender, args) => Deployer.EditRules();
+            btRules.ButtonPressed += (sender, args) => DeploymentRules.EditRules();
 
             // view rules
             tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
-            btSeeRules.ButtonPressed += (sender, args) => { UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment"); };
+            btSeeRules.ButtonPressed += (sender, args) => { UserCommunication.Message(DeploymentRules.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment"); };
 
             DeployProfile.OnDeployProfilesUpdate += () => {
                 UpdateCombo();
@@ -197,7 +197,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // subscribe
             ProEnvironment.OnEnvironmentChange += OnShow;
-            Deployer.OnDeployConfigurationUpdate += OnShow;
+            DeploymentRules.OnDeployConfigurationUpdate += OnShow;
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);

@@ -379,15 +379,11 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Deploy
 
-            public string DeploymentRulesFilePath {
-                get { return Config.FileDeploymentRules; }
-            }
-
             /// <summary>
             /// The deployer for this environment (can either be a new one, or a copy of this proenv is, itself, a copy)
             /// </summary>
             public Deployer Deployer {
-                get { return _deployer != null ? _deployer : new Deployer(DeploymentRulesFilePath, this); }
+                get { return _deployer != null ? _deployer : new Deployer(DeploymentRules.GetRules(Config.FileDeploymentRules, Name, Suffix), this); }
             }
 
             #endregion

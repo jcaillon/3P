@@ -71,8 +71,8 @@ namespace _3PA.MainFeatures {
                         new ConfLine {
                             Label = "Deployment rules",
                             HandledItem = Config.FileDeploymentRules,
-                            OnImport = line => Deployer.Import(),
-                            OnExport = line => Deployer.Export(),
+                            OnImport = line => DeploymentRules.Import(),
+                            OnExport = line => DeploymentRules.Export(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
