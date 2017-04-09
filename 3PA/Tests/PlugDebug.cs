@@ -142,7 +142,20 @@ namespace _3PA.Tests {
             }, Encoding.Default);
         }
 
-        public static void DebugTest2() {}
+        public static void DebugTest2() {
+
+            var exec = new ProExecutionTableCrc {
+                NeedDatabaseConnection = true
+            };
+            exec.OnExecutionOk += execution => {
+                var sb = new StringBuilder();
+                foreach (var tab in ((ProExecutionTableCrc)execution).GetTableCrc()) {
+                    sb.Append(tab.QualifiedTableName + " -> " + tab.Crc + "<br>");
+                }
+                UserCommunication.Notify(sb.ToString());
+            };
+            exec.Start();
+        }
 
         public static void DebugTest3() {
             /*

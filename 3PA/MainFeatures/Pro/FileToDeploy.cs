@@ -113,7 +113,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <returns></returns>
         public override string ToString() {
             var sb = new StringBuilder();
-            sb.Append("<div>");
+            sb.Append("<div style='padding-left: 10px'>");
             if (IsOk) {
                 sb.Append("<img height='15px' src='" + Utils.GetExtensionImage((Path.GetExtension(To) ?? "").Replace(".", "")) + "'>");
             } else {
@@ -121,7 +121,7 @@ namespace _3PA.MainFeatures.Pro {
             }
             sb.Append("(" + DeployType + ") " + To.ToHtmlLink(To.Replace(GroupBasePath, "").TrimStart('\\')));
             sb.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> ");
-            sb.Append(Origin.ToHtmlLink(null, true));
+            sb.Append(Origin.ToHtmlLink(Path.GetFileName(Origin), true));
             if (!IsOk) {
                 sb.Append("<br>" + DeployError);
             }

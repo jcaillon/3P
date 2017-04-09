@@ -486,7 +486,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Sci.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecutionCompile.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "<div style='padding-bottom: 5px;'>Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :</div>" + ProExecutionCompile.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }

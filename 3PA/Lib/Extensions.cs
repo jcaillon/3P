@@ -326,16 +326,24 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string ToHtmlLink(this string url, string urlName = null, bool accentuate = false) {
             try {
-                if (urlName == null && (File.Exists(url) || Directory.Exists(url))) {
-                    var output = new StringBuilder();
-                    var path = new StringBuilder();
-                    var splitted = url.Split('\\');
-                    for (int i = 0; i < splitted.Length; i++) {
-                        path.Append(splitted[i]);
-                        output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitted[i], i < splitted.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitted.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
-                        path.Append("\\");
+                if (File.Exists(url) || Directory.Exists(url)) {
+                    var splitName = urlName == null ? new string[] { } : urlName.Split('\\');
+                    if (urlName == null || splitName.Length > 0) {
+                        var splitUrl = url.Split('\\');
+                        var output = new StringBuilder();
+                        var path = new StringBuilder();
+                        var j = 0;
+                        for (int i = 0; i < splitUrl.Length; i++) {
+                            path.Append(splitUrl[i]);
+                            if (urlName == null || splitUrl[i].EqualsCi(splitName[j])) {
+                                output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitUrl[i], i < splitUrl.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitUrl.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
+                                j++;
+                            }
+                            path.Append("\\");
+                        }
+                        if (output.Length > 0)
+                            return output.ToString();
                     }
-                    return output.ToString();
                 }
             } catch (Exception) {
                 // ignored invalid char path

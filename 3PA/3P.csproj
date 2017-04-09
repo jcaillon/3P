@@ -196,6 +196,7 @@
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
     <Compile Include="MainFeatures\Pro\DeploymentRules.cs" />
+    <Compile Include="MainFeatures\Pro\FileToCompile.cs" />
     <Compile Include="MainFeatures\Pro\FileToDeploy.cs" />
     <Compile Include="MainFeatures\Pro\ProDeployment.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
@@ -720,6 +721,7 @@
     <None Include="_Resource\Data\ProgressTemplates\InternalProcedure.p" />
     <None Include="_Resource\Data\Progress\DeploymentHook.p" />
     <None Include="_Resource\Data\Progress\DumpDatabase.p" />
+    <None Include="_Resource\Data\Progress\DumpTableCrc.p" />
     <None Include="_Resource\Data\Progress\ProgressRun.p" />
     <None Include="_Resource\Data\Progress\StartProlint.p" />
     <None Include="_Resource\Data\Snippets" />

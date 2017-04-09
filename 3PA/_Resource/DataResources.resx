@@ -136,6 +136,9 @@
   <data name="DumpDatabase" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>data\progress\dumpdatabase.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="DumpTableCrc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>data\progress\dumptablecrc.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="FunctionImplementation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>data\progresstemplates\functionimplementation.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

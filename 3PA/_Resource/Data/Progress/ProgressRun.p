@@ -35,6 +35,7 @@
     &SCOPED-DEFINE CurrentFilePath ""
     &SCOPED-DEFINE OutputPath ""
 
+    &SCOPED-DEFINE AnalysisMode FALSE
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
 &ENDIF
@@ -42,17 +43,17 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE STREAM str_w.
 DEFINE STREAM str_r.
 DEFINE STREAM str_rlist.
-DEFINE STREAM str_wlog.
-DEFINE STREAM str_wdblog.
+DEFINE STREAM str_w.
 DEFINE STREAM str_wout.
+DEFINE STREAM str_werlog.
+DEFINE STREAM str_wdblog.
 
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 
-/* Prototypes */
+/* ***************************  Prototypes  *************************** */
 
 FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER) FORWARD.
 FUNCTION fi_output_last_error RETURNS LOGICAL PRIVATE ( ) FORWARD.
@@ -61,28 +62,30 @@ FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACT
 
 /* ***************************  Main Block  *************************** */
 
-/* Critical options!! */
+/* Session options */
 SESSION:SYSTEM-ALERT-BOXES = YES.
 SESSION:APPL-ALERT-BOXES = YES.
 
-OUTPUT STREAM str_wdblog TO VALUE({&DbLogPath}) BINARY.
-OUTPUT STREAM str_wlog TO VALUE({&LogPath}) BINARY.
-PUT STREAM str_wlog UNFORMATTED "".
+/* Stream used for the unexpected errors in this program */
+OUTPUT STREAM str_werlog TO VALUE({&LogPath}) BINARY.
+PUT STREAM str_werlog UNFORMATTED "".
 
-/* assign the PROPATH here */
+/* Assign the PROPATH here */
 ASSIGN PROPATH = TRIM({&PropathToUse} + "," + PROPATH, ",").
 
-/* connect the database(s) */
+/* Connect the database(s) */
 &IF {&DbConnectString} > "" &THEN
+    OUTPUT STREAM str_wdblog TO VALUE({&DbLogPath}) BINARY.
     CONNECT VALUE(fi_add_connec_try({&DbConnectString})) NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
+    OUTPUT STREAM str_wdblog CLOSE.
 &ENDIF
 
-/* pre execution program */
+/* Pre-execution program */
 &IF {&PreExecutionProgram} > "" &THEN
     IF SEARCH({&PreExecutionProgram}) = ? THEN
-        PUT STREAM str_wlog UNFORMATTED "Couldn't find the pre-execution program : " + QUOTER({&PreExecutionProgram}) SKIP.
+        PUT STREAM str_werlog UNFORMATTED "Couldn't find the pre-execution program : " + QUOTER({&PreExecutionProgram}) SKIP.
     ELSE DO:
         DO  ON STOP   UNDO, LEAVE
             ON ERROR  UNDO, LEAVE
@@ -116,9 +119,12 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             RUN VALUE({&CurrentFilePath}) NO-ERROR.
             fi_output_last_error().
         END.
+        WHEN "TABLECRC" OR
         WHEN "DATABASE" THEN DO:
             IF NUM-DBS < 1 THEN DO:
-                PUT STREAM str_wdblog UNFORMATTED "0 database(s) connected! There is nothing to be done." SKIP.
+                OUTPUT STREAM str_wdblog TO VALUE({&DbLogPath}) APPEND BINARY.
+                PUT STREAM str_wdblog UNFORMATTED "Zero database connected, there is nothing to be done." SKIP.
+                OUTPUT STREAM str_wdblog CLOSE.
                 ASSIGN gl_dbKo = TRUE.
             END.
             /* for each connected db */
@@ -159,7 +165,7 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             IF fi_output_last_error() THEN DO:
                 RUN _ab.p NO-ERROR.
                 IF fi_output_last_error() THEN
-                    PUT STREAM str_wlog UNFORMATTED SKIP "The following commands both failed : RUN adeuib/_uibmain.p. RUN _ab.p" SKIP.
+                    PUT STREAM str_werlog UNFORMATTED SKIP "The following commands both failed : RUN adeuib/_uibmain.p. RUN _ab.p" SKIP.
             END.
         END.
     END CASE.
@@ -168,16 +174,13 @@ END.
 
 UNSUBSCRIBE TO "eventToPublishToNotifyTheUserAfterExecution".
 
-OUTPUT STREAM str_wlog CLOSE.
-OUTPUT STREAM str_wdblog CLOSE.
-
 IF NOT gl_dbKo THEN
-    OS-DELETE VALUE({&DbLogPath}).
+    OS-DELETE VALUE({&DbLogPath}) NO-ERROR.
 
-/* post execution program */
+/* Post-execution program */
 &IF {&PostExecutionProgram} > "" &THEN
     IF SEARCH({&PostExecutionProgram}) = ? THEN
-        PUT STREAM str_wlog UNFORMATTED "Couldn't find the post-execution program : " + QUOTER({&PostExecutionProgram}) SKIP.
+        PUT STREAM str_werlog UNFORMATTED "Couldn't find the post-execution program : " + QUOTER({&PostExecutionProgram}) SKIP.
     ELSE DO:
         DO  ON STOP   UNDO, LEAVE
             ON ERROR  UNDO, LEAVE
@@ -188,6 +191,8 @@ IF NOT gl_dbKo THEN
         fi_output_last_error().
     END.
 &ENDIF
+
+OUTPUT STREAM str_werlog CLOSE.
 
 /* Must be QUIT or prowin32.exe opens an empty editor! */
 QUIT.
@@ -287,20 +292,35 @@ PROCEDURE pi_compileList PRIVATE:
 ------------------------------------------------------------------------------*/
 
     DEFINE VARIABLE lc_from AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_to AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_outdir AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_lis AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_xrf AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_dgb AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_fileid AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_reftables AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_tempDirectory AS CHARACTER NO-UNDO.
 
-    ASSIGN FILE-INFO:FILE-NAME = {&ToCompileListFile}.
-    IF FILE-INFO:FILE-TYPE = ? OR NOT FILE-INFO:FILE-TYPE MATCHES("*R*") OR NOT FILE-INFO:FILE-TYPE MATCHES("*F*") THEN
-        RETURN ERROR "Can't find the list of files to compile".
+    ASSIGN lc_tempDirectory = ENTRY(1, {&propathToUse}, ",").
 
     /* loop through all the files to compile */
     INPUT STREAM str_rlist FROM VALUE({&ToCompileListFile}) NO-ECHO.
     REPEAT:
-        IMPORT STREAM str_rlist lc_from lc_to lc_lis lc_xrf lc_dgb.
+        IMPORT STREAM str_rlist lc_from lc_outdir lc_lis lc_xrf lc_dgb lc_fileid lc_reftables.
         IF lc_from > "" THEN DO:
+        
+            &IF {&ExecutionType} = "GENERATEDEBUGFILE" OR {&ExecutionType} = "CHECKSYNTAX" &THEN
+                ASSIGN lc_outdir = lc_tempDirectory.
+            &ENDIF
+        
+            &IF {&AnalysisMode} &THEN
+                /* we don't bother saving/restoring the log-manager state since we are only compiling, there
+                   should be no *useful* log activated at this moment */
+                ASSIGN
+                    LOG-MANAGER:LOGFILE-NAME = lc_fileid
+                    LOG-MANAGER:LOGGING-LEVEL = 3
+                    LOG-MANAGER:LOG-ENTRY-TYPES = "FileID"
+                    .
+            &ENDIF
 
             &IF {&ExecutionType} = "RUN" &THEN
                 DO  ON STOP   UNDO, LEAVE
@@ -312,9 +332,9 @@ PROCEDURE pi_compileList PRIVATE:
             &ELSE
                 &IF {&ExecutionType} = "CHECKSYNTAX" &THEN
                     COMPILE VALUE(lc_from)
-                        /* we still save into because if we compile a file and a .r exists next to said file, it 
-                           doesn't compile... */
-                        SAVE INTO VALUE(lc_to)
+                        /* we still save into because if we compile a file and a .r exists next to said file, it
+                           doesn't compile... *Sad* */
+                        SAVE INTO VALUE(lc_outdir)
                         NO-ERROR.
                 &ELSE
                     /* COMPILE / GENERATEDEBUGFILE */
@@ -323,32 +343,32 @@ PROCEDURE pi_compileList PRIVATE:
                     IF lc_dgb = "?" THEN ASSIGN lc_dgb = ?.
                     IF lc_xrf = ? OR NOT lc_xrf MATCHES "*~~.xml" THEN
                         COMPILE VALUE(lc_from)
-                            &IF {&ExecutionType} = "GENERATEDEBUGFILE" &THEN
-                                SAVE = FALSE                            
-                            &ELSE
-                                SAVE INTO VALUE(lc_to)
-                            &ENDIF
+                            SAVE INTO VALUE(lc_outdir)
                             LISTING VALUE(lc_lis)
                             XREF VALUE(lc_xrf)
                             DEBUG-LIST VALUE(lc_dgb)
                             NO-ERROR.
                     ELSE
                         COMPILE VALUE(lc_from)
-                            &IF {&ExecutionType} = "GENERATEDEBUGFILE" &THEN
-                                SAVE = FALSE                            
-                            &ELSE
-                                SAVE INTO VALUE(lc_to)
-                            &ENDIF
+                            SAVE INTO VALUE(lc_outdir)
                             LISTING VALUE(lc_lis)
                             XREF-XML VALUE(lc_xrf)
                             DEBUG-LIST VALUE(lc_dgb)
-                            NO-ERROR.            
+                            NO-ERROR.
                 &ENDIF
             &ENDIF
-            
+
             fi_output_last_error().
             RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
             fi_output_last_error().
+
+            &IF {&AnalysisMode} &THEN
+                LOG-MANAGER:CLOSE-LOG().
+
+                /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
+                RUN pi_generateTableRef (INPUT lc_from, INPUT lc_outdir, INPUT lc_reftables) NO-ERROR.
+                fi_output_last_error().
+            &ENDIF
 
             /* the following stream / file is used to inform the C# side of the progression */
             OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
@@ -362,6 +382,108 @@ PROCEDURE pi_compileList PRIVATE:
     RETURN "".
 
 END PROCEDURE.
+
+&IF {&AnalysisMode} &THEN
+    PROCEDURE pi_generateTableRef PRIVATE:
+    /*------------------------------------------------------------------------------
+      Summary    : generate a file that lists all db.tables + CRC referenced in the .r code produced
+      Parameters : <none>
+    ------------------------------------------------------------------------------*/
+
+        DEFINE INPUT PARAMETER ipc_compiledSource AS CHARACTER NO-UNDO.
+        DEFINE INPUT PARAMETER ipc_compilationDir AS CHARACTER NO-UNDO.
+        DEFINE INPUT PARAMETER ipc_outTableRefPath AS CHARACTER NO-UNDO.
+
+        DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
+        DEFINE VARIABLE lc_tableList AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_crcList AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_rcode AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_rcodePath AS CHARACTER NO-UNDO.
+
+        ASSIGN
+            lc_rcode = ipc_compiledSource
+            lc_rcode = SUBSTRING(lc_rcode, R-INDEX(lc_rcode, "~\") + 1)
+            lc_rcode = SUBSTRING(lc_rcode, 1, R-INDEX(lc_rcode, ".") - 1)
+            lc_rcode = lc_rcode + ".r"
+            lc_rcodePath = RIGHT-TRIM(ipc_compilationDir, "~\") + "~\" + lc_rcode
+            .
+
+        /* The only difficulty is to find the .r code for classes */
+        ASSIGN FILE-INFO:FILE-NAME = lc_rcodePath.
+        IF FILE-INFO:FILE-TYPE = ? THEN DO:
+
+            /* need to find the right .r code in the directories created during compilation */
+            RUN pi_findInFolders (INPUT lc_rcode, INPUT ipc_compilationDir) NO-ERROR.
+            ASSIGN lc_rcodePath = RETURN-VALUE.
+            IF fi_output_last_error() OR NOT lc_rcodePath > "" THEN
+                RETURN "". /* we failed */
+        END.
+        /* Retrieve table list as well as their CRC values */
+        ASSIGN
+            RCODE-INFO:FILE-NAME = lc_rcodePath
+            lc_tableList = RCODE-INFO:TABLE-LIST
+            lc_crcList =  RCODE-INFO:TABLE-CRC-LIST
+            .
+
+        /* Store tables referenced in the .R file */
+        OUTPUT STREAM str_w TO VALUE(ipc_outTableRefPath) BINARY.
+        PUT STREAM str_w UNFORMATTED "".
+        REPEAT li_i = 1 TO NUM-ENTRIES(lc_tableList):
+            PUT STREAM str_w UNFORMATTED ENTRY(li_i, lc_tableList) + "~t" + ENTRY(li_i, lc_crcList).
+        END.
+        OUTPUT STREAM str_w CLOSE.
+
+        RETURN "".
+
+    END PROCEDURE.
+
+    PROCEDURE pi_findInFolders PRIVATE:
+    /*------------------------------------------------------------------------------
+      Summary    : Allows to find the fullpath of the given file in a given folder (recursively)
+      Parameters : <none>
+    ------------------------------------------------------------------------------*/
+
+        DEFINE INPUT PARAMETER ipc_fileToFind AS CHARACTER NO-UNDO.
+        DEFINE INPUT PARAMETER ipc_dir AS CHARACTER NO-UNDO.
+
+        DEFINE VARIABLE lc_listSubdir AS CHARACTER NO-UNDO INITIAL "".
+        DEFINE VARIABLE li_subDir AS INTEGER NO-UNDO.
+        DEFINE VARIABLE lc_listFilesSubDir AS CHARACTER NO-UNDO INITIAL "".
+        DEFINE VARIABLE lc_filename AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_fullPath AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_fileType AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_outputFullPath AS CHARACTER NO-UNDO INITIAL "".
+
+        INPUT STREAM str_r FROM OS-DIR(ipc_dir).
+        dirRepeat:
+        REPEAT:
+            IMPORT STREAM str_r lc_filename lc_fullPath lc_fileType.
+            IF lc_filename = "." OR lc_filename = ".." THEN
+                NEXT dirRepeat.
+            IF lc_filename = ipc_fileToFind THEN DO:
+                ASSIGN lc_outputFullPath = lc_fullPath.
+                LEAVE dirRepeat.
+            END.
+            ELSE IF lc_fileType MATCHES "*D*" THEN
+                ASSIGN lc_listSubdir = lc_listSubdir + lc_fullPath + ",".
+        END.
+        INPUT STREAM str_r CLOSE.
+
+        IF lc_outputFullPath > "" THEN
+            RETURN lc_outputFullPath.
+
+        ASSIGN lc_listSubdir = TRIM(lc_listSubdir, ",").
+        DO li_subDir = 1 TO NUM-ENTRIES(lc_listSubdir):
+            RUN pi_findInFolders (INPUT ipc_fileToFind, INPUT ENTRY(li_subDir, lc_listSubdir)) NO-ERROR.
+            ASSIGN lc_outputFullPath = RETURN-VALUE.
+            IF NOT fi_output_last_error() AND lc_outputFullPath > "" THEN
+                RETURN lc_outputFullPath.
+        END.
+
+        RETURN "".
+
+    END PROCEDURE.
+&ENDIF
 
 PROCEDURE pi_feedNotification PRIVATE:
 /*------------------------------------------------------------------------------
@@ -413,7 +535,7 @@ END.
 
 FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER) :
 /*------------------------------------------------------------------------------
-  Purpose: extract a more detailed error message from the progress help
+  Purpose: extracts a more detailed error message from the progress help
   Parameters:  ipi_messNumber AS INTEGER
 ------------------------------------------------------------------------------*/
 
@@ -480,10 +602,10 @@ FUNCTION fi_output_last_error RETURNS LOGICAL PRIVATE ( ) :
 
     IF ERROR-STATUS:ERROR THEN DO:
         IF RETURN-VALUE > "" THEN
-            PUT STREAM str_wlog UNFORMATTED RETURN-VALUE SKIP.
+            PUT STREAM str_werlog UNFORMATTED RETURN-VALUE SKIP.
         IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_wlog UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+                PUT STREAM str_werlog UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
         RETURN TRUE.
@@ -522,7 +644,9 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
         END.
         RETURN TRUE.
     END.
+
     ERROR-STATUS:ERROR = NO.
+
     RETURN FALSE.
 
 END FUNCTION.
