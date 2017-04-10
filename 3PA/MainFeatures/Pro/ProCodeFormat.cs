@@ -112,16 +112,19 @@ namespace _3PA.MainFeatures.Pro {
             return outputSnippet.ToString();
         }
 
+        private static HashSet<string> _displayParserErrorsIgnoredFiles = new HashSet<string>();
+
         /// <summary>
         /// Check the validity of a progress code in the point of view of the appbuilder (make sure it can be opened within the appbuilder)
         /// </summary>
         public static void DisplayParserErrors(bool silent = false) {
-            if (Npp.CurrentFile.IsProgress) {
+            if (Npp.CurrentFile.IsProgress && !_displayParserErrorsIgnoredFiles.Contains(Npp.CurrentFile.Path)) {
                 Task.Factory.StartNew(() => {
+                    var currentFilePath = Npp.CurrentFile.Path;
                     var message = new StringBuilder();
-                    message.Append("The analyzed file was :<br>" + Npp.CurrentFile.Path.ToHtmlLink() + "<br>");
+                    message.Append("The analyzed file was :<br>" + currentFilePath.ToHtmlLink() + "<br>");
 
-                    var parser = new Parser.Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
+                    var parser = new Parser.Parser(Sci.Text, currentFilePath, null, false);
 
                     var parserErrors = parser.ParseErrorsInHtml;
                     if (!string.IsNullOrEmpty(parserErrors)) {
@@ -151,13 +154,15 @@ namespace _3PA.MainFeatures.Pro {
                         message.Append("No problems found!");
                     } else {
                         if (silent)
-                            message.Append("<br><br>" + "disable".ToHtmlLink("Click here to disable the automatic check on save"));
+                            message.Append("<br><br>" + "disable".ToHtmlLink("Click here to disable the automatic check for this file"));
                     }
 
                     UserCommunication.NotifyUnique("DisplayParserErrors", message.ToString(), noProb ? MessageImg.MsgOk : MessageImg.MsgWarning, "Check code validity", "Analysis results", args => {
                         if (args.Link.Equals("disable")) {
                             args.Handled = true;
-                            Config.Instance.DisplayParserErrorsOnSave = false;
+                            UserCommunication.CloseUniqueNotif("DisplayParserErrors");
+                            if (!_displayParserErrorsIgnoredFiles.Contains(currentFilePath))
+                                _displayParserErrorsIgnoredFiles.Add(currentFilePath);
                         }
                     }, noProb ? 5 : 0);
                 });

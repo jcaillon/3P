@@ -18,6 +18,16 @@ namespace _3PA.MainFeatures.Pro {
         #region Properties
 
         /// <summary>
+        /// If this file has been added through a rule, this holds the rule reference (can be null)
+        /// </summary>
+        public DeployTransferRule RuleReference { get; set; }
+
+        /// <summary>
+        /// target path computed from the deployment rules
+        /// </summary>
+        public string TargetPath { get; set; }
+
+        /// <summary>
         /// The path of input file that was originally compiled to trigger this move (can be equal to From)
         /// </summary>
         public string Origin { get; set; }
@@ -38,11 +48,6 @@ namespace _3PA.MainFeatures.Pro {
         public bool IsOk { get; set; }
 
         /// <summary>
-        /// target path computed from the deployment rules
-        /// </summary>
-        public string TargetPath { get; set; }
-
-        /// <summary>
         /// Type of transfer
         /// </summary>
         public virtual DeployType DeployType { get { return DeployType.Copy; } }
@@ -53,14 +58,10 @@ namespace _3PA.MainFeatures.Pro {
         public string DeployError { get; set; }
 
         /// <summary>
-        /// Return true if the deployment type can be parallelized
+        /// This is used to group the FileToDeploy during the creation of the deployment report,
+        /// use this in addition with GroupHeaderToString
         /// </summary>
-        public virtual bool CanParallelizeDeploy { get { return false; } }
-
-        /// <summary>
-        /// Directory name of To
-        /// </summary>
-        public virtual string GroupBasePath { get { return Path.GetDirectoryName(To); } }
+        public virtual string GroupKey { get { return Path.GetDirectoryName(To); } }
 
         /// <summary>
         /// A directory that must exist or be created for this deployment
@@ -74,17 +75,17 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="targetPath"></param>
-        public FileToDeploy(string targetPath) {
+        public FileToDeploy(string sourcePath, string targetPath, DeployTransferRule rule) {
+            Origin = sourcePath;
             TargetPath = targetPath;
+            RuleReference = rule;
         }
 
         #endregion
 
         #region Methods
 
-        public virtual FileToDeploy Set(string origin, string from, string to) {
-            Origin = origin;
+        public virtual FileToDeploy Set(string from, string to) {
             From = from;
             To = to;
             return this;
@@ -93,8 +94,8 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Returns a "copy" (only target path and those inputs are copied) if this object, setting properties in the meantime
         /// </summary>
-        public virtual FileToDeploy Copy(string origin, string from, string to) {
-            return New(DeployType, TargetPath).Set(origin, from, to);
+        public virtual FileToDeploy Copy(string from, string to) {
+            return New(DeployType, Origin, TargetPath, RuleReference).Set(from, to);
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace _3PA.MainFeatures.Pro {
         /// A representation of this file to deploy
         /// </summary>
         /// <returns></returns>
-        public override string ToString() {
+        public virtual string ToStringDescription() {
             var sb = new StringBuilder();
             sb.Append("<div style='padding-left: 10px'>");
             if (IsOk) {
@@ -119,9 +120,14 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 sb.Append("<img height='15px' src='Error30x30'>Transfer failed for ");
             }
-            sb.Append("(" + DeployType + ") " + To.ToHtmlLink(To.Replace(GroupBasePath, "").TrimStart('\\')));
-            sb.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> ");
+            sb.Append("(" + DeployType + ") " + To.ToHtmlLink(To.Replace(GroupKey, "").TrimStart('\\')));
+            sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>from</span>");
             sb.Append(Origin.ToHtmlLink(Path.GetFileName(Origin), true));
+            if (RuleReference != null) {
+                sb.Append(" <span style='padding-left: 8px;'>");
+                sb.Append(RuleReference.ToStringDescription());
+                sb.Append("</span>");
+            }
             if (!IsOk) {
                 sb.Append("<br>" + DeployError);
             }
@@ -133,8 +139,8 @@ namespace _3PA.MainFeatures.Pro {
         /// Representation of a group of this type
         /// </summary>
         /// <returns></returns>
-        public virtual string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
+        public virtual string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + GroupKey.ToHtmlLink(null, true) + "</b></div>";
         }
 
         #endregion
@@ -152,24 +158,28 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Factory
 
-        public static FileToDeploy New(DeployType deployType, string targetPath) {
+        public static FileToDeploy New(DeployType deployType, string sourcePath, string targetPath, DeployTransferRule rule) {
             switch (deployType) {
                 case DeployType.Prolib:
-                    return new FileToDeployProlib(targetPath);
+                    return new FileToDeployProlib(sourcePath, targetPath, rule);
                 case DeployType.Zip:
-                    return new FileToDeployZip(targetPath);
+                    return new FileToDeployZip(sourcePath, targetPath, rule);
                 case DeployType.DeleteInProlib:
-                    return new FileToDeployDeleteInProlib(targetPath);
+                    return new FileToDeployDeleteInProlib(sourcePath, targetPath, rule);
                 case DeployType.Ftp:
-                    return new FileToDeployFtp(targetPath);
+                    return new FileToDeployFtp(sourcePath, targetPath, rule);
                 case DeployType.Delete:
-                    return new FileToDeployDelete(targetPath);
+                    return new FileToDeployDelete(sourcePath, targetPath, rule);
                 case DeployType.Copy:
-                    return new FileToDeployCopy(targetPath);
+                    return new FileToDeployCopy(sourcePath, targetPath, rule);
                 case DeployType.Move:
-                    return new FileToDeployMove(targetPath);
+                    return new FileToDeployMove(sourcePath, targetPath, rule);
                 case DeployType.Cab:
-                    return new FileToDeployCab(targetPath);
+                    return new FileToDeployCab(sourcePath, targetPath, rule);
+                case DeployType.CopyFolder:
+                    return new FileToDeployCopyFolder(sourcePath, targetPath, rule);
+                case DeployType.DeleteFolder:
+                    return new FileToDeployDeleteFolder(sourcePath, targetPath, rule);
                 default:
                     throw new ArgumentOutOfRangeException("deployType", deployType, null);
             }
@@ -177,6 +187,8 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
     }
+
+    #region FileToDeployInPack
 
     #region FileToDeployInPack
 
@@ -205,7 +217,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Path to the pack file
         /// </summary>
-        public override string GroupBasePath { get { return PackPath ?? To; } }
+        public override string GroupKey { get { return PackPath ?? To; } }
 
         /// <summary>
         /// Extension of the archive file
@@ -219,21 +231,13 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        protected FileToDeployInPack(string targetPath) : base(targetPath) { }
+        protected FileToDeployInPack(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         #endregion
 
         #region Methods
 
-        public override FileToDeploy Set(string origin, string @from, string to) {
-            var pos = to.LastIndexOf(PackExt, StringComparison.CurrentCultureIgnoreCase);
-            if (pos >= 0) {
-                pos += PackExt.Length;
-                PackPath = to.Substring(0, pos);
-                RelativePathInPack = to.Substring(pos + 1);
-            }
-            return base.Set(origin, @from, to);
-        }
+        #region Virtual
 
         /// <summary>
         /// Returns a new archive info
@@ -253,7 +257,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Allows to check the source file before putting this fileToDeploy in a pack
         /// </summary>
-        public bool IfFromFileExists() {
+        public virtual bool IfFromFileExists() {
             if (!File.Exists(From)) {
                 DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
                 return false;
@@ -261,16 +265,30 @@ namespace _3PA.MainFeatures.Pro {
             return true;
         }
 
+        #endregion
+
+        public override FileToDeploy Set(string @from, string to) {
+            var pos = to.LastIndexOf(PackExt, StringComparison.CurrentCultureIgnoreCase);
+            if (pos >= 0) {
+                pos += PackExt.Length;
+                PackPath = to.Substring(0, pos);
+                RelativePathInPack = to.Substring(pos + 1);
+            }
+            return base.Set(@from, to);
+        }
+
         /// <summary>
         /// Representation of a group of this type
         /// </summary>
         /// <returns></returns>
-        public override string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(PackExt.Replace(".", "")) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
+        public override string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(PackExt.Replace(".", "")) + "' height='15px'><b>" + GroupKey.ToHtmlLink(null, true) + "</b></div>";
         }
 
         #endregion
     }
+
+    #endregion
 
     #region FileToDeployCab
 
@@ -283,7 +301,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public override string PackExt { get { return ".cab"; } }
 
-        public FileToDeployCab(string targetPath) : base(targetPath) { }
+        public FileToDeployCab(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -306,7 +324,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public override string PackExt { get { return ".pl"; } }
 
-        public FileToDeployProlib(string targetPath) : base(targetPath) { }
+        public FileToDeployProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -330,7 +348,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public override string PackExt { get { return ".zip"; } }
 
-        public FileToDeployZip(string targetPath) : base(targetPath) { }
+        public FileToDeployZip(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -351,7 +369,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public override DeployType DeployType { get { return DeployType.DeleteInProlib; } }
 
-        public FileToDeployDeleteInProlib(string targetPath) : base(targetPath) { }
+        public FileToDeployDeleteInProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
     }
 
     #endregion
@@ -370,7 +388,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Path to the pack file
         /// </summary>
-        public override string GroupBasePath { get { return PackPath ?? To; } }
+        public override string GroupKey { get { return PackPath ?? To; } }
 
         /// <summary>
         /// A directory that must exist or be created for this deployment
@@ -384,7 +402,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        public FileToDeployFtp(string targetPath) : base(targetPath) { }
+        public FileToDeployFtp(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         #endregion
 
@@ -395,7 +413,7 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Methods
 
-        public override FileToDeploy Set(string origin, string @from, string to) {
+        public override FileToDeploy Set(string @from, string to) {
             // parse our uri
             var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
             var match = regex.Match(to.Replace("\\", "/"));
@@ -414,7 +432,7 @@ namespace _3PA.MainFeatures.Pro {
                         _port = -1;
                 }
             }
-            return base.Set(origin, @from, to);
+            return base.Set(@from, to);
         }
 
         /// <summary>
@@ -436,8 +454,8 @@ namespace _3PA.MainFeatures.Pro {
         /// Representation of a group of this type
         /// </summary>
         /// <returns></returns>
-        public override string GroupHeaderToString() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Ftp", true) + "' height='15px'><b>" + GroupBasePath.ToHtmlLink(null, true) + "</b></div>";
+        public override string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Ftp", true) + "' height='15px'><b>" + GroupKey.ToHtmlLink(null, true) + "</b></div>";
         }
 
         #endregion
@@ -466,7 +484,11 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        public FileToDeployDelete(string targetPath) : base(targetPath) { }
+        #region Life and death
+
+        public FileToDeployDelete(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
 
         #region Methods
 
@@ -488,14 +510,87 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region FileToDeployCopyFolder
+
+    internal class FileToDeployCopyFolder : FileToDeploy {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.CopyFolder; } }
+
+        #endregion
+
+        #region Life and death
+
+        public FileToDeployCopyFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
+
+        #region Methods
+
+        protected override bool TryDeploy() {
+            try {
+                //if (string.IsNullOrEmpty(To) || !File.Exists(To))
+                //    return true;
+                //File.Delete(To);
+            } catch (Exception e) {
+                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
+    #region FileToDeployDeleteFolder
+
+    internal class FileToDeployDeleteFolder : FileToDeploy {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.DeleteFolder; } }
+
+        #endregion
+
+        #region Life and death
+
+        public FileToDeployDeleteFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
+
+        #region Methods
+
+        protected override bool TryDeploy() {
+            try {
+                //if (string.IsNullOrEmpty(To) || !File.Exists(To))
+                //    return true;
+                //File.Delete(To);
+            } catch (Exception e) {
+                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
     #region FileToDeployCopy
 
     internal class FileToDeployCopy : FileToDeploy {
-
-        /// <summary>
-        /// Return true if the deployment type can be parallelized
-        /// </summary>
-        public override bool CanParallelizeDeploy { get { return true; } }
 
         /// <summary>
         /// This can be set to true for a file deployed during step 0 (compilation), if the last 
@@ -509,7 +604,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public override DeployType DeployType { get { return FinalDeploy ? DeployType.Move : DeployType.Copy; } }
 
-        public FileToDeployCopy(string targetPath) : base(targetPath) { }
+        public FileToDeployCopy(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         protected override bool TryDeploy() {
             try {
@@ -536,16 +631,11 @@ namespace _3PA.MainFeatures.Pro {
     internal class FileToDeployMove : FileToDeploy {
 
         /// <summary>
-        /// Return true if the deployment type can be parallelized
-        /// </summary>
-        public override bool CanParallelizeDeploy { get { return true; } }
-
-        /// <summary>
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Move; } }
 
-        public FileToDeployMove(string targetPath) : base(targetPath) { }
+        public FileToDeployMove(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
 
         protected override bool TryDeploy() {
             try {

@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.Pro {
             var outputList = new List<FileToDeploy>();
 
             // list the files to deploy
-            foreach (var file in GetFilesList(listOfSourceDir, searchOptions, step)) {
+            foreach (var file in GetFilteredFilesList(listOfSourceDir, step, searchOptions)) {
                 outputList.AddRange(GetTransfersNeededForFile(file, step));
             }
 
@@ -108,10 +108,10 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// returns the list of transfers needed for a given file
         /// </summary>
-        public List<FileToDeploy> GetTransfersNeededForFile(string file, int step) {
-            var fileName = Path.GetFileName(file);
+        public List<FileToDeploy> GetTransfersNeededForFile(string sourcePath, int step) {
+            var fileName = Path.GetFileName(sourcePath);
             if (fileName != null)
-                return GetTargetsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetPath, fileName))).ToList();
+                return GetTargetsNeededForFile(sourcePath, step).Select(deploy => deploy.Set(sourcePath, Path.Combine(deploy.TargetPath, fileName))).ToList();
             return new List<FileToDeploy>();
         }
 
@@ -120,12 +120,12 @@ namespace _3PA.MainFeatures.Pro {
         /// If CompileLocally, returns the directory of the source
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directory as well
         /// </summary>
-        public List<FileToDeploy> GetTargetsNeededForFile(string sourcePath, int step) {
+        private List<FileToDeploy> GetTargetsNeededForFile(string sourcePath, int step) {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && _compileLocally) {
                 return new List<FileToDeploy> {
-                    FileToDeploy.New(DeployType.Move, Path.GetDirectoryName(sourcePath))
+                    FileToDeploy.New(DeployType.Move, sourcePath, Path.GetDirectoryName(sourcePath), null)
                 };
             }
 
@@ -148,7 +148,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 if (!outList.Exists(needed => needed.TargetPath.EqualsCi(outPath))) {
-                    outList.Add(FileToDeploy.New(rule.Type, outPath));
+                    outList.Add(FileToDeploy.New(rule.Type, sourcePath, outPath, rule));
                 }
 
                 // stop ?
@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures.Pro {
             if (step == 0) {
                 if (outList.Count == 0) {
                     // move to deployment directory by default
-                    outList.Add(FileToDeploy.New(DeployType.Move, _deploymentDirectory));
+                    outList.Add(FileToDeploy.New(DeployType.Move, sourcePath, _deploymentDirectory, null));
                 } else {
                     var lastCopy = outList.LastOrDefault() as FileToDeployCopy;
                     if (lastCopy != null) {
@@ -177,28 +177,47 @@ namespace _3PA.MainFeatures.Pro {
         /// Returns a list of files in the given folders (recursively or not depending on the option),
         /// this list is filtered thanks to the filtered rules given
         /// </summary>
-        public HashSet<string> GetFilesList(List<string> listOfFolderPath, SearchOption searchOptions, int step, string fileExtensionFilter = "*") {
+        public HashSet<string> GetFilteredFilesList(List<string> listOfFolderPath, int step, SearchOption searchOptions, string fileExtensionFilter = "*") {
             // constructs the list of all the files (unique) across the different folders
             var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
-            // construct the filters list
-            var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
-            var excludeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
-
-            foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
-                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(searchPattern => Directory.EnumerateFiles(folderPath, searchPattern, searchOptions))) {
-                    if (!filesToCompile.Contains(filePath) && IsFilePassingFilters(filePath, includeFiltersList, excludeFiltersList))
-                        filesToCompile.Add(filePath);
-                }
+            foreach (var filePath in 
+                GetFilteredFilesList(
+                    listOfFolderPath
+                        .Where(Directory.Exists)
+                        .SelectMany(
+                            s => fileExtensionFilter
+                                .Split(',')
+                                .SelectMany(searchPattern => Directory.EnumerateFiles(s, searchPattern, searchOptions))
+                        )
+                        , step)
+                ) {
+                if (!filesToCompile.Contains(filePath))
+                    filesToCompile.Add(filePath);
             }
 
             return filesToCompile;
         }
 
         /// <summary>
+        /// Returns a list of files in the given folders (recursively or not depending on the option),
+        /// this list is filtered thanks to the filtered rules given
+        /// </summary>
+        public IEnumerable<string> GetFilteredFilesList(IEnumerable<string> filesList, int step) {
+            // construct the filters list
+            var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
+            var excludeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
+
+            foreach (var file in filesList) {
+                if (IsFilePassingFilters(file, includeFiltersList, excludeFiltersList))
+                    yield return file;
+            }
+        }
+
+        /// <summary>
         /// Returns true if the given file path passes the include + exclude filters
         /// </summary>
-        public bool IsFilePassingFilters(string filePath, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
+        private bool IsFilePassingFilters(string filePath, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
             bool passing = true;
 
             // test include filters
@@ -276,21 +295,21 @@ namespace _3PA.MainFeatures.Pro {
                         targetRPath = Path.Combine(deployNeeded.TargetPath, compiledFile.CompOutputR.Replace(compiledFile.CompilationOutputDir, "").TrimStart('\\'));
 
                     // add .r and .lst (if needed) to the list of files to deploy
-                    outputList.Add(deployNeeded.Set(compiledFile.SourcePath, compiledFile.CompOutputR, targetRPath));
+                    outputList.Add(deployNeeded.Set(compiledFile.CompOutputR, targetRPath));
 
                     // listing
                     if (execution.CompileWithListing && !string.IsNullOrEmpty(compiledFile.CompOutputLis)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.SourcePath, compiledFile.CompOutputLis, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtLis)));
+                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputLis, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtLis)));
                     }
 
                     // xref
                     if (execution.CompileWithXref && !string.IsNullOrEmpty(compiledFile.CompOutputXrf)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.SourcePath, compiledFile.CompOutputXrf, Path.ChangeExtension(targetRPath, execution.UseXmlXref ? ProExecutionHandleCompilation.ExtXrfXml : ProExecutionHandleCompilation.ExtXrf)));
+                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputXrf, Path.ChangeExtension(targetRPath, execution.UseXmlXref ? ProExecutionHandleCompilation.ExtXrfXml : ProExecutionHandleCompilation.ExtXrf)));
                     }
 
                     // debug-list
                     if (execution.CompileWithDebugList && !string.IsNullOrEmpty(compiledFile.CompOutputDbg)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.SourcePath, compiledFile.CompOutputDbg, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtDbg)));
+                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputDbg, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtDbg)));
                     }
                 }
             }
@@ -306,7 +325,6 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy a given list of files (can reduce the list if there are duplicated items so it returns it)
         /// </summary>
         public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage, CancellationTokenSource cancelToken) {
-
             try {
                 if (cancelToken == null) {
                     cancelToken = new CancellationTokenSource();
@@ -338,7 +356,8 @@ namespace _3PA.MainFeatures.Pro {
                             deploy.DeployError = "Couldn't create directory " + deploy.DirectoryThatMustExist.ProQuoter() + " : \"" + e.Message + "\"";
                         }
                     });
-                
+
+                _nbFilesDeployed = 0;
                 _totalNbFilesToDeploy = deployToDo.Count;
 
                 #region for packs we do everything here
@@ -368,10 +387,11 @@ namespace _3PA.MainFeatures.Pro {
                         }
                     });
 
-                // package each pack
+                // package each pack (can't do it in parallel because of .pl packs, for which we MOVE the files to temp folders so they wouldn't be available for other packs
                 foreach (var pack in packs) {
                     // canceled?
                     cancelToken.Token.ThrowIfCancellationRequested();
+
                     try {
                         var currentPack = pack;
                         pack.Value.Item1.PackFileSet(pack.Value.Item2, _compressionLevel, (sender, args) => {
@@ -385,8 +405,9 @@ namespace _3PA.MainFeatures.Pro {
 
                                     if (!currentPack.Value.Item2[args.CurrentFileName].IsOk) {
                                         _nbFilesDeployed++;
-                                        if (updateDeploymentPercentage != null)
+                                        if (updateDeploymentPercentage != null) {
                                             updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                                        }
                                     }
 
                                     if (args.TreatmentException != null) {
@@ -410,26 +431,16 @@ namespace _3PA.MainFeatures.Pro {
                 #endregion
 
                 // do a deployment action for each file
-                Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployInPack) && deploy.CanParallelizeDeploy), parallelOptions, file => {
+                Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployInPack)), parallelOptions, file => {
                     // canceled?
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 
                     if (file.DeploySelf())
                         _nbFilesDeployed++;
-                    if (updateDeploymentPercentage != null)
-                        updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                    if (updateDeploymentPercentage != null) {
+                        updateDeploymentPercentage((float)_nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                    }
                 });
-
-                // don't use parallel for the others
-                foreach (var file in deployToDo.Where(deploy => !(deploy is FileToDeployInPack) && !deploy.CanParallelizeDeploy)) {
-                    // canceled?
-                    cancelToken.Token.ThrowIfCancellationRequested();
-
-                    if (file.DeploySelf())
-                        _nbFilesDeployed++;
-                    if (updateDeploymentPercentage != null)
-                        updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
-                }
 
             } catch (OperationCanceledException) {
                 // we expect this exception if the task has been canceled

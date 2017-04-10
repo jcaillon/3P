@@ -38,6 +38,11 @@ namespace _3PA.MainFeatures.Pro {
         public string CompOutputRefTables { get; set; }
 
         /// <summary>
+        /// List of errors
+        /// </summary>
+        public List<FileError> Errors { get; set; }
+
+        /// <summary>
         /// represents the source file (i.e. includes) used to generate a given .r code file
         /// </summary>
         public List<string> RCodeSourceFilesUsed { get; private set; }
@@ -91,6 +96,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // read RCodeSourceFileUsed
             if (!string.IsNullOrEmpty(CompOutputFileIdLog)) {
+                var compiledSourcePathBaseFileName = Path.GetFileName(CompiledSourcePath);
                 var references = new HashSet<string>();
                 Utils.ForEachLine(CompOutputFileIdLog, new byte[0], (i, line) => {
                     try {
@@ -135,7 +141,10 @@ namespace _3PA.MainFeatures.Pro {
 
                         if (!references.Contains(newFile) &&
                             !newFile.EndsWith(".r", StringComparison.CurrentCultureIgnoreCase) &&
-                            !newFile.EndsWith(".pl", StringComparison.CurrentCultureIgnoreCase)) {
+                            !newFile.EndsWith(".pl", StringComparison.CurrentCultureIgnoreCase) &&
+                            !newFile.StartsWith(CompilationOutputDir, StringComparison.CurrentCultureIgnoreCase) &&
+                            !Path.GetFileName(newFile).Equals(compiledSourcePathBaseFileName)
+                            ) {
                             references.Add(newFile);
                         }
                     } catch (Exception) {
@@ -148,6 +157,8 @@ namespace _3PA.MainFeatures.Pro {
         }
     }
 
+    #region TableCrc
+
     /// <summary>
     /// This class represent the tables that were referenced in a given .r code file
     /// </summary>
@@ -155,6 +166,8 @@ namespace _3PA.MainFeatures.Pro {
         public string QualifiedTableName { get; set; }
         public string Crc { get; set; }
     }
+
+    #endregion
 
     #region FileError
 
@@ -185,10 +198,10 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public string CompiledFilePath { get; set; }
 
-        public override string ToString() {
+        public virtual string ToStringDescription() {
             var sb = new StringBuilder();
             sb.Append("<div>");
-            sb.Append("<img height='15px' src='"); sb.Append(Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning"); sb.Append("'>");
+            sb.Append("<img height='15px' src='"); sb.Append(Level > ErrorLevel.StrongWarning ? "Error30x30" : "Warning30x30"); sb.Append("'>");
             if (!CompiledFilePath.Equals(SourcePath)) {
                 sb.Append("in "); sb.Append(SourcePath.ToHtmlLink(Path.GetFileName(SourcePath))); sb.Append(", ");
             }

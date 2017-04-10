@@ -410,19 +410,16 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Each time progress files are compiled, we update their respective error list to display them in notepad++ 
         /// </summary>
-        public static void ProExecutionHandleCompilationOnEachCompilationOk(ProExecutionHandleCompilation proExecutionHandleCompilation, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> errorsList, List<FileToDeploy> filesToDeploy) {
+        public static void ProExecutionHandleCompilationOnEachCompilationOk(ProExecutionHandleCompilation proExecutionHandleCompilation, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
 
             // clear errors on each compiled file
             if (fileToCompiles != null) {
-                foreach (var fileToCompile in fileToCompiles) {
-                    ClearAllErrors(fileToCompile.SourcePath, true);
-                }
-            }
-
-            // update the errors
-            if (errorsList != null) {
-                foreach (var keyValue in errorsList) {
-                    UpdateFileErrors(keyValue.Key, keyValue.Value);
+                foreach (var file in fileToCompiles) {
+                    if (file.Errors != null && file.Errors.Count > 0) {
+                        UpdateFileErrors(file.SourcePath, file.Errors);
+                    } else {
+                        ClearAllErrors(file.SourcePath, true);
+                    }
                 }
             }
         }

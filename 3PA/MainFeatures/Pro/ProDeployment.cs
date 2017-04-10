@@ -174,10 +174,10 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         protected virtual List<FileToCompile> GetFilesToCompileInStepZero() {
             return 
-                _proEnv.Deployer.GetFilesList(
+                _proEnv.Deployer.GetFilteredFilesList(
                     new List<string> { _currentProfile.SourceDirectory },
-                    _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly,
                     0,
+                    _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly,
                     Config.Instance.FilesPatternCompilable
                 ).Select(s => new FileToCompile(s)).ToList();
         }
@@ -224,7 +224,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called when the compilation step 0 ended correctly
         /// </summary>
-        private void OnCompilationOk(ProCompilation comp, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> compilationErrors, List<FileToDeploy> filesToDeploy) {
+        private void OnCompilationOk(ProCompilation comp, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             if (HasBeenCancelled)
                 return;
 
@@ -305,6 +305,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (OnExecutionEnd != null)
                 OnExecutionEnd(this);
+            
         }
 
         #endregion
@@ -371,18 +372,15 @@ namespace _3PA.MainFeatures.Pro {
             var nbCompilationWarning = 0;
 
             // compilation errors
-            foreach (var kpv in _proCompilation.ListErrors.Where(pair => pair.Value != null)) {
-                var filePath = kpv.Key;
-                var errorsOfTheFile = kpv.Value;
-
-                bool hasError = errorsOfTheFile.Exists(error => error.Level >= ErrorLevel.Error);
-                bool hasWarning = errorsOfTheFile.Exists(error => error.Level < ErrorLevel.Error);
+            foreach (var fileInError in _proCompilation.ListFilesToCompile.Where(file => file.Errors != null)) {
+                bool hasError = fileInError.Errors.Exists(error => error.Level >= ErrorLevel.Error);
+                bool hasWarning = fileInError.Errors.Exists(error => error.Level < ErrorLevel.Error);
 
                 if (hasError || hasWarning) {
                     // only add compilation errors
                     line.Clear();
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                    line.Append(ProExecutionCompile.FormatCompilationResultForSingleFile(filePath, errorsOfTheFile, null));
+                    line.Append(ProExecutionCompile.FormatCompilationResultForSingleFile(fileInError.SourcePath, fileInError, null));
                     line.Append("</div>");
                     listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
                 }
@@ -392,25 +390,24 @@ namespace _3PA.MainFeatures.Pro {
                 } else if (hasWarning)
                     nbCompilationWarning++;
             }
-
-
+            
             // for each deploy step
             var listLinesByStep = new Dictionary<int, List<Tuple<int, string>>> {
                     {0, new List<Tuple<int, string>>()}
                 };
             foreach (var kpv in _filesToDeployPerStep) {
                 // group either by directory name or by pack name
-                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.GroupBasePath).Select(deploys => deploys.ToList()).ToList();
+                var groupDirectory = kpv.Value.GroupBy(deploy => deploy.GroupKey).Select(deploys => deploys.ToList()).ToList();
 
-                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().GroupBasePath)) {
+                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().GroupKey)) {
                     var deployFailed = group.Exists(deploy => !deploy.IsOk);
                     var first = group.First();
 
                     line.Clear();
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                    line.Append(first.GroupHeaderToString());
+                    line.Append(first.ToStringGroupHeader());
                     foreach (var fileToDeploy in group.OrderBy(deploy => deploy.To)) {
-                        line.Append(fileToDeploy);
+                        line.Append(fileToDeploy.ToStringDescription());
                     }
                     line.Append("</div>");
 

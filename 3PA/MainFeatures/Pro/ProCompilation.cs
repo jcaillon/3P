@@ -47,7 +47,7 @@ namespace _3PA.MainFeatures.Pro {
         /// - the errors for each file compiled (if any)
         /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
         /// </summary>
-        public event Action<ProCompilation, List<FileToCompile>, Dictionary<string, List<FileError>>, List<FileToDeploy>> OnCompilationOk;
+        public event Action<ProCompilation, List<FileToCompile>, List<FileToDeploy>> OnCompilationOk;
 
         /// <summary>
         /// Event fired when the compilation ends
@@ -169,13 +169,6 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// List of all the compilation errors found (should be used after the execution)
-        /// </summary>
-        public Dictionary<string, List<FileError>> ListErrors {
-            get { return _listErrors; }
-        }
-
-        /// <summary>
         /// List of all the files that need to be deployed after the compilation (should be used after the execution)
         /// </summary>
         public List<FileToDeploy> ListFilesToDeploy {
@@ -197,8 +190,6 @@ namespace _3PA.MainFeatures.Pro {
         private bool _hasBeenKilled;
 
         private List<FileToCompile> _listFilesToCompile = new List<FileToCompile>();
-
-        private Dictionary<string, List<FileError>> _listErrors = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
 
         private List<FileToDeploy> _listFilesToDeploy = new List<FileToDeploy>();
 
@@ -339,7 +330,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (!_hasBeenKilled) {
                 if (OnCompilationOk != null)
-                    OnCompilationOk(this, _listFilesToCompile, _listErrors, _listFilesToDeploy);
+                    OnCompilationOk(this, _listFilesToCompile, _listFilesToDeploy);
             } else {
                 if (OnCompilationFailed != null)
                     OnCompilationFailed(this);
@@ -362,20 +353,11 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// When a process has finished compiling correctly
         /// </summary>
-        private void ExecOnOnCompilationOk(ProExecutionHandleCompilation proc, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> errors, List<FileToDeploy> filesToDeploy) {
+        private void ExecOnOnCompilationOk(ProExecutionHandleCompilation proc, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             DoInLock(() => {
                 // aggregate the info on each process
                 if (fileToCompiles != null)
                     _listFilesToCompile.AddRange(fileToCompiles);
-                if (errors != null) {
-                    foreach (var kpv in errors) {
-                        if (_listErrors.ContainsKey(kpv.Key)) {
-                            _listErrors[kpv.Key].AddRange(kpv.Value);
-                        } else {
-                            _listErrors.Add(kpv.Key, kpv.Value);
-                        }
-                    }
-                }
                 if (filesToDeploy != null)
                     _listFilesToDeploy.AddRange(filesToDeploy);
             });

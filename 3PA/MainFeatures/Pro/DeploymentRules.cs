@@ -12,8 +12,6 @@ namespace _3PA.MainFeatures.Pro {
 
     internal static class DeploymentRules {
 
-        #region Static
-
         #region public event
 
         /// <summary>
@@ -228,11 +226,12 @@ namespace _3PA.MainFeatures.Pro {
                         return;
 
                     var obj = DeployTransferRule.New(type);
+                    obj.Source = path;
+                    obj.Line = lineNb + 1;
                     obj.Step = step;
                     obj.NameFilter = items[1].Trim();
                     obj.SuffixFilter = items[2].Trim();
                     obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
-                    obj.Line = lineNb + 1;
                     obj.SourcePattern = items[5].Trim();
                     obj.DeployTarget = items[6].Trim().Replace('/', '\\');
 
@@ -252,6 +251,8 @@ namespace _3PA.MainFeatures.Pro {
                     // new filter rule
 
                     var obj = new DeployFilterRule {
+                        Source = path,
+                        Line = lineNb + 1,
                         Step = step,
                         NameFilter = items[1].Trim(),
                         SuffixFilter = items[2].Trim(),
@@ -267,6 +268,8 @@ namespace _3PA.MainFeatures.Pro {
                     // new variable
 
                     var obj = new DeployVariableRule {
+                        Source = path,
+                        Line = lineNb + 1,
                         NameFilter = items[0].Trim(),
                         SuffixFilter = items[1].Trim(),
                         VariableName = items[2].Trim(),
@@ -290,10 +293,8 @@ namespace _3PA.MainFeatures.Pro {
         
         #endregion
 
-        #endregion
     }
-
-
+    
     #region DeployRule
 
     public abstract class DeployRule {
@@ -311,6 +312,23 @@ namespace _3PA.MainFeatures.Pro {
         /// This compilation path applies to a given Env letter (can be empty)
         /// </summary>
         public string SuffixFilter { get; set; }
+        
+        /// <summary>
+        /// The line from which we read this info, allows to sort by line
+        /// </summary>
+        public int Line { get; set; }
+
+        /// <summary>
+        /// the full file path in which this rule can be found
+        /// </summary>
+        public string Source { get; set; }
+
+        /// <summary>
+        /// Provides a representation for this rule
+        /// </summary>
+        public string ToStringDescription() {
+            return (Source + "|" + Line).ToHtmlLink("(rule n°" + Line + ")");
+        }
     }
 
     public class DeployVariableRule : DeployRule {
@@ -346,6 +364,9 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRule
 
+    /// <summary>
+    /// Base class for transfer rules
+    /// </summary>
     public abstract class DeployTransferRule : DeployRule {
 
         #region Properties
@@ -379,11 +400,6 @@ namespace _3PA.MainFeatures.Pro {
         /// True if the rule is directly written as a regex and we want to replace matches in the source directory in the deploy target (in that case it must start with ":")
         /// </summary>
         public bool ShouldDeployTargetReplaceDollar { get; set; }
-
-        /// <summary>
-        /// The line from which we read this info, allows to sort by line
-        /// </summary>
-        public int Line { get; set; }
 
         #endregion
 
@@ -424,6 +440,10 @@ namespace _3PA.MainFeatures.Pro {
                     return new DeployTransferRuleCopy();
                 case DeployType.Move:
                     return new DeployTransferRuleMove();
+                case DeployType.CopyFolder:
+                    return new DeployTransferRuleCopyFolder();
+                case DeployType.DeleteFolder:
+                    return new DeployTransferRuleDeleteFolder();
                 default:
                     throw new ArgumentOutOfRangeException("type", type, null);
             }
@@ -434,7 +454,10 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleArchive
 
-    public abstract class DeployTransferRuleArchive : DeployTransferRule {
+    /// <summary>
+    /// Abstract class for PACK rules
+    /// </summary>
+    public abstract class DeployTransferRulePack : DeployTransferRule {
 
         public virtual string ArchiveExt { get { return ".arc"; } }
 
@@ -449,7 +472,10 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleProlib
 
-    public class DeployTransferRuleProlib : DeployTransferRuleArchive {
+    /// <summary>
+    /// Transfer file(s) to a .pl file
+    /// </summary>
+    public class DeployTransferRuleProlib : DeployTransferRulePack {
 
         public override DeployType Type { get { return DeployType.Prolib; } }
 
@@ -460,7 +486,10 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleZip
 
-    public class DeployTransferRuleZip : DeployTransferRuleArchive {
+    /// <summary>
+    /// Transfer file(s) to a .zip file
+    /// </summary>
+    public class DeployTransferRuleZip : DeployTransferRulePack {
 
         public override DeployType Type { get { return DeployType.Zip; } }
 
@@ -471,7 +500,10 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleCab
 
-    public class DeployTransferRuleCab : DeployTransferRuleArchive {
+    /// <summary>
+    /// Transfer file(s) to a .cab file
+    /// </summary>
+    public class DeployTransferRuleCab : DeployTransferRulePack {
 
         public override DeployType Type { get { return DeployType.Cab; } }
 
@@ -482,7 +514,10 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleDeleteInProlib
 
-    public class DeployTransferRuleDeleteInProlib : DeployTransferRuleArchive {
+    /// <summary>
+    /// Delete file(s) in a prolib file
+    /// </summary>
+    public class DeployTransferRuleDeleteInProlib : DeployTransferRulePack {
 
         public override DeployType Type { get { return DeployType.DeleteInProlib; } }
 
@@ -491,11 +526,12 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
-    #endregion
-
     #region DeployTransferRuleFtp
 
-    public class DeployTransferRuleFtp : DeployTransferRule {
+    /// <summary>
+    /// Send file(s) over FTP
+    /// </summary>
+    public class DeployTransferRuleFtp : DeployTransferRulePack {
 
         public override DeployType Type { get { return DeployType.Ftp; } }
 
@@ -510,8 +546,13 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #endregion
+
     #region DeployTransferRuleDelete
 
+    /// <summary>
+    /// Delete file(s) 
+    /// </summary>
     public class DeployTransferRuleDelete : DeployTransferRule {
 
         public override DeployType Type { get { return DeployType.Delete; } }
@@ -527,8 +568,42 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region DeployTransferRuleCopyFolder
+
+    /// <summary>
+    /// Copy folder(s) recursively
+    /// </summary>
+    public class DeployTransferRuleCopyFolder : DeployTransferRule {
+        public override DeployType Type { get { return DeployType.CopyFolder; } }
+    }
+
+    #endregion
+
+    #region DeployTransferRuleDeleteFolder
+
+    /// <summary>
+    /// Delete folder(s) recursively
+    /// </summary>
+    public class DeployTransferRuleDeleteFolder : DeployTransferRule {
+
+        public override DeployType Type { get { return DeployType.DeleteFolder; } }
+
+        public override bool IsValid(out string error) {
+            if (Step < 1) {
+                error = "Line " + Line + " : The DeleteFolder rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return base.IsValid(out error);
+        }
+    }
+
+    #endregion
+
     #region DeployTransferRuleCopy
 
+    /// <summary>
+    /// Copy file(s) 
+    /// </summary>
     public class DeployTransferRuleCopy : DeployTransferRule {
         public override DeployType Type { get { return DeployType.Copy; } }
     }
@@ -537,6 +612,9 @@ namespace _3PA.MainFeatures.Pro {
 
     #region DeployTransferRuleMove
 
+    /// <summary>
+    /// Move file(s) 
+    /// </summary>
     public class DeployTransferRuleMove : DeployTransferRule {
         public override DeployType Type { get { return DeployType.Move; } }
     }
@@ -567,10 +645,12 @@ namespace _3PA.MainFeatures.Pro {
         Zip = 2,
         Cab = 3,
         DeleteInProlib = 4,
-        Archive = 10,
+        Ftp = 5,
+        // every item above are treated in "packs"
 
-        Ftp = 15,
-        Delete = 16,
+        Delete = 20,
+        CopyFolder = 21,
+        DeleteFolder = 22,
 
         // Copy / move should always be last
         Copy = 30,

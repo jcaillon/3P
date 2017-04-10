@@ -422,7 +422,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
 
-        private static void OnGenerateDebugFileOk(ProExecutionHandleCompilation lastExec, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> errorsList, List<FileToDeploy> filesToDeploy) {
+        private static void OnGenerateDebugFileOk(ProExecutionHandleCompilation lastExec, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             var exec = (ProExecutionGenerateDebugfile) lastExec;
             if (!string.IsNullOrEmpty(exec.GeneratedFilePath) && File.Exists(exec.GeneratedFilePath)) {
                 if (exec.CompileWithDebugList) {
@@ -435,13 +435,13 @@ namespace _3PA.MainFeatures.Pro {
                 }
                 Npp.Goto(exec.GeneratedFilePath);
             }
-            OnSingleExecutionOk(lastExec, fileToCompiles, errorsList, filesToDeploy);
+            OnSingleExecutionOk(lastExec, fileToCompiles, filesToDeploy);
         }
 
         /// <summary>
         /// Called after the execution of run/compile/check/prolint
         /// </summary>
-        public static void OnSingleExecutionOk(ProExecutionHandleCompilation lastExec, List<FileToCompile> fileToCompiles, Dictionary<string, List<FileError>> dicErrorsList, List<FileToDeploy> filesToDeploy) {
+        public static void OnSingleExecutionOk(ProExecutionHandleCompilation lastExec, List<FileToCompile> filesToCompile, List<FileToDeploy> filesToDeploy) {
             try {
                 var treatedFile = lastExec.Files.First();
                 CurrentOperation currentOperation;
@@ -452,16 +452,14 @@ namespace _3PA.MainFeatures.Pro {
                 var otherFilesInError = false;
                 int nbWarnings = 0;
                 int nbErrors = 0;
-
-                if (dicErrorsList.Any()) {
-                    // count number of warnings/errors, loop through files > loop through errors in each file
-                    foreach (var keyValue in dicErrorsList) {
-                        foreach (var fileError in keyValue.Value) {
-                            if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
-                            else nbErrors++;
-                        }
-                        otherFilesInError = otherFilesInError || !treatedFile.SourcePath.EqualsCi(keyValue.Key);
+                
+                // count number of warnings/errors, loop through files > loop through errors in each file
+                foreach (var fileInError in filesToCompile.Where(file => file.Errors != null)) {
+                    foreach (var error in fileInError.Errors) {
+                        if (error.Level <= ErrorLevel.StrongWarning) nbWarnings++;
+                        else nbErrors++;
                     }
+                    otherFilesInError = otherFilesInError || !treatedFile.SourcePath.EqualsCi(fileInError.SourcePath);
                 }
 
                 // Prepare the notification content
@@ -473,12 +471,6 @@ namespace _3PA.MainFeatures.Pro {
                     ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
                         "Syntax correct");
 
-                // build the error list
-                var errorsList = new List<FileError>();
-                foreach (var keyValue in dicErrorsList) {
-                    errorsList.AddRange(keyValue.Value);
-                }
-
                 // when compiling, transferring .r/.lst to compilation dir
                 if (filesToDeploy != null) {
                     filesToDeploy = lastExec.ProEnv.Deployer.DeployFiles(filesToDeploy, null, null);
@@ -486,7 +478,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Sci.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "<div style='padding-bottom: 5px;'>Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :</div>" + ProExecutionCompile.FormatCompilationResultForSingleFile(treatedFile.SourcePath, errorsList, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.SourcePath, "<div style='padding-bottom: 5px;'>Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :</div>" + ProExecutionCompile.FormatCompilationResultForSingleFile(treatedFile.SourcePath, treatedFile, filesToDeploy), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }
@@ -507,10 +499,7 @@ namespace _3PA.MainFeatures.Pro {
                 UserCommunication.Notify("Deploying a compilable file is strictly equal as compiling it<br>The deployment rules for step 0 are applied in both case!", MessageImg.MsgInfo, "Deploy a file", "Bypass to compilation", 2);
             } else {
                 var currentDeployer = ProEnvironment.Current.Deployer;
-                if (currentDeployer.IsFilePassingFilters(
-                    Npp.CurrentFile.Path,
-                    currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
-                    currentDeployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
+                if (currentDeployer.GetFilteredFilesList(new List<string> { Npp.CurrentFile.Path }, 1).Any()) {
                     // deploy the file for STEP 1
                     var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1), null, null);
                     if (deployedFiles == null || deployedFiles.Count == 0) {

@@ -34,6 +34,10 @@ code {
     Font: 11px "Consolas";
 }
 
+table {
+    Font: 12px "Segoe UI";
+}
+
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
     border: solid 2px @FormBorder;

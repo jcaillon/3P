@@ -44,11 +44,22 @@
 /* ***************************  Definitions  ************************** */
 
 DEFINE STREAM str_r.
-DEFINE STREAM str_rlist.
 DEFINE STREAM str_w.
 DEFINE STREAM str_wout.
 DEFINE STREAM str_werlog.
 DEFINE STREAM str_wdblog.
+
+DEFINE TEMP-TABLE tt_list NO-UNDO
+    FIELD order AS INTEGER
+    FIELD source AS CHARACTER
+    FIELD outdir AS CHARACTER
+    FIELD lis AS CHARACTER
+    FIELD xrf AS CHARACTER
+    FIELD dbg AS CHARACTER
+    FIELD fileid AS CHARACTER
+    FIELD reftables AS CHARACTER
+    INDEX rtb_idxfld order ASCENDING 
+   .
 
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
@@ -291,93 +302,94 @@ PROCEDURE pi_compileList PRIVATE:
   Parameters:  <none>
 ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE lc_from AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_outdir AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_lis AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_xrf AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_dgb AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_fileid AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc_reftables AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li_order AS INTEGER NO-UNDO INITIAL 0.
     DEFINE VARIABLE lc_tempDirectory AS CHARACTER NO-UNDO.
 
     ASSIGN lc_tempDirectory = ENTRY(1, {&propathToUse}, ",").
 
     /* loop through all the files to compile */
-    INPUT STREAM str_rlist FROM VALUE({&ToCompileListFile}) NO-ECHO.
+    INPUT STREAM str_r FROM VALUE({&ToCompileListFile}) NO-ECHO.
     REPEAT:
-        IMPORT STREAM str_rlist lc_from lc_outdir lc_lis lc_xrf lc_dgb lc_fileid lc_reftables.
-        IF lc_from > "" THEN DO:
-        
-            &IF {&ExecutionType} = "GENERATEDEBUGFILE" OR {&ExecutionType} = "CHECKSYNTAX" &THEN
-                ASSIGN lc_outdir = lc_tempDirectory.
-            &ENDIF
-        
-            &IF {&AnalysisMode} &THEN
-                /* we don't bother saving/restoring the log-manager state since we are only compiling, there
-                   should be no *useful* log activated at this moment */
-                ASSIGN
-                    LOG-MANAGER:LOGFILE-NAME = lc_fileid
-                    LOG-MANAGER:LOGGING-LEVEL = 3
-                    LOG-MANAGER:LOG-ENTRY-TYPES = "FileID"
-                    .
-            &ENDIF
-
-            &IF {&ExecutionType} = "RUN" &THEN
-                DO  ON STOP   UNDO, LEAVE
-                    ON ERROR  UNDO, LEAVE
-                    ON ENDKEY UNDO, LEAVE
-                    ON QUIT   UNDO, LEAVE:
-                    RUN VALUE(lc_from) NO-ERROR.
-                END.
-            &ELSE
-                &IF {&ExecutionType} = "CHECKSYNTAX" &THEN
-                    COMPILE VALUE(lc_from)
-                        /* we still save into because if we compile a file and a .r exists next to said file, it
-                           doesn't compile... *Sad* */
-                        SAVE INTO VALUE(lc_outdir)
-                        NO-ERROR.
-                &ELSE
-                    /* COMPILE / GENERATEDEBUGFILE */
-                    IF lc_lis = "?" THEN ASSIGN lc_lis = ?.
-                    IF lc_xrf = "?" THEN ASSIGN lc_xrf = ?.
-                    IF lc_dgb = "?" THEN ASSIGN lc_dgb = ?.
-                    IF lc_xrf = ? OR NOT lc_xrf MATCHES "*~~.xml" THEN
-                        COMPILE VALUE(lc_from)
-                            SAVE INTO VALUE(lc_outdir)
-                            LISTING VALUE(lc_lis)
-                            XREF VALUE(lc_xrf)
-                            DEBUG-LIST VALUE(lc_dgb)
-                            NO-ERROR.
-                    ELSE
-                        COMPILE VALUE(lc_from)
-                            SAVE INTO VALUE(lc_outdir)
-                            LISTING VALUE(lc_lis)
-                            XREF-XML VALUE(lc_xrf)
-                            DEBUG-LIST VALUE(lc_dgb)
-                            NO-ERROR.
-                &ENDIF
-            &ENDIF
-
-            fi_output_last_error().
-            RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
-            fi_output_last_error().
-
-            &IF {&AnalysisMode} &THEN
-                LOG-MANAGER:CLOSE-LOG().
-
-                /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
-                RUN pi_generateTableRef (INPUT lc_from, INPUT lc_outdir, INPUT lc_reftables) NO-ERROR.
-                fi_output_last_error().
-            &ENDIF
-
-            /* the following stream / file is used to inform the C# side of the progression */
-            OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
-            PUT STREAM str_w UNFORMATTED "x".
-            OUTPUT STREAM str_w CLOSE.
-
-        END.
+        CREATE tt_list.
+        ASSIGN 
+            tt_list.order = li_order
+            li_order = li_order + 1.
+        IMPORT STREAM str_r tt_list EXCEPT order.
+        RELEASE tt_list.
     END.
-    INPUT STREAM str_rlist CLOSE.
+    INPUT STREAM str_r CLOSE.
+    IF AVAILABLE(tt_list) THEN
+        DELETE tt_list.
+
+    /* for each file to compile */
+    FOR EACH tt_list:
+        &IF {&ExecutionType} = "GENERATEDEBUGFILE" OR {&ExecutionType} = "CHECKSYNTAX" &THEN
+            ASSIGN tt_list.outdir = lc_tempDirectory.
+        &ENDIF
+
+        &IF {&AnalysisMode} &THEN
+            /* we don't bother saving/restoring the log-manager state since we are only compiling, there
+               should be no *useful* log activated at this moment */
+            ASSIGN
+                LOG-MANAGER:LOGFILE-NAME = tt_list.fileid
+                LOG-MANAGER:LOGGING-LEVEL = 3
+                LOG-MANAGER:LOG-ENTRY-TYPES = "FileID"
+                .
+        &ENDIF
+
+        &IF {&ExecutionType} = "RUN" &THEN
+            DO  ON STOP   UNDO, LEAVE
+                ON ERROR  UNDO, LEAVE
+                ON ENDKEY UNDO, LEAVE
+                ON QUIT   UNDO, LEAVE:
+                RUN VALUE(tt_list.source) NO-ERROR.
+            END.
+        &ELSE
+            &IF {&ExecutionType} = "CHECKSYNTAX" &THEN
+                COMPILE VALUE(tt_list.source)
+                    /* we still save into because if we compile a file and a .r exists next to said file, it
+                       doesn't compile... *Sad* */
+                    SAVE INTO VALUE(tt_list.outdir)
+                    NO-ERROR.
+            &ELSE
+                /* COMPILE / GENERATEDEBUGFILE */
+                IF tt_list.lis = "?" THEN ASSIGN tt_list.lis = ?.
+                IF tt_list.xrf = "?" THEN ASSIGN tt_list.xrf = ?.
+                IF tt_list.dbg = "?" THEN ASSIGN tt_list.dbg = ?.
+                IF tt_list.xrf = ? OR NOT tt_list.xrf MATCHES "*~~.xml" THEN
+                    COMPILE VALUE(tt_list.source)
+                        SAVE INTO VALUE(tt_list.outdir)
+                        LISTING VALUE(tt_list.lis)
+                        XREF VALUE(tt_list.xrf)
+                        DEBUG-LIST VALUE(tt_list.dbg)
+                        NO-ERROR.
+                ELSE
+                    COMPILE VALUE(tt_list.source)
+                        SAVE INTO VALUE(tt_list.outdir)
+                        LISTING VALUE(tt_list.lis)
+                        XREF-XML VALUE(tt_list.xrf)
+                        DEBUG-LIST VALUE(tt_list.dbg)
+                        NO-ERROR.
+            &ENDIF
+        &ENDIF
+
+        fi_output_last_error().
+        RUN pi_handleCompilErrors (INPUT tt_list.source) NO-ERROR.
+        fi_output_last_error().
+
+        &IF {&AnalysisMode} &THEN
+            LOG-MANAGER:CLOSE-LOG().
+
+            /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
+            RUN pi_generateTableRef (INPUT tt_list.source, INPUT tt_list.outdir, INPUT tt_list.reftables) NO-ERROR.
+            fi_output_last_error().
+        &ENDIF
+
+        /* the following stream / file is used to inform the C# side of the progression */
+        OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
+        PUT STREAM str_w UNFORMATTED "x".
+        OUTPUT STREAM str_w CLOSE.
+    END.
 
     RETURN "".
 
@@ -421,8 +433,8 @@ END PROCEDURE.
         /* Retrieve table list as well as their CRC values */
         ASSIGN
             RCODE-INFO:FILE-NAME = lc_rcodePath
-            lc_tableList = RCODE-INFO:TABLE-LIST
-            lc_crcList =  RCODE-INFO:TABLE-CRC-LIST
+            lc_tableList = TRIM(RCODE-INFO:TABLE-LIST)
+            lc_crcList = TRIM(RCODE-INFO:TABLE-CRC-LIST)
             .
 
         /* Store tables referenced in the .R file */

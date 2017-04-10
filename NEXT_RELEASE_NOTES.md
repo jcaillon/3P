@@ -3,6 +3,7 @@
 
 - New options for the deployment :
   - You can now send files to a .cab file (works like zip rules)
+  - Changed the behavior of the `display parser errors on save`, the notification now allows you to disable the feature for the current file only
 
 **Fixed issues :**
 

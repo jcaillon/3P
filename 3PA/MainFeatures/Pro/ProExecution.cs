@@ -576,7 +576,7 @@ namespace _3PA.MainFeatures.Pro {
         /// - the errors for each file compiled (if any)
         /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
         /// </summary>
-        public static event Action<ProExecutionHandleCompilation, List<FileToCompile>, Dictionary<string, List<FileError>>, List<FileToDeploy>> OnEachCompilationOk;
+        public static event Action<ProExecutionHandleCompilation, List<FileToCompile>, List<FileToDeploy>> OnEachCompilationOk;
 
         #endregion        
 
@@ -588,7 +588,7 @@ namespace _3PA.MainFeatures.Pro {
         /// - the errors for each file compiled (if any)
         /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
         /// </summary>
-        public event Action<ProExecutionHandleCompilation, List<FileToCompile>, Dictionary<string, List<FileError>>, List<FileToDeploy>> OnCompilationOk;
+        public event Action<ProExecutionHandleCompilation, List<FileToCompile>, List<FileToDeploy>> OnCompilationOk;
 
         #endregion
 
@@ -720,7 +720,7 @@ namespace _3PA.MainFeatures.Pro {
                 // for *.cls files, as many *.r files are generated, we need to compile in a temp directory
                 // we need to know which *.r files were generated for each input file
                 // so each file gets his own sub tempDir
-                var lastDeployment = ProEnv.Deployer.GetTargetsNeededForFile(fileToCompile.SourcePath, 0).Last();
+                var lastDeployment = ProEnv.Deployer.GetTransfersNeededForFile(fileToCompile.SourcePath, 0).Last();
                 if ((lastDeployment.DeployType != DeployType.Move) ||
                     Config.Instance.CompileForceUseOfTemp ||
                     Path.GetExtension(fileToCompile.SourcePath).Equals(ExtCls)) {
@@ -831,12 +831,19 @@ namespace _3PA.MainFeatures.Pro {
                     }
                 }
 
+                foreach (var kpv in errorsList) {
+                    var find = Files.Find(file => file.SourcePath.Equals(kpv.Key));
+                    if (find != null) {
+                        find.Errors = kpv.Value;
+                    }
+                }
+
                 if (OnCompilationOk != null) {
-                    OnCompilationOk(this, Files, errorsList, deployList);
+                    OnCompilationOk(this, Files, deployList);
                 }
 
                 if (OnEachCompilationOk != null) {
-                    OnEachCompilationOk(this, Files, errorsList, deployList);
+                    OnEachCompilationOk(this, Files, deployList);
                 }
             }            
 
@@ -913,7 +920,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (fields.Count == 8) {
                     // new file
                     // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
-                    var compilerFailPath = String.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
+                    var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
                     var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
                     if (!output.ContainsKey(filePath)) {
                         output.Add(filePath, new List<FileError>());
@@ -1053,7 +1060,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Allows to format a small text to explain the errors found in a file and the generated files...
         /// </summary>
-        public static string FormatCompilationResultForSingleFile(string sourceFilePath, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
+        public static string FormatCompilationResultForSingleFile(string sourceFilePath, FileToCompile fileToCompile, List<FileToDeploy> listDeployedFiles) {
             var line = new StringBuilder();
 
             line.Append("<div style='padding-bottom: 5px;'>");
@@ -1061,10 +1068,10 @@ namespace _3PA.MainFeatures.Pro {
             line.Append("<b>" + sourceFilePath.ToHtmlLink(Path.GetFileName(sourceFilePath), true) + "</b> in " + Path.GetDirectoryName(sourceFilePath).ToHtmlLink());
             line.Append("</div>");
 
-            if (listErrorFiles != null) {
+            if (fileToCompile != null && fileToCompile.Errors != null) {
                 line.Append("<div style='padding-left: 10px; padding-bottom: 5px;'>");
-                foreach (var fileError in listErrorFiles) {
-                    line.Append(fileError);
+                foreach (var error in fileToCompile.Errors) {
+                    line.Append(error.ToStringDescription());
                 }
                 line.Append("</div>");
             }
@@ -1072,11 +1079,11 @@ namespace _3PA.MainFeatures.Pro {
             if (listDeployedFiles != null) {
                 line.Append("<div>");
                 // group either by directory name or by pack name
-                var groupDirectory = listDeployedFiles.GroupBy(deploy => deploy.GroupBasePath).Select(deploys => deploys.ToList()).ToList();
-                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().GroupBasePath)) {
-                    line.Append(group.First().GroupHeaderToString());
+                var groupDirectory = listDeployedFiles.GroupBy(deploy => deploy.GroupKey).Select(deploys => deploys.ToList()).ToList();
+                foreach (var group in groupDirectory.OrderByDescending(list => list.First().DeployType).ThenBy(list => list.First().GroupKey)) {
+                    line.Append(group.First().ToStringGroupHeader());
                     foreach (var fileToDeploy in group.OrderBy(deploy => deploy.To)) {
-                        line.Append(fileToDeploy);
+                        line.Append(fileToDeploy.ToStringDescription());
                     }
                 }
                 line.Append("</div>");
