@@ -7,6 +7,7 @@ using _3PA.Lib.Compression.Cab;
 using _3PA.Lib.Compression.Prolib;
 using _3PA.Lib.Compression.Zip;
 using _3PA.Lib.Ftp;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro {
 
@@ -225,7 +226,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         public override string ToStringGroupHeader() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>Delete</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + nameof(ImageResources.Delete) + "' height='15px'><b>Delete</b></div>";
         }
 
         /// <summary>
@@ -297,7 +298,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         public override string ToStringGroupHeader() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>Delete</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + nameof(ImageResources.Delete) + "' height='15px'><b>Delete</b></div>";
         }
 
         /// <summary>
