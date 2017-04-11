@@ -92,35 +92,74 @@ namespace _3PA.MainFeatures.Pro {
         #region public methods
 
         /// <summary>
-        /// Creates a list of files to deploy for the given step
-        /// </summary>
-        public List<FileToDeploy> GetFilesToDeployForStep(int step, List<string> listOfSourceDir, SearchOption searchOptions, string fileExtensionFilter = "*") {
-            var outputList = new List<FileToDeploy>();
-
-            // list the files to deploy
-            foreach (var file in GetFilteredFilesList(listOfSourceDir, step, searchOptions)) {
-                outputList.AddRange(GetTransfersNeededForFile(file, step));
-            }
-
-            return outputList;
-        }
-
-        /// <summary>
         /// returns the list of transfers needed for a given file
         /// </summary>
         public List<FileToDeploy> GetTransfersNeededForFile(string sourcePath, int step) {
-            var fileName = Path.GetFileName(sourcePath);
-            if (fileName != null)
-                return GetTargetsNeededForFile(sourcePath, step).Select(deploy => deploy.Set(sourcePath, Path.Combine(deploy.TargetPath, fileName))).ToList();
+            try { 
+                var fileName = Path.GetFileName(sourcePath);
+                if (fileName != null)
+                    return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.File).Select(deploy => deploy.Set(sourcePath, Path.Combine(deploy.TargetPath, fileName))).ToList();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "GetTransfersNeededForFile");
+            }
             return new List<FileToDeploy>();
         }
+
+        /// <summary>
+        /// returns the list of transfers needed for a given folder
+        /// </summary>
+        public List<FileToDeploy> GetTransfersNeededForFolders(string sourcePath, int step) {
+            try {
+                return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.Folder).Select(deploy => deploy.Set(sourcePath, deploy.TargetPath)).ToList();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "GetTransfersNeededForFolders");
+            }
+            return new List<FileToDeploy>();
+        }
+
+        /// <summary>
+        /// Returns a list of files in the given folders (recursively or not depending on the option),
+        /// this list is filtered thanks to the filtered rules given
+        /// </summary>
+        public IEnumerable<string> GetFilteredList(IEnumerable<string> list, int step) {
+            // construct the filters list
+            var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
+            var excludeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
+
+            foreach (var file in list) {
+                if (IsFilePassingFilters(file, includeFiltersList, excludeFiltersList))
+                    yield return file;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the given path passes the include + exclude filters
+        /// </summary>
+        private bool IsFilePassingFilters(string path, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
+            bool passing = true;
+
+            // test include filters
+            if (includeFiltersList.Count > 0) {
+                var hasMatch = includeFiltersList.Any(rule => path.RegexMatch(rule.RegexSourcePattern));
+                passing = hasMatch;
+            }
+
+            // test exclude filters
+            if (excludeFiltersList.Count > 0) {
+                var hasNoMatch = excludeFiltersList.All(rule => !path.RegexMatch(rule.RegexSourcePattern));
+                passing = passing && hasNoMatch;
+            }
+
+            return passing;
+        }
+
 
         /// <summary>
         /// This method returns the target directories (or pl, zip or ftp) for the given source path, for each :
         /// If CompileLocally, returns the directory of the source
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directory as well
         /// </summary>
-        private List<FileToDeploy> GetTargetsNeededForFile(string sourcePath, int step) {
+        private List<FileToDeploy> GetTargetsNeeded(string sourcePath, int step, DeployTransferRuleTarget targetType) {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && _compileLocally) {
@@ -132,10 +171,10 @@ namespace _3PA.MainFeatures.Pro {
             var outList = new List<FileToDeploy>();
 
             // for each transfer rule that match the source pattern
-            foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step)) {
+            foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step && rule.TargetType == targetType)) {
                 string outPath;
 
-                var deployTarget = ReplaceVariablesIn(rule.DeployTarget);
+                var deployTarget = ReplaceVariablesIn(rule.DeployTarget ?? string.Empty);
 
                 if (rule.ShouldDeployTargetReplaceDollar) {
                     outPath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
@@ -173,67 +212,9 @@ namespace _3PA.MainFeatures.Pro {
             return outList;
         }
 
-        /// <summary>
-        /// Returns a list of files in the given folders (recursively or not depending on the option),
-        /// this list is filtered thanks to the filtered rules given
-        /// </summary>
-        public HashSet<string> GetFilteredFilesList(List<string> listOfFolderPath, int step, SearchOption searchOptions, string fileExtensionFilter = "*") {
-            // constructs the list of all the files (unique) across the different folders
-            var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        #endregion
 
-            foreach (var filePath in 
-                GetFilteredFilesList(
-                    listOfFolderPath
-                        .Where(Directory.Exists)
-                        .SelectMany(
-                            s => fileExtensionFilter
-                                .Split(',')
-                                .SelectMany(searchPattern => Directory.EnumerateFiles(s, searchPattern, searchOptions))
-                        )
-                        , step)
-                ) {
-                if (!filesToCompile.Contains(filePath))
-                    filesToCompile.Add(filePath);
-            }
-
-            return filesToCompile;
-        }
-
-        /// <summary>
-        /// Returns a list of files in the given folders (recursively or not depending on the option),
-        /// this list is filtered thanks to the filtered rules given
-        /// </summary>
-        public IEnumerable<string> GetFilteredFilesList(IEnumerable<string> filesList, int step) {
-            // construct the filters list
-            var includeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
-            var excludeFiltersList = DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
-
-            foreach (var file in filesList) {
-                if (IsFilePassingFilters(file, includeFiltersList, excludeFiltersList))
-                    yield return file;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if the given file path passes the include + exclude filters
-        /// </summary>
-        private bool IsFilePassingFilters(string filePath, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
-            bool passing = true;
-
-            // test include filters
-            if (includeFiltersList.Count > 0) {
-                var hasMatch = includeFiltersList.Any(rule => filePath.RegexMatch(rule.RegexSourcePattern));
-                passing = hasMatch;
-            }
-
-            // test exclude filters
-            if (excludeFiltersList.Count > 0) {
-                var hasNoMatch = excludeFiltersList.All(rule => !filePath.RegexMatch(rule.RegexSourcePattern));
-                passing = passing && hasNoMatch;
-            }
-
-            return passing;
-        }
+        #region Static GetFilesToDeployAfterCompilation
 
         /// <summary>
         /// Creates a list of files to deploy after a compilation,
@@ -241,79 +222,81 @@ namespace _3PA.MainFeatures.Pro {
         /// and one .lst if the option has been checked
         /// </summary>
         public static List<FileToDeploy> GetFilesToDeployAfterCompilation(ProExecutionCompile execution) {
-
             var outputList = new List<FileToDeploy>();
-            var filesCompiled = execution.Files.ToList();
+            try { 
+                var filesCompiled = execution.Files.ToList();
 
-            // Handle the case of .cls files, for which several .r code are compiled
-            foreach (var clsFile in execution.Files.Where(file => file.SourcePath.EndsWith(ProExecutionHandleCompilation.ExtCls, StringComparison.CurrentCultureIgnoreCase))) {
+                // Handle the case of .cls files, for which several .r code are compiled
+                foreach (var clsFile in execution.Files.Where(file => file.SourcePath.EndsWith(ProExecutionHandleCompilation.ExtCls, StringComparison.CurrentCultureIgnoreCase))) {
 
-                // if the file we compiled inherits from another class or if another class inherits of our file, 
-                // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
+                    // if the file we compiled inherits from another class or if another class inherits of our file, 
+                    // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
 
-                // for each *.r file in the compilation output directory
-                foreach (var rCodeFilePath in Directory.EnumerateFiles(clsFile.CompilationOutputDir, "*" + ProExecutionHandleCompilation.ExtR, SearchOption.AllDirectories)) {
-                    try {
-                        // find the path of the source
-                        var relativePath = rCodeFilePath.Replace(clsFile.CompilationOutputDir, "").TrimStart('\\');
+                    // for each *.r file in the compilation output directory
+                    foreach (var rCodeFilePath in Directory.EnumerateFiles(clsFile.CompilationOutputDir, "*" + ProExecutionHandleCompilation.ExtR, SearchOption.AllDirectories)) {
+                        try {
+                            // find the path of the source
+                            var relativePath = rCodeFilePath.Replace(clsFile.CompilationOutputDir, "").TrimStart('\\');
 
-                        // if this is actually the .cls file we want to compile, the .r file isn't necessary directly in the compilation dir like we expect,
-                        // it can be in folders corresponding to the package of the class
-                        if (Path.GetFileNameWithoutExtension(clsFile.SourcePath ?? "").Equals(Path.GetFileNameWithoutExtension(relativePath))) {
-                            // correct .r path
-                            clsFile.CompOutputR = rCodeFilePath;
-                            continue;
+                            // if this is actually the .cls file we want to compile, the .r file isn't necessary directly in the compilation dir like we expect,
+                            // it can be in folders corresponding to the package of the class
+                            if (Path.GetFileNameWithoutExtension(clsFile.SourcePath ?? "").Equals(Path.GetFileNameWithoutExtension(relativePath))) {
+                                // correct .r path
+                                clsFile.CompOutputR = rCodeFilePath;
+                                continue;
+                            }
+
+                            // otherwise, try to get the source .cls for this .r
+                            var sourcePath = execution.ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ProExecutionHandleCompilation.ExtCls));
+
+                            // if the source isn't already in the files that needed to be compiled, we add it
+                            if (!string.IsNullOrEmpty(sourcePath) && !filesCompiled.Exists(compiledFile => compiledFile.SourcePath.Equals(sourcePath))) {
+                                filesCompiled.Add(new FileToCompile(sourcePath) {
+                                    CompilationOutputDir = clsFile.CompilationOutputDir,
+                                    CompiledSourcePath = sourcePath,
+                                    CompOutputR = rCodeFilePath
+                                });
+                            }
+                        } catch (Exception e) {
+                            ErrorHandler.LogError(e);
                         }
-
-                        // otherwise, try to get the source .cls for this .r
-                        var sourcePath = execution.ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ProExecutionHandleCompilation.ExtCls));
-
-                        // if the source isn't already in the files that needed to be compiled, we add it
-                        if (!string.IsNullOrEmpty(sourcePath) && !filesCompiled.Exists(compiledFile => compiledFile.SourcePath.Equals(sourcePath))) {
-                            filesCompiled.Add(new FileToCompile(sourcePath) {
-                                CompilationOutputDir = clsFile.CompilationOutputDir,
-                                CompiledSourcePath = sourcePath,
-                                CompOutputR = rCodeFilePath
-                            });
-                        }
-                    } catch (Exception e) {
-                        ErrorHandler.LogError(e);
                     }
                 }
-            }
 
-            // for each .r
-            foreach (var compiledFile in filesCompiled) {
-                if (string.IsNullOrEmpty(compiledFile.CompOutputR))
-                    continue;
-                foreach (var deployNeeded in execution.ProEnv.Deployer.GetTargetsNeededForFile(compiledFile.SourcePath, 0)) {
+                // for each .r
+                foreach (var compiledFile in filesCompiled) {
+                    if (string.IsNullOrEmpty(compiledFile.CompOutputR))
+                        continue;
+                    foreach (var deployNeeded in execution.ProEnv.Deployer.GetTargetsNeeded(compiledFile.SourcePath, 0, DeployTransferRuleTarget.File)) {
 
-                    string targetRPath;
-                    if (execution.ProEnv.CompileLocally)
-                        targetRPath = Path.Combine(deployNeeded.TargetPath, Path.GetFileName(compiledFile.CompOutputR));
-                    else
-                        targetRPath = Path.Combine(deployNeeded.TargetPath, compiledFile.CompOutputR.Replace(compiledFile.CompilationOutputDir, "").TrimStart('\\'));
+                        string targetRPath;
+                        if (execution.ProEnv.CompileLocally)
+                            targetRPath = Path.Combine(deployNeeded.TargetPath, Path.GetFileName(compiledFile.CompOutputR));
+                        else
+                            targetRPath = Path.Combine(deployNeeded.TargetPath, compiledFile.CompOutputR.Replace(compiledFile.CompilationOutputDir, "").TrimStart('\\'));
 
-                    // add .r and .lst (if needed) to the list of files to deploy
-                    outputList.Add(deployNeeded.Set(compiledFile.CompOutputR, targetRPath));
+                        // add .r and .lst (if needed) to the list of files to deploy
+                        outputList.Add(deployNeeded.Set(compiledFile.CompOutputR, targetRPath));
 
-                    // listing
-                    if (execution.CompileWithListing && !string.IsNullOrEmpty(compiledFile.CompOutputLis)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputLis, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtLis)));
-                    }
+                        // listing
+                        if (execution.CompileWithListing && !string.IsNullOrEmpty(compiledFile.CompOutputLis)) {
+                            outputList.Add(deployNeeded.Copy(compiledFile.CompOutputLis, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtLis)));
+                        }
 
-                    // xref
-                    if (execution.CompileWithXref && !string.IsNullOrEmpty(compiledFile.CompOutputXrf)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputXrf, Path.ChangeExtension(targetRPath, execution.UseXmlXref ? ProExecutionHandleCompilation.ExtXrfXml : ProExecutionHandleCompilation.ExtXrf)));
-                    }
+                        // xref
+                        if (execution.CompileWithXref && !string.IsNullOrEmpty(compiledFile.CompOutputXrf)) {
+                            outputList.Add(deployNeeded.Copy(compiledFile.CompOutputXrf, Path.ChangeExtension(targetRPath, execution.UseXmlXref ? ProExecutionHandleCompilation.ExtXrfXml : ProExecutionHandleCompilation.ExtXrf)));
+                        }
 
-                    // debug-list
-                    if (execution.CompileWithDebugList && !string.IsNullOrEmpty(compiledFile.CompOutputDbg)) {
-                        outputList.Add(deployNeeded.Copy(compiledFile.CompOutputDbg, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtDbg)));
+                        // debug-list
+                        if (execution.CompileWithDebugList && !string.IsNullOrEmpty(compiledFile.CompOutputDbg)) {
+                            outputList.Add(deployNeeded.Copy(compiledFile.CompOutputDbg, Path.ChangeExtension(targetRPath, ProExecutionHandleCompilation.ExtDbg)));
+                        }
                     }
                 }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Failed to find .r codes to deploy");
             }
-
             return outputList;
         }
 
@@ -333,7 +316,7 @@ namespace _3PA.MainFeatures.Pro {
                     CancellationToken = cancelToken.Token,
                     MaxDegreeOfParallelism = Environment.ProcessorCount
                 };
-               
+
                 // make sure to transfer a given file only once at the same place (happens with .cls file since a source
                 // can have several .r files generated if it is used in another classes)
                 deployToDo = deployToDo
@@ -438,12 +421,14 @@ namespace _3PA.MainFeatures.Pro {
                     if (file.DeploySelf())
                         _nbFilesDeployed++;
                     if (updateDeploymentPercentage != null) {
-                        updateDeploymentPercentage((float)_nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                        updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
                     }
                 });
 
             } catch (OperationCanceledException) {
                 // we expect this exception if the task has been canceled
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error during the deployment");
             }
 
             return deployToDo;
@@ -451,7 +436,7 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region private /utils
+        #region Private / Utils
 
         /// <summary>
         /// Replace the variables &lt;XXX&gt; in the string

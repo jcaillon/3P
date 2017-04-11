@@ -499,7 +499,7 @@ namespace _3PA.MainFeatures.Pro {
                 UserCommunication.Notify("Deploying a compilable file is strictly equal as compiling it<br>The deployment rules for step 0 are applied in both case!", MessageImg.MsgInfo, "Deploy a file", "Bypass to compilation", 2);
             } else {
                 var currentDeployer = ProEnvironment.Current.Deployer;
-                if (currentDeployer.GetFilteredFilesList(new List<string> { Npp.CurrentFile.Path }, 1).Any()) {
+                if (currentDeployer.GetFilteredList(new List<string> { Npp.CurrentFile.Path }, 1).Any()) {
                     // deploy the file for STEP 1
                     var deployedFiles = currentDeployer.DeployFiles(currentDeployer.GetTransfersNeededForFile(Npp.CurrentFile.Path, 1), null, null);
                     if (deployedFiles == null || deployedFiles.Count == 0) {

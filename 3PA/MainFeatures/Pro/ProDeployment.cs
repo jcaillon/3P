@@ -174,34 +174,44 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         protected virtual List<FileToCompile> GetFilesToCompileInStepZero() {
             return 
-                _proEnv.Deployer.GetFilteredFilesList(
-                    new List<string> { _currentProfile.SourceDirectory },
-                    0,
-                    _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly,
-                    Config.Instance.FilesPatternCompilable
-                ).Select(s => new FileToCompile(s)).ToList();
+                GetFilteredFilesList(_currentProfile.SourceDirectory, 0, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, Config.Instance.FilesPatternCompilable)
+                    .Select(s => new FileToCompile(s))
+                    .ToList();
         }
 
         /// <summary>
         /// List all the files that should be deployed from the source directory
         /// </summary>
         protected virtual List<FileToDeploy> GetFilesToDeployInStepOne() {
-            return _proEnv.Deployer.GetFilesToDeployForStep(1,
-                new List<string> { _currentProfile.SourceDirectory },
-                _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
-            );
+            // list files
+            var outlist = GetFilteredFilesList(_currentProfile.SourceDirectory, 1, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .SelectMany(file => _proEnv.Deployer.GetTransfersNeededForFile(file, 1))
+                .ToNonNullList();
+            // list folders
+            outlist.AddRange(GetFilteredFoldersList(_currentProfile.SourceDirectory, 1, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .SelectMany(folder => _proEnv.Deployer.GetTransfersNeededForFolders(folder, 1))
+                .ToNonNullList());
+            return outlist;
         }
 
         /// <summary>
         /// List all the files that should be deployed from the source directory
         /// </summary>
         protected virtual List<FileToDeploy> GetFilesToDeployInStepTwoAndMore(int currentStep) {
-            return _proEnv.Deployer.GetFilesToDeployForStep(currentStep,
-                new List<string> { _proEnv.BaseCompilationPath },
-                _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
-            );
+            // list files
+            var outlist = GetFilteredFilesList(_proEnv.BaseCompilationPath, currentStep, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .SelectMany(file => _proEnv.Deployer.GetTransfersNeededForFile(file, currentStep))
+                .ToNonNullList();
+            // list folders
+            outlist.AddRange(GetFilteredFoldersList(_proEnv.BaseCompilationPath, currentStep, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .SelectMany(folder => _proEnv.Deployer.GetTransfersNeededForFolders(folder, currentStep))
+                .ToNonNullList());
+            return outlist;
         }
 
+        /// <summary>
+        /// Deploys the list of files
+        /// </summary>
         protected virtual List<FileToDeploy> Deployfiles(List<FileToDeploy> filesToDeploy) {
             return _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f, _cancelSource);
         }
@@ -209,6 +219,28 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Private
+
+        /// <summary>
+        /// Returns a list of folders in the given folder (recursively or not depending on the option),
+        /// this list is filtered thanks to the filtered rules
+        /// </summary>
+        protected List<string> GetFilteredFoldersList(string folder, int step, SearchOption searchOptions) {
+            return _proEnv.Deployer.GetFilteredList(Directory.EnumerateDirectories(folder, "*", searchOptions), step).ToList();
+        }
+
+        /// <summary>
+        /// Returns a list of files in the given folder (recursively or not depending on the option),
+        /// this list is filtered thanks to the filtered rules
+        /// </summary>
+        protected List<string> GetFilteredFilesList(string folder, int step, SearchOption searchOptions, string fileExtensionFilter = "*") {
+            return _proEnv.Deployer.GetFilteredList
+                (
+                    fileExtensionFilter
+                        .Split(',')
+                        .SelectMany(searchPattern => Directory.EnumerateFiles(folder, searchPattern, searchOptions)),
+                    step
+                ).ToList();
+        }
 
         /// <summary>
         /// Called when the compilation step 0 failed

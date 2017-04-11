@@ -717,31 +717,11 @@ namespace _3PA.MainFeatures.Pro {
                 var localSubTempDir = Path.Combine(_localTempDir, count.ToString());
                 var baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.SourcePath);
 
-                // for *.cls files, as many *.r files are generated, we need to compile in a temp directory
-                // we need to know which *.r files were generated for each input file
-                // so each file gets his own sub tempDir
-                var lastDeployment = ProEnv.Deployer.GetTransfersNeededForFile(fileToCompile.SourcePath, 0).Last();
-                if ((lastDeployment.DeployType != DeployType.Move) ||
-                    Config.Instance.CompileForceUseOfTemp ||
-                    Path.GetExtension(fileToCompile.SourcePath).Equals(ExtCls)) {
-                    
-                    // if the deployment dir is not on the same disk as the temp folder, we create a temp dir
-                    // as close to the final deployment as possible (= in the deployment base dir!)
-                    if (lastDeployment.DeployType != DeployType.Ftp &&
-                        !string.IsNullOrEmpty(ProEnv.BaseCompilationPath) && ProEnv.BaseCompilationPath.Length > 2 && !ProEnv.BaseCompilationPath.Substring(0, 2).EqualsCi(_localTempDir.Substring(0, 2))) {
-
-                        if (!Utils.CreateDirectory(DistantTempDir, FileAttributes.Hidden))
-                            return false;
-                        fileToCompile.CompilationOutputDir = Path.Combine(DistantTempDir, count.ToString());
-                    } else {
-                        fileToCompile.CompilationOutputDir = localSubTempDir;
-                    }
-
-                } else {
-                    // if we want to move the r-code somewhere during the deployment, then we will compile the r-code
-                    // directly there, because it's faster than generating it in a temp folder and moving it afterward
-                    fileToCompile.CompilationOutputDir = lastDeployment.TargetPath;
-                }
+                // get the output directory that will be use to generate the .r (and listing debug-list...)
+                if (!ComputeOutputDir(fileToCompile, localSubTempDir, count))
+                    return false;
+                if (!Utils.CreateDirectory(fileToCompile.CompilationOutputDir))
+                    return false;
 
                 fileToCompile.CompOutputR = Path.Combine(fileToCompile.CompilationOutputDir, baseFileName + ExtR);
                 if (CompileWithListing)
@@ -769,9 +749,6 @@ namespace _3PA.MainFeatures.Pro {
                     fileToCompile.CompiledSourcePath = fileToCompile.SourcePath;
                 }
 
-                if (!Utils.CreateDirectory(fileToCompile.CompilationOutputDir))
-                    return false;
-
                 // feed files list
                 filesListcontent.AppendLine(fileToCompile.CompiledSourcePath.ProQuoter() + " " + fileToCompile.CompilationOutputDir.ProQuoter() + " " + (fileToCompile.CompOutputLis ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputXrf ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputDbg ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputFileIdLog ?? "").ProQuoter() + " " + (fileToCompile.CompOutputRefTables ?? "").ProQuoter());
 
@@ -789,6 +766,14 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("AnalysisMode", IsAnalysisMode.ToString());
 
             return base.SetExecutionInfo();
+        }
+
+        /// <summary>
+        /// get the output directory that will be use to generate the .r (and listing debug-list...) 
+        /// </summary>
+        protected virtual bool ComputeOutputDir(FileToCompile fileToCompile, string localSubTempDir, int count) {
+            fileToCompile.CompilationOutputDir = localSubTempDir;
+            return true;
         }
         
         /// <summary>
@@ -1050,6 +1035,40 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         protected override bool CanUseBatchMode() {
+            return true;
+        }
+
+        /// <summary>
+        /// get the output directory that will be use to generate the .r (and listing debug-list...) 
+        /// </summary>
+        protected override bool ComputeOutputDir(FileToCompile fileToCompile, string localSubTempDir, int count) {
+
+            // for *.cls files, as many *.r files are generated, we need to compile in a temp directory
+            // we need to know which *.r files were generated for each input file
+            // so each file gets his own sub tempDir
+            var lastDeployment = ProEnv.Deployer.GetTransfersNeededForFile(fileToCompile.SourcePath, 0).Last();
+            if (lastDeployment.DeployType != DeployType.Move ||
+                Config.Instance.CompileForceUseOfTemp ||
+                Path.GetExtension(fileToCompile.SourcePath ?? "").Equals(ExtCls)) {
+
+                // if the deployment dir is not on the same disk as the temp folder, we create a temp dir
+                // as close to the final deployment as possible (= in the deployment base dir!)
+                if (lastDeployment.DeployType != DeployType.Ftp &&
+                    !string.IsNullOrEmpty(ProEnv.BaseCompilationPath) && ProEnv.BaseCompilationPath.Length > 2 && !ProEnv.BaseCompilationPath.Substring(0, 2).EqualsCi(_localTempDir.Substring(0, 2))) {
+
+                    if (!Utils.CreateDirectory(DistantTempDir, FileAttributes.Hidden))
+                        return false;
+                    fileToCompile.CompilationOutputDir = Path.Combine(DistantTempDir, count.ToString());
+                } else {
+                    fileToCompile.CompilationOutputDir = localSubTempDir;
+                }
+
+            } else {
+                // if we want to move the r-code somewhere during the deployment, then we will compile the r-code
+                // directly there, because it's faster than generating it in a temp folder and moving it afterward
+                fileToCompile.CompilationOutputDir = lastDeployment.TargetPath;
+            }
+
             return true;
         }
 

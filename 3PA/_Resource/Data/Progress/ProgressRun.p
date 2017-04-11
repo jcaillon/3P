@@ -43,11 +43,7 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE STREAM str_r.
-DEFINE STREAM str_w.
-DEFINE STREAM str_wout.
-DEFINE STREAM str_werlog.
-DEFINE STREAM str_wdblog.
+DEFINE STREAM str_rw.
 
 DEFINE TEMP-TABLE tt_list NO-UNDO
     FIELD order AS INTEGER
@@ -58,18 +54,22 @@ DEFINE TEMP-TABLE tt_list NO-UNDO
     FIELD dbg AS CHARACTER
     FIELD fileid AS CHARACTER
     FIELD reftables AS CHARACTER
-    INDEX rtb_idxfld order ASCENDING 
+    INDEX rtb_idxfld order ASCENDING
    .
 
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 
+/* Used for the unexpected errors in this program */
+DEFINE VARIABLE gc_lastError AS CHARACTER NO-UNDO INITIAL "".
+
 /* ***************************  Prototypes  *************************** */
 
-FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER) FORWARD.
+FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER ) FORWARD.
 FUNCTION fi_output_last_error RETURNS LOGICAL PRIVATE ( ) FORWARD.
 FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) FORWARD.
-FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACTER) FORWARD.
+FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACTER ) FORWARD.
+FUNCTION fi_write RETURNS LOGICAL PRIVATE ( INPUT ipc_path AS CHARACTER, INPUT ipc_content AS CHARACTER ) FORWARD.
 
 /* ***************************  Main Block  *************************** */
 
@@ -77,26 +77,25 @@ FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACT
 SESSION:SYSTEM-ALERT-BOXES = YES.
 SESSION:APPL-ALERT-BOXES = YES.
 
-/* Stream used for the unexpected errors in this program */
-OUTPUT STREAM str_werlog TO VALUE({&LogPath}) BINARY.
-PUT STREAM str_werlog UNFORMATTED "".
+/* Make sure to create this log, otherwise the C# side would think something went wrong */
+fi_write(INPUT {&LogPath}, INPUT "").
 
 /* Assign the PROPATH here */
 ASSIGN PROPATH = TRIM({&PropathToUse} + "," + PROPATH, ",").
 
 /* Connect the database(s) */
 &IF {&DbConnectString} > "" &THEN
-    OUTPUT STREAM str_wdblog TO VALUE({&DbLogPath}) BINARY.
     CONNECT VALUE(fi_add_connec_try({&DbConnectString})) NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
-    OUTPUT STREAM str_wdblog CLOSE.
 &ENDIF
+
+SUBSCRIBE "eventToPublishToNotifyTheUserAfterExecution" ANYWHERE RUN-PROCEDURE "pi_feedNotification".
 
 /* Pre-execution program */
 &IF {&PreExecutionProgram} > "" &THEN
     IF SEARCH({&PreExecutionProgram}) = ? THEN
-        PUT STREAM str_werlog UNFORMATTED "Couldn't find the pre-execution program : " + QUOTER({&PreExecutionProgram}) SKIP.
+        ASSIGN gc_lastError = gc_lastError + "Couldn't find the pre-execution program : " + QUOTER({&PreExecutionProgram}) + "~n".
     ELSE DO:
         DO  ON STOP   UNDO, LEAVE
             ON ERROR  UNDO, LEAVE
@@ -108,8 +107,6 @@ ASSIGN PROPATH = TRIM({&PropathToUse} + "," + PROPATH, ",").
     END.
 &ENDIF
 
-SUBSCRIBE "eventToPublishToNotifyTheUserAfterExecution" ANYWHERE RUN-PROCEDURE "pi_feedNotification".
-
 IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
 
     CASE {&ExecutionType} :
@@ -117,13 +114,8 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
         WHEN "COMPILE" OR
         WHEN "GENERATEDEBUGFILE" OR
         WHEN "RUN" THEN DO:
-            OUTPUT STREAM str_wout TO VALUE({&OutputPath}) BINARY.
-            PUT STREAM str_wout UNFORMATTED "".
-
             RUN pi_compileList NO-ERROR.
             fi_output_last_error().
-
-            OUTPUT STREAM str_wout CLOSE.
         END.
         WHEN "DEPLOYMENTHOOK" OR
         WHEN "PROLINT" THEN DO:
@@ -133,9 +125,7 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
         WHEN "TABLECRC" OR
         WHEN "DATABASE" THEN DO:
             IF NUM-DBS < 1 THEN DO:
-                OUTPUT STREAM str_wdblog TO VALUE({&DbLogPath}) APPEND BINARY.
-                PUT STREAM str_wdblog UNFORMATTED "Zero database connected, there is nothing to be done." SKIP.
-                OUTPUT STREAM str_wdblog CLOSE.
+                fi_write(INPUT {&DbLogPath}, INPUT "Zero database connected, there is nothing to be done.~n").
                 ASSIGN gl_dbKo = TRUE.
             END.
             /* for each connected db */
@@ -147,9 +137,7 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             END.
         END.
         WHEN "PROVERSION" THEN DO:
-            OUTPUT STREAM str_wout TO VALUE({&OutputPath}) BINARY.
-            PUT STREAM str_wout UNFORMATTED PROVERSION(0).
-            OUTPUT STREAM str_wout CLOSE.
+            fi_write(INPUT {&OutputPath}, INPUT PROVERSION).
         END.
         WHEN "DATADIGGER" THEN DO:
             RUN DataDigger.p NO-ERROR.
@@ -176,14 +164,12 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             IF fi_output_last_error() THEN DO:
                 RUN _ab.p NO-ERROR.
                 IF fi_output_last_error() THEN
-                    PUT STREAM str_werlog UNFORMATTED SKIP "The following commands both failed : RUN adeuib/_uibmain.p. RUN _ab.p" SKIP.
+                    ASSIGN gc_lastError = gc_lastError + "The following commands both failed : RUN adeuib/_uibmain.p. RUN _ab.p : ~n".
             END.
         END.
     END CASE.
 
 END.
-
-UNSUBSCRIBE TO "eventToPublishToNotifyTheUserAfterExecution".
 
 IF NOT gl_dbKo THEN
     OS-DELETE VALUE({&DbLogPath}) NO-ERROR.
@@ -191,7 +177,7 @@ IF NOT gl_dbKo THEN
 /* Post-execution program */
 &IF {&PostExecutionProgram} > "" &THEN
     IF SEARCH({&PostExecutionProgram}) = ? THEN
-        PUT STREAM str_werlog UNFORMATTED "Couldn't find the post-execution program : " + QUOTER({&PostExecutionProgram}) SKIP.
+        ASSIGN gc_lastError = gc_lastError + "Couldn't find the post-execution program : ~n".
     ELSE DO:
         DO  ON STOP   UNDO, LEAVE
             ON ERROR  UNDO, LEAVE
@@ -203,7 +189,10 @@ IF NOT gl_dbKo THEN
     END.
 &ENDIF
 
-OUTPUT STREAM str_werlog CLOSE.
+UNSUBSCRIBE TO "eventToPublishToNotifyTheUserAfterExecution".
+
+IF gc_lastError > "" THEN
+    fi_write(INPUT {&LogPath}, INPUT gc_lastError).
 
 /* Must be QUIT or prowin32.exe opens an empty editor! */
 QUIT.
@@ -221,36 +210,42 @@ QUIT.
 
         DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
+        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO INITIAL "".
 
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
             DO li_i = 1 TO COMPILER:NUM-MESSAGES:
-                PUT STREAM str_wout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
-                lc_from,
-                COMPILER:GET-FILE-NAME(li_i),
-                IF COMPILER:GET-MESSAGE-TYPE(li_i) = 1 THEN "Critical" ELSE "Warning",
-                COMPILER:GET-ERROR-ROW(li_i),
-                COMPILER:GET-ERROR-COLUMN(li_i),
-                COMPILER:GET-NUMBER(li_i),
-                TRIM(REPLACE(REPLACE(COMPILER:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(COMPILER:GET-NUMBER(li_i)) + ")", "")),
-                fi_get_message_description(INTEGER(COMPILER:GET-NUMBER(li_i)))
-                ) SKIP.
+                ASSIGN lc_msg = lc_msg + SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8&9",
+                    lc_from,
+                    COMPILER:GET-FILE-NAME(li_i),
+                    IF COMPILER:GET-MESSAGE-TYPE(li_i) = 1 THEN "Critical" ELSE "Warning",
+                    COMPILER:GET-ERROR-ROW(li_i),
+                    COMPILER:GET-ERROR-COLUMN(li_i),
+                    COMPILER:GET-NUMBER(li_i),
+                    TRIM(REPLACE(REPLACE(COMPILER:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(COMPILER:GET-NUMBER(li_i)) + ")", "")),
+                    fi_get_message_description(INTEGER(COMPILER:GET-NUMBER(li_i))),
+                    "~r~n"
+                    ).
             END.
         END.
 
         IF ERROR-STATUS:ERROR THEN DO:
             DO li_i = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_wout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
-                lc_from,
-                lc_from,
-                "Critical",
-                0,
-                0,
-                ERROR-STATUS:GET-NUMBER(li_i),
-                TRIM(REPLACE(REPLACE(ERROR-STATUS:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(ERROR-STATUS:GET-NUMBER(li_i)) + ")", "")),
-                ""
-                ) SKIP.
+                ASSIGN lc_msg = lc_msg + SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8&9",
+                    lc_from,
+                    lc_from,
+                    "Critical",
+                    0,
+                    0,
+                    ERROR-STATUS:GET-NUMBER(li_i),
+                    TRIM(REPLACE(REPLACE(ERROR-STATUS:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(ERROR-STATUS:GET-NUMBER(li_i)) + ")", "")),
+                    "",
+                    "~r~n"
+                    ).
             END.
         END.
+
+        IF lc_msg > "" THEN
+            fi_write(INPUT {&OutputPath}, INPUT lc_msg).
 
         ERROR-STATUS:ERROR = NO.
 
@@ -260,23 +255,23 @@ QUIT.
 &ELSE
     PROCEDURE pi_handleCompilErrors PRIVATE:
     /*------------------------------------------------------------------------------
-      Purpose: save any compilation error into a log file (using global stream str_wout)
+      Purpose: save any compilation error into a log file
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
         DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
-        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO INITIAL "".
 
         IF COMPILER:ERROR OR COMPILER:WARNING OR ERROR-STATUS:ERROR THEN DO:
             IF RETURN-VALUE > "" THEN
-                lc_msg = RETURN-VALUE + "~n".
+                ASSIGN lc_msg = RETURN-VALUE + "~n".
             IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
                 DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
                 DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                    lc_msg = lc_msg + "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) + "~n".
+                    ASSIGN lc_msg = lc_msg + "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) + "~n".
                 END.
             END.
-            lc_msg = SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+            ASSIGN lc_msg = SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8&9",
                 lc_from,
                 COMPILER:FILE-NAME,
                 IF COMPILER:ERROR THEN "Critical" ELSE "Warning",
@@ -284,10 +279,13 @@ QUIT.
                 COMPILER:ERROR-COLUMN,
                 ?,
                 REPLACE(lc_msg, "~n", "<br>"),
-                ""
+                "",
+                "~r~n"
                 ).
-            PUT STREAM str_wout UNFORMATTED lc_msg SKIP.
         END.
+
+        IF lc_msg > "" THEN
+            fi_write(INPUT {&OutputPath}, INPUT lc_msg).
 
         ERROR-STATUS:ERROR = NO.
 
@@ -303,30 +301,23 @@ PROCEDURE pi_compileList PRIVATE:
 ------------------------------------------------------------------------------*/
 
     DEFINE VARIABLE li_order AS INTEGER NO-UNDO INITIAL 0.
-    DEFINE VARIABLE lc_tempDirectory AS CHARACTER NO-UNDO.
-
-    ASSIGN lc_tempDirectory = ENTRY(1, {&propathToUse}, ",").
 
     /* loop through all the files to compile */
-    INPUT STREAM str_r FROM VALUE({&ToCompileListFile}) NO-ECHO.
+    INPUT STREAM str_rw FROM VALUE({&ToCompileListFile}) NO-ECHO.
     REPEAT:
         CREATE tt_list.
-        ASSIGN 
+        ASSIGN
             tt_list.order = li_order
             li_order = li_order + 1.
-        IMPORT STREAM str_r tt_list EXCEPT order.
+        IMPORT STREAM str_rw tt_list EXCEPT tt_list.order.
         RELEASE tt_list.
     END.
-    INPUT STREAM str_r CLOSE.
+    INPUT STREAM str_rw CLOSE.
     IF AVAILABLE(tt_list) THEN
         DELETE tt_list.
 
     /* for each file to compile */
     FOR EACH tt_list:
-        &IF {&ExecutionType} = "GENERATEDEBUGFILE" OR {&ExecutionType} = "CHECKSYNTAX" &THEN
-            ASSIGN tt_list.outdir = lc_tempDirectory.
-        &ENDIF
-
         &IF {&AnalysisMode} &THEN
             /* we don't bother saving/restoring the log-manager state since we are only compiling, there
                should be no *useful* log activated at this moment */
@@ -386,9 +377,7 @@ PROCEDURE pi_compileList PRIVATE:
         &ENDIF
 
         /* the following stream / file is used to inform the C# side of the progression */
-        OUTPUT STREAM str_w TO VALUE({&CompileProgressionFile}) APPEND BINARY.
-        PUT STREAM str_w UNFORMATTED "x".
-        OUTPUT STREAM str_w CLOSE.
+        fi_write(INPUT {&CompileProgressionFile}, INPUT "x").
     END.
 
     RETURN "".
@@ -438,12 +427,12 @@ END PROCEDURE.
             .
 
         /* Store tables referenced in the .R file */
-        OUTPUT STREAM str_w TO VALUE(ipc_outTableRefPath) BINARY.
-        PUT STREAM str_w UNFORMATTED "".
+        OUTPUT STREAM str_rw TO VALUE(ipc_outTableRefPath) APPEND BINARY.
+        PUT STREAM str_rw UNFORMATTED "".
         REPEAT li_i = 1 TO NUM-ENTRIES(lc_tableList):
-            PUT STREAM str_w UNFORMATTED ENTRY(li_i, lc_tableList) + "~t" + ENTRY(li_i, lc_crcList).
+            PUT STREAM str_rw UNFORMATTED ENTRY(li_i, lc_tableList) + "~t" + ENTRY(li_i, lc_crcList).
         END.
-        OUTPUT STREAM str_w CLOSE.
+        OUTPUT STREAM str_rw CLOSE.
 
         RETURN "".
 
@@ -466,10 +455,10 @@ END PROCEDURE.
         DEFINE VARIABLE lc_fileType AS CHARACTER NO-UNDO.
         DEFINE VARIABLE lc_outputFullPath AS CHARACTER NO-UNDO INITIAL "".
 
-        INPUT STREAM str_r FROM OS-DIR(ipc_dir).
+        INPUT STREAM str_rw FROM OS-DIR(ipc_dir).
         dirRepeat:
         REPEAT:
-            IMPORT STREAM str_r lc_filename lc_fullPath lc_fileType.
+            IMPORT STREAM str_rw lc_filename lc_fullPath lc_fileType.
             IF lc_filename = "." OR lc_filename = ".." THEN
                 NEXT dirRepeat.
             IF lc_filename = ipc_fileToFind THEN DO:
@@ -479,7 +468,7 @@ END PROCEDURE.
             ELSE IF lc_fileType MATCHES "*D*" THEN
                 ASSIGN lc_listSubdir = lc_listSubdir + lc_fullPath + ",".
         END.
-        INPUT STREAM str_r CLOSE.
+        INPUT STREAM str_rw CLOSE.
 
         IF lc_outputFullPath > "" THEN
             RETURN lc_outputFullPath.
@@ -497,7 +486,7 @@ END PROCEDURE.
     END PROCEDURE.
 &ENDIF
 
-PROCEDURE pi_feedNotification PRIVATE:
+PROCEDURE pi_feedNotification:
 /*------------------------------------------------------------------------------
   Purpose: called when the associated event is published, allows to display a
     custom notification to the user after executing this program
@@ -528,16 +517,15 @@ PROCEDURE pi_feedNotification PRIVATE:
         WHEN 4 THEN lc_messageType = "MsgHighImportance".
     END CASE.
 
-    OUTPUT STREAM str_w TO VALUE({&NotificationOutputPath}) APPEND BINARY.
-    PUT STREAM str_w UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6",
+    fi_write(INPUT {&NotificationOutputPath}, INPUT SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6&7",
         ipc_message,
         lc_messageType,
         ipc_title,
         ipc_subtitle,
         STRING(ipi_duration),
-        ipc_uniqueTag
-        ) SKIP.
-    OUTPUT STREAM str_w CLOSE.
+        ipc_uniqueTag,
+        "~r~n"
+        )).
 
     RETURN "".
 END.
@@ -545,7 +533,7 @@ END.
 
 /* ************************  Function Implementations ***************** */
 
-FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER) :
+FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNumber AS INTEGER ) :
 /*------------------------------------------------------------------------------
   Purpose: extracts a more detailed error message from the progress help
   Parameters:  ipi_messNumber AS INTEGER
@@ -572,31 +560,28 @@ FUNCTION fi_get_message_description RETURNS CHARACTER PRIVATE (INPUT ipi_messNum
     cCategoryArray[7] = "Syntax"
     iPosition = (ipi_messNumber MODULO 50) WHEN (ipi_messNumber MODULO 50) > 0.
 
-    ASSIGN
-    cMsgFile = SEARCH("prohelp/msgdata/msg" + STRING(TRUNCATE((ipi_messNumber - 1) / 50, 0) + 1))
-    NO-ERROR.
-
+    ASSIGN cMsgFile = SEARCH("prohelp/msgdata/msg" + STRING(TRUNCATE((ipi_messNumber - 1) / 50, 0) + 1)) NO-ERROR.
     IF cMsgFile = ? THEN
         RETURN "".
 
-    INPUT STREAM str_r FROM VALUE(cMsgFile) NO-ECHO.
+    INPUT STREAM str_rw FROM VALUE(cMsgFile) NO-ECHO.
     DO iCount = 1 TO iPosition ON ENDKEY UNDO, LEAVE:
-        IMPORT STREAM str_r cMsgNumber cText cDescription cCategory cKnowledgeBase.
+        IMPORT STREAM str_rw cMsgNumber cText cDescription cCategory cKnowledgeBase.
     END.
-    INPUT STREAM str_r CLOSE.
+    INPUT STREAM str_rw CLOSE.
 
     ASSIGN
-    cCategoryIndex = LOOKUP(cCategory, "C,D,I,M,O,P,S")
-    cDescription = REPLACE(cDescription, "~n", "<br>")
-    cDescription = REPLACE(cDescription, "~r", "")
-    cDescription = REPLACE(cDescription, "~t", "").
+        cCategoryIndex = LOOKUP(cCategory, "C,D,I,M,O,P,S")
+        cDescription = REPLACE(cDescription, "~n", "<br>")
+        cDescription = REPLACE(cDescription, "~r", "")
+        cDescription = REPLACE(cDescription, "~t", "").
 
     IF INTEGER(cMsgNumber) = ipi_messNumber AND cText <> "Reserved for Seq " THEN DO: /* Process Description */
         IF cDescription BEGINS "syserr" THEN
             ASSIGN cDescription = "An unexpected system error has occurred. Can't say much more.".
         IF cCategoryIndex <> 0 THEN
             ASSIGN cDescription = "(" + cCategoryArray[cCategoryIndex] + ") " + cDescription.
-        IF (cKnowledgeBase GT "") EQ TRUE THEN
+        IF cKnowledgeBase > "" THEN
             ASSIGN cDescription = cDescription + "(" + cKnowledgeBase + ").".
     END.
 
@@ -611,17 +596,20 @@ FUNCTION fi_output_last_error RETURNS LOGICAL PRIVATE ( ) :
 ------------------------------------------------------------------------------*/
 
     DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lc_out AS CHARACTER NO-UNDO.
 
     IF ERROR-STATUS:ERROR THEN DO:
         IF RETURN-VALUE > "" THEN
-            PUT STREAM str_werlog UNFORMATTED RETURN-VALUE SKIP.
+            ASSIGN lc_out = RETURN-VALUE.
         IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_werlog UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+                ASSIGN lc_out = "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) + "~n".
             END.
         END.
         RETURN TRUE.
     END.
+
+    fi_write(INPUT {&LogPath}, INPUT lc_out).
 
     ERROR-STATUS:ERROR = NO.
 
@@ -637,11 +625,13 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
 
     DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
     DEFINE VARIABLE ll_dbDown AS LOGICAL NO-UNDO.
+    
+    OUTPUT STREAM str_rw TO VALUE({&DbLogPath}) APPEND BINARY.
 
     IF ERROR-STATUS:ERROR THEN DO:
 
         IF RETURN-VALUE > "" THEN
-            PUT STREAM str_wdblog UNFORMATTED RETURN-VALUE SKIP.
+            PUT STREAM str_rw UNFORMATTED RETURN-VALUE SKIP.
 
         IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
@@ -649,13 +639,15 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
                     ASSIGN ll_dbDown = TRUE.
             END.
             IF ll_dbDown THEN
-                PUT STREAM str_wdblog UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
+                PUT STREAM str_rw UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_wdblog UNFORMATTED "(" + STRING(ERROR-STATUS:GET-NUMBER(li_)) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+                PUT STREAM str_rw UNFORMATTED "(" + STRING(ERROR-STATUS:GET-NUMBER(li_)) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
         RETURN TRUE.
     END.
+    
+    OUTPUT STREAM str_rw CLOSE.
 
     ERROR-STATUS:ERROR = NO.
 
@@ -663,7 +655,7 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
 
 END FUNCTION.
 
-FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACTER) :
+FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACTER ) :
 /*------------------------------------------------------------------------------
   Purpose: adds a -ct 1 option for each connection
     Notes:
@@ -679,5 +671,19 @@ FUNCTION fi_add_connec_try RETURNS CHARACTER PRIVATE ( INPUT ipc_conn AS CHARACT
         lc_conn = lc_conn + " " + lc_toAdd.
 
     RETURN lc_conn.
+
+END FUNCTION.
+
+FUNCTION fi_write RETURNS LOGICAL PRIVATE ( INPUT ipc_path AS CHARACTER, INPUT ipc_content AS CHARACTER ) :
+/*------------------------------------------------------------------------------
+  Purpose: adds a -ct 1 option for each connection
+    Notes:
+------------------------------------------------------------------------------*/
+
+    OUTPUT STREAM str_rw TO VALUE(ipc_path) APPEND BINARY.
+    PUT STREAM str_rw UNFORMATTED ipc_content.
+    OUTPUT STREAM str_rw CLOSE.
+
+    RETURN TRUE.
 
 END FUNCTION.

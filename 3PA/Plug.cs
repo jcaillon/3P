@@ -544,6 +544,17 @@ namespace _3PA {
         public static void DoNppDocumentSaved() {
             // if it's a conf file, import it
             ShareExportConf.TryToImportFile(Npp.CurrentFile.Path);
+
+            if (!Npp.CurrentFile.IsProgress)
+                return;
+
+            // Display parser errors if any
+            if (Config.Instance.DisplayParserErrorsOnSave) {
+                ProCodeFormat.DisplayParserErrors(true);
+            }
+
+            // update function prototypes
+            ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion
@@ -622,7 +633,7 @@ namespace _3PA {
 
         #endregion
 
-        #region Other
+        #region OnSciMarginClick
 
         /// <summary>
         /// When the user click on the margin
@@ -641,6 +652,10 @@ namespace _3PA {
             }
         }
 
+        #endregion
+
+        #region OnSciDwellStart
+
         /// <summary>
         /// When the user leaves his cursor inactive on npp
         /// </summary>
@@ -649,6 +664,10 @@ namespace _3PA {
                 InfoToolTip.ShowToolTipFromDwell();
         }
 
+        #endregion
+
+        #region OnSciDwellEnd
+
         /// <summary>
         /// When the user moves his cursor
         /// </summary>
@@ -656,6 +675,10 @@ namespace _3PA {
             if (!KeyboardMonitor.GetModifiers.IsCtrl)
                 InfoToolTip.Cloak(true);
         }
+
+        #endregion
+
+        #region OnUpdateSelection
 
         /// <summary>
         /// called when the user changes its selection in npp (the caret moves)
@@ -672,6 +695,10 @@ namespace _3PA {
             CodeExplorer.Instance.UpdateCurrentScope();
         }
 
+        #endregion
+
+        #region OnPageScrolled
+
         /// <summary>
         /// called when the user scrolls..
         /// </summary>
@@ -682,24 +709,18 @@ namespace _3PA {
                 ParserHandler.ParseDocumentAsap();
         }
 
+        #endregion
+
+        #region OnNppFileBeforeSaved
+
         /// <summary>
         /// Called when the user saves the current document (just before it saves itself)
         /// </summary>
         public static void OnNppFileBeforeSaved() {
-            if (!Npp.CurrentFile.IsProgress)
-                return;
-
-            // Display parser errors if any
-            if (Config.Instance.DisplayParserErrorsOnSave) {
-                ProCodeFormat.DisplayParserErrors(true);
-            }
-
-            // update function prototypes
-            ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion
-
+        
         #region Apply Scintilla options
 
         public static Annotation AnnotationMode {

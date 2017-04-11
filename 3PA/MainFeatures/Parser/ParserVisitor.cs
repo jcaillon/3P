@@ -640,7 +640,7 @@ namespace _3PA.MainFeatures.Parser {
                 curField.FromParser = true;
                 curField.SubText = field.Type.ToString();
                 curField.Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name);
-                curField.Flags = field.Flags | ~ParseFlag.Primary;
+                curField.Flags = field.Flags & ~ParseFlag.Primary;
                 curField.ParentItem = parsedTable;
                 return curField;
             }).ToList();

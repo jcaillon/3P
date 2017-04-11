@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var alt = false;
                     foreach (var rule in rules.OfType<DeployTransferRule>()) {
-                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + WebUtility.HtmlEncode(rule.SourcePattern.Length > 50 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 50) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + WebUtility.HtmlEncode(rule.DeployTarget.Length > 50 ? "..." + rule.DeployTarget.Substring(rule.DeployTarget.Length - 50) : rule.DeployTarget) + "</td></tr>");
+                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + WebUtility.HtmlEncode(rule.SourcePattern.Length > 50 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 50) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (!string.IsNullOrEmpty(rule.DeployTarget) ? WebUtility.HtmlEncode(rule.DeployTarget.Length > 50 ? "..." + rule.DeployTarget.Substring(rule.DeployTarget.Length - 50) : rule.DeployTarget) : "")+ "</td></tr>");
                         alt = !alt;
                     }
 
@@ -220,34 +220,40 @@ namespace _3PA.MainFeatures.Pro {
                     return;
 
                 // new transfer rule
-                if (items.Length == 7) {
+                if (items.Length >= 6) {
                     DeployType type;
-                    if (!Enum.TryParse(items[3].Trim(), true, out type))
-                        return;
+                    if (Enum.TryParse(items[3].Trim(), true, out type)) {
 
-                    var obj = DeployTransferRule.New(type);
-                    obj.Source = path;
-                    obj.Line = lineNb + 1;
-                    obj.Step = step;
-                    obj.NameFilter = items[1].Trim();
-                    obj.SuffixFilter = items[2].Trim();
-                    obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
-                    obj.SourcePattern = items[5].Trim();
-                    obj.DeployTarget = items[6].Trim().Replace('/', '\\');
+                        var obj = DeployTransferRule.New(type);
+                        obj.Source = path;
+                        obj.Line = lineNb + 1;
+                        obj.Step = step;
+                        obj.NameFilter = items[1].Trim();
+                        obj.SuffixFilter = items[2].Trim();
+                        obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
+                        obj.SourcePattern = items[5].Trim();
 
-                    obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
-                    if (obj.ShouldDeployTargetReplaceDollar)
-                        obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+                        if (items.Length > 6) {
+                            obj.DeployTarget = items[6].Trim().Replace('/', '\\');
+                            obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
+                            if (obj.ShouldDeployTargetReplaceDollar)
+                                obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+                        }
 
-                    string errorMsg;
-                    if (obj.IsValid(out errorMsg))
-                        list.Add(obj);
-                    if (!string.IsNullOrEmpty(errorMsg)) {
-                        outputMessage.Append(errorMsg);
-                        outputMessage.Append("<br>");
+                        string errorMsg;
+                        var isOk = obj.IsValid(out errorMsg);
+                        if (isOk) {
+                            list.Add(obj);
+                            return;
+                        }
+                        if (!string.IsNullOrEmpty(errorMsg)) {
+                            outputMessage.Append(errorMsg);
+                            outputMessage.Append("<br>");
+                        }
                     }
+                }
 
-                } else if (items.Length == 5) {
+                if (items.Length == 5) {
                     // new filter rule
 
                     var obj = new DeployFilterRule {
@@ -327,7 +333,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Provides a representation for this rule
         /// </summary>
         public string ToStringDescription() {
-            return (Source + "|" + Line).ToHtmlLink("(rule n°" + Line + ")");
+            return (Source + "|" + Line).ToHtmlLink("Rule n°" + Line);
         }
     }
 
@@ -414,7 +420,7 @@ namespace _3PA.MainFeatures.Pro {
             if (!string.IsNullOrEmpty(SourcePattern) && !string.IsNullOrEmpty(DeployTarget)) {
                 return true;
             }
-            error = "Line " + Line + " : Source pattern or deploy target path null";
+            error = ToStringDescription() + " : The source pattern or the deploy target path is empty";
             return false;
         }
 
@@ -452,7 +458,9 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
     }
 
-    #region DeployTransferRuleArchive
+    #region DeployTransferRulePack
+
+    #region DeployTransferRulePack
 
     /// <summary>
     /// Abstract class for PACK rules
@@ -463,12 +471,14 @@ namespace _3PA.MainFeatures.Pro {
 
         public override bool IsValid(out string error) {
             if (!DeployTarget.ContainsFast(ArchiveExt)) {
-                error = "Line " + Line + " : The rule has an incorrect deployment target, a " + ArchiveExt + " should be found";
+                error = ToStringDescription() + " : The rule has an incorrect deployment target, it should contain a file with the extension " + ArchiveExt;
                 return false;
             }
             return base.IsValid(out error);
         }
     }
+
+    #endregion
 
     #region DeployTransferRuleProlib
 
@@ -522,6 +532,19 @@ namespace _3PA.MainFeatures.Pro {
         public override DeployType Type { get { return DeployType.DeleteInProlib; } }
 
         public override string ArchiveExt { get { return ".pl"; } }
+
+        public override bool IsValid(out string error) {
+            error = null;
+            if (string.IsNullOrEmpty(SourcePattern)) {
+                error = ToStringDescription() + " : The source pattern path is empty";
+                return false;
+            }
+            if (Step < 2) {
+                error = ToStringDescription() + " : The DeleteInProlib rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return true;
+        }
     }
 
     #endregion
@@ -537,7 +560,7 @@ namespace _3PA.MainFeatures.Pro {
 
         public override bool IsValid(out string error) {
             if (!DeployTarget.IsValidFtpAdress()) {
-                error = "Line " + Line + " : The FTP rule has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optional)";
+                error = ToStringDescription() + " : The FTP rule has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optional)";
                 return false;
             }
             return base.IsValid(out error);
@@ -558,11 +581,16 @@ namespace _3PA.MainFeatures.Pro {
         public override DeployType Type { get { return DeployType.Delete; } }
 
         public override bool IsValid(out string error) {
-            if (Step < 1) {
-                error = "Line " + Line + " : The Delete rule can only applied to steps >= 1 for safety reasons";
+            error = null;
+            if (string.IsNullOrEmpty(SourcePattern)) {
+                error = ToStringDescription() + " : The source pattern path is empty";
                 return false;
             }
-            return base.IsValid(out error);
+            if (Step < 2) {
+                error = ToStringDescription() + " : The Delete rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return true;
         }
     }
 
@@ -574,7 +602,10 @@ namespace _3PA.MainFeatures.Pro {
     /// Copy folder(s) recursively
     /// </summary>
     public class DeployTransferRuleCopyFolder : DeployTransferRule {
+
         public override DeployType Type { get { return DeployType.CopyFolder; } }
+
+        public override DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.Folder; } }
     }
 
     #endregion
@@ -588,12 +619,19 @@ namespace _3PA.MainFeatures.Pro {
 
         public override DeployType Type { get { return DeployType.DeleteFolder; } }
 
+        public override DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.Folder; } }
+
         public override bool IsValid(out string error) {
-            if (Step < 1) {
-                error = "Line " + Line + " : The DeleteFolder rule can only applied to steps >= 1 for safety reasons";
+            error = null;
+            if (string.IsNullOrEmpty(SourcePattern)) {
+                error = ToStringDescription() + " : The source pattern path is empty";
                 return false;
             }
-            return base.IsValid(out error);
+            if (Step < 2) {
+                error = ToStringDescription() + " : The DeleteFolder rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return true;
         }
     }
 
@@ -641,16 +679,17 @@ namespace _3PA.MainFeatures.Pro {
     /// Types of deploy, used during rules sorting
     /// </summary>
     public enum DeployType : byte {
-        Prolib = 1,
-        Zip = 2,
-        Cab = 3,
-        DeleteInProlib = 4,
-        Ftp = 5,
+        Delete = 1,
+        DeleteFolder = 2,
+
+        Prolib = 11,
+        Zip = 12,
+        Cab = 13,
+        DeleteInProlib = 14,
+        Ftp = 15,
         // every item above are treated in "packs"
 
-        Delete = 20,
         CopyFolder = 21,
-        DeleteFolder = 22,
 
         // Copy / move should always be last
         Copy = 30,

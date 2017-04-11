@@ -58,15 +58,37 @@ namespace _3PA.MainFeatures.Pro {
         public string DeployError { get; set; }
 
         /// <summary>
+        /// A directory that must exist or be created for this deployment (can be null if nothing to do)
+        /// </summary>
+        public virtual string DirectoryThatMustExist { get { return Path.GetDirectoryName(To); } }
+
+        /// <summary>
         /// This is used to group the FileToDeploy during the creation of the deployment report,
         /// use this in addition with GroupHeaderToString
         /// </summary>
         public virtual string GroupKey { get { return Path.GetDirectoryName(To); } }
 
         /// <summary>
-        /// A directory that must exist or be created for this deployment
+        /// The image that should be used for this deployment representation
         /// </summary>
-        public virtual string DirectoryThatMustExist { get { return Path.GetDirectoryName(To); } }
+        protected virtual string DeployImage { get { return Utils.GetExtensionImage((Path.GetExtension(To) ?? "").Replace(".", "")); } }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected virtual string DeployText {
+            get {
+                var sb = new StringBuilder();
+                sb.Append("(" + DeployType);
+                if (RuleReference != null)
+                    sb.Append(" " + RuleReference.ToStringDescription());
+                sb.Append(") ");
+                sb.Append(To.ToHtmlLink(To.Replace(GroupKey, "").TrimStart('\\')));
+                sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>from</span>");
+                sb.Append(Origin.ToHtmlLink(Path.GetFileName(Origin), true));
+                return sb.ToString();
+            }
+        }
 
         #endregion
 
@@ -116,20 +138,14 @@ namespace _3PA.MainFeatures.Pro {
             var sb = new StringBuilder();
             sb.Append("<div style='padding-left: 10px'>");
             if (IsOk) {
-                sb.Append("<img height='15px' src='" + Utils.GetExtensionImage((Path.GetExtension(To) ?? "").Replace(".", "")) + "'>");
+                sb.Append("<img height='15px' src='" + DeployImage + "'>");
             } else {
                 sb.Append("<img height='15px' src='Error30x30'>Transfer failed for ");
             }
-            sb.Append("(" + DeployType + ") " + To.ToHtmlLink(To.Replace(GroupKey, "").TrimStart('\\')));
-            sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>from</span>");
-            sb.Append(Origin.ToHtmlLink(Path.GetFileName(Origin), true));
-            if (RuleReference != null) {
-                sb.Append(" <span style='padding-left: 8px;'>");
-                sb.Append(RuleReference.ToStringDescription());
-                sb.Append("</span>");
-            }
+            sb.Append(DeployText);
             if (!IsOk) {
-                sb.Append("<br>" + DeployError);
+                sb.Append("<br>");
+                sb.Append(DeployError);
             }
             sb.Append("</div>");
             return sb.ToString();
@@ -142,7 +158,7 @@ namespace _3PA.MainFeatures.Pro {
         public virtual string ToStringGroupHeader() {
             return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + GroupKey.ToHtmlLink(null, true) + "</b></div>";
         }
-
+        
         #endregion
 
         #region Protected methods
@@ -187,6 +203,146 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
     }
+
+    #region FileToDeployDelete
+
+    internal class FileToDeployDelete : FileToDeploy {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.Delete; } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
+        public override string GroupKey {
+            get { return "Deleted"; }
+        }
+
+        public override string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>Delete</b></div>";
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText {
+            get {
+                var sb = new StringBuilder();
+                sb.Append("(" + DeployType);
+                if (RuleReference != null)
+                    sb.Append(" " + RuleReference.ToStringDescription());
+                sb.Append(") ");
+                sb.Append(From.ToHtmlLink());
+                return sb.ToString();
+            }
+        }
+
+        #endregion
+
+        #region Life and death
+
+        public FileToDeployDelete(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
+
+        #region Methods
+
+        protected override bool TryDeploy() {
+            try {
+                if (string.IsNullOrEmpty(To) || !File.Exists(To))
+                    return true;
+                File.Delete(To);
+            } catch (Exception e) {
+                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
+    #region FileToDeployDeleteFolder
+
+    internal class FileToDeployDeleteFolder : FileToDeploy {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.DeleteFolder; } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
+        /// <summary>
+        /// The image that should be used for this deployment representation
+        /// </summary>
+        protected override string DeployImage { get { return Utils.GetExtensionImage("Folder", true); } }
+
+        public override string GroupKey {
+            get { return "Deleted"; }
+        }
+
+        public override string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>Delete</b></div>";
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText {
+            get {
+                var sb = new StringBuilder();
+                sb.Append("(" + DeployType);
+                if (RuleReference != null)
+                    sb.Append(" " + RuleReference.ToStringDescription());
+                sb.Append(") ");
+                sb.Append(From.ToHtmlLink());
+                return sb.ToString();
+            }
+        }
+
+        #endregion
+
+        #region Life and death
+
+        public FileToDeployDeleteFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
+
+        #region Methods
+
+        protected override bool TryDeploy() {
+            try {
+                if (string.IsNullOrEmpty(From) || !Directory.Exists(From))
+                    return true;
+                Directory.Delete(From, true);
+            } catch (Exception e) {
+                DeployError = "Couldn't delete the folder " + From.ProQuoter() + " : \"" + e.Message + "\"";
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
 
     #region FileToDeployInPack
 
@@ -466,50 +622,6 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
-    #region FileToDeployDelete
-
-    internal class FileToDeployDelete : FileToDeploy {
-
-        #region Properties
-
-        /// <summary>
-        /// A directory that must exist or be created for this deployment
-        /// </summary>
-        public override string DirectoryThatMustExist { get { return null; } }
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.Delete; } }
-
-        #endregion
-
-        #region Life and death
-
-        public FileToDeployDelete(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
-
-        #endregion
-
-        #region Methods
-
-        protected override bool TryDeploy() {
-            try {
-                if (string.IsNullOrEmpty(To) || !File.Exists(To))
-                    return true;
-                File.Delete(To);
-            } catch (Exception e) {
-                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-
-        #endregion
-
-    }
-
-    #endregion
-
     #region FileToDeployCopyFolder
 
     internal class FileToDeployCopyFolder : FileToDeploy {
@@ -520,6 +632,22 @@ namespace _3PA.MainFeatures.Pro {
         /// Type of transfer
         /// </summary>
         public override DeployType DeployType { get { return DeployType.CopyFolder; } }
+
+        /// <summary>
+        /// This is used to group the FileToDeploy during the creation of the deployment report,
+        /// use this in addition with GroupHeaderToString
+        /// </summary>
+        public override string GroupKey { get { return From; } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
+        /// <summary>
+        /// The image that should be used for this deployment representation
+        /// </summary>
+        protected override string DeployImage { get { return Utils.GetExtensionImage("Folder", true); } }
 
         #endregion
 
@@ -533,50 +661,23 @@ namespace _3PA.MainFeatures.Pro {
 
         protected override bool TryDeploy() {
             try {
-                //if (string.IsNullOrEmpty(To) || !File.Exists(To))
-                //    return true;
-                //File.Delete(To);
+                if (!Directory.Exists(From)) {
+                    DeployError = "The source folder " + From.ProQuoter() + " doesn't exist";
+                    return false;
+                }
+                // make sure that both From and To finish with \
+                From = Path.GetFullPath(From);
+                To = Path.GetFullPath(To);
+                // create all of the directories
+                foreach (string dirPath in Directory.EnumerateDirectories(From, "*", SearchOption.AllDirectories)) {
+                    Directory.CreateDirectory(dirPath.Replace(From, To));
+                }
+                // copy all the files & replaces any files with the same name
+                foreach (string newPath in Directory.EnumerateFiles(From, "*.*", SearchOption.AllDirectories)) {
+                    File.Copy(newPath, newPath.Replace(From, To), true);
+                }
             } catch (Exception e) {
-                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
-                return false;
-            }
-            return true;
-        }
-
-        #endregion
-
-    }
-
-    #endregion
-
-    #region FileToDeployDeleteFolder
-
-    internal class FileToDeployDeleteFolder : FileToDeploy {
-
-        #region Properties
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.DeleteFolder; } }
-
-        #endregion
-
-        #region Life and death
-
-        public FileToDeployDeleteFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
-
-        #endregion
-
-        #region Methods
-
-        protected override bool TryDeploy() {
-            try {
-                //if (string.IsNullOrEmpty(To) || !File.Exists(To))
-                //    return true;
-                //File.Delete(To);
-            } catch (Exception e) {
-                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't copy the folder " + From.ProQuoter() + " to " + To.ProQuoter() + " : \"" + e.Message + "\"";
                 return false;
             }
             return true;
@@ -614,8 +715,7 @@ namespace _3PA.MainFeatures.Pro {
                     DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
                     return false;
                 }
-                File.Delete(To);
-                File.Copy(From, To);
+                File.Copy(From, To, true);
             } catch (Exception e) {
                 DeployError = "Couldn't copy " + From.ProQuoter() + " to  " + To.ProQuoter() + " : \"" + e.Message + "\"";
                 return false;
