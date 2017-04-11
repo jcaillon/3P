@@ -39,6 +39,8 @@
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
 &ENDIF
+&SCOPED-DEFINE verHigherThan11 DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, "."))) >= 11
+&SCOPED-DEFINE CanAnalyse {&AnalysisMode} AND {&verHigherThan11}
 
 
 /* ***************************  Definitions  ************************** */
@@ -201,7 +203,7 @@ QUIT.
 /* **********************  Internal Procedures  *********************** */
 
 /* if PROVERSION >= 11 */
-&IF DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, "."))) >= 11 &THEN
+&IF {&verHigherThan11} &THEN
     PROCEDURE pi_handleCompilErrors PRIVATE:
     /*------------------------------------------------------------------------------
       Purpose: save any compilation error into a log file
@@ -317,8 +319,8 @@ PROCEDURE pi_compileList PRIVATE:
         DELETE tt_list.
 
     /* for each file to compile */
-    FOR EACH tt_list:
-        &IF {&AnalysisMode} &THEN
+    FOR EACH tt_list:    
+        &IF {&CanAnalyse} &THEN
             /* we don't bother saving/restoring the log-manager state since we are only compiling, there
                should be no *useful* log activated at this moment */
             ASSIGN
@@ -358,7 +360,11 @@ PROCEDURE pi_compileList PRIVATE:
                     COMPILE VALUE(tt_list.source)
                         SAVE INTO VALUE(tt_list.outdir)
                         LISTING VALUE(tt_list.lis)
-                        XREF-XML VALUE(tt_list.xrf)
+                        &IF {&verHigherThan11} &THEN
+                            XREF-XML VALUE(tt_list.xrf)
+                        &ELSE
+                            XREF VALUE(tt_list.xrf)
+                        &ENDIF
                         DEBUG-LIST VALUE(tt_list.dbg)
                         NO-ERROR.
             &ENDIF
@@ -368,7 +374,7 @@ PROCEDURE pi_compileList PRIVATE:
         RUN pi_handleCompilErrors (INPUT tt_list.source) NO-ERROR.
         fi_output_last_error().
 
-        &IF {&AnalysisMode} &THEN
+        &IF {&CanAnalyse} &THEN
             LOG-MANAGER:CLOSE-LOG().
 
             /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
@@ -384,7 +390,7 @@ PROCEDURE pi_compileList PRIVATE:
 
 END PROCEDURE.
 
-&IF {&AnalysisMode} &THEN
+&IF {&CanAnalyse} &THEN
     PROCEDURE pi_generateTableRef PRIVATE:
     /*------------------------------------------------------------------------------
       Summary    : generate a file that lists all db.tables + CRC referenced in the .r code produced
