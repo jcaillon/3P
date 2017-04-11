@@ -47,7 +47,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Optimize>true</Optimize>
-    <LangVersion>default</LangVersion>
+    <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -164,6 +164,7 @@
     <Compile Include="Lib\Compression\IPackStreamContext.cs" />
     <Compile Include="Lib\Compression\IUnpackStreamContext.cs" />
     <Compile Include="Lib\Compression\OffsetStream.cs" />
+    <Compile Include="Lib\Compression\Prolib\ProlibDelete.cs" />
     <Compile Include="Lib\Compression\Prolib\ProlibPackager.cs" />
     <Compile Include="Lib\Compression\SafeNativeMethods.cs" />
     <Compile Include="Lib\Compression\Zip\ConcatStream.cs" />

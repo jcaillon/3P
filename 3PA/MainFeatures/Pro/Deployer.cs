@@ -174,7 +174,7 @@ namespace _3PA.MainFeatures.Pro {
             foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step && rule.TargetType == targetType)) {
                 string outPath;
 
-                var deployTarget = ReplaceVariablesIn(rule.DeployTarget ?? string.Empty);
+                var deployTarget = ReplaceVariablesIn(rule.DeployTarget ?? sourcePath);
 
                 if (rule.ShouldDeployTargetReplaceDollar) {
                     outPath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
@@ -414,7 +414,7 @@ namespace _3PA.MainFeatures.Pro {
                 #endregion
 
                 // do a deployment action for each file
-                Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployInPack)), parallelOptions, file => {
+                Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployInPack) && deploy.CanBeParallelized), parallelOptions, file => {
                     // canceled?
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 
@@ -424,6 +424,17 @@ namespace _3PA.MainFeatures.Pro {
                         updateDeploymentPercentage((float) _nbFilesDeployed / _totalNbFilesToDeploy * 100);
                     }
                 });
+
+                foreach (var file in deployToDo.Where(deploy => !(deploy is FileToDeployInPack) && !deploy.CanBeParallelized)) {
+                    // canceled?
+                    cancelToken.Token.ThrowIfCancellationRequested();
+
+                    if (file.DeploySelf())
+                        _nbFilesDeployed++;
+                    if (updateDeploymentPercentage != null) {
+                        updateDeploymentPercentage((float)_nbFilesDeployed / _totalNbFilesToDeploy * 100);
+                    }
+                }
 
             } catch (OperationCanceledException) {
                 // we expect this exception if the task has been canceled

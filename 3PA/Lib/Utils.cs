@@ -655,6 +655,10 @@ namespace _3PA.Lib {
             return tryImg ?? ImageResources.Error;
         }
 
+        public static string GetImageNameOf(string name) {
+            return ImageResources.ResourceManager.GetObject(name) != null ? name : "Error";
+        }
+
         #endregion
 
         #region Reflection

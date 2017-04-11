@@ -458,6 +458,58 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
     }
 
+    #region DeployTransferRuleDelete
+
+    /// <summary>
+    /// Delete file(s) 
+    /// </summary>
+    public class DeployTransferRuleDelete : DeployTransferRule {
+
+        public override DeployType Type { get { return DeployType.Delete; } }
+
+        public override bool IsValid(out string error) {
+            error = null;
+            if (string.IsNullOrEmpty(SourcePattern)) {
+                error = ToStringDescription() + " : The source pattern path is empty";
+                return false;
+            }
+            if (Step < 2) {
+                error = ToStringDescription() + " : The Delete rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return true;
+        }
+    }
+
+    #endregion
+
+    #region DeployTransferRuleDeleteFolder
+
+    /// <summary>
+    /// Delete folder(s) recursively
+    /// </summary>
+    public class DeployTransferRuleDeleteFolder : DeployTransferRule {
+
+        public override DeployType Type { get { return DeployType.DeleteFolder; } }
+
+        public override DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.Folder; } }
+
+        public override bool IsValid(out string error) {
+            error = null;
+            if (string.IsNullOrEmpty(SourcePattern)) {
+                error = ToStringDescription() + " : The source pattern path is empty";
+                return false;
+            }
+            if (Step < 2) {
+                error = ToStringDescription() + " : The DeleteFolder rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            return true;
+        }
+    }
+
+    #endregion
+
     #region DeployTransferRulePack
 
     #region DeployTransferRulePack
@@ -571,31 +623,6 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
-    #region DeployTransferRuleDelete
-
-    /// <summary>
-    /// Delete file(s) 
-    /// </summary>
-    public class DeployTransferRuleDelete : DeployTransferRule {
-
-        public override DeployType Type { get { return DeployType.Delete; } }
-
-        public override bool IsValid(out string error) {
-            error = null;
-            if (string.IsNullOrEmpty(SourcePattern)) {
-                error = ToStringDescription() + " : The source pattern path is empty";
-                return false;
-            }
-            if (Step < 2) {
-                error = ToStringDescription() + " : The Delete rule can only applied to steps >= 1 for safety reasons";
-                return false;
-            }
-            return true;
-        }
-    }
-
-    #endregion
-
     #region DeployTransferRuleCopyFolder
 
     /// <summary>
@@ -609,34 +636,7 @@ namespace _3PA.MainFeatures.Pro {
     }
 
     #endregion
-
-    #region DeployTransferRuleDeleteFolder
-
-    /// <summary>
-    /// Delete folder(s) recursively
-    /// </summary>
-    public class DeployTransferRuleDeleteFolder : DeployTransferRule {
-
-        public override DeployType Type { get { return DeployType.DeleteFolder; } }
-
-        public override DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.Folder; } }
-
-        public override bool IsValid(out string error) {
-            error = null;
-            if (string.IsNullOrEmpty(SourcePattern)) {
-                error = ToStringDescription() + " : The source pattern path is empty";
-                return false;
-            }
-            if (Step < 2) {
-                error = ToStringDescription() + " : The DeleteFolder rule can only applied to steps >= 1 for safety reasons";
-                return false;
-            }
-            return true;
-        }
-    }
-
-    #endregion
-
+    
     #region DeployTransferRuleCopy
 
     /// <summary>
