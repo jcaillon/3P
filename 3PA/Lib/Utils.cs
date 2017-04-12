@@ -1,5 +1,4 @@
 #region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Utils.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -523,7 +520,8 @@ namespace _3PA.Lib {
                 wc.Headers.Add("user-agent", Config.GetUserAgent);
                 if (setWebClient != null)
                     setWebClient(wc);
-                wc.DownloadFileCompleted += handler;
+                if (handler != null)
+                    wc.DownloadFileCompleted += handler;
                 wc.DownloadFileAsync(new Uri(url), downloadPath);
             }
         }

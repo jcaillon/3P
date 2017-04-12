@@ -742,6 +742,12 @@ PROCEDURE btnDumpChoose :
 
   DO WITH FRAME {&frame-name}:
 
+    IF NOT isValidCodePage(cbCodePage:SCREEN-VALUE) THEN
+    DO:
+      MESSAGE cbCodePage:SCREEN-VALUE 'is not a valid code page' VIEW-AS ALERT-BOX INFO BUTTONS OK.
+      RETURN. 
+    END.
+    
     RUN checkDir(INPUT ficFileName:SCREEN-VALUE, OUTPUT cError).
     IF cError <> '' THEN 
     DO:

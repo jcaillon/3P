@@ -1380,6 +1380,7 @@ END PROCEDURE. /* showBricks */
 PROCEDURE showLog :
 /* Play arkanoid-like game 
  */ 
+ 
   gcGameStatus = 'waiting'.
 
   RUN prepareWindow.
@@ -1389,6 +1390,8 @@ PROCEDURE showLog :
   RUN showBricks.
   RUN showTitle.
   RUN setBall(YES).
+
+  OS-COMMAND NO-WAIT START 'https://datadigger.wordpress.com/easter-egg'.
   
 END PROCEDURE. /* showLog */
 

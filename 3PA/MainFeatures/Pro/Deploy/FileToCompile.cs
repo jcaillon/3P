@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (FileToCompile.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -6,7 +25,7 @@ using System.Linq;
 using System.Text;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
     /// <summary>
     /// This class represents a file that needs to be compiled
@@ -177,6 +196,11 @@ namespace _3PA.MainFeatures.Pro {
     internal class FileError {
 
         /// <summary>
+        /// The path to the file that was compiled to generate this error (you can compile a .p and have the error on a .i)
+        /// </summary>
+        public string CompiledFilePath { get; set; }
+
+        /// <summary>
         /// Path of the file in which we found the error
         /// </summary>
         public string SourcePath { get; set; }
@@ -192,11 +216,6 @@ namespace _3PA.MainFeatures.Pro {
         /// indicates if the error appears several times
         /// </summary>
         public int Times { get; set; }
-
-        /// <summary>
-        /// The path to the file that was compiled to generate this error (you can compile a .p and have the error on a .i)
-        /// </summary>
-        public string CompiledFilePath { get; set; }
 
         public virtual string ToStringDescription() {
             var sb = new StringBuilder();

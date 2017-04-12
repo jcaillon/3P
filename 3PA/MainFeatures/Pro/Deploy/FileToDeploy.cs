@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (FileToDeploy.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,7 +27,7 @@ using _3PA.Lib.Compression.Prolib;
 using _3PA.Lib.Compression.Zip;
 using _3PA.Lib.Ftp;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
     /// <summary>
     /// Represents a file that needs to be deployed
@@ -74,21 +93,6 @@ namespace _3PA.MainFeatures.Pro {
         protected virtual string DeployImage { get { return Utils.GetExtensionImage((Path.GetExtension(To) ?? "").Replace(".", "")); } }
 
         /// <summary>
-        /// The text representing this deployment
-        /// </summary>
-        protected virtual string DeployText {
-            get {
-                var sb = new StringBuilder();
-                sb.Append(To.ToHtmlLink(To.Replace(GroupKey, "").TrimStart('\\')));
-                sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>from</span>");
-                sb.Append(Path.GetDirectoryName(Origin).ToHtmlLink("$", true));
-                sb.Append("<b>\\</b>");
-                sb.Append(Origin.ToHtmlLink(Path.GetFileName(Origin), true));
-                return sb.ToString();
-            }
-        }
-
-        /// <summary>
         /// Indicate whether or not this deployment can be parallelized
         /// </summary>
         public virtual bool CanBeParallelized { get { return true; } }
@@ -137,7 +141,7 @@ namespace _3PA.MainFeatures.Pro {
         /// A representation of this file to deploy
         /// </summary>
         /// <returns></returns>
-        public virtual string ToStringDescription() {
+        public virtual string ToStringDescription(string sourceDir = null) {
             var sb = new StringBuilder();
             sb.Append("<div style='padding-left: 10px'>");
             if (IsOk) {
@@ -149,12 +153,23 @@ namespace _3PA.MainFeatures.Pro {
             if (RuleReference != null)
                 sb.Append(" " + RuleReference.ToStringDescription());
             sb.Append(")</span>");
-            sb.Append(DeployText);
+            sb.Append(DeployText(sourceDir));
             if (!IsOk) {
                 sb.Append("<br>");
                 sb.Append(DeployError);
             }
             sb.Append("</div>");
+            return sb.ToString();
+        }
+        
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected virtual string DeployText(string sourceDir = null) {
+            var sb = new StringBuilder();
+            sb.Append(To.ToHtmlLink(To.Replace(GroupKey, "").TrimStart('\\')));
+            sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>from</span>");
+            sb.Append(Origin.ToHtmlLink(!string.IsNullOrEmpty(sourceDir) ? Origin.Replace(sourceDir, "").TrimStart('\\') : Path.GetFileName(Origin), true));
             return sb.ToString();
         }
 
@@ -235,15 +250,6 @@ namespace _3PA.MainFeatures.Pro {
             return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete") + "' height='15px'><b>Deleted files and folders</b></div>";
         }
 
-        /// <summary>
-        /// The text representing this deployment
-        /// </summary>
-        protected override string DeployText {
-            get {
-                return Path.GetDirectoryName(To).ToHtmlLink(To, true);
-            }
-        }
-
         #endregion
 
         #region Life and death
@@ -264,6 +270,13 @@ namespace _3PA.MainFeatures.Pro {
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText(string sourceDir = null) {
+            return Path.GetDirectoryName(To).ToHtmlLink(To, true);
         }
 
         #endregion
@@ -302,15 +315,6 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// The text representing this deployment
-        /// </summary>
-        protected override string DeployText {
-            get {
-                return To.ToHtmlLink(null, true);
-            }
-        }
-
-        /// <summary>
         /// Indicate whether or not this deployment can be parallelized
         /// </summary>
         public override bool CanBeParallelized { get { return false; } }
@@ -335,6 +339,13 @@ namespace _3PA.MainFeatures.Pro {
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText(string sourceDir = null) {
+                return To.ToHtmlLink(null, true);
         }
 
         #endregion
@@ -445,6 +456,81 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region FileToDeployDeleteInProlib
+
+    internal class FileToDeployDeleteInProlib : FileToDeployInPack {
+
+        #region Properties
+
+        /// <summary>
+        /// Type of transfer
+        /// </summary>
+        public override DeployType DeployType { get { return DeployType.DeleteInProlib; } }
+
+        public override string PackExt { get { return ".pl"; } }
+
+        /// <summary>
+        /// A directory that must exist or be created for this deployment
+        /// </summary>
+        public override string DirectoryThatMustExist { get { return null; } }
+
+        /// <summary>
+        /// The image that should be used for this deployment representation
+        /// </summary>
+        protected override string DeployImage { get { return Utils.GetExtensionImage("Pl", true); } }
+
+        public override string GroupKey {
+            get { return "Deleted .pl"; }
+        }
+
+        public override string ToStringGroupHeader() {
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete") + "' height='15px'><b>Deleted files in .pl</b></div>";
+        }
+
+        #endregion
+
+        #region Life and death
+
+        public FileToDeployDeleteInProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Returns a new archive info
+        /// </summary>
+        public override IPackager NewArchive(Deployer deployer) {
+            return new ProlibDelete(PackPath, deployer.ProlibPath);
+        }
+
+        public override FileToDeploy Set(string @from, string to) {
+            From = @from;
+            PackPath = @from;
+            if (RuleReference != null) {
+                RelativePathInPack = RuleReference.DeployTarget;
+                To = Path.Combine(@from, RuleReference.DeployTarget);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText(string sourceDir = null) {
+                var sb = new StringBuilder();
+                sb.Append(To.ToHtmlLink(RelativePathInPack));
+                sb.Append("<span style='padding-left: 8px; padding-right: 8px;'>in</span>");
+                sb.Append(PackPath.ToHtmlLink(null, true));
+                return sb.ToString();
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
     #region FileToDeployCab
 
     internal class FileToDeployCab : FileToDeployInPack {
@@ -510,27 +596,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public override IPackager NewArchive(Deployer deployer) {
             return new ZipPackager(PackPath);
-        }
-    }
-
-    #endregion
-
-    #region FileToDeployDeleteInProlib
-
-    internal class FileToDeployDeleteInProlib : FileToDeployProlib {
-
-        /// <summary>
-        /// Type of transfer
-        /// </summary>
-        public override DeployType DeployType { get { return DeployType.DeleteInProlib; } }
-
-        public FileToDeployDeleteInProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
-
-        /// <summary>
-        /// Returns a new archive info
-        /// </summary>
-        public override IPackager NewArchive(Deployer deployer) {
-            return new ProlibDelete(PackPath, deployer.ProlibPath);
         }
     }
 
@@ -655,18 +720,6 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         protected override string DeployImage { get { return Utils.GetExtensionImage("Folder", true); } }
 
-        /// <summary>
-        /// The text representing this deployment
-        /// </summary>
-        protected override string DeployText {
-            get {
-                var sb = new StringBuilder();
-                sb.Append("<span style='padding-right: 8px;'>from</span>");
-                sb.Append(Origin.ToHtmlLink(null, true));
-                return sb.ToString();
-            }
-        }
-
         #endregion
 
         #region Life and death
@@ -699,6 +752,16 @@ namespace _3PA.MainFeatures.Pro {
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// The text representing this deployment
+        /// </summary>
+        protected override string DeployText(string sourceDir = null) {
+                var sb = new StringBuilder();
+                sb.Append("<span style='padding-right: 8px;'>from</span>");
+                sb.Append(Origin.ToHtmlLink(null, true));
+                return sb.ToString();
         }
 
         #endregion

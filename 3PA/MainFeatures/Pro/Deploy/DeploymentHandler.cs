@@ -1,31 +1,53 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (DeploymentHandler.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using _3PA.Lib;
+using _3PA._Resource;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
-    internal class ProDeployment {
+    internal class DeploymentHandler {
 
         #region Events
 
         /// <summary>
         /// The action to execute just after the end of a prowin process
         /// </summary>
-        public Action<ProDeployment> OnExecutionEnd { private get; set; }
+        public Action<DeploymentHandler> OnExecutionEnd { private get; set; }
 
         /// <summary>
         /// The action to execute at the end of the process if it went well = we found a .log and the database is connected or is not mandatory
         /// </summary>
-        public Action<ProDeployment> OnExecutionOk { private get; set; }
+        public Action<DeploymentHandler> OnExecutionOk { private get; set; }
 
         /// <summary>
         /// The action to execute at the end of the process if something went wrong (no .log or database down)
         /// </summary>
-        public Action<ProDeployment> OnExecutionFailed { private get; set; }
+        public Action<DeploymentHandler> OnExecutionFailed { private get; set; }
 
         #endregion
 
@@ -35,6 +57,11 @@ namespace _3PA.MainFeatures.Pro {
         /// If true, don't actually do anything, just test it
         /// </summary>
         public bool IsTestMode { get; set; }
+
+        /// <summary>
+        /// When true, we activate the log just before compiling with FileId active + we generate a file that list referenced table in the .r
+        /// </summary>
+        public bool IsAnalysisMode { get; set; }
 
         #endregion
 
@@ -59,7 +86,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// 0 -> 100% progression for the deployment
         /// </summary>
-        public float ProgressionPercentage {
+        public float OverallProgressionPercentage {
             get {
                 float totalPerc = _proCompilation == null ? 0 : _proCompilation.CompilationProgression;
                 if (CurrentStep > 0) {
@@ -67,6 +94,33 @@ namespace _3PA.MainFeatures.Pro {
                 }
                 totalPerc += _currentStepDeployPercentage;
                 return totalPerc / TotalNumberOfSteps;
+            }
+        }
+
+        /// <summary>
+        /// Returns the name of the current step
+        /// </summary>
+        public string CurrentStepName {
+            get {
+                if (CurrentStep == 0) {
+                    if (_proCompilation != null && _proCompilation.CurrentNumberOfProcesses > 0) {
+                        return "Compiling";
+                    }
+                    return "Deploying rcode";
+                }
+                return "Deploying step " + CurrentStep;
+            }
+        }
+
+        /// <summary>
+        /// Returns the progression for the current step
+        /// </summary>
+        public float CurrentStepPercentage {
+            get {
+                if (CurrentStep == 0 && _proCompilation != null && _proCompilation.CurrentNumberOfProcesses > 0) {
+                    return _proCompilation.CompilationProgression;
+                }
+                return _currentStepDeployPercentage;
             }
         }
 
@@ -93,20 +147,22 @@ namespace _3PA.MainFeatures.Pro {
             get { return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds)); }
         }
 
+
+
         #endregion
 
         #region Private fields
 
         private Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
 
-        private DeployProfile _currentProfile;
+        private DeploymentProfile _currentProfile;
 
         private ProEnvironment.ProEnvironmentObject _proEnv;
 
         private volatile float _currentStepDeployPercentage;
 
         // Stores the current compilation info
-        private ProCompilation _proCompilation;
+        private MultiCompilation _proCompilation;
 
         CancellationTokenSource _cancelSource = new CancellationTokenSource();
 
@@ -119,9 +175,9 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Constructor
         /// </summary>
-        public ProDeployment(ProEnvironment.ProEnvironmentObject proEnv, DeployProfile currentProfile) {
+        public DeploymentHandler(ProEnvironment.ProEnvironmentObject proEnv, DeploymentProfile currentProfile) {
             _proEnv = new ProEnvironment.ProEnvironmentObject(proEnv);
-            _currentProfile = new DeployProfile(currentProfile);
+            _currentProfile = new DeploymentProfile(currentProfile);
             StartingTime = DateTime.Now;
         }
 
@@ -139,12 +195,13 @@ namespace _3PA.MainFeatures.Pro {
             _filesToDeployPerStep.Clear();
 
             // new mass compilation
-            _proCompilation = new ProCompilation(_proEnv) {
+            _proCompilation = new MultiCompilation(_proEnv) {
                 // check if we need to force the compiler to only use 1 process 
                 // (either because the user want to, or because we have a single user mode database)
                 MonoProcess = _currentProfile.ForceSingleProcess || _proEnv.IsDatabaseSingleUser,
                 NumberOfProcessesPerCore = _currentProfile.NumberProcessPerCore,
-                RFilesOnly = _currentProfile.OnlyGenerateRcode
+                RFilesOnly = _currentProfile.OnlyGenerateRcode,
+                IsTestMode = IsTestMode
             };
 
             _proCompilation.OnCompilationOk += OnCompilationOk;
@@ -213,6 +270,12 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploys the list of files
         /// </summary>
         protected virtual List<FileToDeploy> Deployfiles(List<FileToDeploy> filesToDeploy) {
+            if (IsTestMode) {
+                foreach (var file in filesToDeploy) {
+                    file.IsOk = true;
+                }
+                return filesToDeploy;
+            }
             return _proEnv.Deployer.DeployFiles(filesToDeploy, f => _currentStepDeployPercentage = f, _cancelSource);
         }
 
@@ -225,6 +288,8 @@ namespace _3PA.MainFeatures.Pro {
         /// this list is filtered thanks to the filtered rules
         /// </summary>
         protected List<string> GetFilteredFoldersList(string folder, int step, SearchOption searchOptions) {
+            if (!Directory.Exists(folder))
+                return new List<string>();
             return _proEnv.Deployer.GetFilteredList(Directory.EnumerateDirectories(folder, "*", searchOptions), step).ToList();
         }
 
@@ -233,6 +298,8 @@ namespace _3PA.MainFeatures.Pro {
         /// this list is filtered thanks to the filtered rules
         /// </summary>
         protected List<string> GetFilteredFilesList(string folder, int step, SearchOption searchOptions, string fileExtensionFilter = "*") {
+            if (!Directory.Exists(folder))
+                return new List<string>();
             return _proEnv.Deployer.GetFilteredList
                 (
                     fileExtensionFilter
@@ -245,7 +312,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called when the compilation step 0 failed
         /// </summary>
-        private void OnCompilationFailed(ProCompilation proCompilation) {
+        private void OnCompilationFailed(MultiCompilation proCompilation) {
             if (HasBeenCancelled)
                 return;
 
@@ -256,12 +323,13 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called when the compilation step 0 ended correctly
         /// </summary>
-        private void OnCompilationOk(ProCompilation comp, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
+        private void OnCompilationOk(MultiCompilation comp, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             if (HasBeenCancelled)
                 return;
 
             // Make the deployment for the compilation step (0)
             _filesToDeployPerStep.Add(0, Deployfiles(filesToDeploy));
+            comp.Clean();
 
             // Make the deployment for the step 1 and >=
             ExecuteDeploymentHook(0);
@@ -359,7 +427,7 @@ namespace _3PA.MainFeatures.Pro {
                         <td class='NotificationTitle'>Deployment report</td>
                     </tr>
                     <tr>
-                        <td class='NotificationSubTitle'>" + (HasBeenCancelled ? "<img style='padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (!CompilationHasFailed ? "<img style='padding-right: 2px;' src='Ok30x30' height='25px'>Done!" : "<img style='padding-right: 2px;' src='Error30x30' height='25px'>An error has occurred...")) + @"</td>
+                        <td class='NotificationSubTitle'>" + (HasBeenCancelled ? "<img style='padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (!CompilationHasFailed ? "<img style='padding-right: 2px;' src='Ok30x30' height='25px'>" + (IsTestMode ? "Test done!" : "Done!") : " <img style='padding-right: 2px;' src='Error30x30' height='25px'>An error has occurred...")) + @"</td>
                     </tr>
                 </table>");
 
@@ -439,7 +507,7 @@ namespace _3PA.MainFeatures.Pro {
                     line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
                     line.Append(first.ToStringGroupHeader());
                     foreach (var fileToDeploy in group.OrderBy(deploy => deploy.To)) {
-                        line.Append(fileToDeploy.ToStringDescription());
+                        line.Append(fileToDeploy.ToStringDescription(kpv.Key <= 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath));
                     }
                     line.Append("</div>");
 
@@ -502,6 +570,40 @@ namespace _3PA.MainFeatures.Pro {
             currentReport.Append("</div>");
 
             return currentReport.ToString();
+        }
+
+        #endregion
+
+        #region ExportReport
+
+        public void ExportReport(string path) {
+
+            var reportDir = Path.GetDirectoryName(path);
+
+            var html = new StringBuilder();
+            html.AppendLine("<html><head><style>");
+            html.AppendLine(ThemeManager.Current.ReplaceAliasesByColor(HtmlResources.StyleSheet));
+            html.AppendLine("</style></head>");
+            html.AppendLine("<body>");
+            html.AppendLine(FormatDeploymentReport());
+            html.AppendLine("</body>");
+            html.AppendLine("</html>");
+
+            var regex1 = new Regex("src=[\"'](.*?)[\"']", RegexOptions.Compiled);
+            foreach (Match match in regex1.Matches(html.ToString())) {
+                if (match.Groups.Count >= 2) {
+                    var imgFile = Path.Combine(reportDir, match.Groups[1].Value);
+                    if (!File.Exists(imgFile)) {
+                        var tryImg = (Image)ImageResources.ResourceManager.GetObject(match.Groups[1].Value);
+                        if (tryImg != null) {
+                            tryImg.Save(imgFile);
+                        }
+                    }
+                }
+            }
+
+            regex1 = new Regex("<a href=\"(.*?)[|\"]", RegexOptions.Compiled);
+            Utils.FileWriteAllText(path, regex1.Replace(html.ToString(), "<a href=\"file:///$1\""), Encoding.Default);
         }
 
         #endregion

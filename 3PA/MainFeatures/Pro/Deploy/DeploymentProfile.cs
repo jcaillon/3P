@@ -1,8 +1,7 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (DeployProfile.cs) is part of 3P.
+// This file (DeploymentProfile.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,17 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Pro {
-    internal class DeployProfile {
+namespace _3PA.MainFeatures.Pro.Deploy {
+
+    internal class DeploymentProfile {
+
         #region public static event
 
         /// <summary>
@@ -45,22 +44,27 @@ namespace _3PA.MainFeatures.Pro {
         public string Name = "";
 
         public string SourceDirectory = "";
+
         public bool ExploreRecursively = true;
+
         public bool AutoUpdateSourceDir = true;
+
         public bool ForceSingleProcess;
+
         public bool OnlyGenerateRcode = true;
+
         public int NumberProcessPerCore = 3;
 
         #endregion
 
         #region Life and death
 
-        public DeployProfile() {}
+        public DeploymentProfile() {}
 
         /// <summary>
         /// Allows to do a hard copy
         /// </summary>
-        public DeployProfile(DeployProfile profile) {
+        public DeploymentProfile(DeploymentProfile profile) {
             Name = profile.Name;
             SourceDirectory = profile.SourceDirectory;
             ExploreRecursively = profile.ExploreRecursively;
@@ -72,32 +76,28 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region private static fields
+        #region Static
 
-        private static List<DeployProfile> _list;
+        private static List<DeploymentProfile> _list;
 
-        private static DeployProfile _current;
-
-        #endregion
-
-        #region Public static methods
+        private static DeploymentProfile _current;
 
         /// <summary>
         /// Get a list of profiles
         /// </summary>
-        public static List<DeployProfile> List {
+        public static List<DeploymentProfile> List {
             get {
                 if (_list == null) {
                     if (File.Exists(Config.FileDeployProfiles)) {
-                        _list = new List<DeployProfile>();
+                        _list = new List<DeploymentProfile>();
                         try {
-                            Object2Xml<DeployProfile>.LoadFromFile(_list, Config.FileDeployProfiles);
+                            Object2Xml<DeploymentProfile>.LoadFromFile(_list, Config.FileDeployProfiles);
                         } catch (Exception e) {
                             ErrorHandler.ShowErrors(e, "Error when loading settings", Config.FileDeployProfiles);
                         }
                     }
                     if (_list == null || _list.Count == 0)
-                        _list = new List<DeployProfile> {new DeployProfile()};
+                        _list = new List<DeploymentProfile> {new DeploymentProfile()};
                     if (OnDeployProfilesUpdate != null)
                         OnDeployProfilesUpdate();
                 }
@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Get the current profile
         /// </summary>
-        public static DeployProfile Current {
+        public static DeploymentProfile Current {
             get {
                 if (_current == null) {
                     _current = List.FirstOrDefault(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile));
@@ -128,6 +128,14 @@ namespace _3PA.MainFeatures.Pro {
         public static void Import() {
             List = null;
             List = List;
+        }
+
+        public static void Save() {
+            try {
+                Object2Xml<DeploymentProfile>.SaveToFile(List, Config.FileDeployProfiles);
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while saving the deployment profiles");
+            }
         }
 
         #endregion

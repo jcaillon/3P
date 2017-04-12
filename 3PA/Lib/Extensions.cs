@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Extensions.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -405,12 +402,15 @@ namespace _3PA.Lib {
 
         /// <summary>
         /// Compares two version string "1.0.0.0".IsHigherVersionThan("0.9") returns true
-        /// Must be STRICTLY superior
         /// </summary>
         public static bool IsHigherOrEqualVersionThan(this string localVersion, string distantVersion) {
             return CompareVersions(localVersion, distantVersion, true);
         }
 
+        /// <summary>
+        /// Returns true if local >(=) distant
+        /// </summary>
+        /// <returns></returns>
         private static bool CompareVersions(this string localVersion, string distantVersion, bool trueIfEqual) {
             try {
                 var splitLocal = localVersion.TrimStart('v').Split('.').Select(s => int.Parse(s.Trim())).ToList();
@@ -423,9 +423,10 @@ namespace _3PA.Lib {
                         return false;
                     i++;
                 }
-                if (splitLocal.Sum() == splitDistant.Sum() && !trueIfEqual)
-                    return false;
-                return true;
+                if (splitLocal.Sum() == splitDistant.Sum() && trueIfEqual)
+                    return true;
+                if (splitLocal.Sum() > splitDistant.Sum())
+                    return true;
             } catch (Exception) {
                 // would happen if the input strings are incorrect
             }

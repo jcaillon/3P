@@ -100,10 +100,10 @@ DEFINE TEMP-TABLE ttData NO-UNDO RCODE-INFORMATION
 /* Definitions for FRAME frMain                                         */
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS brRecord fiNumRecords btnOk btnDecrease ~
-btnClose tgWriteTrigger btnIncrease btnDatePicker btnEditor btnEncode ~
+&Scoped-Define ENABLED-OBJECTS brRecord tgSelAll fiNumRecords btnDecrease ~
+btnOk btnClose tgWriteTrigger btnIncrease btnDatePicker btnEditor btnEncode ~
 btnListEdit btnLowerCase btnUpperCase btnWordCase 
-&Scoped-Define DISPLAYED-OBJECTS fiNumRecords tgWriteTrigger 
+&Scoped-Define DISPLAYED-OBJECTS tgSelAll fiNumRecords tgWriteTrigger 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -174,9 +174,14 @@ DEFINE BUTTON btnWordCase  NO-FOCUS FLAT-BUTTON
      SIZE-PIXELS 30 BY 23 TOOLTIP "each word begins with a capital".
 
 DEFINE VARIABLE fiNumRecords AS CHARACTER FORMAT "X(256)":U 
-     LABEL "Records Selected" 
+     LABEL "Records" 
      VIEW-AS FILL-IN NATIVE 
      SIZE-PIXELS 50 BY 21 NO-UNDO.
+
+DEFINE VARIABLE tgSelAll AS LOGICAL INITIAL yes 
+     LABEL "" 
+     VIEW-AS TOGGLE-BOX
+     SIZE-PIXELS 15 BY 15 TOOLTIP "toggle selection for all records" NO-UNDO.
 
 DEFINE VARIABLE tgWriteTrigger AS LOGICAL INITIAL yes 
      LABEL "Use &write trigger" 
@@ -212,11 +217,12 @@ DEFINE BROWSE brRecord
 
 DEFINE FRAME frMain
      brRecord AT Y 25 X 0 WIDGET-ID 200
-     fiNumRecords AT Y 425 X 116 COLON-ALIGNED WIDGET-ID 10
-     btnOk AT Y 425 X 505 WIDGET-ID 6
+     tgSelAll AT Y 27 X 5 WIDGET-ID 38
+     fiNumRecords AT Y 425 X 78 COLON-ALIGNED WIDGET-ID 10
      btnDecrease AT Y 0 X 210 WIDGET-ID 26
+     btnOk AT Y 425 X 505 WIDGET-ID 6
      btnClose AT Y 425 X 585 WIDGET-ID 4
-     tgWriteTrigger AT Y 427 X 183 WIDGET-ID 16
+     tgWriteTrigger AT Y 427 X 145 WIDGET-ID 16
      btnIncrease AT Y 0 X 180 WIDGET-ID 24
      btnDatePicker AT Y 0 X 240 WIDGET-ID 34
      btnEditor AT Y 0 X 0 WIDGET-ID 36
@@ -336,7 +342,7 @@ END.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL wEdit wEdit
 ON WINDOW-CLOSE OF wEdit /* Edit records */
-OR "LEAVE" of wEdit
+/* OR "LEAVE" of wEdit */
 DO:
   /* This event will close the window and terminate the procedure.  */
   APPLY "CLOSE":U TO THIS-PROCEDURE.
@@ -740,6 +746,22 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME tgSelAll
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgSelAll wEdit
+ON VALUE-CHANGED OF tgSelAll IN FRAME frMain
+DO:
+  FOR EACH ttColumn:
+    ttColumn.lShow = SELF:CHECKED.
+  END.
+
+  RUN reopenFieldBrowse(?,?).
+
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME tgWriteTrigger
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL tgWriteTrigger wEdit
 ON VALUE-CHANGED OF tgWriteTrigger IN FRAME frMain /* Use write trigger */
@@ -945,7 +967,7 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
   VIEW wEdit.
 
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
-    WAIT-FOR CLOSE OF THIS-PROCEDURE.
+    WAIT-FOR CLOSE OF THIS-PROCEDURE FOCUS brRecord.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1194,11 +1216,11 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY fiNumRecords tgWriteTrigger 
+  DISPLAY tgSelAll fiNumRecords tgWriteTrigger 
       WITH FRAME frMain IN WINDOW wEdit.
-  ENABLE brRecord fiNumRecords btnOk btnDecrease btnClose tgWriteTrigger 
-         btnIncrease btnDatePicker btnEditor btnEncode btnListEdit btnLowerCase 
-         btnUpperCase btnWordCase 
+  ENABLE brRecord tgSelAll fiNumRecords btnDecrease btnOk btnClose 
+         tgWriteTrigger btnIncrease btnDatePicker btnEditor btnEncode 
+         btnListEdit btnLowerCase btnUpperCase btnWordCase 
       WITH FRAME frMain IN WINDOW wEdit.
   {&OPEN-BROWSERS-IN-QUERY-frMain}
 END PROCEDURE.
@@ -1331,7 +1353,7 @@ PROCEDURE initializeObject :
   RUN setLabelPosition(fiNumRecords:HANDLE).
 
   /* This program is called for both ADD and EDIT */
-  lNewRecord = picMode = 'add'.
+  lNewRecord = (picMode = 'add').
 
   /* If we add a new record, enable all fields that are either
    * part of a unique index or are mandatory
@@ -1373,7 +1395,7 @@ PROCEDURE initializeObject :
   END.
 
   /* Collect data for all fields 
-   * And  if we only have 1 value for all selected records, let's show that 
+   * And if we only have 1 value for all selected records, let's show that 
    */
   FOR EACH ttColumn: 
     FIND ttField WHERE ttField.cFieldname = ttColumn.cFieldName.
@@ -1468,6 +1490,9 @@ PROCEDURE initializeObject :
 
   IF plReadOnlyDigger THEN btnOk:SENSITIVE = FALSE.
 
+  /* Start listener to table changes in main window */
+  SUBSCRIBE TO 'TableChange' ANYWHERE. 
+
 END PROCEDURE. /* initializeObject */
 
 /* _UIB-CODE-BLOCK-END */
@@ -1557,6 +1582,21 @@ PROCEDURE reopenFieldBrowse :
   END.
 
 END PROCEDURE. /* reopenFieldBrowse */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE tableChange wEdit 
+PROCEDURE tableChange :
+/* Event handler for 'TableChange' event of main window
+ */
+  DEFINE INPUT PARAMETER pcNewDatabase AS CHARACTER NO-UNDO.
+  DEFINE INPUT PARAMETER pcNewTable    AS CHARACTER NO-UNDO.
+
+  IF   pcNewDatabase <> picDatabase
+    OR pcNewTable <> picTableName THEN APPLY 'close' TO THIS-PROCEDURE. 
+
+END PROCEDURE. /* tableChange */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

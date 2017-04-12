@@ -1,8 +1,7 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (ProCompilation.cs) is part of 3P.
+// This file (MultiCompilation.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,29 +16,27 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
     /// <summary>
     /// This class starts several ProExecution to compile a lot of progress files in parallel 
     /// It starts multiple processes
     /// </summary>
-    internal class ProCompilation {
+    internal class MultiCompilation {
 
         #region Events
 
         /// <summary>
         /// Event fired when the compilation ends
         /// </summary>
-        public event Action<ProCompilation> OnCompilationEnd;
+        public event Action<MultiCompilation> OnCompilationEnd;
 
         /// <summary>
         /// The action to execute at the end of the compilation if it went well
@@ -47,12 +44,12 @@ namespace _3PA.MainFeatures.Pro {
         /// - the errors for each file compiled (if any)
         /// - the list of all the deployments needed for the files compiled (move the .r but also .dbg and so on...)
         /// </summary>
-        public event Action<ProCompilation, List<FileToCompile>, List<FileToDeploy>> OnCompilationOk;
+        public event Action<MultiCompilation, List<FileToCompile>, List<FileToDeploy>> OnCompilationOk;
 
         /// <summary>
         /// Event fired when the compilation ends
         /// </summary>
-        public event Action<ProCompilation> OnCompilationFailed;
+        public event Action<MultiCompilation> OnCompilationFailed;
 
         #endregion
 
@@ -77,6 +74,11 @@ namespace _3PA.MainFeatures.Pro {
         /// If true, don't actually do anything, just test it
         /// </summary>
         public bool IsTestMode { get; set; }
+
+        /// <summary>
+        /// When true, we activate the log just before compiling with FileId active + we generate a file that list referenced table in the .r
+        /// </summary>
+        public bool IsAnalysisMode { get; set; }
 
         /// <summary>
         /// Pro environment to use
@@ -132,9 +134,7 @@ namespace _3PA.MainFeatures.Pro {
         /// this error is caused by too much connection on the same database (too much processes started!)
         /// </summary>
         public bool CompilationFailedOnMaxUser {
-            get {
-                return _processes.Any(proc => proc.ConnectionFailed && proc.DbConnectionFailedOnMaxUser);
-            }
+            get { return _processes.Any(proc => proc.ConnectionFailed && proc.DbConnectionFailedOnMaxUser); }
         }
 
         /// <summary>
@@ -142,6 +142,10 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public float CompilationProgression {
             get {
+                if (NbFilesToCompile == 0)
+                    return 0;
+                if (CompilationDone)
+                    return 100;
                 return (float) NumberOfFilesTreated / NbFilesToCompile * 100;
             }
         }
@@ -185,7 +189,7 @@ namespace _3PA.MainFeatures.Pro {
         private List<ProExecutionCompile> _processes = new List<ProExecutionCompile>();
 
         // total number of processes still running
-        private int _processesRunning;
+        private int _processesRunning = -1;
         
         private bool _hasBeenKilled;
 
@@ -207,9 +211,9 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Uses the current environment
         /// </summary>
-        public ProCompilation() : this(null) {}
+        public MultiCompilation() : this(null) {}
 
-        public ProCompilation(ProEnvironment.ProEnvironmentObject proEnv) {
+        public MultiCompilation(ProEnvironment.ProEnvironmentObject proEnv) {
             ProEnv = proEnv == null ? new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current) : proEnv;
             StartingTime = DateTime.Now;
         }
@@ -267,7 +271,7 @@ namespace _3PA.MainFeatures.Pro {
                 };
                 exec.OnExecutionOk += OnExecutionOk;
                 exec.OnExecutionFailed += OnExecutionFailed;
-                exec.OnCompilationOk += ExecOnOnCompilationOk;
+                exec.OnCompilationOk += OnExecCompilationOk;
 
                 if (RFilesOnly) {
                     exec.CompileWithDebugList = false;
@@ -314,6 +318,15 @@ namespace _3PA.MainFeatures.Pro {
             }
         }
 
+        /// <summary>
+        /// Clean the temporary directories created for the compilation (call this after the deployment)
+        /// </summary>
+        public void Clean() {
+            foreach (var process in _processes) {
+                process.Clean();
+            }
+        }
+
         #endregion
 
         #region private methods
@@ -323,7 +336,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         private void EndOfCompilation() {
             // only do stuff we have reached the last running process
-            if (_processesRunning != 0)
+            if (_processesRunning > 0)
                 return;
 
             TotalCompilationTime = ElapsedTime;
@@ -353,7 +366,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// When a process has finished compiling correctly
         /// </summary>
-        private void ExecOnOnCompilationOk(ProExecutionHandleCompilation proc, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
+        private void OnExecCompilationOk(ProExecutionHandleCompilation proc, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             DoInLock(() => {
                 // aggregate the info on each process
                 if (fileToCompiles != null)
@@ -366,7 +379,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Called when a process has finished UNsuccessfully
         /// </summary>
-        private void OnExecutionFailed(ProExecution obj) {
+        private void OnExecutionFailed(ProExecution lastExecution) {
             DoInLock(() => {
                 KillProcesses();
                 EndOfCompilation();

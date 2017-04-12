@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (EmphasisData.cs) is part of 3P.
+// This file (FileDeployed.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,22 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace _3PA.Lib.CommonMark.Syntax {
-    /// <summary>
-    /// Contains additional data for emphasis elements. Used in the <see cref="Inline.Emphasis"/> property.
-    /// </summary>
-    public struct EmphasisData {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmphasisData"/> struccture.
-        /// </summary>
-        /// <param name="delimiterCharacter">Delimiter character.</param>
-        public EmphasisData(char delimiterCharacter) : this() {
-            DelimiterCharacter = delimiterCharacter;
-        }
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-        /// <summary>
-        /// Gets or sets the delimiter character.
-        /// </summary>
-        public char DelimiterCharacter { get; set; }
+namespace _3PA.MainFeatures.Pro.Deploy {
+
+    internal class FileDeployed {
+
+
     }
+
 }

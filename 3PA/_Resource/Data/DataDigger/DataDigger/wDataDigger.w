@@ -117,6 +117,15 @@ DEFINE VARIABLE glUseTimer                 AS LOGICAL     NO-UNDO. /* use PSTime
 DEFINE VARIABLE gcPreviousValues           AS CHARACTER   NO-UNDO. /* used in DataRowDisplay for row coloring */
 DEFINE VARIABLE glUseEvenRowColorSet       AS LOGICAL     NO-UNDO. /* used in DataRowDisplay for row coloring */
 
+/* Procedure used in update check */
+PROCEDURE URLDownloadToFileA EXTERNAL "URLMON.DLL" :
+  DEFINE INPUT PARAMETER pCaller    AS LONG.
+  DEFINE INPUT PARAMETER szURL      AS CHARACTER.
+  DEFINE INPUT PARAMETER szFilename AS CHARACTER.
+  DEFINE INPUT PARAMETER dwReserved AS LONG.
+  DEFINE INPUT PARAMETER lpfnCB     AS LONG.
+END PROCEDURE. /* URLDownloadToFileA */
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -956,6 +965,54 @@ DEFINE FRAME frMain
          AT X 0 Y 0
          SIZE-PIXELS 1494 BY 675 DROP-TARGET.
 
+DEFINE FRAME frSettings
+     btnSettings-txt AT Y 32 X 30 WIDGET-ID 200
+     btnDataDigger AT Y 0 X 0 WIDGET-ID 126
+     btnConnections AT Y 0 X 186 WIDGET-ID 212
+     btnSettings AT Y 32 X 0 WIDGET-ID 210
+     btnProcEdit AT Y 32 X 186 WIDGET-ID 228
+     btnDict AT Y 64 X 0 WIDGET-ID 224
+     btnDataAdmin AT Y 64 X 186 WIDGET-ID 214
+     btnQueries-3 AT Y 96 X 0 WIDGET-ID 190
+     btnQueryTester AT Y 96 X 186 WIDGET-ID 232
+     btnHelp AT Y 128 X 0 WIDGET-ID 260
+     btnAbout AT Y 128 X 186 WIDGET-ID 196
+     btnAbout-txt AT Y 128 X 216 WIDGET-ID 208
+     btnConnections-txt AT Y 0 X 216 WIDGET-ID 202
+     btnDataAdmin-txt AT Y 64 X 216 WIDGET-ID 206
+     btnDataDigger-txt AT Y 0 X 30 WIDGET-ID 236
+     btnDict-txt AT Y 64 X 30 WIDGET-ID 226
+     btnHelp-txt AT Y 128 X 30 WIDGET-ID 262
+     btnProcEdit-txt AT Y 32 X 216 WIDGET-ID 230
+     btnQueries-txt AT Y 96 X 30 WIDGET-ID 204
+     btnQueryTester-txt AT Y 96 X 216 WIDGET-ID 234
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 160.6 ROW 9.48 SCROLLABLE 
+         BGCOLOR 15  WIDGET-ID 500.
+
+DEFINE FRAME frData
+     btnDataSort AT Y 5 X 15 WIDGET-ID 300
+     btnClearDataFilter AT Y 5 X 755 WIDGET-ID 76
+     fiNumSelected AT Y 198 X 636 COLON-ALIGNED NO-LABEL WIDGET-ID 298
+     fiNumRecords AT Y 198 X 665 COLON-ALIGNED NO-LABEL WIDGET-ID 210
+     rctData AT Y 0 X 0 WIDGET-ID 272
+     rctDataFilter AT Y 1 X 12 WIDGET-ID 296
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 15.05
+         SIZE 158 BY 10.24 WIDGET-ID 700.
+
+DEFINE FRAME frHint
+     edHint AT Y 0 X 35 NO-LABEL WIDGET-ID 2
+     btGotIt AT Y 80 X 70 WIDGET-ID 4
+     imgArrow AT Y 0 X 0 WIDGET-ID 10
+    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
+         AT X 1194 Y 242
+         SIZE-PIXELS 205 BY 110
+         BGCOLOR 14  WIDGET-ID 600.
+
 DEFINE FRAME frWhere
      btnBegins AT Y 123 X 17 WIDGET-ID 74
      cbAndOr AT Y 5 X 46 COLON-ALIGNED WIDGET-ID 10
@@ -991,54 +1048,6 @@ DEFINE FRAME frWhere
          SIZE-PIXELS 656 BY 285
          TITLE "Query Editor"
          DEFAULT-BUTTON btnOK WIDGET-ID 400.
-
-DEFINE FRAME frHint
-     edHint AT Y 0 X 35 NO-LABEL WIDGET-ID 2
-     btGotIt AT Y 80 X 70 WIDGET-ID 4
-     imgArrow AT Y 0 X 0 WIDGET-ID 10
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS TOP-ONLY NO-UNDERLINE THREE-D 
-         AT X 1194 Y 242
-         SIZE-PIXELS 205 BY 110
-         BGCOLOR 14  WIDGET-ID 600.
-
-DEFINE FRAME frData
-     btnDataSort AT Y 5 X 15 WIDGET-ID 300
-     btnClearDataFilter AT Y 5 X 755 WIDGET-ID 76
-     fiNumSelected AT Y 198 X 636 COLON-ALIGNED NO-LABEL WIDGET-ID 298
-     fiNumRecords AT Y 198 X 665 COLON-ALIGNED NO-LABEL WIDGET-ID 210
-     rctData AT Y 0 X 0 WIDGET-ID 272
-     rctDataFilter AT Y 1 X 12 WIDGET-ID 296
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 15.05
-         SIZE 158 BY 10.24 WIDGET-ID 700.
-
-DEFINE FRAME frSettings
-     btnSettings-txt AT Y 32 X 30 WIDGET-ID 200
-     btnDataDigger AT Y 0 X 0 WIDGET-ID 126
-     btnConnections AT Y 0 X 186 WIDGET-ID 212
-     btnSettings AT Y 32 X 0 WIDGET-ID 210
-     btnProcEdit AT Y 32 X 186 WIDGET-ID 228
-     btnDict AT Y 64 X 0 WIDGET-ID 224
-     btnDataAdmin AT Y 64 X 186 WIDGET-ID 214
-     btnQueries-3 AT Y 96 X 0 WIDGET-ID 190
-     btnQueryTester AT Y 96 X 186 WIDGET-ID 232
-     btnHelp AT Y 128 X 0 WIDGET-ID 260
-     btnAbout AT Y 128 X 186 WIDGET-ID 196
-     btnAbout-txt AT Y 128 X 216 WIDGET-ID 208
-     btnConnections-txt AT Y 0 X 216 WIDGET-ID 202
-     btnDataAdmin-txt AT Y 64 X 216 WIDGET-ID 206
-     btnDataDigger-txt AT Y 0 X 30 WIDGET-ID 236
-     btnDict-txt AT Y 64 X 30 WIDGET-ID 226
-     btnHelp-txt AT Y 128 X 30 WIDGET-ID 262
-     btnProcEdit-txt AT Y 32 X 216 WIDGET-ID 230
-     btnQueries-txt AT Y 96 X 30 WIDGET-ID 204
-     btnQueryTester-txt AT Y 96 X 216 WIDGET-ID 234
-    WITH 1 DOWN KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 160.6 ROW 9.48 SCROLLABLE 
-         BGCOLOR 15  WIDGET-ID 500.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -2192,6 +2201,9 @@ DO:
   IF cOldTable <> gcCurrentTable
     OR cOldDatabase <> gcCurrentDatabase THEN
   DO:
+    /* Report new table to listeners */
+    PUBLISH 'TableChange' (gcCurrentDatabase,gcCurrentTable).
+
     EMPTY TEMP-TABLE ttField.
     EMPTY TEMP-TABLE ttIndex.
 
@@ -4097,8 +4109,9 @@ PROCEDURE btnCloneChoose :
   IF plReadOnlyDigger THEN RETURN.
 
   /* If no data then go back */
-  IF ghDataBrowse:QUERY:num-results = 0
-    OR ghDataBrowse:QUERY:num-results = ? THEN RETURN.
+  IF ghDataBrowse:QUERY:NUM-RESULTS = 0
+    OR ghDataBrowse:QUERY:NUM-RESULTS = ? 
+    OR NOT CAN-FIND(FIRST ttField WHERE ttField.lShow = TRUE) THEN RETURN.
 
   /* If there is no record selected, select the focused one */
   IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
@@ -4170,7 +4183,8 @@ PROCEDURE btnDeleteChoose :
   IF plReadOnlyDigger THEN RETURN.
 
   /* If nothing selected, go back */
-  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN RETURN.
+  IF ghDataBrowse:NUM-SELECTED-ROWS = 0 
+    OR NOT CAN-FIND(FIRST ttField WHERE ttField.lShow = TRUE) THEN RETURN.
 
   /* Prohibit editing of VST records */
   IF gcCurrentTable BEGINS '_' THEN
@@ -4334,8 +4348,9 @@ PROCEDURE btnEditChoose :
   DEFINE BUFFER ttField FOR ttField.
 
   /* If no data then go back */
-  IF ghDataBrowse:QUERY:num-results = 0
-    OR ghDataBrowse:QUERY:num-results = ? THEN RETURN.
+  IF ghDataBrowse:QUERY:NUM-RESULTS = 0
+    OR ghDataBrowse:QUERY:NUM-RESULTS = ? 
+    OR NOT CAN-FIND(FIRST ttField WHERE ttField.lShow = TRUE) THEN RETURN.
 
   /* If there is no record selected, select the focused one */
   IF ghDataBrowse:NUM-SELECTED-ROWS = 0 THEN
@@ -5159,8 +5174,10 @@ DO:
   ASSIGN
     chCtrlFrame = CtrlFrame:COM-HANDLE
     UIB_S = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
-    CtrlFrame:NAME = "CtrlFrame":U
+    CtrlFrame:NAME = "CtrlFrame":U NO-ERROR.
   .
+  IF ERROR-STATUS:ERROR THEN MESSAGE 'helaas pindakaas' VIEW-AS ALERT-BOX.
+  
   RUN initialize-controls IN THIS-PROCEDURE NO-ERROR.
 END.
 ELSE MESSAGE "wDataDigger.wrx":U SKIP(1)
@@ -7710,7 +7727,11 @@ PROCEDURE initializeSettingsFile :
     OR getRegistry("DataDigger:Backup", "BackupDir") = '' THEN setRegistry("DataDigger:Backup", "BackupDir", "<PROGDIR>\Backup\").
 
   /* Update check, set to check on STABLE */
-  IF getRegistry("DataDigger:Update","UpdateChannel") = ? THEN setRegistry("DataDigger:Update","UpdateChannel", "{&CHECK-BETA}").
+  IF getRegistry("DataDigger:Update","UpdateChannel") = ? THEN setRegistry("DataDigger:Update","UpdateChannel", "{&CHECK-STABLE}").
+  IF getRegistry('DataDigger:Update','PingBack') = ? THEN setRegistry('DataDigger:Update','PingBack','YES').
+
+  /* DB Name to use in title bar */
+  IF getRegistry('DataDigger','TitleBarDbName') = ? THEN setRegistry('DataDigger','TitleBarDbName','ldbname').
 
   {&timerStop}
 END PROCEDURE. /* initializeSettingsFile */
@@ -7735,10 +7756,20 @@ PROCEDURE initializeUi :
   DO:
     ASSIGN
       chCtrlFrame    = CtrlFrame:COM-HANDLE
-      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
-      CtrlFrame:NAME = "CtrlFrame":U
+      CtrlFrame:NAME = "CtrlFrame":U 
+      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U) NO-ERROR
     .
-    glUseTimer = TRUE.
+    
+    /* Check for message 6087:
+     * Specified ActiveX control is not registered or the .ocx file was moved from where it was registered.
+     * Error occurred in procedure: <procedure name> (6087)
+     * This error occurred while trying to load an ActiveX control.  
+     * It is possible that the control was not properly installed or that the .ocx file was moved or deleted.
+     */
+    IF ERROR-STATUS:GET-NUMBER(1) = 6087 THEN 
+      glUseTimer = NO.
+    ELSE
+      glUseTimer = NO.
   END.
 
   /* FRAME frMain */
@@ -9954,8 +9985,6 @@ PROCEDURE setFilterFieldTabOrder :
   DEFINE VARIABLE hPrevFilter AS HANDLE  NO-UNDO.
   DEFINE BUFFER bColumn FOR ttColumn.
 
-  PUBLISH 'debugMessage' (1, 'Yooooo!' ).
-
   /* Set the TAB order of the filter to after the previous filter field */
   FOR EACH bColumn BY bColumn.iColumnNr:
     IF NOT bColumn.hColumn:VISIBLE THEN NEXT.
@@ -10207,6 +10236,10 @@ PROCEDURE setTable :
   ELSE
     cTable = pcSelectedText.
 
+  /* If it contains multiple words, forget it, it's not gonna be a table */
+  IF NUM-ENTRIES(cTable,' ') > 1 THEN cTable = ''.
+  IF LENGTH(cTable) < 3 THEN cTable = ''.
+
   /* Now see if we can do anything with the text */
   IF cTable <> "" THEN
   DO:
@@ -10216,22 +10249,23 @@ PROCEDURE setTable :
       SESSION:SET-WAIT-STATE("general").
       setWindowFreeze(TRUE).
 
-      fiTableFilter:screen-value = cTable.
-      APPLY 'value-changed' TO fiTableFilter.
-
-      RUN reopenTableBrowse(?).
-
       /* If we have a full match on table name, for example when text "ORDER"
        * is selected, make sure table is set to "ORDER" and not "ORDERLINE"
        */
-      FIND ttTable WHERE ttTable.cTableName = cTable NO-ERROR.
-      IF AVAILABLE ttTable THEN
-      DO:
-        brTables:query:reposition-to-rowid( ROWID(ttTable)).
-        brTables:refresh().
-      END.
-      APPLY 'value-changed' TO brTables.
+      FIND FIRST ttTable WHERE ttTable.cTableName MATCHES '*' + cTable + '*' AND ttTable.lShowInList NO-ERROR.
+      IF AVAILABLE ttTable THEN 
+      DO: 
+        /* Set db and file name */
+        cbDatabaseFilter:SCREEN-VALUE = ''.
+        fiTableFilter:SCREEN-VALUE = cTable.
+        RUN reopenTableBrowse(?).
 
+        brTables:QUERY:REPOSITION-TO-ROWID( ROWID(ttTable)).
+        brTables:REFRESH().
+      END.
+                 
+      APPLY 'value-changed' TO brTables.
+                       
       IF gcCurrentTable <> "" THEN
       DO:
         RUN setTableContext(INPUT gcCurrentTable ).
@@ -10239,13 +10273,13 @@ PROCEDURE setTable :
       END.
       ELSE
       DO:
-        fiTableFilter:screen-value = "".
+        fiTableFilter:SCREEN-VALUE = "".
         APPLY 'value-changed' TO fiTableFilter.
         RUN reopenTableBrowse(?).
       END.
 
-      APPLY 'value-changed' TO brTables.
-
+      APPLY 'entry' TO brTables.
+                  
       setWindowFreeze(NO).
       SESSION:SET-WAIT-STATE("").
     END.
@@ -10548,15 +10582,15 @@ END PROCEDURE. /* setViewType */
 PROCEDURE setWindowTitle :
 /* Set the title of the DataDigger window
  */
-  DEFINE VARIABLE cTitle  AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE hParent AS INTEGER   NO-UNDO.
-  DEFINE VARIABLE hOwner  AS INTEGER   NO-UNDO.
-  DEFINE VARIABLE cFilter AS CHARACTER   NO-UNDO.
-
-  DEFINE VARIABLE cNameShow  AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE cNameHide  AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE cFieldShow AS CHARACTER   NO-UNDO.
-  DEFINE VARIABLE cFieldHide AS CHARACTER   NO-UNDO.
+  DEFINE VARIABLE cTitle          AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE hParent         AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE hOwner          AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE cFilter         AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cDatabase       AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cNameShow       AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cNameHide       AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cFieldShow      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cFieldHide      AS CHARACTER NO-UNDO.
 
   FIND ttTableFilter.
   ASSIGN
@@ -10580,16 +10614,29 @@ PROCEDURE setWindowTitle :
   IF cFieldShow <> '' THEN cFilter = TRIM(SUBSTITUTE('&1 |  Has fields: &2', cFilter, cFieldShow),' |').
   IF cFieldHide <> '' THEN cFilter = TRIM(SUBSTITUTE('&1 |  Has not fields: &2', cFilter, cFieldHide),' |').
 
+  /* Set db name to use */
+  CASE getRegistry('DataDigger','TitleBarDbName'):
+    WHEN 'none'    THEN cDatabase = ''.
+    WHEN 'ldbname' THEN cDatabase = LDBNAME(gcCurrentDatabase) + '.'.
+    WHEN 'pdbname' THEN DO:
+      /* Ignore pathnames */
+      cDatabase = PDBNAME(gcCurrentDatabase) + '.'.
+      cDatabase = ENTRY(NUM-ENTRIES(cDatabase,'/'),cDatabase,'/').
+      cDatabase = ENTRY(NUM-ENTRIES(cDatabase,'\'),cDatabase,'\').
+    END.
+    OTHERWISE cDatabase = gcCurrentDatabase + '.'.
+  END. 
+
   /*
   ** Display the current database and table name in the windowtitle
   **
   ** DataDigger 17 - DEVELOP - sports.customer
   */
-  cTitle = SUBSTITUTE( "&1 &2 &3 - &4.&5 &6"
+  cTitle = SUBSTITUTE( "&1 &2 &3 - &4&5 &6"
                      , "DataDigger"
                      , "{&version}"
                      , (IF SESSION:PARAMETER <> '' THEN '- ' + SESSION:PARAMETER ELSE '')
-                     , gcCurrentDatabase
+                     , cDatabase
                      , gcCurrentTable
                      , (IF cFilter <> '' THEN '(' + cFilter + ')'  ELSE '')
                      ).
@@ -11345,9 +11392,23 @@ PROCEDURE startSession :
       OS-COMMAND NO-WAIT START VALUE("http://datadigger.wordpress.com/{&build}").
   END.
 
-  /* Check for new versions on GitHub */
-  iChannel = INTEGER(getRegistry('DataDigger:Update','UpdateChannel')).
-  RUN checkVersion.p(INPUT iChannel, INPUT FALSE). /* no manual check */
+  /* PhoneHome / Check for new version only once a day */
+  IF getRegistry('DataDigger:Update','LastUpdateCheck') <> ISO-DATE(TODAY) THEN 
+  DO:
+    /* Phone Home 
+     * Don't be alarmed, this link refers to the build.i version on GitHub. 
+     * This to track the use of DataDigger. 
+     * Interested yourself? Check https://goo.gl/24deK3+ to see statistics
+    */
+    IF getRegistry('DataDigger:Update','PingBack') <> ? THEN
+      RUN urlDownloadToFileA (0, '{&PINGBACKURL}', '', 0, 0).
+
+    /* Check for new versions on GitHub */
+    iChannel = INTEGER(getRegistry('DataDigger:Update','UpdateChannel')).
+    RUN checkVersion.p(INPUT iChannel, INPUT FALSE). /* no manual check */
+
+    setRegistry('DataDigger:Update','LastUpdateCheck',ISO-DATE(TODAY)).
+  END.
 
 END PROCEDURE. /* startSession */
 

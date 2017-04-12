@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (DoDeployPage.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -35,6 +32,7 @@ using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -50,7 +48,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private Timer _progressTimer;
 
         // proenv copied when clicking on the start button
-        private ProDeployment _proDeployment;
+        private DeploymentHandler _proDeployment;
 
         private string _reportExportPath;
 
@@ -105,6 +103,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application");
             btStart.ButtonPressed += BtStartOnButtonPressed;
 
+            // Test
+            btTest.BackGrndImage = ImageResources.Tests;
+            tooltip.SetToolTip(btTest, "Click to <b>test</b> the deployment your application (this is safe)");
+            btTest.ButtonPressed += BtTestOnButtonPressed;
+
             // cancel
             btCancel.BackGrndImage = ImageResources.Cancel;
             tooltip.SetToolTip(btCancel, "Click to <b>cancel</b> the current deployement");
@@ -138,7 +141,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btSave, "Save the settings for the currently selected profile");
             btSave.BackGrndImage = ImageResources.Save;
             btSave.ButtonPressed += (sender, args) => {
-                if (string.IsNullOrEmpty(DeployProfile.Current.Name) && !ChooseName())
+                if (string.IsNullOrEmpty(DeploymentProfile.Current.Name) && !ChooseName())
                     return;
                 SetDataFromFields();
                 SaveProfilesList();
@@ -148,17 +151,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btSaveAs, "Save the settings in a new profile that you will name");
             btSaveAs.BackGrndImage = ImageResources.Save;
             btSaveAs.ButtonPressed += (sender, args) => {
-                var cur = DeployProfile.Current;
-                DeployProfile.List.Add(new DeployProfile());
-                DeployProfile.Current = DeployProfile.List.Last();
+                var cur = DeploymentProfile.Current;
+                DeploymentProfile.List.Add(new DeploymentProfile());
+                DeploymentProfile.Current = DeploymentProfile.List.Last();
                 if (ChooseName()) {
                     SetDataFromFields();
                     SaveProfilesList();
                 } else {
-                    DeployProfile.List.RemoveAt(DeployProfile.List.Count - 1);
-                    DeployProfile.Current = cur;
+                    DeploymentProfile.List.RemoveAt(DeploymentProfile.List.Count - 1);
+                    DeploymentProfile.Current = cur;
                 }
-                btDelete.Visible = DeployProfile.List.Count > 1;
+                btDelete.Visible = DeploymentProfile.List.Count > 1;
             };
 
             // delete
@@ -166,11 +169,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btDelete.BackGrndImage = ImageResources.Delete;
             btDelete.ButtonPressed += (sender, args) => {
                 if (UserCommunication.Message("Do you really want to delete this profile?", MessageImg.MsgQuestion, "Delete", "Deployment profile", new List<string> {"Yes", "Cancel"}) == 0) {
-                    DeployProfile.List.Remove(DeployProfile.Current);
-                    DeployProfile.Current = null;
+                    DeploymentProfile.List.Remove(DeploymentProfile.Current);
+                    DeploymentProfile.Current = null;
                     SaveProfilesList();
                     SetFieldsFromData();
-                    if (DeployProfile.List.Count == 1)
+                    if (DeploymentProfile.List.Count == 1)
                         btDelete.Hide();
                 }
             };
@@ -189,10 +192,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
             btSeeRules.ButtonPressed += (sender, args) => { UserCommunication.Message(DeploymentRules.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment"); };
 
-            DeployProfile.OnDeployProfilesUpdate += () => {
+            DeploymentProfile.OnDeployProfilesUpdate += () => {
                 UpdateCombo();
                 SetFieldsFromData();
-                btDelete.Visible = DeployProfile.List.Count > 1;
+                btDelete.Visible = DeploymentProfile.List.Count > 1;
             };
 
             // subscribe
@@ -216,7 +219,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             }
 
             // hide delete if needed
-            btDelete.Visible = DeployProfile.List.Count > 1;
+            btDelete.Visible = DeploymentProfile.List.Count > 1;
 
             // cur env
             lblCurEnv.Text = string.Format("{0} <a href='#'>(switch)</a>", ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : ""));
@@ -226,7 +229,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             var currentDeployer = ProEnvironment.Current.Deployer;
             lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", currentDeployer.DeployRules.Count(rule => rule.Step == 0), currentDeployer.DeployRules.Count(rule => rule.Step == 1), currentDeployer.DeployRules.Count(rule => rule.Step == 2), currentDeployer.DeployRules.Count(rule => rule.Step >= 3));
 
-            if (DeployProfile.Current.AutoUpdateSourceDir)
+            if (DeploymentProfile.Current.AutoUpdateSourceDir)
                 fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 
@@ -234,21 +237,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         #region events
 
+        private void BtTestOnButtonPressed(object sender, EventArgs e) {
+            BtStartOnButtonPressed(null, e);
+        }
+
         /// <summary>
         /// Start the deployment!
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
 
+            bool isTest = sender == null;
+
             SetDataFromFields();
             SaveProfilesList();
 
-            if (string.IsNullOrEmpty(DeployProfile.Current.SourceDirectory) || !Directory.Exists(DeployProfile.Current.SourceDirectory)) {
+            if (string.IsNullOrEmpty(DeploymentProfile.Current.SourceDirectory) || !Directory.Exists(DeploymentProfile.Current.SourceDirectory)) {
                 BlinkTextBox(fl_directory, ThemeManager.Current.GenericErrorColor);
                 return;
             }
 
             // init screen
             btStart.Visible = false;
+            btTest.Visible = false;
             btReset.Visible = false;
             progressBar.Visible = true;
             progressBar.Progress = 0;
@@ -256,12 +266,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btReport.Visible = false;
             lbl_report.Visible = false;
             _reportExportPath = null;
-            Application.DoEvents();
 
             // start the deployment
             Task.Factory.StartNew(() => {
-                _proDeployment = new ProDeployment(ProEnvironment.Current, DeployProfile.Current) {
-                    IsTestMode = false,
+                _proDeployment = new DeploymentHandler(ProEnvironment.Current, DeploymentProfile.Current) {
+                    IsTestMode = isTest,
                     OnExecutionEnd = OnCompilationEnd
                 };
 
@@ -285,7 +294,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         // called when the compilation ended
-        private void OnCompilationEnd(ProDeployment proDeployment) {
+        private void OnCompilationEnd(DeploymentHandler proDeployment) {
             Task.Factory.StartNew(() => {
                 this.SafeInvoke(page => {
                     // get rid of the timer
@@ -374,33 +383,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 return;
             _reportExportPath = Path.Combine(reportDir, "index.html");
 
-            var html = lbl_report.GetHtml();
-
-            var regex1 = new Regex("src=\"(.*?)\"", RegexOptions.Compiled);
-            foreach (Match match in regex1.Matches(html)) {
-                if (match.Groups.Count >= 2) {
-                    var imgFile = Path.Combine(reportDir, match.Groups[1].Value);
-                    if (!File.Exists(imgFile)) {
-                        var tryImg = (Image) ImageResources.ResourceManager.GetObject(match.Groups[1].Value);
-                        if (tryImg != null) {
-                            tryImg.Save(imgFile);
-                        }
-                    }
-                }
-            }
-
-            regex1 = new Regex("<a href=\"(.*?)[|\"]", RegexOptions.Compiled);
-            html = regex1.Replace(html, "<a href=\"file:///$1\"");
-
-            Utils.FileWriteAllText(_reportExportPath, html, Encoding.Default);
+            _proDeployment.ExportReport(_reportExportPath);
 
             // open it
             Utils.OpenAnyLink(_reportExportPath);
         }
 
         private void CbNameOnSelectedIndexChanged(YamuiComboBox sender) {
-            DeployProfile.Current = DeployProfile.List[cbName.SelectedIndex];
-            Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
+            DeploymentProfile.Current = DeploymentProfile.List[cbName.SelectedIndex];
+            Config.Instance.CurrentDeployProfile = DeploymentProfile.Current.Name;
             SetFieldsFromData();
         }
 
@@ -411,11 +402,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // allows to update the progression bar
         private void UpdateProgressBar() {
             progressBar.SafeInvoke(bar => {
-                if (_proDeployment.ProgressionPercentage < 0.1)
+                if (_proDeployment.OverallProgressionPercentage < 0.1)
                     bar.Text = @"Initializing, please wait...";
                 else
-                    bar.Text = Math.Round(_proDeployment.ProgressionPercentage, 1) + @"%" + @" (in " + _proDeployment.ElapsedTime +  @", step " + _proDeployment.CurrentStep + @"/" + _proDeployment.MaxStep + @")";
-                bar.Progress = _proDeployment.ProgressionPercentage;
+                    bar.Text = Math.Round(_proDeployment.OverallProgressionPercentage, 1) + @"% / " + _proDeployment.CurrentStepName + @" / total time " + _proDeployment.ElapsedTime;
+                bar.Progress = _proDeployment.OverallProgressionPercentage;
             });
         }
 
@@ -436,6 +427,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void ResetScreen() {
             this.SafeInvoke(page => {
                 btStart.Visible = true;
+                btTest.Visible = true;
                 btReset.Visible = true;
                 btCancel.Visible = false;
                 progressBar.Visible = false;
@@ -461,52 +453,48 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             if (UserCommunication.Input(ref name, "", MessageImg.MsgQuestion, "Save profile as...", "Enter a name for this profile") == 1 ||
                 string.IsNullOrEmpty((string) name))
                 return false;
-            DeployProfile.Current.Name = (string) name;
+            DeploymentProfile.Current.Name = (string) name;
             return true;
         }
 
         private void SaveProfilesList() {
-            try {
-                Object2Xml<DeployProfile>.SaveToFile(DeployProfile.List, Config.FileDeployProfiles);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while saving the deployment profiles");
-            }
-            Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
+            DeploymentProfile.Save();
+            Config.Instance.CurrentDeployProfile = DeploymentProfile.Current.Name;
             UpdateCombo();
         }
 
         private void SetFieldsFromData() {
-            fl_directory.Text = DeployProfile.Current.SourceDirectory;
-            toggleRecurs.Checked = DeployProfile.Current.ExploreRecursively;
-            toggleAutoUpdateSourceDir.Checked = DeployProfile.Current.AutoUpdateSourceDir;
-            toggleMono.Checked = DeployProfile.Current.ForceSingleProcess;
-            toggleOnlyGenerateRcode.Checked = DeployProfile.Current.OnlyGenerateRcode;
-            fl_nbProcess.Text = DeployProfile.Current.NumberProcessPerCore.ToString();
+            fl_directory.Text = DeploymentProfile.Current.SourceDirectory;
+            toggleRecurs.Checked = DeploymentProfile.Current.ExploreRecursively;
+            toggleAutoUpdateSourceDir.Checked = DeploymentProfile.Current.AutoUpdateSourceDir;
+            toggleMono.Checked = DeploymentProfile.Current.ForceSingleProcess;
+            toggleOnlyGenerateRcode.Checked = DeploymentProfile.Current.OnlyGenerateRcode;
+            fl_nbProcess.Text = DeploymentProfile.Current.NumberProcessPerCore.ToString();
         }
 
         private void SetDataFromFields() {
-            DeployProfile.Current.SourceDirectory = fl_directory.Text;
-            DeployProfile.Current.ExploreRecursively = toggleRecurs.Checked;
-            DeployProfile.Current.AutoUpdateSourceDir = toggleAutoUpdateSourceDir.Checked;
-            DeployProfile.Current.ForceSingleProcess = toggleMono.Checked;
-            DeployProfile.Current.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
-            if (!int.TryParse(fl_nbProcess.Text, out DeployProfile.Current.NumberProcessPerCore))
-                DeployProfile.Current.NumberProcessPerCore = 1;
-            DeployProfile.Current.NumberProcessPerCore.Clamp(1, 15);
+            DeploymentProfile.Current.SourceDirectory = fl_directory.Text;
+            DeploymentProfile.Current.ExploreRecursively = toggleRecurs.Checked;
+            DeploymentProfile.Current.AutoUpdateSourceDir = toggleAutoUpdateSourceDir.Checked;
+            DeploymentProfile.Current.ForceSingleProcess = toggleMono.Checked;
+            DeploymentProfile.Current.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
+            if (!int.TryParse(fl_nbProcess.Text, out DeploymentProfile.Current.NumberProcessPerCore))
+                DeploymentProfile.Current.NumberProcessPerCore = 1;
+            DeploymentProfile.Current.NumberProcessPerCore.Clamp(1, 15);
         }
 
         private void UpdateCombo() {
-            cbName.DataSource = DeployProfile.List.Select(profile => profile.Name).ToList();
-            if (DeployProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
+            cbName.DataSource = DeploymentProfile.List.Select(profile => profile.Name).ToList();
+            if (DeploymentProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
                 cbName.SelectedText = Config.Instance.CurrentDeployProfile;
             else
                 cbName.SelectedIndex = 0;
         }
 
         private void ResetFields() {
-            DeployProfile.Current = new DeployProfile();
+            DeploymentProfile.Current = new DeploymentProfile();
             SetFieldsFromData();
-            DeployProfile.Current = null;
+            DeploymentProfile.Current = null;
         }
 
         /// <summary>

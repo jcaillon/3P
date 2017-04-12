@@ -29,8 +29,8 @@ using System.Text.RegularExpressions;
 
 namespace YamuiFramework.Helper {
     /// <summary>
-    /// A class that can be herited to hold themes,
-    /// instead of directly carrying Color fields, it only has a dictionnary of property -> value
+    /// A class that can be inherited to hold themes,
+    /// instead of directly carrying Color fields, it only has a dictionary of property -> value
     /// that is used to fill the Color properties of the class that inherits from this one
     /// </summary>
     public class GenericThemeHolder {
@@ -42,7 +42,7 @@ namespace YamuiFramework.Helper {
         public string ThemeName = "";
 
         /// <summary>
-        /// a property -> value dictionnary
+        /// a property -> value dictionary
         /// </summary>
         public Dictionary<string, string> SavedStringValues = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -61,7 +61,7 @@ namespace YamuiFramework.Helper {
 
             Utilities.ForEachLine(filePath, dataResources,
                 (i, line) => {
-                    // beggining of a new theme, read its name
+                    // beginning of a new theme, read its name
                     if (line.Length > 2 && line[0] == '>') {
                         if (curTheme != null)
                             previousStringValues = curTheme.SavedStringValues;
@@ -87,7 +87,7 @@ namespace YamuiFramework.Helper {
         }
 
         /// <summary>
-        /// Allows to replace all the occurences of @color by the actual color using the internal dico
+        /// Allows to replace all the occurrences of @color by the actual color using the internal dico
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
@@ -106,7 +106,7 @@ namespace YamuiFramework.Helper {
         #region Core
 
         /// <summary>
-        /// Saves info on the dictionnary, allows to recompute the Color values later
+        /// Saves info on the dictionary, allows to recompute the Color values later
         /// </summary>
         public void SetStringValues(string name, string value) {
             if (!SavedStringValues.ContainsKey(name))
@@ -116,7 +116,7 @@ namespace YamuiFramework.Helper {
         }
 
         /// <summary>
-        /// Set the values of this instance, using a dictionnary of key -> values
+        /// Set the values of this instance, using a dictionary of key -> values
         /// </summary>
         public void SetColorValues(Type thisType) {
             if (SavedStringValues == null)
@@ -138,7 +138,7 @@ namespace YamuiFramework.Helper {
         }
 
         /// <summary>
-        /// Find the html color behing any property
+        /// Find the html color behind any property
         /// </summary>
         public string GetHtmlColor(string propertyName) {
             return propertyName.ReplaceAliases(SavedStringValues).ApplyColorFunctions();

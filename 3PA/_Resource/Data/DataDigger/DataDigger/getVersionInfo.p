@@ -40,11 +40,13 @@ FUNCTION getRemoteFile RETURNS CHARACTER (pcRemoteFile AS CHARACTER):
   DEFINE VARIABLE iResult    AS INTEGER   NO-UNDO.
 
   cLocalFile = SESSION:TEMP-DIR + 'VersionInfo.txt'.
-  OS-DELETE cLocalFile NO-ERROR.
+  OS-DELETE cLocalFile.
 
   RUN DeleteURLCacheEntry (INPUT pcRemoteFile).
   RUN urlDownloadToFileA (0, pcRemoteFile, cLocalFile, 0, 0, OUTPUT iResult).
 
-  COPY-LOB FILE cLocalFile TO cContents NO-ERROR.
+  IF SEARCH(cLocalFile) <> ? THEN
+    COPY-LOB FILE cLocalFile TO cContents.
+    
   RETURN STRING(cContents).
 END FUNCTION. /* getRemoteFile */

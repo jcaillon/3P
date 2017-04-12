@@ -196,10 +196,12 @@
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
-    <Compile Include="MainFeatures\Pro\DeploymentRules.cs" />
-    <Compile Include="MainFeatures\Pro\FileToCompile.cs" />
-    <Compile Include="MainFeatures\Pro\FileToDeploy.cs" />
-    <Compile Include="MainFeatures\Pro\ProDeployment.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\DeploymentRules.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\FileDeployed.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\FileToCompile.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\FileToDeploy.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\DeploymentHandler.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\ProExecutionHandleCompilation.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -281,10 +283,10 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\Parser\ParserAnalyze.cs" />
-    <Compile Include="MainFeatures\Pro\Deployer.cs" />
-    <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\Deployer.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\DeploymentProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
-    <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\MultiCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="NppCore\NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />

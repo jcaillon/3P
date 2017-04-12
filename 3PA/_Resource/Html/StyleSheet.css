@@ -13,7 +13,7 @@ hr {
     width: 70%;
 }
 
-a:link {
+a {
     color: @GenericLinkColor;
     text-decoration: underline;
 }

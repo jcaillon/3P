@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Deployer.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,8 +26,11 @@ using System.Threading.Tasks;
 using WixToolset.Dtf.Compression;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
+    /// <summary>
+    /// This class is responsible for deploying FileToDeploy following DeploymentRules
+    /// </summary>
     internal class Deployer {
         
         #region Fields

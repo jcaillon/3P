@@ -118,10 +118,7 @@ END PROCEDURE.
 DEFINE TEMP-TABLE ttWidget NO-UNDO RCODE-INFORMATION
   FIELD hWidget   AS HANDLE
   FIELD iPosX     AS INTEGER
-  FIELD iPosY     AS INTEGER
   FIELD iWidth    AS INTEGER
-  FIELD iHeight   AS INTEGER
-  FIELD lVisible  AS LOGICAL 
   INDEX iPrim AS PRIMARY hWidget.
 
 /* If you have trouble with the cache, disable it in the settings screen */
@@ -492,6 +489,17 @@ FUNCTION isMouseOver RETURNS LOGICAL
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD isTableFilterUsed Procedure 
 FUNCTION isTableFilterUsed RETURNS LOGICAL
   ( INPUT TABLE ttTableFilter )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-isValidCodePage) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD isValidCodePage Procedure 
+FUNCTION isValidCodePage RETURNS LOGICAL
+  (pcCodepage AS CHARACTER) FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1501,14 +1509,15 @@ PROCEDURE getDumpFileName :
   IF VALID-HANDLE(hBuffer) THEN
   DO:
     hBuffer:FIND-UNIQUE(SUBSTITUTE('where _file-name = &1 and _File._File-Number < 32768', QUOTER(pcTable)),NO-LOCK).
-    IF hBuffer:AVAILABLE THEN 
+    IF hBuffer:AVAILABLE THEN
       cDumpName = hBuffer::_dump-name.
     ELSE 
       cDumpName = pcTable.
   END.
   ELSE 
     cDumpName = pcTable.
-
+  IF cDumpName = ? THEN cDumpName = pcTable.
+  
   PUBLISH "debugMessage" (3, SUBSTITUTE("DumpDir  : &1", cDumpDir)).
   PUBLISH "debugMessage" (3, SUBSTITUTE("BackupDir: &1", cBackupDir)).
   PUBLISH "debugMessage" (3, SUBSTITUTE("LastDir  : &1", cLastDir)).
@@ -1737,7 +1746,7 @@ PROCEDURE getFields :
               
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
 
-CREATE bField.
+    CREATE bField.
     ASSIGN 
       iFieldOrder          = iFieldOrder + 1
       bField.cTableCacheId = bTable.cCacheId
@@ -1824,7 +1833,7 @@ CREATE bField.
     bField.cTablename    = pcTableName
     bField.cFieldName    = "RECID"
                           
-    bField.lShow         = lShowRecidField
+    bField.lShow         = (IF cSelectedFields = '*' THEN lShowRecidField ELSE LOOKUP('RECID',cSelectedFields) > 0)
     bField.iOrder        = iFieldOrder
     bField.iOrderOrg     = iFieldOrder
     bField.cFullName     = 'RECID'
@@ -1859,7 +1868,7 @@ CREATE bField.
     bField.cTablename    = pcTableName
     bField.cFieldName    = "ROWID"
                           
-    bField.lShow         = lShowRowidField
+    bField.lShow         = (IF cSelectedFields = '*' THEN lShowRowidField ELSE LOOKUP('ROWID',cSelectedFields) > 0)
     bField.iOrder        = iFieldOrder
     bField.iOrderOrg     = iFieldOrder
     bField.cFieldName    = 'ROWID'
@@ -3493,8 +3502,8 @@ PROCEDURE updateFields :
     iFieldOrder = MAXIMUM(iFieldOrder,bField.iOrder).
 
     /* RECID / ROWID field visibility might be changed */
-    IF LOOKUP(bField.cFullName, "RECID,ROWID") > 0 THEN
-      bField.lShow = LOGICAL(getRegistry ("DataDigger", "AddDataColumnFor" + bField.cFullName)).
+/*     IF LOOKUP(bField.cFullName, "RECID,ROWID") > 0 THEN                                          */
+/*       bField.lShow = LOGICAL(getRegistry ("DataDigger", "AddDataColumnFor" + bField.cFullName)). */
 
   END. /* f/e bField */
 
@@ -4814,8 +4823,7 @@ END FUNCTION. /* isMouseOver */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION isTableFilterUsed Procedure 
 FUNCTION isTableFilterUsed RETURNS LOGICAL
   ( INPUT TABLE ttTableFilter ) :
-  /* 
-   * Returns whether any setting is used for table filtering 
+  /* Returns whether any setting is used for table filtering 
    */
   FIND ttTableFilter NO-ERROR.
   IF NOT AVAILABLE ttTableFilter THEN RETURN FALSE. 
@@ -4857,6 +4865,27 @@ END FUNCTION. /* isTableFilterUsed */
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-isValidCodePage) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION isValidCodePage Procedure 
+FUNCTION isValidCodePage RETURNS LOGICAL
+  (pcCodepage AS CHARACTER):
+  /* Returns whether pcCodePage is valid
+  */
+  DEFINE VARIABLE cDummy AS LONGCHAR NO-UNDO.
+  
+  IF pcCodePage = '' THEN RETURN TRUE.
+
+  FIX-CODEPAGE(cDummy) = pcCodepage NO-ERROR.
+  RETURN NOT ERROR-STATUS:ERROR.
+
+END FUNCTION. /* isValidCodePage */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
 &IF DEFINED(EXCLUDE-isWidgetChanged) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION isWidgetChanged Procedure 
@@ -4879,41 +4908,28 @@ FUNCTION isWidgetChanged RETURNS LOGICAL
   find ttWidget where ttWidget.hWidget = phWidget no-error.
   IF NOT AVAILABLE ttWidget THEN 
   DO:
-    PUBLISH "debugMessage" (2, SUBSTITUTE("New widget: &1 &2", phWidget:TYPE, phWidget:NAME)).
     CREATE ttWidget.
     ASSIGN ttWidget.hWidget = phWidget.
   END.
-  ELSE
-    PUBLISH "debugMessage" (3, SUBSTITUTE("Widget: &1 &2", phWidget:TYPE, phWidget:NAME)).
 
-  PUBLISH "debugMessage" (3, SUBSTITUTE("  iPosX     &1 - &2", ttWidget.iPosX    , phWidget:X           )).
-  PUBLISH "debugMessage" (3, SUBSTITUTE("  iPosY     &1 - &2", ttWidget.iPosY    , phWidget:Y           )).
-  PUBLISH "debugMessage" (3, SUBSTITUTE("  iWidth    &1 - &2", ttWidget.iWidth   , phWidget:WIDTH-PIXELS)).
-  PUBLISH "debugMessage" (3, SUBSTITUTE("  iHeight   &1 - &2", ttWidget.iHeight  , phWidget:HEIGHT-PIXELS)).
-  PUBLISH "debugMessage" (3, SUBSTITUTE("  lVisible  &1 - &2", ttWidget.lVisible , phWidget:VISIBLE)).
+  PUBLISH "debugMessage" (3, SUBSTITUTE("Widget: &1 &2", phWidget:TYPE, phWidget:NAME)).
 
   IF ttWidget.iPosX     <> phWidget:X
-/*  or ttWidget.iPosY     <> phWidget:y */
-  OR ttWidget.iWidth    <> phWidget:WIDTH-PIXELS
-/*  or ttWidget.iHeight   <> phWidget:height-pixels 
-  or ttWidget.lVisible  <> phWidget:visible */
-    THEN
+  OR ttWidget.iWidth <> phWidget:WIDTH-PIXELS THEN
   DO:
     ASSIGN
       ttWidget.iPosX     = phWidget:X
-      ttWidget.iPosY     = phWidget:Y
       ttWidget.iWidth    = phWidget:WIDTH-PIXELS
-      ttWidget.iHeight   = phWidget:HEIGHT-PIXELS
-/*       ttWidget.hFirstCol = hFirstColumn */
-      ttWidget.lVisible  = phWIdget:VISIBLE
       lChangeDetected    = TRUE.
   END.
 
   PUBLISH "debugMessage" (2, SUBSTITUTE("  Widget changed: &1", lChangeDetected)).
 
-  {&TimerStop}
   return lChangeDetected.
 
+  FINALLY:
+    {&TimerStop}
+  END FINALLY.
 END FUNCTION. /* isWidgetChanged */
 
 /* _UIB-CODE-BLOCK-END */
@@ -5237,3 +5253,4 @@ END FUNCTION. /* setRegistry */
 &ANALYZE-RESUME
 
 &ENDIF
+

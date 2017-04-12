@@ -30,6 +30,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.btOpenHook = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lbl_deployDir = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btStart = new YamuiFramework.Controls.YamuiButton();
@@ -66,7 +67,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.btReport = new YamuiFramework.Controls.YamuiButton();
             this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
-            this.btOpenHook = new YamuiFramework.Controls.YamuiButton();
+            this.btTest = new YamuiFramework.Controls.YamuiButton();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -89,6 +90,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.btTest);
             this.scrollPanel.ContentPanel.Controls.Add(this.btOpenHook);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
             this.scrollPanel.ContentPanel.Controls.Add(this.lbl_deployDir);
@@ -137,6 +139,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
+            // btOpenHook
+            // 
+            this.btOpenHook.BackGrndImage = null;
+            this.btOpenHook.GreyScaleBackGrndImage = null;
+            this.btOpenHook.IsFocused = false;
+            this.btOpenHook.IsHovered = false;
+            this.btOpenHook.IsPressed = false;
+            this.btOpenHook.Location = new System.Drawing.Point(268, 228);
+            this.btOpenHook.Name = "btOpenHook";
+            this.btOpenHook.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btOpenHook.Size = new System.Drawing.Size(282, 24);
+            this.btOpenHook.TabIndex = 169;
+            this.btOpenHook.Text = "Modify the procedure executed after each step";
+            // 
             // htmlLabel5
             // 
             this.htmlLabel5.AutoSize = false;
@@ -168,6 +184,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btStart
             // 
             this.btStart.BackGrndImage = null;
+            this.btStart.GreyScaleBackGrndImage = null;
+            this.btStart.IsFocused = false;
+            this.btStart.IsHovered = false;
+            this.btStart.IsPressed = false;
             this.btStart.Location = new System.Drawing.Point(30, 356);
             this.btStart.Name = "btStart";
             this.btStart.SetImgSize = new System.Drawing.Size(20, 20);
@@ -178,7 +198,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btReset
             // 
             this.btReset.BackGrndImage = null;
-            this.btReset.Location = new System.Drawing.Point(153, 356);
+            this.btReset.GreyScaleBackGrndImage = null;
+            this.btReset.IsFocused = false;
+            this.btReset.IsHovered = false;
+            this.btReset.IsPressed = false;
+            this.btReset.Location = new System.Drawing.Point(292, 356);
             this.btReset.Name = "btReset";
             this.btReset.SetImgSize = new System.Drawing.Size(20, 20);
             this.btReset.Size = new System.Drawing.Size(112, 24);
@@ -202,6 +226,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleAutoUpdateSourceDir
             // 
             this.toggleAutoUpdateSourceDir.BackGrndImage = null;
+            this.toggleAutoUpdateSourceDir.GreyScaleBackGrndImage = null;
+            this.toggleAutoUpdateSourceDir.IsFocused = false;
+            this.toggleAutoUpdateSourceDir.IsHovered = false;
+            this.toggleAutoUpdateSourceDir.IsPressed = false;
             this.toggleAutoUpdateSourceDir.Location = new System.Drawing.Point(268, 90);
             this.toggleAutoUpdateSourceDir.Margin = new System.Windows.Forms.Padding(5);
             this.toggleAutoUpdateSourceDir.Name = "toggleAutoUpdateSourceDir";
@@ -227,6 +255,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleOnlyGenerateRcode
             // 
             this.toggleOnlyGenerateRcode.BackGrndImage = null;
+            this.toggleOnlyGenerateRcode.GreyScaleBackGrndImage = null;
+            this.toggleOnlyGenerateRcode.IsFocused = false;
+            this.toggleOnlyGenerateRcode.IsHovered = false;
+            this.toggleOnlyGenerateRcode.IsPressed = false;
             this.toggleOnlyGenerateRcode.Location = new System.Drawing.Point(268, 178);
             this.toggleOnlyGenerateRcode.Margin = new System.Windows.Forms.Padding(5);
             this.toggleOnlyGenerateRcode.Name = "toggleOnlyGenerateRcode";
@@ -238,6 +270,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btSeeRules
             // 
             this.btSeeRules.BackGrndImage = null;
+            this.btSeeRules.GreyScaleBackGrndImage = null;
+            this.btSeeRules.IsFocused = false;
+            this.btSeeRules.IsHovered = false;
+            this.btSeeRules.IsPressed = false;
             this.btSeeRules.Location = new System.Drawing.Point(455, 321);
             this.btSeeRules.Name = "btSeeRules";
             this.btSeeRules.SetImgSize = new System.Drawing.Size(20, 20);
@@ -290,6 +326,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btDelete
             // 
             this.btDelete.BackGrndImage = null;
+            this.btDelete.GreyScaleBackGrndImage = null;
+            this.btDelete.IsFocused = false;
+            this.btDelete.IsHovered = false;
+            this.btDelete.IsPressed = false;
             this.btDelete.Location = new System.Drawing.Point(687, 29);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
@@ -301,6 +341,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btSaveAs
             // 
             this.btSaveAs.BackGrndImage = null;
+            this.btSaveAs.GreyScaleBackGrndImage = null;
+            this.btSaveAs.IsFocused = false;
+            this.btSaveAs.IsHovered = false;
+            this.btSaveAs.IsPressed = false;
             this.btSaveAs.Location = new System.Drawing.Point(595, 29);
             this.btSaveAs.Name = "btSaveAs";
             this.btSaveAs.SetImgSize = new System.Drawing.Size(20, 20);
@@ -312,6 +356,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btSave
             // 
             this.btSave.BackGrndImage = null;
+            this.btSave.GreyScaleBackGrndImage = null;
+            this.btSave.IsFocused = false;
+            this.btSave.IsHovered = false;
+            this.btSave.IsPressed = false;
             this.btSave.Location = new System.Drawing.Point(527, 29);
             this.btSave.Name = "btSave";
             this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
@@ -322,14 +370,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // cbName
             // 
+            this.cbName.BackGrndImage = null;
+            this.cbName.GreyScaleBackGrndImage = null;
+            this.cbName.IsFocused = false;
+            this.cbName.IsHovered = false;
+            this.cbName.IsPressed = false;
             this.cbName.Location = new System.Drawing.Point(268, 29);
             this.cbName.Name = "cbName";
+            this.cbName.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbName.Size = new System.Drawing.Size(253, 21);
             this.cbName.TabIndex = 153;
             // 
             // btRules
             // 
             this.btRules.BackGrndImage = null;
+            this.btRules.GreyScaleBackGrndImage = null;
+            this.btRules.IsFocused = false;
+            this.btRules.IsHovered = false;
+            this.btRules.IsPressed = false;
             this.btRules.Location = new System.Drawing.Point(268, 321);
             this.btRules.Name = "btRules";
             this.btRules.SetImgSize = new System.Drawing.Size(20, 20);
@@ -393,6 +451,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btBrowse
             // 
             this.btBrowse.BackGrndImage = null;
+            this.btBrowse.GreyScaleBackGrndImage = null;
+            this.btBrowse.IsFocused = false;
+            this.btBrowse.IsHovered = false;
+            this.btBrowse.IsPressed = false;
             this.btBrowse.Location = new System.Drawing.Point(225, 62);
             this.btBrowse.Margin = new System.Windows.Forms.Padding(0);
             this.btBrowse.Name = "btBrowse";
@@ -404,6 +466,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btUndo
             // 
             this.btUndo.BackGrndImage = null;
+            this.btUndo.GreyScaleBackGrndImage = null;
+            this.btUndo.IsFocused = false;
+            this.btUndo.IsHovered = false;
+            this.btUndo.IsPressed = false;
             this.btUndo.Location = new System.Drawing.Point(245, 62);
             this.btUndo.Margin = new System.Windows.Forms.Padding(0);
             this.btUndo.Name = "btUndo";
@@ -416,6 +482,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.fl_directory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.fl_directory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_directory.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_directory.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_directory.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_directory.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_directory.Location = new System.Drawing.Point(268, 62);
             this.fl_directory.Name = "fl_directory";
             this.fl_directory.Size = new System.Drawing.Size(580, 20);
@@ -426,6 +498,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btOpen.BackGrndImage = null;
+            this.btOpen.GreyScaleBackGrndImage = null;
+            this.btOpen.IsFocused = false;
+            this.btOpen.IsHovered = false;
+            this.btOpen.IsPressed = false;
             this.btOpen.Location = new System.Drawing.Point(851, 62);
             this.btOpen.Margin = new System.Windows.Forms.Padding(0);
             this.btOpen.Name = "btOpen";
@@ -438,6 +514,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btHistoric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btHistoric.BackGrndImage = null;
+            this.btHistoric.GreyScaleBackGrndImage = null;
+            this.btHistoric.IsFocused = false;
+            this.btHistoric.IsHovered = false;
+            this.btHistoric.IsPressed = false;
             this.btHistoric.Location = new System.Drawing.Point(871, 62);
             this.btHistoric.Margin = new System.Windows.Forms.Padding(0);
             this.btHistoric.Name = "btHistoric";
@@ -477,6 +557,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleRecurs
             // 
             this.toggleRecurs.BackGrndImage = null;
+            this.toggleRecurs.GreyScaleBackGrndImage = null;
+            this.toggleRecurs.IsFocused = false;
+            this.toggleRecurs.IsHovered = false;
+            this.toggleRecurs.IsPressed = false;
             this.toggleRecurs.Location = new System.Drawing.Point(268, 126);
             this.toggleRecurs.Margin = new System.Windows.Forms.Padding(5);
             this.toggleRecurs.Name = "toggleRecurs";
@@ -502,6 +586,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleMono
             // 
             this.toggleMono.BackGrndImage = null;
+            this.toggleMono.GreyScaleBackGrndImage = null;
+            this.toggleMono.IsFocused = false;
+            this.toggleMono.IsHovered = false;
+            this.toggleMono.IsPressed = false;
             this.toggleMono.Location = new System.Drawing.Point(268, 152);
             this.toggleMono.Margin = new System.Windows.Forms.Padding(5);
             this.toggleMono.Name = "toggleMono";
@@ -526,6 +614,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // fl_nbProcess
             // 
+            this.fl_nbProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_nbProcess.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_nbProcess.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_nbProcess.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_nbProcess.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_nbProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_nbProcess.Location = new System.Drawing.Point(268, 202);
             this.fl_nbProcess.Name = "fl_nbProcess";
             this.fl_nbProcess.Size = new System.Drawing.Size(34, 20);
@@ -535,6 +629,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btCancel
             // 
             this.btCancel.BackGrndImage = null;
+            this.btCancel.GreyScaleBackGrndImage = null;
+            this.btCancel.IsFocused = false;
+            this.btCancel.IsHovered = false;
+            this.btCancel.IsPressed = false;
             this.btCancel.Location = new System.Drawing.Point(30, 356);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
@@ -545,7 +643,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btReport
             // 
             this.btReport.BackGrndImage = null;
-            this.btReport.Location = new System.Drawing.Point(271, 356);
+            this.btReport.GreyScaleBackGrndImage = null;
+            this.btReport.IsFocused = false;
+            this.btReport.IsHovered = false;
+            this.btReport.IsPressed = false;
+            this.btReport.Location = new System.Drawing.Point(410, 356);
             this.btReport.Name = "btReport";
             this.btReport.SetImgSize = new System.Drawing.Size(20, 20);
             this.btReport.Size = new System.Drawing.Size(148, 24);
@@ -564,15 +666,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.progressBar.Size = new System.Drawing.Size(782, 24);
             this.progressBar.TabIndex = 114;
             // 
-            // btOpenHook
+            // btTest
             // 
-            this.btOpenHook.BackGrndImage = null;
-            this.btOpenHook.Location = new System.Drawing.Point(268, 228);
-            this.btOpenHook.Name = "btOpenHook";
-            this.btOpenHook.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btOpenHook.Size = new System.Drawing.Size(282, 24);
-            this.btOpenHook.TabIndex = 169;
-            this.btOpenHook.Text = "Modify the procedure executed after each step";
+            this.btTest.BackGrndImage = null;
+            this.btTest.GreyScaleBackGrndImage = null;
+            this.btTest.IsFocused = false;
+            this.btTest.IsHovered = false;
+            this.btTest.IsPressed = false;
+            this.btTest.Location = new System.Drawing.Point(153, 356);
+            this.btTest.Name = "btTest";
+            this.btTest.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btTest.Size = new System.Drawing.Size(133, 24);
+            this.btTest.TabIndex = 170;
+            this.btTest.Text = "Test deployment";
             // 
             // DoDeployPage
             // 
@@ -630,5 +736,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private HtmlLabel lbl_deployDir;
         private HtmlLabel htmlLabel5;
         private YamuiButton btOpenHook;
+        private YamuiButton btTest;
     }
 }

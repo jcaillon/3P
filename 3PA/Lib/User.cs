@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (User.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Globalization;
 using System.IO;
@@ -41,7 +38,7 @@ namespace _3PA.Lib {
                 if (!DateTime.TryParseExact(Config.Instance.TechnicalLastPing, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastPing)) {
                     lastPing = DateTime.MinValue;
                 }
-                // ping once every hour
+                // ping once 4 hours
                 if (DateTime.Now.Subtract(lastPing).TotalMinutes > Config.Instance.TechnicalPingEveryXMin) {
                     var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
                     webServiceJson.AddToReq("UUID", UniqueId);
@@ -53,6 +50,8 @@ namespace _3PA.Lib {
                         }
                     };
                     webServiceJson.Execute();
+
+                    Utils.DownloadFile(Config.PingGoogleAnalytics, Path.Combine(Config.FolderTemp, Path.GetTempFileName()), null);
                 }
             } catch (Exception e) {
                 if (Config.IsDevelopper)

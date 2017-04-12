@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ShareExportConf.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,6 +27,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -63,7 +61,7 @@ namespace _3PA.MainFeatures {
                         new ConfLine {
                             Label = "Deployment profiles",
                             HandledItem = Config.FileDeployProfiles,
-                            OnImport = line => DeployProfile.Import(),
+                            OnImport = line => DeploymentProfile.Import(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush

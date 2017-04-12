@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (DeploymentRules.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +27,7 @@ using _3PA.Lib;
 using _3PA.NppCore;
 using _3PA._Resource;
 
-namespace _3PA.MainFeatures.Pro {
+namespace _3PA.MainFeatures.Pro.Deploy {
 
     internal static class DeploymentRules {
 
@@ -437,7 +456,7 @@ namespace _3PA.MainFeatures.Pro {
                 case DeployType.Zip:
                     return new DeployTransferRuleZip();
                 case DeployType.DeleteInProlib:
-                    return new DeployTransferRuleProlib();
+                    return new DeployTransferRuleDeleteInProlib();
                 case DeployType.Ftp:
                     return new DeployTransferRuleFtp();
                 case DeployType.Delete:
@@ -522,7 +541,7 @@ namespace _3PA.MainFeatures.Pro {
         public virtual string ArchiveExt { get { return ".arc"; } }
 
         public override bool IsValid(out string error) {
-            if (!DeployTarget.ContainsFast(ArchiveExt)) {
+            if (!string.IsNullOrEmpty(DeployTarget) && !DeployTarget.ContainsFast(ArchiveExt)) {
                 error = ToStringDescription() + " : The rule has an incorrect deployment target, it should contain a file with the extension " + ArchiveExt;
                 return false;
             }
@@ -587,12 +606,16 @@ namespace _3PA.MainFeatures.Pro {
 
         public override bool IsValid(out string error) {
             error = null;
-            if (string.IsNullOrEmpty(SourcePattern)) {
-                error = ToStringDescription() + " : The source pattern path is empty";
+            if (string.IsNullOrEmpty(SourcePattern) || string.IsNullOrEmpty(DeployTarget)) {
+                error = ToStringDescription() + " : The source .pl pattern or relative path in the .pl is empty";
                 return false;
             }
             if (Step < 2) {
                 error = ToStringDescription() + " : The DeleteInProlib rule can only applied to steps >= 1 for safety reasons";
+                return false;
+            }
+            if (!SourcePattern.EndsWith(ArchiveExt)) {
+                error = ToStringDescription() + " : The rule has an incorrect source pattern, it should end with the extension " + ArchiveExt;
                 return false;
             }
             return true;
@@ -611,7 +634,7 @@ namespace _3PA.MainFeatures.Pro {
         public override DeployType Type { get { return DeployType.Ftp; } }
 
         public override bool IsValid(out string error) {
-            if (!DeployTarget.IsValidFtpAdress()) {
+            if (!string.IsNullOrEmpty(DeployTarget) && !DeployTarget.IsValidFtpAdress()) {
                 error = ToStringDescription() + " : The FTP rule has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optional)";
                 return false;
             }
@@ -682,11 +705,11 @@ namespace _3PA.MainFeatures.Pro {
         Delete = 1,
         DeleteFolder = 2,
 
+        DeleteInProlib = 10,
         Prolib = 11,
         Zip = 12,
         Cab = 13,
-        DeleteInProlib = 14,
-        Ftp = 15,
+        Ftp = 14,
         // every item above are treated in "packs"
 
         CopyFolder = 21,

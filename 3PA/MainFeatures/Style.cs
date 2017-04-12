@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Style.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,6 +27,7 @@ using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.NppCore;
 using _3PA._Resource;
 

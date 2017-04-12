@@ -20,20 +20,34 @@ DataDigger version 23 - 17 apr 2017 (Easter Egg)
 - New   : Row coloring now depending on chosen sort
 - New   : Right-click on data browse now shows total, min, max, avg of selected rows
 
-Fixed on beta 20170320:
+Changes in beta 20170320:
 - Solved: Filter window looks weird with large font
 - Solved: Query result always shows that query is incomplete (Mike Derrick)
 - Solved: First hint on upgrading does not show
 - Solved: Obsolete images of v18 and older were not cleaned up
 - Solved: Version upgrade logic does not run on new beta version
 
-Fixed in beta 20170330
+Changes in beta 20170330
 - Solved: Custom hook customFormat did not fire
 - Solved: Data Administration accessible in readonly mode (Curtis Schroer)
 - Solved: About-window not accessible without timer (Frans Hoekstra)
 - Solved: Several shortcuts conflicted (Frans Hoekstra)
 - Solved: Window title not cleared after resetting filter (Dirk Vreken)
 
+Changes in beta 20170412
+- Solved: Check on new version is done on each start, now once a day
+- Solved: Availability of a new version is shown on each start (Jeroen Beugels)
+- Solved: Dumping data from VST tables result in unknown dump file name (Edwin Schutten)
+- Solved: Dumping data with non-existing code page results in crash (Edwin Schutten)
+- Solved: Edit window closes when it loses focus (Edwin Schutten)
+- Solved: Error when updating record when no fields are visible (Edwin Schutten)
+- Solved: Field visibility for RECID / ROWID fields was not preserved (Edwin Schutten)
+- Solved: Error when opening DD with data on clipboard and database filled in in filter
+- Solved: Error message when running DD on a machine where PSTIMER is not registered
+
+- New: set physical database name in title (Edwin Schutten)
+- New: toggle selection of all fields in edit window
+- New: optional pingback of DataDigger
 
 =====================================================================================
 

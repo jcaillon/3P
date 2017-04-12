@@ -1,5 +1,4 @@
 ﻿#region header
-
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Config.cs) is part of 3P.
@@ -17,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -40,6 +37,7 @@ namespace _3PA.MainFeatures {
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     internal static class Config {
+
         #region config Object
 
         /// <summary>
@@ -617,7 +615,7 @@ namespace _3PA.MainFeatures {
         /// To update when updating the version of datadigger
         /// </summary>
         public static string EmbeddedDataDiggerVersion {
-            get { return @"v22"; }
+            get { return @"v22.1"; }
         }
 
         public static string DataDiggerVersionUrl {
@@ -693,6 +691,10 @@ namespace _3PA.MainFeatures {
 
         public static string BugsGetWebWervice {
             get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; }
+        }
+
+        public static string PingGoogleAnalytics {
+            get { return @"https://goo.gl/cx0k5G"; }
         }
 
         /// <summary>
