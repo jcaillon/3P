@@ -535,7 +535,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             } else {
                 // if we want to move the r-code somewhere during the deployment, then we will compile the r-code
                 // directly there, because it's faster than generating it in a temp folder and moving it afterward
-                fileToCompile.CompilationOutputDir = lastDeployment.TargetPath;
+                fileToCompile.CompilationOutputDir = lastDeployment.TargetBasePath;
             }
 
             return true;

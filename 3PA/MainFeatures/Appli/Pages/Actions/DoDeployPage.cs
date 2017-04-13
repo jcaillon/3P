@@ -26,6 +26,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
@@ -48,7 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private Timer _progressTimer;
 
         // proenv copied when clicking on the start button
-        private DeploymentHandler _proDeployment;
+        private DifferentialDeploymentHandler _proDeployment;
 
         private string _reportExportPath;
 
@@ -269,7 +271,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // start the deployment
             Task.Factory.StartNew(() => {
-                _proDeployment = new DeploymentHandler(ProEnvironment.Current, DeploymentProfile.Current) {
+                _proDeployment = new DifferentialDeploymentHandler(ProEnvironment.Current, DeploymentProfile.Current) {
                     IsTestMode = isTest,
                     OnExecutionEnd = OnCompilationEnd
                 };
@@ -295,6 +297,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // called when the compilation ended
         private void OnCompilationEnd(DeploymentHandler proDeployment) {
+
+            var diffProDeployement = proDeployment as DifferentialDeploymentHandler;
+
+            if (diffProDeployement != null) {
+                XmlSerializer serializer = new XmlSerializer(typeof(List<FileDeployed>));
+                using (TextWriter writer = new StreamWriter(@"d:\Profiles\jcaillon\Desktop\out.xml")) {
+                    serializer.Serialize(writer, diffProDeployement.FilesDeployed);
+                }
+            }
+
+
             Task.Factory.StartNew(() => {
                 this.SafeInvoke(page => {
                     // get rid of the timer

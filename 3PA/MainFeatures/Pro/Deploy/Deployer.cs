@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             try { 
                 var fileName = Path.GetFileName(sourcePath);
                 if (fileName != null)
-                    return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.File).Select(deploy => deploy.Set(sourcePath, Path.Combine(deploy.TargetPath, fileName))).ToList();
+                    return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.File).Select(deploy => deploy.Set(sourcePath, Path.Combine(deploy.TargetBasePath, fileName))).ToList();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "GetTransfersNeededForFile");
             }
@@ -110,7 +110,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public List<FileToDeploy> GetTransfersNeededForFolders(string sourcePath, int step) {
             try {
-                return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.Folder).Select(deploy => deploy.Set(sourcePath, deploy.TargetPath)).ToList();
+                return GetTargetsNeeded(sourcePath, step, DeployTransferRuleTarget.Folder).Select(deploy => deploy.Set(sourcePath, deploy.TargetBasePath)).ToList();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "GetTransfersNeededForFolders");
             }
@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     outPath = Path.Combine(_deploymentDirectory, outPath);
                 }
 
-                if (!outList.Exists(needed => needed.TargetPath.EqualsCi(outPath))) {
+                if (!outList.Exists(needed => needed.TargetBasePath.EqualsCi(outPath))) {
                     outList.Add(FileToDeploy.New(rule.Type, sourcePath, outPath, rule));
                 }
 
@@ -271,9 +271,9 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
                         string targetRPath;
                         if (execution.ProEnv.CompileLocally)
-                            targetRPath = Path.Combine(deployNeeded.TargetPath, Path.GetFileName(compiledFile.CompOutputR));
+                            targetRPath = Path.Combine(deployNeeded.TargetBasePath, Path.GetFileName(compiledFile.CompOutputR));
                         else
-                            targetRPath = Path.Combine(deployNeeded.TargetPath, compiledFile.CompOutputR.Replace(compiledFile.CompilationOutputDir, "").TrimStart('\\'));
+                            targetRPath = Path.Combine(deployNeeded.TargetBasePath, compiledFile.CompOutputR.Replace(compiledFile.CompilationOutputDir, "").TrimStart('\\'));
 
                         // add .r and .lst (if needed) to the list of files to deploy
                         outputList.Add(deployNeeded.Set(compiledFile.CompOutputR, targetRPath));

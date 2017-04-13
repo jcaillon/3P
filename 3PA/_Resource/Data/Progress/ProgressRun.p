@@ -319,7 +319,7 @@ PROCEDURE pi_compileList PRIVATE:
         DELETE tt_list.
 
     /* for each file to compile */
-    FOR EACH tt_list:    
+    FOR EACH tt_list:
         &IF {&CanAnalyse} &THEN
             /* we don't bother saving/restoring the log-manager state since we are only compiling, there
                should be no *useful* log activated at this moment */
@@ -369,14 +369,16 @@ PROCEDURE pi_compileList PRIVATE:
                         NO-ERROR.
             &ENDIF
         &ENDIF
+        
+        &IF {&CanAnalyse} &THEN
+            LOG-MANAGER:CLOSE-LOG().
+        &ENDIF
 
         fi_output_last_error().
         RUN pi_handleCompilErrors (INPUT tt_list.source) NO-ERROR.
         fi_output_last_error().
 
         &IF {&CanAnalyse} &THEN
-            LOG-MANAGER:CLOSE-LOG().
-
             /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
             RUN pi_generateTableRef (INPUT tt_list.source, INPUT tt_list.outdir, INPUT tt_list.reftables) NO-ERROR.
             fi_output_last_error().
@@ -612,10 +614,9 @@ FUNCTION fi_output_last_error RETURNS LOGICAL PRIVATE ( ) :
                 ASSIGN lc_out = "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) + "~n".
             END.
         END.
+        fi_write(INPUT {&LogPath}, INPUT lc_out).
         RETURN TRUE.
     END.
-
-    fi_write(INPUT {&LogPath}, INPUT lc_out).
 
     ERROR-STATUS:ERROR = NO.
 
@@ -631,10 +632,10 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
 
     DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
     DEFINE VARIABLE ll_dbDown AS LOGICAL NO-UNDO.
-    
-    OUTPUT STREAM str_rw TO VALUE({&DbLogPath}) APPEND BINARY.
 
     IF ERROR-STATUS:ERROR THEN DO:
+
+        OUTPUT STREAM str_rw TO VALUE({&DbLogPath}) APPEND BINARY.
 
         IF RETURN-VALUE > "" THEN
             PUT STREAM str_rw UNFORMATTED RETURN-VALUE SKIP.
@@ -650,10 +651,11 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
                 PUT STREAM str_rw UNFORMATTED "(" + STRING(ERROR-STATUS:GET-NUMBER(li_)) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
+        
+        OUTPUT STREAM str_rw CLOSE.
+        
         RETURN TRUE.
     END.
-    
-    OUTPUT STREAM str_rw CLOSE.
 
     ERROR-STATUS:ERROR = NO.
 

@@ -47,36 +47,10 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-
-            // CREATING ZIP FILE BY ADDING LIST OF FILES
-            var zip = new ZipInfo(@"D:\testarchive1.zip");
-            var files = new List<string>();
-            files.Add(@"D:\outils\defraggler x86.exe");
-            files.Add(@"C:\Windows\Notepad.exe");
-            zip.PackFiles(null, files, null);
-
-            CabInfo cab;
-
-            // CREATING ZIP FILE BY ADDING FOLDER (WITH SUB-FOLDERS) USING MAXIMUM COMPRESSION
-            cab = new CabInfo(@"D:\cnafexe\tests_webclient\webclient_locator\0002\diffs\clt5to6.cab");
-            cab.Pack(@"D:\cnafexe\tests_webclient\webclient_locator\0002\diffs\clt5to6", true, CompressionLevel.Max, null);
-
-            // CREATING CAB FILE BY ADDING LIST OF FILES
-            cab = new CabInfo(@"D:\testarchive1.cab");
-            files.Clear();
-            files.Add(@"C:\Windows\Explorer.exe");
-            files.Add(@"C:\Windows\Notepad.exe");
-            cab.PackFiles(null, files, null);
-
-            // CREATING CAB FILE BY ADDING FOLDER (WITH SUB-FOLDERS) USING MINIMUM COMPRESSION
-            //cab = new CabInfo(@"D:\testarchive2.cab");
-            //cab.Pack(@"C:\Balaji", true, Microsoft.Deployment.Compression.CompressionLevel.Min, null);
-
             MeasureIt(() => {
-                //fuck = ListStuff();
+                var fuck = ListStuff();
+                var t = fuck;
             }, "1 : ");
-
-
         }
 
         private static List<FileCoo> ListStuff() {
@@ -98,45 +72,6 @@ namespace _3PA.Tests {
         internal class FileCoo {
             public string Path;
             public string Md5;
-        }
-
-        private static void FindIncludes2() {
-            Utils.ForEachLine(@"d:\Profiles\jcaillon\Desktop\test.xrf", new byte[0], (i, line) => {
-                var startIdx = 0;
-                do {
-                    var incIdx = line.IndexOf("INCLUDE ", startIdx, StringComparison.CurrentCulture);
-                    if (incIdx > 0) {
-                        // the line format should be 999 INCLUDE inc.i, we test the presence of the number
-                        if (incIdx - 2 < 0 || !char.IsDigit(line[incIdx - 2])) {
-                            startIdx = incIdx + 1;
-                            continue;
-                        }
-                        // position at the start of inc.i
-                        incIdx += 8;
-                        if (incIdx < line.Length - 1) {
-                            // skip a first "
-                            if (line[incIdx] == '"') {
-                                incIdx++;
-                            }
-                            // skip all the whitespaces
-                            while (incIdx < line.Length && char.IsWhiteSpace(line[incIdx])) {
-                                incIdx++;
-                            }
-                            // now match until the next whitespace
-                            var maxIdx = incIdx;
-                            while (maxIdx < line.Length && !char.IsWhiteSpace(line[maxIdx])) {
-                                maxIdx++;
-                            }
-                            // extract the .i name
-                            if (maxIdx > incIdx) {
-                                var yoyo = line.Substring(incIdx, maxIdx - incIdx).Trim().TrimEnd('"');
-                                UserCommunication.Notify(yoyo);
-                            }
-                        }
-                    }
-                    break;
-                } while (true);
-            }, Encoding.Default);
         }
 
         public static void DebugTest2() {

@@ -64,12 +64,12 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// represents the source file (i.e. includes) used to generate a given .r code file
         /// </summary>
-        public List<string> RCodeSourceFilesUsed { get; private set; }
+        public List<string> RequiredFiles { get; private set; }
 
         /// <summary>
         /// represent the tables that were referenced in a given .r code file
         /// </summary>
-        public List<TableCrc> RCodeTablesReferenced { get; private set; }
+        public List<TableCrc> RequiredTables { get; private set; }
 
         /// <summary>
         /// Returns the base file name (set in constructor)
@@ -89,6 +89,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             BaseFileName = Path.GetFileNameWithoutExtension(sourcePath);
             try {
                 Size = new FileInfo(sourcePath).Length;
+
             } catch (Exception) {
                 Size = 0;
             }
@@ -100,14 +101,17 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public void ReadAnalysisResults() {
             // read RCodeTableReferenced
             if (!string.IsNullOrEmpty(CompOutputRefTables)) {
-                RCodeTablesReferenced = new List<TableCrc>();
+                RequiredTables = new List<TableCrc>();
                 Utils.ForEachLine(CompOutputRefTables, new byte[0], (i, line) => {
                     var split = line.Split('\t');
                     if (split.Length == 2) {
-                        RCodeTablesReferenced.Add(new TableCrc {
-                            QualifiedTableName = split[0],
-                            Crc = split[1]
-                        });
+                        var crc = split[1].Trim();
+                        if (!crc.Equals("0")) {
+                            RequiredTables.Add(new TableCrc {
+                                QualifiedTableName = split[0].Trim(),
+                                Crc = crc
+                            });
+                        }
                     }
                 }, Encoding.Default);
                 CompOutputRefTables = null;
@@ -170,7 +174,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                         // wrong line format
                     }
                 }, Encoding.Default);
-                RCodeSourceFilesUsed = references.ToList();
+                RequiredFiles = references.ToList();
                 CompOutputFileIdLog = null;
             }
         }
@@ -181,7 +185,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
     /// <summary>
     /// This class represent the tables that were referenced in a given .r code file
     /// </summary>
-    internal class TableCrc {
+    public class TableCrc {
         public string QualifiedTableName { get; set; }
         public string Crc { get; set; }
     }

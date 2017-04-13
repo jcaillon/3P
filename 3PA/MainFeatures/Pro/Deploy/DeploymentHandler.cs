@@ -37,17 +37,17 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// The action to execute just after the end of a prowin process
         /// </summary>
-        public Action<DeploymentHandler> OnExecutionEnd { private get; set; }
+        public Action<DeploymentHandler> OnExecutionEnd { protected get; set; }
 
         /// <summary>
         /// The action to execute at the end of the process if it went well = we found a .log and the database is connected or is not mandatory
         /// </summary>
-        public Action<DeploymentHandler> OnExecutionOk { private get; set; }
+        public Action<DeploymentHandler> OnExecutionOk { protected get; set; }
 
         /// <summary>
         /// The action to execute at the end of the process if something went wrong (no .log or database down)
         /// </summary>
-        public Action<DeploymentHandler> OnExecutionFailed { private get; set; }
+        public Action<DeploymentHandler> OnExecutionFailed { protected get; set; }
 
         #endregion
 
@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// When true, we activate the log just before compiling with FileId active + we generate a file that list referenced table in the .r
         /// </summary>
-        public bool IsAnalysisMode { get; set; }
+        public virtual bool IsAnalysisMode { get; set; }
 
         #endregion
 
@@ -70,7 +70,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// max step number composing this deployment
         /// </summary>
-        public int MaxStep { get; private set; }
+        public int MaxStep { get; protected set; }
 
         /// <summary>
         /// Total number of steps composing this deployment
@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Current deployment step
         /// </summary>
-        public int CurrentStep { get; private set; }
+        public int CurrentStep { get; protected set; }
 
         /// <summary>
         /// 0 -> 100% progression for the deployment
@@ -127,14 +127,14 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// remember the time when the compilation started
         /// </summary>
-        public DateTime StartingTime { get; private set; }
+        public DateTime StartingTime { get; protected set; }
 
         /// <summary>
         /// Human readable amount of time needed for this execution
         /// </summary>
-        public string TotalDeploymentTime { get; private set; }
+        public string TotalDeploymentTime { get; protected set; }
 
-        public bool CompilationHasFailed { get; private set; }
+        public bool CompilationHasFailed { get; protected set; }
 
         public bool HasBeenCancelled {
             get { return _cancelSource.IsCancellationRequested; }
@@ -146,27 +146,25 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public string ElapsedTime {
             get { return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds)); }
         }
-
-
-
+        
         #endregion
 
-        #region Private fields
+        #region protected fields
 
-        private Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
+        protected Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
 
-        private DeploymentProfile _currentProfile;
+        protected DeploymentProfile _currentProfile;
 
-        private ProEnvironment.ProEnvironmentObject _proEnv;
+        protected ProEnvironment.ProEnvironmentObject _proEnv;
 
-        private volatile float _currentStepDeployPercentage;
+        protected volatile float _currentStepDeployPercentage;
 
         // Stores the current compilation info
-        private MultiCompilation _proCompilation;
+        protected MultiCompilation _proCompilation;
 
         CancellationTokenSource _cancelSource = new CancellationTokenSource();
 
-        private ProExecutionDeploymentHook _hookExecution;
+        protected ProExecutionDeploymentHook _hookExecution;
 
         #endregion
 
@@ -201,7 +199,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 MonoProcess = _currentProfile.ForceSingleProcess || _proEnv.IsDatabaseSingleUser,
                 NumberOfProcessesPerCore = _currentProfile.NumberProcessPerCore,
                 RFilesOnly = _currentProfile.OnlyGenerateRcode,
-                IsTestMode = IsTestMode
+                IsTestMode = IsTestMode,
+                IsAnalysisMode = IsAnalysisMode
             };
 
             _proCompilation.OnCompilationOk += OnCompilationOk;
@@ -244,10 +243,6 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             var outlist = GetFilteredFilesList(_currentProfile.SourceDirectory, 1, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
                 .SelectMany(file => _proEnv.Deployer.GetTransfersNeededForFile(file, 1))
                 .ToNonNullList();
-            // list folders
-            outlist.AddRange(GetFilteredFoldersList(_currentProfile.SourceDirectory, 1, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .SelectMany(folder => _proEnv.Deployer.GetTransfersNeededForFolders(folder, 1))
-                .ToNonNullList());
             return outlist;
         }
 
@@ -281,7 +276,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         #endregion
 
-        #region Private
+        #region protected
 
         /// <summary>
         /// Returns a list of folders in the given folder (recursively or not depending on the option),
@@ -312,7 +307,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Called when the compilation step 0 failed
         /// </summary>
-        private void OnCompilationFailed(MultiCompilation proCompilation) {
+        protected void OnCompilationFailed(MultiCompilation proCompilation) {
             if (HasBeenCancelled)
                 return;
 
@@ -323,7 +318,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Called when the compilation step 0 ended correctly
         /// </summary>
-        private void OnCompilationOk(MultiCompilation comp, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
+        protected void OnCompilationOk(MultiCompilation comp, List<FileToCompile> fileToCompiles, List<FileToDeploy> filesToDeploy) {
             if (HasBeenCancelled)
                 return;
 
@@ -338,7 +333,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Deployment for the step 1 and >=
         /// </summary>
-        private void DeployStepOneAndMore(int currentStep) {
+        protected void DeployStepOneAndMore(int currentStep) {
             if (HasBeenCancelled)
                 return;
 
@@ -363,7 +358,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Execute the hook procedure for the step 0+
         /// </summary>
-        private void ExecuteDeploymentHook(int currentStep) {
+        protected void ExecuteDeploymentHook(int currentStep) {
             if (HasBeenCancelled)
                 return;
 
@@ -391,7 +386,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// This method is executed when the overall execution is over
         /// </summary>
-        private void EndOfDeployment() {
+        protected void EndOfDeployment() {
 
             TotalDeploymentTime = ElapsedTime;
 
@@ -609,5 +604,4 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         #endregion
 
     }
-    
 }

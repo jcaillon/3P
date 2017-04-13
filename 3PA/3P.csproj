@@ -197,6 +197,7 @@
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentRules.cs" />
+    <Compile Include="MainFeatures\Pro\Deploy\DifferentialDeploymentHandler.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileDeployed.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileToCompile.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileToDeploy.cs" />

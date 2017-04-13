@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// target path computed from the deployment rules
         /// </summary>
-        public string TargetPath { get; set; }
+        public string TargetBasePath { get; set; }
 
         /// <summary>
         /// The path of input file that was originally compiled to trigger this move (can be equal to From)
@@ -104,9 +104,9 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Constructor
         /// </summary>
-        public FileToDeploy(string sourcePath, string targetPath, DeployTransferRule rule) {
+        public FileToDeploy(string sourcePath, string targetBasePath, DeployTransferRule rule) {
             Origin = sourcePath;
-            TargetPath = targetPath;
+            TargetBasePath = targetBasePath;
             RuleReference = rule;
         }
 
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// Returns a "copy" (only target path and those inputs are copied) if this object, setting properties in the meantime
         /// </summary>
         public virtual FileToDeploy Copy(string from, string to) {
-            return New(DeployType, Origin, TargetPath, RuleReference).Set(from, to);
+            return New(DeployType, Origin, TargetBasePath, RuleReference).Set(from, to);
         }
 
         /// <summary>
@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         #region Life and death
 
-        public FileToDeployDelete(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployDelete(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -323,7 +323,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         #region Life and death
 
-        public FileToDeployDeleteFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployDeleteFolder(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -397,7 +397,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Constructor
         /// </summary>
-        protected FileToDeployInPack(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        protected FileToDeployInPack(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -491,7 +491,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         #region Life and death
 
-        public FileToDeployDeleteInProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployDeleteInProlib(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -542,7 +542,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         public override string PackExt { get { return ".cab"; } }
 
-        public FileToDeployCab(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployCab(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -565,7 +565,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         public override string PackExt { get { return ".pl"; } }
 
-        public FileToDeployProlib(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployProlib(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -589,7 +589,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         public override string PackExt { get { return ".zip"; } }
 
-        public FileToDeployZip(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployZip(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         /// <summary>
         /// Returns a new archive info
@@ -629,7 +629,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Constructor
         /// </summary>
-        public FileToDeployFtp(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployFtp(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -724,7 +724,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         #region Life and death
 
-        public FileToDeployCopyFolder(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployCopyFolder(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         #endregion
 
@@ -786,7 +786,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public override DeployType DeployType { get { return FinalDeploy ? DeployType.Move : DeployType.Copy; } }
 
-        public FileToDeployCopy(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployCopy(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         protected override bool TryDeploy() {
             try {
@@ -816,7 +816,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public override DeployType DeployType { get { return DeployType.Move; } }
 
-        public FileToDeployMove(string sourcePath, string targetPath, DeployTransferRule rule) : base(sourcePath, targetPath, rule) { }
+        public FileToDeployMove(string sourcePath, string targetBasePath, DeployTransferRule rule) : base(sourcePath, targetBasePath, rule) { }
 
         protected override bool TryDeploy() {
             try {

@@ -656,6 +656,14 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public override DeployType Type { get { return DeployType.CopyFolder; } }
 
         public override DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.Folder; } }
+
+        public override bool IsValid(out string error) {
+            if (Step < 2) {
+                error = ToStringDescription() + " : The CopyFolder rule can only applied to steps >= 1";
+                return false;
+            }
+            return base.IsValid(out error);
+        }
     }
 
     #endregion

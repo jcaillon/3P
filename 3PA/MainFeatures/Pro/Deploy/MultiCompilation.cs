@@ -267,7 +267,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     Files = fileLists[i],
                     NeedDatabaseConnection = true,
                     NoBatch = true,
-                    IsTestMode = IsTestMode
+                    IsTestMode = IsTestMode,
+                    IsAnalysisMode = IsAnalysisMode
                 };
                 exec.OnExecutionOk += OnExecutionOk;
                 exec.OnExecutionFailed += OnExecutionFailed;

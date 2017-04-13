@@ -19,14 +19,59 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Xml.Serialization;
 
 namespace _3PA.MainFeatures.Pro.Deploy {
 
-    internal class FileDeployed {
+    [Serializable]
+    [XmlInclude(typeof(FileDeployedCompiled))]
+    public class FileDeployed {
 
+        /// <summary>
+        /// The relative path of the source file
+        /// </summary>
+        public string SourcePath { get; set; }
 
+        public DateTime LastWriteTime { get; set; }
+
+        public long Size { get; set; }
+
+        /// <summary>
+        /// MD5 
+        /// </summary>
+        public string Md5 { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string TargetPath { get; set; }
+
+        public string TargetPackPath { get; set; }
+
+        public string TargetPathInPack { get; set; }
+
+        public DeploymentState State { get; set; }
+
+    }
+
+    [Serializable]
+    public class FileDeployedCompiled : FileDeployed {
+
+        /// <summary>
+        /// represents the source file (i.e. includes) used to generate a given .r code file
+        /// </summary>
+        public List<string> RequiredFiles { get; set; }
+
+        /// <summary>
+        /// represent the tables that were referenced in a given .r code file
+        /// </summary>
+        public List<TableCrc> RequiredTables { get; set; }
+
+    }
+
+    public enum DeploymentState {
+        Add,
+        Delete,
     }
 
 }

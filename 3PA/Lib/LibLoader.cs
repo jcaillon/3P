@@ -36,12 +36,15 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
             try {
-                var assName = args.Name.Substring(0, args.Name.IndexOf(",", StringComparison.CurrentCultureIgnoreCase));
-                switch (assName) {
-                    case "YamuiFramework":
-                        return Assembly.Load(DependenciesResources.YamuiFramework);
-                    default:
-                        return null;
+                var commaIdx = args.Name.IndexOf(",", StringComparison.CurrentCultureIgnoreCase);
+                if (commaIdx > 0) {
+                    var assName = args.Name.Substring(0, commaIdx);
+                    switch (assName) {
+                        case "YamuiFramework":
+                            return Assembly.Load(DependenciesResources.YamuiFramework);
+                        default:
+                            return null;
+                    }
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in LibLoader");
