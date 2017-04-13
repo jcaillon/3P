@@ -426,7 +426,8 @@ namespace _3PA.MainFeatures {
             public bool CodeExplorerVisible = true;
 
             public string CodeExplorerItemPriorityList = "";
-            public bool CodeExplorerDisplayExternalItems = false;
+            public bool CodeExplorerDisplayPersistentItems = false;
+            public bool CodeExplorerDisplayItemsFromInclude = true;
 
             [Display(Name = "Auto-hide/show for progress documents",
                 Description = "Check this option to automatically hide the Code explorer when the current isn't<br>a progress file, and automatically show it when it is",

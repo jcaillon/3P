@@ -15,3 +15,4 @@
 - Problem with progress v9x : issue with the use of too many streams in the 3P progress program, v9 limits the max stream to 5 -> corrected to only use 1 stream...
 - Fields display all the flags
 - Change the behavior of the prototype update, it now occurs AFTER the file is saved, which is safer in case of a problem
+- #163 : The code explorer now has again the button "from include" that allows to display/hide the items parsed from include files

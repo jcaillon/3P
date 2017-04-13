@@ -112,6 +112,9 @@ namespace _3PA.MainFeatures.Parser {
         /// Add an item as a child of "parent", parent can be null and it will be added to the root node
         /// </summary>
         private void PushToCodeExplorer(CodeItem parent, CodeItem newChild, bool addAsNode = false) {
+            if (!Config.Instance.CodeExplorerDisplayItemsFromInclude && newChild.Flags.HasFlag(ParseFlag.FromInclude)) {
+                return;
+            }
             if (parent == null) {
                 _parsedExplorerItemsList.Add(newChild);
             } else {
@@ -691,7 +694,7 @@ namespace _3PA.MainFeatures.Parser {
             _parsedCompletionItemsList.AddRange(listToAdd);
 
             // add info to the code explorer
-            if (Config.Instance.CodeExplorerDisplayExternalItems) {
+            if (Config.Instance.CodeExplorerDisplayPersistentItems) {
                 foreach (var codeExplorerItem in parserVisitor.ParsedExplorerItemsList.SelectMany(item => item.Children ?? new List<FilteredTypeTreeListItem>()).Cast<CodeItem>().Where(item => item is FunctionCodeItem || item is ProcedureCodeItem)) {
                     codeExplorerItem.Flags = codeExplorerItem.Flags | ParseFlag.Persistent;
                     PushToCodeExplorer(codeExplorerItem is FunctionCodeItem ? GetExplorerListNode("Functions", CodeExplorerIconType.Function) : GetExplorerListNode("Procedures", CodeExplorerIconType.Procedure), codeExplorerItem);

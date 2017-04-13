@@ -58,18 +58,24 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 new YamuiFilterBox.YamuiFilterBoxButton {
                     Image = ImageResources.Numerical_sorting,
                     OnClic = buttonSort_Click,
-                    ToolTip = "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order<br>-Uncategorized, unsorted"
+                    ToolTip = "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order"
                 },
                 new YamuiFilterBox.YamuiFilterBoxButton {
                     Image = ImageResources.Persistent,
+                    OnClic = ButtonPersistentOnButtonPressed,
+                    ToolTip = "Toggle on/off <b>to display</b>, in the explorer, the functions and procedures loaded in persistent in this file"
+                },
+                new YamuiFilterBox.YamuiFilterBoxButton {
+                    Image = ImageResources.FromInclude,
                     OnClic = ButtonFromIncludeOnButtonPressed,
-                    ToolTip = "Toggle on/off <b>the display</b>, in the explorer, the functions and procedures loaded in persistent in this file"
+                    ToolTip = "Toggle on/off <b>to display</b>, in the explorer, all the items loaded from include files"
                 }
             };
             filterbox.Initialize(yamuiList);
             filterbox.ExtraButtonsList[1].BackGrndImage = _isExpanded ? ImageResources.Collapse : ImageResources.Expand;
-            filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
             filterbox.ExtraButtonsList[2].BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.Alphabetical_sorting : ImageResources.Numerical_sorting;
+            filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayPersistentItems;
+            filterbox.ExtraButtonsList[4].UseGreyScale = !Config.Instance.CodeExplorerDisplayItemsFromInclude;
 
             Refreshing = false;
 
@@ -146,7 +152,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (curItem == null)
                 return false;
 
-            if (!curItem.CanExpand) {
+            if (!curItem.CanExpand && !string.IsNullOrEmpty(curItem.DocumentOwner)) {
                 // Item clicked : go to line
                 Npp.Goto(curItem.DocumentOwner, curItem.GoToLine, curItem.GoToColumn);
                 return true;
@@ -196,10 +202,19 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Sci.GrabFocus();
         }
 
+        private void ButtonPersistentOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
+            // change option and image
+            Config.Instance.CodeExplorerDisplayPersistentItems = !Config.Instance.CodeExplorerDisplayPersistentItems;
+            filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayPersistentItems;
+            // Parse the document
+            ParserHandler.ParseDocumentNow();
+            Sci.GrabFocus();
+        }
+
         private void ButtonFromIncludeOnButtonPressed(YamuiButtonImage sender, EventArgs e) {
             // change option and image
-            Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
-            filterbox.ExtraButtonsList[3].UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
+            Config.Instance.CodeExplorerDisplayItemsFromInclude = !Config.Instance.CodeExplorerDisplayItemsFromInclude;
+            filterbox.ExtraButtonsList[4].UseGreyScale = !Config.Instance.CodeExplorerDisplayItemsFromInclude;
             // Parse the document
             ParserHandler.ParseDocumentNow();
             Sci.GrabFocus();
