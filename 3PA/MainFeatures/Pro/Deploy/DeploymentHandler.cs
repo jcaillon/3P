@@ -390,17 +390,24 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             TotalDeploymentTime = ElapsedTime;
 
-            if (!HasBeenCancelled && !CompilationHasFailed) {
-                if (OnExecutionOk != null)
-                    OnExecutionOk(this);
-            } else {
-                if (OnExecutionFailed != null)
-                    OnExecutionFailed(this);
+            try {
+                if (!HasBeenCancelled && !CompilationHasFailed) {
+                    if (OnExecutionOk != null)
+                        OnExecutionOk(this);
+                } else {
+                    if (OnExecutionFailed != null)
+                        OnExecutionFailed(this);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
             }
 
-            if (OnExecutionEnd != null)
-                OnExecutionEnd(this);
-            
+            try {
+                if (OnExecutionEnd != null)
+                    OnExecutionEnd(this);
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
+            }
         }
 
         #endregion

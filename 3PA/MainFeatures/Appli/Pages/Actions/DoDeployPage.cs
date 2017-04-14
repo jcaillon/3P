@@ -297,17 +297,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // called when the compilation ended
         private void OnCompilationEnd(DeploymentHandler proDeployment) {
-
-            var diffProDeployement = proDeployment as DifferentialDeploymentHandler;
-
-            if (diffProDeployement != null) {
-                XmlSerializer serializer = new XmlSerializer(typeof(List<FileDeployed>));
-                using (TextWriter writer = new StreamWriter(@"d:\Profiles\jcaillon\Desktop\out.xml")) {
-                    serializer.Serialize(writer, diffProDeployement.FilesDeployed);
-                }
-            }
-
-
             Task.Factory.StartNew(() => {
                 this.SafeInvoke(page => {
                     // get rid of the timer

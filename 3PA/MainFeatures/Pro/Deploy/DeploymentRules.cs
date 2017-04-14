@@ -232,82 +232,86 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             // get all the rules
             var list = new List<DeployRule>();
             Utils.ForEachLine(path, new byte[0], (lineNb, lineString) => {
-                var items = lineString.Split('\t');
+                try {
+                    var items = lineString.Split('\t');
 
-                int step = 0;
-                if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
-                    return;
+                    int step = 0;
+                    if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
+                        return;
 
-                // new transfer rule
-                if (items.Length >= 6) {
-                    DeployType type;
-                    if (Enum.TryParse(items[3].Trim(), true, out type)) {
+                    // new transfer rule
+                    if (items.Length >= 6) {
+                        DeployType type;
+                        if (Enum.TryParse(items[3].Trim(), true, out type)) {
 
-                        var obj = DeployTransferRule.New(type);
-                        obj.Source = path;
-                        obj.Line = lineNb + 1;
-                        obj.Step = step;
-                        obj.NameFilter = items[1].Trim();
-                        obj.SuffixFilter = items[2].Trim();
-                        obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
-                        obj.SourcePattern = items[5].Trim();
+                            var obj = DeployTransferRule.New(type);
+                            obj.Source = path;
+                            obj.Line = lineNb + 1;
+                            obj.Step = step;
+                            obj.NameFilter = items[1].Trim();
+                            obj.SuffixFilter = items[2].Trim();
+                            obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
+                            obj.SourcePattern = items[5].Trim();
 
-                        if (items.Length > 6) {
-                            obj.DeployTarget = items[6].Trim().Replace('/', '\\');
-                            obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
-                            if (obj.ShouldDeployTargetReplaceDollar)
-                                obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+                            if (items.Length > 6) {
+                                obj.DeployTarget = items[6].Trim().Replace('/', '\\');
+                                obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
+                                if (obj.ShouldDeployTargetReplaceDollar)
+                                    obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+                            }
+
+                            string errorMsg;
+                            var isOk = obj.IsValid(out errorMsg);
+                            if (isOk) {
+                                list.Add(obj);
+                                return;
+                            }
+                            if (!string.IsNullOrEmpty(errorMsg)) {
+                                outputMessage.Append(errorMsg);
+                                outputMessage.Append("<br>");
+                            }
                         }
+                    }
 
-                        string errorMsg;
-                        var isOk = obj.IsValid(out errorMsg);
-                        if (isOk) {
+                    if (items.Length == 5) {
+                        // new filter rule
+
+                        var obj = new DeployFilterRule {
+                            Source = path,
+                            Line = lineNb + 1,
+                            Step = step,
+                            NameFilter = items[1].Trim(),
+                            SuffixFilter = items[2].Trim(),
+                            Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
+                            SourcePattern = items[4].Trim()
+                        };
+                        obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
+
+                        if (!string.IsNullOrEmpty(obj.SourcePattern))
                             list.Add(obj);
+
+                    } else if (items.Length == 4) {
+                        // new variable
+
+                        var obj = new DeployVariableRule {
+                            Source = path,
+                            Line = lineNb + 1,
+                            NameFilter = items[0].Trim(),
+                            SuffixFilter = items[1].Trim(),
+                            VariableName = items[2].Trim(),
+                            Path = items[3].Trim()
+                        };
+
+                        if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
+                            outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
                             return;
                         }
-                        if (!string.IsNullOrEmpty(errorMsg)) {
-                            outputMessage.Append(errorMsg);
-                            outputMessage.Append("<br>");
-                        }
+
+                        if (!string.IsNullOrEmpty(obj.Path))
+                            list.Add(obj);
                     }
-                }
-
-                if (items.Length == 5) {
-                    // new filter rule
-
-                    var obj = new DeployFilterRule {
-                        Source = path,
-                        Line = lineNb + 1,
-                        Step = step,
-                        NameFilter = items[1].Trim(),
-                        SuffixFilter = items[2].Trim(),
-                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
-                        SourcePattern = items[4].Trim()
-                    };
-                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
-
-                    if (!string.IsNullOrEmpty(obj.SourcePattern))
-                        list.Add(obj);
-
-                } else if (items.Length == 4) {
-                    // new variable
-
-                    var obj = new DeployVariableRule {
-                        Source = path,
-                        Line = lineNb + 1,
-                        NameFilter = items[0].Trim(),
-                        SuffixFilter = items[1].Trim(),
-                        VariableName = items[2].Trim(),
-                        Path = items[3].Trim()
-                    };
-
-                    if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
-                        outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
-                        return;
-                    }
-
-                    if (!string.IsNullOrEmpty(obj.Path))
-                        list.Add(obj);
+                } catch (Exception e) {
+                    outputMessage.Append("- Unknown error reading rule line n°" + (lineNb + 1) + " : " + e.Message + "<br>");
                 }
             }, Encoding.Default);
 

@@ -505,19 +505,27 @@ namespace _3PA.MainFeatures.Pro {
         protected virtual void PublishExecutionEndEvents() {
 
             // end of successful/unsuccessful execution action
-            if (ExecutionFailed || (ConnectionFailed && NeedDatabaseConnection)) {
-                if (OnExecutionFailed != null) {
-                    OnExecutionFailed(this);
+            try {
+                if (ExecutionFailed || (ConnectionFailed && NeedDatabaseConnection)) {
+                    if (OnExecutionFailed != null) {
+                        OnExecutionFailed(this);
+                    }
+                } else {
+                    if (OnExecutionOk != null) {
+                        OnExecutionOk(this);
+                    }
                 }
-            } else {
-                if (OnExecutionOk != null) {
-                    OnExecutionOk(this);
-                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
             }
 
             // end of execution action
-            if (OnExecutionEnd != null) {
-                OnExecutionEnd(this);
+            try { 
+                if (OnExecutionEnd != null) {
+                    OnExecutionEnd(this);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
             }
         }
 

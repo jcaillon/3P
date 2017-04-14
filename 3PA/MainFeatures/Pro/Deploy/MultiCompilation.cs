@@ -240,7 +240,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             filesToCompile.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all those files in a fair way among the Prowin processes we will create...
-            var numberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
+            var numberOfProcesses = MonoProcess ? 1 : Math.Min(NumberOfProcessesPerCore, 1) * Environment.ProcessorCount;
 
             var fileLists = new List<List<FileToCompile>>();
             var currentProcess = 0;
@@ -342,16 +342,24 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             TotalCompilationTime = ElapsedTime;
 
-            if (!_hasBeenKilled) {
-                if (OnCompilationOk != null)
-                    OnCompilationOk(this, _listFilesToCompile, _listFilesToDeploy);
-            } else {
-                if (OnCompilationFailed != null)
-                    OnCompilationFailed(this);
+            try {
+                if (!_hasBeenKilled) {
+                    if (OnCompilationOk != null)
+                        OnCompilationOk(this, _listFilesToCompile, _listFilesToDeploy);
+                } else {
+                    if (OnCompilationFailed != null)
+                        OnCompilationFailed(this);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
             }
 
-            if (OnCompilationEnd != null)
-                OnCompilationEnd(this);
+            try { 
+                if (OnCompilationEnd != null)
+                    OnCompilationEnd(this);
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e);
+            }
         }
 
         /// <summary>
