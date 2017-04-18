@@ -73,34 +73,34 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public int MaxStep { get; protected set; }
 
         /// <summary>
-        /// Total number of steps composing this deployment
-        /// 1 compil, 2 deploy compil r code, 3 step 1...
-        /// </summary>
-        public int TotalNumberOfSteps { get { return MaxStep + 2; } }
-
-        /// <summary>
         /// Current deployment step
         /// </summary>
         public int CurrentStep { get; protected set; }
 
         /// <summary>
+        /// Total number of operations composing this deployment
+        /// 1 compil, 2 deploy compil r code, 3 step 1...
+        /// </summary>
+        public virtual int TotalNumberOfOperations { get { return MaxStep + 2; } }
+
+        /// <summary>
         /// 0 -> 100% progression for the deployment
         /// </summary>
-        public float OverallProgressionPercentage {
+        public virtual float OverallProgressionPercentage {
             get {
                 float totalPerc = _proCompilation == null ? 0 : _proCompilation.CompilationProgression;
                 if (CurrentStep > 0) {
                     totalPerc += CurrentStep * 100;
                 }
                 totalPerc += _currentStepDeployPercentage;
-                return totalPerc / TotalNumberOfSteps;
+                return totalPerc;
             }
         }
 
         /// <summary>
         /// Returns the name of the current step
         /// </summary>
-        public string CurrentStepName {
+        public virtual string CurrentOperationName {
             get {
                 if (CurrentStep == 0) {
                     if (_proCompilation != null && _proCompilation.CurrentNumberOfProcesses > 0) {
@@ -115,7 +115,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Returns the progression for the current step
         /// </summary>
-        public float CurrentStepPercentage {
+        public virtual float CurrentOperationPercentage {
             get {
                 if (CurrentStep == 0 && _proCompilation != null && _proCompilation.CurrentNumberOfProcesses > 0) {
                     return _proCompilation.CompilationProgression;
@@ -162,7 +162,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         // Stores the current compilation info
         protected MultiCompilation _proCompilation;
 
-        CancellationTokenSource _cancelSource = new CancellationTokenSource();
+        protected CancellationTokenSource _cancelSource = new CancellationTokenSource();
 
         protected ProExecutionDeploymentHook _hookExecution;
 
@@ -206,7 +206,12 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             _proCompilation.OnCompilationOk += OnCompilationOk;
             _proCompilation.OnCompilationFailed += OnCompilationFailed;
 
-            return _proCompilation.CompileFiles(GetFilesToCompileInStepZero());
+            var filesToCompile = GetFilesToCompileInStepZero();
+            if (filesToCompile == null) {
+                return false;
+            }
+
+            return _proCompilation.CompileFiles(filesToCompile);
         }
 
         /// <summary>

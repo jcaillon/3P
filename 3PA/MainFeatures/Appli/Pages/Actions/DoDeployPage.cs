@@ -407,8 +407,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (_proDeployment.OverallProgressionPercentage < 0.1)
                     bar.Text = @"Initializing, please wait...";
                 else
-                    bar.Text = Math.Round(_proDeployment.OverallProgressionPercentage, 1) + @"% / " + _proDeployment.CurrentStepName + @" / total time " + _proDeployment.ElapsedTime;
-                bar.Progress = _proDeployment.OverallProgressionPercentage;
+                    bar.Text = Math.Round(_proDeployment.OverallProgressionPercentage / _proDeployment.TotalNumberOfOperations, 1) + @"% / " + _proDeployment.CurrentOperationName + @" / total time " + _proDeployment.ElapsedTime;
+                bar.Progress = _proDeployment.OverallProgressionPercentage / _proDeployment.TotalNumberOfOperations;
             });
         }
 
