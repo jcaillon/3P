@@ -172,22 +172,22 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             // for each transfer rule that match the source pattern
             foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(GetRegexAndReplaceVariablesIn(rule.SourcePattern)) && rule.Step == step && rule.TargetType == targetType)) {
-                string outPath;
+                string targetBasePath;
 
                 var deployTarget = ReplaceVariablesIn(rule.DeployTarget ?? sourcePath);
 
                 if (rule.ShouldDeployTargetReplaceDollar) {
-                    outPath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
+                    targetBasePath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
                 } else {
-                    outPath = deployTarget;
+                    targetBasePath = deployTarget;
                 }
 
                 if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(deployTarget)) {
-                    outPath = Path.Combine(_deploymentDirectory, outPath);
+                    targetBasePath = Path.Combine(_deploymentDirectory, targetBasePath);
                 }
 
-                if (!outList.Exists(needed => needed.TargetBasePath.EqualsCi(outPath))) {
-                    outList.Add(FileToDeploy.New(rule.Type, sourcePath, outPath, rule));
+                if (!outList.Exists(needed => needed.TargetBasePath.EqualsCi(targetBasePath))) {
+                    outList.Add(FileToDeploy.New(rule.Type, sourcePath, targetBasePath, rule));
                 }
 
                 // stop ?

@@ -325,7 +325,7 @@ namespace _3PA.Lib {
         public static string ToHtmlLink(this string url, string urlName = null, bool accentuate = false) {
             try {
                 if (File.Exists(url) || Directory.Exists(url)) {
-                    var splitName = urlName == null ? new string[] { } : urlName.Split('\\');
+                    var splitName = (urlName ?? url).Split('\\');
                     if (urlName == null || splitName.Length > 0) {
                         var splitUrl = url.Split('\\');
                         var output = new StringBuilder();
@@ -333,11 +333,16 @@ namespace _3PA.Lib {
                         var j = 0;
                         for (int i = 0; i < splitUrl.Length; i++) {
                             path.Append(splitUrl[i]);
-                            if (urlName == null || splitUrl[i].EqualsCi(splitName[j])) {
-                                output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitUrl[i], i < splitUrl.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitUrl.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
+                            if (splitUrl[i].EqualsCi(splitName[j])) {
+                                output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitUrl[i], i < splitName.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitName.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
                                 j++;
                             }
                             path.Append("\\");
+                        }
+                        for (int i = splitUrl.Length; i < splitName.Length; i++) {
+                            output.Append(splitName[i]);
+                            if (i < splitName.Length - 1)
+                                output.Append("<span class='linkSeparator'>\\</span>");
                         }
                         if (output.Length > 0)
                             return output.ToString();

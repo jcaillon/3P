@@ -714,6 +714,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
     /// Types of deploy, used during rules sorting
     /// </summary>
     public enum DeployType : byte {
+        None = 0,
         Delete = 1,
         DeleteFolder = 2,
 
