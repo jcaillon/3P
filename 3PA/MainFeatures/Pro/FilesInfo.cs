@@ -414,7 +414,9 @@ namespace _3PA.MainFeatures.Pro {
             if (fileToCompiles != null) {
                 foreach (var file in fileToCompiles) {
                     if (file.Errors != null && file.Errors.Count > 0) {
-                        UpdateFileErrors(file.SourcePath, file.Errors);
+                        foreach (var fileErrors in file.Errors.GroupBy(error => error.SourcePath)) {
+                            UpdateFileErrors(fileErrors.First().SourcePath, fileErrors.ToList());
+                        }
                     } else {
                         ClearAllErrors(file.SourcePath, true);
                     }

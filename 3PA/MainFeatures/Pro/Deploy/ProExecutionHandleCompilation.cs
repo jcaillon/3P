@@ -372,12 +372,13 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             Utils.ForEachLine(fullPath, new byte[0], (i, line) => {
                 var fields = line.Split('\t').ToList();
                 if (fields.Count == 8) {
+                    var compiledPath = permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0];
                     // new file
                     // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
-                    var compiledPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
-                    var sourcePath = permutePaths.ContainsKey(compiledPath) ? permutePaths[compiledPath] : compiledPath;
-                    if (!output.ContainsKey(sourcePath)) {
-                        output.Add(sourcePath, new List<FileError>());
+                    var sourcePath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
+                    sourcePath = permutePaths.ContainsKey(sourcePath) ? permutePaths[sourcePath] : sourcePath;
+                    if (!output.ContainsKey(compiledPath)) {
+                        output.Add(compiledPath, new List<FileError>());
                         lastLineNbCouple = new[] { -10, -10 };
                     }
 
@@ -390,8 +391,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
                     if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
                         // same line/error number as previously
-                        if (output[sourcePath].Count > 0) {
-                            var lastFileError = output[sourcePath].Last();
+                        if (output[compiledPath].Count > 0) {
+                            var lastFileError = output[compiledPath].Last();
                             if (lastFileError != null)
                                 lastFileError.Times = lastFileError.Times == 0 ? 2 : lastFileError.Times + 1;
                         }
@@ -402,8 +403,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     var baseFileName = Path.GetFileName(sourcePath);
 
                     // add error
-                    output[sourcePath].Add(new FileError {
-                        CompiledFilePath = permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0],
+                    output[compiledPath].Add(new FileError {
+                        CompiledFilePath = compiledPath,
                         SourcePath = sourcePath,
                         Level = errorLevel,
                         Line = Math.Max(0, lastLineNbCouple[0] - 1),
