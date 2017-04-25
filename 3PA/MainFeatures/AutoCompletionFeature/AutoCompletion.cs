@@ -300,22 +300,37 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                 bool textHasChanged = false;
 
-                // See if the char of the "word" we finished entering is actually part of a word
-                // (maybe not if, for instance, we just input 2 spaces consecutively)
-                if (offset > 0 && strOnLeftLength > offset && IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - offset])) {
-                    // automatically insert selected keyword of the completion list?
-                    if (InsertSelectedSuggestionOnWordEnd && isVisible) {
-                        InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
-                        textHasChanged = true;
+                if (offset > 0 && strOnLeftLength > offset) {
+
+                    bool hasAtLeastOneLetter = false;
+                    var checkOffset = offset;
+                    while (IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - checkOffset])) {
+                        var ch = strOnLeft[strOnLeftLength - 1 - checkOffset];
+                        if (char.IsLetter(ch)) {
+                            hasAtLeastOneLetter = true;
+                            break;
+                        }
+                        checkOffset++;
                     }
 
-                    // automatically change the case of the keyword?
-                    else if (AutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
-                        var candidates = FindInCompletionData(strOnLeft.Substring(0, strOnLeftLength - offset), nppCurrentLine);
-                        // we matched the word in the list, correct the case
-                        if (candidates != null && candidates.Count > 0) {
-                            InsertSuggestion(candidates.First(), -offset);
+                    // See if the char of the "word" we finished entering is actually part of a word
+                    // (maybe not if, for instance, we just input 2 spaces consecutively)
+                    if (hasAtLeastOneLetter) {
+
+                        // automatically insert selected keyword of the completion list?
+                        if (InsertSelectedSuggestionOnWordEnd && isVisible) {
+                            InsertSuggestion(_form.GetCurrentCompletionItem(), -offset);
                             textHasChanged = true;
+                        }
+
+                        // automatically change the case of the keyword?
+                        else if (AutoCase && (nppCurrentPosition - offset) != _positionOfLastInsertion) {
+                            var candidates = FindInCompletionData(strOnLeft.Substring(0, strOnLeftLength - offset), nppCurrentLine);
+                            // we matched the word in the list, correct the case
+                            if (candidates != null && candidates.Count > 0) {
+                                InsertSuggestion(candidates.First(), -offset);
+                                textHasChanged = true;
+                            }
                         }
                     }
                 }
