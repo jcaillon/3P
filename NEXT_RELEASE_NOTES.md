@@ -17,3 +17,5 @@
 - Change the behavior of the prototype update, it now occurs AFTER the file is saved, which is safer in case of a problem
 - #163 : The code explorer now has again the button "from include" that allows to display/hide the items parsed from include files
 - No longer automatically autocompletes simple numbers
+- fixed compilation errors display issue that would occur if the error was located in an include file for instance
+- #164 : Search window inactive when CRTL+F

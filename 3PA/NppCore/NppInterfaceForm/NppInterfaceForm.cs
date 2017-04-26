@@ -67,11 +67,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
         /// </summary>
         public double FocusedOpacity;
 
-        /// <summary>
-        /// Use this to know if the form is currently activated
-        /// </summary>
-        public bool IsActivated;
-
         public bool IsVisible { get; set; }
 
         #endregion
@@ -132,8 +127,9 @@ namespace _3PA.NppCore.NppInterfaceForm {
             // move this to an invisible part of the screen, otherwise we can see this window
             // if another window with Opacity <1 is in front Oo
             Location = new Point(-10000, -10000);
-            GiveFocusBack();
             IsVisible = false;
+            Opacity = UnfocusedOpacity;
+            //GiveFocusBack();
         }
 
         /// <summary>
@@ -164,8 +160,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
                 Sci.GrabFocus();
             else
                 WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            IsActivated = !IsActivated;
-            Opacity = UnfocusedOpacity;
         }
 
         #endregion
@@ -184,7 +178,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
         }
 
         protected override void OnActivated(EventArgs e) {
-            IsActivated = true;
             Opacity = FocusedOpacity;
             base.OnActivated(e);
         }
