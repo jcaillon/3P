@@ -334,15 +334,14 @@ namespace _3PA.Lib {
                         for (int i = 0; i < splitUrl.Length; i++) {
                             path.Append(splitUrl[i]);
                             if (splitUrl[i].EqualsCi(splitName[j])) {
-                                output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitUrl[i], i < splitName.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitName.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
+                                output.Append(string.Format("<a {3}href='{0}'>{1}</a>{2}", path, splitUrl[i], i < splitUrl.Length - 1 ? "<span class='linkSeparator'>\\</span>" : "", i == splitUrl.Length - 1 && accentuate ? "class='SubTextColor' " : ""));
                                 j++;
                             }
                             path.Append("\\");
                         }
                         for (int i = splitUrl.Length; i < splitName.Length; i++) {
+                            output.Append("<span class='linkSeparator'>\\</span>");
                             output.Append(splitName[i]);
-                            if (i < splitName.Length - 1)
-                                output.Append("<span class='linkSeparator'>\\</span>");
                         }
                         if (output.Length > 0)
                             return output.ToString();
