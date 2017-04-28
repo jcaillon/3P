@@ -287,6 +287,42 @@ namespace _3PA.Lib {
             return true;
         }
 
+        /// <summary>
+        /// Same as Directory.EnumerateDirectories but doesn't list hidden folders
+        /// </summary>
+        public static IEnumerable<string> EnumerateFolders(string folderPath, string pattern, SearchOption options) {
+            var hiddenDirList = new List<string>();
+            foreach (var dir in Directory.EnumerateDirectories(folderPath, pattern, options)) {
+                if (new DirectoryInfo(dir).Attributes.HasFlag(FileAttributes.Hidden)) {
+                    hiddenDirList.Add(dir);
+                }
+                bool hidden = false;
+                foreach (var hiddenDir in hiddenDirList) {
+                    if (dir.StartsWith(hiddenDir)) {
+                        hidden = true;
+                    }
+                }
+                if (!hidden)
+                    yield return dir;
+            }
+        }
+
+        /// <summary>
+        /// Same as Directory.EnumerateFiles but doesn't list files in hidden folders
+        /// </summary>
+        public static IEnumerable<string> EnumerateFiles(string folderPath, string pattern, SearchOption options) {
+            foreach (var file in Directory.EnumerateFiles(folderPath, pattern, SearchOption.TopDirectoryOnly)) {
+                yield return file;
+            }
+            if (options == SearchOption.AllDirectories) {
+                foreach (var folder in EnumerateFolders(folderPath, "*", SearchOption.AllDirectories)) {
+                    foreach (var file in Directory.EnumerateFiles(folder, pattern, SearchOption.TopDirectoryOnly)) {
+                        yield return file;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region File/directory selection
