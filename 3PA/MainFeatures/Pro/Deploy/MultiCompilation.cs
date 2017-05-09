@@ -399,12 +399,11 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// Execute the action behind the lock
         /// </summary>
         private static void DoInLock(Action toDo) {
-            if (Monitor.TryEnter(_lock)) {
-                try {
-                    toDo();
-                } finally {
-                    Monitor.Exit(_lock);
-                }
+            Monitor.Enter(_lock);
+            try {
+                toDo();
+            } finally {
+                Monitor.Exit(_lock);
             }
         }
 

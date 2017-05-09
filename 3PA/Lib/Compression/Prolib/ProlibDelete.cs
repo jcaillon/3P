@@ -51,15 +51,13 @@ namespace _3PA.Lib.Compression.Prolib {
 
         #region Methods
 
-        public void PackFileSet(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
+        public void ExtractFiles(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
             var archiveFolder = Path.GetDirectoryName(_archivePath);
             if (!string.IsNullOrEmpty(archiveFolder))
                 _prolibExe.StartInfo.WorkingDirectory = archiveFolder;
 
-            bool archivePathContainsSpace = _archivePath.ContainsFast(" ");
-
             // for files containing a space, we don't have a choice, call delete for each...
-            foreach (var file in files.Values.Where(deploy => deploy.RelativePathInPack.ContainsFast(" ") || archivePathContainsSpace)) {
+            foreach (var file in files.Values.Where(deploy => deploy.RelativePathInPack.ContainsFast(" "))) {
                 _prolibExe.Arguments = _archivePath.ProQuoter() + " -delete " + file.RelativePathInPack.ProQuoter();
                 var isOk = _prolibExe.TryDoWait(true);
                 if (progressHandler != null) {
@@ -67,12 +65,13 @@ namespace _3PA.Lib.Compression.Prolib {
                 }
             }
 
-            if (!archivePathContainsSpace) {
+            var remainingFiles = files.Values.Where(deploy => !deploy.RelativePathInPack.ContainsFast(" ")).ToList();
+            if (remainingFiles.Count > 0) {
+
                 // for the other files, we can use the -pf parameter
                 var pfContent = new StringBuilder();
-                pfContent.AppendLine(_archivePath);
                 pfContent.AppendLine("-delete");
-                foreach (var file in files.Values.Where(deploy => !deploy.RelativePathInPack.ContainsFast(" "))) {
+                foreach (var file in remainingFiles) {
                     pfContent.AppendLine(file.RelativePathInPack);
                 }
 
@@ -85,7 +84,7 @@ namespace _3PA.Lib.Compression.Prolib {
                     ex = e;
                 }
 
-                _prolibExe.Arguments = " -pf " + Path.GetFileName(pfPath).ProQuoter();
+                _prolibExe.Arguments = _archivePath.ProQuoter() + " -pf " + pfPath.ProQuoter();
                 var isOk = _prolibExe.TryDoWait(true);
 
                 try {

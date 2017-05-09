@@ -452,7 +452,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         #endregion
 
         public override FileToDeploy Set(string @from, string to) {
-            var pos = to.LastIndexOf(PackExt, StringComparison.CurrentCultureIgnoreCase);
+            var pos = to.LastIndexOf(PackExt + @"\\", StringComparison.CurrentCultureIgnoreCase);
             if (pos >= 0) {
                 pos += PackExt.Length;
                 PackPath = to.Substring(0, pos);
