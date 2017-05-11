@@ -406,8 +406,13 @@ namespace _3PA.MainFeatures.Pro {
                     _process.Close();
 
                 // delete temp dir
-                if (_localTempDir != null)
-                    Utils.DeleteDirectory(_localTempDir, true);
+                if (_localTempDir != null) {
+                    try {
+                        Directory.Delete(_localTempDir, true);
+                    } catch (Exception) {
+                        // ignored
+                    }
+                }
 
                 // restore splashscreen
                 if (!string.IsNullOrEmpty(ProEnv.ProwinPath))

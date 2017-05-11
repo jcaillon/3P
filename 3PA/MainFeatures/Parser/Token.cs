@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 namespace _3PA.MainFeatures.Parser {
 
     /// <summary>
@@ -43,7 +44,10 @@ namespace _3PA.MainFeatures.Parser {
             EndPosition = endPosition;
         }
 
+        public abstract Token Copy();
+
         public abstract void Accept(ILexerVisitor visitor);
+
     }
 
     /// <summary>
@@ -60,6 +64,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenComment(Value, Line, Column, StartPosition, EndPosition, IsSingleLine);
+        }
     }
 
     /// <summary>
@@ -70,6 +78,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenPreProcDirective(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -82,6 +94,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenInclude(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     /// <summary>
@@ -92,6 +108,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenPreProcVariable(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -104,6 +124,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenEos(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     internal class TokenUnknown : Token {
@@ -111,6 +135,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenUnknown(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -120,6 +148,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenWord(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     internal class TokenNumber : Token {
@@ -127,6 +159,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenNumber(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -138,6 +174,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenString(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -152,6 +192,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenStringDescriptor(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     internal class TokenWhiteSpace : Token {
@@ -160,6 +204,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenWhiteSpace(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     internal class TokenSymbol : Token {
@@ -167,6 +215,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenSymbol(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 
@@ -179,6 +231,10 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
+
+        public override Token Copy() {
+            return new TokenEol(Value, Line, Column, StartPosition, EndPosition);
+        }
     }
 
     /// <summary>
@@ -189,6 +245,10 @@ namespace _3PA.MainFeatures.Parser {
 
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
+        }
+
+        public override Token Copy() {
+            return new TokenEof(Value, Line, Column, StartPosition, EndPosition);
         }
     }
 }

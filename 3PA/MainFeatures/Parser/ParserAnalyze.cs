@@ -1699,7 +1699,7 @@ namespace _3PA.MainFeatures.Parser {
                     // add this include to the references and modify each token
                     _parsedIncludes.Add(newInclude);
                     var includeNumber = (ushort) (_parsedIncludes.Count - 1);
-                    var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1);
+                    var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1).Select(token => token.Copy()).ToList();
                     tokens.ForEach(token => token.OwnerNumber = includeNumber);
 
                     // replace the tokens

@@ -233,11 +233,6 @@ namespace _3PA.NppCore {
                                 Plug.OnNppFileBeforeClose();
                                 return;
 
-                            case (uint) NppNotif.NPPN_FILEBEFORESAVE:
-                                // on file saved
-                                Plug.OnNppFileBeforeSaved();
-                                return;
-
                             case (uint) NppNotif.NPPN_LANGCHANGED:
                                 // on lang type changed
                                 NppBufferActivated();

@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -222,8 +223,10 @@ namespace _3PA.MainFeatures.Parser {
 
             // create root item
             if (defaultScope == null) {
-                _rootScope = new ParsedFile("Root", new TokenEos(null, 0, 0, 0, 0));
-                AddParsedItem(_rootScope, 0);
+                var rootToken = new TokenEos(null, 0, 0, 0, 0);
+                rootToken.OwnerNumber = 0;
+                _rootScope = new ParsedFile("Root", rootToken);
+                AddParsedItem(_rootScope, rootToken.OwnerNumber);
             } else
                 _rootScope = defaultScope;
             _context.Scope = _rootScope;

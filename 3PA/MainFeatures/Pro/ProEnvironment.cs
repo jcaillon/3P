@@ -154,8 +154,10 @@ namespace _3PA.MainFeatures.Pro {
                     if (DbConnectionInfo.ContainsKey(CurrentDb))
                         return DbConnectionInfo[CurrentDb];
 
-                    CurrentDb = DbConnectionInfo.First().Key;
-                    return DbConnectionInfo[CurrentDb];
+                    if (DbConnectionInfo.Count > 0) {
+                        CurrentDb = DbConnectionInfo.First().Key;
+                        return DbConnectionInfo[CurrentDb];
+                    }
                 }
                 return string.Empty;
             }

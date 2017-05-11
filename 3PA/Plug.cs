@@ -708,16 +708,6 @@ namespace _3PA {
         }
 
         #endregion
-
-        #region OnNppFileBeforeSaved
-
-        /// <summary>
-        /// Called when the user saves the current document (just before it saves itself)
-        /// </summary>
-        public static void OnNppFileBeforeSaved() {
-        }
-
-        #endregion
         
         #region Apply Scintilla options
 

@@ -23,7 +23,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using WixToolset.Dtf.Compression;
-using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
 
 namespace _3PA.Lib.Compression.Prolib {
@@ -51,7 +50,7 @@ namespace _3PA.Lib.Compression.Prolib {
 
         #region Methods
 
-        public void ExtractFiles(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
+        public void PackFileSet(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
             var archiveFolder = Path.GetDirectoryName(_archivePath);
             if (!string.IsNullOrEmpty(archiveFolder))
                 _prolibExe.StartInfo.WorkingDirectory = archiveFolder;
