@@ -347,7 +347,9 @@ PROCEDURE pi_compileList PRIVATE:
             &ELSE
                 /* COMPILE / GENERATEDEBUGFILE */
                 IF tt_list.lis = "?" THEN ASSIGN tt_list.lis = ?.
-                IF tt_list.xrf = "?" THEN ASSIGN tt_list.xrf = ?.
+                IF tt_list.xrf = "?" THEN DO:
+                    ASSIGN tt_list.xrf = IF NOT {&CanAnalyse} THEN ? ELSE RIGHT-TRIM(ENTRY(1, PROPATH, ","), "~\") + "~\compil.xref".
+                END.
                 IF tt_list.dbg = "?" THEN ASSIGN tt_list.dbg = ?.
                 IF tt_list.xrf = ? OR NOT tt_list.xrf MATCHES "*~~.xml" THEN
                     COMPILE VALUE(tt_list.source)
@@ -360,7 +362,7 @@ PROCEDURE pi_compileList PRIVATE:
                     COMPILE VALUE(tt_list.source)
                         SAVE INTO VALUE(tt_list.outdir)
                         LISTING VALUE(tt_list.lis)
-                        &IF {&verHigherThan11} &THEN
+                        &IF {&verHigherThan11} AND NOT {&CanAnalyse} &THEN
                             XREF-XML VALUE(tt_list.xrf)
                         &ELSE
                             XREF VALUE(tt_list.xrf)
@@ -369,7 +371,7 @@ PROCEDURE pi_compileList PRIVATE:
                         NO-ERROR.
             &ENDIF
         &ENDIF
-        
+
         &IF {&CanAnalyse} &THEN
             LOG-MANAGER:CLOSE-LOG().
         &ENDIF
@@ -380,7 +382,7 @@ PROCEDURE pi_compileList PRIVATE:
 
         &IF {&CanAnalyse} &THEN
             /* Here we generate a file that lists all db.tables + CRC referenced in the .r code produced */
-            RUN pi_generateTableRef (INPUT tt_list.source, INPUT tt_list.outdir, INPUT tt_list.reftables) NO-ERROR.
+            RUN pi_generateTableRef (INPUT tt_list.source, INPUT tt_list.outdir, INPUT tt_list.xrf, INPUT tt_list.reftables) NO-ERROR.
             fi_output_last_error().
         &ENDIF
 
@@ -401,6 +403,7 @@ END PROCEDURE.
 
         DEFINE INPUT PARAMETER ipc_compiledSource AS CHARACTER NO-UNDO.
         DEFINE INPUT PARAMETER ipc_compilationDir AS CHARACTER NO-UNDO.
+        DEFINE INPUT PARAMETER ipc_xrefPath AS CHARACTER NO-UNDO.
         DEFINE INPUT PARAMETER ipc_outTableRefPath AS CHARACTER NO-UNDO.
 
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
@@ -434,11 +437,38 @@ END PROCEDURE.
             lc_crcList = TRIM(RCODE-INFO:TABLE-CRC-LIST)
             .
 
+        DEFINE VARIABLE lc_sourcePath AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_filePath AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_lineNumber AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_xrefType AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_info AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_field AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lh_buff AS HANDLE.
+
+        /* okay, since RCODE-INFO:TABLE-LIST doesn't list table references in LIKE TABLE sentences, we HAVE */
+        INPUT STREAM str_rw FROM VALUE(ipc_xrefPath) NO-ECHO.
+        REPEAT:
+            IMPORT STREAM str_rw lc_sourcePath lc_filePath lc_lineNumber lc_xrefType lc_info lc_field NO-ERROR.
+            IF lc_xrefType = "REFERENCE" AND lc_info MATCHES "*~~.*" AND LOOKUP(lc_info, lc_tableList) = 0 THEN DO:
+                ASSIGN lc_tableList = lc_tableList + "," + lc_info.
+                CREATE BUFFER lh_buff FOR TABLE lc_info NO-ERROR.
+                IF NOT VALID-HANDLE(lh_buff) THEN
+                    ASSIGN lc_crcList = lc_crcList + ",?".
+                ELSE DO:
+                    ASSIGN lc_crcList = lc_crcList + "," + STRING(lh_buff:CRC-VALUE).
+                    DELETE OBJECT lh_buff NO-ERROR.
+                END.
+            END.
+        END.
+        INPUT STREAM str_rw CLOSE.
+
+        ASSIGN lc_tableList = LEFT-TRIM(lc_tableList, ",").
+
         /* Store tables referenced in the .R file */
         OUTPUT STREAM str_rw TO VALUE(ipc_outTableRefPath) APPEND BINARY.
         PUT STREAM str_rw UNFORMATTED "".
         REPEAT li_i = 1 TO NUM-ENTRIES(lc_tableList):
-            PUT STREAM str_rw UNFORMATTED ENTRY(li_i, lc_tableList) + "~t" + ENTRY(li_i, lc_crcList).
+            PUT STREAM str_rw UNFORMATTED ENTRY(li_i, lc_tableList) + "~t" + ENTRY(li_i, lc_crcList) SKIP.
         END.
         OUTPUT STREAM str_rw CLOSE.
 
@@ -492,6 +522,7 @@ END PROCEDURE.
         RETURN "".
 
     END PROCEDURE.
+
 &ENDIF
 
 PROCEDURE pi_feedNotification:
@@ -651,9 +682,9 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL PRIVATE ( ) :
                 PUT STREAM str_rw UNFORMATTED "(" + STRING(ERROR-STATUS:GET-NUMBER(li_)) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
-        
+
         OUTPUT STREAM str_rw CLOSE.
-        
+
         RETURN TRUE.
     END.
 
