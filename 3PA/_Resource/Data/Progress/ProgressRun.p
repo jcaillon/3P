@@ -39,7 +39,7 @@
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
 &ENDIF
-&SCOPED-DEFINE verHigherThan11 DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, "."))) >= 11
+&SCOPED-DEFINE verHigherThan11 DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, ".") - 1)) >= 11
 &SCOPED-DEFINE CanAnalyse {&AnalysisMode} AND {&verHigherThan11}
 
 
@@ -407,8 +407,8 @@ END PROCEDURE.
         DEFINE INPUT PARAMETER ipc_outTableRefPath AS CHARACTER NO-UNDO.
 
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
-        DEFINE VARIABLE lc_tableList AS CHARACTER NO-UNDO.
-        DEFINE VARIABLE lc_crcList AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE lc_tableList AS CHARACTER NO-UNDO INITIAL "".
+        DEFINE VARIABLE lc_crcList AS CHARACTER NO-UNDO INITIAL "".
         DEFINE VARIABLE lc_rcode AS CHARACTER NO-UNDO.
         DEFINE VARIABLE lc_rcodePath AS CHARACTER NO-UNDO.
 
@@ -426,16 +426,17 @@ END PROCEDURE.
 
             /* need to find the right .r code in the directories created during compilation */
             RUN pi_findInFolders (INPUT lc_rcode, INPUT ipc_compilationDir) NO-ERROR.
-            ASSIGN lc_rcodePath = RETURN-VALUE.
-            IF fi_output_last_error() OR NOT lc_rcodePath > "" THEN
-                RETURN "". /* we failed */
+            ASSIGN 
+                lc_rcodePath = RETURN-VALUE
+                FILE-INFO:FILE-NAME = lc_rcodePath.
         END.
         /* Retrieve table list as well as their CRC values */
-        ASSIGN
-            RCODE-INFO:FILE-NAME = lc_rcodePath
-            lc_tableList = TRIM(RCODE-INFO:TABLE-LIST)
-            lc_crcList = TRIM(RCODE-INFO:TABLE-CRC-LIST)
-            .
+        IF FILE-INFO:FILE-TYPE <> ? THEN
+            ASSIGN
+                RCODE-INFO:FILE-NAME = lc_rcodePath
+                lc_tableList = TRIM(RCODE-INFO:TABLE-LIST)
+                lc_crcList = TRIM(RCODE-INFO:TABLE-CRC-LIST)
+                .
 
         DEFINE VARIABLE lc_sourcePath AS CHARACTER NO-UNDO.
         DEFINE VARIABLE lc_filePath AS CHARACTER NO-UNDO.
@@ -462,7 +463,10 @@ END PROCEDURE.
         END.
         INPUT STREAM str_rw CLOSE.
 
-        ASSIGN lc_tableList = LEFT-TRIM(lc_tableList, ",").
+        ASSIGN 
+            lc_crcList = LEFT-TRIM(lc_crcList, ",")
+            lc_tableList = LEFT-TRIM(lc_tableList, ",")
+            .
 
         /* Store tables referenced in the .R file */
         OUTPUT STREAM str_rw TO VALUE(ipc_outTableRefPath) APPEND BINARY.

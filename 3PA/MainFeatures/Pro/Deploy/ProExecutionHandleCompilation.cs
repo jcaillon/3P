@@ -103,6 +103,11 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public string DistantTempDir { get; private set; }
 
+        /// <summary>
+        /// In analysis mode, allows to affect the crc to each used table
+        /// </summary>
+        public List<TableCrc> TablesCrcs { get; set; }
+
         #endregion
 
         #region Constants
@@ -262,43 +267,49 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             // Analysis mode, read output files
             if (IsAnalysisMode) {
-                // do a deployment action for each file
-                Parallel.ForEach(Files, file => {
-                    file.ReadAnalysisResults();
-                });
+                try {
+                    // do a deployment action for each file
+                    Parallel.ForEach(Files, file => {
+                        file.ReadAnalysisResults();
+                    });
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Erreur durant l'analyse de résultats de compilation");
+                }
             }
 
             // end of successful execution action
             if (!ExecutionFailed && (!ConnectionFailed || !NeedDatabaseConnection)) {
+                try { 
+                    var errorsList = LoadErrorLog();
+                    var deployList = GetFilesToDeployAfterCompilation();
 
-                var errorsList = LoadErrorLog();
-                var deployList = GetFilesToDeployAfterCompilation();
-
-                // don't try to deploy files with errors...
-                if (deployList != null) {
-                    foreach (var kpv in errorsList) {
-                        if (kpv.Value != null && kpv.Value.Exists(error => error.Level >= ErrorLevel.Error)) {
-                            // the file has errors, it was not generated, we don't deploy it
-                            deployList.RemoveAll(deploy => deploy.Origin.Equals(kpv.Key));
+                    // don't try to deploy files with errors...
+                    if (deployList != null) {
+                        foreach (var kpv in errorsList) {
+                            if (kpv.Value != null && kpv.Value.Exists(error => error.Level >= ErrorLevel.Error)) {
+                                // the file has errors, it was not generated, we don't deploy it
+                                deployList.RemoveAll(deploy => deploy.Origin.Equals(kpv.Key));
+                            }
                         }
                     }
-                }
 
-                foreach (var kpv in errorsList) {
-                    var find = Files.Find(file => file.SourcePath.Equals(kpv.Key));
-                    if (find != null) {
-                        find.Errors = kpv.Value;
+                    foreach (var kpv in errorsList) {
+                        var find = Files.Find(file => file.SourcePath.Equals(kpv.Key));
+                        if (find != null) {
+                            find.Errors = kpv.Value;
+                        }
                     }
-                }
 
-                if (OnCompilationOk != null) {
-                    OnCompilationOk(this, Files, deployList);
-                }
+                    if (OnCompilationOk != null) {
+                        OnCompilationOk(this, Files, deployList);
+                    }
 
-                if (OnEachCompilationOk != null) {
-                    OnEachCompilationOk(this, Files, deployList);
+                    if (OnEachCompilationOk != null) {
+                        OnEachCompilationOk(this, Files, deployList);
+                    }
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error during the analyze of the compilation output");
                 }
-
             }
 
             base.PublishExecutionEndEvents();

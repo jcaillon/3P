@@ -38,23 +38,9 @@ table {
     Font: 12px "Segoe UI";
 }
 
-/*This is the class of the HtmlToolTip*/
-.yamui-tooltip {
-    border: solid 2px @FormBorder;
-    background-color: @FormBack;
-    color: @FormFore;
-    padding: 4px;
-}
-
-.contextMenuTitle {
-    border-width: 0;
-    color: @FormFore;
+.errors {
+    background-color: #E6E6E6;
     padding: 5px;
-    font-weight: bold;
-    font-size: 13px;
-    text-align: center;
-    /*background-color: @FormBack;*/
-    padding-right: 20px;
 }
 
 .AccentColor {
@@ -75,7 +61,41 @@ table {
     color: @FormFore;
 }
 
+.Title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1E1E1E;
+}
 
+.SubTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #093850;
+}
+
+.IndentDiv {
+    margin-left: 8px;
+}
+
+
+/*This is the class of the HtmlToolTip*/
+.yamui-tooltip {
+    border: solid 2px @FormBorder;
+    background-color: @FormBack;
+    color: @FormFore;
+    padding: 4px;
+}
+
+.contextMenuTitle {
+    border-width: 0;
+    color: @FormFore;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    /*background-color: @FormBack;*/
+    padding-right: 20px;
+}
 
 /* ==================================== */
 /* TOOL TIPS */

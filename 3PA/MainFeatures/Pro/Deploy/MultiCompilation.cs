@@ -240,7 +240,9 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             filesToCompile.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all those files in a fair way among the Prowin processes we will create...
-            var numberOfProcesses = MonoProcess ? 1 : Math.Min(NumberOfProcessesPerCore, 1) * Environment.ProcessorCount;
+            var numberOfProcesses = MonoProcess ? 1 : Math.Max(NumberOfProcessesPerCore, 1) * Environment.ProcessorCount;
+            // ensure that each process will at least take in 10 files, starting a new process for 1 file to compile isn't efficient!
+            numberOfProcesses = Math.Min(numberOfProcesses, NbFilesToCompile / 10); 
 
             var fileLists = new List<List<FileToCompile>>();
             var currentProcess = 0;

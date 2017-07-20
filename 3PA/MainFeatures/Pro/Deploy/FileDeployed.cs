@@ -24,8 +24,9 @@ using System.Xml.Serialization;
 namespace _3PA.MainFeatures.Pro.Deploy {
 
     [Serializable]
+    [XmlInclude(typeof(FileDeployed))]
     [XmlInclude(typeof(FileDeployedCompiled))]
-    public class FileDeployed {
+    public class FileSourceInfo {
 
         /// <summary>
         /// The relative path of the source file
@@ -39,18 +40,23 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// MD5 
         /// </summary>
-        public string Md5 { get; set; }
+        public byte[] Md5 { get; set; }
+
+    }
+
+    [Serializable]
+    [XmlInclude(typeof(FileDeployedCompiled))]
+    public class FileDeployed : FileSourceInfo {
 
         /// <summary>
-        /// 
+        /// a list of the targets for this deployment
         /// </summary>
-        public string TargetPath { get; set; }
+        public List<DeploymentTarget> Targets { get; set; }
 
-        public string TargetPackPath { get; set; }
-
-        public string TargetPathInPack { get; set; }
-
-        public DeploymentState State { get; set; }
+        /// <summary>
+        /// The action done for this file
+        /// </summary>
+        public DeploymentAction Action { get; set; }
 
     }
 
@@ -60,7 +66,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// represents the source file (i.e. includes) used to generate a given .r code file
         /// </summary>
-        public List<string> RequiredFiles { get; set; }
+        public List<FileSourceInfo> RequiredFiles { get; set; }
 
         /// <summary>
         /// represent the tables that were referenced in a given .r code file
@@ -69,9 +75,35 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
     }
 
-    public enum DeploymentState {
-        Add,
-        Delete,
+    [Serializable]
+    public class DeploymentTarget {
+
+        /// <summary>
+        /// Relative target path (relative to the target directory)
+        /// </summary>
+        public string TargetPath { get; set; }
+
+        /// <summary>
+        /// The type of deployment done for this target
+        /// </summary>
+        public DeployType DeployType { get; set; }
+
+        /// <summary>
+        /// Relative path of the pack in which this file is deployed (if any)
+        /// </summary>
+        public string TargetPackPath { get; set; }
+
+        /// <summary>
+        /// Relative path within the pack (if any)
+        /// </summary>
+        public string TargetPathInPack { get; set; }
+    }
+
+    public enum DeploymentAction {
+        Added,
+        Replaced,
+        Deleted,
+        Existing,
     }
 
 }

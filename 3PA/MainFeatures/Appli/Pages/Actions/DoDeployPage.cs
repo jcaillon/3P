@@ -22,12 +22,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
@@ -50,7 +46,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private Timer _progressTimer;
 
         // proenv copied when clicking on the start button
-        private DifferentialDeploymentHandler _proDeployment;
+        private DeploymentHandler _proDeployment;
 
         private string _reportExportPath;
 
@@ -271,9 +267,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // start the deployment
             Task.Factory.StartNew(() => {
-                _proDeployment = new DifferentialDeploymentHandler(ProEnvironment.Current, DeploymentProfile.Current) {
+                _proDeployment = new DeploymentHandler(ProEnvironment.Current, DeploymentProfile.Current) {
                     IsTestMode = isTest,
-                    OnExecutionEnd = OnCompilationEnd
+                    OnExecutionEnd = OnCompilationEnd,
+                    IsAnalysisMode = false
                 };
 
                 UpdateProgressBar();
@@ -407,7 +404,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (_proDeployment.OverallProgressionPercentage < 0.1)
                     bar.Text = @"Initializing, please wait...";
                 else
-                    bar.Text = Math.Round(_proDeployment.OverallProgressionPercentage / _proDeployment.TotalNumberOfOperations, 1) + @"% / " + _proDeployment.CurrentOperationName + @" / total time " + _proDeployment.ElapsedTime;
+                    bar.Text = Math.Round((decimal) (_proDeployment.OverallProgressionPercentage / _proDeployment.TotalNumberOfOperations), 1) + @"% / " + _proDeployment.CurrentOperationName + @" / total time " + _proDeployment.ElapsedTime;
                 bar.Progress = _proDeployment.OverallProgressionPercentage / _proDeployment.TotalNumberOfOperations;
             });
         }

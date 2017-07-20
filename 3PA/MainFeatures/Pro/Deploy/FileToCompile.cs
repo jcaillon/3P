@@ -84,14 +84,23 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// <summary>
         /// Constructor
         /// </summary>
-        public FileToCompile(string sourcePath) {
+        public FileToCompile(string sourcePath) : this(sourcePath, -1) {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public FileToCompile(string sourcePath, long size) {
             SourcePath = sourcePath;
             BaseFileName = Path.GetFileNameWithoutExtension(sourcePath);
-            try {
-                Size = new FileInfo(sourcePath).Length;
-
-            } catch (Exception) {
-                Size = 0;
+            if (size > -1) {
+                Size = size;
+            } else {
+                try {
+                    Size = new FileInfo(sourcePath).Length;
+                } catch (Exception) {
+                    Size = 0;
+                }
             }
         }
 
@@ -106,11 +115,14 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     var split = line.Split('\t');
                     if (split.Length == 2) {
                         var crc = split[1].Trim();
+                        var qualifiedName = split[0].Trim();
                         if (!crc.Equals("0")) {
-                            RequiredTables.Add(new TableCrc {
-                                QualifiedTableName = split[0].Trim(),
-                                Crc = crc
-                            });
+                            if (!RequiredTables.Exists(tableCrc => tableCrc.QualifiedTableName.EqualsCi(qualifiedName))) {
+                                RequiredTables.Add(new TableCrc {
+                                    QualifiedTableName = qualifiedName,
+                                    Crc = crc
+                                });
+                            }
                         }
                     }
                 }, Encoding.Default);
@@ -185,6 +197,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
     /// <summary>
     /// This class represent the tables that were referenced in a given .r code file
     /// </summary>
+    [Serializable]
     public class TableCrc {
         public string QualifiedTableName { get; set; }
         public string Crc { get; set; }

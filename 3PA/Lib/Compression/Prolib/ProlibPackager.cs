@@ -17,12 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using WixToolset.Dtf.Compression;
-using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures;
 using _3PA.MainFeatures.Pro.Deploy;
 
 namespace _3PA.Lib.Compression.Prolib {
@@ -101,7 +102,12 @@ namespace _3PA.Lib.Compression.Prolib {
                 });
 
                 // now we just need to add the content of temp folders into the .pl
-                var prolibOk = _prolibExe.TryDoWait(true);
+                bool prolibOk = false;
+                try {
+                    prolibOk = _prolibExe.TryDoWait(true);
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e);
+                }
 
                 // move files from the temp subfolder
                 Parallel.ForEach(subFolder.Value, file => {
@@ -115,8 +121,12 @@ namespace _3PA.Lib.Compression.Prolib {
                     } catch (Exception e) {
                         ex = e;
                     }
-                    if (progressHandler != null) {
-                        progressHandler(this, new ArchiveProgressEventArgs(ArchiveProgressType.FinishFile, file.RelativePath, ex ?? (prolibOk ? null : new Exception(_prolibExe.ErrorOutput.ToString()))));
+                    try {
+                        if (progressHandler != null) {
+                            progressHandler(this, new ArchiveProgressEventArgs(ArchiveProgressType.FinishFile, file.RelativePath, ex ?? (prolibOk ? null : new Exception(_prolibExe.ErrorOutput.ToString()))));
+                        }
+                    } catch (Exception) {
+                        // ignored
                     }
                 });
             }

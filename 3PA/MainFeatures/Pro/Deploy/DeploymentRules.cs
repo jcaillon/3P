@@ -235,6 +235,27 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 try {
                     var items = lineString.Split('\t');
 
+                    if (items.Length == 4) {
+                        // new variable
+
+                        var obj = new DeployVariableRule {
+                            Source = path,
+                            Line = lineNb + 1,
+                            NameFilter = items[0].Trim(),
+                            SuffixFilter = items[1].Trim(),
+                            VariableName = items[2].Trim(),
+                            Path = items[3].Trim()
+                        };
+
+                        if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
+                            outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
+                            return;
+                        }
+
+                        if (!string.IsNullOrEmpty(obj.Path))
+                            list.Add(obj);
+                    }
+
                     int step = 0;
                     if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
                         return;
@@ -290,25 +311,6 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                         if (!string.IsNullOrEmpty(obj.SourcePattern))
                             list.Add(obj);
 
-                    } else if (items.Length == 4) {
-                        // new variable
-
-                        var obj = new DeployVariableRule {
-                            Source = path,
-                            Line = lineNb + 1,
-                            NameFilter = items[0].Trim(),
-                            SuffixFilter = items[1].Trim(),
-                            VariableName = items[2].Trim(),
-                            Path = items[3].Trim()
-                        };
-
-                        if (!obj.VariableName.StartsWith("<") || !obj.VariableName.EndsWith(">")) {
-                            outputMessage.Append("- The variable rule line n°" + (lineNb + 1) + " is incorrect, the variable should have the format <b>&lt;XXX&gt;</b><br>");
-                            return;
-                        }
-
-                        if (!string.IsNullOrEmpty(obj.Path))
-                            list.Add(obj);
                     }
                 } catch (Exception e) {
                     outputMessage.Append("- Unknown error reading rule line n°" + (lineNb + 1) + " : " + e.Message + "<br>");
@@ -475,6 +477,27 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     return new DeployTransferRuleDeleteFolder();
                 default:
                     throw new ArgumentOutOfRangeException("type", type, null);
+            }
+        }
+
+        #endregion
+
+        #region GetDeletetionType
+
+        /// <summary>
+        /// Returns the type of deployment needed to delete a file deployed with the given type
+        /// </summary>
+        public static DeployType GetDeletetionType(DeployType type) {
+            switch (type) {
+                case DeployType.Prolib:
+                    return DeployType.DeleteInProlib;
+                case DeployType.CopyFolder:
+                    return DeployType.DeleteFolder;
+                case DeployType.Copy:
+                case DeployType.Move:
+                    return DeployType.Delete;
+                default:
+                    return DeployType.None;
             }
         }
 

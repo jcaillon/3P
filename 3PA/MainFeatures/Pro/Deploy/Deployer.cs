@@ -39,7 +39,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         private string _deploymentDirectory;
         private int _totalNbFilesToDeploy;
         private int _nbFilesDeployed;
-        private CompressionLevel _compressionLevel = CompressionLevel.None;
+        private bool _compileUnmatchedProgressFilesToDeployDir;
+        private CompressionLevel _compressionLevel;
 
         #endregion
 
@@ -51,6 +52,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public Deployer(List<DeployRule> deployRules, ProEnvironment.ProEnvironmentObject proEnv) {
             _compileLocally = proEnv.CompileLocally;
             _deploymentDirectory = proEnv.BaseCompilationPath;
+            _compressionLevel = CompressionLevel.Normal;
+            _compileUnmatchedProgressFilesToDeployDir = true;
             ProlibPath = proEnv.ProlibPath;
 
             DeployRules = deployRules.ToNonNullList();
@@ -177,13 +180,21 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 var deployTarget = ReplaceVariablesIn(rule.DeployTarget ?? sourcePath);
 
                 if (rule.ShouldDeployTargetReplaceDollar) {
-                    targetBasePath = sourcePath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
+                    string matchedPath;
+                    try {
+                        matchedPath = sourcePath.RegexFind(GetRegexAndReplaceVariablesIn(rule.SourcePattern))[0].Groups[0].Value;
+                    } catch (Exception) {
+                        matchedPath = sourcePath;
+                    }
+                    targetBasePath = matchedPath.RegexReplace(GetRegexAndReplaceVariablesIn(rule.SourcePattern), deployTarget);
                 } else {
                     targetBasePath = deployTarget;
                 }
 
                 if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(deployTarget)) {
                     targetBasePath = Path.Combine(_deploymentDirectory, targetBasePath);
+                } else if (deployTarget.Equals("\\")) {
+                    targetBasePath = _deploymentDirectory;
                 }
 
                 if (!outList.Exists(needed => needed.TargetBasePath.EqualsCi(targetBasePath))) {
@@ -197,7 +208,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             // for the compilation step
             if (step == 0) {
-                if (outList.Count == 0) {
+                if (outList.Count == 0 && _compileUnmatchedProgressFilesToDeployDir) {
                     // move to deployment directory by default
                     outList.Add(FileToDeploy.New(DeployType.Move, sourcePath, _deploymentDirectory, null));
                 } else {
@@ -312,10 +323,6 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 if (cancelToken == null) {
                     cancelToken = new CancellationTokenSource();
                 }
-                ParallelOptions parallelOptions = new ParallelOptions {
-                    CancellationToken = cancelToken.Token,
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
-                };
 
                 // make sure to transfer a given file only once at the same place (happens with .cls file since a source
                 // can have several .r files generated if it is used in another classes)
@@ -414,6 +421,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 #endregion
 
                 // do a deployment action for each file
+                ParallelOptions parallelOptions = new ParallelOptions { CancellationToken = cancelToken.Token };
                 Parallel.ForEach(deployToDo.Where(deploy => !(deploy is FileToDeployInPack) && deploy.CanBeParallelized), parallelOptions, file => {
                     // canceled?
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();

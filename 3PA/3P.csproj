@@ -165,6 +165,7 @@
     <Compile Include="Lib\Compression\IUnpackStreamContext.cs" />
     <Compile Include="Lib\Compression\OffsetStream.cs" />
     <Compile Include="Lib\Compression\Prolib\ProlibDelete.cs" />
+    <Compile Include="Lib\Compression\Prolib\ProlibExtractor.cs" />
     <Compile Include="Lib\Compression\Prolib\ProlibPackager.cs" />
     <Compile Include="Lib\Compression\SafeNativeMethods.cs" />
     <Compile Include="Lib\Compression\Zip\ConcatStream.cs" />
@@ -197,7 +198,6 @@
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentRules.cs" />
-    <Compile Include="MainFeatures\Pro\Deploy\DifferentialDeploymentHandler.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileDeployed.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileToCompile.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileToDeploy.cs" />

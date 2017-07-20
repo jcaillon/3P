@@ -23,27 +23,28 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using WixToolset.Dtf.Compression;
-using _3PA.MainFeatures.Pro.Deploy;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib.Compression.Prolib {
 
     /// <summary>
     /// Allows to delete files in a prolib file
     /// </summary>
-    internal class ProlibDelete : IPackager {
+    internal class ProlibExtractor {
 
         #region Private
 
         private ProcessIo _prolibExe;
         private string _archivePath;
+        private string _plExtractionFolder;
 
         #endregion
 
         #region Life and death
 
-        public ProlibDelete(string archivePath, string prolibPath) {
+        public ProlibExtractor(string archivePath, string prolibPath, string plExtractionFolder) {
             _archivePath = archivePath;
+            _plExtractionFolder = plExtractionFolder;
             _prolibExe = new ProcessIo(prolibPath);
         }
 
@@ -51,56 +52,62 @@ namespace _3PA.Lib.Compression.Prolib {
 
         #region Methods
 
-        public void PackFileSet(IDictionary<string, FileToDeployInPack> files, CompressionLevel compLevel, EventHandler<ArchiveProgressEventArgs> progressHandler) {
-            var archiveFolder = Path.GetDirectoryName(_archivePath);
-            if (!string.IsNullOrEmpty(archiveFolder))
-                _prolibExe.StartInfo.WorkingDirectory = archiveFolder;
+        /// <summary>
+        /// Extract the files given RelativePathInPack
+        /// </summary>
+        /// <param name="files"></param>
+        public void ExtractFiles(List<string> files) {
 
-            // for files containing a space, we don't have a choice, call delete for each...
-            foreach (var file in files.Values.Where(deploy => deploy.RelativePathInPack.ContainsFast(" "))) {
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -delete " + file.RelativePathInPack.ProQuoter();
-                var isOk = _prolibExe.TryDoWait(true);
-                if (progressHandler != null) {
-                    progressHandler(this, new ArchiveProgressEventArgs(ArchiveProgressType.FinishFile, file.RelativePathInPack, isOk ? null : new Exception(_prolibExe.ErrorOutput.ToString())));
+           _prolibExe.StartInfo.WorkingDirectory = _plExtractionFolder;
+
+            // create the subfolders needed to extract each file
+            foreach (var folder in files.Select(Path.GetDirectoryName).Distinct(StringComparer.CurrentCultureIgnoreCase)) {
+                try {
+                    Directory.CreateDirectory(Path.Combine(_plExtractionFolder, folder));
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e);
                 }
             }
 
-            var remainingFiles = files.Values.Where(deploy => !deploy.RelativePathInPack.ContainsFast(" ")).ToList();
+            // for files containing a space, we don't have a choice, call delete for each...
+            foreach (var file in files.Where(deploy => deploy.ContainsFast(" "))) {
+                _prolibExe.Arguments = _archivePath.ProQuoter() + " -extract " + file.ProQuoter();
+                if (!_prolibExe.TryDoWait(true)) {
+                    ErrorHandler.LogError(new Exception(_prolibExe.ErrorOutput.ToString()), "Erreur durant l'extraction de fichiers depuis une .pl");
+                }
+            }
+
+            var remainingFiles = files.Where(deploy => !deploy.ContainsFast(" ")).ToList();
             if (remainingFiles.Count > 0) {
 
                 // for the other files, we can use the -pf parameter
                 var pfContent = new StringBuilder();
-                pfContent.AppendLine("-delete");
+                pfContent.AppendLine("-extract");
                 foreach (var file in remainingFiles) {
-                    pfContent.AppendLine(file.RelativePathInPack);
+                    pfContent.AppendLine(file);
                 }
-
-                Exception ex = null;
-                var pfPath = _archivePath + "~" + Path.GetRandomFileName() + ".pf";
+                
+                var pfPath = _plExtractionFolder + Path.GetFileName(_archivePath) + "~" + Path.GetRandomFileName() + ".pf";
 
                 try {
                     File.WriteAllText(pfPath, pfContent.ToString(), Encoding.Default);
                 } catch (Exception e) {
-                    ex = e;
+                    ErrorHandler.LogError(e);
                 }
 
                 _prolibExe.Arguments = _archivePath.ProQuoter() + " -pf " + pfPath.ProQuoter();
-                var isOk = _prolibExe.TryDoWait(true);
+                if (!_prolibExe.TryDoWait(true)) {
+                    ErrorHandler.LogError(new Exception(_prolibExe.ErrorOutput.ToString()), "Erreur durant l'extraction de fichiers depuis une .pl");
+                }
 
                 try {
-                    if (ex == null) {
+                    if (File.Exists(pfPath))
                         File.Delete(pfPath);
-                    }
                 } catch (Exception e) {
-                    ex = e;
-                }
-
-                if (progressHandler != null) {
-                    foreach (var file in files.Values.Where(deploy => !deploy.RelativePathInPack.ContainsFast(" "))) {
-                        progressHandler(this, new ArchiveProgressEventArgs(ArchiveProgressType.FinishFile, file.RelativePathInPack, ex ?? (isOk ? null : new Exception(_prolibExe.ErrorOutput.ToString()))));
-                    }
+                    ErrorHandler.LogError(e);
                 }
             }
+            
         }
 
         #endregion
