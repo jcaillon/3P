@@ -313,6 +313,7 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
+    <Content Include="_Resource\Images\Appli\Clock.png" />
     <Content Include="_Resource\Images\FilesExt\ExtCab.png" />
     <Content Include="_Resource\Images\FilesExt\ExtCls.png" />
     <Content Include="_Resource\Images\FilesExt\ExtD.png" />
@@ -380,7 +381,6 @@
     <Content Include="_Resource\Images\Appli\Report_64x64.png" />
     <Content Include="_Resource\Images\Appli\Rules.png" />
     <Content Include="_Resource\Images\Appli\Save.png" />
-    <Content Include="_Resource\Images\Appli\Save2.png" />
     <Content Include="_Resource\Images\Appli\SelectFile.png" />
     <Content Include="_Resource\Images\Appli\Stop.png" />
     <Content Include="_Resource\Images\Appli\Time.png" />

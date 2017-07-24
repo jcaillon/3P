@@ -477,21 +477,21 @@ namespace _3PA.MainFeatures.Pro.Deploy
                     </tr>
                     <tr>");
 
-            html.AppendLine("<td class='NotificationSubTitle'>" + (HasBeenCancelled ? "<img style = 'padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (!CompilationHasFailed ? "<img style = 'padding-right: 2px;' src='Ok30x30' height='25px'>" + (IsTestMode ? "Test done!" : "Done!") : " <img style = 'padding-right: 2px;' src='Error30x30' height='25px'>An error has occurred...")) + @"</td>");
+            html.AppendLine("<td class='SubTitle'>" + (HasBeenCancelled ? "<img style = 'padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (!CompilationHasFailed ? "<img style = 'padding-right: 2px;' src='Ok30x30' height='25px'>" + (IsTestMode ? "Test done!" : "Done!") : " <img style = 'padding-right: 2px;' src='Error30x30' height='25px'>An error has occurred...")) + @"</td>");
 
             /*
             switch (Config.Instance.ReturnCode) {
                 case Config.ReturnCode.Error:
-                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Error_25x25' height='25px'>Une erreur est survenue</td>");
+                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Error_30x30' height='25px'>Une erreur est survenue</td>");
                     break;
                 case Config.ReturnCode.Ok:
                     if (_deployment.IsTestMode)
-                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Test_25x25' height='25px'>Test réalisé avec succès</td>");
+                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Test_30x30' height='25px'>Test réalisé avec succès</td>");
                     else
-                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Ok_25x25' height='25px'>Le déploiement s'est déroulé correctement</td>");
+                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Ok_30x30' height='25px'>Le déploiement s'est déroulé correctement</td>");
                     break;
                 case Config.ReturnCode.Canceled:
-                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Warning_25x25' height='25px'>Déploiement annulé par l'utilisateur</td>");
+                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Warning_30x30' height='25px'>Déploiement annulé par l'utilisateur</td>");
                     break;
             }
             */
@@ -547,18 +547,18 @@ namespace _3PA.MainFeatures.Pro.Deploy
 
             if (HasBeenCancelled) {
                 // the process has been canceled
-                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Warning_25x25' height='15px'>The deployment has been canceled by the user</div>");
+                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Warning30x30' height='15px'>The deployment has been canceled by the user</div>");
 
             } else if (CompilationHasFailed) {
 
                 // provide info on the possible error!
-                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Error_25x25' height='15px'>At least one process has ended in error, the compilation has been canceled</div>");
+                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Error30x30' height='15px'>At least one process has ended in error, the compilation has been canceled</div>");
 
                 if (_proCompilation.CompilationFailedOnMaxUser) {
-                    currentReport.Append(@"<div><img style='padding-right: 20px;' src='Help_25x25' height='15px'>One or more processes started for this compilation tried to connect to the database and failed because the maximum number of connection has been reached (error 748). To correct this problem, you can either :<br><li>reduce the number of processes to use for each core of your computer</li><li>or increase the maximum of connections for your database (-n parameter in the PROSERVE command)</li></div>");
+                    currentReport.Append(@"<div><img style='padding-right: 20px;' src='Help30x30' height='15px'>One or more processes started for this compilation tried to connect to the database and failed because the maximum number of connection has been reached (error 748). To correct this problem, you can either :<br><li>reduce the number of processes to use for each core of your computer</li><li>or increase the maximum of connections for your database (-n parameter in the PROSERVE command)</li></div>");
                 }
             } else if (_deploymentErrorOccured) {
-                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Error_25x25' height='15px'>Le déploiement a échoué</div>");
+                currentReport.Append(@"<div><img style='padding-right: 20px;' src='Error30x30' height='15px'>Le déploiement a échoué</div>");
             }
 
             var listLinesCompilation = new List<Tuple<int, string>>();
@@ -577,7 +577,7 @@ namespace _3PA.MainFeatures.Pro.Deploy
                 if (hasError || hasWarning) {
                     // only add compilation errors
                     line.Clear();
-                    line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error_25x25" : "Warning_25x25") + "'); padding-left: 35px; padding-top: 6px; padding-bottom: 6px;\">");
+                    line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 35px; padding-top: 6px; padding-bottom: 6px;\">");
                     line.Append(ProExecutionCompile.FormatCompilationResultForSingleFile(fileInError.SourcePath, fileInError, null));
                     line.Append("</div>");
                     listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
@@ -602,7 +602,7 @@ namespace _3PA.MainFeatures.Pro.Deploy
                     var first = group.First();
 
                     line.Clear();
-                    line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error_25x25" : "Ok_25x25") + "'); padding-left: 35px; padding-top: 6px; padding-bottom: 6px;\">");
+                    line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 35px; padding-top: 6px; padding-bottom: 6px;\">");
                     line.Append(first.ToStringGroupHeader());
                     foreach (var fileToDeploy in group.OrderBy(deploy => deploy.To)) {
                         line.Append(fileToDeploy.ToStringDescription(kpv.Key <= 1 ? _proEnv.BaseLocalPath : _proEnv.BaseCompilationPath));
@@ -625,25 +625,25 @@ namespace _3PA.MainFeatures.Pro.Deploy
             currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Compiling <b>" + _proCompilation.NbFilesToCompile + "</b> files : <b>" + Utils.GetNbFilesPerType(_proCompilation.GetListOfFileToCompile.Select(compile => compile.SourcePath).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
 
             // compilation time
-            currentReport.Append(@"<div><img style='padding-right: 20px;' src='Clock_15px' height='15px'>Total elapsed time for the compilation : <b>" + _proCompilation.TotalCompilationTime + @"</b></div>");
+            currentReport.Append(@"<div><img style='padding-right: 20px;' src='Clock' height='15px'>Total elapsed time for the compilation : <b>" + _proCompilation.TotalCompilationTime + @"</b></div>");
 
             if (nbCompilationError > 0)
-                currentReport.Append("<div><img style='padding-right: 20px;' src='Error_25x25' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
+                currentReport.Append("<div><img style='padding-right: 20px;' src='Error30x30' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
             if (nbCompilationWarning > 0)
-                currentReport.Append("<div><img style='padding-right: 20px;' src='Warning_25x25' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
+                currentReport.Append("<div><img style='padding-right: 20px;' src='Warning30x30' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
             if (_proCompilation.NumberOfFilesTreated - nbCompilationError - nbCompilationWarning > 0)
-                currentReport.Append("<div><img style='padding-right: 20px;' src='Ok_25x25' height='15px'>" + (_proCompilation.NumberOfFilesTreated - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
+                currentReport.Append("<div><img style='padding-right: 20px;' src='Ok30x30' height='15px'>" + (_proCompilation.NumberOfFilesTreated - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
 
             // deploy
             currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Deploying <b>" + totalDeployedFiles + "</b> files : <b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
 
             // deployment time
-            currentReport.Append(@"<div><img style='padding-right: 20px;' src='Clock_15px' height='15px'>Total elapsed time for the deployment : <b>" + TotalDeploymentTime + @"</b></div>");
+            currentReport.Append(@"<div><img style='padding-right: 20px;' src='Clock' height='15px'>Total elapsed time for the deployment : <b>" + TotalDeploymentTime + @"</b></div>");
 
             if (nbDeploymentError > 0)
-                currentReport.Append("<div><img style='padding-right: 20px;' src='Error_25x25' height='15px'>" + nbDeploymentError + " files not deployed</div>");
+                currentReport.Append("<div><img style='padding-right: 20px;' src='Error30x30' height='15px'>" + nbDeploymentError + " files not deployed</div>");
             if (totalDeployedFiles - nbDeploymentError > 0)
-                currentReport.Append("<div><img style='padding-right: 20px;' src='Ok_25x25' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
+                currentReport.Append("<div><img style='padding-right: 20px;' src='Ok30x30' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
 
             // compilation
             if (listLinesCompilation.Count > 0) {

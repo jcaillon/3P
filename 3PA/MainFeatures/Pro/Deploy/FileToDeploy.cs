@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             if (IsOk) {
                 sb.Append("<img height='15px' src='" + DeployImage + "'>");
             } else {
-                sb.Append("<img height='15px' src='Error_25x25'>Transfer failed for ");
+                sb.Append("<img height='15px' src='Error'>Transfer failed for ");
             }
             sb.Append("<span style='padding-right: 8px;'>(" + DeployType);
             if (RuleReference != null)
@@ -255,7 +255,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         }
 
         public override string ToStringGroupHeader() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete_15px") + "' height='15px'><b>Deleted files and folders</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete") + "' height='15px'><b>Deleted files and folders</b></div>";
         }
 
         /// <summary>
@@ -324,7 +324,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         }
 
         public override string ToStringGroupHeader() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete_15px") + "' height='15px'><b>Deleted files and folders</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete") + "' height='15px'><b>Deleted files and folders</b></div>";
         }
 
         /// <summary>
@@ -508,7 +508,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         }
 
         public override string ToStringGroupHeader() {
-            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete_15px") + "' height='15px'><b>Deleted files in .pl</b></div>";
+            return "<div style='padding-bottom: 5px;'><img src='" + Utils.GetImageNameOf("Delete") + "' height='15px'><b>Deleted files in .pl</b></div>";
         }
 
         /// <summary>
