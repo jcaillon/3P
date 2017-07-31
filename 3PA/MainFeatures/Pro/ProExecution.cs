@@ -765,9 +765,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
                     return false;
                 if (needUpdate) {
-                    if (string.IsNullOrEmpty(Config.Instance.InstalledDataDiggerVersion)) {
-                        UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
-                    }
+                    UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
                     Config.Instance.InstalledDataDiggerVersion = Config.EmbeddedDataDiggerVersion;
                     try {
                         // delete all previous r code

@@ -616,7 +616,7 @@ namespace _3PA.MainFeatures {
         /// To update when updating the version of datadigger
         /// </summary>
         public static string EmbeddedDataDiggerVersion {
-            get { return @"v22.1"; }
+            get { return @"v23"; }
         }
 
         public static string DataDiggerVersionUrl {
@@ -679,19 +679,19 @@ namespace _3PA.MainFeatures {
         /// Url for the webservices
         /// </summary>
         public static string PingPostWebWervice {
-            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=ping&softName=3p"; }
+            get { return @"http://users.epizy.com/ws/1.6.4/?action=ping&softName=3p"; }
         }
 
         public static string BugsPostWebWervice {
-            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=bugs&softName=3p"; }
+            get { return @"http://users.epizy.com/ws/1.6.4/?action=bugs&softName=3p"; }
         }
 
         public static string PingGetWebWervice {
-            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; }
+            get { return @"http://users.epizy.com/ws/1.6.4/?action=getPing&softName=3p"; }
         }
 
         public static string BugsGetWebWervice {
-            get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; }
+            get { return @"http://users.epizy.com/ws/1.6.4/?action=getBugs&softName=3p"; }
         }
 
         public static string PingGoogleAnalytics {

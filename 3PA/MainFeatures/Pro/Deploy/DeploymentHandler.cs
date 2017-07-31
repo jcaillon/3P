@@ -479,22 +479,6 @@ namespace _3PA.MainFeatures.Pro.Deploy
 
             html.AppendLine("<td class='SubTitle'>" + (HasBeenCancelled ? "<img style = 'padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (!CompilationHasFailed ? "<img style = 'padding-right: 2px;' src='Ok30x30' height='25px'>" + (IsTestMode ? "Test done!" : "Done!") : " <img style = 'padding-right: 2px;' src='Error30x30' height='25px'>An error has occurred...")) + @"</td>");
 
-            /*
-            switch (Config.Instance.ReturnCode) {
-                case Config.ReturnCode.Error:
-                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Error_30x30' height='25px'>Une erreur est survenue</td>");
-                    break;
-                case Config.ReturnCode.Ok:
-                    if (_deployment.IsTestMode)
-                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Test_30x30' height='25px'>Test réalisé avec succès</td>");
-                    else
-                        html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Ok_30x30' height='25px'>Le déploiement s'est déroulé correctement</td>");
-                    break;
-                case Config.ReturnCode.Canceled:
-                    html.AppendLine(@"<td class='SubTitle'><img style='padding-right: 2px;' src='Warning_30x30' height='25px'>Déploiement annulé par l'utilisateur</td>");
-                    break;
-            }
-            */
             html.AppendLine(@"
                     </tr>
                 </table>");

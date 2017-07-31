@@ -5,7 +5,7 @@
       
 =====================================================================================
 
-DataDigger version 23 - 17 apr 2017 (Easter Egg)
+DataDigger version 23 - 15 apr 2017 (Easter Egg)
 
 - Solved: Query-open errors were not shown in tooltip of query fill-in
 - Solved: High nr of decimals on non-decimal fields could cause errors. See PKB P185263
@@ -15,26 +15,16 @@ DataDigger version 23 - 17 apr 2017 (Easter Egg)
 - Solved: Curly brace could break query
 - Solved: Resize error in large window with resize bar
 - Solved: Check on updates reports new BETA although set to check on STABLE
-
-- New   : Multi-sort on data columns now possible
-- New   : Row coloring now depending on chosen sort
-- New   : Right-click on data browse now shows total, min, max, avg of selected rows
-
-Changes in beta 20170320:
 - Solved: Filter window looks weird with large font
 - Solved: Query result always shows that query is incomplete (Mike Derrick)
 - Solved: First hint on upgrading does not show
 - Solved: Obsolete images of v18 and older were not cleaned up
 - Solved: Version upgrade logic does not run on new beta version
-
-Changes in beta 20170330
 - Solved: Custom hook customFormat did not fire
 - Solved: Data Administration accessible in readonly mode (Curtis Schroer)
 - Solved: About-window not accessible without timer (Frans Hoekstra)
 - Solved: Several shortcuts conflicted (Frans Hoekstra)
 - Solved: Window title not cleared after resetting filter (Dirk Vreken)
-
-Changes in beta 20170412
 - Solved: Check on new version is done on each start, now once a day
 - Solved: Availability of a new version is shown on each start (Jeroen Beugels)
 - Solved: Dumping data from VST tables result in unknown dump file name (Edwin Schutten)
@@ -44,10 +34,16 @@ Changes in beta 20170412
 - Solved: Field visibility for RECID / ROWID fields was not preserved (Edwin Schutten)
 - Solved: Error when opening DD with data on clipboard and database filled in in filter
 - Solved: Error message when running DD on a machine where PSTIMER is not registered
+- Solved: error when clearing data filters from data context menu (Dirk Vreken)
+- Solved: dictionary not resizable anymore (Dirk Vreken)
+- Solved: timer not functioning at all
 
-- New: set physical database name in title (Edwin Schutten)
-- New: toggle selection of all fields in edit window
-- New: optional pingback of DataDigger
+- New   : Multi-sort on data columns now possible
+- New   : Row coloring now depending on chosen sort
+- New   : Right-click on data browse now shows total, min, max, avg of selected rows
+- New   : set physical database name in title (Edwin Schutten)
+- New   : toggle selection of all fields in edit window
+- New   : optional pingback of DataDigger
 
 =====================================================================================
 

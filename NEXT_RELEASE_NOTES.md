@@ -19,3 +19,4 @@
 - No longer automatically autocompletes simple numbers
 - fixed compilation errors display issue that would occur if the error was located in an include file for instance
 - #164 : Search window inactive when CRTL+F
+- #165 : Incomplete procedure name when using preprocessed variables

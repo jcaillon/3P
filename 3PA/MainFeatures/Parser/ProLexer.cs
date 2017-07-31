@@ -166,11 +166,18 @@ namespace _3PA.MainFeatures.Parser {
 
                 case '-':
                 case '+':
-                    // number
-                    if (!char.IsDigit(PeekAtChr(1)))
-                        return CreateSymbolToken();
-                    ReadChr();
-                    return CreateNumberToken();
+                    var nextChr = PeekAtChr(1);
+                    var prevChr = PeekAtChrReverse(1);
+                    // number?
+                    if (char.IsWhiteSpace(prevChr) && char.IsDigit(nextChr)) {
+                        ReadChr();
+                        return CreateNumberToken();
+                    }
+                    // a word?
+                    if (!char.IsWhiteSpace(prevChr) && IsCharWord(nextChr)) {
+                        return CreateWordToken();
+                    }
+                    return CreateSymbolToken();
 
                 case '0':
                 case '1':

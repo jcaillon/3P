@@ -631,29 +631,6 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enable_UI wAbout  _DEFAULT-ENABLE
-PROCEDURE enable_UI :
-/*------------------------------------------------------------------------------
-  Purpose:     ENABLE the User Interface
-  Parameters:  <none>
-  Notes:       Here we display/view/enable the widgets in the
-               user-interface.  In addition, OPEN all queries
-               associated with each FRAME and BROWSE.
-               These statements here are based on the "Other 
-               Settings" section of the widget Property Sheets.
-------------------------------------------------------------------------------*/
-  RUN control_load.
-  DISPLAY edChangelog fiDataDigger-1 fiDataDigger-2 fiWebsite 
-      WITH FRAME DEFAULT-FRAME IN WINDOW wAbout.
-  ENABLE btnDataDigger BtnOK edChangelog fiWebsite 
-      WITH FRAME DEFAULT-FRAME IN WINDOW wAbout.
-  VIEW FRAME DEFAULT-FRAME IN WINDOW wAbout.
-  {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE gameOver wAbout 
 PROCEDURE gameOver :
 /* Game over
@@ -804,10 +781,20 @@ PROCEDURE initializeUi :
   DO:
     ASSIGN
       chCtrlFrame    = CtrlFrame:COM-HANDLE
-      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U)
       CtrlFrame:NAME = "CtrlFrame":U
+      UIB_S          = chCtrlFrame:LoadControls( OCXFile, "CtrlFrame":U) NO-ERROR
     .
-    glUseTimer = TRUE.
+
+    /* Check for message 6087:
+     * Specified ActiveX control is not registered or the .ocx file was moved from where it was registered.
+     * Error occurred in procedure: <procedure name> (6087)
+     * This error occurred while trying to load an ActiveX control.  
+     * It is possible that the control was not properly installed or that the .ocx file was moved or deleted.
+     */
+    IF ERROR-STATUS:GET-NUMBER(1) = 6087 THEN 
+      glUseTimer = NO.
+    ELSE
+      glUseTimer = YES.
   END.
 
   /* From enable_ui */
