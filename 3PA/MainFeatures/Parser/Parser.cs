@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,6 +33,7 @@ namespace _3PA.MainFeatures.Parser {
     /// from the tokens created by the proLexer
     /// </summary>
     internal partial class Parser {
+
         #region static
 
         /// <summary>

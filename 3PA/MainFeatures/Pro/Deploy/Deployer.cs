@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WixToolset.Dtf.Compression;
@@ -37,6 +38,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         private bool _compileLocally;
         private string _deploymentDirectory;
+        private string _sourceDirectory;
         private int _totalNbFilesToDeploy;
         private int _nbFilesDeployed;
         private bool _compileUnmatchedProgressFilesToDeployDir;
@@ -52,6 +54,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public Deployer(List<DeployRule> deployRules, ProEnvironment.ProEnvironmentObject proEnv) {
             _compileLocally = proEnv.CompileLocally;
             _deploymentDirectory = proEnv.BaseCompilationPath;
+            _sourceDirectory = Path.GetFullPath(proEnv.BaseLocalPath).TrimEnd('\\');
             _compressionLevel = CompressionLevel.Normal;
             _compileUnmatchedProgressFilesToDeployDir = true;
             ProlibPath = proEnv.ProlibPath;
@@ -462,9 +465,14 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         private string ReplaceVariablesIn(string input) {
             if (input.ContainsFast("<")) {
+                var fr = new FastReplacer("<", ">", false);
+                fr.Append(input);
+                // special replacement
+                fr.Replace(@"<ROOT>", input.StartsWith(":") ? Regex.Escape(_sourceDirectory) : _sourceDirectory);
                 foreach (var variableRule in DeployVarList) {
-                    input = input.Replace(variableRule.VariableName, variableRule.Path);
+                    fr.Replace(variableRule.VariableName, variableRule.Path);
                 }
+                return fr.ToString();
             }
             return input;
         }

@@ -90,6 +90,8 @@
 # You can define variables on a line with info separated by tabulations; the format is :
 # name	suffix	<var_name>	path
 # The <var_name> is then replaced in the transfer rules by the value of the "path"
+# You can also use the special variable <ROOT> which is always available and is replaced by the
+# path to your source directory (without the ending '\')
 # See the example below for a better understanding
 # ========================================================================
 
