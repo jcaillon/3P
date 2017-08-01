@@ -179,6 +179,8 @@
     <Compile Include="Lib\Compression\Zip\ZipPackager.cs" />
     <Compile Include="Lib\Compression\Zip\ZipPacker.cs" />
     <Compile Include="Lib\Compression\Zip\ZipUnpacker.cs" />
+    <Compile Include="Lib\FastReplacer.cs" />
+    <Compile Include="Lib\FastReplacerSnippet.cs" />
     <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />

@@ -264,7 +264,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     if (items.Length >= 6) {
                         DeployType type;
                         if (Enum.TryParse(items[3].Trim(), true, out type)) {
-
+                            
                             var obj = DeployTransferRule.New(type);
                             obj.Source = path;
                             obj.Line = lineNb + 1;
@@ -274,22 +274,31 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                             obj.ContinueAfterThisRule = items[4].Trim().EqualsCi("yes") || items[4].Trim().EqualsCi("true");
                             obj.SourcePattern = items[5].Trim();
 
+                            var newRules = new List<DeployTransferRule> { obj };
                             if (items.Length > 6) {
-                                obj.DeployTarget = items[6].Trim().Replace('/', '\\');
-                                obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
-                                if (obj.ShouldDeployTargetReplaceDollar)
-                                    obj.DeployTarget = obj.DeployTarget.Remove(0, 1);
+                                var multipleTargets = items[6].Split('|');
+                                obj.DeployTarget = multipleTargets[0].Trim().Replace('/', '\\');
+                                for (int i = 1; i < multipleTargets.Length; i++) {
+                                    DeployTransferRule copiedRule = obj.GetCopy();
+                                    copiedRule.ContinueAfterThisRule = true;
+                                    copiedRule.DeployTarget = multipleTargets[i].Trim().Replace('/', '\\');
+                                    newRules.Add(copiedRule);
+                                }
                             }
 
-                            string errorMsg;
-                            var isOk = obj.IsValid(out errorMsg);
-                            if (isOk) {
-                                list.Add(obj);
-                                return;
-                            }
-                            if (!string.IsNullOrEmpty(errorMsg)) {
-                                outputMessage.Append(errorMsg);
-                                outputMessage.Append("<br>");
+                            foreach (var rule in newRules) {
+                                rule.ShouldDeployTargetReplaceDollar = rule.DeployTarget.StartsWith(":");
+                                if (rule.ShouldDeployTargetReplaceDollar)
+                                    rule.DeployTarget = rule.DeployTarget.Remove(0, 1);
+
+                                string errorMsg;
+                                var isOk = rule.IsValid(out errorMsg);
+                                if (isOk) {
+                                    list.Add(rule);
+                                } else if (!string.IsNullOrEmpty(errorMsg)) {
+                                    outputMessage.Append(errorMsg);
+                                    outputMessage.Append("<br>");
+                                }
                             }
                         }
                     }
@@ -413,7 +422,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public virtual DeployTransferRuleTarget TargetType { get { return DeployTransferRuleTarget.File; } }
 
         /// <summary>
-        /// if true, this should be the last rule applied to this file
+        /// if false, this should be the last rule applied to this file
         /// </summary>
         public bool ContinueAfterThisRule { get; set; }
 
@@ -447,6 +456,23 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             }
             error = ToStringDescription() + " : The source pattern or the deploy target path is empty";
             return false;
+        }
+
+
+        /// <summary>
+        /// Get a copy of this object
+        /// </summary>
+        /// <returns></returns>
+        public virtual DeployTransferRule GetCopy() {
+            var theCopy = New(Type);
+            theCopy.Line = Line;
+            theCopy.Step = Step;
+            theCopy.Source = Source;
+            theCopy.NameFilter = NameFilter;
+            theCopy.SuffixFilter = SuffixFilter;
+            theCopy.ContinueAfterThisRule = ContinueAfterThisRule;
+            theCopy.SourcePattern = SourcePattern;
+            return theCopy;
         }
 
         #endregion
