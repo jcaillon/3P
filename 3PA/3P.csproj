@@ -193,6 +193,7 @@
     <Compile Include="Lib\Ftp\StaticFtpsClient.cs" />
     <Compile Include="Lib\NanoXmlParser.cs" />
     <Compile Include="Lib\ProcessIo.cs" />
+    <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />

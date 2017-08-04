@@ -452,13 +452,13 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         #endregion
 
         public override FileToDeploy Set(string @from, string to) {
-            var pos = to.LastIndexOf(PackExt + @"\\", StringComparison.CurrentCultureIgnoreCase);
+            var pos = to.LastIndexOf(PackExt + @"\", StringComparison.CurrentCultureIgnoreCase);
             if (pos < 0)
                 pos = to.LastIndexOf(PackExt, StringComparison.CurrentCultureIgnoreCase);
             if (pos >= 0) {
                 pos += PackExt.Length;
                 PackPath = to.Substring(0, pos);
-                RelativePathInPack = to.Substring(pos + 1);
+                RelativePathInPack = pos + 1 < to.Length ? to.Substring(pos + 1) : "\\";
             }
             return base.Set(@from, to);
         }

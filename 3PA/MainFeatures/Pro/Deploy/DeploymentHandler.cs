@@ -83,7 +83,7 @@ namespace _3PA.MainFeatures.Pro.Deploy
 
         /// <summary>
         /// Total number of operations composing this deployment
-        /// 1 compil, 2 deploy compil r code (step 0), 3 step 1...
+        /// compil, deploy compil r code (step 0), step 1...
         /// </summary>
         public virtual int TotalNumberOfOperations { get { return MaxStep + 2; } }
 
@@ -140,9 +140,7 @@ namespace _3PA.MainFeatures.Pro.Deploy
 
         public bool CompilationHasFailed { get; protected set; }
 
-        public bool HasBeenCancelled {
-            get { return _cancelSource.IsCancellationRequested; }
-        }
+        public bool HasBeenCancelled { get; protected set; }
 
         /// <summary>
         /// Get the time elapsed since the beginning of the compilation in a human readable format
@@ -226,8 +224,8 @@ namespace _3PA.MainFeatures.Pro.Deploy
         /// <summary>
         /// Call this method to cancel the execution of this deployment
         /// </summary>
-        public void Cancel()
-        {
+        public virtual void Cancel() {
+            HasBeenCancelled = true;
             _cancelSource.Cancel();
             if (_proCompilation != null)
                 _proCompilation.CancelCompilation();
@@ -241,11 +239,17 @@ namespace _3PA.MainFeatures.Pro.Deploy
         #region To override
 
         /// <summary>
+        /// Called just before calling the end of deployment events and once everything is done
+        /// </summary>
+        protected virtual void BeforeEndOfSuccessfulDeployment() {
+            EndOfDeployment();
+        }
+
+        /// <summary>
         /// Do stuff before starting the treatment, returns false if we shouldn't start the treatment
         /// </summary>
         /// <returns></returns>
-        protected virtual bool BeforeStarting()
-        {
+        protected virtual bool BeforeStarting() {
             return true;
         }
 
@@ -391,7 +395,7 @@ namespace _3PA.MainFeatures.Pro.Deploy
             } else {
 
                 // end of the overall deployment
-                EndOfDeployment();
+                BeforeEndOfSuccessfulDeployment();
             }
         }
 
