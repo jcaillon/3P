@@ -650,6 +650,13 @@ namespace _3PA.MainFeatures {
             get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
         }
 
+        /// <summary>
+        /// Url for the github webservices
+        /// </summary>
+        public static string ProlintReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
+        }
+
         // HELP URL
         public static string UrlWebSite {
             get { return @"http://jcaillon.github.io/3P/"; }

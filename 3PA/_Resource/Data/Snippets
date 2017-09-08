@@ -24,3 +24,11 @@
 #  |<value>| - snippet parameter 
 #  |||       - special snippet parameter indicating the 
 #              caret position after the snippet insertion is completed. 
+
+
+def var ${1:varName} as ${2:char} no-undo.
+$0
+
+function ${1:functionName} returns ${2:char} (input ${3:parameterName} as ${4:char}):
+	$0
+	return.

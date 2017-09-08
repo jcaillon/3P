@@ -39,7 +39,7 @@
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
 &ENDIF
-&SCOPED-DEFINE verHigherThan11 DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, ".") - 1)) >= 11
+&SCOPED-DEFINE verHigherThan11 INTEGER(ENTRY(1, PROVERSION, '.')) >= 11
 &SCOPED-DEFINE CanAnalyse {&AnalysisMode} AND {&verHigherThan11}
 
 

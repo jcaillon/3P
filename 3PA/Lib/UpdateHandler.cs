@@ -36,6 +36,7 @@ namespace _3PA.Lib {
     /// Handles the update of this software
     /// </summary>
     internal static class UpdateHandler {
+
         #region fields
 
         /// <summary>
@@ -383,5 +384,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
+
     }
 }

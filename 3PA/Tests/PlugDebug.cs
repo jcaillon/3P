@@ -107,6 +107,30 @@ namespace _3PA.Tests {
                 new List<string> {"ok", "cancel"},
                 true);
              */
+
+            var g = new GitHubUpdater();
+            g.AssetDownloadFolder = @"D:\temp";
+            g.AssetName = "prolint.zip";
+            g.BasicAuthenticationToken = @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz";
+            g.GetPreReleases = true;
+            g.GitHubReleaseApi = Config.ProlintReleasesApi;
+            g.LocalVersion = "v0.0.0.0.0";
+            g.ErrorOccured += GOnErrorOccured;
+            g.NewReleaseDownloaded += GOnNewReleaseDownloaded;
+            g.AlreadyUpdated += GOnAlreadyUpdated;
+            g.CheckForUpdates();
+        }
+
+        private static void GOnAlreadyUpdated(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo) {
+            UserCommunication.Notify(@"Updated!");
+        }
+
+        private static void GOnNewReleaseDownloaded(GitHubUpdater gitHubUpdater) {
+            UserCommunication.Notify(@"Download! : " + gitHubUpdater.AssetDownloadFolder.ToHtmlLink());
+        }
+
+        private static void GOnErrorOccured(GitHubUpdater gitHubUpdater, GitHubUpdater.GitHubUpdaterFailReason gitHubUpdaterFailReason) {
+            UserCommunication.Notify(gitHubUpdaterFailReason.ToString());
         }
 
         #endregion

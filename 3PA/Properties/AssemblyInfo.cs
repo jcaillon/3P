@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("LeCavalierCasta")]
 [assembly: AssemblyProduct("3P")]
-[assembly: AssemblyCopyright("Copyright (c) 2016 - Julien Caillon - GNU General Public License v3")]
+[assembly: AssemblyCopyright("Copyright (c) 2017 - Julien Caillon - GNU General Public License v3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

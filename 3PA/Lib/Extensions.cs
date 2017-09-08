@@ -35,6 +35,7 @@ namespace _3PA.Lib {
     /// This class regroups all the extension methods
     /// </summary>
     public static class Extensions {
+
         #region object
 
         /// <summary>
