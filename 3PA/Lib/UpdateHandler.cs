@@ -340,6 +340,78 @@ namespace _3PA.Lib {
 
         #endregion
 
+        public static void CheckForProlintUpdates() {
+
+            // update prolint
+            var localVersion = "v0";
+            var releasePath = Path.Combine(Config.FolderProlint, "prolint", "core", "release.ini");
+
+            if (File.Exists(releasePath)) {
+                var prolintRelease = new IniReader(releasePath);
+                localVersion = prolintRelease.GetValue(@"prolint", @"0");
+                UserCommunication.Notify(localVersion);
+            }
+            
+            var prolintUpdater = new GitHubUpdater {
+                UpdatedSoftName = "prolint",
+                AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
+                AssetName = Config.FileProlintGitHubAssetName,
+                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
+                GetPreReleases = Config.Instance.UserGetsPreReleases,
+                GitHubReleaseApi = Config.ProlintReleasesApi,
+                LocalVersion = localVersion
+            };
+            prolintUpdater.ErrorOccured += OnErrorOccured;
+            prolintUpdater.NewReleaseDownloaded += OnNewReleaseDownloaded;
+            prolintUpdater.AlreadyUpdated += OnAlreadyUpdated;
+            prolintUpdater.CheckForUpdates();
+
+            // update proparse.net
+            localVersion = "v0";
+            releasePath = Path.Combine(Config.FolderProlint, "proparse.net", "proparse.net.dll");
+
+            if (File.Exists(releasePath)) {
+                localVersion = Utils.GetDllVersion(releasePath);
+                UserCommunication.Notify(localVersion);
+            }
+            var proparseUpdater = new GitHubUpdater {
+                UpdatedSoftName = "proparse.net",
+                AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
+                AssetName = Config.FileProparseGitHubAssetName,
+                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
+                GetPreReleases = Config.Instance.UserGetsPreReleases,
+                GitHubReleaseApi = Config.ProparseReleasesApi,
+                LocalVersion = localVersion
+            };
+            proparseUpdater.ErrorOccured += OnErrorOccured;
+            proparseUpdater.NewReleaseDownloaded += OnNewReleaseDownloaded;
+            proparseUpdater.AlreadyUpdated += OnAlreadyUpdated;
+            proparseUpdater.CheckForUpdates();
+        }
+
+        private static void OnAlreadyUpdated(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo) {
+            UserCommunication.Notify("Already ok");
+        }
+
+        private static void OnNewReleaseDownloaded(GitHubUpdater gitHubUpdater, string downloadedFile) {
+            // Extract the .zip file
+            if (Utils.ExtractAll(downloadedFile, Config.FolderProlint)) {
+                // check the presence of the plugin file
+                if (File.Exists(Config.FileDownloadedPlugin)) {
+
+                } else {
+                }
+                UserCommunication.Notify("Updated : " + Config.FolderProlint.ToHtmlLink());
+                Utils.DeleteFile(downloadedFile);
+            } else {
+                UserCommunication.Notify("I failed to unzip the following file : <br>" + downloadedFile.ToHtmlLink() + "<br>It contains the update for prolint, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
+            }
+        }
+
+        private static void OnErrorOccured(GitHubUpdater gitHubUpdater, Exception e, GitHubUpdater.GitHubUpdaterFailReason gitHubUpdaterFailReason) {
+            ErrorHandler.ShowErrors(e, gitHubUpdaterFailReason.ToString());
+        }
+
         #region ReleaseInfo
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]

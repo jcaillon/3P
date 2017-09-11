@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -14,16 +13,60 @@ namespace _3PA.Lib {
 
         #region fields
 
+        /// <summary>
+        /// Just as an information, name of the software you are updating
+        /// </summary>
+        public string UpdatedSoftName { get; set; }
+
+        /// <summary>
+        /// Github release api URL
+        /// </summary>
         public string GitHubReleaseApi { get; set; }
+
+        /// <summary>
+        /// Basic authen for github api
+        /// </summary>
         public string BasicAuthenticationToken { get; set; }
+
+        /// <summary>
+        /// Local version of the soft that will be compared to the distant one
+        /// </summary>
         public string LocalVersion { get; set; }
+
+        /// <summary>
+        /// Set to false to ignore releases marked as pre-release on github
+        /// </summary>
         public bool GetPreReleases { get; set; }
+
+        /// <summary>
+        /// Folder path in which to download the asset file
+        /// </summary>
         public string AssetDownloadFolder { get; set; }
+
+        /// <summary>
+        /// Name of the file to download from the github release
+        /// </summary>
         public string AssetName { get; set; }
 
+        /// <summary>
+        /// Called after the download, path to the downloaded file
+        /// </summary>
         public event Action<GitHubUpdater, string> NewReleaseDownloaded;
+
+        /// <summary>
+        /// Called when the soft is up to date
+        /// </summary>
         public event Action<GitHubUpdater, ReleaseInfo> AlreadyUpdated;
-        public event Action<GitHubUpdater, GitHubUpdaterFailReason> ErrorOccured;
+
+        /// <summary>
+        /// Called when the soft is being updated because we found a newer distant version
+        /// </summary>
+        public event Action<GitHubUpdater, ReleaseInfo> StartingUpdate;
+
+        /// <summary>
+        /// Called on error
+        /// </summary>
+        public event Action<GitHubUpdater, Exception, GitHubUpdaterFailReason> ErrorOccured;
 
         #endregion
 
@@ -41,9 +84,8 @@ namespace _3PA.Lib {
                 wb.OnRequestEnded += OnGithubResponse;
                 wb.Execute();
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when checking updates at " + GitHubReleaseApi);
                 if (ErrorOccured != null)
-                    ErrorOccured(this, GitHubUpdaterFailReason.RequestFailed);
+                    ErrorOccured(this, e, GitHubUpdaterFailReason.RequestFailed);
             }
         }
 
@@ -89,11 +131,16 @@ namespace _3PA.Lib {
                             if (latestReleaseInfo.assets != null && latestReleaseInfo.assets.Count > 0 && latestReleaseInfo.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
 
                                 var downloadFile = Path.Combine(AssetDownloadFolder, AssetName);
+                                Utils.CreateDirectory(AssetDownloadFolder);
                                 Utils.DeleteFile(downloadFile);
+
+                                if (StartingUpdate != null)
+                                    StartingUpdate(this, latestReleaseInfo);
+
                                 Utils.DownloadFile(latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
                             } else {
                                 if (ErrorOccured != null)
-                                    ErrorOccured(this, GitHubUpdaterFailReason.NoAssetOnLatestRelease);
+                                    ErrorOccured(this, new Exception("Asset not found"), GitHubUpdaterFailReason.NoAssetOnLatestRelease);
                             }
                         } else {
                             if (AlreadyUpdated != null)
@@ -102,12 +149,11 @@ namespace _3PA.Lib {
                     }
                 } else {
                     if (ErrorOccured != null)
-                        ErrorOccured(this, GitHubUpdaterFailReason.ReleaseApiUnreachable);
+                        ErrorOccured(this, webServiceJson.ResponseException, GitHubUpdaterFailReason.ReleaseApiUnreachable);
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when checking updates at " + GitHubReleaseApi);
                 if (ErrorOccured != null)
-                    ErrorOccured(this, GitHubUpdaterFailReason.AnalyseReleasesFailed);
+                    ErrorOccured(this, e, GitHubUpdaterFailReason.AnalyseReleasesFailed);
             }
         }
 
@@ -121,9 +167,8 @@ namespace _3PA.Lib {
         private void OnAssetDownloaded(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
                 if (asyncCompletedEventArgs.Error != null) {
-                    ErrorHandler.ShowErrors(asyncCompletedEventArgs.Error);
                     if (ErrorOccured != null)
-                        ErrorOccured(this, GitHubUpdaterFailReason.AssetDownloadFailed);
+                        ErrorOccured(this, asyncCompletedEventArgs.Error, GitHubUpdaterFailReason.AssetDownloadFailed);
                 } else {
                     var downloadFile = Path.Combine(AssetDownloadFolder, AssetName);
                     if (File.Exists(downloadFile)) {
@@ -132,9 +177,8 @@ namespace _3PA.Lib {
                     }
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when receiving updates from " + GitHubReleaseApi);
                 if (ErrorOccured != null)
-                    ErrorOccured(this, GitHubUpdaterFailReason.AssetDownloadFailed);
+                    ErrorOccured(this, e, GitHubUpdaterFailReason.AssetDownloadFailed);
             }
         }
 

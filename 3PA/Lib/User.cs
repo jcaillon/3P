@@ -114,7 +114,7 @@ namespace _3PA.Lib {
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, url);
 
             // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
-            wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config._3PUserCredentials);
+            wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config.GitHubBasicAuthenticationToken);
             wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
                                 "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.SoftwareVersion + " ####\r\n" +
                                 message

@@ -634,27 +634,8 @@ namespace _3PA.MainFeatures {
             get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; }
         }
 
-        /// <summary>
-        /// Url for the github webservices
-        /// </summary>
-        public static string ReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
-        }
-
         public static string IssueUrl {
             get { return @"https://github.com/jcaillon/3P/issues"; }
-        }
-
-        // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
-        public static string _3PUserCredentials {
-            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
-        }
-
-        /// <summary>
-        /// Url for the github webservices
-        /// </summary>
-        public static string ProlintReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
         }
 
         // HELP URL
@@ -735,10 +716,6 @@ namespace _3PA.MainFeatures {
 
         public static string FolderDatabase {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DatabaseInfo")); }
-        }
-
-        public static string FolderUpdate {
-            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
         }
 
         public static string FolderTemplates {
@@ -822,8 +799,25 @@ namespace _3PA.MainFeatures {
         }
 
         // updates related
+        
+        /// <summary>
+        /// Url for the github webservices
+        /// </summary>
+        public static string ReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
+        }
+
+        // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
+        public static string GitHubBasicAuthenticationToken {
+            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
+        }
+
         public static string FileVersionLog {
             get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+        }
+        
+        public static string FolderUpdate {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
         }
 
         public static string FilePreviousVersion {
@@ -854,6 +848,35 @@ namespace _3PA.MainFeatures {
         public static string FileGitHubAssetName {
             get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
         }
+
+
+        /// <summary>
+        /// Url for the github webservices
+        /// </summary>
+        public static string ProlintReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
+        }
+
+        public static string FolderProlint {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "prolint")); }
+        }
+
+        // name of the zip file containing the release in the assets of the release
+        public static string FileProlintGitHubAssetName {
+            get { return @"prolint.zip"; }
+        }
+
+        /// <summary>
+        /// Url for the github webservices
+        /// </summary>
+        public static string ProparseReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/proparse/releases"; }
+        }
+
+        public static string FileProparseGitHubAssetName {
+            get { return @"proparse.net.zip"; }
+        }
+
 
         #endregion
 
