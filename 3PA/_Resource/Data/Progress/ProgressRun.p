@@ -24,7 +24,7 @@
 &IF DEFINED(LogPath) = 0 &THEN
     &SCOPED-DEFINE ExecutionType "DICTIONNARY"
     &SCOPED-DEFINE LogPath "run.log"
-    &SCOPED-DEFINE PropathToUse ""
+    &SCOPED-DEFINE PropathFilePath ""
     &SCOPED-DEFINE DbConnectString ""
     &SCOPED-DEFINE DbLogPath "db.log"
     &SCOPED-DEFINE DbConnectionMandatory FALSE
@@ -61,6 +61,7 @@ DEFINE TEMP-TABLE tt_list NO-UNDO
 
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
+DEFINE VARIABLE llg_propath AS LONGCHAR NO-UNDO.
 
 /* Used for the unexpected errors in this program */
 DEFINE VARIABLE gc_lastError AS CHARACTER NO-UNDO INITIAL "".
@@ -83,7 +84,10 @@ SESSION:APPL-ALERT-BOXES = YES.
 fi_write(INPUT {&LogPath}, INPUT "").
 
 /* Assign the PROPATH here */
-ASSIGN PROPATH = TRIM({&PropathToUse} + "," + PROPATH, ",").
+COPY-LOB FROM FILE {&PropathFilePath} TO llg_propath.
+IF LENGTH(llg_propath) > 31190 THEN
+    ASSIGN llg_propath = SUBSTRING(llg_propath, 1, 31190 - LENGTH(PROPATH)).
+ASSIGN PROPATH = TRIM(STRING(llg_propath), ",") + "," + PROPATH.
 
 /* Connect the database(s) */
 &IF {&DbConnectString} > "" &THEN

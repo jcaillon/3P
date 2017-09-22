@@ -155,6 +155,8 @@ namespace _3PA.MainFeatures.Pro {
 
         protected string _propath;
 
+        protected string _propathFilePath;
+
         /// <summary>
         /// Parameters of the .exe call
         /// </summary>
@@ -189,7 +191,7 @@ namespace _3PA.MainFeatures.Pro {
             _preprocessedVars = new Dictionary<string, string> {
                 {"LogPath", "\"\""},
                 {"DbLogPath", "\"\""},
-                {"PropathToUse", "\"\""},
+                {"PropathFilePath", "\"\""},
                 {"DbConnectString", "\"\""},
                 {"ExecutionType", "\"\""},
                 {"CurrentFilePath", "\"\""},
@@ -253,6 +255,8 @@ namespace _3PA.MainFeatures.Pro {
             _dbLogPath = Path.Combine(_localTempDir, "db.ko");
             _notifPath = Path.Combine(_localTempDir, "postExecution.notif");
             _propath = (_localTempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).Trim().Trim(',');
+            _propathFilePath = Path.Combine(_localTempDir, "progress.propath");
+            Utils.FileWriteAllText(_propathFilePath, _propath, Encoding.Default);
 
             // Set info
             if (!SetExecutionInfo())
@@ -260,7 +264,7 @@ namespace _3PA.MainFeatures.Pro {
 
             SetPreprocessedVar("ExecutionType", ExecutionType.ToString().ToUpper().ProQuoter());
             SetPreprocessedVar("LogPath", _logPath.ProQuoter());
-            SetPreprocessedVar("propathToUse", _propath.ProQuoter());
+            SetPreprocessedVar("PropathFilePath", _propathFilePath.ProQuoter());
             SetPreprocessedVar("DbConnectString", ProEnv.ConnectionString.ProQuoter());
             SetPreprocessedVar("DbLogPath", _dbLogPath.ProQuoter());
             SetPreprocessedVar("DbConnectionMandatory", NeedDatabaseConnection.ToString());
