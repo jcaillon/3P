@@ -14,11 +14,6 @@ namespace _3PA.Lib {
         #region fields
 
         /// <summary>
-        /// Just as an information, name of the software you are updating
-        /// </summary>
-        public string UpdatedSoftName { get; set; }
-
-        /// <summary>
         /// Github release api URL
         /// </summary>
         public string GitHubReleaseApi { get; set; }
@@ -49,6 +44,16 @@ namespace _3PA.Lib {
         public string AssetName { get; set; }
 
         /// <summary>
+        /// A concatenation of all the version log from the version updated to the latest version
+        /// </summary>
+        public StringBuilder VersionLog { get; set; }
+
+        /// <summary>
+        /// Info on the latest release when the github webservice responded
+        /// </summary>
+        public ReleaseInfo LatestReleaseInfo { get; set; }
+
+        /// <summary>
         /// Called after the download, path to the downloaded file
         /// </summary>
         public event Action<GitHubUpdater, string> NewReleaseDownloaded;
@@ -59,9 +64,10 @@ namespace _3PA.Lib {
         public event Action<GitHubUpdater, ReleaseInfo> AlreadyUpdated;
 
         /// <summary>
-        /// Called when the soft is being updated because we found a newer distant version
+        /// Called when the soft is being updated because we found a newer distant version,
+        /// called before the download starts, you can cancel the download through the event
         /// </summary>
-        public event Action<GitHubUpdater, ReleaseInfo> StartingUpdate;
+        public event Action<GitHubUpdater, ReleaseInfo, StartingDownloadEvent> StartingUpdate;
 
         /// <summary>
         /// Called on error
@@ -104,7 +110,7 @@ namespace _3PA.Lib {
                         // sort descending
                         releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
 
-                        var outputBody = new StringBuilder();
+                        VersionLog = new StringBuilder();
                         foreach (var release in releases) {
                             if (string.IsNullOrEmpty(release.tag_name))
                                 continue;
@@ -113,9 +119,9 @@ namespace _3PA.Lib {
                             // Will be used to display the version log to the user
                             if (release.tag_name.IsHigherVersionThan(LocalVersion) && (GetPreReleases || !release.prerelease)) {
                                 // h1
-                                outputBody.AppendLine("## " + (release.tag_name ?? "?") + " : " + (release.name ?? "") + " ##\n\n");
+                                VersionLog.AppendLine("## " + (release.tag_name ?? "?") + " : " + (release.name ?? "") + " ##\n\n");
                                 // body
-                                outputBody.AppendLine((release.body ?? "") + "\n\n");
+                                VersionLog.AppendLine((release.body ?? "") + "\n\n");
 
                                 // the first higher release encountered is the latest
                                 if (latestReleaseInfo == null)
@@ -125,8 +131,6 @@ namespace _3PA.Lib {
 
                         // There is a distant version higher than the local one
                         if (latestReleaseInfo != null) {
-                            // to display all the release notes
-                            latestReleaseInfo.body = outputBody.ToString();
 
                             if (latestReleaseInfo.assets != null && latestReleaseInfo.assets.Count > 0 && latestReleaseInfo.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
 
@@ -134,10 +138,15 @@ namespace _3PA.Lib {
                                 Utils.CreateDirectory(AssetDownloadFolder);
                                 Utils.DeleteFile(downloadFile);
 
-                                if (StartingUpdate != null)
-                                    StartingUpdate(this, latestReleaseInfo);
+                                var e = new StartingDownloadEvent();
 
-                                Utils.DownloadFile(latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
+                                if (StartingUpdate != null)
+                                    StartingUpdate(this, latestReleaseInfo, e);
+
+                                if (!e.CancelDownload) {
+                                    Utils.DownloadFile(latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
+                                }
+
                             } else {
                                 if (ErrorOccured != null)
                                     ErrorOccured(this, new Exception("Asset not found"), GitHubUpdaterFailReason.NoAssetOnLatestRelease);
@@ -174,6 +183,7 @@ namespace _3PA.Lib {
                     if (File.Exists(downloadFile)) {
                         if (NewReleaseDownloaded != null)
                             NewReleaseDownloaded(this, downloadFile);
+                        Utils.DeleteFile(downloadFile);
                     }
                 }
             } catch (Exception e) {
@@ -192,6 +202,14 @@ namespace _3PA.Lib {
             AnalyseReleasesFailed,
             AssetDownloadFailed,
             NoAssetOnLatestRelease,
+        }
+
+        #endregion
+
+        #region StartingDownloadEvent
+
+        public class StartingDownloadEvent : EventArgs {
+            public bool CancelDownload { get; set; }
         }
 
         #endregion
@@ -219,7 +237,7 @@ namespace _3PA.Lib {
 
             public bool prerelease { get; set; }
             public string published_at { get; set; }
-            public List<UpdateHandler.Asset> assets { get; set; }
+            public List<Asset> assets { get; set; }
 
             /// <summary>
             /// content of the release text

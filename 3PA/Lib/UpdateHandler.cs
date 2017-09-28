@@ -19,12 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using _3PA.Lib._3pUpdater;
@@ -35,20 +30,292 @@ namespace _3PA.Lib {
     /// <summary>
     /// Handles the update of this software
     /// </summary>
-    internal static class UpdateHandler {
+    #region UpdaterWrapper
 
-        #region fields
+    internal class UpdaterWrapper {
+
+        #region Private fields
+
+        private GitHubUpdaterExtented _gitHubUpdater;
+
+        #endregion
+
+        #region Singleton
+
+        private static UpdaterWrapper _updaterWrapper;
+
+        public static UpdaterWrapper Instance {
+            get {
+                if (_updaterWrapper == null)
+                    _updaterWrapper = new UpdaterWrapper();
+                return _updaterWrapper;
+            }
+        }
+
+        #endregion
+
+        #region public
 
         /// <summary>
-        /// Holds the info about the latest release found on the distant update server
+        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately if 
+        /// Config.Instance.TechnicalCheckUpdateEveryXMin condition is met
         /// </summary>
-        private static ReleaseInfo _latestReleaseInfo;
+        public void StartCheckingForUpdate() {
+            // check for updates every now and then
+            Updater.CheckRegularlyAction = RecurentAction.StartNew(() => {
+                // Check for new updates
+                if (!Config.Instance.GlobalDontCheckUpdates)
+                    CheckForUpdate(false);
+            }, 1000 * 60 * Config.TechnicalCheckUpdateEveryXMin, 0, Utils.IsLastCallFromMoreThanXMinAgo(Updater.UpdatedSoftName + "update", Config.TechnicalCheckUpdateEveryXMin));
+        }
 
-        private static RecurentAction _checkEveryHourAction;
+        /// <summary>
+        /// To call when the user click on an update button
+        /// </summary>
+        public void CheckForUpdate() {
+            if (!Utils.IsSpamming(Updater.UpdatedSoftName + "update", 19000)) {
+                UserCommunication.Notify("Checking for a new release from " + Updater.GitHubReleaseApi.ToHtmlLink("GITHUB", true) + ", you will be notified when it's done", MessageImg.MsgInfo, Updater.UpdatedSoftName + " updater", "Checking for updates...", 5);
+                Task.Factory.StartNew(() => {
+                    CheckForUpdate(true);
+                });
+            }
+        }
 
-        private static volatile bool _isChecking;
-        private static volatile bool _displayResultNotif;
-        private static bool _updateAvailableOnRestart;
+        #endregion
+
+        #region Protected / private
+
+        /// <summary>
+        /// Gets an object with the latest release info
+        /// </summary>
+        private void CheckForUpdate(bool alwaysShowNotifications) {
+            if (Updater.RestartNeeded && Updater.LatestReleaseInfo != null) {
+                // we already checked and there is a new version
+                if (alwaysShowNotifications)
+                    NotifyUpdateAvailable(Updater);
+            } else {
+                Updater.AlwaysShowNotifications = alwaysShowNotifications;
+                Updater.CheckForUpdates();
+            }
+        }
+
+        /// <summary>
+        /// Get githubupdater
+        /// </summary>
+        protected GitHubUpdaterExtented Updater {
+            get {
+                if (_gitHubUpdater == null) {
+                    _gitHubUpdater = GetGitHubUpdaterExtented();
+                    _gitHubUpdater.ErrorOccured += OnErrorOccured;
+                    _gitHubUpdater.NewReleaseDownloaded += OnNewReleaseDownloaded;
+                    _gitHubUpdater.AlreadyUpdated += OnAlreadyUpdated;
+                    _gitHubUpdater.StartingUpdate += MainUpdaterOnStartingUpdate;
+                }
+                return _gitHubUpdater;
+            }
+            set { _gitHubUpdater = value; }
+        }
+
+        /// <summary>
+        /// Should be override to set the githubupdater
+        /// </summary>
+        protected virtual GitHubUpdaterExtented GetGitHubUpdaterExtented() {
+            return new GitHubUpdaterExtented {
+                AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
+                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
+                GetPreReleases = Config.Instance.UserGetsPreReleases
+        };
+        }
+        
+        /// <summary>
+        /// Called before the download starts
+        /// </summary>
+        protected virtual void MainUpdaterOnStartingUpdate(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo, GitHubUpdater.StartingDownloadEvent e) {
+            var updater = gitHubUpdater as GitHubUpdaterExtented;
+            if (updater != null) {
+
+            }
+        }
+
+        /// <summary>
+        /// Called when the soft is already up to date
+        /// </summary>
+        protected virtual void OnAlreadyUpdated(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo) {
+            var updater = gitHubUpdater as GitHubUpdaterExtented;
+            if (updater != null) {
+                UserCommunication.NotifyUnique("UpdateChecked" + updater.UpdatedSoftName, "Congratulations! You already possess the latest <b>" + (!updater.GetPreReleases ? "beta" : "stable") + "</b> version of " + updater.UpdatedSoftName + ".", MessageImg.MsgOk, updater.UpdatedSoftName + " updater", "Local version " + updater.LocalVersion, null);
+            }
+        }
+
+        /// <summary>
+        /// Called when a new release has been downloaded
+        /// </summary>
+        protected virtual void OnNewReleaseDownloaded(GitHubUpdater gitHubUpdater, string downloadedFile) {
+            var updater = gitHubUpdater as GitHubUpdaterExtented;
+            if (updater != null) {
+                // Extract the .zip file
+                if (Utils.ExtractAll(downloadedFile, updater.FolderUnzip)) {
+
+                    // execute extra actions (for the 3P update for instance)
+                    if (updater.ExtraActionWhenDownloaded != null) {
+                        updater.ExtraActionWhenDownloaded(updater);
+                    }
+
+                    NotifyUpdateAvailable(Updater);
+                } else {
+                    UserCommunication.Notify("Failed to unzip the following file : <br>" + downloadedFile.ToHtmlLink() + "<br>It contains the update for " + updater.UpdatedSoftName + ", you will have to do a manual update.", MessageImg.MsgError, updater.UpdatedSoftName + " updater", "Unzip failed");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when an error occurred during the update
+        /// </summary>
+        /// <param name="gitHubUpdater"></param>
+        /// <param name="e"></param>
+        /// <param name="gitHubUpdaterFailReason"></param>
+        protected virtual void OnErrorOccured(GitHubUpdater gitHubUpdater, Exception e, GitHubUpdater.GitHubUpdaterFailReason gitHubUpdaterFailReason) {
+            var updater = gitHubUpdater as GitHubUpdaterExtented;
+            if (updater != null) {
+
+                switch (gitHubUpdaterFailReason) {
+
+                    case GitHubUpdater.GitHubUpdaterFailReason.ReleaseApiUnreachable:
+
+                        if (Config.Instance.TechnicalLastWebserviceCallOk || updater.AlwaysShowNotifications) {
+                            // only show this message once in case of repetitive failures
+                            UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't retrieve the releases list on GITHUB.<br><br>The API requested was :<br>" + updater.GitHubReleaseApi.ToHtmlLink() + "<br><br>The automatic update as been canceled, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, updater.UpdatedSoftName + " updater", "Couldn't request GITHUB API", null);
+                        }
+
+                        Config.Instance.TechnicalLastWebserviceCallOk = false;
+
+                        // check if there is an update available in the Shared config folder
+                        if (!String.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
+
+                            var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
+
+                            // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
+                            if (File.Exists(potentialUpdate) &&
+                                Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
+                                (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
+
+                                // copy to local update folder and warn the user 
+                                if (Utils.CopyFile(potentialUpdate, Path.Combine(updater.FolderUnzip, AssemblyInfo.AssemblyName))) {
+                                    updater.LatestReleaseInfo = new GitHubUpdater.ReleaseInfo {
+                                        tag_name = Utils.GetDllVersion(potentialUpdate),
+                                        prerelease = Utils.GetDllVersion(potentialUpdate).EndsWith(".1"),
+                                        published_at = "???",
+                                        html_url = Config.UrlCheckReleases
+                                    };
+
+                                    if (updater.ExtraActionWhenDownloaded != null) {
+                                        updater.ExtraActionWhenDownloaded(updater);
+                                    }
+
+                                    updater.VersionLog.Append("Version found on the shared folder : \n" + Config.Instance.SharedConfFolder.ToHtmlLink() + "\n\nCheck the official website to learn more about this release");
+
+                                    NotifyUpdateAvailable(Updater);
+                                }
+                            }
+                        }
+
+                        break;
+
+                    case GitHubUpdater.GitHubUpdaterFailReason.AnalyseReleasesFailed:
+                        break;
+
+                    case GitHubUpdater.GitHubUpdaterFailReason.AssetDownloadFailed:
+                        break;
+
+                    case GitHubUpdater.GitHubUpdaterFailReason.NoAssetOnLatestRelease:
+                        break;
+
+                    default:
+                        ErrorHandler.ShowErrors(e, "Update error of type " + gitHubUpdaterFailReason);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when an update is available
+        /// </summary>
+        protected virtual void NotifyUpdateAvailable(GitHubUpdaterExtented updater) {
+            if (updater.LatestReleaseInfo != null) {
+
+                UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
+                    <br>
+                    A new version of " + updater.UpdatedSoftName + @" has been downloaded!<br>" +
+                                                                  (updater.RestartNeeded ? @"It will be automatically installed the next time you restart Notepad++<br>" : "It has already been installed in the 3P folder<br>") + @"
+                    <br>                   
+                    Your version: <b>" + updater.LocalVersion + @"</b><br>
+                    Distant version: <b>" + updater.LatestReleaseInfo.tag_name + @"</b><br>
+                    Release name: <b>" + updater.LatestReleaseInfo.name + @"</b><br>
+                    Available since: <b>" + updater.LatestReleaseInfo.published_at + @"</b><br>
+                    Release URL: <b>" + updater.LatestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
+                                                                  (updater.LatestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
+                                                                  (updater.RestartNeeded ? (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current version by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") + @"<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>" : ""),
+                    MessageImg.MsgUpdate, updater.UpdatedSoftName + " updater", "An update has been downloaded",
+                    args => {
+                        if (args.Link.Equals("Restart")) {
+                            args.Handled = true;
+                            Npp.Restart();
+                        } else if (args.Link.Equals("ShowLog")) {
+                            args.Handled = true;
+                            UserCommunication.Message(("# What's new in this version? #\n\n" + updater.VersionLog).MdToHtml(),
+                                MessageImg.MsgUpdate,
+                                "A new update is available",
+                                "Updated to version " + updater.LatestReleaseInfo.tag_name,
+                                new List<string> { "ok" },
+                                false);
+                        }
+                    });
+
+                if (updater.RestartNeeded && updater.CheckRegularlyAction != null) {
+                    // stop checking for more updates :)
+                    updater.CheckRegularlyAction.Dispose();
+                }
+            }
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region MainUpdaterWrapper
+
+    /// <summary>
+    /// The 3P updater
+    /// </summary>
+    internal class MainUpdaterWrapper : UpdaterWrapper {
+
+        #region Singleton
+
+        private static MainUpdaterWrapper _updaterWrapper;
+
+        public new static MainUpdaterWrapper Instance {
+            get {
+                if (_updaterWrapper == null)
+                    _updaterWrapper = new MainUpdaterWrapper();
+                return _updaterWrapper;
+            }
+        }
+
+        #endregion
+
+        #region Override
+
+        protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
+            var n = base.GetGitHubUpdaterExtented();
+            n.UpdatedSoftName = AssemblyInfo.AssemblyProduct;
+            n.AssetName = Config.FileGitHubAssetName;
+            n.GitHubReleaseApi = Config.ReleasesApi;
+            n.LocalVersion = AssemblyInfo.Version;
+            n.ExtraActionWhenDownloaded = On3PUpdate;
+            n.RestartNeeded = true;
+            return n;
+        }
 
         #endregion
 
@@ -58,41 +325,40 @@ namespace _3PA.Lib {
         /// Method to call when the user starts notepad++,
         /// check if an update has been done since the last time notepad was closed
         /// </summary>
-        public static void CheckForUpdateDone() {
+        public void CheckForUpdateDone() {
+
+            var previousVersion = File.Exists(Config.FilePreviousVersion) ? Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default) : null;
+
             // an update has been done
             if (File.Exists(Config.FileVersionLog)) {
-                // The dll is still in the update dir, something went wrong
-                if (File.Exists(Config.FileDownloadedPlugin)) {
+                // we didn't update to a newer version, something went wrong
+                if (!AssemblyInfo.Version.IsHigherVersionThan(previousVersion)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
                         <div>
-                        The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
-                        It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
-                        You will have to manually copy the new file and delete the old file :<br><br>
-                        <b>MOVE (delete the source and replace the target)</b> this file : <div>" + Path.GetDirectoryName(Config.FileDownloadedPlugin).ToHtmlLink(Config.FileDownloadedPlugin) + @"</div><br>
-                        <b>In this folder</b> (replacing the old file) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
+                        The update didn't go as expected, the old plugin files have not been replaced by the new ones!<br>
+                        It is very likely because the updater didn't get the rights to write a file in your /plugins/ folder.<br>
+                        You will have to manually copy the new files to replace the existing files :<br><br>
+                        <b>MOVE (delete the source and replace the target)</b> all the files in this folder : <div>" + Config.FolderUpdateReleaseUnzipped.ToHtmlLink() + @"</div><br>
+                        <b>In this folder</b> (replacing the existing files) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
                         <i>(n.b. : this message will be shown at startup as long as the above-mentioned file exists!)</i><br>
-                        Thank you for your patience!</div>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
+                        Thank you for your patience!</div>", MessageImg.MsgUpdate, Updater.UpdatedSoftName + " updater", "Problem during the update!");
                     return;
                 }
-                
-                UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Config.FileVersionLog, Encoding.Default)).MdToHtml(),
+
+                UserCommunication.Message(("# What's new? #\n\n" + Utils.ReadAllText(Config.FileVersionLog, Encoding.Default)).MdToHtml(),
                     MessageImg.MsgUpdate,
-                    "A new version has been installed!",
-                    "Updated to version " + AssemblyInfo.Version,
-                    new List<string> {"ok"},
+                    Updater.UpdatedSoftName + " updater",
+                    "New version install : " + AssemblyInfo.Version,
+                    new List<string> { "ok" },
                     false);
 
                 // Special actions to take depending on the previous version?
-                if (File.Exists(Config.FilePreviousVersion))
-                    UpdateDoneFromVersion(Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default));
+                if (!string.IsNullOrEmpty(previousVersion))
+                    UpdateDoneFromVersion(previousVersion);
 
                 // delete update related files/folders
                 Utils.DeleteDirectory(Config.FolderUpdate, true);
-                Utils.DeleteFile(Config.FileVersionLog);
-
-                // reset the log files
-                Utils.DeleteDirectory(Config.FolderLog, true);
 
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
@@ -100,362 +366,127 @@ namespace _3PA.Lib {
             }
         }
 
-        /// <summary>
-        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately if 
-        /// Config.Instance.TechnicalCheckUpdateEveryXMin condition is met
-        /// </summary>
-        public static void StartCheckingForUpdate() {
-            // check for updates every now and then (2h)
-            DateTime lastCheck;
-            if (!DateTime.TryParseExact(Config.Instance.TechnicalLastCheckUpdate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastCheck)) {
-                lastCheck = DateTime.MinValue;
-            }
-            _checkEveryHourAction = RecurentAction.StartNew(() => {
-                // Check for new updates
-                if (!Config.Instance.GlobalDontCheckUpdates)
-                    CheckForUpdate(true);
-            }, 1000 * 60 * 120, 0, DateTime.Now.Subtract(lastCheck).TotalMinutes > Config.Instance.TechnicalCheckUpdateEveryXMin);
-        }
-
-        /// <summary>
-        /// To call when the user click on an update button
-        /// </summary>
-        public static void CheckForUpdate() {
-            if (!Utils.IsSpamming("updates", 1000)) {
-                UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
-                Task.Factory.StartNew(() => { CheckForUpdate(false); });
-            }
-        }
-
-        /// <summary>
-        /// Gets an object with the latest release info
-        /// </summary>
-        public static void CheckForUpdate(bool periodicCheck) {
-            _displayResultNotif = !periodicCheck;
-
-            if (_isChecking)
-                return;
-
-            if (_updateAvailableOnRestart && _latestReleaseInfo != null && _displayResultNotif) {
-                // we already checked and there is a new version
-                NotifyUpdateAvailable();
-                return;
-            }
-            _isChecking = true;
-            try {
-                var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi) {
-                    TimeOut = 3000
-                };
-                wb.OnInitHttpWebRequest += request => { request.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"); };
-                wb.OnRequestEnded += WbOnOnRequestEnded;
-                wb.Execute();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when checking for updates");
-                _isChecking = false;
-            }
-
-            Config.Instance.TechnicalLastCheckUpdate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        }
-
-        /// <summary>
-        /// Called when the gitub api for releases responses
-        /// </summary>
-        private static void WbOnOnRequestEnded(WebServiceJson webServiceJson) {
-            try {
-                if (webServiceJson.StatusCodeResponse == HttpStatusCode.OK && webServiceJson.ResponseException == null) {
-                    Config.Instance.TechnicalLastCheckUpdateOk = true;
-
-                    // get the releases
-                    var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
-                    if (releases != null && releases.Count > 0) {
-                        // sort
-                        releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
-
-                        var localVersion = AssemblyInfo.Version;
-                        var outputBody = new StringBuilder();
-                        foreach (var release in releases) {
-                            if (string.IsNullOrEmpty(release.tag_name))
-                                continue;
-
-                            // For each version higher than the local one, append to the release body
-                            // Will be used to display the version log to the user
-                            if (release.tag_name.IsHigherVersionThan(localVersion) &&
-                                (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || !release.prerelease) &&
-                                release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(Config.FileGitHubAssetName))) {
-                                // in case something is undefined (but shouldn't happen)
-                                if (string.IsNullOrEmpty(release.tag_name)) release.tag_name = "vX.X.X.X";
-                                if (string.IsNullOrEmpty(release.name)) release.name = "unknown";
-                                if (string.IsNullOrEmpty(release.body)) release.body = "...";
-                                if (string.IsNullOrEmpty(release.published_at)) release.published_at = DateTime.Now.ToString(CultureInfo.CurrentCulture);
-
-                                // h1
-                                outputBody.AppendLine("## " + release.tag_name + " : " + release.name + " ##\n\n");
-                                // body
-                                outputBody.AppendLine(release.body + "\n\n");
-
-                                // the first higher release encountered is the latest
-                                if (_latestReleaseInfo == null)
-                                    _latestReleaseInfo = release;
-                            }
-                        }
-
-                        // There is a distant version higher than the local one
-                        if (_latestReleaseInfo != null) {
-                            // to display all the release notes
-                            _latestReleaseInfo.body = outputBody.ToString();
-
-                            // delete existing dir
-                            Utils.DeleteDirectory(Config.FolderUpdate, true);
-
-                            Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(Config.FileGitHubAssetName)).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
-                            return;
-                        }
-
-                        if (_displayResultNotif) {
-                            UserCommunication.NotifyUnique("UpdateChecked", "Congratulations! You already possess the latest <b>" + (!AssemblyInfo.IsPreRelease ? "stable" : "beta") + "</b> version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version, null);
-                        }
-                    }
-                } else {
-                    // failed to retrieve the list
-                    if (_displayResultNotif || Config.Instance.TechnicalLastCheckUpdateOk)
-                        UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on GITHUB.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessful, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach GITHUB", "Connection failed", null);
-
-                    Config.Instance.TechnicalLastCheckUpdateOk = false;
-
-                    // check if there is an update available in the Shared config folder
-                    if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
-                        var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
-
-                        // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
-                        if (File.Exists(potentialUpdate) &&
-                            Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
-                            (Config.Instance.UserGetsPreReleases || AssemblyInfo.IsPreRelease || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
-                            // copy to local update folder and warn the user 
-                            if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
-                                _latestReleaseInfo = new ReleaseInfo {
-                                    name = "Updated from shared directory",
-                                    tag_name = Utils.GetDllVersion(Config.FileDownloadedPlugin),
-                                    prerelease = Utils.GetDllVersion(Config.FileDownloadedPlugin).EndsWith(".1"),
-                                    published_at = "???",
-                                    html_url = Config.UrlCheckReleases
-                                };
-
-                                // set up the update so the .dll file downloaded replaces the current .dll
-                                _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
-
-                                // write the version log
-                                Utils.FileWriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
-                                Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
-
-                                NotifyUpdateAvailable();
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when checking the latest release");
-            }
-            _isChecking = false;
-        }
-
         #endregion
 
         #region private
 
         /// <summary>
-        /// Called when the latest release download is done
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="asyncCompletedEventArgs"></param>
-        private static void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
-            try {
-                // Extract the .zip file
-                if (Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
-                    // check the presence of the plugin file
-                    if (File.Exists(Config.FileDownloadedPlugin)) {
-                        // set up the update so the .dll file downloaded replaces the current .dll
-                        _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
-
-                        // if the release was containing a .pdb file, we want to copied it as well
-                        if (File.Exists(Config.FileDownloadedPdb)) {
-                            _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPdb, Path.Combine(Path.GetDirectoryName(AssemblyInfo.Location) ?? "", Path.GetFileName(Config.FileDownloadedPdb) ?? ""));
-                        }
-
-                        // write the version log
-                        Utils.FileWriteAllText(Config.FileVersionLog, _latestReleaseInfo.body, Encoding.Default);
-                        Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
-
-                        NotifyUpdateAvailable();
-                    } else {
-                        Utils.DeleteDirectory(Config.FolderUpdate, true);
-                    }
-                } else {
-                    UserCommunication.Notify("I failed to unzip the following file : <br>" + Config.FileLatestReleaseZip + "<br>It contains the update for 3P, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "On Download File Completed");
-            }
-            _isChecking = false;
-        }
-
-        private static void NotifyUpdateAvailable() {
-            if (_latestReleaseInfo != null) {
-                _updateAvailableOnRestart = true;
-
-                UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
-                    <br>
-                    A new version of 3P has been downloaded!<br>
-                    It will be automatically installed the next time you restart Notepad++<br>
-                    <br>                   
-                    Your version: <b>" + AssemblyInfo.Version + @"</b><br>
-                    Distant version: <b>" + _latestReleaseInfo.tag_name + @"</b><br>
-                    Release name: <b>" + _latestReleaseInfo.name + @"</b><br>
-                    Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
-                                                                  "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
-                                                                  (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                                                                  (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") +
-                                                                  "<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>",
-                    MessageImg.MsgUpdate, "Update check", "An update is available",
-                    args => {
-                        if (args.Link.Equals("Restart")) {
-                            args.Handled = true;
-                            Npp.Restart();
-                        }
-                    });
-
-                // stop checking for more updates :)
-                _checkEveryHourAction.Dispose();
-            }
-            _isChecking = false;
-        }
-
-        /// <summary>
         /// Called on an update, allows to do special stuff according to the version updated
         /// </summary>
-        private static void UpdateDoneFromVersion(string fromVersion) {
+        private void UpdateDoneFromVersion(string fromVersion) {
+            // reset the log files
+            Utils.DeleteDirectory(Config.FolderLog, true);
+
             if (!fromVersion.IsHigherVersionThan("1.7.3")) {
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
             }
         }
 
+        /// <summary>
+        /// Called when the release file is downloaded and extracted to updater.FolderUnzip
+        /// </summary>
+        /// <param name="updater"></param>
+        private void On3PUpdate(GitHubUpdaterExtented updater) {
+
+            // list all the files of the zip, they should be copied in the notepad++ /plugins/ folder by the updater
+            foreach (var fullPath in Directory.EnumerateFiles(updater.FolderUnzip, "*", SearchOption.TopDirectoryOnly)) {
+                _3PUpdater.Instance.AddFileToMove(fullPath, Path.Combine(Path.GetDirectoryName(AssemblyInfo.Location) ?? "", Path.GetFileName(fullPath) ?? ""));
+            }
+
+            // write the version log
+            Utils.FileWriteAllText(Config.FileVersionLog, updater.VersionLog.ToString(), Encoding.Default);
+            Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
+        }
+
         #endregion
 
-        public static void CheckForProlintUpdates() {
+    }
 
-            // update prolint
+    #endregion
+
+    #region ProlintUpdaterWrapper
+
+    /// <summary>
+    /// The prolint updater
+    /// </summary>
+    internal class ProlintUpdaterWrapper : UpdaterWrapper {
+        #region Override
+
+        protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
+
             var localVersion = "v0";
             var releasePath = Path.Combine(Config.FolderProlint, "prolint", "core", "release.ini");
 
             if (File.Exists(releasePath)) {
                 var prolintRelease = new IniReader(releasePath);
                 localVersion = prolintRelease.GetValue(@"prolint", @"0");
-                UserCommunication.Notify(localVersion);
             }
-            
-            var prolintUpdater = new GitHubUpdater {
-                UpdatedSoftName = "prolint",
-                AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
-                AssetName = Config.FileProlintGitHubAssetName,
-                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
-                GetPreReleases = Config.Instance.UserGetsPreReleases,
-                GitHubReleaseApi = Config.ProlintReleasesApi,
-                LocalVersion = localVersion
-            };
-            prolintUpdater.ErrorOccured += OnErrorOccured;
-            prolintUpdater.NewReleaseDownloaded += OnNewReleaseDownloaded;
-            prolintUpdater.AlreadyUpdated += OnAlreadyUpdated;
-            prolintUpdater.CheckForUpdates();
 
-            // update proparse.net
-            localVersion = "v0";
-            releasePath = Path.Combine(Config.FolderProlint, "proparse.net", "proparse.net.dll");
-
-            if (File.Exists(releasePath)) {
-                localVersion = Utils.GetDllVersion(releasePath);
-                UserCommunication.Notify(localVersion);
-            }
-            var proparseUpdater = new GitHubUpdater {
-                UpdatedSoftName = "proparse.net",
-                AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
-                AssetName = Config.FileProparseGitHubAssetName,
-                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
-                GetPreReleases = Config.Instance.UserGetsPreReleases,
-                GitHubReleaseApi = Config.ProparseReleasesApi,
-                LocalVersion = localVersion
-            };
-            proparseUpdater.ErrorOccured += OnErrorOccured;
-            proparseUpdater.NewReleaseDownloaded += OnNewReleaseDownloaded;
-            proparseUpdater.AlreadyUpdated += OnAlreadyUpdated;
-            proparseUpdater.CheckForUpdates();
-        }
-
-        private static void OnAlreadyUpdated(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo) {
-            UserCommunication.Notify("Already ok");
-        }
-
-        private static void OnNewReleaseDownloaded(GitHubUpdater gitHubUpdater, string downloadedFile) {
-            // Extract the .zip file
-            if (Utils.ExtractAll(downloadedFile, Config.FolderProlint)) {
-                // check the presence of the plugin file
-                if (File.Exists(Config.FileDownloadedPlugin)) {
-
-                } else {
-                }
-                UserCommunication.Notify("Updated : " + Config.FolderProlint.ToHtmlLink());
-                Utils.DeleteFile(downloadedFile);
-            } else {
-                UserCommunication.Notify("I failed to unzip the following file : <br>" + downloadedFile.ToHtmlLink() + "<br>It contains the update for prolint, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
-            }
-        }
-
-        private static void OnErrorOccured(GitHubUpdater gitHubUpdater, Exception e, GitHubUpdater.GitHubUpdaterFailReason gitHubUpdaterFailReason) {
-            ErrorHandler.ShowErrors(e, gitHubUpdaterFailReason.ToString());
-        }
-
-        #region ReleaseInfo
-
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        public class Asset {
-            public string name { get; set; }
-            public object label { get; set; }
-            public string content_type { get; set; }
-            public string state { get; set; }
-            public int download_count { get; set; }
-            public string created_at { get; set; }
-            public string updated_at { get; set; }
-            public string browser_download_url { get; set; }
-        }
-
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        public class ReleaseInfo {
-            public string html_url { get; set; }
-
-            /// <summary>
-            /// Release version
-            /// </summary>
-            public string tag_name { get; set; }
-
-            /// <summary>
-            /// Targeted branch
-            /// </summary>
-            public string target_commitish { get; set; }
-
-            /// <summary>
-            /// Release name
-            /// </summary>
-            public string name { get; set; }
-
-            public bool prerelease { get; set; }
-            public string published_at { get; set; }
-            public List<Asset> assets { get; set; }
-
-            /// <summary>
-            /// content of the release text
-            /// </summary>
-            public string body { get; set; }
+            var n = base.GetGitHubUpdaterExtented();
+            n.UpdatedSoftName = "prolint";
+            n.AssetName = Config.FileProlintGitHubAssetName;
+            n.GitHubReleaseApi = Config.ProlintReleasesApi;
+            n.LocalVersion = localVersion;
+            return n;
         }
 
         #endregion
-
     }
+
+    #endregion
+
+    #region ProparseUpdaterWrapper
+    
+    /// <summary>
+    /// The proparse.net updater
+    /// </summary>
+    internal class ProparseUpdaterWrapper : UpdaterWrapper {
+
+        #region Override
+
+        protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
+
+            var localVersion = "v0";
+            var releasePath = Path.Combine(Config.FolderProlint, "proparse.net", "proparse.net.dll");
+
+            if (File.Exists(releasePath)) {
+                localVersion = Utils.GetDllVersion(releasePath);
+            }
+
+            var n = base.GetGitHubUpdaterExtented();
+            n.UpdatedSoftName = "proparse.net";
+            n.AssetName = Config.FileProparseGitHubAssetName;
+            n.GitHubReleaseApi = Config.ProparseReleasesApi;
+            n.LocalVersion = localVersion;
+            return n;
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region GitHubUpdaterExtented
+
+    internal class GitHubUpdaterExtented : GitHubUpdater {
+
+        /// <summary>
+        /// Just as an information, name of the software you are updating
+        /// </summary>
+        public string UpdatedSoftName { get; set; }
+
+        public bool RestartNeeded { get; set; }
+
+        public bool AlwaysShowNotifications { get; set; }
+
+        public RecurentAction CheckRegularlyAction;
+
+        public Action<GitHubUpdaterExtented> ExtraActionWhenDownloaded { get; set; }
+
+        public string FolderUnzip { get; set; }
+
+        public string HowToInstallManually { get; set; }
+    }
+
+    #endregion
 }

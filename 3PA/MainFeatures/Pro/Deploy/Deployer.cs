@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         public Deployer(List<DeployRule> deployRules, ProEnvironment.ProEnvironmentObject proEnv) {
             _compileLocally = proEnv.CompileLocally;
             _deploymentDirectory = proEnv.BaseCompilationPath;
-            _sourceDirectory = Path.GetFullPath(proEnv.BaseLocalPath).TrimEnd('\\');
+            _sourceDirectory = (string.IsNullOrEmpty(proEnv.BaseLocalPath) ? "" : Path.GetFullPath(proEnv.BaseLocalPath).TrimEnd('\\'));
             _compressionLevel = CompressionLevel.Normal;
             _compileUnmatchedProgressFilesToDeployDir = true;
             ProlibPath = proEnv.ProlibPath;

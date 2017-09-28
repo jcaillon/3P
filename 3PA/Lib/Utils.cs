@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
 using System.Net;
@@ -574,6 +575,32 @@ namespace _3PA.Lib {
                 sb.Append(hash[i].ToString("X2"));
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// register a feature's last execution datetime and prevent the user from using it too often 
+        /// by setting a minimum amount of time to wait between two calls
+        /// </summary>
+        public static bool IsLastCallFromMoreThanXMinAgo(string name, int waitTimeInMinute, bool resetOnSpam = false) {
+            // first use, no problem
+            if (!Config.Instance.LastCallDateTime.ContainsKey(name)) {
+                Config.Instance.LastCallDateTime.Add(name, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                return true;
+            }
+            DateTime lastCheck;
+            if (!DateTime.TryParseExact(Config.Instance.LastCallDateTime[name], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastCheck)) {
+                lastCheck = DateTime.MinValue;
+            }
+
+            // minimum interval not respected
+            if (DateTime.Now.Subtract(lastCheck).TotalMinutes < waitTimeInMinute) {
+                if (resetOnSpam) {
+                    Config.Instance.LastCallDateTime[name] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                }
+                return false;
+            }
+            Config.Instance.LastCallDateTime[name] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            return true;
         }
 
         private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();

@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using _3PA.MainFeatures;
@@ -34,24 +33,19 @@ namespace _3PA.Lib {
         /// </summary>
         public static void Ping() {
             try {
-                DateTime lastPing;
-                if (!DateTime.TryParseExact(Config.Instance.TechnicalLastPing, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastPing)) {
-                    lastPing = DateTime.MinValue;
-                }
-                // ping once 4 hours
-                if (DateTime.Now.Subtract(lastPing).TotalMinutes > Config.Instance.TechnicalPingEveryXMin) {
+                // ping once x hours
+                if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.TechnicalPingEveryXMin)) {
                     var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
                     webServiceJson.AddToReq("UUID", UniqueId);
                     webServiceJson.AddToReq("userName", Name);
                     webServiceJson.AddToReq("version", AssemblyInfo.Version);
                     webServiceJson.OnRequestEnded += req => {
-                        if (req.StatusCodeResponse == HttpStatusCode.OK) {
-                            Config.Instance.TechnicalLastPing = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        if (req.StatusCodeResponse != HttpStatusCode.OK) {
+                            if (Config.IsDevelopper)
+                                ErrorHandler.ShowErrors(new Exception(req.JsonResponse), "Error when pinging " + req.StatusCodeResponse.ToString());
                         }
                     };
                     webServiceJson.Execute();
-
-                    Utils.DownloadFile(Config.PingGoogleAnalytics, Path.Combine(Config.FolderTemp, Path.GetTempFileName()), null);
                 }
             } catch (Exception e) {
                 if (Config.IsDevelopper)

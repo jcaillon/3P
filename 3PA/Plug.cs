@@ -210,12 +210,12 @@ namespace _3PA {
                 if (!Npp.ConfXml.AskToDisableAutocompletionAndRestart()) {
 
                     // check if an update was done 
-                    UpdateHandler.CheckForUpdateDone();
+                    MainUpdaterWrapper.Instance.CheckForUpdateDone();
                 }
             });
 
             // start checking for new updates
-            UpdateHandler.StartCheckingForUpdate(); // async
+            MainUpdaterWrapper.Instance.StartCheckingForUpdate(); // async
 
             // Try to update the configuration from the distant shared folder
             ShareExportConf.StartCheckingForUpdates();

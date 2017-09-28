@@ -108,7 +108,33 @@ namespace _3PA.Tests {
                 true);
              */
 
-            UpdateHandler.CheckForProlintUpdates();
+            Uri address = new Uri("http://google.com/");               
+                // Create the web request 
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(address);
+
+            // Set type to POST  ;
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+
+            request.Proxy = new WebProxy("10.61.10.30", 666);
+            request.Proxy.Credentials = new NetworkCredential("", "");
+
+   
+
+
+            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
+            webServiceJson.AddToReq("UUID", "zz");
+            webServiceJson.AddToReq("userName", "jca");
+            webServiceJson.AddToReq("version", AssemblyInfo.Version);
+            webServiceJson.OnRequestEnded += req => {
+                if (req.StatusCodeResponse == HttpStatusCode.OK) {
+                    UserCommunication.Notify("ok");
+                }
+                UserCommunication.Notify(req.StatusDescriptionResponse + " " + req.JsonResponse + " " + req.ResponseException);
+            };
+            webServiceJson.Execute();
+
+            /*UpdateHandler.CheckForProlintUpdates();*/
         }
         
         #endregion

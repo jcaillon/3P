@@ -46,8 +46,8 @@ namespace _3PA.Lib {
         /// <summary>
         /// Start a new recurrent action
         /// </summary>
-        public static RecurentAction StartNew(Action actionToDo, long interval, int nbRepeat = 0, bool doActionOnCreate = true) {
-            var created = new RecurentAction(actionToDo, interval, nbRepeat, doActionOnCreate);
+        public static RecurentAction StartNew(Action actionToDo, long intervalInMs, int nbRepeat = 0, bool doActionOnCreate = true) {
+            var created = new RecurentAction(actionToDo, intervalInMs, nbRepeat, doActionOnCreate);
             _savedReccurentActionStarted.Add(created);
             return created;
         }

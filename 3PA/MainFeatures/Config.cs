@@ -180,6 +180,32 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool GlobalDontUpdateUdlOnUpdate = false;
 
+            [Display(Name = "Use a webproxy for updates",
+                Description = "",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public bool WebUseProxy = false;
+
+            [Display(Name = "Webproxy URI",
+                Description = "",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public string WebProxyUri = @"";
+
+            [Display(Name = "Webproxy Username (if any)",
+                Description = "",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public string WebProxyUsername = @"";
+
+            [Display(Name = "Webproxy Password (if any)",
+                Description = "",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public string WebProxyPassword = @"";
+
+            public string DebugReleasesApi = @"";
+
             #endregion
 
             #region AUTOCOMPLETION
@@ -507,14 +533,9 @@ namespace _3PA.MainFeatures {
             // last ping time
             public string TechnicalLastPing = "";
             public string TechnicalMyUuid = Guid.NewGuid().ToString();
-            public int TechnicalPingEveryXMin = 4 * 60;
-
-            // last update check
-            public string TechnicalLastCheckUpdate = "";
-            public int TechnicalCheckUpdateEveryXMin = 6 * 60;
 
             // did the last update check went ok?
-            public bool TechnicalLastCheckUpdateOk = true;
+            public bool TechnicalLastWebserviceCallOk = true;
 
             // THEMES
             public int ThemeId = 0;
@@ -524,7 +545,10 @@ namespace _3PA.MainFeatures {
 
             public string InstalledDataDiggerVersion = "";
 
-            // SHORTCUTS (id, spec)
+            // stores at which did we last did a specific action
+            public Dictionary<string, string> LastCallDateTime = new Dictionary<string, string>();
+
+            // SHORTCUTS (id, shortcut spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
 
             #region methods
@@ -534,14 +558,14 @@ namespace _3PA.MainFeatures {
             /// </summary>
             /// <returns></returns>
             public IWebProxy GetWebClientProxy() {
-                IWebProxy proxy;
-                //proxy = new WebProxy {
-                //    Address = new Uri("http://8.8.8.8:2015/"),
-                //    Credentials = new NetworkCredential("usernameHere", "pa****rdHere"),
-                //    UseDefaultCredentials = false,
-                //    BypassProxyOnLocal = false
-                //};
-                proxy = WebRequest.DefaultWebProxy;
+                if (WebUseProxy && !string.IsNullOrEmpty(WebProxyUri)) {
+                    return new WebProxy(WebProxyUri) {
+                        Credentials = new NetworkCredential(WebProxyUsername ?? "", WebProxyPassword ?? ""),
+                        UseDefaultCredentials = false,
+                        BypassProxyOnLocal = true
+                    };
+                }
+                IWebProxy proxy = WebRequest.DefaultWebProxy;
                 proxy.Credentials = CredentialCache.DefaultCredentials;
                 return proxy;
             }
@@ -667,24 +691,23 @@ namespace _3PA.MainFeatures {
         /// Url for the webservices
         /// </summary>
         public static string PingPostWebWervice {
-            get { return @"http://users.epizy.com/ws/1.6.4/?action=ping&softName=3p"; }
+            get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=ping&softName=3p"; }
         }
 
         public static string BugsPostWebWervice {
-            get { return @"http://users.epizy.com/ws/1.6.4/?action=bugs&softName=3p"; }
+            get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=bugs&softName=3p"; }
         }
 
         public static string PingGetWebWervice {
-            get { return @"http://users.epizy.com/ws/1.6.4/?action=getPing&softName=3p"; }
+            get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getPing&softName=3p"; }
         }
 
         public static string BugsGetWebWervice {
-            get { return @"http://users.epizy.com/ws/1.6.4/?action=getBugs&softName=3p"; }
+            get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getBugs&softName=3p"; }
         }
 
-        public static string PingGoogleAnalytics {
-            get { return @"https://goo.gl/cx0k5G"; }
-        }
+        public static int TechnicalPingEveryXMin = 2 * 60;
+
 
         /// <summary>
         /// Is developper = the file debug exists
@@ -799,37 +822,40 @@ namespace _3PA.MainFeatures {
         }
 
         // updates related
-        
-        /// <summary>
-        /// Url for the github webservices
-        /// </summary>
-        public static string ReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
-        }
 
         // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
         public static string GitHubBasicAuthenticationToken {
             get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
         }
 
-        public static string FileVersionLog {
-            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
-        }
+        public static int TechnicalCheckUpdateEveryXMin = 6 * 60;
         
         public static string FolderUpdate {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
         }
 
+        /// <summary>
+        /// Url for the github webservices
+        /// </summary>
+        public static string ReleasesApi {
+            get { return IsDevelopper && !string.IsNullOrEmpty(Instance.DebugReleasesApi) ? Instance.DebugReleasesApi : @"https://api.github.com/repos/jcaillon/3P/releases"; }
+        }
+
+        public static string FileVersionLog {
+            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+        }
+
         public static string FilePreviousVersion {
-            get { return Path.Combine(FolderUpdate, "previous.ver"); }
+            get { return Path.Combine(FolderUpdate, "previous.version"); }
         }
 
-        public static string FileDownloadedPlugin {
-            get { return Path.Combine(FolderUpdate, "3P.dll"); }
+        public static string FolderUpdateReleaseUnzipped {
+            get { return Path.Combine(FolderUpdate, "latest"); }
         }
 
-        public static string FileDownloadedPdb {
-            get { return Path.Combine(FolderUpdate, "3P.pdb"); }
+        // name of the zip file containing the release in the assets of the release
+        public static string FileGitHubAssetName {
+            get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
         }
 
         public static string FileUpdaterExe {
@@ -838,15 +864,6 @@ namespace _3PA.MainFeatures {
 
         public static string FileUpdaterLst {
             get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); }
-        }
-
-        public static string FileLatestReleaseZip {
-            get { return Path.Combine(FolderUpdate, "3P_latestRelease" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"); }
-        }
-
-        // name of the zip file containing the release in the assets of the release
-        public static string FileGitHubAssetName {
-            get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
         }
 
 
