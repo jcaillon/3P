@@ -216,7 +216,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @"Check for updates",
                     BackGrndImage = ImageResources.Update
                 };
-                updateButton.ButtonPressed += (sender, args) => MainUpdaterWrapper.Instance.CheckForUpdate();
+                updateButton.ButtonPressed += (sender, args) => Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
                 scrollPanel.ContentPanel.Controls.Add(updateButton);
             }

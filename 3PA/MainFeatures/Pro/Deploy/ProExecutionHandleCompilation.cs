@@ -25,7 +25,9 @@ using System.Text;
 using System.Threading.Tasks;
 using YamuiFramework.Helper;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Pro.Deploy {
 
@@ -626,10 +628,35 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
         private string _prolintOutputPath;
 
+        protected override string CheckParameters() {
+
+            // Check if the startprolint procedure exists or create it from resources
+            if (!File.Exists(Config.ProlintStartProcedure))
+                if (!Utils.FileWriteAllBytes(Config.ProlintStartProcedure, DataResources.StartProlint))
+                    return "Could not write the prolint entry point procedure, check reading rights for the file : " + Config.ProlintStartProcedure.ToHtmlLink();
+
+            return base.CheckParameters();
+        }
+
         protected override bool SetExecutionInfo() {
 
             if (!base.SetExecutionInfo())
                 return false;
+
+            if (!Config.Instance.GlobalDontCheckProlintUpdates && (!Updater<ProlintUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0") || !Updater<ProparseUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))) {
+                UserCommunication.NotifyUnique("NeedProlint", 
+                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint") + "<br><br><i>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + "</i>", 
+                    MessageImg.MsgQuestion, "Prolint execution", "Prolint installation not found", args => {
+                        if (args.Link.Equals("options")) {
+                            args.Handled = true;
+                            Appli.Appli.GoToPage(PageNames.OptionsUpdate);
+                        } else if (args.Link.Equals("download")) {
+                            args.Handled = true;
+                            UserCommunication.Notify("Start the download!");
+                        }
+                    });
+                return false;
+            }
 
             // prolint, we need to copy the StartProlint program
             var fileToExecute = "prolint_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
@@ -638,7 +665,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             StringBuilder prolintProgram = new StringBuilder();
             prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + Files.First().CompiledSourcePath.ProQuoter());
             prolintProgram.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + _prolintOutputPath.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.ProlintStartProcedure.ProQuoter());
             prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProQuoter());
             prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + Files.First().SourcePath.ProQuoter());
             var filename = Npp.CurrentFile.FileName;
@@ -651,8 +678,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProQuoter());
             }
-            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
-            Utils.FileWriteAllText(Path.Combine(_localTempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
+            var encoding = TextEncodingDetect.GetFileEncoding(Config.ProlintStartProcedure);
+            Utils.FileWriteAllText(Path.Combine(_localTempDir, fileToExecute), Utils.ReadAllText(Config.ProlintStartProcedure, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 
             SetPreprocessedVar("CurrentFilePath", fileToExecute.ProQuoter());
 

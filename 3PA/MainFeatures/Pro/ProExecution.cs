@@ -383,7 +383,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// Return true if can use batch mode
+        /// Return false to cancel the start of the process
         /// </summary>
         protected virtual bool SetExecutionInfo() {
             return true;
@@ -776,11 +776,12 @@ namespace _3PA.MainFeatures.Pro {
                         foreach (FileInfo file in new DirectoryInfo(Config.DataDiggerFolder).GetFiles("*.r", SearchOption.TopDirectoryOnly)) {
                             File.Delete(file.FullName);
                         }
-                    } catch(Exception) {
+                    } catch (Exception) {
                         // ignored
                     }
                 }
             }
+
             // add the datadigger folder to the propath
             _propath = Config.DataDiggerFolder + "," + _propath;
             _processStartDir = Config.DataDiggerFolder;

@@ -1,3 +1,9 @@
+Hello, long time no see! I had less time to spend on 3P lately but that doesn't mean the project is dead, far from it! I'm still planning a stable release any time now, please be patient :)
+And without further ado, let's move on to the news...
+
+**Prolint automatically installed!**
+
+Remark : The location of the StartProlint.p procedure has changed, it is now in a folder called `prolint`. This means your previous procedure is not lost and you can reuse parts of it for the new procedure. When you are done, it is advised to delete the old and obsolete file.
 
 **Improvements :**
 
@@ -25,3 +31,5 @@
 - #165 : Incomplete procedure name when using preprocessed variables
 - Fixed the critical bug with progress version inferior to 11.6 in the latest version of 3P
 - Fix a problem occuring when the PROPATH used was too long
+
+And as always, ENJOY!

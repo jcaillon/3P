@@ -85,8 +85,8 @@ namespace _3PA.MainFeatures {
                         },
                         new ConfLine {
                             Label = "Prolint startup procedure",
-                            HandledItem = Config.FileStartProlint,
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint),
+                            HandledItem = Config.ProlintStartProcedure,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.ProlintStartProcedure, DataResources.StartProlint),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush

@@ -31,27 +31,32 @@ namespace _3PA.Lib {
     /// <summary>
     /// Handles the update of this software
     /// </summary>
+
     #region UpdaterWrapper
 
-    internal class UpdaterWrapper {
+    internal class Updater<T> where T : UpdaterWrapper, new() {
+
+        #region Singleton
+
+        private static T _updaterWrapper;
+
+        public static T Instance {
+            get {
+                if (_updaterWrapper == null)
+                    _updaterWrapper = new T();
+                return _updaterWrapper;
+            }
+        }
+
+        #endregion
+
+    }
+
+    internal abstract class UpdaterWrapper {
 
         #region Private fields
 
         private GitHubUpdaterExtented _gitHubUpdater;
-
-        #endregion
-
-        #region Singleton
-
-        private static UpdaterWrapper _updaterWrapper;
-
-        public static UpdaterWrapper Instance {
-            get {
-                if (_updaterWrapper == null)
-                    _updaterWrapper = new UpdaterWrapper();
-                return _updaterWrapper;
-            }
-        }
 
         #endregion
 
@@ -87,8 +92,11 @@ namespace _3PA.Lib {
             }
         }
 
-        public string GetLocalVersion() {
-            return Updater.LocalVersion;
+        /// <summary>
+        /// Returns the local version of the soft (v0 if it doesn't exist)
+        /// </summary>
+        public string LocalVersion {
+            get { return Updater.LocalVersion; }
         }
 
         #endregion
@@ -286,10 +294,10 @@ namespace _3PA.Lib {
                             Npp.Restart();
                         } else if (args.Link.Equals("log")) {
                             args.Handled = true;
-                            UserCommunication.Message(("# Release notes from " + Updater.LocalVersion + " to " + Updater.LatestReleaseInfo.tag_name + " #\n\n" + updater.VersionLog).MdToHtml(),
+                            UserCommunication.Message(updater.VersionLog.ToString().MdToHtml(),
                                 MessageImg.MsgUpdate,
                                 Updater.UpdatedSoftName + " updater",
-                                "New version : " + updater.LatestReleaseInfo.tag_name,
+                                "Release notes from " + Updater.LocalVersion + " to " + Updater.LatestReleaseInfo.tag_name,
                                 new List<string> { "ok" },
                                 false);
                         }
@@ -313,20 +321,6 @@ namespace _3PA.Lib {
     /// The 3P updater
     /// </summary>
     internal class MainUpdaterWrapper : UpdaterWrapper {
-
-        #region Singleton
-
-        private static MainUpdaterWrapper _updaterWrapper;
-
-        public new static MainUpdaterWrapper Instance {
-            get {
-                if (_updaterWrapper == null)
-                    _updaterWrapper = new MainUpdaterWrapper();
-                return _updaterWrapper;
-            }
-        }
-
-        #endregion
 
         #region Override
 
@@ -373,13 +367,15 @@ namespace _3PA.Lib {
                     return;
                 }
 
-                UserCommunication.Notify("A new version of the software has just been installed, congratulations!<br><br>" + "log".ToHtmlLink("Click here to show what is new in this version"), MessageImg.MsgUpdate, Updater.UpdatedSoftName + " updater", "Install successful", args => {
+                var versionLog = File.Exists(Config.UpdateVersionLog) ? Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default) : null;
+
+                UserCommunication.Notify("A new version of the software has just been installed, congratulations!" + (!string.IsNullOrEmpty(versionLog) ? "<br><br>" + "log".ToHtmlLink("Click here to show what is new in this version") : ""), MessageImg.MsgUpdate, Updater.UpdatedSoftName + " updater", "Install successful", args => {
                     if (args.Link.Equals("log")) {
                         args.Handled = true;
-                        UserCommunication.Message(("# Release notes from " + previousVersion + " to " + AssemblyInfo.Version + " #\n\n" + Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default)).MdToHtml(),
+                        UserCommunication.Message(versionLog.MdToHtml(),
                             MessageImg.MsgUpdate,
                             Updater.UpdatedSoftName + " updater",
-                            "New version installed : " + AssemblyInfo.Version,
+                            "Release notes from " + previousVersion + " to " + AssemblyInfo.Version,
                             new List<string> { "ok" },
                             false);
                     }
@@ -442,6 +438,7 @@ namespace _3PA.Lib {
     /// The prolint updater
     /// </summary>
     internal class ProlintUpdaterWrapper : UpdaterWrapper {
+
         #region Override
 
         protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {

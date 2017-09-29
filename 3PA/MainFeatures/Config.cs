@@ -162,8 +162,8 @@ namespace _3PA.MainFeatures {
 
             #region UPDATES
 
-            [Display(Name = "No automatic updates",
-                Description = "Check this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+            [Display(Name = "No automatic updates for 3P",
+                Description = "Toggle this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool GlobalDontCheckUpdates = false;
@@ -173,6 +173,12 @@ namespace _3PA.MainFeatures {
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
+
+            [Display(Name = "No automatic updates for prolint",
+                Description = "Toggle this option to prevent 3P from automatically checking for a new version of prolint on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public bool GlobalDontCheckProlintUpdates = false;
 
             [Display(Name = "Do not install syntax highlighting on update",
                 Description = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
@@ -809,10 +815,6 @@ namespace _3PA.MainFeatures {
             get { return Path.Combine(Npp.ConfigDirectory, "settings.xml"); }
         }
 
-        public static string FileStartProlint {
-            get { return Path.Combine(Npp.ConfigDirectory, "StartProlint.p"); }
-        }
-
         public static string FileDeploymentHook {
             get { return Path.Combine(Npp.ConfigDirectory, "DeploymentHookProc.p"); }
         }
@@ -838,7 +840,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static string UpdateVersionLog {
-            get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
+            get { return Path.Combine(FolderUpdate, "version.log"); }
         }
 
         public static string UpdatePreviousVersion {
@@ -861,11 +863,8 @@ namespace _3PA.MainFeatures {
         public static string FileUpdaterLst {
             get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); }
         }
-
-
-        /// <summary>
-        /// Url for the github webservices
-        /// </summary>
+        
+        // Prolint
         public static string ProlintReleasesApi {
             get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
         }
@@ -873,15 +872,16 @@ namespace _3PA.MainFeatures {
         public static string ProlintFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "prolint")); }
         }
-
-        // name of the zip file containing the release in the assets of the release
+        
+        public static string ProlintStartProcedure {
+            get { return Path.Combine(ProlintFolder, "StartProlint.p"); }
+        }
+        
         public static string ProlintGitHubAssetName {
             get { return @"prolint.zip"; }
         }
 
-        /// <summary>
-        /// Url for the github webservices
-        /// </summary>
+        // Proparse.net
         public static string ProparseReleasesApi {
             get { return @"https://api.github.com/repos/jcaillon/proparse/releases"; }
         }
@@ -889,7 +889,6 @@ namespace _3PA.MainFeatures {
         public static string ProparseGitHubAssetName {
             get { return @"proparse.net.zip"; }
         }
-
 
         public static string DataDiggerFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }

@@ -134,7 +134,7 @@ namespace _3PA.Lib {
                     }
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while the following file : " + path);
+                ErrorHandler.ShowErrors(e, "Error while reading the following file : " + path);
             }
             return null;
         }

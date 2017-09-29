@@ -355,13 +355,6 @@ namespace _3PA.MainFeatures.Pro {
             // update function prototypes
             ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
 
-            // prolint? check that the StartProlint.p program is created, or do it
-            if (executionType == ExecutionType.Prolint) {
-                if (!File.Exists(Config.FileStartProlint))
-                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
-                        return;
-            }
-
             // launch the compile process for the current file
             FilesInfo.CurrentFileInfoObject.ProgressExecution = (ProExecutionHandleCompilation) ProExecution.Factory(executionType);
             FilesInfo.CurrentFileInfoObject.ProgressExecution.Files = new List<FileToCompile> {

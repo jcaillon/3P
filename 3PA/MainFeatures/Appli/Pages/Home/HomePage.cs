@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
             if (htmlLinkClickedEventArgs.Link.Equals("update")) {
-                MainUpdaterWrapper.Instance.CheckForUpdate();
+                Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
                 htmlLinkClickedEventArgs.Handled = true;
             }
         }
