@@ -70,7 +70,7 @@ namespace _3PA.MainFeatures.Pro {
             // if we didn't parse the code correctly or if there are grammar errors
             if (!canIndentSafely) {
                 Utils.FileWriteAllText(linesLogFile, x.ToString());
-                UserCommunication.Notify("If the code compiles successfully and the document is incorrectly formatted, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.IssueUrl.ToHtmlLink() + (Config.IsDevelopper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() : ""), MessageImg.MsgRip, "Correct indentation", "Incorrect grammar", null, 10);
+                UserCommunication.Notify("If the code compiles successfully and the document is incorrectly formatted, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.UrlIssues.ToHtmlLink() + (Config.IsDeveloper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() : ""), MessageImg.MsgRip, "Correct indentation", "Incorrect grammar", null, 10);
             }
         }
 

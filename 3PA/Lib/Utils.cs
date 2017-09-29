@@ -554,7 +554,7 @@ namespace _3PA.Lib {
         public static void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
             using (WebClient wc = new WebClient()) {
                 wc.Proxy = Config.Instance.GetWebClientProxy();
-                wc.Headers.Add("user-agent", Config.GetUserAgent);
+                wc.Headers.Add("user-agent", Config.WebclientUserAgent);
                 if (setWebClient != null)
                     setWebClient(wc);
                 if (handler != null)

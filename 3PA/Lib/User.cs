@@ -34,21 +34,21 @@ namespace _3PA.Lib {
         public static void Ping() {
             try {
                 // ping once x hours
-                if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.TechnicalPingEveryXMin)) {
-                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
+                if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.PostPingEveryXMin)) {
+                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
                     webServiceJson.AddToReq("UUID", UniqueId);
                     webServiceJson.AddToReq("userName", Name);
                     webServiceJson.AddToReq("version", AssemblyInfo.Version);
                     webServiceJson.OnRequestEnded += req => {
                         if (req.StatusCodeResponse != HttpStatusCode.OK) {
-                            if (Config.IsDevelopper)
+                            if (Config.IsDeveloper)
                                 ErrorHandler.ShowErrors(new Exception(req.JsonResponse), "Error when pinging " + req.StatusCodeResponse.ToString());
                         }
                     };
                     webServiceJson.Execute();
                 }
             } catch (Exception e) {
-                if (Config.IsDevelopper)
+                if (Config.IsDeveloper)
                     ErrorHandler.ShowErrors(e);
             }
         }
@@ -82,7 +82,7 @@ namespace _3PA.Lib {
                     } else
                         Utils.FileWriteAllText(checkIdPath, Config.Instance.TechnicalMyUuid);
                 } catch (Exception e) {
-                    if (Config.IsDevelopper)
+                    if (Config.IsDeveloper)
                         ErrorHandler.ShowErrors(e);
                 }
                 return Config.Instance.TechnicalMyUuid;

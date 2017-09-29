@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Appli {
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> {"General", "Compilation"})),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
-                    new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> {"Updates"})),
+                    new YamuiSecMenu("UPDATES", PageNames.OptionsUpdate.ToString(), new OptionPage(new List<string> {"Updates"})),
                     new YamuiSecMenu("AUTOCOMPLETION", "autocompletion", new OptionPage(new List<string> {"Autocompletion", "Default autocompletion replacement", "Progress autocompletion"})),
                     new YamuiSecMenu("CODE EDITION", "code_edition", new OptionPage(new List<string> {"Code edition"})),
                     new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> {"File explorer", "Code explorer", "Tooltip"})),
@@ -97,7 +97,7 @@ namespace _3PA.MainFeatures.Appli {
                         Process.Start(@"https://github.com/jcaillon/3P/issues/3");
                         break;
                     case 1:
-                        Process.Start(@"" + Config.IssueUrl + "");
+                        Process.Start(@"" + Config.UrlIssues + "");
                         break;
                     case 2:
                         Process.Start(@"http://jcaillon.github.io/3P/");
@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.Appli {
 
             // title
             string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='" + HtmlHelper.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (Environment.Is64BitProcess ? " x64" : "") + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDevelopper ? " (debug)" : "") + @"</b></span>";
+            labelTitle.Text = @"<img src='" + HtmlHelper.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (Environment.Is64BitProcess ? " x64" : "") + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDeveloper ? " (debug)" : "") + @"</b></span>";
 
             // register to Npp
             Npp.RegisterToNpp(Handle);
@@ -179,6 +179,7 @@ namespace _3PA.MainFeatures.Appli {
         Welcome,
         FileInfo,
         OptionsGeneral,
+        OptionsUpdate,
         OptionsMisc,
         ExportShareConf,
         SetEnvironment,

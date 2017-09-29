@@ -162,8 +162,8 @@ namespace _3PA.MainFeatures {
 
             #region UPDATES
 
-            [Display(Name = "Do not check for updates",
-                Description = "Check this option to prevent 3P from fetching the latest version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+            [Display(Name = "No automatic updates",
+                Description = "Check this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool GlobalDontCheckUpdates = false;
@@ -181,25 +181,25 @@ namespace _3PA.MainFeatures {
             public bool GlobalDontUpdateUdlOnUpdate = false;
 
             [Display(Name = "Use a webproxy for updates",
-                Description = "",
+                Description = "Toggle this option to use the http(s) proxy defined below when querying updates from github",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool WebUseProxy = false;
 
             [Display(Name = "Webproxy URI",
-                Description = "",
+                Description = "Configure your proxy here<br><i>http://host:port/</i>",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public string WebProxyUri = @"";
 
             [Display(Name = "Webproxy Username (if any)",
-                Description = "",
+                Description = "If your proxy is using authentication fill the username here, otherwise leave empty",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public string WebProxyUsername = @"";
 
             [Display(Name = "Webproxy Password (if any)",
-                Description = "",
+                Description = "If your proxy is using authentication fill the password here, otherwise leave empty<br><b>Please notice that your password will be stored in plain text!</b>",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public string WebProxyPassword = @"";
@@ -633,7 +633,7 @@ namespace _3PA.MainFeatures {
         #region public fields
 
         public static string RequiredNppVersion {
-            get { return "v7.3.2"; }
+            get { return "v7.5.1"; }
         }
 
         /// <summary>
@@ -654,11 +654,11 @@ namespace _3PA.MainFeatures {
             get { return _instance ?? (_instance = Init()); }
         }
 
-        public static string GetUserAgent {
+        public static string WebclientUserAgent {
             get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; }
         }
 
-        public static string IssueUrl {
+        public static string UrlIssues {
             get { return @"https://github.com/jcaillon/3P/issues"; }
         }
 
@@ -690,29 +690,29 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Url for the webservices
         /// </summary>
-        public static string PingPostWebWervice {
+        public static string PostPingWebWervice {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=ping&softName=3p"; }
         }
 
-        public static string BugsPostWebWervice {
+        public static string PostBugsWebWervice {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=bugs&softName=3p"; }
         }
 
-        public static string PingGetWebWervice {
+        public static string GetPingWebWervice {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getPing&softName=3p"; }
         }
 
-        public static string BugsGetWebWervice {
+        public static string GetBugsWebWervice {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getBugs&softName=3p"; }
         }
 
-        public static int TechnicalPingEveryXMin = 2 * 60;
+        public static int PostPingEveryXMin = 3 * 60;
 
 
         /// <summary>
-        /// Is developper = the file debug exists
+        /// Is developer = the file debug exists
         /// </summary>
-        public static bool IsDevelopper {
+        public static bool IsDeveloper {
             get {
                 if (_isDevelopper == null)
                     _isDevelopper = File.Exists(FileDebug);
@@ -748,13 +748,13 @@ namespace _3PA.MainFeatures {
         public static string FolderThemes {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Themes")); }
         }
+        
+        public static string FolderUpdate {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
+        }
 
         public static string FolderTemp {
             get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); }
-        }
-
-        public static string FolderDataDigger {
-            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }
 
         // themes
@@ -828,33 +828,29 @@ namespace _3PA.MainFeatures {
             get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
         }
 
-        public static int TechnicalCheckUpdateEveryXMin = 6 * 60;
-        
-        public static string FolderUpdate {
-            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "Update")); }
-        }
+        public static int UpdateCheckEveryXMin = 6 * 60;
 
         /// <summary>
         /// Url for the github webservices
         /// </summary>
-        public static string ReleasesApi {
-            get { return IsDevelopper && !string.IsNullOrEmpty(Instance.DebugReleasesApi) ? Instance.DebugReleasesApi : @"https://api.github.com/repos/jcaillon/3P/releases"; }
+        public static string UpdateReleasesApi {
+            get { return IsDeveloper && !string.IsNullOrEmpty(Instance.DebugReleasesApi) ? Instance.DebugReleasesApi : @"https://api.github.com/repos/jcaillon/3P/releases"; }
         }
 
-        public static string FileVersionLog {
+        public static string UpdateVersionLog {
             get { return Path.Combine(Npp.ConfigDirectory, "version.log"); }
         }
 
-        public static string FilePreviousVersion {
+        public static string UpdatePreviousVersion {
             get { return Path.Combine(FolderUpdate, "previous.version"); }
         }
 
-        public static string FolderUpdateReleaseUnzipped {
+        public static string UpdateReleaseUnzippedFolder {
             get { return Path.Combine(FolderUpdate, "latest"); }
         }
 
         // name of the zip file containing the release in the assets of the release
-        public static string FileGitHubAssetName {
+        public static string UpdateGitHubAssetName {
             get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
         }
 
@@ -874,12 +870,12 @@ namespace _3PA.MainFeatures {
             get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
         }
 
-        public static string FolderProlint {
+        public static string ProlintFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "prolint")); }
         }
 
         // name of the zip file containing the release in the assets of the release
-        public static string FileProlintGitHubAssetName {
+        public static string ProlintGitHubAssetName {
             get { return @"prolint.zip"; }
         }
 
@@ -890,8 +886,13 @@ namespace _3PA.MainFeatures {
             get { return @"https://api.github.com/repos/jcaillon/proparse/releases"; }
         }
 
-        public static string FileProparseGitHubAssetName {
+        public static string ProparseGitHubAssetName {
             get { return @"proparse.net.zip"; }
+        }
+
+
+        public static string DataDiggerFolder {
+            get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }
 
 

@@ -755,7 +755,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (needUpdate) {
                 // check the version installed (maybe datadigger updated itself to a higher version)
-                var versionFile = Path.Combine(Config.FolderDataDigger, "version.i");
+                var versionFile = Path.Combine(Config.DataDiggerFolder, "version.i");
                 if (File.Exists(versionFile)) {
                     var realVersion = Utils.ReadAllText(versionFile, Encoding.Default).Trim();
                     Config.Instance.InstalledDataDiggerVersion = realVersion;
@@ -763,17 +763,17 @@ namespace _3PA.MainFeatures.Pro {
                 }
             }
 
-            if (needUpdate || !File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
-                if (!Utils.FileWriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger))
+            if (needUpdate || !File.Exists(Path.Combine(Config.DataDiggerFolder, "DataDigger.p"))) {
+                if (!Utils.FileWriteAllBytes(Path.Combine(Config.DataDiggerFolder, "DataDigger.zip"), DataResources.DataDigger))
                     return false;
-                if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
+                if (!Utils.ExtractAll(Path.Combine(Config.DataDiggerFolder, "DataDigger.zip"), Config.DataDiggerFolder))
                     return false;
                 if (needUpdate) {
                     UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
                     Config.Instance.InstalledDataDiggerVersion = Config.EmbeddedDataDiggerVersion;
                     try {
                         // delete all previous r code
-                        foreach (FileInfo file in new DirectoryInfo(Config.FolderDataDigger).GetFiles("*.r", SearchOption.TopDirectoryOnly)) {
+                        foreach (FileInfo file in new DirectoryInfo(Config.DataDiggerFolder).GetFiles("*.r", SearchOption.TopDirectoryOnly)) {
                             File.Delete(file.FullName);
                         }
                     } catch(Exception) {
@@ -782,8 +782,8 @@ namespace _3PA.MainFeatures.Pro {
                 }
             }
             // add the datadigger folder to the propath
-            _propath = Config.FolderDataDigger + "," + _propath;
-            _processStartDir = Config.FolderDataDigger;
+            _propath = Config.DataDiggerFolder + "," + _propath;
+            _processStartDir = Config.DataDiggerFolder;
 
             return true;
         }

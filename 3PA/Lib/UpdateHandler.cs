@@ -24,6 +24,7 @@ using System.Text;
 using System.Threading.Tasks;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
 
 namespace _3PA.Lib {
@@ -57,6 +58,11 @@ namespace _3PA.Lib {
         #region public
 
         /// <summary>
+        /// published when the download +install of a new release is done or simply when the release check is done and nothing is new
+        /// </summary>
+        public event Action<UpdaterWrapper> OnUpdateDone;
+
+        /// <summary>
         /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediately if 
         /// Config.Instance.TechnicalCheckUpdateEveryXMin condition is met
         /// </summary>
@@ -66,7 +72,7 @@ namespace _3PA.Lib {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
                     CheckForUpdate(false);
-            }, 1000 * 60 * Config.TechnicalCheckUpdateEveryXMin, 0, Utils.IsLastCallFromMoreThanXMinAgo(Updater.UpdatedSoftName + "update", Config.TechnicalCheckUpdateEveryXMin));
+            }, 1000 * 60 * Config.UpdateCheckEveryXMin, 0, Utils.IsLastCallFromMoreThanXMinAgo(Updater.UpdatedSoftName + "update", Config.UpdateCheckEveryXMin));
         }
 
         /// <summary>
@@ -74,11 +80,15 @@ namespace _3PA.Lib {
         /// </summary>
         public void CheckForUpdate() {
             if (!Utils.IsSpamming(Updater.UpdatedSoftName + "update", 19000)) {
-                UserCommunication.Notify("Checking for a new release from " + Updater.GitHubReleaseApi.ToHtmlLink("GITHUB", true) + ", you will be notified when it's done", MessageImg.MsgInfo, Updater.UpdatedSoftName + " updater", "Checking for updates...", 5);
+                UserCommunication.NotifyUnique("Update" + Updater.UpdatedSoftName, "Checking for a new release from " + Updater.GitHubReleaseApi.ToHtmlLink("GITHUB", true) + ", you will be notified when it's done", MessageImg.MsgInfo, Updater.UpdatedSoftName + " updater", "Checking for updates...", null, 5);
                 Task.Factory.StartNew(() => {
                     CheckForUpdate(true);
                 });
             }
+        }
+
+        public string GetLocalVersion() {
+            return Updater.LocalVersion;
         }
 
         #endregion
@@ -89,12 +99,13 @@ namespace _3PA.Lib {
         /// Gets an object with the latest release info
         /// </summary>
         private void CheckForUpdate(bool alwaysShowNotifications) {
-            if (Updater.RestartNeeded && Updater.LatestReleaseInfo != null) {
-                // we already checked and there is a new version
+            if (Updater.RestartNeeded && Updater.LatestReleaseInfo != null && Updater.CheckRegularlyAction.HasBeenDisposed) {
+                // we already checked and there is a new version, we can't do an update until a restart of n++
                 if (alwaysShowNotifications)
                     NotifyUpdateAvailable(Updater);
             } else {
                 Updater.AlwaysShowNotifications = alwaysShowNotifications;
+                Updater.GetPreReleases = Config.Instance.UserGetsPreReleases;
                 Updater.CheckForUpdates();
             }
         }
@@ -122,8 +133,7 @@ namespace _3PA.Lib {
         protected virtual GitHubUpdaterExtented GetGitHubUpdaterExtented() {
             return new GitHubUpdaterExtented {
                 AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
-                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken,
-                GetPreReleases = Config.Instance.UserGetsPreReleases
+                BasicAuthenticationToken = Config.GitHubBasicAuthenticationToken
         };
         }
         
@@ -131,9 +141,12 @@ namespace _3PA.Lib {
         /// Called before the download starts
         /// </summary>
         protected virtual void MainUpdaterOnStartingUpdate(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo, GitHubUpdater.StartingDownloadEvent e) {
+
+            Config.Instance.TechnicalLastWebserviceCallOk = true;
+
             var updater = gitHubUpdater as GitHubUpdaterExtented;
             if (updater != null) {
-
+                UserCommunication.NotifyUnique("Update" + updater.UpdatedSoftName, "A newer version of " + updater.UpdatedSoftName + " (" + releaseInfo.tag_name + ") has been found online.<br>It is being downloaded, you will be notified when the update is available.", MessageImg.MsgUpdate, updater.UpdatedSoftName + " updater", "New version found", null, 5);
             }
         }
 
@@ -141,10 +154,21 @@ namespace _3PA.Lib {
         /// Called when the soft is already up to date
         /// </summary>
         protected virtual void OnAlreadyUpdated(GitHubUpdater gitHubUpdater, GitHubUpdater.ReleaseInfo releaseInfo) {
+
+            Config.Instance.TechnicalLastWebserviceCallOk = true;
+
             var updater = gitHubUpdater as GitHubUpdaterExtented;
-            if (updater != null) {
-                UserCommunication.NotifyUnique("UpdateChecked" + updater.UpdatedSoftName, "Congratulations! You already possess the latest <b>" + (!updater.GetPreReleases ? "beta" : "stable") + "</b> version of " + updater.UpdatedSoftName + ".", MessageImg.MsgOk, updater.UpdatedSoftName + " updater", "Local version " + updater.LocalVersion, null);
+            if (updater != null && updater.AlwaysShowNotifications) {
+                UserCommunication.NotifyUnique("Update" + updater.UpdatedSoftName, "Congratulations! You already own the latest <b>" + (!updater.GetPreReleases ? "beta" : "stable") + "</b> version of " + updater.UpdatedSoftName + "." + (!updater.GetPreReleases ? "<br><br><i>If you wish to check for beta versions as well, toggle the corresponding option in the update " + "options".ToHtmlLink("options page") + "</i>" : ""), MessageImg.MsgUpdate, updater.UpdatedSoftName + " updater", "Local version is " + updater.LocalVersion, args => {
+                    if (args.Link.Equals("options")) {
+                        args.Handled = true;
+                        Appli.GoToPage(PageNames.OptionsUpdate);
+                    }
+                });
             }
+
+            if (OnUpdateDone != null)
+                OnUpdateDone(this);
         }
 
         /// <summary>
@@ -162,8 +186,11 @@ namespace _3PA.Lib {
                     }
 
                     NotifyUpdateAvailable(Updater);
+
+                    if (OnUpdateDone != null)
+                        OnUpdateDone(this);
                 } else {
-                    UserCommunication.Notify("Failed to unzip the following file : <br>" + downloadedFile.ToHtmlLink() + "<br>It contains the update for " + updater.UpdatedSoftName + ", you will have to do a manual update.", MessageImg.MsgError, updater.UpdatedSoftName + " updater", "Unzip failed");
+                    UserCommunication.NotifyUnique("Update" + Updater.UpdatedSoftName, "Failed to unzip the following file : <br>" + downloadedFile.ToHtmlLink() + "<br>It contains the update for " + updater.UpdatedSoftName + ", you will have to do a manual update." + Updater.HowToInstallManually, MessageImg.MsgError, updater.UpdatedSoftName + " updater", "Unzip failed", null);
                 }
             }
         }
@@ -184,7 +211,12 @@ namespace _3PA.Lib {
 
                         if (Config.Instance.TechnicalLastWebserviceCallOk || updater.AlwaysShowNotifications) {
                             // only show this message once in case of repetitive failures
-                            UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't retrieve the releases list on GITHUB.<br><br>The API requested was :<br>" + updater.GitHubReleaseApi.ToHtmlLink() + "<br><br>The automatic update as been canceled, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, updater.UpdatedSoftName + " updater", "Couldn't request GITHUB API", null);
+                            UserCommunication.NotifyUnique("Update" + updater.UpdatedSoftName, "For your information, it has not been possible to check for new releases on GITHUB.<br><br>The API requested was :<br>" + updater.GitHubReleaseApi.ToHtmlLink() + "<br>You might want to check your proxy settings on the " + "options".ToHtmlLink("update options page") + Updater.HowToInstallManually, MessageImg.MsgHighImportance, updater.UpdatedSoftName + " updater", "Couldn't query GITHUB API", args => {
+                                if (args.Link.Equals("options")) {
+                                    args.Handled = true;
+                                    Appli.GoToPage(PageNames.OptionsUpdate);
+                                }
+                            });
                         }
 
                         Config.Instance.TechnicalLastWebserviceCallOk = false;
@@ -221,17 +253,8 @@ namespace _3PA.Lib {
 
                         break;
 
-                    case GitHubUpdater.GitHubUpdaterFailReason.AnalyseReleasesFailed:
-                        break;
-
-                    case GitHubUpdater.GitHubUpdaterFailReason.AssetDownloadFailed:
-                        break;
-
-                    case GitHubUpdater.GitHubUpdaterFailReason.NoAssetOnLatestRelease:
-                        break;
-
                     default:
-                        ErrorHandler.ShowErrors(e, "Update error of type " + gitHubUpdaterFailReason);
+                        ErrorHandler.ShowErrors(e, "Update error for " + Updater.UpdatedSoftName + " : " + gitHubUpdaterFailReason);
                         break;
                 }
             }
@@ -242,30 +265,31 @@ namespace _3PA.Lib {
         /// </summary>
         protected virtual void NotifyUpdateAvailable(GitHubUpdaterExtented updater) {
             if (updater.LatestReleaseInfo != null) {
-
-                UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
+                UserCommunication.NotifyUnique("Update" + updater.UpdatedSoftName, 
+                    @"Dear user, <br>
                     <br>
                     A new version of " + updater.UpdatedSoftName + @" has been downloaded!<br>" +
-                                                                  (updater.RestartNeeded ? @"It will be automatically installed the next time you restart Notepad++<br>" : "It has already been installed in the 3P folder<br>") + @"
+                    (updater.RestartNeeded ? @"It will be automatically installed the next time you restart Notepad++<br>" : "It has already been installed successfully<br>") + @"
                     <br>                   
                     Your version: <b>" + updater.LocalVersion + @"</b><br>
-                    Distant version: <b>" + updater.LatestReleaseInfo.tag_name + @"</b><br>
+                    New version: <b>" + updater.LatestReleaseInfo.tag_name + @"</b><br>
                     Release name: <b>" + updater.LatestReleaseInfo.name + @"</b><br>
                     Available since: <b>" + updater.LatestReleaseInfo.published_at + @"</b><br>
                     Release URL: <b>" + updater.LatestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
-                                                                  (updater.LatestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
-                                                                  (updater.RestartNeeded ? (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current version by the new release,<br>please click yes when you are asked to execute it</i></span>" : "") + @"<br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>" : ""),
-                    MessageImg.MsgUpdate, updater.UpdatedSoftName + " updater", "An update has been downloaded",
+                    (updater.LatestReleaseInfo.prerelease ? "<i>This new release is a beta version</i><br>" : "") +
+                    "log".ToHtmlLink("Click here to see what is new in this version", true) + "<br>" +
+                    (updater.RestartNeeded ? (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current version by the new release,<br>please click yes when you are asked to execute it</i></span><br>" : "") + @"<br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>" : ""),
+                    MessageImg.MsgUpdate, updater.UpdatedSoftName + " updater", "New update downloaded",
                     args => {
                         if (args.Link.Equals("Restart")) {
                             args.Handled = true;
                             Npp.Restart();
-                        } else if (args.Link.Equals("ShowLog")) {
+                        } else if (args.Link.Equals("log")) {
                             args.Handled = true;
-                            UserCommunication.Message(("# What's new in this version? #\n\n" + updater.VersionLog).MdToHtml(),
+                            UserCommunication.Message(("# Release notes from " + Updater.LocalVersion + " to " + Updater.LatestReleaseInfo.tag_name + " #\n\n" + updater.VersionLog).MdToHtml(),
                                 MessageImg.MsgUpdate,
-                                "A new update is available",
-                                "Updated to version " + updater.LatestReleaseInfo.tag_name,
+                                Updater.UpdatedSoftName + " updater",
+                                "New version : " + updater.LatestReleaseInfo.tag_name,
                                 new List<string> { "ok" },
                                 false);
                         }
@@ -309,8 +333,10 @@ namespace _3PA.Lib {
         protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
             var n = base.GetGitHubUpdaterExtented();
             n.UpdatedSoftName = AssemblyInfo.AssemblyProduct;
-            n.AssetName = Config.FileGitHubAssetName;
-            n.GitHubReleaseApi = Config.ReleasesApi;
+            n.FolderUnzip = Config.UpdateReleaseUnzippedFolder;
+            n.HowToInstallManually = "<br><br><i>If you wish to manually install " + n.UpdatedSoftName + ", you have to : <br><ul><li>Close notepad++</li><li>Download the latest release on " + "https://github.com/jcaillon/3P/releases".ToHtmlLink("GITHUB") + "</li><li>Extract its content to " + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + "</li></ul></i>";
+            n.AssetName = Config.UpdateGitHubAssetName;
+            n.GitHubReleaseApi = Config.UpdateReleasesApi;
             n.LocalVersion = AssemblyInfo.Version;
             n.ExtraActionWhenDownloaded = On3PUpdate;
             n.RestartNeeded = true;
@@ -327,10 +353,11 @@ namespace _3PA.Lib {
         /// </summary>
         public void CheckForUpdateDone() {
 
-            var previousVersion = File.Exists(Config.FilePreviousVersion) ? Utils.ReadAllText(Config.FilePreviousVersion, Encoding.Default) : null;
+            var previousVersion = File.Exists(Config.UpdatePreviousVersion) ? Utils.ReadAllText(Config.UpdatePreviousVersion, Encoding.Default) : null;
 
             // an update has been done
-            if (File.Exists(Config.FileVersionLog)) {
+            if (!string.IsNullOrEmpty(previousVersion)) {
+
                 // we didn't update to a newer version, something went wrong
                 if (!AssemblyInfo.Version.IsHigherVersionThan(previousVersion)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
@@ -338,20 +365,25 @@ namespace _3PA.Lib {
                         The update didn't go as expected, the old plugin files have not been replaced by the new ones!<br>
                         It is very likely because the updater didn't get the rights to write a file in your /plugins/ folder.<br>
                         You will have to manually copy the new files to replace the existing files :<br><br>
-                        <b>MOVE (delete the source and replace the target)</b> all the files in this folder : <div>" + Config.FolderUpdateReleaseUnzipped.ToHtmlLink() + @"</div><br>
+                        <b>MOVE (delete the source and replace the target)</b> all the files in this folder : <div>" + Config.UpdateReleaseUnzippedFolder.ToHtmlLink() + @"</div><br>
                         <b>In this folder</b> (replacing the existing files) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        <i>(n.b. : this message will be shown at startup as long as the above-mentioned file exists!)</i><br>
+                        <i>(n.b. : this message will be shown at startup as long as the above-mentioned folder exists!)</i><br>
                         Thank you for your patience!</div>", MessageImg.MsgUpdate, Updater.UpdatedSoftName + " updater", "Problem during the update!");
                     return;
                 }
 
-                UserCommunication.Message(("# What's new? #\n\n" + Utils.ReadAllText(Config.FileVersionLog, Encoding.Default)).MdToHtml(),
-                    MessageImg.MsgUpdate,
-                    Updater.UpdatedSoftName + " updater",
-                    "New version install : " + AssemblyInfo.Version,
-                    new List<string> { "ok" },
-                    false);
+                UserCommunication.Notify("A new version of the software has just been installed, congratulations!<br><br>" + "log".ToHtmlLink("Click here to show what is new in this version"), MessageImg.MsgUpdate, Updater.UpdatedSoftName + " updater", "Install successful", args => {
+                    if (args.Link.Equals("log")) {
+                        args.Handled = true;
+                        UserCommunication.Message(("# Release notes from " + previousVersion + " to " + AssemblyInfo.Version + " #\n\n" + Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default)).MdToHtml(),
+                            MessageImg.MsgUpdate,
+                            Updater.UpdatedSoftName + " updater",
+                            "New version installed : " + AssemblyInfo.Version,
+                            new List<string> { "ok" },
+                            false);
+                    }
+                });
 
                 // Special actions to take depending on the previous version?
                 if (!string.IsNullOrEmpty(previousVersion))
@@ -394,8 +426,8 @@ namespace _3PA.Lib {
             }
 
             // write the version log
-            Utils.FileWriteAllText(Config.FileVersionLog, updater.VersionLog.ToString(), Encoding.Default);
-            Utils.FileWriteAllText(Config.FilePreviousVersion, AssemblyInfo.Version, Encoding.Default);
+            Utils.FileWriteAllText(Config.UpdateVersionLog, updater.VersionLog.ToString(), Encoding.Default);
+            Utils.FileWriteAllText(Config.UpdatePreviousVersion, AssemblyInfo.Version, Encoding.Default);
         }
 
         #endregion
@@ -415,7 +447,7 @@ namespace _3PA.Lib {
         protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
 
             var localVersion = "v0";
-            var releasePath = Path.Combine(Config.FolderProlint, "prolint", "core", "release.ini");
+            var releasePath = Path.Combine(Config.ProlintFolder, "prolint", "core", "release.ini");
 
             if (File.Exists(releasePath)) {
                 var prolintRelease = new IniReader(releasePath);
@@ -423,8 +455,10 @@ namespace _3PA.Lib {
             }
 
             var n = base.GetGitHubUpdaterExtented();
-            n.UpdatedSoftName = "prolint";
-            n.AssetName = Config.FileProlintGitHubAssetName;
+            n.UpdatedSoftName = "Prolint";
+            n.FolderUnzip = Config.ProlintFolder;
+            n.HowToInstallManually = "<br><br><i>If you wish to manually install " + n.UpdatedSoftName + ", you have to : <br><ul><li>Download the latest release on " + "https://github.com/jcaillon/prolint/releases".ToHtmlLink("GITHUB") + "</li><li>Extract its content to " + Config.ProlintFolder.ToHtmlLink() + "</li></ul></i>";
+            n.AssetName = Config.ProlintGitHubAssetName;
             n.GitHubReleaseApi = Config.ProlintReleasesApi;
             n.LocalVersion = localVersion;
             return n;
@@ -447,15 +481,17 @@ namespace _3PA.Lib {
         protected override GitHubUpdaterExtented GetGitHubUpdaterExtented() {
 
             var localVersion = "v0";
-            var releasePath = Path.Combine(Config.FolderProlint, "proparse.net", "proparse.net.dll");
+            var releasePath = Path.Combine(Config.ProlintFolder, "proparse.net", "proparse.net.dll");
 
             if (File.Exists(releasePath)) {
                 localVersion = Utils.GetDllVersion(releasePath);
             }
 
             var n = base.GetGitHubUpdaterExtented();
-            n.UpdatedSoftName = "proparse.net";
-            n.AssetName = Config.FileProparseGitHubAssetName;
+            n.UpdatedSoftName = "Proparse.net";
+            n.FolderUnzip = Config.ProlintFolder;
+            n.HowToInstallManually = "<br><br><i>If you wish to manually install " + n.UpdatedSoftName + ", you have to : <br><ul><li>Download the latest release on " + "https://github.com/jcaillon/proparse/releases".ToHtmlLink("GITHUB") + "</li><li>Extract its content to " + Config.ProlintFolder.ToHtmlLink() + "</li></ul></i>";
+            n.AssetName = Config.ProparseGitHubAssetName;
             n.GitHubReleaseApi = Config.ProparseReleasesApi;
             n.LocalVersion = localVersion;
             return n;
@@ -475,16 +511,34 @@ namespace _3PA.Lib {
         /// </summary>
         public string UpdatedSoftName { get; set; }
 
+        /// <summary>
+        /// Set to true if the update needs notepad++ to restart
+        /// </summary>
         public bool RestartNeeded { get; set; }
 
+        /// <summary>
+        /// Set to true to show the notifications on every update results
+        /// </summary>
         public bool AlwaysShowNotifications { get; set; }
-
+        
+        /// <summary>
+        /// The object that allows to check for update regularly
+        /// </summary>
         public RecurentAction CheckRegularlyAction;
 
+        /// <summary>
+        /// Extra action to carry on when the download of the new release is done
+        /// </summary>
         public Action<GitHubUpdaterExtented> ExtraActionWhenDownloaded { get; set; }
-
+        
+        /// <summary>
+        /// The folder to which the downloaded .zip should be unzipped
+        /// </summary>
         public string FolderUnzip { get; set; }
 
+        /// <summary>
+        /// A small text to describe how the user should do to manually update this software
+        /// </summary>
         public string HowToInstallManually { get; set; }
     }
 

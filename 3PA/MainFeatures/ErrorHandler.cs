@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures {
         public static void ShowErrors(Exception e, string message = null) {
             if (LogError(e, message, false)) {
                 // show it to the user
-                UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                UserCommunication.Notify("The last action you started has triggered an error and has been canceled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.UrlIssues.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
                     MessageImg.MsgPoison, "An error has occurred", message,
                     args => {
                         if (args.Link.EndsWith(".log")) {
@@ -85,7 +85,7 @@ namespace _3PA.MainFeatures {
             if (e == null)
                 return false;
 
-            if (showIfDev && Config.IsDevelopper) {
+            if (showIfDev && Config.IsDeveloper) {
                 ShowErrors(e, message);
                 return true;
             }
@@ -134,10 +134,10 @@ namespace _3PA.MainFeatures {
                 Utils.FileAppendAllText(Config.FileErrorLog, toAppend.ToString());
 
                 // send the report
-                if (!Config.IsDevelopper)
+                if (!Config.IsDeveloper)
                     SendBugReport(info);
             } catch (Exception x) {
-                if (Config.IsDevelopper)
+                if (Config.IsDeveloper)
                     ShowErrors(x, message);
             }
 
@@ -148,7 +148,7 @@ namespace _3PA.MainFeatures {
         /// Sends the given report to the web service of 3P
         /// </summary>
         private static void SendBugReport(ExceptionInfo bugReport) {
-            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.BugsPostWebWervice);
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostBugsWebWervice);
             wb.Serialize(bugReport);
 
             // save the request in a file

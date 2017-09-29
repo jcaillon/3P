@@ -295,7 +295,7 @@ namespace _3PA.NppCore {
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
                     ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for " + GetDebugString());
-                    if (Config.IsDevelopper)
+                    if (Config.IsDeveloper)
                         Debug.Assert(false);
                 }
                 return SciPositionFromLine(index);

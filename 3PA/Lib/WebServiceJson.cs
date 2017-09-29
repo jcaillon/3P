@@ -144,7 +144,7 @@ namespace _3PA.Lib {
                         _httpRequest.Proxy = Config.Instance.GetWebClientProxy();
                         _httpRequest.Method = Method.ToString().ToUpper();
                         _httpRequest.ContentType = "application/json";
-                        _httpRequest.UserAgent = Config.GetUserAgent;
+                        _httpRequest.UserAgent = Config.WebclientUserAgent;
                         _httpRequest.ReadWriteTimeout = TimeOut;
                         _httpRequest.Timeout = TimeOut;
                     }

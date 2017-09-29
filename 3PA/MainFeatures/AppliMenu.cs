@@ -332,7 +332,7 @@ namespace _3PA.MainFeatures {
 
             #region special dev
 
-            if (Config.IsDevelopper) {
+            if (Config.IsDeveloper) {
                 MainMenuList.Add(
                     new MenuItem(this, "Tests", ImageResources.Tests, null, null, null, new List<MenuItem> {
                         new MenuItem(this, "DebugTest1", ImageResources.TestTube, item => PlugDebug.DebugTest1(), "DebugTest1", "Ctrl+OemQuotes") {Generic = true},

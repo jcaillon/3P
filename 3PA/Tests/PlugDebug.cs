@@ -122,7 +122,7 @@ namespace _3PA.Tests {
    
 
 
-            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
+            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
             webServiceJson.AddToReq("UUID", "zz");
             webServiceJson.AddToReq("userName", "jca");
             webServiceJson.AddToReq("version", AssemblyInfo.Version);
@@ -202,7 +202,7 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void DisplayBugs() {
-            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.BugsGetWebWervice);
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.GetBugsWebWervice);
             // wb.AddToReq("UUID", "allo");
             wb.OnRequestEnded += webServ => {
                 if (webServ.StatusCodeResponse != HttpStatusCode.OK)

@@ -1,12 +1,15 @@
 
 **Improvements :**
 
+- New option in the update page, you can now configuration a proxy to use to check for updates
 - New options for the deployment :
   - You can now send files to a .cab file (works like zip rules)
   - Changed the behavior of the `display parser errors on save`, the notification now allows you to disable the feature for the current file only
   - Extended the possibilities of the deployer :
     - CopyFolder
 	- DeleteFolder
+  - You can now use the special variable `<ROOT>` which is always available and is replaced by the path to your source directory (without the ending '')
+  - For the transfer rules and in particular, for the transfert target : it is now possible to use the | character to separate several target path (the file will then be copied to the different locations). This is equivalent to writing several rules with the "continue" option set to "yes", it is just a simpler way to write it
 
 **Fixed issues :**
 
@@ -20,3 +23,5 @@
 - fixed compilation errors display issue that would occur if the error was located in an include file for instance
 - #164 : Search window inactive when CRTL+F
 - #165 : Incomplete procedure name when using preprocessed variables
+- Fixed the critical bug with progress version inferior to 11.6 in the latest version of 3P
+- Fix a problem occuring when the PROPATH used was too long

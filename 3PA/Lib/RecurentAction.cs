@@ -66,6 +66,8 @@ namespace _3PA.Lib {
 
         private object _lock;
 
+        private bool _hasBeenDisposed;
+
         #endregion
 
         #region Life and death
@@ -109,8 +111,18 @@ namespace _3PA.Lib {
         }
 
         public void Dispose() {
+            _hasBeenDisposed = true;
             Stop();
         }
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Returns true if the object has been disposed
+        /// </summary>
+        public bool HasBeenDisposed { get { return _hasBeenDisposed; } }
 
         #endregion
 

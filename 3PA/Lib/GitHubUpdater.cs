@@ -102,7 +102,7 @@ namespace _3PA.Lib {
             try {
                 if (webServiceJson.StatusCodeResponse == HttpStatusCode.OK && webServiceJson.ResponseException == null) {
 
-                    ReleaseInfo latestReleaseInfo = null;
+                    LatestReleaseInfo = null;
 
                     // get the releases
                     var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
@@ -124,15 +124,15 @@ namespace _3PA.Lib {
                                 VersionLog.AppendLine((release.body ?? "") + "\n\n");
 
                                 // the first higher release encountered is the latest
-                                if (latestReleaseInfo == null)
-                                    latestReleaseInfo = release;
+                                if (LatestReleaseInfo == null)
+                                    LatestReleaseInfo = release;
                             }
                         }
 
                         // There is a distant version higher than the local one
-                        if (latestReleaseInfo != null) {
+                        if (LatestReleaseInfo != null) {
 
-                            if (latestReleaseInfo.assets != null && latestReleaseInfo.assets.Count > 0 && latestReleaseInfo.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
+                            if (LatestReleaseInfo.assets != null && LatestReleaseInfo.assets.Count > 0 && LatestReleaseInfo.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
 
                                 var downloadFile = Path.Combine(AssetDownloadFolder, AssetName);
                                 Utils.CreateDirectory(AssetDownloadFolder);
@@ -141,10 +141,10 @@ namespace _3PA.Lib {
                                 var e = new StartingDownloadEvent();
 
                                 if (StartingUpdate != null)
-                                    StartingUpdate(this, latestReleaseInfo, e);
+                                    StartingUpdate(this, LatestReleaseInfo, e);
 
                                 if (!e.CancelDownload) {
-                                    Utils.DownloadFile(latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
+                                    Utils.DownloadFile(LatestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
                                 }
 
                             } else {

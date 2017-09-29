@@ -20,11 +20,11 @@
 # ======================
 # Two type of rules exist :
 # 
-# - Transfer rules : they define when / where / how a file should be deployed
 # - Filter rules : they define which files are eligible to the deployment
+# - Transfer rules : they define when / where / how a file should be deployed
 # 
 ## ======================
-# Each transfer rule as 5 components separated by tabulations :
+# Each Filter rule as 5 components separated by tabulations :
 # step	name	suffix	type	source_pattern
 # 
 # - The deployment step : integer (a rule is always defined for a particular step)
@@ -40,10 +40,10 @@
 # - The deployment step : integer (a rule is always defined for a particular step)
 # - The application name filter : If the application name of your current environment matches this filter (you can use wildcards), the rule can apply 
 # - The application suffix filter : If the application suffix of your current environment matches this filter (you can use wildcards), the rule can apply 
-# - The deployment type : `Move` / `Copy` / `Prolib` (the file will be added to a progress library .pl) / `Ftp` (the file will be sent to an ftp server) / `Ftp` (see next paragraph for more details)
+# - The transfer type : `Move` / `Copy` / `Prolib` (the file will be added to a progress library .pl) / `Zip` / `Cab` / `Ftp` (the file will be sent to an ftp server) / `Ftp` (see next paragraph for more details)
 # - Execute further rules : `yes` / `no` : yes if more rules can be applied after this one, no to stop at this rule
 # - The source path pattern : when deploying, if a file matches this pattern (you can use wildcards), the rule can apply
-# - The deployment target : It can either be an absolute path or a relative one; If relative, it will be relative to the deployment base directory set for your current environment
+# - The transfer target : The path in which the file will be deployed. It can either be an absolute path or a relative one; If relative, it will be relative to the deployment base directory set for your current environment. If the transfer type is `Zip` / `Cab` / `Prolib` then the target should be a file with the corresponding extension (ex : target.zip). It is also possible to use the | character to separate several target path (the file will then be copied to the different locations)
 #
 ## ======================
 # Type of transfers :

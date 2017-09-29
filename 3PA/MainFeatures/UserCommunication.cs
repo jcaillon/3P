@@ -119,13 +119,13 @@ namespace _3PA.MainFeatures {
                     ErrorHandler.LogError(e, "Error in NotifyUnique");
 
                     // if we are here, display the error message the old way
-                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.UrlIssues + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             })) {
                 ErrorHandler.LogError(new Exception("No UIThread!"), "Error in NotifyUnique");
 
                 // show the old way
-                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.\n\nThe initial message was :\n" + htmlContent.Replace("<br>", "\n"), AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.UrlIssues + " if the problem persists.\n\nThe initial message was :\n" + htmlContent.Replace("<br>", "\n"), AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
