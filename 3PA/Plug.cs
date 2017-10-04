@@ -209,14 +209,11 @@ namespace _3PA {
             DelayedAction.StartNew(100, () => {
                 if (!Npp.ConfXml.AskToDisableAutocompletionAndRestart()) {
 
-                    // check if an update was done 
-                    Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDone();
+                    // check if an update was done and start checking for new updates
+                    Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
                 }
             });
-
-            // start checking for new updates
-            Updater<MainUpdaterWrapper>.Instance.StartCheckingForUpdate(); // async
-
+            
             // Try to update the configuration from the distant shared folder
             ShareExportConf.StartCheckingForUpdates();
 

@@ -162,17 +162,17 @@ namespace _3PA.MainFeatures {
 
             #region UPDATES
 
-            [Display(Name = "No automatic updates for 3P",
-                Description = "Toggle this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
-            public bool GlobalDontCheckUpdates = false;
-
             [Display(Name = "I want to get beta releases",
                 Description = "Check this option if you want to update 3P with the latest beta version <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
+
+            [Display(Name = "No automatic updates for 3P",
+                Description = "Toggle this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+                GroupName = "Updates",
+                AutoGenerateField = false)]
+            public bool GlobalDontCheckUpdates = false;
 
             [Display(Name = "No automatic updates for prolint",
                 Description = "Toggle this option to prevent 3P from automatically checking for a new version of prolint on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
@@ -865,12 +865,12 @@ namespace _3PA.MainFeatures {
         }
         
         // Prolint
-        public static string ProlintReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
-        }
-
         public static string ProlintFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "prolint")); }
+        }
+
+        public static string ProlintReleasesApi {
+            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
         }
         
         public static string ProlintStartProcedure {
@@ -890,6 +890,7 @@ namespace _3PA.MainFeatures {
             get { return @"proparse.net.zip"; }
         }
 
+        // Datadigger
         public static string DataDiggerFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }

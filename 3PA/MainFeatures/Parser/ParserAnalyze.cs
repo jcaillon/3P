@@ -1693,7 +1693,8 @@ namespace _3PA.MainFeatures.Parser {
                     } else {
                         // Parse it
                         proLexer = new ProLexer(Utils.ReadAllText(fullFilePath));
-                        SavedLexerInclude.Add(fullFilePath, proLexer);
+                        if (!SavedLexerInclude.ContainsKey(fullFilePath))
+                            SavedLexerInclude.Add(fullFilePath, proLexer);
                     }
 
                     // add this include to the references and modify each token

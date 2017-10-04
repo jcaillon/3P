@@ -61,9 +61,24 @@ namespace _3PA.MainFeatures {
         #region Notify and NotifyUnique
 
         /// <summary>
+        /// Returns true if the notification is being displayed
+        /// </summary>
+        public static bool IsUniqueNotifShown(string id) {
+            if (_registeredNotif.ContainsKey(id)) {
+                try {
+                    if (_registeredNotif[id] != null && _registeredNotif[id].Visible) {
+                        return true;
+                    }
+                } catch (Exception) {
+                    // ignored
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Closes the notification represented by the given id
         /// </summary>
-        /// <param name="id"></param>
         public static void CloseUniqueNotif(string id) {
             if (_registeredNotif.ContainsKey(id)) {
                 try {

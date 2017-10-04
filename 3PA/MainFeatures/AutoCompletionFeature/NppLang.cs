@@ -292,7 +292,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             foreach (var descendant in langElement["KeywordLists"].SubNodes) {
                                 var xAttribute = descendant.GetAttribute(@"name");
                                 if (xAttribute != null && xAttribute.Value.StartsWith("keywords", StringComparison.CurrentCultureIgnoreCase)) {
-                                    foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
+                                    foreach (var keyword in (WebUtility.HtmlDecode(descendant.Value) ?? "").Replace('\r', ' ').Replace('\n', ' ').Split(' ')) {
                                         if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                             uniqueKeywords.Add(keyword);
                                             _keywords.Add(new NppKeywordUserLangs(keyword, this) {
@@ -312,7 +312,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         if (langElement != null) {
                             // get the list of keywords from langs.xml
                             foreach (var descendant in langElement.SubNodes) {
-                                foreach (var keyword in WebUtility.HtmlDecode(descendant.Value).Split(' ')) {
+                                foreach (var keyword in (WebUtility.HtmlDecode(descendant.Value) ?? "").Split(' ')) {
                                     if (!string.IsNullOrEmpty(keyword) && !uniqueKeywords.Contains(keyword)) {
                                         uniqueKeywords.Add(keyword);
                                         _keywords.Add(new NppKeywordLangs(keyword, this) {

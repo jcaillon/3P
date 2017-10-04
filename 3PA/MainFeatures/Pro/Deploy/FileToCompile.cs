@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro.Deploy {
@@ -245,7 +246,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             if (Times > 0) {
                 sb.Append(" (x" + Times + ")");
             }
-            sb.Append(" " + Message);
+            sb.Append(" " + Message.EscapeHtml());
             sb.Append("</div>");
             return sb.ToString();
         }

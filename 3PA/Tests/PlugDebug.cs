@@ -47,33 +47,9 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            MeasureIt(() => {
-                var fuck = ListStuff();
-                var t = fuck;
-            }, "1 : ");
+            UserCommunication.Notify(string.Concat(WebUtility.HtmlDecode(null).Split(' ')));
         }
-
-        private static List<FileCoo> ListStuff() {
-            var output = new List<FileCoo>();
-            using (var md5 = MD5.Create()) {
-                foreach (var filePath in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
-                    using (var stream = File.OpenRead(filePath)) {
-                        output.Add(new FileCoo {
-                            Path = filePath,
-                            Md5 = Encoding.Default.GetString(md5.ComputeHash(stream))
-                    });
-                    }
-                    
-                }
-            }
-            return output;
-        }
-
-        internal class FileCoo {
-            public string Path;
-            public string Md5;
-        }
-
+        
         public static void DebugTest2() {
 
             var exec = new ProExecutionTableCrc {
@@ -107,34 +83,7 @@ namespace _3PA.Tests {
                 new List<string> {"ok", "cancel"},
                 true);
              */
-
-            Uri address = new Uri("http://google.com/");               
-                // Create the web request 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(address);
-
-            // Set type to POST  ;
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-
-            request.Proxy = new WebProxy("10.61.10.30", 666);
-            request.Proxy.Credentials = new NetworkCredential("", "");
-
-   
-
-
-            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
-            webServiceJson.AddToReq("UUID", "zz");
-            webServiceJson.AddToReq("userName", "jca");
-            webServiceJson.AddToReq("version", AssemblyInfo.Version);
-            webServiceJson.OnRequestEnded += req => {
-                if (req.StatusCodeResponse == HttpStatusCode.OK) {
-                    UserCommunication.Notify("ok");
-                }
-                UserCommunication.Notify(req.StatusDescriptionResponse + " " + req.JsonResponse + " " + req.ResponseException);
-            };
-            webServiceJson.Execute();
-
-            /*UpdateHandler.CheckForProlintUpdates();*/
+             
         }
         
         #endregion

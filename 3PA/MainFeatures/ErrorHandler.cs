@@ -105,9 +105,11 @@ namespace _3PA.MainFeatures {
                 else
                     frameworkNs = frameworkNs.Substring(0, frameworkNs.IndexOf(".", StringComparison.Ordinal) + 1);
 
-                if (!info.fullException.ContainsFast(libNs) &&
-                    !info.fullException.ContainsFast(frameworkNs))
-                    return false;
+                if (e.Source != null) {
+                    if (!info.fullException.ContainsFast(libNs) &&
+                        !info.fullException.ContainsFast(frameworkNs))
+                        return false;
+                }
 
                 // don't show the same error twice in a session
                 var excepUniqueId = info.originMethod + info.originLine;

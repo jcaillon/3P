@@ -645,15 +645,18 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             if (!Config.Instance.GlobalDontCheckProlintUpdates && (!Updater<ProlintUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0") || !Updater<ProparseUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))) {
                 UserCommunication.NotifyUnique("NeedProlint", 
-                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint") + "<br><br><i>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + "</i>", 
+                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint automatically") + "<br><br><i>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + ".<br>Please note that in that case, you will need to configure prolint yourself</i>", 
                     MessageImg.MsgQuestion, "Prolint execution", "Prolint installation not found", args => {
                         if (args.Link.Equals("options")) {
                             args.Handled = true;
                             Appli.Appli.GoToPage(PageNames.OptionsUpdate);
                         } else if (args.Link.Equals("download")) {
                             args.Handled = true;
-                            UserCommunication.Notify("Start the download!");
+                            Updater<ProlintUpdaterWrapper>.Instance.CheckForUpdate();
+                            Updater<ProparseUpdaterWrapper>.Instance.CheckForUpdate();
                         }
+                        if (args.Handled)
+                            UserCommunication.CloseUniqueNotif("NeedProlint");
                     });
                 return false;
             }
@@ -677,7 +680,12 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProQuoter());
+
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagOpening " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener).ProQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagEnding " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser).ProQuoter());
             }
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProlint " + Updater<ProlintUpdaterWrapper>.Instance.ApplicationFolder.ProQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProparseAssemblies " + Updater<ProparseUpdaterWrapper>.Instance.ApplicationFolder.ProQuoter());
             var encoding = TextEncodingDetect.GetFileEncoding(Config.ProlintStartProcedure);
             Utils.FileWriteAllText(Path.Combine(_localTempDir, fileToExecute), Utils.ReadAllText(Config.ProlintStartProcedure, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Cache;
 using System.Text;
 
 namespace _3PA.Lib {
@@ -86,7 +87,11 @@ namespace _3PA.Lib {
                 var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, GitHubReleaseApi) {
                     TimeOut = 3000
                 };
-                wb.OnInitHttpWebRequest += request => { request.Headers.Add("Authorization", "Basic " + BasicAuthenticationToken); };
+                wb.OnInitHttpWebRequest += request => {
+                    request.Headers.Add("Authorization", "Basic " + BasicAuthenticationToken);
+                    request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+
+                };
                 wb.OnRequestEnded += OnGithubResponse;
                 wb.Execute();
             } catch (Exception e) {
@@ -158,7 +163,7 @@ namespace _3PA.Lib {
                     }
                 } else {
                     if (ErrorOccured != null)
-                        ErrorOccured(this, webServiceJson.ResponseException, GitHubUpdaterFailReason.ReleaseApiUnreachable);
+                        ErrorOccured(this, new Exception("Update error", webServiceJson.ResponseException), GitHubUpdaterFailReason.ReleaseApiUnreachable);
                 }
             } catch (Exception e) {
                 if (ErrorOccured != null)
@@ -177,7 +182,7 @@ namespace _3PA.Lib {
             try {
                 if (asyncCompletedEventArgs.Error != null) {
                     if (ErrorOccured != null)
-                        ErrorOccured(this, asyncCompletedEventArgs.Error, GitHubUpdaterFailReason.AssetDownloadFailed);
+                        ErrorOccured(this, new Exception("Release download error", asyncCompletedEventArgs.Error), GitHubUpdaterFailReason.AssetDownloadFailed);
                 } else {
                     var downloadFile = Path.Combine(AssetDownloadFolder, AssetName);
                     if (File.Exists(downloadFile)) {

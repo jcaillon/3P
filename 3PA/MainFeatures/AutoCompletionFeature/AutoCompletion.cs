@@ -262,6 +262,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// (externally called when a new char is entered or when a char is deleted)
         /// </summary>
         public static void UpdateAutocompletion(char c = char.MinValue, int insertPosition = -1) {
+
             if (_insertingWord)
                 return;
 

@@ -24,7 +24,9 @@ using _3PA.MainFeatures;
 using _3PA.NppCore;
 
 namespace _3PA.Lib {
+
     public static class User {
+
         #region Ping
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace _3PA.Lib {
                     webServiceJson.OnRequestEnded += req => {
                         if (req.StatusCodeResponse != HttpStatusCode.OK) {
                             if (Config.IsDeveloper)
-                                ErrorHandler.ShowErrors(new Exception(req.JsonResponse), "Error when pinging " + req.StatusCodeResponse.ToString());
+                                ErrorHandler.ShowErrors(new Exception(req.JsonResponse), "Error when pinging : " + req.StatusCodeResponse.ToString());
                         }
                     };
                     webServiceJson.Execute();

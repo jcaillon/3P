@@ -32,9 +32,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         public HomePage() {
             InitializeComponent();
+
+            var prolintVer = Updater<ProlintUpdaterWrapper>.Instance.LocalVersion;
+            var proparseVer = Updater<ProparseUpdaterWrapper>.Instance.LocalVersion;
+                 
+
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
                 .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
                 .Replace("%YamuiFrameworkVersion%", LibLoader.GetYamuiAssemblyVersion())
+                .Replace("%ProlintVersion%", prolintVer.Equals("v0") ? "*not installed*" : prolintVer)
+                .Replace("%ProparseVersion%", proparseVer.Equals("v0") ? "*not installed*" : proparseVer)
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
             html.LinkClicked += HtmlOnLinkClicked;

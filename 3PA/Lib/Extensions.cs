@@ -364,6 +364,15 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
+        /// Escape all special html characters from the given string
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string EscapeHtml(this string text) {
+            return System.Security.SecurityElement.Escape(text);
+        }
+
+        /// <summary>
         /// Replaces every forbidden char (forbidden for a filename) in the text
         /// </summary>
         /// <param name="text"></param>
