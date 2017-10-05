@@ -382,12 +382,30 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Replaces " by ~", replaces new lines by spaces and add extra " at the start and end of the string
+        /// Replaces " by "", replaces new lines by spaces and add extra " at the start and end of the string
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static string ProQuoter(this string text) {
+        public static string Quoter(this string text) {
             return "\"" + (text ?? "").Replace("\"", "~\"").Replace("\n", " ").Replace("\r", "") + "\"";
+        }
+
+        /// <summary>
+        /// Format a text to use as a single line CHARACTER string encapsulated in double quotes "
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        private static string ProQuoter(this string text) {
+            return "\"" + (text ?? "").Replace("\"", "~\"").Replace("\\", "~\\").Replace("/", "~/").Replace("*", "~*").Replace("\n", "~n").Replace("\r", "~r") + "\"";
+        }
+
+        /// <summary>
+        /// Uses ProQuoter then make sure to escape every ~ with a double ~~
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string PreProcQuoter(this string text) {
+            return text.ProQuoter().Replace("~", "~~");
         }
 
         /// <summary>

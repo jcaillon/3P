@@ -58,7 +58,7 @@ namespace _3PA.Lib.Compression.Prolib {
 
             // for files containing a space, we don't have a choice, call delete for each...
             foreach (var file in files.Values.Where(deploy => deploy.RelativePathInPack.ContainsFast(" "))) {
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -delete " + file.RelativePathInPack.ProQuoter();
+                _prolibExe.Arguments = _archivePath.Quoter() + " -delete " + file.RelativePathInPack.Quoter();
                 var isOk = _prolibExe.TryDoWait(true);
                 if (progressHandler != null) {
                     progressHandler(this, new ArchiveProgressEventArgs(ArchiveProgressType.FinishFile, file.RelativePathInPack, isOk ? null : new Exception(_prolibExe.ErrorOutput.ToString())));
@@ -84,7 +84,7 @@ namespace _3PA.Lib.Compression.Prolib {
                     ex = e;
                 }
 
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -pf " + pfPath.ProQuoter();
+                _prolibExe.Arguments = _archivePath.Quoter() + " -pf " + pfPath.Quoter();
                 var isOk = _prolibExe.TryDoWait(true);
 
                 try {

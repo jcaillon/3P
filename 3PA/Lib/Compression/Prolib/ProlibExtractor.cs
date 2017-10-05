@@ -71,7 +71,7 @@ namespace _3PA.Lib.Compression.Prolib {
 
             // for files containing a space, we don't have a choice, call delete for each...
             foreach (var file in files.Where(deploy => deploy.ContainsFast(" "))) {
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -extract " + file.ProQuoter();
+                _prolibExe.Arguments = _archivePath.Quoter() + " -extract " + file.Quoter();
                 if (!_prolibExe.TryDoWait(true)) {
                     ErrorHandler.LogError(new Exception(_prolibExe.ErrorOutput.ToString()), "Erreur durant l'extraction de fichiers depuis une .pl");
                 }
@@ -95,7 +95,7 @@ namespace _3PA.Lib.Compression.Prolib {
                     ErrorHandler.LogError(e);
                 }
 
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -pf " + pfPath.ProQuoter();
+                _prolibExe.Arguments = _archivePath.Quoter() + " -pf " + pfPath.Quoter();
                 if (!_prolibExe.TryDoWait(true)) {
                     ErrorHandler.LogError(new Exception(_prolibExe.ErrorOutput.ToString()), "Erreur durant l'extraction de fichiers depuis une .pl");
                 }

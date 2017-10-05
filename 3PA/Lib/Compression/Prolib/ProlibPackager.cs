@@ -86,7 +86,7 @@ namespace _3PA.Lib.Compression.Prolib {
 
             foreach (var subFolder in subFolders) {
 
-                _prolibExe.Arguments = _archivePath.ProQuoter() + " -create -nowarn -add " + Path.Combine(subFolder.Key.Replace(uniqueTempFolder, "").TrimStart('\\'), "*").ProQuoter();
+                _prolibExe.Arguments = _archivePath.Quoter() + " -create -nowarn -add " + Path.Combine(subFolder.Key.Replace(uniqueTempFolder, "").TrimStart('\\'), "*").Quoter();
 
                 // move files to the temp subfolder
                 Parallel.ForEach(subFolder.Value, file => {
@@ -132,7 +132,7 @@ namespace _3PA.Lib.Compression.Prolib {
             }
 
             // compress .pl
-            _prolibExe.Arguments = _archivePath.ProQuoter() + " -compress -nowarn";
+            _prolibExe.Arguments = _archivePath.Quoter() + " -compress -nowarn";
             _prolibExe.TryDoWait(true);
 
             // delete temp folder

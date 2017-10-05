@@ -346,7 +346,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                                 Directory.CreateDirectory(deploy.DirectoryThatMustExist);
                             }
                         } catch (Exception e) {
-                            deploy.DeployError = "Couldn't create directory " + deploy.DirectoryThatMustExist.ProQuoter() + " : \"" + e.Message + "\"";
+                            deploy.DeployError = "Couldn't create directory " + deploy.DirectoryThatMustExist.Quoter() + " : " + e.Message.Quoter();
                         }
                     });
 

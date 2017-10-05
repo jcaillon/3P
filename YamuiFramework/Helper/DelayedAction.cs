@@ -48,7 +48,7 @@ namespace YamuiFramework.Helper {
         /// Clean all delayed actions started
         /// </summary>
         public static void CleanAll() {
-            foreach (var action in _savedDelayedActions.ToList()) {
+            foreach (var action in _savedDelayedActions.ToList().Where(action => action != null)) {
                 action.Stop();
             }
         }

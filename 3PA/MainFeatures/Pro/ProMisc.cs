@@ -338,7 +338,7 @@ namespace _3PA.MainFeatures.Pro {
                 return;
             }
             if (!Npp.CurrentFile.IsCompilable) {
-                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Npp.CurrentFile.Path).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Npp.CurrentFile.Path).Quoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
             }
                     

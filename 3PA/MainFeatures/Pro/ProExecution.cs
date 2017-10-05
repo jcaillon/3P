@@ -262,15 +262,15 @@ namespace _3PA.MainFeatures.Pro {
             if (!SetExecutionInfo())
                 return false;
 
-            SetPreprocessedVar("ExecutionType", ExecutionType.ToString().ToUpper().ProQuoter());
-            SetPreprocessedVar("LogPath", _logPath.ProQuoter());
-            SetPreprocessedVar("PropathFilePath", _propathFilePath.ProQuoter());
-            SetPreprocessedVar("DbConnectString", ProEnv.ConnectionString.ProQuoter());
-            SetPreprocessedVar("DbLogPath", _dbLogPath.ProQuoter());
+            SetPreprocessedVar("ExecutionType", ExecutionType.ToString().ToUpper().PreProcQuoter());
+            SetPreprocessedVar("LogPath", _logPath.PreProcQuoter());
+            SetPreprocessedVar("PropathFilePath", _propathFilePath.PreProcQuoter());
+            SetPreprocessedVar("DbConnectString", ProEnv.ConnectionString.PreProcQuoter());
+            SetPreprocessedVar("DbLogPath", _dbLogPath.PreProcQuoter());
             SetPreprocessedVar("DbConnectionMandatory", NeedDatabaseConnection.ToString());
-            SetPreprocessedVar("NotificationOutputPath", _notifPath.ProQuoter());
-            SetPreprocessedVar("PreExecutionProgram", ProEnv.PreExecutionProgram.Trim().ProQuoter());
-            SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().ProQuoter());
+            SetPreprocessedVar("NotificationOutputPath", _notifPath.PreProcQuoter());
+            SetPreprocessedVar("PreExecutionProgram", ProEnv.PreExecutionProgram.Trim().PreProcQuoter());
+            SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().PreProcQuoter());
 
             // prepare the .p runner
             _runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");
@@ -296,7 +296,7 @@ namespace _3PA.MainFeatures.Pro {
                     MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"));
                 }
             }
-            _exeParameters.Append(" -p " + _runnerPath.ProQuoter());
+            _exeParameters.Append(" -p " + _runnerPath.Quoter());
             if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
                 _exeParameters.Append(" " + ProEnv.CmdLineParameters.Trim());
             AppendProgressParameters(_exeParameters);
@@ -394,7 +394,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         protected virtual void AppendProgressParameters(StringBuilder sb) {
             if (!string.IsNullOrEmpty(_tempInifilePath))
-                sb.Append(" -ininame " + _tempInifilePath.ProQuoter() + " -basekey " + "INI".ProQuoter());
+                sb.Append(" -ininame " + _tempInifilePath.Quoter() + " -basekey " + "INI".Quoter());
         }
 
         #endregion
@@ -594,14 +594,14 @@ namespace _3PA.MainFeatures.Pro {
         protected override bool SetExecutionInfo() {
 
             _outputPath = Path.Combine(_localTempDir, "pro.version");
-            SetPreprocessedVar("OutputPath", _outputPath.ProQuoter());
+            SetPreprocessedVar("OutputPath", _outputPath.PreProcQuoter());
 
             return true;
         }
 
         protected override void AppendProgressParameters(StringBuilder sb) {
             sb.Clear();
-            _exeParameters.Append(" -b -p " + _runnerPath.ProQuoter());
+            _exeParameters.Append(" -b -p " + _runnerPath.Quoter());
         }
 
         protected override bool CanUseBatchMode() {
@@ -634,12 +634,12 @@ namespace _3PA.MainFeatures.Pro {
         protected override bool SetExecutionInfo() {
 
             OutputPath = Path.Combine(_localTempDir, "db.extract");
-            SetPreprocessedVar("OutputPath", OutputPath.ProQuoter());
+            SetPreprocessedVar("OutputPath", OutputPath.PreProcQuoter());
 
             var fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             if (!Utils.FileWriteAllBytes(Path.Combine(_localTempDir, fileToExecute), DataResources.DumpDatabase))
                 return false;
-            SetPreprocessedVar("CurrentFilePath", fileToExecute.ProQuoter());
+            SetPreprocessedVar("CurrentFilePath", fileToExecute.PreProcQuoter());
 
             return true;
         }
@@ -676,12 +676,12 @@ namespace _3PA.MainFeatures.Pro {
         protected override bool SetExecutionInfo() {
 
             OutputPath = Path.Combine(_localTempDir, "db.extract");
-            SetPreprocessedVar("OutputPath", OutputPath.ProQuoter());
+            SetPreprocessedVar("OutputPath", OutputPath.PreProcQuoter());
 
             var fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             if (!Utils.FileWriteAllBytes(Path.Combine(_localTempDir, fileToExecute), DataResources.DumpTableCrc))
                 return false;
-            SetPreprocessedVar("CurrentFilePath", fileToExecute.ProQuoter());
+            SetPreprocessedVar("CurrentFilePath", fileToExecute.PreProcQuoter());
 
             return true;
         }
@@ -727,7 +727,7 @@ namespace _3PA.MainFeatures.Pro {
 
         protected override bool SetExecutionInfo() {
 
-            SetPreprocessedVar("CurrentFilePath", CurrentFile.ProQuoter());
+            SetPreprocessedVar("CurrentFilePath", CurrentFile.PreProcQuoter());
 
             return true;
         }
@@ -791,7 +791,7 @@ namespace _3PA.MainFeatures.Pro {
 
         protected override void AppendProgressParameters(StringBuilder sb) {
             sb.Append(" -basekey \"INI\" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8 ");
-            sb.Append(" -T " + _localTempDir.Trim('\\').ProQuoter());
+            sb.Append(" -T " + _localTempDir.Trim('\\').Quoter());
         }
     }
 
@@ -838,15 +838,15 @@ namespace _3PA.MainFeatures.Pro {
 
             var fileToExecute = "hook_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             StringBuilder hookProc = new StringBuilder();
-            hookProc.AppendLine("&SCOPED-DEFINE ApplicationName " + ProEnv.Name.ProQuoter());
-            hookProc.AppendLine("&SCOPED-DEFINE ApplicationSuffix " + ProEnv.Suffix.ProQuoter());
+            hookProc.AppendLine("&SCOPED-DEFINE ApplicationName " + ProEnv.Name.PreProcQuoter());
+            hookProc.AppendLine("&SCOPED-DEFINE ApplicationSuffix " + ProEnv.Suffix.PreProcQuoter());
             hookProc.AppendLine("&SCOPED-DEFINE StepNumber " + DeploymentStep);
-            hookProc.AppendLine("&SCOPED-DEFINE SourceDirectory " + DeploymentSourcePath.ProQuoter());
-            hookProc.AppendLine("&SCOPED-DEFINE DeploymentDirectory " + ProEnv.BaseCompilationPath.ProQuoter());
+            hookProc.AppendLine("&SCOPED-DEFINE SourceDirectory " + DeploymentSourcePath.PreProcQuoter());
+            hookProc.AppendLine("&SCOPED-DEFINE DeploymentDirectory " + ProEnv.BaseCompilationPath.PreProcQuoter());
             var encoding = TextEncodingDetect.GetFileEncoding(Config.FileDeploymentHook);
             Utils.FileWriteAllText(Path.Combine(_localTempDir, fileToExecute), Utils.ReadAllText(Config.FileDeploymentHook, encoding).Replace(@"/*<inserted_3P_values>*/", hookProc.ToString()), encoding);
 
-            SetPreprocessedVar("CurrentFilePath", fileToExecute.ProQuoter());
+            SetPreprocessedVar("CurrentFilePath", fileToExecute.PreProcQuoter());
 
             return true;
         }

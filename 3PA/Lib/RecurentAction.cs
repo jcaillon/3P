@@ -38,7 +38,7 @@ namespace _3PA.Lib {
         /// Clean all recurrent actions started
         /// </summary>
         public static void CleanAll() {
-            foreach (var reccurentAction in _savedReccurentActionStarted.ToList()) {
+            foreach (var reccurentAction in _savedReccurentActionStarted.ToList().Where(action => action != null)) {
                 reccurentAction.Stop();
             }
         }

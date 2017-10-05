@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 }
 
                 // feed files list
-                filesListcontent.AppendLine(fileToCompile.CompiledSourcePath.ProQuoter() + " " + fileToCompile.CompilationOutputDir.ProQuoter() + " " + (fileToCompile.CompOutputLis ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputXrf ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputDbg ?? "?").ProQuoter() + " " + (fileToCompile.CompOutputFileIdLog ?? "").ProQuoter() + " " + (fileToCompile.CompOutputRefTables ?? "").ProQuoter());
+                filesListcontent.AppendLine(fileToCompile.CompiledSourcePath.Quoter() + " " + fileToCompile.CompilationOutputDir.Quoter() + " " + (fileToCompile.CompOutputLis ?? "?").Quoter() + " " + (fileToCompile.CompOutputXrf ?? "?").Quoter() + " " + (fileToCompile.CompOutputDbg ?? "?").Quoter() + " " + (fileToCompile.CompOutputFileIdLog ?? "").Quoter() + " " + (fileToCompile.CompOutputRefTables ?? "").Quoter());
 
                 count++;
             }
@@ -235,9 +235,9 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             _progressionFilePath = Path.Combine(_localTempDir, "compile.progression");
             _compilationLog = Path.Combine(_localTempDir, "compilation.log");
 
-            SetPreprocessedVar("ToCompileListFile", filesListPath.ProQuoter());
-            SetPreprocessedVar("CompileProgressionFile", _progressionFilePath.ProQuoter());
-            SetPreprocessedVar("OutputPath", _compilationLog.ProQuoter());
+            SetPreprocessedVar("ToCompileListFile", filesListPath.PreProcQuoter());
+            SetPreprocessedVar("CompileProgressionFile", _progressionFilePath.PreProcQuoter());
+            SetPreprocessedVar("OutputPath", _compilationLog.PreProcQuoter());
             SetPreprocessedVar("AnalysisMode", IsAnalysisMode.ToString());
 
             return base.SetExecutionInfo();
@@ -572,7 +572,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             if (fileToCompile != null && fileToCompile.Errors != null) {
                 line.Append("<div style='padding-left: 10px; padding-bottom: 5px;'>");
-                foreach (var error in fileToCompile.Errors) {
+                foreach (var error in fileToCompile.Errors.OrderBy(error => error.Line)) {
                     line.Append(error.ToStringDescription());
                 }
                 line.Append("</div>");
@@ -666,30 +666,30 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             _prolintOutputPath = Path.Combine(_localTempDir, "prolint.log");
 
             StringBuilder prolintProgram = new StringBuilder();
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + Files.First().CompiledSourcePath.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + _prolintOutputPath.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.ProlintStartProcedure.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + Files.First().SourcePath.ProQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + Files.First().CompiledSourcePath.PreProcQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + _prolintOutputPath.PreProcQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.ProlintStartProcedure.PreProcQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.PreProcQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + Files.First().SourcePath.PreProcQuoter());
             var filename = Npp.CurrentFile.FileName;
             if (FileTag.Contains(filename)) {
                 var fileInfo = FileTag.GetLastFileTag(filename);
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.PreProcQuoter());
 
-                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagOpening " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener).ProQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagEnding " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser).ProQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagOpening " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener).PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagEnding " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser).PreProcQuoter());
             }
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProlint " + Updater<ProlintUpdaterWrapper>.Instance.ApplicationFolder.ProQuoter());
-            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProparseAssemblies " + Updater<ProparseUpdaterWrapper>.Instance.ApplicationFolder.ProQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProlint " + Updater<ProlintUpdaterWrapper>.Instance.ApplicationFolder.PreProcQuoter());
+            prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProparseAssemblies " + Updater<ProparseUpdaterWrapper>.Instance.ApplicationFolder.PreProcQuoter());
             var encoding = TextEncodingDetect.GetFileEncoding(Config.ProlintStartProcedure);
             Utils.FileWriteAllText(Path.Combine(_localTempDir, fileToExecute), Utils.ReadAllText(Config.ProlintStartProcedure, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 
-            SetPreprocessedVar("CurrentFilePath", fileToExecute.ProQuoter());
+            SetPreprocessedVar("CurrentFilePath", fileToExecute.PreProcQuoter());
 
             return true;
         }

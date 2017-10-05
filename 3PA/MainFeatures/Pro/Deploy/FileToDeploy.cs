@@ -279,7 +279,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     return true;
                 File.Delete(To);
             } catch (Exception e) {
-                DeployError = "Couldn't delete " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't delete " + To.Quoter() + " : " + e.Message.Quoter();
                 return false;
             }
             return true;
@@ -353,7 +353,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     return true;
                 Directory.Delete(To, true);
             } catch (Exception e) {
-                DeployError = "Couldn't delete the folder " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't delete the folder " + To.Quoter() + " : " + e.Message.Quoter();
                 return false;
             }
             return true;
@@ -435,7 +435,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public virtual void RegisterArchiveException(Exception e) {
             IsOk = false;
-            DeployError = "Problem with the target pack " + PackPath.ProQuoter() + " : \"" + e.Message + "\"";
+            DeployError = "Problem with the target pack " + PackPath.Quoter() + " : " + e.Message.Quoter();
         }
 
         /// <summary>
@@ -443,7 +443,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public virtual bool IfFromFileExists() {
             if (!File.Exists(From)) {
-                DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
+                DeployError = "The source file " + From.Quoter() + " doesn't exist";
                 return false;
             }
             return true;
@@ -712,7 +712,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         /// </summary>
         public override void RegisterArchiveException(Exception e) {
             IsOk = false;
-            DeployError = "Problem with the FTP " + PackPath.ProQuoter() + " : \"" + e.Message + "\"";
+            DeployError = "Problem with the FTP " + PackPath.Quoter() + " : " + e.Message.Quoter();
         }
 
         /// <summary>
@@ -771,7 +771,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         protected override bool TryDeploy() {
             try {
                 if (!Directory.Exists(From)) {
-                    DeployError = "The source folder " + From.ProQuoter() + " doesn't exist";
+                    DeployError = "The source folder " + From.Quoter() + " doesn't exist";
                     return false;
                 }
                 // make sure that both From and To finish with \
@@ -786,7 +786,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                     File.Copy(newPath, newPath.Replace(From, To), true);
                 }
             } catch (Exception e) {
-                DeployError = "Couldn't copy the folder " + From.ProQuoter() + " to " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't copy the folder " + From.Quoter() + " to " + To.Quoter() + " : " + e.Message.Quoter();
                 return false;
             }
             return true;
@@ -831,12 +831,12 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 if (From.Equals(To))
                     return true;
                 if (!File.Exists(From)) {
-                    DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
+                    DeployError = "The source file " + From.Quoter() + " doesn't exist";
                     return false;
                 }
                 File.Copy(From, To, true);
             } catch (Exception e) {
-                DeployError = "Couldn't copy " + From.ProQuoter() + " to  " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't copy " + From.Quoter() + " to  " + To.Quoter() + " : " + e.Message.Quoter();
                 return false;
             }
             return true;
@@ -861,13 +861,13 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 if (From.Equals(To))
                     return true;
                 if (!File.Exists(From)) {
-                    DeployError = "The source file " + From.ProQuoter() + " doesn't exist";
+                    DeployError = "The source file " + From.Quoter() + " doesn't exist";
                     return false;
                 }
                 File.Delete(To);
                 File.Move(From, To);
             } catch (Exception e) {
-                DeployError = "Couldn't move " + From.ProQuoter() + " to  " + To.ProQuoter() + " : \"" + e.Message + "\"";
+                DeployError = "Couldn't move " + From.Quoter() + " to  " + To.Quoter() + " : " + e.Message.Quoter();
                 return false;
             }
             return true;

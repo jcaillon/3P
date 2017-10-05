@@ -33,14 +33,12 @@ Notes       : This file CAN and MUST be freely modified by the user.
 /* ***************************  Definitions  ************************** */
 
 DEFINE VARIABLE gi_currentFile AS INTEGER NO-UNDO.
-DEFINE VARIABLE gc_xmlFileList AS CHARACTER NO-UNDO.
-DEFINE VARIABLE gc_computedOutputDir AS CHARACTER NO-UNDO.
 
 DEFINE STREAM str_logout.
 DEFINE STREAM str_source.
 DEFINE STREAM str_dir.
 
-DEFINE TEMP-TABLE tt_rangesToProlint
+DEFINE TEMP-TABLE tt_rangesToProlint NO-UNDO
     FIELD cFileName     AS CHARACTER
     FIELD iLineBegin    AS INTEGER
     FIELD iLineEnd      AS INTEGER
@@ -185,9 +183,7 @@ PROCEDURE MainProc:
     ------------------------------------------------------------------------------*/
 
     DEFINE VARIABLE li_tag AS INTEGER NO-UNDO.
-    DEFINE VARIABLE lc_messageContent AS CHARACTER NO-UNDO INITIAL "".
     DEFINE VARIABLE li_messageType AS INTEGER NO-UNDO INITIAL 3.
-    DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
 
     /* add the prolint directory to the propath */
     PROPATH = {&PathDirectoryToProlint} + "," + PROPATH.
@@ -195,7 +191,7 @@ PROCEDURE MainProc:
     /* Make sure to find the assemblies needed for prolint (proparse assemblies) */
     RUN ChangeAssembliesPath (INPUT {&PathDirectoryToProparseAssemblies}) NO-ERROR.
     IF ERROR-STATUS:ERROR THEN
-        MESSAGE "Error when loading the prolint assemblies : " + RETURN-VALUE.
+        RETURN ERROR "Error when loading the prolint assemblies : " + RETURN-VALUE.
 
     /* handles the results published by PROLINT */
     SUBSCRIBE TO "Prolint_AddResult" ANYWHERE.
@@ -207,25 +203,14 @@ PROCEDURE MainProc:
         INPUT fi_get_profile(INPUT {&FileApplicationName}), /* profile */
         INPUT TRUE
         ).
-
-    /* display the notif in 3P */
-    DO li_i = 1 TO NUM-ENTRIES(gc_xmlFileList):
-        IF LENGTH(ENTRY(li_i, gc_xmlFileList)) > 0 THEN
-            ASSIGN lc_messageContent = lc_messageContent + "<div>- <a href='" + btPathGetDirectoryName(INPUT ENTRY(li_i, gc_xmlFileList)) + "'>" + btPathGetDirectoryName(INPUT ENTRY(li_i, gc_xmlFileList)) + "</a><a href='" + ENTRY(li_i, gc_xmlFileList) + "'>" + btPathGetFileName(INPUT ENTRY(li_i, gc_xmlFileList)) + "</a></div>".
-    END.
-
-    IF LENGTH(lc_messageContent) = 0 THEN
-        ASSIGN li_messageType = 2.
     
     ASSIGN li_tag = INTEGER({&FileCorrectionNumber}) NO-ERROR.
-    ASSIGN lc_messageContent = (IF li_tag <= 0 THEN "The whole file has been prolinted" ELSE "The modifications between the tags n°" + STRING(li_tag) + " have been prolinted") + "<br><br>Here is the list of the generated files : <br>" + lc_messageContent.
-
     PUBLISH "eventToPublishToNotifyTheUserAfterExecution" (
-        INPUT lc_messageContent,
+        INPUT (IF li_tag <= 0 THEN "The whole file has been prolinted" ELSE "The modifications between the tags n°" + STRING(li_tag) + " have been prolinted"),
         INPUT li_messageType,
         INPUT "Prolint output",
         INPUT "Auto generated file",
-        INPUT 0,
+        INPUT 5,
         INPUT "prolintOutputFile"
         ).
 
@@ -379,7 +364,6 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
     DEFINE VARIABLE li_tag AS INTEGER NO-UNDO.
 
     DEFINE VARIABLE lc_line AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
     DEFINE VARIABLE li_lineNumber AS INTEGER NO-UNDO INITIAL 0.
     DEFINE VARIABLE li_tagColumn AS INTEGER NO-UNDO.
 
@@ -429,7 +413,7 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
                         tt_tagBlock.iLineEnd = ?
                         .
                     RELEASE tt_tagBlock.
-                    END.
+                END.
 
                 /* Does the line owns an ending tag? */
                 ASSIGN li_tagColumn  = INDEX(lc_line, {&ModificationTagEnding}).
@@ -503,25 +487,24 @@ PROCEDURE ChangeAssembliesPath PRIVATE:
     DEFINE INPUT PARAMETER ipc_newPath AS CHARACTER NO-UNDO.
 
     DEFINE VARIABLE assemblyStore AS Progress.ClrBridge.AssemblyStore NO-UNDO.
-    DEFINE VARIABLE lc_oldAssemblyDir AS CHARACTER NO-UNDO.
 
     assemblyStore = Progress.ClrBridge.AssemblyStore:Instance.
-    lc_oldAssemblyDir = assemblyStore:AssembliesPath.
 
     IF LENGTH(ipc_newPath) > 0 THEN DO:
-        assemblyStore:AssembliesPath = ipc_newPath.
+        assemblyStore:AssembliesPath = ipc_newPath NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN
+            RETURN ERROR-STATUS:GET-MESSAGE(1).
     END.
 
     assemblyStore:Load() NO-ERROR.
-    assemblyStore:AssembliesPath  = lc_oldAssemblyDir.
-
-    IF VALID-OBJECT(assemblyStore) THEN
-        DELETE OBJECT assemblyStore.
     IF ERROR-STATUS:ERROR THEN
         RETURN ERROR-STATUS:GET-MESSAGE(1).
 
+    IF VALID-OBJECT(assemblyStore) THEN
+        DELETE OBJECT assemblyStore NO-ERROR.
+
     RETURN "".
-END.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -541,8 +524,8 @@ FUNCTION fi_get_profile RETURNS CHARACTER
     DEFINE VARIABLE lc_fileType AS CHARACTER NO-UNDO.
 
     IF ipc_appliName = ? OR ipc_appliName = "" THEN
-        ASSIGN ipc_appliName = "*".
-
+        RETURN "3P".
+        
     INPUT STREAM str_dir FROM OS-DIR({&PathDirectoryToProlint} + "\prolint\settings") .
     REPEAT:
         IMPORT STREAM str_dir lc_filename lc_fullPath lc_fileType.
@@ -552,6 +535,7 @@ FUNCTION fi_get_profile RETURNS CHARACTER
         IF lc_fileType MATCHES "*D*" AND ipc_appliName MATCHES lc_filename THEN
             RETURN lc_filename.
     END.
+    INPUT STREAM str_dir CLOSE.
 
     RETURN "3P".
 
@@ -584,7 +568,7 @@ FUNCTION GetSeverityLabel RETURNS CHARACTER PRIVATE
             RETURN "Warning".
         OTHERWISE
             RETURN "Information".
-    END.
+    END CASE.
 
     RETURN "NoErrors".
 
