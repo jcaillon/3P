@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -133,30 +134,6 @@ namespace _3PA {
                 // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
 
-                // if the UDL is not installed
-                if (!Style.InstallUdl(true)) {
-                    Style.InstallUdl();
-                } else {
-                    // first use message?
-                    if (Config.Instance.UserFirstUse) {
-                        UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
-                            Appli.ToggleView();
-                            UserCommunication.CloseUniqueNotif("welcome");
-                            args.Handled = true;
-                        });
-                        Config.Instance.UserFirstUse = false;
-                    }
-                }
-
-                // check if npp version is meeting current recommended version
-                if (!string.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherOrEqualVersionThan(Config.RequiredNppVersion)) {
-                    if (!Config.Instance.NppOutdatedVersion) {
-                        UserCommunication.Notify("This version of 3P has been developed for Notepad++ " + Config.RequiredNppVersion + ", your version (" + Npp.SoftwareVersion + ") is outdated.<br><br>Using an outdated version, you might encounter bugs that would not occur otherwise.<br>Try to update your version of Notepad++ as soon as possible, or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the latest version of Notepad++ here</a>", MessageImg.MsgHighImportance, "Outdated version", "3P requirements are not met");
-                        Config.Instance.NppOutdatedVersion = true;
-                    }
-                } else
-                    Config.Instance.NppOutdatedVersion = false;
-
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Instance.Toggle(Npp.NppFileInfo.GetFullPathApi.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress));
@@ -206,17 +183,46 @@ namespace _3PA {
             FileTag.Import();
 
             // ask to disable the default autocompletion
-            DelayedAction.StartNew(100, () => {
-                if (!Npp.ConfXml.AskToDisableAutocompletionAndRestart()) {
+            DelayedAction.StartNew(1000, () => {
+                if (Config.Instance.UserFirstUse) {
+                    if (Style.InstallUdl(true)) {
+                        // UDL already installed, we are at the second startup
+                        UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                            Appli.ToggleView();
+                            UserCommunication.CloseUniqueNotif("welcome");
+                            args.Handled = true;
+                        });
 
-                    // check if an update was done and start checking for new updates
-                    Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
+                        Config.Instance.UserFirstUse = false;
+                    } else {
+                        // we are at the first notepad++ start
+                        Style.InstallUdl();
+                        object options = new ConfigXmlOptions();
+                        UserCommunication.Input(ref options, "Welcome to 3P!", MessageImg.MsgUpdate, "3P - Progress Programmers Pal", "Finishing the installation");
+
+                        // Npp.AskToDisableAutocompletionAndRestart()
+
+                        Npp.Restart();
+                        return;
+                    }
                 }
+                
+                // check if an update was done and start checking for new updates
+                Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
+
+                // Try to update the configuration from the distant shared folder
+                ShareExportConf.StartCheckingForUpdates();
             });
             
-            // Try to update the configuration from the distant shared folder
-            ShareExportConf.StartCheckingForUpdates();
-
+            // check if npp version is meeting current recommended version
+            if (!string.IsNullOrEmpty(Npp.SoftwareVersion) && !Npp.SoftwareVersion.IsHigherOrEqualVersionThan(Config.RequiredNppVersion)) {
+                if (!Config.Instance.NppOutdatedVersion) {
+                    UserCommunication.Notify("This version of 3P has been developed for Notepad++ " + Config.RequiredNppVersion + ", your version (" + Npp.SoftwareVersion + ") is outdated.<br><br>Using an outdated version, you might encounter bugs that would not occur otherwise.<br>Try to update your version of Notepad++ as soon as possible, or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the latest version of Notepad++ here</a>", MessageImg.MsgHighImportance, "Outdated version", "3P requirements are not met");
+                    Config.Instance.NppOutdatedVersion = true;
+                }
+            } else
+                Config.Instance.NppOutdatedVersion = false;
+            
             // ReSharper disable once ObjectCreationAsStatement
             RecurentAction.StartNew(User.Ping, 1000 * 60 * 120);
 
@@ -226,6 +232,14 @@ namespace _3PA {
         }
 
         #endregion
+
+        internal class ConfigXmlOptions {
+            [YamuiInput("Use 3P auto-completion", Order = 0)]
+            public bool DisableDefaultAutocompletion { get; set; }
+
+            [YamuiInput("Enable backup on save ", Order = 1)]
+            public bool EnableBackupOnSave { get; set; }
+        }
 
         #region Die
 

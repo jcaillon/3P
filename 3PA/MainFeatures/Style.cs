@@ -26,6 +26,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Lib;
+using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.NppCore;
@@ -107,32 +108,29 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
+
             var encoding = TextEncodingDetect.GetFileEncoding(Npp.ConfXml.FileNppUserDefinedLang);
             var fileContent = File.Exists(Npp.ConfXml.FileNppUserDefinedLang) ? Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang, encoding) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
-            if (matches.Success) {
-                if (onlyCheckInstall)
-                    return true;
-                // if it already exists in the file, delete the existing one
-                fileContent = regex.Replace(fileContent, @"");
-            } else {
-                if (onlyCheckInstall)
-                    return false;
-                // if it doesn't exist in the file
-                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + "</b>", MessageImg.MsgInfo, "Information", "Installing syntax highlighting",
-                    args => {
-                        args.Handled = true;
-                        Npp.Restart();
-                    });
-            }
-            if (fileContent.ContainsFast(@"<NotepadPlus />"))
+
+            if (onlyCheckInstall)
+                return matches.Success;
+            
+            if (matches.Success)
+                fileContent = regex.Replace(fileContent, DataResources.UDL);
+            else if (fileContent.ContainsFast(@"<NotepadPlus />"))
                 fileContent = fileContent.Replace(@"<NotepadPlus />", "<NotepadPlus>\r\n" + DataResources.UDL + "\r\n</NotepadPlus>");
             else
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
+
             // write to userDefinedLang.xml
-            if (!Utils.FileWriteAllText(Npp.ConfXml.FileNppUserDefinedLang, fileContent, encoding))
-                UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Npp.ConfXml.FileNppUserDefinedLang + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
+            var copyPath = Path.Combine(Config.FolderUpdate, "userDefineLang.xml");
+            Utils.FileWriteAllText(copyPath, fileContent, encoding);
+
+            // replace default file by its copy on npp shutdown
+            _3PUpdater.Instance.AddFileToMove(copyPath, Npp.ConfXml.FileNppUserDefinedLang);
+            
             return true;
         }
 

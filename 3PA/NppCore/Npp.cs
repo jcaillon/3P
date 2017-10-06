@@ -939,7 +939,7 @@ namespace _3PA.NppCore {
                         ErrorHandler.LogError(e, "Error parsing " + FileNppConfigXml);
                     }
                 } else {
-                    UserCommunication.Notify("Couldn't find the config.xml file.<br>If this is not your first use of notepad++, please consider opening an issue on 3P", MessageImg.MsgInfo, "Reading config.xml", "File not found");
+                    UserCommunication.Notify("Couldn't find the config.xml file.<br>If this is not your first use of notepad++, please consider opening an issue on 3P", MessageImg.MsgHighImportance, "Reading config.xml", "File not found");
                 }
 
                 if (!string.IsNullOrEmpty(FileNppStylersXml) && !File.Exists(FileNppStylersXml))
