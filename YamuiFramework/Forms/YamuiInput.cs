@@ -35,6 +35,7 @@ using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiInput : YamuiFormButtons {
+
         #region Fields
 
         public object DataObject;
@@ -67,6 +68,8 @@ namespace YamuiFramework.Forms {
         private const int InputDefaultWidth = 200;
         private const int InputPadding = 10;
 
+        private HtmlToolTip _tooltip;
+
         #endregion
 
         #region Constructor
@@ -76,6 +79,8 @@ namespace YamuiFramework.Forms {
         /// </summary>
         private YamuiInput(string htmlTitle, string htmlMessage, List<string> buttonsList, object dataObject, int formMaxWidth, int formMaxHeight, int formMinWidth, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked) {
             InitializeComponent();
+
+            _tooltip = new HtmlToolTip();
 
             var maxWidthInPanel = formMaxWidth - (Padding.Left + Padding.Right);
             contentPanel.NoBackgroundImage = true;
@@ -143,8 +148,13 @@ namespace YamuiFramework.Forms {
                 // Build rows for each item
                 yPos += 10;
                 for (int i = 0; i < _items.Count; i++) {
-                    contentPanel.ContentPanel.Controls.Add(InsertInputForItem(i, ref yPos));
+                    var inputControl = InsertInputForItem(i, ref yPos);
+                    contentPanel.ContentPanel.Controls.Add(inputControl);
                     contentPanel.ContentPanel.Controls.Add(InsertLabelForItem(i, ref yPos));
+
+                    // add tooltip on the control
+                    if (_items[i] != null && !string.IsNullOrEmpty(GetAttr(_items[i]).Tooltip))
+                        _tooltip.SetToolTip(inputControl, GetAttr(_items[i]).Tooltip);
                 }
                 contentPanel.ContentPanel.Height = yPos;
             }
@@ -486,7 +496,12 @@ namespace YamuiFramework.Forms {
         /// Gets or sets the label to use as the label for this field or property
         /// </summary>
         public string Label { get; set; }
-
+        
+        /// <summary>
+        /// Text to show in the tooltip
+        /// </summary>
+        public string Tooltip { get; set; }
+        
         /// <summary>
         /// Gets or sets the order in which to display the input for this field
         /// </summary>

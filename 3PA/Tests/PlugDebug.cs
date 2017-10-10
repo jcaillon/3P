@@ -83,7 +83,12 @@ namespace _3PA.Tests {
                 new List<string> {"ok", "cancel"},
                 true);
              */
-             
+
+            Plug.ModifyingNppConfig();
+
+            Updater<DataDiggerUpdaterWrapper>.Instance.CheckForUpdate();
+
+
         }
         
         #endregion

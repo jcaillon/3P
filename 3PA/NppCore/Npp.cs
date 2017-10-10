@@ -26,6 +26,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
@@ -859,15 +860,11 @@ namespace _3PA.NppCore {
         /// and stylers.xml (or whichever style .xml is used at the moment)
         /// </summary>
         internal class NppConfig {
+
+            #region Private
+
             private string _fileNppStylersXml;
-
-            #region Properties
-
-            /// <summary>
-            /// Should be 0 to deactivate
-            /// </summary>
-            public int AutocompletionMode { get; set; }
-
+            
             /// <summary>
             /// location of all the basic configuration files, they can either be...
             /// in the installation folder if doLocalConf.xml is here
@@ -875,6 +872,40 @@ namespace _3PA.NppCore {
             /// or in the folder described in cloud/choice
             /// </summary>
             private string FolderBaseConf { get; set; }
+
+            #endregion
+
+            #region Properties
+
+            /// <summary>
+            /// Equals 0 if the default autocompletion is deactivated
+            /// </summary>
+            public int AutocompletionMode { get; private set; }
+
+            /// <summary>
+            /// Equals 0 if deactivated, 1 if simple backup, 2 for verbose backup
+            /// </summary>
+            public int BackupMode { get; private set; }
+
+            /// <summary>
+            /// Use a custom directory for backup or not
+            /// </summary>
+            public bool BackupUseCustomDir { get; private set; }
+
+            /// <summary>
+            /// Path to the backup directory
+            /// </summary>
+            public string BackupDirectory { get { return Path.Combine(FolderBaseConf, "backup"); } }
+
+            /// <summary>
+            /// Path to the backup directory
+            /// </summary>
+            public string CustomBackupDirectory { get; private set; }
+
+            /// <summary>
+            /// is the multi selection enabled or not?
+            /// </summary>
+            public bool MultiSelectionEnabled { get; private set; }
 
             public string FileNppUserDefinedLang {
                 get { return Path.Combine(FolderBaseConf, @"userDefineLang.xml"); }
@@ -886,7 +917,7 @@ namespace _3PA.NppCore {
 
             public string FileNppStylersXml {
                 get { return _fileNppStylersXml ?? Path.Combine(FolderBaseConf, @"stylers.xml"); }
-                set { _fileNppStylersXml = value; }
+                private set { _fileNppStylersXml = value; }
             }
 
             public string FileNppLangsXml {
@@ -914,6 +945,7 @@ namespace _3PA.NppCore {
             /// Allows to reload the npp configuration from the files
             /// </summary>
             public void Reload() {
+
                 // get the base folder
                 FolderBaseConf = FolderNppDefaultBaseConf;
                 if (File.Exists(FileNppCloudChoice)) {
@@ -931,6 +963,11 @@ namespace _3PA.NppCore {
                         var configs = new NanoXmlDocument(Utils.ReadAllText(FileNppConfigXml)).RootNode["GUIConfigs"].SubNodes;
                         FileNppStylersXml = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("stylerTheme")).GetAttribute("path").Value;
                         AutocompletionMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("auto-completion")).GetAttribute("autoCAction").Value);
+                        CustomBackupDirectory = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("Backup")).GetAttribute("dir").Value;
+                        BackupUseCustomDir = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("Backup")).GetAttribute("useCustumDir").Value.EqualsCi("yes");
+                        BackupMode = int.Parse(configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("Backup")).GetAttribute("action").Value);
+                        MultiSelectionEnabled = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("ScintillaGlobalSettings")).GetAttribute("enableMultiSelection").Value.EqualsCi("yes");
+
                         var wordCharListCfg = configs.FirstOrDefault(x => x.GetAttribute("name").Value.Equals("wordCharList"));
                         if (wordCharListCfg != null && wordCharListCfg.GetAttribute("useDefault").Value.EqualsCi("no")) {
                             WordCharList = wordCharListCfg.GetAttribute("charsAdded").Value;
@@ -947,30 +984,38 @@ namespace _3PA.NppCore {
             }
 
             /// <summary>
-            /// Ask the user to disable the default auto completion
+            /// Applies new options to the config.xml and restart npp to take them into account
             /// </summary>
-            public bool AskToDisableAutocompletionAndRestart() {
-                if (AutocompletionMode == 0 || Config.Instance.AutoCompleteNeverAskToDisableDefault)
-                    return false;
-
-                var answer = UserCommunication.Message("3P (Progress Programmers Pal) <b>fully replaces the default autocompletion</b> offered by Notepad++ by a much better version.<br><br>If the default autocompletion isn't disabled, you will see 2 lists of suggestions!<br><br>I advise you to let 3P disable the default autocompletion now (restart required); otherwise, you can do it manually later", MessageImg.MsgInfo, "Autocompletion", "Deactivate default autocompletion now", new List<string> {"Yes, restart now", "No, never ask again", "I'll do it later myself"});
-                if (answer == 1)
-                    Config.Instance.AutoCompleteNeverAskToDisableDefault = true;
-                if (answer != 0)
-                    return false;
+            /// <param name="options"></param>
+            public void ApplyNewOptions(NppConfigXmlOptions options) {
+                if (options == null)
+                    return;
 
                 var encoding = TextEncodingDetect.GetFileEncoding(FileNppConfigXml);
                 var fileContent = Utils.ReadAllText(FileNppConfigXml, encoding);
-                fileContent = fileContent.Replace("autoCAction=\"3\"", "autoCAction=\"0\"");
+                fileContent = fileContent.Replace("autoCAction=\"" + AutocompletionMode + "\"", "autoCAction=\"" + (options.DisableDefaultAutocompletion ? 0 : 3) + "\"");
+                fileContent = fileContent.Replace("name=\"Backup\" action=\"" + BackupMode + "\"", "name=\"Backup\" action=\"" + (options.EnableBackupOnSave ? 2 : 0) + "\"");
+                fileContent = fileContent.Replace("enableMultiSelection=\"" + (MultiSelectionEnabled ? "yes":"no") + "\"", "enableMultiSelection=\"" + (options.EnableMultiSelection ? "yes" : "no") + "\"");
                 var configCopyPath = Path.Combine(Config.FolderUpdate, "config.xml");
                 if (!Utils.FileWriteAllText(configCopyPath, fileContent, encoding))
-                    return false;
+                    return;
 
                 // replace default config by its copy on npp shutdown
                 _3PUpdater.Instance.AddFileToMove(configCopyPath, FileNppConfigXml);
 
                 Restart();
-                return true;
+            }
+
+            internal class NppConfigXmlOptions {
+                
+                [YamuiInput("Enable multi-selection", Order = 0, Tooltip = "Allows multi-selection in the editor(CTRL+Click)")]
+                public bool EnableMultiSelection { get; set; }
+
+                [YamuiInput("Use 3P auto-completion", Order = 1, Tooltip = "3P replaces the default auto-completion of notepad++ by an improved version")]
+                public bool DisableDefaultAutocompletion { get; set; }
+
+                [YamuiInput("Enable backup on save", Order = 2, Tooltip = "Backup your files as you save them, avoid bad surprises after a notepad++ crash")]
+                public bool EnableBackupOnSave { get; set; }
             }
 
             #endregion

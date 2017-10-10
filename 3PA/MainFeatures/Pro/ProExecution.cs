@@ -750,36 +750,17 @@ namespace _3PA.MainFeatures.Pro {
 
         protected override bool SetExecutionInfo() {
 
-            // need to init datadigger?
-            bool needUpdate = !Config.Instance.InstalledDataDiggerVersion.IsHigherOrEqualVersionThan(Config.EmbeddedDataDiggerVersion);
-
-            if (needUpdate) {
-                // check the version installed (maybe datadigger updated itself to a higher version)
-                var versionFile = Path.Combine(Config.DataDiggerFolder, "version.i");
-                if (File.Exists(versionFile)) {
-                    var realVersion = Utils.ReadAllText(versionFile, Encoding.Default).Trim();
-                    Config.Instance.InstalledDataDiggerVersion = realVersion;
-                    needUpdate = !Config.Instance.InstalledDataDiggerVersion.IsHigherOrEqualVersionThan(Config.EmbeddedDataDiggerVersion);
-                }
-            }
-
-            if (needUpdate || !File.Exists(Path.Combine(Config.DataDiggerFolder, "DataDigger.p"))) {
-                if (!Utils.FileWriteAllBytes(Path.Combine(Config.DataDiggerFolder, "DataDigger.zip"), DataResources.DataDigger))
-                    return false;
-                if (!Utils.ExtractAll(Path.Combine(Config.DataDiggerFolder, "DataDigger.zip"), Config.DataDiggerFolder))
-                    return false;
-                if (needUpdate) {
-                    UserCommunication.Notify("A new version of datadigger has been installed : " + Config.EmbeddedDataDiggerVersion + "<br><br>Check out the release notes " + Config.DataDiggerVersionUrl.ToHtmlLink("here"), MessageImg.MsgInfo, "DataDigger updated", "To " + Config.EmbeddedDataDiggerVersion, 5);
-                    Config.Instance.InstalledDataDiggerVersion = Config.EmbeddedDataDiggerVersion;
-                    try {
-                        // delete all previous r code
-                        foreach (FileInfo file in new DirectoryInfo(Config.DataDiggerFolder).GetFiles("*.r", SearchOption.TopDirectoryOnly)) {
-                            File.Delete(file.FullName);
+            if (!Updater<DataDiggerUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0")) {
+                UserCommunication.NotifyUnique("NeedDataDigger",
+                    "The DataDigger installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of DataDigger automatically") + "<br><br><i>You will be informed when it is installed and you will be able to use this feature immediately after.</i>",
+                    MessageImg.MsgQuestion, "DataDigger execution", "DataDigger installation not found", args => {
+                        if (args.Link.Equals("download")) {
+                            args.Handled = true;
+                            Updater<DataDiggerUpdaterWrapper>.Instance.CheckForUpdate();
+                            UserCommunication.CloseUniqueNotif("NeedDataDigger");
                         }
-                    } catch (Exception) {
-                        // ignored
-                    }
-                }
+                    });
+                return false;
             }
 
             // add the datadigger folder to the propath

@@ -26,6 +26,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Cryptography;
@@ -61,6 +62,7 @@ namespace _3PA.Lib {
     /// Class that exposes utility methods
     /// </summary>
     internal static class Utils {
+
         #region File manipulation wrappers
 
         /// <summary>
@@ -254,8 +256,7 @@ namespace _3PA.Lib {
                     UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
                     return false;
                 }
-                File.Delete(targetFile);
-                File.Copy(sourceFile, targetFile);
+                File.Copy(sourceFile, targetFile, true);
             } catch (Exception e) {
                 UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
                 return false;
@@ -264,25 +265,60 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Copy a file, ensures the user gets a feedback is something goes wrong
-        /// return true if ok, false otherwise
+        /// Copy a directory, ensures the user gets a feedback is something goes wrong
+        /// returns true if ok, false otherwise
         /// </summary>
         public static bool CopyDirectory(string sourceFolder, string targetFolder, bool deleteExistingTarget = false) {
             try {
+                sourceFolder = Path.GetFullPath(sourceFolder);
+                targetFolder = Path.GetFullPath(targetFolder);
                 if (!Directory.Exists(sourceFolder)) {
                     UserCommunication.Notify("There was a problem when trying to copy a folder, the source doesn't exist :<br>" + sourceFolder, MessageImg.MsgError, "Copy folder", "Couldn't find source folder");
                     return false;
                 }
                 if (deleteExistingTarget)
-                    Directory.Delete(targetFolder, true);
+                    DeleteDirectory(targetFolder, true);
 
                 Directory.CreateDirectory(targetFolder);
 
                 //Copy all the files & Replaces any files with the same name
-                foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.TopDirectoryOnly))
-                    File.Copy(newPath, newPath.Replace(sourceFolder, targetFolder), true);
+                foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories).ToList()) {
+                    var target = newPath.Replace(sourceFolder, targetFolder);
+                    CreateDirectory(Path.GetDirectoryName(target));
+                    File.Copy(newPath, target, true);
+                }
             } catch (Exception e) {
                 UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Move a directory, ensures the user gets a feedback is something goes wrong
+        /// returns true if ok, false otherwise
+        /// </summary>
+        public static bool MoveDirectory(string sourceFolder, string targetFolder, bool deleteExistingTarget = false) {
+            try {
+                sourceFolder = Path.GetFullPath(sourceFolder);
+                targetFolder = Path.GetFullPath(targetFolder);
+                if (!Directory.Exists(sourceFolder)) {
+                    UserCommunication.Notify("There was a problem when trying to move a folder, the source doesn't exist :<br>" + sourceFolder, MessageImg.MsgError, "Copy folder", "Couldn't find source folder");
+                    return false;
+                }
+                if (deleteExistingTarget)
+                    DeleteDirectory(targetFolder, true);
+
+                Directory.CreateDirectory(targetFolder);
+
+                //Copy all the files & Replaces any files with the same name
+                foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories).ToList()) {
+                    var target = newPath.Replace(sourceFolder, targetFolder);
+                    CreateDirectory(Path.GetDirectoryName(target));
+                    File.Move(newPath, target);
+                }
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to move the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Move folder", "Couldn't write target folder");
                 return false;
             }
             return true;

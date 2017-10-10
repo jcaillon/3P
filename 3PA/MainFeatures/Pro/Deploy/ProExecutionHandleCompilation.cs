@@ -645,7 +645,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             if (!Config.Instance.GlobalDontCheckProlintUpdates && (!Updater<ProlintUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0") || !Updater<ProparseUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))) {
                 UserCommunication.NotifyUnique("NeedProlint", 
-                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint automatically") + "<br><br><i>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + ".<br>Please note that in that case, you will need to configure prolint yourself</i>", 
+                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint automatically") + "<br><br><i>You will be informed when it is installed and you will be able to use this feature immediately after.<br><br>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + ".<br>Please note that in that case, you will need to configure prolint yourself</i>", 
                     MessageImg.MsgQuestion, "Prolint execution", "Prolint installation not found", args => {
                         if (args.Link.Equals("options")) {
                             args.Handled = true;

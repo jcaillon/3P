@@ -34,6 +34,7 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiCheckBoxDesigner")]
     [ToolboxBitmap(typeof(CheckBox))]
     public class YamuiCheckBox : CheckBox {
+
         #region Fields
 
         [DefaultValue(false)]

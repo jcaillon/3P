@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -182,31 +181,32 @@ namespace _3PA {
             //Snippets.Init();
             FileTag.Import();
 
-            // ask to disable the default autocompletion
-            DelayedAction.StartNew(1000, () => {
+            DelayedAction.StartNew(100, () => {
                 if (Config.Instance.UserFirstUse) {
-                    if (Style.InstallUdl(true)) {
-                        // UDL already installed, we are at the second startup
-                        UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
-                            Appli.ToggleView();
-                            UserCommunication.CloseUniqueNotif("welcome");
-                            args.Handled = true;
-                        });
-
-                        Config.Instance.UserFirstUse = false;
-                    } else {
+                    if (!Style.InstallUdl(true)) {
                         // we are at the first notepad++ start
                         Style.InstallUdl();
-                        object options = new ConfigXmlOptions();
-                        UserCommunication.Input(ref options, "Welcome to 3P!", MessageImg.MsgUpdate, "3P - Progress Programmers Pal", "Finishing the installation");
-
-                        // Npp.AskToDisableAutocompletionAndRestart()
-
-                        Npp.Restart();
+                        FinishPluginInstall(); // will apply npp options and restart npp
                         return;
                     }
+                    // UDL already installed, we are at the second startup
+                    UserCommunication.NotifyUnique("welcome", "Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P you should probably read the <b>getting started</b> section of the home page by clicking " + "go".ToHtmlLink("on this link right here") + ".<br><br><div align='right'>And as always... Enjoy!</div>", MessageImg.MsgInfo, "Fresh install", "Hello and welcome aboard!", args => {
+                        Appli.ToggleView();
+                        UserCommunication.CloseUniqueNotif("welcome");
+                        args.Handled = true;
+                    });
+                    Config.Instance.UserFirstUse = false;
+                } else if (!Config.Instance.NppStoppedCorrectly) {
+                    // Npp didn't stop correctly, if the backup mode is activated, inform the user
+                    if (Npp.ConfXml.BackupMode > 0) {
+                        UserCommunication.Notify("It seems that notepad++ didn't stop correctly.<br>If you lost some modifications, don't forget that you have a backup folder here :<br><br>" + Npp.ConfXml.BackupDirectory.ToHtmlLink() + (Npp.ConfXml.BackupUseCustomDir ? "<br>" + Npp.ConfXml.CustomBackupDirectory.ToHtmlLink() : ""), MessageImg.MsgInfo, "Notepad++ crashed", "Backup folder location");
+                    }
+                } else if (!Style.InstallUdl(true)) {
+                    Style.InstallUdl();
                 }
-                
+                Config.Instance.NppStoppedCorrectly = false;
+                Config.Save();
+
                 // check if an update was done and start checking for new updates
                 Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
 
@@ -233,13 +233,47 @@ namespace _3PA {
 
         #endregion
 
-        internal class ConfigXmlOptions {
-            [YamuiInput("Use 3P auto-completion", Order = 0)]
-            public bool DisableDefaultAutocompletion { get; set; }
+        #region Modify Npp configuration (config.xml)
 
-            [YamuiInput("Enable backup on save ", Order = 1)]
-            public bool EnableBackupOnSave { get; set; }
+        /// <summary>
+        /// Called when the plugin is first used, suggests default options for npp
+        /// </summary>
+        internal static void FinishPluginInstall() {
+            object options = new Npp.NppConfig.NppConfigXmlOptions {
+                EnableMultiSelection = true,
+                DisableDefaultAutocompletion = true,
+                EnableBackupOnSave = true
+            };
+            ModifyingNppConfig(options, true);
         }
+        
+        /// <summary>
+        /// Can be called at anytime to let the user modify notepad++ options
+        /// </summary>
+        internal static void ModifyingNppConfig() {
+            object options = new Npp.NppConfig.NppConfigXmlOptions {
+                EnableMultiSelection = Npp.ConfXml.MultiSelectionEnabled,
+                DisableDefaultAutocompletion = Npp.ConfXml.AutocompletionMode == 0,
+                EnableBackupOnSave = Npp.ConfXml.BackupMode != 0
+            };
+            ModifyingNppConfig(options, false);
+        }
+
+        private static void ModifyingNppConfig(object opts, bool installMode) {
+            var options = opts as Npp.NppConfig.NppConfigXmlOptions;
+            if (options != null) {
+                var buttons = installMode ? new List<string> {"Apply changes now (restart)"} : new List<string> {"Apply changes now (restart)", "Cancel"};
+
+                var awnser = UserCommunication.Input(ref opts, (installMode ? "You are almost done with the installation!<br>" : "") + "You can now setup some configurations for notepad++.<br><b>It is highly recommended to " + (installMode ? "let all the options toggled ON" : "toggle ON all the options") + "</b> :<br><br>", MessageImg.MsgUpdate, "3P setup", "Modifying notepad++ options", buttons);
+
+                if (installMode || awnser == 0) {
+                    Npp.ConfXml.ApplyNewOptions(options);
+                }
+
+            }
+        }
+
+        #endregion
 
         #region Die
 
@@ -283,6 +317,9 @@ namespace _3PA {
 
                 // export modified conf
                 FileTag.Export();
+
+                // Npp stopped correctly
+                Config.Instance.NppStoppedCorrectly = true;
 
                 // save config (should be done but just in case)
                 Config.Save();

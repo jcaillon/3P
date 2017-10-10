@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YamuiFramework.Helper;
@@ -394,7 +395,17 @@ namespace _3PA.Lib {
         /// </summary>
         public void CheckForUpdateDoneAndStartCheckingForUpdates() {
 
-            var previousVersion = File.Exists(Config.UpdatePreviousVersion) ? Utils.ReadAllText(Config.UpdatePreviousVersion, Encoding.Default) : null;
+            var previousVersion = File.Exists(Config.UpdatePreviousVersion) ? Utils.ReadAllText(Config.UpdatePreviousVersion, Encoding.Default).Trim() : null;
+
+            // compatibility with 3P v1.7.0 and older
+            if (string.IsNullOrEmpty(previousVersion)) {
+                var oldVersionLogPath = Path.Combine(Npp.ConfigDirectory, "version.log");
+                if (File.Exists(oldVersionLogPath)) {
+                    previousVersion = "1.7.0";
+                    Utils.CopyFile(oldVersionLogPath, Config.UpdateVersionLog);
+                    Utils.DeleteFile(oldVersionLogPath);
+                }
+            }
 
             // an update has been done
             if (!string.IsNullOrEmpty(previousVersion)) {
@@ -457,6 +468,9 @@ namespace _3PA.Lib {
 
             if (!fromVersion.IsHigherVersionThan("1.7.3")) {
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
+            }
+            if (!fromVersion.IsHigherVersionThan("1.7.5")) {
+                Plug.FinishPluginInstall();
             }
         }
 
@@ -559,6 +573,56 @@ namespace _3PA.Lib {
             Updater.AssetName = Config.ProparseGitHubAssetName;
             Updater.GitHubReleaseApi = Config.ProparseReleasesApi;
             Updater.LocalVersion = localVersion;
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region DataDiggerUpdaterWrapper
+
+    /// <summary>
+    /// The proparse.net updater
+    /// </summary>
+    internal class DataDiggerUpdaterWrapper : UpdaterWrapper {
+
+        #region Public properties
+
+        /// <summary>
+        /// Returns the folder path in which prolint is installed
+        /// </summary>
+        public string ApplicationFolder { get { return Config.DataDiggerFolder; } }
+
+        #endregion
+
+        #region Life and death
+
+        public DataDiggerUpdaterWrapper() {
+
+            UpdatedSoftName = "DataDigger";
+            FolderUnzip = Config.DataDiggerFolder;
+            HowToInstallManually = "<br><br><i>If you wish to manually install " + UpdatedSoftName + ", you have to : <br><ul><li>Download the latest release on " + "https://github.com/patrickTingen/DataDigger/releases".ToHtmlLink("GITHUB") + "</li><li>Extract its content to " + ApplicationFolder.ToHtmlLink() + "</li></ul></i>";
+
+            var localVersion = "v0";
+            var releasePath = Path.Combine(ApplicationFolder, "version.i");
+
+            if (File.Exists(releasePath)) {
+                localVersion = Utils.ReadAllText(releasePath, Encoding.Default).Trim();
+            }
+
+            Updater.AssetName = "datadigger.zip";
+            Updater.GitHubReleaseApi = Config.DataDiggerReleasesApi;
+            Updater.LocalVersion = localVersion;
+            Updater.GetDownloadUrl = release => release.zipball_url;
+
+            ExtraActionWhenDownloaded += updater => {
+                var subFolders = Directory.GetDirectories(FolderUnzip, "*", SearchOption.TopDirectoryOnly).ToNonNullList();
+                if (subFolders.Count == 1) {
+                    Utils.MoveDirectory(subFolders.First(), FolderUnzip);
+                    Utils.DeleteDirectory(subFolders.First(), true);
+                }
+            };
         }
 
         #endregion

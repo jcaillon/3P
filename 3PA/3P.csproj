@@ -722,7 +722,6 @@
   <ItemGroup>
     <None Include="_Resource\Data\Abbreviations" />
     <None Include="_Resource\Data\DeploymentRules" />
-    <None Include="_Resource\Data\DataDigger\DataDigger.zip" />
     <None Include="_Resource\Data\KeywordsList" />
     <None Include="_Resource\Data\KeywordsHelp" />
     <None Include="_Resource\Data\ProgressTemplates\FunctionImplementation.p" />

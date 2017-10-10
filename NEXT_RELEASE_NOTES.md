@@ -1,4 +1,4 @@
-Hello, long time no see! I had less time to spend on 3P lately but that doesn't mean the project is dead, far from it! I'm still planning a stable release any time now, please be patient :)
+Hello, long time no see! I had less time to spend on 3P lately but that doesn't mean the project is dead, far from it! I'm still planning to release a stable in a near future (that will include OOABL), please be patient :)
 And without further ado, let's move on to the news...
 
 **Prolint automatically installed!**
@@ -16,6 +16,8 @@ Remark : The location of the StartProlint.p procedure has changed, it is now in 
 	- DeleteFolder
   - You can now use the special variable `<ROOT>` which is always available and is replaced by the path to your source directory (without the ending '')
   - For the transfer rules and in particular, for the transfert target : it is now possible to use the | character to separate several target path (the file will then be copied to the different locations). This is equivalent to writing several rules with the "continue" option set to "yes", it is just a simpler way to write it
+  - Improved updater and added a setup dialog box after an install to modify notepad++ options such as : automatic backup, multi-selection and default auto-completion replacement
+  - Added keywords : `PROCESS-ARCHITECTURE` `PROCEDURE-COMPLETE` `Write`
 
 **Fixed issues :**
 

@@ -506,10 +506,14 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
+            public bool NppStoppedCorrectly; 
+
             // Shared configuration last folder selected
             public string SharedConfFolder = "";
+
             // a list of Label corresponding to confLine(s) that are auto-updated
             public string AutoUpdateConfList = "";
+
             // a list of folders used in the shared/exported conf
             public string SharedConfHistoric = "";
 
@@ -548,9 +552,7 @@ namespace _3PA.MainFeatures {
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 0;
             public bool UseSyntaxHighlightTheme = true;
-
-            public string InstalledDataDiggerVersion = "";
-
+            
             // stores at which did we last did a specific action
             public Dictionary<string, string> LastCallDateTime = new Dictionary<string, string>();
 
@@ -641,18 +643,7 @@ namespace _3PA.MainFeatures {
         public static string RequiredNppVersion {
             get { return "v7.5.1"; }
         }
-
-        /// <summary>
-        /// To update when updating the version of datadigger
-        /// </summary>
-        public static string EmbeddedDataDiggerVersion {
-            get { return @"v23"; }
-        }
-
-        public static string DataDiggerVersionUrl {
-            get { return @"https://datadigger.wordpress.com/"; }
-        }
-
+        
         /// <summary>
         /// Singleton instance of ConfigObject
         /// </summary>
@@ -893,6 +884,11 @@ namespace _3PA.MainFeatures {
         // Datadigger
         public static string DataDiggerFolder {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
+        }
+        
+        // Only get the latest release because they are not named as we would like them to be (Datadigger22, BETA2010404 and so on...)
+        public static string DataDiggerReleasesApi {
+            get { return @"https://api.github.com/repos/patrickTingen/DataDigger/releases/latest"; }
         }
 
 

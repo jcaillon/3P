@@ -124,9 +124,6 @@
   <data name="ApplicationThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>data\applicationthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DataDigger" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>data\datadigger\datadigger.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="DeploymentHook" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>data\progress\deploymenthook.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

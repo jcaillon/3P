@@ -40,9 +40,15 @@ namespace _3PA.Lib {
         public string AssetDownloadFolder { get; set; }
 
         /// <summary>
-        /// Name of the file to download from the github release
+        /// Name of the file to download from the github release (if you don't set GetDownloadUrl, 
+        /// it will try to find this asset name online and it will download it with this filename on your computer
         /// </summary>
         public string AssetName { get; set; }
+
+        /// <summary>
+        /// You can overload the method used to find the url of the file to download from the latest release
+        /// </summary>
+        public Func<ReleaseInfo, string> GetDownloadUrl { get; set; }
 
         /// <summary>
         /// A concatenation of all the version log from the version updated to the latest version
@@ -111,6 +117,15 @@ namespace _3PA.Lib {
 
                     // get the releases
                     var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
+
+                    // case where we put the url for the latest release only
+                    if (releases != null && releases.Count == 0) {
+                        var latestRelease = webServiceJson.Deserialize<ReleaseInfo>();
+                        if (latestRelease != null) {
+                            releases = new List<ReleaseInfo> { latestRelease };
+                        }
+                    }
+
                     if (releases != null && releases.Count > 0) {
                         // sort descending
                         releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
@@ -137,7 +152,8 @@ namespace _3PA.Lib {
                         // There is a distant version higher than the local one
                         if (LatestReleaseInfo != null) {
 
-                            if (LatestReleaseInfo.assets != null && LatestReleaseInfo.assets.Count > 0 && LatestReleaseInfo.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
+                            var url = GetDownloadUrl != null ? GetDownloadUrl(LatestReleaseInfo) : DefaultGetDownloadUrl(LatestReleaseInfo);
+                            if (!string.IsNullOrEmpty(url)) {
 
                                 var downloadFile = Path.Combine(AssetDownloadFolder, AssetName);
                                 Utils.CreateDirectory(AssetDownloadFolder);
@@ -149,13 +165,13 @@ namespace _3PA.Lib {
                                     StartingUpdate(this, LatestReleaseInfo, e);
 
                                 if (!e.CancelDownload) {
-                                    Utils.DownloadFile(LatestReleaseInfo.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url, downloadFile, OnAssetDownloaded);
+                                    Utils.DownloadFile(url, downloadFile, OnAssetDownloaded);
                                 }
-
                             } else {
                                 if (ErrorOccured != null)
                                     ErrorOccured(this, new Exception("Asset not found"), GitHubUpdaterFailReason.NoAssetOnLatestRelease);
                             }
+                            
                         } else {
                             if (AlreadyUpdated != null)
                                 AlreadyUpdated(this, releases.First());
@@ -195,6 +211,16 @@ namespace _3PA.Lib {
                 if (ErrorOccured != null)
                     ErrorOccured(this, e, GitHubUpdaterFailReason.AssetDownloadFailed);
             }
+        }
+
+        /// <summary>
+        /// default way to find the url to download
+        /// </summary>
+        private string DefaultGetDownloadUrl(ReleaseInfo release) {
+            if (release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(AssetName))) {
+                return release.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url;
+            }
+            return null;
         }
 
         #endregion
@@ -245,9 +271,15 @@ namespace _3PA.Lib {
             public List<Asset> assets { get; set; }
 
             /// <summary>
+            /// Url of the zip containing the source code
+            /// </summary>
+            public string zipball_url { get; set; }
+
+            /// <summary>
             /// content of the release text
             /// </summary>
             public string body { get; set; }
+
         }
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]

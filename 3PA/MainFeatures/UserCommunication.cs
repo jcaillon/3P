@@ -164,6 +164,7 @@ namespace _3PA.MainFeatures {
         /// Allows to ask information to the user,
         /// returns an integer (-1 if closed, or from 0 to x = buttons.count - 1), 
         /// buttonsList default to { "Ok", "Cancel" } 
+        /// Only the first button (i.e. OK) will update the referenced object, it will be untouched for the other buttons
         /// </summary>
         /// <remarks>
         /// This should always be called on the UI THREAD!!!!
