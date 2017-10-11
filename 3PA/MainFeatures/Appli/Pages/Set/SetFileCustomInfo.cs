@@ -22,12 +22,12 @@ using System.Collections.Generic;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Lib;
-using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.ModificationsTag;
 using _3PA.NppCore;
 using _3PA._Resource;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    internal partial class SetFileInfo : YamuiPage {
+    internal partial class SetFileCustomInfo : YamuiPage {
         #region fields
 
         private FileTagObject _locFileTagObject;
@@ -37,10 +37,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region constructor
 
-        public SetFileInfo() {
+        public SetFileCustomInfo() {
             InitializeComponent();
 
             // add event handlers
+            btTemplate.ButtonPressed += BtTemplateOnButtonPressed;
+            btTemplate.BackGrndImage = ImageResources.ModificationTagMenu;
+            toolTip.SetToolTip(btTemplate, "Modify the template used in the modification tags feature");
+
             cb_info.SelectedIndexChangedByUser += SelectedIndexChanged;
             bt_ok.ButtonPressed += BtOkOnButtonPressed;
             bt_ok.BackGrndImage = ImageResources.Save;
@@ -94,15 +98,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             // populate combobox
             var list = new List<ItemCombo> {
-                new ItemCombo {DisplayText = "Last info", Nb = FileTag.LastTag},
-                new ItemCombo {DisplayText = "Default info", Nb = FileTag.DefaultTag}
+                new ItemCombo {DisplayText = "Last info", Nb = FileCustomInfo.LastTag},
+                new ItemCombo {DisplayText = "Default info", Nb = FileCustomInfo.DefaultTag}
             };
 
             cb_info.DisplayMember = "DisplayText";
             cb_info.ValueMember = "Nb";
 
-            if (FileTag.Contains(_filename)) {
-                var currentList = FileTag.GetFileTagsList(_filename);
+            if (FileCustomInfo.Contains(_filename)) {
+                var currentList = FileCustomInfo.GetFileTagsList(_filename);
                 _locFileTagObject = currentList.Last();
 
                 var i = 2;
@@ -117,7 +121,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cb_info.DataSource = list;
                 cb_info.SelectedIndex = lastItemPos;
             } else {
-                _locFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
+                _locFileTagObject = FileCustomInfo.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileCustomInfo.DefaultTag : FileCustomInfo.LastTag, "");
 
                 cb_info.DataSource = list;
                 cb_info.SelectedIndex = Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? 1 : 0;
@@ -131,11 +135,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region private event
 
+        private void BtTemplateOnButtonPressed(object sender1, EventArgs eventArgs) {
+            ModificationTagTemplate.EditTemplate();
+        }
+
         private void BtOkOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Save(_filename);
-            Save(FileTag.LastTag);
+            Save(FileCustomInfo.LastTag);
             UpdateInfo();
-            FileTag.Export();
+            FileCustomInfo.Export();
             Appli.ToggleView();
         }
 
@@ -151,7 +159,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDefaultOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            Save(FileTag.DefaultTag);
+            Save(FileCustomInfo.DefaultTag);
         }
 
         private void BtTodayOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -159,7 +167,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (FileTag.DeleteFileTags(_filename, _locFileTagObject.CorrectionNumber))
+            if (FileCustomInfo.DeleteFileTags(_filename, _locFileTagObject.CorrectionNumber))
                 UpdateInfo();
         }
 
@@ -168,11 +176,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void SelectedIndexChanged(YamuiComboBox sender) {
             var val = cb_info.SelectedValue.ToString();
-            if (val.Equals(FileTag.LastTag) || val.Equals(FileTag.DefaultTag))
-                _locFileTagObject = FileTag.GetFileTags(val, "");
+            if (val.Equals(FileCustomInfo.LastTag) || val.Equals(FileCustomInfo.DefaultTag))
+                _locFileTagObject = FileCustomInfo.GetFileTags(val, "");
             else {
-                _locFileTagObject = FileTag.GetFileTags(_filename, val);
-                FileTag.SetFileTags(_filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
+                _locFileTagObject = FileCustomInfo.GetFileTags(_filename, val);
+                FileCustomInfo.SetFileTags(_filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
             }
             UpdateView();
         }
@@ -191,7 +199,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="filename"></param>
         private void Save(string filename) {
             UpdateModel();
-            FileTag.SetFileTags(filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
+            FileCustomInfo.SetFileTags(filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
         }
 
         private void UpdateModel() {
@@ -215,7 +223,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             lb_FileName.Text = @"<b>" + Npp.CurrentFile.FileName + @"</b>";
             var val = cb_info.SelectedValue.ToString();
-            if (!val.Equals(FileTag.LastTag) && !val.Equals(FileTag.DefaultTag)) {
+            if (!val.Equals(FileCustomInfo.LastTag) && !val.Equals(FileCustomInfo.DefaultTag)) {
                 lb_SaveState.Text = @"<b>Info saved</b>";
                 bt_SaveState.BackGrndImage = ImageResources.Ok;
                 toolTip.SetToolTip(bt_SaveState, "3P has access to info on the current file");

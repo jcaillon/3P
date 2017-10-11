@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="lbl_about.Text" xml:space="preserve">
-    <value>Set information on the Progress file currently opened, these information will be used in the &lt;b&gt;Modification tags&lt;/b&gt; feature. They are also passed to the &lt;b&gt;Prolint&lt;/b&gt; starting procedure and can be used however you like in that context.</value>
+    <value>Set information on the Progress file currently opened, these information will be used in the &lt;b&gt;Modification tags&lt;/b&gt; feature. They are also passed to the &lt;b&gt;Prolint&lt;/b&gt; starting procedure and can be used however you like in that context. You can set up your own templates for the modification tags by clicking the button below.</value>
   </data>
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>108, 17</value>

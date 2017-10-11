@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA._Resource;
 
@@ -35,6 +34,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
             var prolintVer = Updater<ProlintUpdaterWrapper>.Instance.LocalVersion;
             var proparseVer = Updater<ProparseUpdaterWrapper>.Instance.LocalVersion;
+            var datadiggerVer = Updater<DataDiggerUpdaterWrapper>.Instance.LocalVersion;
                  
 
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
@@ -42,18 +42,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
                 .Replace("%YamuiFrameworkVersion%", LibLoader.GetYamuiAssemblyVersion())
                 .Replace("%ProlintVersion%", prolintVer.Equals("v0") ? "*not installed*" : prolintVer)
                 .Replace("%ProparseVersion%", proparseVer.Equals("v0") ? "*not installed*" : proparseVer)
+                .Replace("%DataDiggerVersion%", datadiggerVer.Equals("v0") ? "*not installed*" : datadiggerVer)
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
-            html.LinkClicked += HtmlOnLinkClicked;
+            html.LinkClicked += (sender, args) => {
+                if (args.Link.Equals("update")) {
+                    Appli.GoToPage(PageNames.OptionsUpdate);
+                    args.Handled = true;
+                }
+            };
 
             yamuiScrollPage1.ContentPanel.Height = html.Height;
-        }
-
-        private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            if (htmlLinkClickedEventArgs.Link.Equals("update")) {
-                Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
-                htmlLinkClickedEventArgs.Handled = true;
-            }
         }
 
         #endregion

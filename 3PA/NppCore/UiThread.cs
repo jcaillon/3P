@@ -23,6 +23,7 @@ using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.NppCore {
     internal class UiThread {
+
         private static NppEmptyForm _anchorForm;
 
         /// <summary>

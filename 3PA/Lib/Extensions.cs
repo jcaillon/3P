@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -47,8 +46,56 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static T GetAttributeFrom<T>(this object instance, string propertyName) where T : Attribute {
             var attrType = typeof(T);
-            var property = instance.GetType().GetProperty(propertyName);
-            return (T) property.GetCustomAttributes(attrType, false).First();
+            var fieldInfo = instance.GetType().GetField(propertyName);
+            if (fieldInfo == null) {
+                var propertyInfo = instance.GetType().GetProperty(propertyName);
+                if (propertyInfo == null) {
+                    return (T) Convert.ChangeType(null, typeof(T));
+                }
+                return (T) propertyInfo.GetCustomAttributes(attrType, false).FirstOrDefault();
+            }
+            return (T) fieldInfo.GetCustomAttributes(attrType, false).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Set a value to this instance, by its property name
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool SetValueOf(this object instance, string propertyName, object value) {
+            var fieldInfo = instance.GetType().GetField(propertyName);
+            if (fieldInfo == null) {
+                var propertyInfo = instance.GetType().GetProperty(propertyName);
+                if (propertyInfo == null) {
+                    return false;
+                }
+                propertyInfo.SetValue(instance, value, null);
+                return true;
+            }
+            fieldInfo.SetValue(instance, value);
+            //var converter = TypeDescriptor.GetConverter(property.FieldType);
+            //property.SetValue(this, converter.);
+            return true;
+        }
+
+        /// <summary>
+        /// Get a value from this instance, by its property name
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static object GetValueOf(this object instance, string propertyName) {
+            var fieldInfo = instance.GetType().GetField(propertyName);
+            if (fieldInfo == null) {
+                var propertyInfo = instance.GetType().GetProperty(propertyName);
+                if (propertyInfo == null) {
+                    return null;
+                }
+                return propertyInfo.GetValue(instance, null);
+            }
+            return fieldInfo.GetValue(instance);
         }
 
         /// <summary>
@@ -70,7 +117,7 @@ namespace _3PA.Lib {
 
         /// <summary>
         /// Invoke the given method with the given parameters on the given object and returns its value
-        /// Returns null if it failes
+        /// Returns null if it fails
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="methodName"></param>
@@ -98,7 +145,7 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Find the index of the first element satisfaying the predicate
+        /// Find the index of the first element satisfying the predicate
         /// </summary>
         public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate) {
             if (predicate == null) throw new ArgumentNullException("predicate");
@@ -182,7 +229,7 @@ namespace _3PA.Lib {
 
         /// <summary>
         /// Returns the attribute array for the given Type T and the given value,
-        /// not to self : dont use that on critical path -> reflection is costly
+        /// not to self : don't use that on critical path -> reflection is costly
         /// </summary>
         public static T[] GetAttributes<T>(this Enum value) where T : Attribute {
             Type type = value.GetType();
@@ -590,13 +637,17 @@ namespace _3PA.Lib {
             return false;
         }
 
-        public static StringBuilder TrimEnd(this StringBuilder builder) {
+        public static StringBuilder TrimEnd(this StringBuilder builder, int maxOccurence = 0) {
+            int occurence = 0;
             if (builder.Length > 0) {
                 int i;
-                for (i = builder.Length - 1; i >= 0; i--)
-                    if (!Char.IsWhiteSpace(builder[i]))
+                for (i = builder.Length - 1; i >= 0; i--) {
+                    if (!char.IsWhiteSpace(builder[i]))
                         break;
-
+                    occurence++;
+                    if (maxOccurence > 0 && occurence > maxOccurence)
+                        break;
+                }
                 builder.Length = i + 1;
             }
             return builder;

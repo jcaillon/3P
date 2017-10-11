@@ -116,8 +116,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             #region Current file
 
             // register to Updated Operation events
-            FilesInfo.OnUpdatedOperation += FilesInfoOnUpdatedOperation;
-            FilesInfo.OnUpdatedErrors += FilesInfoOnUpdatedErrors;
+            OpenedFilesInfo.OnUpdatedOperation += FilesInfoOnUpdatedOperation;
+            OpenedFilesInfo.OnUpdatedErrors += FilesInfoOnUpdatedErrors;
 
             btPrevError.ButtonPressed += BtPrevErrorOnButtonPressed;
             btNextError.ButtonPressed += BtNextErrorOnButtonPressed;
@@ -425,23 +425,23 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            FilesInfo.ClearAllErrors(Npp.CurrentFile.Path);
+            OpenedFilesInfo.ClearAllErrors(Npp.CurrentFile.Path);
             Sci.GrabFocus();
         }
 
         private void BtNextErrorOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            FilesInfo.GoToNextError(Sci.Line.CurrentLine + 1);
+            OpenedFilesInfo.GoToNextError(Sci.Line.CurrentLine + 1);
         }
 
         private void BtPrevErrorOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            FilesInfo.GoToPrevError(Sci.Line.CurrentLine - 1);
+            OpenedFilesInfo.GoToPrevError(Sci.Line.CurrentLine - 1);
         }
 
         private void BtGetHelpOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
             btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
-            FilesInfo.ClearAnnotationsAndMarkers();
-            FilesInfo.UpdateErrorsInScintilla();
+            OpenedFilesInfo.ClearAnnotationsAndMarkers();
+            OpenedFilesInfo.UpdateErrorsInScintilla();
             Sci.GrabFocus();
         }
 
@@ -450,8 +450,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (FilesInfo.CurrentFileInfoObject.ProgressExecution != null)
-                FilesInfo.CurrentFileInfoObject.ProgressExecution.BringProcessToFront();
+            if (OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution != null)
+                OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.BringProcessToFront();
         }
 
         #endregion

@@ -1,0 +1,43 @@
+##############
+# You can use the following values (taken from the file info form) :
+# ${a} : application
+# ${v} version of the application
+# ${w} : workpackage
+# ${b} : bug ID
+# ${n} : correction number
+# ${da} : correction date
+# ${u} : username
+# ${de} : description of the correction
+#
+# If you leave spaces within the brackets (e.g. ${u  }) you can force the maximum space a text can take
+# (in this example, it can take 6 characters since there are 2 white spaces)
+# If there are no spaces, it can take the space needed
+##############
+
+#
+# ------------------------
+# The following will be used in the "surround with modification tags" feature
+# ------------------------
+#
+TagOpener=>
+/* Begin #${n} */
+#
+TagCloser=>
+/* End #${n} */
+#
+
+#
+# ------------------------
+# The following will be used in the "insert title block" feature
+# ------------------------
+#
+TitleBlockHeader=>
+/* |      |            |           |                                                                | */
+/* | ${n }| ${da     } | ${u     } | ${v     } - ${w } - ${b                                      } | */
+#
+TitleBlockLine=>
+/* |      |            |           | ${de                                                         } | */
+#
+TitleBlockFooter=>
+/* |______|____________|___________|________________________________________________________________| */
+#

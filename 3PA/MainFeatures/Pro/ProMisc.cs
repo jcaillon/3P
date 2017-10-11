@@ -321,7 +321,7 @@ namespace _3PA.MainFeatures.Pro {
                 currentOperation = CurrentOperation.Run;
 
             // process already running?
-            if (FilesInfo.CurrentFileInfoObject.CurrentOperation >= CurrentOperation.Prolint) {
+            if (OpenedFilesInfo.CurrentOpenedFileInfo.CurrentOperation >= CurrentOperation.Prolint) {
                 UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
                     KillCurrentProcess();
                     StartProgressExec(executionType);
@@ -356,36 +356,36 @@ namespace _3PA.MainFeatures.Pro {
             ProGenerateCode.Factory.UpdateFunctionPrototypesIfNeeded(true);
 
             // launch the compile process for the current file
-            FilesInfo.CurrentFileInfoObject.ProgressExecution = (ProExecutionHandleCompilation) ProExecution.Factory(executionType);
-            FilesInfo.CurrentFileInfoObject.ProgressExecution.Files = new List<FileToCompile> {
+            OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution = (ProExecutionHandleCompilation) ProExecution.Factory(executionType);
+            OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.Files = new List<FileToCompile> {
                 new FileToCompile(Npp.CurrentFile.Path)
             };
-            FilesInfo.CurrentFileInfoObject.ProgressExecution.OnExecutionEnd += OnSingleExecutionEnd;
+            OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.OnExecutionEnd += OnSingleExecutionEnd;
             if (execSetter != null) {
-                execSetter(FilesInfo.CurrentFileInfoObject.ProgressExecution);
-                FilesInfo.CurrentFileInfoObject.ProgressExecution.OnCompilationOk += OnGenerateDebugFileOk;
+                execSetter(OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution);
+                OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.OnCompilationOk += OnGenerateDebugFileOk;
             } else {
-                FilesInfo.CurrentFileInfoObject.ProgressExecution.OnCompilationOk += OnSingleExecutionOk;
+                OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.OnCompilationOk += OnSingleExecutionOk;
             }
-            if (!FilesInfo.CurrentFileInfoObject.ProgressExecution.Start())
+            if (!OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.Start())
                 return;
 
             // change file object current operation, set flag
-            FilesInfo.CurrentFileInfoObject.CurrentOperation |= currentOperation;
-            FilesInfo.UpdateFileStatus();
+            OpenedFilesInfo.CurrentOpenedFileInfo.CurrentOperation |= currentOperation;
+            OpenedFilesInfo.UpdateFileStatus();
 
             // clear current errors (updates the current file info)
-            FilesInfo.ClearAllErrors(Npp.CurrentFile.Path, true);
+            OpenedFilesInfo.ClearAllErrors(Npp.CurrentFile.Path, true);
         }
         
         /// <summary>
         /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
         /// </summary>
         public static void KillCurrentProcess() {
-            if (FilesInfo.CurrentFileInfoObject.ProgressExecution != null) {
-                FilesInfo.CurrentFileInfoObject.ProgressExecution.KillProcess();
+            if (OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution != null) {
+                OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution.KillProcess();
                 UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                OnSingleExecutionEnd(FilesInfo.CurrentFileInfoObject.ProgressExecution);
+                OnSingleExecutionEnd(OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution);
             }
         }
 
@@ -401,12 +401,12 @@ namespace _3PA.MainFeatures.Pro {
                     currentOperation = CurrentOperation.Run;
 
                 // Clear flag or we can't do any other actions on this file
-                FilesInfo.GetFileInfo(treatedFile.SourcePath).CurrentOperation &= ~currentOperation;
+                OpenedFilesInfo.GetOpenedFileInfo(treatedFile.SourcePath).CurrentOperation &= ~currentOperation;
                 var isCurrentFile = treatedFile.SourcePath.EqualsCi(Npp.CurrentFile.Path);
                 if (isCurrentFile)
-                    FilesInfo.UpdateFileStatus();
+                    OpenedFilesInfo.UpdateFileStatus();
 
-                FilesInfo.CurrentFileInfoObject.ProgressExecution = null;
+                OpenedFilesInfo.CurrentOpenedFileInfo.ProgressExecution = null;
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
             }

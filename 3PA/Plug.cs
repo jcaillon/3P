@@ -30,6 +30,7 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
+using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
@@ -173,13 +174,13 @@ namespace _3PA {
             ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
             ParserHandler.OnEnd += CodeExplorer.Instance.OnParseEnd;
 
-            ProExecutionHandleCompilation.OnEachCompilationOk += FilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
+            ProExecutionHandleCompilation.OnEachCompilationOk += OpenedFilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
 
             // Clear the %temp% directory if we didn't do it properly last time
             Utils.DeleteDirectory(Config.FolderTemp, true);
 
             //Snippets.Init();
-            FileTag.Import();
+            FileCustomInfo.Import();
 
             DelayedAction.StartNew(100, () => {
                 if (Config.Instance.UserFirstUse) {
@@ -233,48 +234,6 @@ namespace _3PA {
 
         #endregion
 
-        #region Modify Npp configuration (config.xml)
-
-        /// <summary>
-        /// Called when the plugin is first used, suggests default options for npp
-        /// </summary>
-        internal static void FinishPluginInstall() {
-            object options = new Npp.NppConfig.NppConfigXmlOptions {
-                EnableMultiSelection = true,
-                DisableDefaultAutocompletion = true,
-                EnableBackupOnSave = true
-            };
-            ModifyingNppConfig(options, true);
-        }
-        
-        /// <summary>
-        /// Can be called at anytime to let the user modify notepad++ options
-        /// </summary>
-        internal static void ModifyingNppConfig() {
-            object options = new Npp.NppConfig.NppConfigXmlOptions {
-                EnableMultiSelection = Npp.ConfXml.MultiSelectionEnabled,
-                DisableDefaultAutocompletion = Npp.ConfXml.AutocompletionMode == 0,
-                EnableBackupOnSave = Npp.ConfXml.BackupMode != 0
-            };
-            ModifyingNppConfig(options, false);
-        }
-
-        private static void ModifyingNppConfig(object opts, bool installMode) {
-            var options = opts as Npp.NppConfig.NppConfigXmlOptions;
-            if (options != null) {
-                var buttons = installMode ? new List<string> {"Apply changes now (restart)"} : new List<string> {"Apply changes now (restart)", "Cancel"};
-
-                var awnser = UserCommunication.Input(ref opts, (installMode ? "You are almost done with the installation!<br>" : "") + "You can now setup some configurations for notepad++.<br><b>It is highly recommended to " + (installMode ? "let all the options toggled ON" : "toggle ON all the options") + "</b> :<br><br>", MessageImg.MsgUpdate, "3P setup", "Modifying notepad++ options", buttons);
-
-                if (installMode || awnser == 0) {
-                    Npp.ConfXml.ApplyNewOptions(options);
-                }
-
-            }
-        }
-
-        #endregion
-
         #region Die
 
         /// <summary>
@@ -313,10 +272,10 @@ namespace _3PA {
                 ParserHandler.OnEndSendCodeExplorerItems -= CodeExplorer.Instance.OnParseEndCodeExplorerItems;
                 ParserHandler.OnEnd -= CodeExplorer.Instance.OnParseEnd;
 
-                ProExecutionHandleCompilation.OnEachCompilationOk -= FilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
+                ProExecutionHandleCompilation.OnEachCompilationOk -= OpenedFilesInfo.ProExecutionHandleCompilationOnEachCompilationOk;
 
                 // export modified conf
-                FileTag.Export();
+                FileCustomInfo.Export();
 
                 // Npp stopped correctly
                 Config.Instance.NppStoppedCorrectly = true;
@@ -555,7 +514,7 @@ namespace _3PA {
 
             if (initiating) {
                 // make sure to use the ProEnvironment and colorize the error counter
-                FilesInfo.UpdateFileStatus();
+                OpenedFilesInfo.UpdateFileStatus();
             } else {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
@@ -566,7 +525,7 @@ namespace _3PA {
             }
 
             // Update info on the current file
-            FilesInfo.UpdateErrorsInScintilla();
+            OpenedFilesInfo.UpdateErrorsInScintilla();
             ProEnvironment.Current.ReComputeProPath();
 
             AutoCompletion.SetStaticItems();
@@ -689,11 +648,11 @@ namespace _3PA {
                 return;
 
             // click on the error margin
-            if (nc.margin == FilesInfo.ErrorMarginNumber) {
+            if (nc.margin == OpenedFilesInfo.ErrorMarginNumber) {
                 // if it's an error symbol that has been clicked, the error on the line will be cleared
-                if (!FilesInfo.ClearLineErrors(Sci.LineFromPosition(nc.position))) {
+                if (!OpenedFilesInfo.ClearLineErrors(Sci.LineFromPosition(nc.position))) {
                     // if nothing has been cleared, we go to the next error position
-                    FilesInfo.GoToNextError(Sci.LineFromPosition(nc.position));
+                    OpenedFilesInfo.GoToNextError(Sci.LineFromPosition(nc.position));
                 }
             }
         }
@@ -862,6 +821,48 @@ namespace _3PA {
         public static void ClosePopups() {
             AutoCompletion.Cloak();
             InfoToolTip.Cloak();
+        }
+
+        #endregion
+
+        #region Modify Npp configuration (config.xml)
+
+        /// <summary>
+        /// Called when the plugin is first used, suggests default options for npp
+        /// </summary>
+        internal static void FinishPluginInstall() {
+            object options = new Npp.NppConfig.NppConfigXmlOptions {
+                EnableMultiSelection = true,
+                DisableDefaultAutocompletion = true,
+                EnableBackupOnSave = true
+            };
+            ModifyingNppConfig(options, true);
+        }
+
+        /// <summary>
+        /// Can be called at anytime to let the user modify notepad++ options
+        /// </summary>
+        internal static void ModifyingNppConfig() {
+            object options = new Npp.NppConfig.NppConfigXmlOptions {
+                EnableMultiSelection = Npp.ConfXml.MultiSelectionEnabled,
+                DisableDefaultAutocompletion = Npp.ConfXml.AutocompletionMode == 0,
+                EnableBackupOnSave = Npp.ConfXml.BackupMode != 0
+            };
+            ModifyingNppConfig(options, false);
+        }
+
+        private static void ModifyingNppConfig(object opts, bool installMode) {
+            var options = opts as Npp.NppConfig.NppConfigXmlOptions;
+            if (options != null) {
+                var buttons = installMode ? new List<string> { "Apply changes now (restart)" } : new List<string> { "Apply changes now (restart)", "Cancel" };
+
+                var awnser = UserCommunication.Input(ref opts, (installMode ? "You are almost done with the installation!<br>" : "") + "You can now setup some configurations for notepad++.<br><b>It is highly recommended to " + (installMode ? "let all the options toggled ON" : "toggle ON all the options") + "</b> :<br><br>", MessageImg.MsgUpdate, "3P setup", "Modifying notepad++ options", buttons);
+
+                if (installMode || awnser == 0) {
+                    Npp.ConfXml.ApplyNewOptions(options);
+                }
+
+            }
         }
 
         #endregion

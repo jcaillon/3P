@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (Npp.CurrentFile.IsProgress) {
                 Style.SetSyntaxStyles();
                 Plug.ApplyOptionsForScintilla();
-                FilesInfo.UpdateFileStatus();
+                OpenedFilesInfo.UpdateFileStatus();
             }
         }
     }

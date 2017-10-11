@@ -31,14 +31,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         public OthersPage() {
             InitializeComponent();
 
-            var usableVar = "<br><br>You can use the following values (taken from the file info form) :<br>{&a} : application<br>{&v} version of the application<br>{&w} : workpackage<br>{&b} : bug ID<br>{&n} : correction number<br>{&da} : correction date<br>{&u} : username<br>{&de} : description of the correction<br><br>If you leave spaces within the brackets (e.g. {&u  }) you can force the maximum space a text can take<br>(in this example, it can take 6 characters since there are 2 white spaces)<br>If there are no spaces, it can take the space needed<br><br><i>I highly recommand you to copy this in notepad++, edit it there<br>and paste it back here once your are done...</i>";
-
-            toolTip.SetToolTip(fl_tagopen, "You can set your custom modification tag here,<br>this part will be added before your selection" + usableVar);
-            toolTip.SetToolTip(fl_tagclose, "You can set your custom modification tag here,<br>this part will be appended to your selection" + usableVar);
-            toolTip.SetToolTip(fl_tagtitle1, "This block is repeated only once at the beggining of the title block." + usableVar);
-            toolTip.SetToolTip(fl_tagtitle2, "This block should contain the {&de} (description) variable and will be repeated as many times it is needed to display the complete description.");
-            toolTip.SetToolTip(fl_tagtitle3, "This block is repeated only once at the end of the title block." + usableVar);
-
             toolTip.SetToolTip(cbEncoding, "Choose the encoding to apply to the files when they are opened<br><i>The default option is 'Automatic', to let Notepad++ select the encoding</i>");
             toolTip.SetToolTip(fl_encodingfilter, "<i>Leave empty to disable this feature (default)</i><br>A comma (,) separated list of filters :<br>when a file is opened, if it matches one of the filter, the selected encoding is applied<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*.p,\\*my_sub_directory\\*,*.r</div>");
 
@@ -66,21 +58,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region private event
 
         private void UpdateView() {
-            fl_tagopen.Text = Config.Instance.TagModifOpener;
-            fl_tagclose.Text = Config.Instance.TagModifCloser;
-            fl_tagtitle1.Text = Config.Instance.TagTitleBlock1;
-            fl_tagtitle2.Text = Config.Instance.TagTitleBlock2;
-            fl_tagtitle3.Text = Config.Instance.TagTitleBlock3;
             fl_encodingfilter.Text = Config.Instance.AutoSwitchEncodingForFilePatterns;
             cbEncoding.SelectedIndex = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).IndexOf(Config.Instance.AutoSwitchEncodingTo.ToString());
         }
 
         private void UpdateModel() {
-            Config.Instance.TagModifOpener = fl_tagopen.Text;
-            Config.Instance.TagModifCloser = fl_tagclose.Text;
-            Config.Instance.TagTitleBlock1 = fl_tagtitle1.Text;
-            Config.Instance.TagTitleBlock2 = fl_tagtitle2.Text;
-            Config.Instance.TagTitleBlock3 = fl_tagtitle3.Text;
             Config.Instance.AutoSwitchEncodingForFilePatterns = fl_encodingfilter.Text;
             NppEncodingFormat format;
             if (Enum.TryParse(Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).ToList()[cbEncoding.SelectedIndex], true, out format))

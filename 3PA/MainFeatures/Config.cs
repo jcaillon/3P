@@ -506,6 +506,7 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
+            // set to false when the plugin starts, and to true when it stops; if false when it starts then npp crashed
             public bool NppStoppedCorrectly; 
 
             // Shared configuration last folder selected
@@ -516,24 +517,6 @@ namespace _3PA.MainFeatures {
 
             // a list of folders used in the shared/exported conf
             public string SharedConfHistoric = "";
-
-            // Values for the Tags
-            public string TagModifOpener =
-                "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";
-
-            public string TagModifCloser =
-                "/* --- Fin modif #{&n} --- */";
-
-            public string TagTitleBlock1 =
-                "/* |      |            |           |                                                                | */\n" +
-                "/* | {&n }| {&da     } | CS-SOPRA  | {&w } - {&b                                                  } | */\n" +
-                "/* |      | {&v      } | {&u     } |                                                                | */";
-
-            public string TagTitleBlock2 =
-                "/* |      |            |           | {&de                                                         } | */";
-
-            public string TagTitleBlock3 =
-                "/* |______|____________|___________|________________________________________________________________| */";
 
             // Current environment
             public string EnvLastDbInfoUsed = "";
@@ -577,60 +560,12 @@ namespace _3PA.MainFeatures {
                 proxy.Credentials = CredentialCache.DefaultCredentials;
                 return proxy;
             }
-
-            /// <summary>
-            /// Get a value from this instance, by its property name
-            /// </summary>
-            /// <param name="propertyName"></param>
-            /// <returns></returns>
-            public object GetValueOf(string propertyName) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-                if (property == null) {
-                    return null;
-                }
-                return property.GetValue(this);
-            }
-
-            /// <summary>
-            /// Set a value to this instance, by its property name
-            /// </summary>
-            /// <param name="propertyName"></param>
-            /// <param name="value"></param>
-            /// <returns></returns>
-            public bool SetValueOf(string propertyName, object value) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-                if (property == null) {
-                    return false;
-                }
-                property.SetValue(this, value);
-                //var converter = TypeDescriptor.GetConverter(property.FieldType);
-                //property.SetValue(this, converter.);
-                return true;
-            }
-
-            /// <summary>
-            /// Gets the DisplayAttribute of the given property
-            /// </summary>
-            /// <param name="propertyName"></param>
-            /// <returns></returns>
-            public T GetAttributeOf<T>(string propertyName) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-                if (property == null) {
-                    return (T) Convert.ChangeType(null, typeof(T));
-                }
-                var listCustomAttr = property.GetCustomAttributes(typeof(T), false);
-                if (!listCustomAttr.Any()) {
-                    return (T) Convert.ChangeType(null, typeof(T));
-                }
-                var displayAttr = (T) listCustomAttr.FirstOrDefault();
-                return displayAttr;
-            }
-
+            
             /// <summary>
             /// Returns the shortcut specs corresponding to the itemId given
             /// </summary>
             public string GetShortcutSpecFromName(string itemId) {
-                return (ShortCuts.ContainsKey(itemId) ? ShortCuts[itemId] : "Unknown shortcut?");
+                return ShortCuts.ContainsKey(itemId) ? ShortCuts[itemId] : "Unknown shortcut?";
             }
 
             #endregion
@@ -794,6 +729,10 @@ namespace _3PA.MainFeatures {
             get { return Path.Combine(Npp.ConfigDirectory, "_DeploymentRules.conf"); }
         }
 
+        public static string FileModificationTags {
+            get { return Path.Combine(Npp.ConfigDirectory, "_ModificationTags.conf"); }
+        }
+
         public static string FileProEnv {
             get { return Path.Combine(Npp.ConfigDirectory, "_ProgressEnvironnement.xml"); }
         }
@@ -886,8 +825,8 @@ namespace _3PA.MainFeatures {
             get { return CreateDirectory(Path.Combine(Npp.ConfigDirectory, "DataDigger")); }
         }
         
-        // Only get the latest release because they are not named as we would like them to be (Datadigger22, BETA2010404 and so on...)
         public static string DataDiggerReleasesApi {
+            // Only get the latest release because they are not named as we would like them to be (Datadigger22, BETA2010404 and so on...)
             get { return @"https://api.github.com/repos/patrickTingen/DataDigger/releases/latest"; }
         }
 

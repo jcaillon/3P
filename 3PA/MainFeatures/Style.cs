@@ -224,20 +224,20 @@ namespace _3PA.MainFeatures {
         private static void SetErrorStyles(byte errorLevel, Color bgColor, Color fgColor) {
             int curFontSize = Sci.GetStyle(0).Size;
 
-            var normalStyle = Sci.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Normal));
+            var normalStyle = Sci.GetStyle(OpenedFilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Normal));
             normalStyle.Font = "Segoe ui";
             normalStyle.Size = (int) (curFontSize * 0.9);
             normalStyle.ForeColor = fgColor;
             normalStyle.BackColor = bgColor;
 
-            var boldStyle = Sci.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Bold));
+            var boldStyle = Sci.GetStyle(OpenedFilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Bold));
             boldStyle.Font = "Segoe ui";
             boldStyle.Size = (int) (curFontSize * 0.9);
             boldStyle.Bold = true;
             boldStyle.ForeColor = fgColor;
             boldStyle.BackColor = bgColor;
 
-            var italicStyle = Sci.GetStyle(FilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Italic));
+            var italicStyle = Sci.GetStyle(OpenedFilesInfo.GetStyleOf((ErrorLevel) errorLevel, ErrorFontWeight.Italic));
             italicStyle.Font = "Segoe ui";
             italicStyle.Size = (int) (curFontSize * 0.9);
             italicStyle.Italic = true;

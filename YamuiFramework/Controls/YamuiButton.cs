@@ -32,6 +32,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]

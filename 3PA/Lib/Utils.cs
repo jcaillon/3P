@@ -113,6 +113,7 @@ namespace _3PA.Lib {
         /// Apply the action toApplyOnEachLine(int lineNumber, string lineString) to each line
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
         /// Uses the char # as a comment in the file (must be the first char of a line)
+        /// Returns the line w/o the \r\n
         /// </summary>
         public static void ForEachLine(string filePath, byte[] dataResources, Action<int, string> toApplyOnEachLine, Encoding encoding = null) {
             try {

@@ -205,7 +205,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 }
 
                 // stop ?
-                if (!rule.ContinueAfterThisRule)
+                if (!rule.ContinueAfterThisRule || rule.Type == DeployType.Move)
                     break;
             }
 

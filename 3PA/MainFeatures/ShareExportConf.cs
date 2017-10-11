@@ -25,6 +25,7 @@ using System.Text;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
@@ -108,7 +109,16 @@ namespace _3PA.MainFeatures {
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
-                        }
+                        },
+                        new ConfLine {
+                            Label = "Modification tags template",
+                            HandledItem = Config.FileModificationTags,
+                            OnImport = line => ModificationTagTemplate.Import(),
+                            OnExport = line => ModificationTagTemplate.Export(),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
                         //new ConfLine {
                         //    Label = "4GL keywords list",
                         //    HandledItem = Config.FileKeywordsList,

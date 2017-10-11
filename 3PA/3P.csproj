@@ -198,6 +198,8 @@
     <Compile Include="Lib\RecurentAction.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
+    <Compile Include="MainFeatures\ModificationsTag\ModificationTag.cs" />
+    <Compile Include="MainFeatures\ModificationsTag\ModificationTagTemplate.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexer.cs" />
     <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
@@ -255,11 +257,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.Designer.cs">
       <DependentUpon>SetFtp.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileCustomInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.Designer.cs">
-      <DependentUpon>SetFileInfo.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileCustomInfo.Designer.cs">
+      <DependentUpon>SetFileCustomInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\AutoCompletionFeature\AutoCompletionForm.cs">
       <SubType>Form</SubType>
@@ -422,6 +424,7 @@
     <Content Include="_Resource\Images\Menu\EnvName.png" />
     <Content Include="_Resource\Images\Menu\EnvSuffix.png" />
     <Content Include="_Resource\Images\Menu\FileInfo.png" />
+    <Content Include="_Resource\Images\Menu\ModificationTagMenu.png" />
     <Content Include="_Resource\Images\Menu\IndentCode.png" />
     <Content Include="_Resource\Images\Menu\GenerateCode.png" />
     <Content Include="_Resource\Images\Menu\Git.png" />
@@ -550,7 +553,6 @@
     <Compile Include="NppCore\NppHeader.cs" />
     <Compile Include="NppCore\GapBuffer.cs" />
     <Compile Include="WindowsCore\HtmlHelpApi.cs" />
-    <Compile Include="Lib\JsonParser.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="Lib\User.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Home\HomePage.cs">
@@ -572,7 +574,7 @@
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Pro\ProCodeFormat.cs" />
-    <Compile Include="MainFeatures\Pro\FilesInfo.cs" />
+    <Compile Include="MainFeatures\Pro\OpenedFilesInfo.cs" />
     <Compile Include="MainFeatures\Pro\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
@@ -594,7 +596,7 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Pro\FileTag.cs" />
+    <Compile Include="MainFeatures\ModificationsTag\FileCustomInfo.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
     <Compile Include="MainFeatures\Pro\ProMisc.cs" />
@@ -685,8 +687,8 @@
       <DependentUpon>SetFtp.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
-      <DependentUpon>SetFileInfo.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileCustomInfo.resx">
+      <DependentUpon>SetFileCustomInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Template.resx">
       <DependentUpon>Template.cs</DependentUpon>
@@ -724,6 +726,7 @@
     <None Include="_Resource\Data\DeploymentRules" />
     <None Include="_Resource\Data\KeywordsList" />
     <None Include="_Resource\Data\KeywordsHelp" />
+    <None Include="_Resource\Data\ModificationTags" />
     <None Include="_Resource\Data\ProgressTemplates\FunctionImplementation.p" />
     <None Include="_Resource\Data\ProgressTemplates\InternalProcedure.p" />
     <None Include="_Resource\Data\Progress\DeploymentHook.p" />

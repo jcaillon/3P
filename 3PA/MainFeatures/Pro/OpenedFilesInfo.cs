@@ -19,12 +19,9 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.MainFeatures.SyntaxHighlighting;
@@ -34,7 +31,8 @@ namespace _3PA.MainFeatures.Pro {
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
     /// </summary>
-    internal static class FilesInfo {
+    internal static class OpenedFilesInfo {
+
         #region event
 
         public delegate void UpdatedOperation(UpdatedOperationEventArgs args);
@@ -52,7 +50,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Dictionnary, file info for each file opened
         /// </summary>
-        private static Dictionary<string, FileInfoObject> _sessionInfo = new Dictionary<string, FileInfoObject>(StringComparer.CurrentCultureIgnoreCase);
+        private static Dictionary<string, OpenedFileInfo> _sessionInfo = new Dictionary<string, OpenedFileInfo>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
@@ -73,8 +71,8 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Information on the current file
         /// </summary>
-        public static FileInfoObject CurrentFileInfoObject {
-            get { return GetFileInfo(Npp.CurrentFile.Path); }
+        public static OpenedFileInfo CurrentOpenedFileInfo {
+            get { return GetOpenedFileInfo(Npp.CurrentFile.Path); }
         }
 
         /// <summary>
@@ -104,7 +102,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <param name="fullPath"></param>
         /// <returns></returns>
-        public static FileInfoObject GetFileInfo(string fullPath) {
+        public static OpenedFileInfo GetOpenedFileInfo(string fullPath) {
             AddIfNew(fullPath);
             return _sessionInfo[fullPath];
         }
@@ -434,7 +432,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <param name="fullPath"></param>
         private static void AddIfNew(string fullPath) {
             if (!_sessionInfo.ContainsKey(fullPath))
-                _sessionInfo.Add(fullPath, new FileInfoObject());
+                _sessionInfo.Add(fullPath, new OpenedFileInfo());
         }
 
         #endregion
@@ -446,7 +444,7 @@ namespace _3PA.MainFeatures.Pro {
     /// <summary>
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
-    internal class FileInfoObject {
+    internal class OpenedFileInfo {
         private CurrentOperation _currentOperation;
 
         private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
@@ -477,10 +475,9 @@ namespace _3PA.MainFeatures.Pro {
         public ProExecutionHandleCompilation ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
         public string FileFullPath { get; set; }
-
         public bool NeedToCleanScintilla { get; set; }
-
         public bool HasErrorsNotDisplayed { get; set; }
+
     }
 
     /// <summary>

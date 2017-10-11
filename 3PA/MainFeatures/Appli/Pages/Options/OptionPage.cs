@@ -40,6 +40,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// This page is built programatically
     /// </summary>
     internal partial class OptionPage : YamuiPage {
+
         #region fields
 
         private List<string> _allowedGroups;
@@ -97,7 +98,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 scrollPanel.ContentPanel.Controls.Add(label);
 
                 var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
-                var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute) listRangeAttr.FirstOrDefault() : null;
+                var rangeAttr = listRangeAttr.Any() ? (RangeAttribute) listRangeAttr.FirstOrDefault() : null;
 
                 if (valObj is string) {
                     // string
@@ -138,7 +139,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     // number
                     var numControl = new YamuiTextBox {
                         Location = new Point(240, yPos),
-                        Text = ((valObj is int) ? ((int) property.GetValue(configInstance)).ToString() : ((double) property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
+                        Text = valObj is int ? ((int) property.GetValue(configInstance)).ToString() : ((double) property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture),
                         Size = new Size(300, 20),
                         Tag = property.Name
                     };
@@ -188,6 +189,36 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             });
 
             yPos += 15;
+            
+            // add a button for the updates
+            if (_allowedGroups.Contains("Updates")) {
+
+                var updateButton = new YamuiButton {
+                    Location = new Point(30, yPos),
+                    Size = new Size(150, 24),
+                    Text = @"Check for 3P updates",
+                    BackGrndImage = ImageResources.Update
+                };
+                updateButton.ButtonPressed += (sender, args) => Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
+                tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
+                scrollPanel.ContentPanel.Controls.Add(updateButton);
+
+                updateButton = new YamuiButton {
+                    Location = new Point(185, yPos),
+                    Size = new Size(175, 24),
+                    Text = @"Check for Prolint updates",
+                    BackGrndImage = ImageResources.ProlintCode
+                };
+                updateButton.ButtonPressed += (sender, args) => {
+                    Updater<ProlintUpdaterWrapper>.Instance.CheckForUpdate();
+                    Updater<ProparseUpdaterWrapper>.Instance.CheckForUpdate();
+                };
+                tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
+                scrollPanel.ContentPanel.Controls.Add(updateButton);
+
+                yPos += updateButton.Height + 5;
+            }
+            
             _btSave = new YamuiButton {
                 Location = new Point(30, yPos),
                 Size = new Size(120, 24),
@@ -208,19 +239,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             tooltip.SetToolTip(defaultButton, "Click to <b>reset</b> all the options to default");
             scrollPanel.ContentPanel.Controls.Add(defaultButton);
 
-            // add a button for the updates
-            if (_allowedGroups.Contains("Updates")) {
-                var updateButton = new YamuiButton {
-                    Location = new Point(280, yPos),
-                    Size = new Size(150, 24),
-                    Text = @"Check for updates",
-                    BackGrndImage = ImageResources.Update
-                };
-                updateButton.ButtonPressed += (sender, args) => Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
-                tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
-                scrollPanel.ContentPanel.Controls.Add(updateButton);
-            }
-
             scrollPanel.ContentPanel.Height = yPos + 50;
         }
 
@@ -240,11 +258,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // find the corresponding control
             var textBox = (YamuiTextBox) ((YamuiButtonImage) sender).Tag;
             var propertyName = (string) textBox.Tag;
-            textBox.Text = ((new Config.ConfigObject()).GetValueOf(propertyName)).ToString();
-            Config.Instance.SetValueOf(propertyName, ((new Config.ConfigObject()).GetValueOf(propertyName)));
+            textBox.Text = new Config.ConfigObject().GetValueOf(propertyName).ToString();
+            Config.Instance.SetValueOf(propertyName, new Config.ConfigObject().GetValueOf(propertyName));
 
             // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
                 ApplySettings();
             }
             Config.Save();
@@ -263,7 +281,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     return;
                 }
                 // check value
-                var rangeAttr = Config.Instance.GetAttributeOf<RangeAttribute>(propertyName);
+                var rangeAttr = Config.Instance.GetAttributeFrom<RangeAttribute>(propertyName);
                 if (rangeAttr != null) {
                     double maxRange = 9999;
                     double minRange = -9999;
@@ -289,7 +307,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
                 ApplySettings();
             }
             Config.Save();
@@ -302,7 +320,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Instance.SetValueOf(propertyName, toggle.Checked);
 
             // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
                 ApplySettings();
             }
             Config.Save();

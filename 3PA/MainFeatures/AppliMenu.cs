@@ -28,6 +28,7 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
@@ -138,7 +139,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static void ShowMiscMenu() {
-            ShowMenu(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Miscellaneous", "Miscellaneous");
+            ShowMenu(DisableItemIfNeeded(Instance._modificationTagMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Miscellaneous", "Miscellaneous");
         }
 
         public static void ShowEditCodeMenu() {
@@ -185,7 +186,7 @@ namespace _3PA.MainFeatures {
 
         private List<MenuItem> _generateCodeMenuList;
 
-        private List<MenuItem> _miscMenuList;
+        private List<MenuItem> _modificationTagMenuList;
 
         private List<MenuItem> _editCodeList;
 
@@ -254,10 +255,10 @@ namespace _3PA.MainFeatures {
 
             #region Misc
 
-            _miscMenuList = new List<MenuItem> {
+            _modificationTagMenuList = new List<MenuItem> {
                 new MenuItem(this, "Edit current file info", ImageResources.FileInfo, item => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
-                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, item => FileTag.AddTitleBlockAtCaret(), "Insert_title_block", "Ctrl+Alt+M"),
-                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => FileTag.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M")
+                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, item => ModificationTag.AddTitleBlockAtCaret(), "Insert_title_block", "Ctrl+Alt+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, item => ModificationTag.SurroundSelectionWithTag(), "Modif_tags", "Ctrl+M")
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
             };
 
@@ -320,9 +321,9 @@ namespace _3PA.MainFeatures {
                     Generic = true,
                     Children = _editCodeList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
-                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, item => ShowMiscMenu(), "Miscellaneous", "Alt+M") {
+                new MenuItem(this, "Modification tag", ImageResources.ModificationTagMenu, item => ShowMiscMenu(), "Modification_tag", "Alt+M") {
                     Generic = true,
-                    Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList()
+                    Children = _modificationTagMenuList.Cast<FilteredTypeTreeListItem>().ToList()
                 },
                 new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Options", ImageResources.ShowOptions, item => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}

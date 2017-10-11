@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
+using _3PA.MainFeatures.ModificationsTag;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -645,7 +646,7 @@ namespace _3PA.MainFeatures.Pro.Deploy {
 
             if (!Config.Instance.GlobalDontCheckProlintUpdates && (!Updater<ProlintUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0") || !Updater<ProparseUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))) {
                 UserCommunication.NotifyUnique("NeedProlint", 
-                    "The prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of prolint automatically") + "<br><br><i>You will be informed when it is installed and you will be able to use this feature immediately after.<br><br>If you do not wish to download it and see this message again :<br> toggle off automatic updates for prolint in the " + "options".ToHtmlLink("update options page") + ".<br>Please note that in that case, you will need to configure prolint yourself</i>", 
+                    "The Prolint installation folder could not be found in 3P.<br>This is normal if it is the first time that you are using this feature.<br><br>" + "download".ToHtmlLink("Please click here to download the latest release of Prolint automatically") + "<br><br><i>You will be informed when it is installed and you will be able to use this feature immediately after.<br><br>If you do not wish to download it and see this message again :<br> toggle off automatic updates for Prolint in the " + "options".ToHtmlLink("update options page") + ".<br>Please note that in that case, you will need to configure Prolint yourself</i>", 
                     MessageImg.MsgQuestion, "Prolint execution", "Prolint installation not found", args => {
                         if (args.Link.Equals("options")) {
                             args.Handled = true;
@@ -672,8 +673,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
             prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.PreProcQuoter());
             prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + Files.First().SourcePath.PreProcQuoter());
             var filename = Npp.CurrentFile.FileName;
-            if (FileTag.Contains(filename)) {
-                var fileInfo = FileTag.GetLastFileTag(filename);
+            if (FileCustomInfo.Contains(filename)) {
+                var fileInfo = FileCustomInfo.GetLastFileTag(filename);
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.PreProcQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.PreProcQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.PreProcQuoter());
@@ -681,8 +682,8 @@ namespace _3PA.MainFeatures.Pro.Deploy {
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.PreProcQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.PreProcQuoter());
 
-                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagOpening " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener).PreProcQuoter());
-                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagEnding " + FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser).PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagOpening " + ModificationTag.ReplaceTokens(fileInfo, ModificationTagTemplate.Instance.TagOpener).PreProcQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE ModificationTagEnding " + ModificationTag.ReplaceTokens(fileInfo, ModificationTagTemplate.Instance.TagCloser).PreProcQuoter());
             }
             prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProlint " + Updater<ProlintUpdaterWrapper>.Instance.ApplicationFolder.PreProcQuoter());
             prolintProgram.AppendLine("&SCOPED-DEFINE PathDirectoryToProparseAssemblies " + Updater<ProparseUpdaterWrapper>.Instance.ApplicationFolder.PreProcQuoter());

@@ -9,7 +9,6 @@
                 The procedure pi_main() should be the entry point for you modifications !
                 
     Author(s)   : Julien Caillon (julien.caillon@gmail.com)
-    Created     : 09/08/2016
 
   ----------------------------------------------------------------------*/
 /*  This file was created with the 3P :  https://jcaillon.github.io/3P/ */

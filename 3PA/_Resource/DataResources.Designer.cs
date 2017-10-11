@@ -163,6 +163,16 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] ModificationTags {
+            get {
+                object obj = ResourceManager.GetObject("ModificationTags", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ProgressRun {
             get {
                 object obj = ResourceManager.GetObject("ProgressRun", resourceCulture);
