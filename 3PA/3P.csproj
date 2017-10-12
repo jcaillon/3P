@@ -239,12 +239,6 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\ExportPage.Designer.cs">
       <DependentUpon>ExportPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
-      <DependentUpon>OthersPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -320,6 +314,10 @@
     </Compile>
     <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
     <Content Include="_Resource\Images\Appli\Clock.png" />
+    <Content Include="_Resource\Images\ErrorProviderIcons\IcoError.ico" />
+    <Content Include="_Resource\Images\ErrorProviderIcons\IcoMandatory.ico" />
+    <Content Include="_Resource\Images\ErrorProviderIcons\IcoOk.ico" />
+    <Content Include="_Resource\Images\ErrorProviderIcons\IcoWarning.ico" />
     <Content Include="_Resource\Images\FilesExt\ExtCab.png" />
     <Content Include="_Resource\Images\FilesExt\ExtCls.png" />
     <Content Include="_Resource\Images\FilesExt\ExtD.png" />
@@ -675,9 +673,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ProfilesPage.resx">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
-      <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.resx">
       <DependentUpon>SetDeploymentRules.cs</DependentUpon>

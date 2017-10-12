@@ -148,13 +148,8 @@ namespace YamuiFramework.Forms {
                 // Build rows for each item
                 yPos += 10;
                 for (int i = 0; i < _items.Count; i++) {
-                    var inputControl = InsertInputForItem(i, ref yPos);
-                    contentPanel.ContentPanel.Controls.Add(inputControl);
+                    contentPanel.ContentPanel.Controls.Add(InsertInputForItem(i, ref yPos));
                     contentPanel.ContentPanel.Controls.Add(InsertLabelForItem(i, ref yPos));
-
-                    // add tooltip on the control
-                    if (_items[i] != null && !string.IsNullOrEmpty(GetAttr(_items[i]).Tooltip))
-                        _tooltip.SetToolTip(inputControl, GetAttr(_items[i]).Tooltip);
                 }
                 contentPanel.ContentPanel.Height = yPos;
             }
@@ -343,6 +338,10 @@ namespace YamuiFramework.Forms {
             // Set standard props
             retVal.Name = "input" + i;
 
+            // add tooltip on the control
+            if (_items[i] != null && !string.IsNullOrEmpty(GetAttr(_items[i]).Tooltip))
+                _tooltip.SetToolTip(retVal, GetAttr(_items[i]).Tooltip);
+
             return retVal;
         }
 
@@ -384,11 +383,7 @@ namespace YamuiFramework.Forms {
         private bool IsTextInvalid(YamuiTextBox tb, Type itemType) {
             if (string.IsNullOrEmpty(tb.Text))
                 return false;
-            Predicate<string> p;
-            Utilities.Validations.TryGetValue(itemType, out p);
-            if (p != null)
-                return !p(tb.Text);
-            return false;
+            return !tb.Text.CanConvertToType(itemType);
         }
 
         private YamuiInputAttribute GetAttr(MemberInfo mi) {

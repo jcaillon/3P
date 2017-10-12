@@ -799,4 +799,16 @@
   <data name="ModificationTagMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\menu\modificationtagmenu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="IcoError" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\errorprovidericons\icoerror.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoMandatory" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\errorprovidericons\icomandatory.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\errorprovidericons\icook.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>images\errorprovidericons\icowarning.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

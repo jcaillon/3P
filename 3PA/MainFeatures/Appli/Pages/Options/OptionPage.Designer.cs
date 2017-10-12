@@ -27,9 +27,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.scrollPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // tooltip
@@ -61,6 +64,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
+            // errorProvider
+            // 
+            this.errorProvider.ContainerControl = this;
+            // 
             // OptionPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -70,6 +77,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.Name = "OptionPage";
             this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -78,5 +86,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private HtmlToolTip tooltip;
         private YamuiScrollPanel scrollPanel;
+        private System.Windows.Forms.ErrorProvider errorProvider;
     }
 }

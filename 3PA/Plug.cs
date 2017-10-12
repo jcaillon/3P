@@ -200,7 +200,7 @@ namespace _3PA {
                 } else if (!Config.Instance.NppStoppedCorrectly) {
                     // Npp didn't stop correctly, if the backup mode is activated, inform the user
                     if (Npp.ConfXml.BackupMode > 0) {
-                        UserCommunication.Notify("It seems that notepad++ didn't stop correctly.<br>If you lost some modifications, don't forget that you have a backup folder here :<br><br>" + Npp.ConfXml.BackupDirectory.ToHtmlLink() + (Npp.ConfXml.BackupUseCustomDir ? "<br>" + Npp.ConfXml.CustomBackupDirectory.ToHtmlLink() : ""), MessageImg.MsgInfo, "Notepad++ crashed", "Backup folder location");
+                        UserCommunication.Notify("It seems that notepad++ didn't stop correctly.<br>If you lost some modifications, don't forget that you have a backup folder here :<br><br><div>" + Npp.ConfXml.BackupDirectory.ToHtmlLink() + "</div>" + (Npp.ConfXml.BackupUseCustomDir ? "<div>" + Npp.ConfXml.CustomBackupDirectory.ToHtmlLink() + "</div>" : ""), MessageImg.MsgInfo, "Notepad++ crashed", "Backup folder location");
                     }
                 } else if (!Style.InstallUdl(true)) {
                     Style.InstallUdl();
@@ -210,6 +210,11 @@ namespace _3PA {
 
                 // check if an update was done and start checking for new updates
                 Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
+
+                if (Updater<ProlintUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))
+                    Updater<ProlintUpdaterWrapper>.Instance.StartCheckingForUpdate();
+                if (Updater<ProparseUpdaterWrapper>.Instance.LocalVersion.IsHigherVersionThan("v0"))
+                    Updater<ProparseUpdaterWrapper>.Instance.StartCheckingForUpdate();
 
                 // Try to update the configuration from the distant shared folder
                 ShareExportConf.StartCheckingForUpdates();
@@ -854,7 +859,7 @@ namespace _3PA {
         private static void ModifyingNppConfig(object opts, bool installMode) {
             var options = opts as Npp.NppConfig.NppConfigXmlOptions;
             if (options != null) {
-                var buttons = installMode ? new List<string> { "Apply changes now (restart)" } : new List<string> { "Apply changes now (restart)", "Cancel" };
+                var buttons = installMode ? new List<string> { "Apply changes now" } : new List<string> { "Apply changes now (restart)", "Cancel" };
 
                 var awnser = UserCommunication.Input(ref opts, (installMode ? "You are almost done with the installation!<br>" : "") + "You can now setup some configurations for notepad++.<br><b>It is highly recommended to " + (installMode ? "let all the options toggled ON" : "toggle ON all the options") + "</b> :<br><br>", MessageImg.MsgUpdate, "3P setup", "Modifying notepad++ options", buttons);
 

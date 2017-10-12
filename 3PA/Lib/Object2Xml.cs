@@ -25,12 +25,14 @@ using System.Linq;
 using System.Xml.Linq;
 
 namespace _3PA.Lib {
+
     /// <summary>
     /// A class to read and write an object instance
     /// FYI : no fields of the T class can be null when saving an instance
     /// TODO: save more than a simple string, string dico
     /// </summary>
     public static class Object2Xml<T> {
+
         #region Fields
 
         private const string RootString = "Root";

@@ -32,6 +32,7 @@ using _3PA.NppCore;
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
+
     /// <summary>
     /// Holds the configuration of the application, this class is a singleton and
     /// you should call it like this : Config.Instance.myparam
@@ -44,7 +45,7 @@ namespace _3PA.MainFeatures {
         /// The config object, should not be used
         /// Each field can have display attributes, they are used in the options pages to automatically
         /// generates the pages
-        /// Set AutoGenerateField to refresh certain options that need special treatment to appear changed (see option page)
+        /// Set NeedApplySetting to refresh certain options that need special treatment to appear changed (see option page)
         /// </summary>
         internal class ConfigObject {
             //[StringLength(15)]
@@ -55,62 +56,55 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// GENERAL
             /// </summary>
-            [Display(Name = "User name",
-                Description = "Used for modification tags",
-                GroupName = "General",
-                AutoGenerateField = false)]
-            public string UserName = GetTrigramFromPa();
+            [ConfigAttribute(Label = "User name",
+                Tooltip = "Used for modification tags",
+                GroupName = "General")]
+            public string UserName = "";
 
-            [Display(Name = "Progress 4GL file patterns",
-                Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Progress 4GL file patterns",
+                Tooltip = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
+                GroupName = "General")]
             public string FilesPatternProgress = "*.p,*.i,*.w,*.t,*.cls,*.dbg,*.df";
 
-            [Display(Name = "Npp files patterns",
-                Description = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Npp files patterns",
+                Tooltip = "A comma separated list of patterns that identify a file that must be open by Npp from the file explorer<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wild-cards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
+                GroupName = "General")]
             public string FilesPatternNppOpenable = "*.txt,*.boi,*.sh,*.cmd,*.xrf,*.lis,*.xml";
 
-            [Display(Name = "Path to the help file",
-                Description = "Should point to the progress documentation file (lgrfeng.chm)",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Path to the help file",
+                Tooltip = "Should point to the progress documentation file (lgrfeng.chm)",
+                GroupName = "General")]
             public string GlobalHelpFilePath = "";
 
-            [Display(Name = "Never use Prowin in batch mode",
-                Description = "For performance considerations and in order to avoid the Progress splash screen,<br>3P starts the Prowin process for compilation in batch mode (-b option)<br>If you absolutely want to avoid having the Prowin process creating a window in the taskbar,<br>you can toggle on this option and the -b option will never be used<br><br><i>The batch mode is slighty faster than its counterpart!</i>",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Never use Prowin in batch mode",
+                Tooltip = "For performance considerations and in order to avoid the Progress splash screen,<br>3P starts the Prowin process for compilation in batch mode (-b option)<br>If you absolutely want to avoid having the Prowin process creating a window in the taskbar,<br>you can toggle on this option and the -b option will never be used<br><br><i>The batch mode is slighty faster than its counterpart!</i>",
+                GroupName = "General")]
             public bool NeverUseProwinInBatchMode = false;
 
-            [Display(Name = "Use default values in file info",
-                Description = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Use default values in file info",
+                Tooltip = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
+                GroupName = "General")]
             public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
-            [Display(Name = "Always show a notification after a compilation",
-                Description = "Whether or not to systematically show a notification after a compilation<br>By default, a notification is shown if notepad++ doesn't have the focus or if they are errors",
-                GroupName = "General",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Always show a notification after a compilation",
+                Tooltip = "Whether or not to systematically show a notification after a compilation<br>By default, a notification is shown if notepad++ doesn't have the focus or if they are errors",
+                GroupName = "General")]
             public bool CompileAlwaysShowNotification = true;
 
-            [Display(Name = "Allow tab animation",
-                Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
+            [ConfigAttribute(Label = "Allow tab animation",
+                Tooltip = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
                 GroupName = "General",
-                AutoGenerateField = true)]
+                NeedApplySetting = true
+                )]
             public bool AppliAllowTabAnimation = true;
 
-            [Display(Name = "Show tree branches",
-                Description = "Whether or not you want to draw the branches of the trees displayed in 3P (for the file and code explorer)",
+            [Config(Label = "Show tree branches",
+                Tooltip = "Whether or not you want to draw the branches of the trees displayed in 3P (for the file and code explorer)",
                 GroupName = "General",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             public bool ShowTreeBranches = false;
 
             public bool GlobalShowDetailedHelpForErrors = true;
-
             public bool UserFirstUse = true;
             public bool NppOutdatedVersion = false;
 
@@ -118,40 +112,34 @@ namespace _3PA.MainFeatures {
 
             #region COMPILATION
 
-            [Display(Name = "Compilable file patterns",
-                Description = "A comma separated list of patterns that identify a compilable Progress file<br>It is used to check if you can compile / check syntax / execute the current file<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Compilable file patterns",
+                Tooltip = "A comma separated list of patterns that identify a compilable Progress file<br>It is used to check if you can compile / check syntax / execute the current file<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
+                GroupName = "Compilation")]
             public string FilesPatternCompilable = "*.p,*.w,*.t,*.cls";
 
-            [Display(Name = "Always use a temp directory to compile",
-                Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Always use a temp directory to compile",
+                Tooltip = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
+                GroupName = "Compilation")]
             public bool CompileForceUseOfTemp = false;
 
-            [Display(Name = "Compile with debug-list",
-                Description = "A compilation option, see the help for the COMPILE statement",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Compile with debug-list",
+                Tooltip = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation")]
             public bool CompileWithDebugList = false;
 
-            [Display(Name = "Compile with xref",
-                Description = "A compilation option, see the help for the COMPILE statement",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Compile with xref",
+                Tooltip = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation")]
             public bool CompileWithXref = false;
 
-            [Display(Name = "Compile with listing",
-                Description = "A compilation option, see the help for the COMPILE statement",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Compile with listing",
+                Tooltip = "A compilation option, see the help for the COMPILE statement",
+                GroupName = "Compilation")]
             public bool CompileWithListing = false;
 
-            [Display(Name = "Get xref in xml format",
-                Description = "Compile with the XREF-XML option instead of XREF",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Get xref in xml format",
+                Tooltip = "Compile with the XREF-XML option instead of XREF",
+                GroupName = "Compilation")]
             public bool CompileUseXmlXref = false;
 
             public string CompileDirectoriesHistoric = "";
@@ -162,52 +150,44 @@ namespace _3PA.MainFeatures {
 
             #region UPDATES
 
-            [Display(Name = "I want to get beta releases",
-                Description = "Check this option if you want to update 3P with the latest beta version <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "I want to get beta releases",
+                Tooltip = "Check this option if you want to update 3P with the latest beta version <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
+                GroupName = "Updates")]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
 
-            [Display(Name = "No automatic updates for 3P",
-                Description = "Toggle this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "No automatic updates for 3P",
+                Tooltip = "Toggle this option to prevent 3P from automatically checking for a new version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+                GroupName = "Updates")]
             public bool GlobalDontCheckUpdates = false;
 
-            [Display(Name = "No automatic updates for prolint",
-                Description = "Toggle this option to prevent 3P from automatically checking for a new version of prolint on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "No automatic updates for prolint",
+                Tooltip = "Toggle this option to prevent 3P from automatically checking for a new version of prolint on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+                GroupName = "Updates")]
             public bool GlobalDontCheckProlintUpdates = false;
 
-            [Display(Name = "Do not install syntax highlighting on update",
-                Description = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Do not install syntax highlighting on update",
+                Tooltip = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
+                GroupName = "Updates")]
             public bool GlobalDontUpdateUdlOnUpdate = false;
 
-            [Display(Name = "Use a webproxy for updates",
-                Description = "Toggle this option to use the http(s) proxy defined below when querying updates from github",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Use a webproxy for updates",
+                Tooltip = "Toggle this option to use the http(s) proxy defined below when querying updates from github",
+                GroupName = "Updates")]
             public bool WebUseProxy = false;
 
-            [Display(Name = "Webproxy URI",
-                Description = "Configure your proxy here<br><i>http://host:port/</i>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Webproxy URI",
+                Tooltip = "Configure your proxy here<br><i>http://host:port/</i>",
+                GroupName = "Updates")]
             public string WebProxyUri = @"";
 
-            [Display(Name = "Webproxy Username (if any)",
-                Description = "If your proxy is using authentication fill the username here, otherwise leave empty",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Webproxy Username (if any)",
+                Tooltip = "If your proxy is using authentication fill the username here, otherwise leave empty",
+                GroupName = "Updates")]
             public string WebProxyUsername = @"";
 
-            [Display(Name = "Webproxy Password (if any)",
-                Description = "If your proxy is using authentication fill the password here, otherwise leave empty<br><b>Please notice that your password will be stored in plain text!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Webproxy Password (if any)",
+                Tooltip = "If your proxy is using authentication fill the password here, otherwise leave empty<br><b>Please notice that your password will be stored in plain text!</b>",
+                GroupName = "Updates")]
             public string WebProxyPassword = @"";
 
             public string DebugReleasesApi = @"";
@@ -219,153 +199,95 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// AUTOCOMPLETION
             /// </summary>
-            [Display(Name = "Show auto completion on key input",
-                Description = "Automatically show the auto completion list when you start entering characters",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Show auto completion on key input",
+                Tooltip = "Automatically show the auto completion list when you start entering characters",
+                GroupName = "Autocompletion")]
             public bool AutoCompleteOnKeyInputShowSuggestions = true;
 
-            [Display(Name = "Start showing after X char",
-                Description = "If you chose to display the list on key input,<br> you can set the minimum number of char necessary before showing the list ",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Start showing after X char",
+                Tooltip = "If you chose to display the list on key input,<br> you can set the minimum number of char necessary before showing the list ",
+                GroupName = "Autocompletion")]
             [Range(1, 99)]
             public int AutoCompleteStartShowingListAfterXChar = 1;
 
-            [Display(Name = "Hide auto completion if empty",
-                Description = "If the list was displayed automatically and there are no suggestions matching your input,<br>this option will automatically hide the list instead of showing it empty",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Hide auto completion if empty",
+                Tooltip = "If the list was displayed automatically and there are no suggestions matching your input,<br>this option will automatically hide the list instead of showing it empty",
+                GroupName = "Autocompletion")]
             public bool AutoCompleteOnKeyInputHideIfEmpty = true;
 
-            [Display(Name = "Show children on separator input",
-                Description = "Choose this option to immediately show the auto completion after a '.' or a ':'<br>Otherwise 3P waits for the set number of characters to show it",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Show children on separator input",
+                Tooltip = "Choose this option to immediately show the auto completion after a '.' or a ':'<br>Otherwise 3P waits for the set number of characters to show it",
+                GroupName = "Autocompletion")]
             public bool AutoCompleteShowChildrenAfterSeparator = true;
 
-            [Display(Name = "Use TAB to accept a suggestion",
-                Description = "Whether or not to allow the TAB key to accept the suggestion",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Use TAB to accept a suggestion",
+                Tooltip = "Whether or not to allow the TAB key to accept the suggestion",
+                GroupName = "Autocompletion")]
             public bool AutoCompleteUseTabToAccept = true;
 
-            [Display(Name = "User ENTER to accept a suggestion",
-                Description = "Whether or not to allow the ENTER key to accept the suggestion",
-                GroupName = "Autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "User ENTER to accept a suggestion",
+                Tooltip = "Whether or not to allow the ENTER key to accept the suggestion",
+                GroupName = "Autocompletion")]
             public bool AutoCompleteUseEnterToAccept = true;
 
-            [Display(Name = "Unfocused opacity",
-                Description = "The opacity of the list when unfocused",
+            [ConfigAttribute(Label = "Unfocused opacity",
+                Tooltip = "The opacity of the list when unfocused",
                 GroupName = "Autocompletion",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             [Range(0.1, 1)]
             public double AutoCompleteUnfocusedOpacity = 0.92;
 
-            [Display(Name = "Focused opacity",
-                Description = "The opacity of the list when focused",
+            [ConfigAttribute(Label = "Focused opacity",
+                Tooltip = "The opacity of the list when focused",
                 GroupName = "Autocompletion",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             [Range(0.1, 1)]
             public double AutoCompleteFocusedOpacity = 0.92;
 
-            /// <summary>
-            /// NPP AUTOCOMPLETION
-            /// </summary>
-            [Display(Name = "Maximum length for the parser",
-                Description = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public int NppAutoCompleteMaxLengthToParse = 5000000;
-
-            [Display(Name = "Ignore numbers",
-                Description = "Should the autocompletion ignore numbers when parsing for words to suggest?",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public bool NppAutoCompleteIgnoreNumbers = false;
-
-            [Display(Name = "Insert current suggestion on word end",
-                Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public bool NppAutoCompleteInsertSelectedSuggestionOnWordEnd = false;
-
-            [Display(Name = "Auto-case as I'm typing",
-                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public bool NppAutoCompleteAutoCase = false;
-
-            [Display(Name = "Minimum length required for suggested words",
-                Description = "Words in your document that have a length strictly inferior to this value<br>will not appear in the autocompletion",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public int NppAutoCompleteMinWordLengthRequired = 2;
-
-            [Display(Name = "Filter case sensitivity",
-                Description = "As you type, the autocompletion list will be filtered to the best matches,<br>this option let you chose the behavior of the filter.<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = false)]
-            public AutoCompletion.CaseMode NppAutoCompleteFilterCaseMode = AutoCompletion.CaseMode.Insensitive;
-
-            [Display(Name = "Keywords list case sensitivity",
-                Description = "Chose how keywords are added to the autocompletion list :<br>- a word can appear several times with different cases (sensitive)<br>- or only once no matter its case (insensitive)<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
-                GroupName = "Default autocompletion replacement",
-                AutoGenerateField = true)]
-            public AutoCompletion.CaseMode NppAutoCompleteParserCaseMode = AutoCompletion.CaseMode.Sensitive;
 
             /// <summary>
             /// PROGRESS AUTOCOMPLETION
             /// </summary>
-            [Display(Name = "Show list in comments and strings",
-                Description = "By default, the auto completion list is hidden in comments and strings<br>you can still show the completion list manually!",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Show list in comments and strings",
+                Tooltip = "By default, the auto completion list is hidden in comments and strings<br>you can still show the completion list manually!",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteShowInCommentsAndStrings = false;
 
-            [Display(Name = "Insert current suggestion on word end",
-                Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Insert current suggestion on word end",
+                Tooltip = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
 
-            [Display(Name = "Auto-case as I'm typing",
-                Description = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Auto-case as I'm typing",
+                Tooltip = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteAutoCase = true;
 
-            [Display(Name = "Keywords case",
-                Description = "Change the case of each word displayed in the auto completion to :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (0)",
+            [ConfigAttribute(Label = "Keywords case",
+                Tooltip = "Change the case of each word displayed in the auto completion to :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (0)",
                 GroupName = "Progress autocompletion",
-                AutoGenerateField = true)]
-            [Range(0, 3)]
-            public int AutoCompleteKeywordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+                NeedApplySetting = true)]
+            public Extensions.CaseMode AutoCompleteKeywordCaseMode = Extensions.CaseMode.Default;
 
-            [Display(Name = "Database words case",
-                Description = "Change the case of each information extracted from the database (db name, tables, fields, sequences) to :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (0)",
+            [ConfigAttribute(Label = "Database words case",
+                Tooltip = "Change the case of each information extracted from the database (db name, tables, fields, sequences) to :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (0)",
                 GroupName = "Progress autocompletion",
-                AutoGenerateField = true)]
-            [Range(0, 3)]
-            public int AutoCompleteDatabaseWordCaseMode = 0; // 0 = default, 1 = upper, 2 = lower, 3 = camel
+                NeedApplySetting = true)]
+            public Extensions.CaseMode AutoCompleteDatabaseWordCaseMode = Extensions.CaseMode.Default;
 
-            [Display(Name = "Insert full word instead of abbreviations",
-                Description = "Automatically replaces abbreviations by their full length counterparts",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Insert full word instead of abbreviations",
+                Tooltip = "Automatically replaces abbreviations by their full length counterparts",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteReplaceAbbreviations = true;
 
-            [Display(Name = "Auto replace semicolon",
-                Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Auto replace semicolon",
+                Tooltip = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteReplaceSemicolon = true;
 
-            [Display(Name = "Only show already defined variables",
-                Description = "By default, 3P filters the autocompletion list to only show you<br>the items that are available at the line where you activate<br>the autocompletion list.<br>You can set this option to false to show an item even if,<br>for the line where your cursor is, it is not yet defined.",
-                GroupName = "Progress autocompletion",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Only show already defined variables",
+                Tooltip = "By default, 3P filters the autocompletion list to only show you<br>the items that are available at the line where you activate<br>the autocompletion list.<br>You can set this option to false to show an item even if,<br>for the line where your cursor is, it is not yet defined.",
+                GroupName = "Progress autocompletion")]
             public bool AutoCompleteOnlyShowDefinedVar = true;
 
             // Height of the autocompletion form
@@ -378,6 +300,46 @@ namespace _3PA.MainFeatures {
 
             public string AutoCompleteItemPriorityList = "";
 
+
+            /// <summary>
+            /// NPP AUTOCOMPLETION
+            /// </summary>
+            [ConfigAttribute(Label = "Maximum length for the parser",
+                Tooltip = "The maximum length of text that should be analyzed by the parser<br>Please note that this is a length relative to your position in the file.<br>If you scroll down on a big text, 3P will parse the text around your current location",
+                GroupName = "Default autocompletion replacement")]
+            public int NppAutoCompleteMaxLengthToParse = 5000000;
+
+            [ConfigAttribute(Label = "Ignore numbers",
+                Tooltip = "Should the autocompletion ignore numbers when parsing for words to suggest?",
+                GroupName = "Default autocompletion replacement")]
+            public bool NppAutoCompleteIgnoreNumbers = false;
+
+            [ConfigAttribute(Label = "Insert current suggestion on word end",
+                Tooltip = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
+                GroupName = "Default autocompletion replacement")]
+            public bool NppAutoCompleteInsertSelectedSuggestionOnWordEnd = false;
+
+            [ConfigAttribute(Label = "Auto-case as I'm typing",
+                Tooltip = "Let 3P automatically correct the case of each word you type<br><i>If there is a match between the word you typed and an item in the autocompletion,<br>the case will be corrected with the autocompletion value</i>",
+                GroupName = "Default autocompletion replacement")]
+            public bool NppAutoCompleteAutoCase = false;
+
+            [ConfigAttribute(Label = "Minimum length required for suggested words",
+                Tooltip = "Words in your document that have a length strictly inferior to this value<br>will not appear in the autocompletion",
+                GroupName = "Default autocompletion replacement")]
+            public int NppAutoCompleteMinWordLengthRequired = 2;
+
+            [ConfigAttribute(Label = "Filter case sensitivity",
+                Tooltip = "As you type, the autocompletion list will be filtered to the best matches,<br>this option let you chose the behavior of the filter.<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
+                GroupName = "Default autocompletion replacement")]
+            public AutoCompletion.CaseMode NppAutoCompleteFilterCaseMode = AutoCompletion.CaseMode.Insensitive;
+
+            [ConfigAttribute(Label = "Keywords list case sensitivity",
+                Tooltip = "Chose how keywords are added to the autocompletion list :<br>- a word can appear several times with different cases (sensitive)<br>- or only once no matter its case (insensitive)<br><br><i>The value to mimic the behavior of notepad++ would be sensitive</i>",
+                GroupName = "Default autocompletion replacement",
+                NeedApplySetting = true)]
+            public AutoCompletion.CaseMode NppAutoCompleteParserCaseMode = AutoCompletion.CaseMode.Sensitive;
+
             #endregion
 
             #region CODE EDITION
@@ -385,35 +347,31 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// CODE EDITION
             /// </summary>
-            [Display(Name = "Max number of characters in a block",
-                Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This value allows to show a warning when you overpass the limit in notepad++",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Max number of characters in a block",
+                Tooltip = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This value allows to show a warning when you overpass the limit in notepad++",
+                GroupName = "Code edition")]
             public int GlobalMaxNbCharInBlock = 31190;
 
-            [Display(Name = "Tab width",
-                Description = "The number of spaces that will be inserted when you press TAB and re-indent the code",
+            [ConfigAttribute(Label = "Tab width",
+                Tooltip = "The number of spaces that will be inserted when you press TAB and re-indent the code",
                 GroupName = "Code edition",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             [Range(0, 10)]
             public int CodeTabSpaceNb = 4;
 
-            [Display(Name = "Activate 'Show spaces' on progress files",
-                Description = "Toggle on/off to activate the 'show spaces' notepad++ option when switching to a progress file<br>This option let the user see the spaces as dots and tabs as arrows in its document",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Activate 'Show spaces' on progress files",
+                Tooltip = "Toggle on/off to activate the 'show spaces' notepad++ option when switching to a progress file<br>This option let the user see the spaces as dots and tabs as arrows in its document",
+                GroupName = "Code edition")]
             public bool CodeShowSpaces = true;
 
-            [Display(Name = "Disable auto update of function prototypes",
-                Description = "Toggle on to prevent 3P from automatically updating your functions prototypes according to their implementation<br>You are still able to manually trigger the update through the menu",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Disable auto update of function prototypes",
+                Tooltip = "Toggle on to prevent 3P from automatically updating your functions prototypes according to their implementation<br>You are still able to manually trigger the update through the menu",
+                GroupName = "Code edition")]
             public bool DisablePrototypeAutoUpdate = false;
 
-            [Display(Name = "Display parser errors on save",
-                Description = "Each time you save a progress file, this will validate that it can be read by the AppBuilder.<br>It checks the length of each block and the syntax of AppBuilder pre-processed statements",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Display parser errors on save",
+                Tooltip = "Each time you save a progress file, this will validate that it can be read by the AppBuilder.<br>It checks the length of each block and the syntax of AppBuilder pre-processed statements",
+                GroupName = "Code edition")]
             public bool DisplayParserErrorsOnSave = true;
 
             #endregion
@@ -426,22 +384,19 @@ namespace _3PA.MainFeatures {
             /// 
             public bool FileExplorerVisible = true;
 
-            [Display(Name = "Ignore unix hidden folder",
-                Description = "Check to ignore all the files/folders starting with a dot '.'",
-                GroupName = "File explorer",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Ignore unix hidden folder",
+                Tooltip = "Check to ignore all the files/folders starting with a dot '.'",
+                GroupName = "File explorer")]
             public bool FileExplorerIgnoreUnixHiddenFolders = true;
 
-            [Display(Name = "Auto-hide/show for progress documents",
-                Description = "Check this option to automatically hide the File explorer when the current isn't<br>a progress file, and automatically show it when it is",
-                GroupName = "File explorer",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Auto-hide/show for progress documents",
+                Tooltip = "Check this option to automatically hide the File explorer when the current isn't<br>a progress file, and automatically show it when it is",
+                GroupName = "File explorer")]
             public bool FileExplorerAutoHideOnNonProgressFile = false;
 
-            [Display(Name = "File listing time out",
-                Description = "The maximum time given to 3P to list the files of your current directory<br>This option is here to limit the amount of time spent to build<br>a list of you files. This time can be huge if you select<br>a folder with a lot of files or if you select a folder on a windows server",
-                GroupName = "File explorer",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "File listing time out",
+                Tooltip = "The maximum time given to 3P to list the files of your current directory<br>This option is here to limit the amount of time spent to build<br>a list of you files. This time can be huge if you select<br>a folder with a lot of files or if you select a folder on a windows server",
+                GroupName = "File explorer")]
             [Range(1000, 30000)]
             public int FileExplorerListFilesTimeOutInMs = 3000;
 
@@ -461,10 +416,9 @@ namespace _3PA.MainFeatures {
             public bool CodeExplorerDisplayPersistentItems = false;
             public bool CodeExplorerDisplayItemsFromInclude = true;
 
-            [Display(Name = "Auto-hide/show for progress documents",
-                Description = "Check this option to automatically hide the Code explorer when the current isn't<br>a progress file, and automatically show it when it is",
-                GroupName = "Code explorer",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Auto-hide/show for progress documents",
+                Tooltip = "Check this option to automatically hide the Code explorer when the current isn't<br>a progress file, and automatically show it when it is",
+                GroupName = "Code explorer")]
             public bool CodeExplorerAutoHideOnNonProgressFile = false;
 
             public SortingType CodeExplorerSortingType;
@@ -476,32 +430,37 @@ namespace _3PA.MainFeatures {
             /// <summary>
             /// TOOLTIPS
             /// </summary>
-            [Display(Name = "Deactivate all tooltips",
-                Description = "Don't do that, it would be a shame to not use them!",
-                GroupName = "Tooltip",
-                AutoGenerateField = false)]
+            [ConfigAttribute(Label = "Deactivate all tooltips",
+                Tooltip = "Don't do that, it would be a shame to not use them!",
+                GroupName = "Tooltip")]
             public bool ToolTipDeactivate = false;
 
-            [Display(Name = "Idle time to spawn",
-                Description = "The amount of time in milliseconds that you have to left your<br>mouse over a word before it shows its tooltip",
+            [ConfigAttribute(Label = "Idle time to spawn",
+                Tooltip = "The amount of time in milliseconds that you have to left your<br>mouse over a word before it shows its tooltip",
                 GroupName = "Tooltip",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             [Range(0, 5000)]
             public int ToolTipmsBeforeShowing = 500;
 
-            [Display(Name = "Opacity",
-                Description = "The tooltip opacity",
+            [ConfigAttribute(Label = "Opacity",
+                Tooltip = "The tooltip opacity",
                 GroupName = "Tooltip",
-                AutoGenerateField = true)]
+                NeedApplySetting = true)]
             [Range(0.1, 1)]
             public double ToolTipOpacity = 0.92;
 
             #endregion
+            
+            #region SWITCH ENCODING
 
-            #region MISC
-
+            [Config(Label = "Automatically change encoding on file opening",
+                Tooltip = "<i>Leave empty to disable this feature (default)</i><br>A comma (,) separated list of filters :<br>when a file is opened, if it matches one of the filter, the selected encoding is applied<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*.p,\\*my_sub_directory\\*,*.r</div>",
+                GroupName = "Switch encoding")]
             public string AutoSwitchEncodingForFilePatterns = "";
 
+            [Config(Label = "Encoding to apply",
+                Tooltip = "Choose the encoding to apply to the files when they are opened<br><i>The default option is 'Automatic', to let Notepad++ select the encoding</i>",
+                GroupName = "Switch encoding")]
             public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
 
             #endregion
@@ -755,12 +714,20 @@ namespace _3PA.MainFeatures {
 
         // updates related
 
+        public static string FileUpdaterExe {
+            get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); }
+        }
+
+        public static string FileUpdaterLst {
+            get { return Path.Combine(Path.GetDirectoryName(FileUpdaterExe) ?? "", "3pUpdater.lst"); }
+        }
+
         // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
         public static string GitHubBasicAuthenticationToken {
             get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
         }
 
-        public static int UpdateCheckEveryXMin = 6 * 60;
+        public static int UpdateCheckEveryXMin = 8 * 60;
 
         /// <summary>
         /// Url for the github webservices
@@ -784,14 +751,6 @@ namespace _3PA.MainFeatures {
         // name of the zip file containing the release in the assets of the release
         public static string UpdateGitHubAssetName {
             get { return @"3P" + (Environment.Is64BitProcess ? "_x64" : "") + ".zip"; }
-        }
-
-        public static string FileUpdaterExe {
-            get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); }
-        }
-
-        public static string FileUpdaterLst {
-            get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); }
         }
         
         // Prolint
@@ -857,16 +816,6 @@ namespace _3PA.MainFeatures {
             return output;
         }
 
-        public static string GetTrigramFromPa() {
-            // default values
-            string paIniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ProgressAssist", "pa.ini");
-            if (File.Exists(paIniPath)) {
-                IniReader ini = new IniReader(paIniPath);
-                return ini.GetValue("Trigram", "");
-            }
-            return "";
-        }
-
         #endregion
 
         #region private
@@ -910,6 +859,41 @@ namespace _3PA.MainFeatures {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when saving settings");
             }
+        }
+
+        #endregion
+
+        #region ConfigAttribute
+
+        [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+        public class ConfigAttribute : Attribute {
+            public ConfigAttribute() { }
+
+            public ConfigAttribute(string label) {
+                Label = label;
+            }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this item is hidden and not displayed
+            /// </summary>
+            public bool Hidden { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the label to use as the label for this field or property
+            /// </summary>
+            public string GroupName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the label to use as the label for this field or property
+            /// </summary>
+            public string Label { get; set; }
+
+            /// <summary>
+            /// Text to show in the tooltip
+            /// </summary>
+            public string Tooltip { get; set; }
+            
+            public bool NeedApplySetting { get; set; }
         }
 
         #endregion

@@ -28,6 +28,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using _3PA.Lib.CommonMark;
+using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -75,8 +76,7 @@ namespace _3PA.Lib {
                 return true;
             }
             fieldInfo.SetValue(instance, value);
-            //var converter = TypeDescriptor.GetConverter(property.FieldType);
-            //property.SetValue(this, converter.);
+
             return true;
         }
 
@@ -533,18 +533,34 @@ namespace _3PA.Lib {
         /// <summary>
         /// autocase the keyword according to the mode given
         /// </summary>
-        public static string ConvertCase(this string keyword, int mode, string naturalCase = null) {
+        public static string ConvertCase(this string keyword, CaseMode mode, string naturalCase = null) {
             switch (mode) {
-                case 1:
+                case CaseMode.UpperCase:
                     return keyword.ToUpper();
-                case 2:
+                case CaseMode.LowerCase:
                     return keyword.ToLower();
-                case 3:
+                case CaseMode.Camel:
                     return keyword.ToTitleCase();
                 default:
                     return naturalCase ?? keyword;
             }
         }
+
+        #region CaseMode
+
+        public enum CaseMode {
+            // 0 = default, 1 = upper, 2 = lower, 3 = camel
+            [Description("As it appears in the documentation")]
+            Default = 0,
+            [Description("Use UPPER CASE")]
+            UpperCase = 1,
+            [Description("Use lower case")]
+            LowerCase = 2,
+            [Description("Use Camel Case")]
+            Camel = 3
+        }
+
+        #endregion
 
         /// <summary>
         /// Count the nb of occurrences...
@@ -637,6 +653,12 @@ namespace _3PA.Lib {
             return false;
         }
 
+        /// <summary>
+        /// Trim the end space characters in the string builder (can be limited to maxOccurences)
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="maxOccurence"></param>
+        /// <returns></returns>
         public static StringBuilder TrimEnd(this StringBuilder builder, int maxOccurence = 0) {
             int occurence = 0;
             if (builder.Length > 0) {

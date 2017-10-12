@@ -127,5 +127,16 @@ namespace _3PA.MainFeatures.Appli {
         public static bool IsVisible {
             get { return !(_form == null || !(bool) _form.SafeSyncInvoke(form => form.Visible)); }
         }
+
+        /// <summary>
+        /// Displays an animated notification on the bottom of the form
+        /// you can choose how much time the notif will last (in seconds)
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="stickDurationSecs"></param>
+        public static void Notify(string message, int stickDurationSecs) {
+            if (IsVisible)
+                Form.Notify(message, stickDurationSecs);
+        }
     }
 }

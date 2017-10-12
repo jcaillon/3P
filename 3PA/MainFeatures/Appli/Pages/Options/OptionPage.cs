@@ -19,15 +19,16 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
@@ -45,7 +46,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private List<string> _allowedGroups;
 
-        private YamuiButton _btSave;
+        private AsapButDelayableAction _saveAction;
 
         #endregion
 
@@ -53,9 +54,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         public OptionPage(List<string> allowedGroups) {
             InitializeComponent();
-
             _allowedGroups = allowedGroups;
-
+            _saveAction = new AsapButDelayableAction(2000, () => {
+                this.SafeInvoke(page => {
+                    Save();
+                });
+            });
             GeneratePage();
         }
 
@@ -63,13 +67,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region private methods
 
+        /// <summary>
+        /// Dynamically generates the page
+        /// </summary>
         private void GeneratePage() {
+
             var lastCategory = "";
             var yPos = 0;
-            var configInstance = Config.Instance;
 
             ForEachConfigPropertyWithDisplayAttribute((property, attribute) => {
-                var valObj = property.GetValue(configInstance);
 
                 // new group
                 if (!lastCategory.EqualsCi(attribute.GroupName)) {
@@ -86,106 +92,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     yPos += 30;
                 }
 
-                // name of the field
-                var label = new HtmlLabel {
-                    AutoSizeHeightOnly = true,
-                    BackColor = Color.Transparent,
-                    Location = new Point(30, yPos),
-                    Size = new Size(190, 10),
-                    IsSelectionEnabled = false,
-                    Text = attribute.Name
-                };
-                scrollPanel.ContentPanel.Controls.Add(label);
-
-                var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
-                var rangeAttr = listRangeAttr.Any() ? (RangeAttribute) listRangeAttr.FirstOrDefault() : null;
-
-                if (valObj is string) {
-                    // string
-                    var strControl = new YamuiTextBox {
-                        Location = new Point(240, yPos),
-                        Text = (string) property.GetValue(configInstance),
-                        Size = new Size(300, 20),
-                        Tag = property.Name
-                    };
-
-                    scrollPanel.ContentPanel.Controls.Add(strControl);
-                    var strButton = new YamuiButtonImage {
-                        Text = @"save",
-                        BackGrndImage = ImageResources.Save,
-                        Size = new Size(20, 20),
-                        Location = new Point(545, yPos),
-                        Tag = strControl,
-                        TabStop = false
-                    };
-                    strButton.ButtonPressed += SaveButtonOnButtonPressed;
-                    scrollPanel.ContentPanel.Controls.Add(strButton);
-                    tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
-
-                    var undoButton = new YamuiButtonImage {
-                        BackGrndImage = ImageResources.UndoUserAction,
-                        Size = new Size(20, 20),
-                        Location = new Point(565, yPos),
-                        Tag = strControl,
-                        TabStop = false
-                    };
-                    undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                    scrollPanel.ContentPanel.Controls.Add(undoButton);
-                    tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
-
-                    tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
-                }
-                if (valObj is int || valObj is double) {
-                    // number
-                    var numControl = new YamuiTextBox {
-                        Location = new Point(240, yPos),
-                        Text = valObj is int ? ((int) property.GetValue(configInstance)).ToString() : ((double) property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture),
-                        Size = new Size(300, 20),
-                        Tag = property.Name
-                    };
-
-                    scrollPanel.ContentPanel.Controls.Add(numControl);
-                    var numButton = new YamuiButtonImage {
-                        Text = @"save",
-                        BackGrndImage = ImageResources.Save,
-                        Size = new Size(20, 20),
-                        Location = new Point(545, yPos),
-                        Tag = numControl,
-                        TabStop = false
-                    };
-                    numButton.ButtonPressed += SaveButtonOnButtonPressed;
-                    scrollPanel.ContentPanel.Controls.Add(numButton);
-                    tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
-
-                    var undoButton = new YamuiButtonImage {
-                        BackGrndImage = ImageResources.UndoUserAction,
-                        Size = new Size(20, 20),
-                        Location = new Point(565, yPos),
-                        Tag = numControl,
-                        TabStop = false
-                    };
-                    undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                    scrollPanel.ContentPanel.Controls.Add(undoButton);
-                    tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
-
-                    tooltip.SetToolTip(numControl, attribute.Description + "<br>" + (rangeAttr != null ? "<br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br>" : "") + "<div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
-                } else if (valObj is bool) {
-                    // bool
-                    var toggleControl = new YamuiButtonToggle {
-                        Location = new Point(240, yPos),
-                        Size = new Size(40, 16),
-                        Text = null,
-                        Checked = (bool) valObj,
-                        Tag = property.Name
-                    };
-                    toggleControl.ButtonPressed += ToggleControlOnCheckedChanged;
-                    scrollPanel.ContentPanel.Controls.Add(toggleControl);
-
-                    // tooltip
-                    tooltip.SetToolTip(toggleControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click to <b>toggle on/off</b> this feature<br>Your choice is automatically applied</div>");
-                }
-
-                yPos += label.Height + 15;
+                scrollPanel.ContentPanel.Controls.Add(InsertInputForItem(property, attribute, ref yPos));
+                scrollPanel.ContentPanel.Controls.Add(InsertLabelForItem(attribute, ref yPos));
             });
 
             yPos += 15;
@@ -218,138 +126,155 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 yPos += updateButton.Height + 5;
             }
-            
-            _btSave = new YamuiButton {
-                Location = new Point(30, yPos),
-                Size = new Size(120, 24),
-                Text = @"Save everything",
-                BackGrndImage = ImageResources.Save
-            };
-            _btSave.ButtonPressed += SaveAllButtonOnButtonPressed;
-            tooltip.SetToolTip(_btSave, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
-            scrollPanel.ContentPanel.Controls.Add(_btSave);
-
-            var defaultButton = new YamuiButton {
-                Location = new Point(155, yPos),
-                Size = new Size(120, 24),
-                Text = @"Reset to default",
-                BackGrndImage = ImageResources.UndoUserAction
-            };
-            defaultButton.ButtonPressed += DefaultButtonOnButtonPressed;
-            tooltip.SetToolTip(defaultButton, "Click to <b>reset</b> all the options to default");
-            scrollPanel.ContentPanel.Controls.Add(defaultButton);
 
             scrollPanel.ContentPanel.Height = yPos + 50;
         }
 
-        #region on events
+        /// <summary>
+        /// Insert the option label
+        /// </summary>
+        private HtmlLabel InsertLabelForItem(Config.ConfigAttribute attr, ref int yPos) {
+            var lbl = new HtmlLabel {
+                AutoSizeHeightOnly = true,
+                BackColor = Color.Transparent,
+                Location = new Point(30, yPos),
+                Size = new Size(270, 10),
+                IsSelectionEnabled = false,
+                Text = attr.Label
+            };
 
-        private void SaveAllButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            // refresh stuff on screen
-            foreach (var control in scrollPanel.ContentPanel.Controls) {
-                var ctrl = (Control) control;
-                if (ctrl is YamuiButtonImage && ((YamuiButtonImage) ctrl).Text.Equals(@"save")) {
-                    SaveButtonOnButtonPressed(ctrl, new EventArgs());
+            yPos += lbl.Height + 10;
+
+            return lbl;
+        }
+
+        /// <summary>
+        /// Insert the correct input for the option
+        /// </summary>
+        private Control InsertInputForItem(FieldInfo property, Config.ConfigAttribute attr, ref int yPos) {
+            // Build control type
+            Control retVal;
+            
+            if (property.FieldType == typeof(bool)) {
+                // for bool
+                var tg = new YamuiButtonToggle {
+                    Location = new Point(320, yPos),
+                    Size = new Size(40, 16),
+                    Text = null,
+                    Checked = (bool)property.GetValue(Config.Instance)
+                };
+                tg.ButtonPressed += (sender, args) => OnFieldModified();
+                retVal = tg;
+
+            } else if (property.FieldType.IsEnum) {
+                // for enum
+                var dataSource = new List<string>();
+                foreach (var name in Enum.GetNames(property.FieldType)) {
+                    var attribute = Attribute.GetCustomAttribute(property.FieldType.GetField(name), typeof(DescriptionAttribute), true) as DescriptionAttribute;
+                    dataSource.Add(attribute != null ? attribute.Description : name);
                 }
-            }
-        }
+                dataSource = dataSource.Select(s => s.Replace("_", " ").Trim()).ToNonNullList();
+                var cb = new YamuiComboBox {
+                    Location = new Point(320, yPos),
+                    Size = new Size(Math.Min(300, dataSource.Select(s => TextRenderer.MeasureText(s, FontManager.GetStandardFont()).Width).Max() + 25), 20),
+                    DataSource = dataSource,
+                };
+                cb.SelectedIndex = Enum.GetNames(property.FieldType).IndexOf(property.GetValue(Config.Instance).ConvertToStr());
+                cb.SelectedIndexChangedByUser += box => OnFieldModified();
+                retVal = cb;
 
-        private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            // find the corresponding control
-            var textBox = (YamuiTextBox) ((YamuiButtonImage) sender).Tag;
-            var propertyName = (string) textBox.Tag;
-            textBox.Text = new Config.ConfigObject().GetValueOf(propertyName).ToString();
-            Config.Instance.SetValueOf(propertyName, new Config.ConfigObject().GetValueOf(propertyName));
-
-            // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
-                ApplySettings();
-            }
-            Config.Save();
-        }
-
-        private void SaveButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            var textBox = (YamuiTextBox) ((YamuiButtonImage) sender).Tag;
-            var propertyName = (string) textBox.Tag;
-            if (Config.Instance.GetValueOf(propertyName) is string) {
-                // set value
-                Config.Instance.SetValueOf(propertyName, textBox.Text);
             } else {
-                double ouptut;
-                if (!double.TryParse(textBox.Text, out ouptut)) {
-                    BlinkTextBox(textBox, ThemeManager.Current.GenericErrorColor);
-                    return;
-                }
-                // check value
-                var rangeAttr = Config.Instance.GetAttributeFrom<RangeAttribute>(propertyName);
-                if (rangeAttr != null) {
-                    double maxRange = 9999;
-                    double minRange = -9999;
-                    try {
-                        maxRange = (double) rangeAttr.Maximum;
-                        minRange = (double) rangeAttr.Minimum;
-                    } catch (Exception e) {
-                        if (e is InvalidCastException) {
-                            maxRange = (int) rangeAttr.Maximum;
-                            minRange = (int) rangeAttr.Minimum;
+                // for everything else
+                var tb = new YamuiTextBox {
+                    Location = new Point(320, yPos),
+                    Size = new Size(300, 20),
+                    Text = property.GetValue(Config.Instance).ConvertToStr(),
+                    Multiline = false,
+                    CausesValidation = true
+                };
+                tb.Enter += (s, e) => tb.SelectAll();
+                if (property.FieldType == typeof(char))
+                    tb.KeyPress += (s, e) => {
+                        e.Handled = !char.IsControl(e.KeyChar) && tb.TextLength > 0;
+                    };
+                else
+                    tb.KeyPress += (s, e) => {
+                        e.Handled = Utilities.IsInvalidKey(e.KeyChar, property.FieldType);
+                    };
+                tb.Validating += ValidateTextBox;
+                tb.Validated += (s, e) => errorProvider.SetError(tb, "");
+                tb.TextChanged += (sender, args) => OnFieldModified();
+                errorProvider.SetIconPadding(tb, -18);
+                errorProvider.Icon = ImageResources.IcoError;
+                retVal = tb;
+            }
+
+            var undoButton = new YamuiButtonImage {
+                BackGrndImage = ImageResources.UndoUserAction,
+                Size = new Size(20, 20),
+                Location = new Point(retVal.Left + retVal.Width + 5, yPos),
+                Tag = retVal,
+                TabStop = false
+            };
+            undoButton.ButtonPressed += OnUndoButton;
+            scrollPanel.ContentPanel.Controls.Add(undoButton);
+            tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
+
+            // add tooltip on the control
+            if (!string.IsNullOrEmpty(attr.Tooltip)) {
+                var rangeAttr = (RangeAttribute)property.GetCustomAttributes(typeof(RangeAttribute), false).FirstOrDefault();
+                tooltip.SetToolTip(retVal, "<b>" + attr.Label + ":</b><br><br>" + attr.Tooltip + (rangeAttr != null ? "<br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b>" : ""));
+            }
+
+            // Set standard props
+            retVal.Name = "option_" + property.Name;
+            retVal.Tag = property;
+            
+            return retVal;
+        }
+
+        /// <summary>
+        /// Validates the content of a text box (set event.Cancel to true if invalid)
+        /// </summary>
+        private void ValidateTextBox(object o, CancelEventArgs cancelEventArgs) {
+            var tb = (YamuiTextBox) o;
+            var property = (FieldInfo) tb.Tag;
+            var rangeAttr = (RangeAttribute)property.GetCustomAttributes(typeof(RangeAttribute), false).FirstOrDefault();
+
+            bool invalid = false;
+            if (!string.IsNullOrEmpty(tb.Text)) {
+                invalid = !tb.Text.CanConvertToType(property.FieldType);
+            }
+            
+            if (invalid) {
+                errorProvider.SetError(tb, "The value has an invalid format for <" + property.FieldType.Name + ">.");
+            } else {
+                // for numbers, check limit values
+                if (property.FieldType == typeof(int) || property.FieldType == typeof(double)) {
+                    if (rangeAttr != null) {
+                        double ouptut = (double) tb.Text.ConvertFromStr(typeof(double));
+                        double maxRange = 0;
+                        double minRange = 0;
+                        try {
+                            maxRange = (double)rangeAttr.Maximum;
+                            minRange = (double)rangeAttr.Minimum;
+                        } catch (Exception ex) {
+                            if (ex is InvalidCastException) {
+                                maxRange = (int)rangeAttr.Maximum;
+                                minRange = (int)rangeAttr.Minimum;
+                            }
+                        }
+                        if (ouptut > maxRange || ouptut < minRange) {
+                            invalid = true;
+                            errorProvider.SetError(tb, "The value should be between " + minRange + " to " + maxRange + ".");
                         }
                     }
-                    if (ouptut > maxRange || ouptut < minRange) {
-                        BlinkTextBox(textBox, ThemeManager.Current.GenericErrorColor);
-                        return;
-                    }
-                }
-                // set value
-                if (Config.Instance.GetValueOf(propertyName) is int)
-                    Config.Instance.SetValueOf(propertyName, (int) ouptut);
-                else
-                    Config.Instance.SetValueOf(propertyName, ouptut);
-            }
-
-            // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
-                ApplySettings();
-            }
-            Config.Save();
-        }
-
-        private void ToggleControlOnCheckedChanged(object sender, EventArgs eventArgs) {
-            var toggle = (YamuiButtonToggle) sender;
-            var propertyName = (string) toggle.Tag;
-            // set value
-            Config.Instance.SetValueOf(propertyName, toggle.Checked);
-
-            // need to refresh stuff to really apply this option?
-            if (Config.Instance.GetAttributeFrom<DisplayAttribute>(propertyName).AutoGenerateField) {
-                ApplySettings();
-            }
-            Config.Save();
-        }
-
-        private void DefaultButtonOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            // apply default settings
-            var defaultConfig = new Config.ConfigObject();
-
-            // refresh stuff on screen
-            foreach (var control in scrollPanel.ContentPanel.Controls) {
-                var ctrl = (Control) control;
-                if (ctrl.Tag != null && ctrl.Tag is string) {
-                    var propertyName = (string) ctrl.Tag;
-                    var value = new Config.ConfigObject().GetValueOf(propertyName);
-                    if (ctrl is YamuiButtonToggle) {
-                        Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
-                        ((YamuiButtonToggle) ctrl).Checked = (bool) value;
-                    } else if (ctrl is YamuiTextBox) {
-                        Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
-                        ((YamuiTextBox) ctrl).Text = value.ToString();
-                    }
                 }
             }
-            ApplySettings();
-            Config.Save();
+            if (!invalid)
+                errorProvider.SetError(tb, "");
+            cancelEventArgs.Cancel = invalid;
         }
-
-        #endregion
 
         /// <summary>
         /// For certain config properties, we need to refresh stuff to see a difference
@@ -367,20 +292,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         /// <summary>
-        /// Makes the given textbox blink
-        /// </summary>
-        /// <param name="textBox"></param>
-        /// <param name="blinkColor"></param>
-        private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
-            textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "BackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
-        }
-
-        /// <summary>
         /// Execute an action for each property of the config object that has a display attribute
         /// </summary>
         /// <param name="action"></param>
-        private void ForEachConfigPropertyWithDisplayAttribute(Action<FieldInfo, DisplayAttribute> action) {
+        private void ForEachConfigPropertyWithDisplayAttribute(Action<FieldInfo, Config.ConfigAttribute> action) {
             var properties = typeof(Config.ConfigObject).GetFields();
 
             /* loop through fields */
@@ -388,26 +303,95 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 if (property.IsPrivate) {
                     continue;
                 }
-                var listCustomAttr = property.GetCustomAttributes(typeof(DisplayAttribute), false);
+                var listCustomAttr = property.GetCustomAttributes(typeof(Config.ConfigAttribute), false);
                 if (!listCustomAttr.Any()) {
                     continue;
                 }
-                var displayAttr = (DisplayAttribute) listCustomAttr.FirstOrDefault();
-                if (displayAttr == null) {
+                var attr = (Config.ConfigAttribute)listCustomAttr.FirstOrDefault();
+                if (attr == null) {
                     continue;
                 }
-                if (string.IsNullOrEmpty(displayAttr.Name)) {
-                    continue;
-                }
-                if (!_allowedGroups.Contains(displayAttr.GroupName)) {
+                if (string.IsNullOrEmpty(attr.Label) || !_allowedGroups.Contains(attr.GroupName, StringComparer.CurrentCultureIgnoreCase)) {
                     continue;
                 }
 
                 // execute the action with the loop property and display attribute
-                action(property, displayAttr);
+                action(property, attr);
             }
         }
 
         #endregion
+
+        #region on events
+
+        /// <summary>
+        /// Called when an option is modified
+        /// </summary>
+        private void OnFieldModified() {
+            _saveAction.DoDelayable();
+        }
+
+        /// <summary>
+        /// Called to save all the options of the page
+        /// </summary>
+        private void Save() {
+            bool needApplySetting = false;
+
+            // refresh stuff on screen
+            foreach (Control inputControl in scrollPanel.ContentPanel.Controls) {
+                if (inputControl.Name.StartsWith("option_")) {
+                    
+                    var property = (FieldInfo)inputControl.Tag;
+                    var attr = property.GetCustomAttributes(typeof(Config.ConfigAttribute), false).FirstOrDefault() as Config.ConfigAttribute;
+                    object inputValue = null;
+
+                    if (inputControl is YamuiComboBox) {
+                        inputValue = Enum.GetNames(property.FieldType).ToList()[((YamuiComboBox)inputControl).SelectedIndex].ConvertFromStr(property.FieldType);
+                    } else if (inputControl is YamuiButtonToggle) {
+                        inputValue = ((YamuiButtonToggle)inputControl).Checked;
+                    } else if (inputControl is YamuiTextBox) {
+                        var cancelArg = new CancelEventArgs();
+                        ValidateTextBox(inputControl, cancelArg);
+                        if (cancelArg.Cancel) {
+                            continue;
+                        }
+                        inputValue = ((YamuiTextBox) inputControl).Text.ConvertFromStr(property.FieldType);    
+                    }
+
+                    Config.Instance.SetValueOf(property.Name, inputValue);
+
+                    needApplySetting = needApplySetting || attr != null && attr.NeedApplySetting;
+                }
+            }
+
+            // need to refresh stuff to really apply this option?
+            if (needApplySetting)
+                ApplySettings();
+
+            Config.Save();
+            Appli.Notify("Options saved successfully", 2);
+        }
+        
+        /// <summary>
+        /// Reset an option, setting it to its default value
+        /// </summary>
+        private void OnUndoButton(object sender, EventArgs eventArgs) {
+            var inputControl = (Control) ((YamuiButtonImage)sender).Tag;
+            var property = (FieldInfo) inputControl.Tag;
+            var defaultValue = new Config.ConfigObject().GetValueOf(property.Name);
+
+            if (inputControl is YamuiComboBox) {
+                ((YamuiComboBox)inputControl).SelectedIndex = Enum.GetNames(property.FieldType).IndexOf(defaultValue.ConvertToStr());
+            } else if (inputControl is YamuiButtonToggle) {
+                ((YamuiButtonToggle)inputControl).Checked = (bool)defaultValue;
+            } else if (inputControl is YamuiTextBox) {
+                ((YamuiTextBox)inputControl).Text = defaultValue.ConvertToStr();
+            }
+
+            OnFieldModified();
+        }
+        
+        #endregion
+
     }
 }

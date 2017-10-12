@@ -147,7 +147,11 @@ namespace YamuiFramework.Helper {
                     return value;
                 return TypeDescriptor.GetConverter(destType).ConvertFromInvariantString(value);
             } catch (Exception) {
-                return destType.IsValueType ? Activator.CreateInstance(destType) : null;
+                try {
+                    return TypeDescriptor.GetConverter(destType).ConvertFromString(value);
+                } catch (Exception) {
+                    return destType.IsValueType ? Activator.CreateInstance(destType) : null;
+                }
             }
         }
 

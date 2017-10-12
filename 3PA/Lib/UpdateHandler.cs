@@ -238,7 +238,7 @@ namespace _3PA.Lib {
 
                     NotifyUpdateAvailable(Updater);
 
-                    if (gitHubUpdater.LatestReleaseInfo != null)
+                    if (gitHubUpdater.LatestReleaseInfo != null && !RestartNeeded)
                         Updater.LocalVersion = gitHubUpdater.LatestReleaseInfo.tag_name;
 
                     if (OnUpdateDone != null)
@@ -333,9 +333,10 @@ namespace _3PA.Lib {
                     Release name: <b>" + updater.LatestReleaseInfo.name + @"</b><br>
                     Available since: <b>" + updater.LatestReleaseInfo.published_at + @"</b><br>
                     Release URL: <b>" + updater.LatestReleaseInfo.html_url.ToHtmlLink() + @"</b><br>" +
-                    (updater.LatestReleaseInfo.prerelease ? "<i>This new release is a beta version</i><br>" : "") + "<br>" +
-                    "log".ToHtmlLink("Click here to see what is new in this version", true) + "<br>" +
-                    (RestartNeeded ? (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current version by the new release,<br>please click yes when you are asked to execute it</i></span><br>" : "") + @"<br><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b>" : ""),
+                    (updater.LatestReleaseInfo.prerelease ? "<i>This new release is a beta version</i><br>" : "") + 
+                    "<br><div>" + "log".ToHtmlLink("Click here to see what is new in this version", true) + "</div>" +
+                    (RestartNeeded ? (_3PUpdater.Instance.IsAdminRightsNeeded ? "<div><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need administrator rights to replace your current version by the new release,<br>please click yes when you are asked to execute it</i></span></div>" : "") +
+                    @"<div><b>" + "Restart".ToHtmlLink("Click here to restart now!") + @"</b></div>" : ""),
                     MessageImg.MsgUpdate, UpdatedSoftName + " updater", "New update downloaded",
                     args => {
                         if (args.Link.Equals("Restart")) {
@@ -439,17 +440,15 @@ namespace _3PA.Lib {
                     }
                 });
 
-                // Special actions to take depending on the previous version?
-                if (!string.IsNullOrEmpty(previousVersion))
-                    UpdateDoneFromVersion(previousVersion);
-
-                // delete update related files/folders
-                Utils.DeleteDirectory(Config.FolderUpdate, true);
+                Utils.DeleteFile(Config.UpdatePreviousVersion);
 
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
                     Style.InstallUdl();
 
+                // Special actions to take depending on the previous version?
+                if (!string.IsNullOrEmpty(previousVersion))
+                    UpdateDoneFromVersion(previousVersion);
             }
 
             StartCheckingForUpdate();
@@ -470,7 +469,7 @@ namespace _3PA.Lib {
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
             }
             if (!fromVersion.IsHigherVersionThan("1.7.5")) {
-                Plug.FinishPluginInstall();
+                DelayedAction.StartNew(100, Plug.FinishPluginInstall);
             }
         }
 

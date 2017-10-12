@@ -127,6 +127,7 @@ namespace YamuiFramework.Helper {
             if (neg) l.Add(c.NegativeSign);
             if (pos) l.Add(c.PositiveSign);
             if (dec) l.Add(c.NumberDecimalSeparator);
+            if (dec) l.Add(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator); // add invariant culture separator
             if (grp) l.Add(c.NumberGroupSeparator);
             if (e) l.Add("Ee");
             var sb = new StringBuilder();
@@ -155,90 +156,25 @@ namespace YamuiFramework.Helper {
             return ca;
         }
 
-        public static readonly Dictionary<Type, Predicate<string>> Validations = new Dictionary<Type, Predicate<string>> {
-            {
-                typeof(byte), s => {
-                    byte n;
-                    return Byte.TryParse(s, out n);
-                }
-            }, {
-                typeof(sbyte), s => {
-                    sbyte n;
-                    return SByte.TryParse(s, out n);
-                }
-            }, {
-                typeof(short), s => {
-                    short n;
-                    return Int16.TryParse(s, out n);
-                }
-            }, {
-                typeof(ushort), s => {
-                    ushort n;
-                    return UInt16.TryParse(s, out n);
-                }
-            }, {
-                typeof(int), s => {
-                    int n;
-                    return Int32.TryParse(s, out n);
-                }
-            }, {
-                typeof(uint), s => {
-                    uint n;
-                    return UInt32.TryParse(s, out n);
-                }
-            }, {
-                typeof(long), s => {
-                    long n;
-                    return Int64.TryParse(s, out n);
-                }
-            }, {
-                typeof(ulong), s => {
-                    ulong n;
-                    return UInt64.TryParse(s, out n);
-                }
-            }, {
-                typeof(char), s => {
-                    char n;
-                    return Char.TryParse(s, out n);
-                }
-            }, {
-                typeof(double), s => {
-                    double n;
-                    return Double.TryParse(s, out n);
-                }
-            }, {
-                typeof(float), s => {
-                    float n;
-                    return Single.TryParse(s, out n);
-                }
-            }, {
-                typeof(decimal), s => {
-                    decimal n;
-                    return Decimal.TryParse(s, out n);
-                }
-            }, {
-                typeof(DateTime), s => {
-                    DateTime n;
-                    return DateTime.TryParse(s, out n);
-                }
-            }, {
-                typeof(TimeSpan), s => {
-                    TimeSpan n;
-                    return TimeSpan.TryParse(s, out n);
-                }
-            }, {
-                typeof(Guid), s => {
-                    try {
-                        // ReSharper disable once ObjectCreationAsStatement
-                        new Guid(s);
-                        return true;
-                    } catch {
-                        return false;
-                    }
+        /// <summary>
+        /// Test if the string can be successfully converted to the given type
+        /// </summary>
+        public static bool CanConvertToType(this string value, Type destType) {
+            try {
+                if (destType == typeof(string))
+                    return true;
+                TypeDescriptor.GetConverter(destType).ConvertFromInvariantString(value);
+                return true;
+            } catch (Exception) {
+                try {
+                    TypeDescriptor.GetConverter(destType).ConvertFromString(value);
+                    return true;
+                } catch (Exception) {
+                    return false;
                 }
             }
-        };
-
+        }
+        
         public static bool IsSupportedType(Type type) {
             if (typeof(IConvertible).IsAssignableFrom(type))
                 return true;

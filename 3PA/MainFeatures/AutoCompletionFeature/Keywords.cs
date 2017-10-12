@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
@@ -212,6 +213,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         #endregion
+
     }
 
     internal class KeywordAbbreviation {

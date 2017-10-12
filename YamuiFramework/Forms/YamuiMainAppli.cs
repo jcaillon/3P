@@ -127,8 +127,8 @@ namespace YamuiFramework.Forms {
                 _bottomNotif = new YamuiNotifLabel {
                     Font = FontManager.GetFont(FontFunction.Normal),
                     Text = "",
-                    Size = new Size(Width - 21, 16),
-                    Location = new Point(1, Height - 17),
+                    Size = new Size(Width - 20 - BorderWidth, 16),
+                    Location = new Point(BorderWidth, Height - 17),
                     Anchor = AnchorStyles.Bottom | AnchorStyles.Left
                 };
                 Controls.Add(_bottomNotif);

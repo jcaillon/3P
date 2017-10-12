@@ -82,10 +82,9 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> {"General", "Compilation"})),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", PageNames.OptionsUpdate.ToString(), new OptionPage(new List<string> {"Updates"})),
-                    new YamuiSecMenu("AUTOCOMPLETION", "autocompletion", new OptionPage(new List<string> {"Autocompletion", "Default autocompletion replacement", "Progress autocompletion"})),
+                    new YamuiSecMenu("AUTOCOMPLETION", "autocompletion", new OptionPage(new List<string> {"Autocompletion", "Progress autocompletion", "Default autocompletion replacement"})),
                     new YamuiSecMenu("CODE EDITION", "code_edition", new OptionPage(new List<string> {"Code edition"})),
-                    new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> {"File explorer", "Code explorer", "Tooltip"})),
-                    new YamuiSecMenu("OTHERS", "others", new OthersPage()),
+                    new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> {"File explorer", "Code explorer", "Tooltip", "Switch encoding"})),
                     new YamuiSecMenu("SHORTCUTS", null, new ShortCutsPage()),
                     new YamuiSecMenu("SHARE/EXPORT CONFIG", PageNames.ExportShareConf.ToString(), new ExportPage())
                 })
