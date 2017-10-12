@@ -85,10 +85,7 @@ namespace _3PA.Tests {
              */
 
             Plug.ModifyingNppConfig();
-
-            Updater<DataDiggerUpdaterWrapper>.Instance.CheckForUpdate();
-
-
+            UserCommunication.Notify(Path.GetFileName("D:\\Repo"));
         }
         
         #endregion

@@ -113,7 +113,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 updateButton = new YamuiButton {
                     Location = new Point(185, yPos),
-                    Size = new Size(175, 24),
+                    Size = new Size(170, 24),
                     Text = @"Check for Prolint updates",
                     BackGrndImage = ImageResources.ProlintCode
                 };
@@ -125,6 +125,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 scrollPanel.ContentPanel.Controls.Add(updateButton);
 
                 yPos += updateButton.Height + 5;
+            }
+
+            // add a button for the updates
+            if (_allowedGroups.Contains("General")) {
+
+                var button = new YamuiButton {
+                    Location = new Point(30, yPos),
+                    Size = new Size(170, 24),
+                    Text = @"Modify notepad++ options"
+                };
+                button.ButtonPressed += (sender, args) => Plug.ModifyingNppConfig();
+                tooltip.SetToolTip(button, "Click to <b>modify notepad++ options</b>");
+                scrollPanel.ContentPanel.Controls.Add(button);
+                
+                yPos += button.Height + 5;
             }
 
             scrollPanel.ContentPanel.Height = yPos + 50;

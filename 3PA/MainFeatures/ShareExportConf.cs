@@ -212,7 +212,7 @@ namespace _3PA.MainFeatures {
                     confLine.AutoUpdate = Config.Instance.AutoUpdateConfList.ContainsFast(confLine.Label);
 
                     confLine.LocalPath = confLine.HandledItem;
-                    confLine.DistantPath = sharedDirOk ? Path.Combine(distantShareDirectory, confLine.HandledItem.Replace(Npp.ConfigDirectory, "").Trim('\\')) : "";
+                    confLine.DistantPath = sharedDirOk ? Path.Combine(distantShareDirectory, (confLine.IsDir ? Path.GetFileName(confLine.HandledItem.TrimEnd('\\')) : Path.GetFileName(confLine.HandledItem)) ?? "") : "";
 
                     confLine.LocalTime = DateTime.Now;
                     confLine.DistantTime = DateTime.Now;

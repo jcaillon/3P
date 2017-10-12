@@ -411,21 +411,19 @@ namespace _3PA.Lib {
             // an update has been done
             if (!string.IsNullOrEmpty(previousVersion)) {
 
+                Utils.DeleteFile(Config.UpdatePreviousVersion);
+
                 // we didn't update to a newer version, something went wrong
                 if (!AssemblyInfo.Version.IsHigherVersionThan(previousVersion)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
-                        <div>
                         The update didn't go as expected, the old plugin files have not been replaced by the new ones!<br>
                         It is very likely because the updater didn't get the rights to write a file in your /plugins/ folder.<br>
                         You will have to manually copy the new files to replace the existing files :<br><br>
                         <b>MOVE (delete the source and replace the target)</b> all the files in this folder : <div>" + Config.UpdateReleaseUnzippedFolder.ToHtmlLink() + @"</div><br>
-                        <b>In this folder</b> (replacing the existing files) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
-                        Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        <i>(n.b. : this message will be shown at startup as long as the above-mentioned folder exists!)</i><br>
-                        Thank you for your patience!</div>", MessageImg.MsgUpdate, UpdatedSoftName + " updater", "Problem during the update!");
+                        <b>In this folder</b> (replacing the existing files) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div>", MessageImg.MsgUpdate, UpdatedSoftName + " updater", "Problem during the update!");
                     return;
                 }
-
+                
                 var versionLog = File.Exists(Config.UpdateVersionLog) ? Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default) : null;
 
                 UserCommunication.Notify("A new version of the software has just been installed, congratulations!" + (!string.IsNullOrEmpty(versionLog) ? "<br><br>" + "log".ToHtmlLink("Click here to show what is new in this version") : ""), MessageImg.MsgUpdate, UpdatedSoftName + " updater", "Install successful", args => {
@@ -440,7 +438,6 @@ namespace _3PA.Lib {
                     }
                 });
 
-                Utils.DeleteFile(Config.UpdatePreviousVersion);
 
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
