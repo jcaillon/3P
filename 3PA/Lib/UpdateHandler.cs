@@ -403,15 +403,12 @@ namespace _3PA.Lib {
                 var oldVersionLogPath = Path.Combine(Npp.ConfigDirectory, "version.log");
                 if (File.Exists(oldVersionLogPath)) {
                     previousVersion = "1.7.0";
-                    Utils.CopyFile(oldVersionLogPath, Config.UpdateVersionLog);
-                    Utils.DeleteFile(oldVersionLogPath);
+                    Utils.MoveFile(oldVersionLogPath, Config.UpdateVersionLog);
                 }
             }
 
             // an update has been done
             if (!string.IsNullOrEmpty(previousVersion)) {
-
-                Utils.DeleteFile(Config.UpdatePreviousVersion);
 
                 // we didn't update to a newer version, something went wrong
                 if (!AssemblyInfo.Version.IsHigherVersionThan(previousVersion)) {
@@ -423,21 +420,8 @@ namespace _3PA.Lib {
                         <b>In this folder</b> (replacing the existing files) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div>", MessageImg.MsgUpdate, UpdatedSoftName + " updater", "Problem during the update!");
                     return;
                 }
-                
-                var versionLog = File.Exists(Config.UpdateVersionLog) ? Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default) : null;
 
-                UserCommunication.Notify("A new version of the software has just been installed, congratulations!" + (!string.IsNullOrEmpty(versionLog) ? "<br><br>" + "log".ToHtmlLink("Click here to show what is new in this version") : ""), MessageImg.MsgUpdate, UpdatedSoftName + " updater", "Install successful", args => {
-                    if (args.Link.Equals("log")) {
-                        args.Handled = true;
-                        UserCommunication.Message(versionLog.MdToHtml(),
-                            MessageImg.MsgUpdate,
-                            UpdatedSoftName + " updater",
-                            "Release notes from " + previousVersion + " to " + AssemblyInfo.Version,
-                            new List<string> { "ok" },
-                            false);
-                    }
-                });
-
+                Utils.DeleteFile(Config.UpdatePreviousVersion);
 
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
@@ -446,6 +430,24 @@ namespace _3PA.Lib {
                 // Special actions to take depending on the previous version?
                 if (!string.IsNullOrEmpty(previousVersion))
                     UpdateDoneFromVersion(previousVersion);
+            }
+
+            // Show the version log
+            if (File.Exists(Config.UpdateVersionLog)) {
+                var versionLog = Utils.ReadAllText(Config.UpdateVersionLog, Encoding.Default);
+                UserCommunication.NotifyUnique("UpdateVersionLog", "A new version of the software has been installed, congratulations!" + "<br><br><div>" + "log".ToHtmlLink("Click here to show what is new in this version") + "</div><br><div>" + "close".ToHtmlLink("Click here to stop showing this notification") + "</div>", MessageImg.MsgUpdate, UpdatedSoftName + " updater", "What is new in " + AssemblyInfo.Version + "?", args => {
+                    args.Handled = true;
+                    Utils.DeleteFile(Config.UpdateVersionLog);
+                    if (args.Link.Equals("log")) {
+                        UserCommunication.Message(versionLog.MdToHtml(),
+                            MessageImg.MsgUpdate,
+                            UpdatedSoftName + " updater",
+                            "Release notes from " + previousVersion + " to " + AssemblyInfo.Version,
+                            new List<string> { "ok" },
+                            false);
+                    }
+                    UserCommunication.CloseUniqueNotif("UpdateVersionLog");
+                });
             }
 
             StartCheckingForUpdate();

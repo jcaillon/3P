@@ -673,19 +673,17 @@ namespace _3PA.Lib {
         public static bool HasFileChanged(string filePath) {
             // first watch, no problem
             if (!_watchedFiles.ContainsKey(filePath)) {
-                if (File.Exists(filePath))
-                    _watchedFiles.Add(filePath, File.GetLastWriteTime(filePath));
+                _watchedFiles.Add(filePath, File.Exists(filePath) ? File.GetLastWriteTime(filePath) : DateTime.Now);
                 return false;
             }
             // then check the last write date didn't change
             if (File.Exists(filePath)) {
-                if (_watchedFiles[filePath].Equals(File.GetLastWriteTime(filePath)))
-                    return false;
-                _watchedFiles[filePath] = File.GetLastWriteTime(filePath);
-            } else {
-                _watchedFiles.Remove(filePath);
+                if (!_watchedFiles[filePath].Equals(File.GetLastWriteTime(filePath))) {
+                    _watchedFiles[filePath] = File.GetLastWriteTime(filePath);
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
 
         /// <summary>
