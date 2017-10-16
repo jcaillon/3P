@@ -219,7 +219,15 @@
     </Compile>
     <Compile Include="NppCore\NppStylers.cs" />
     <Compile Include="NppCore\SciApi.cs" />
+    <Compile Include="NppCore\SciIndicator.cs" />
+    <Compile Include="NppCore\SciMarkerHandle.cs" />
+    <Compile Include="NppCore\SciMargin.cs" />
+    <Compile Include="NppCore\SciMarker.cs" />
+    <Compile Include="NppCore\SciLine.cs" />
+    <Compile Include="NppCore\SciSelection.cs" />
+    <Compile Include="NppCore\SciStyle.cs" />
     <Compile Include="NppCore\UiThread.cs" />
+    <Compile Include="Tests\CsLexer.cs" />
     <Compile Include="WindowsCore\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />

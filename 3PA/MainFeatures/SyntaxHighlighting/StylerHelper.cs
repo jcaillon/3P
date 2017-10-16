@@ -26,6 +26,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
     /// It creates the byte array of styles for the text it is fed with
     /// </summary>
     internal class StylerHelper {
+
         #region private fields
 
         private List<byte> _styleArray = new List<byte>();

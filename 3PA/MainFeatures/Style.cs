@@ -37,6 +37,7 @@ namespace _3PA.MainFeatures {
     /// This class handles the Styles of scintilla
     /// </summary>
     internal static class Style {
+
         #region Current theme
 
         private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();

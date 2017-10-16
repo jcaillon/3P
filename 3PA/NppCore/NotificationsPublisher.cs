@@ -23,6 +23,8 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.SyntaxHighlighting;
+using _3PA.Tests;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
@@ -163,7 +165,7 @@ namespace _3PA.NppCore {
 
                             case (uint) SciNotif.SCN_STYLENEEDED:
                                 // if we use the contained lexer, we will receive this notification and we will have to style the text
-                                //Style.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
+                                SyntaxHighlight.Colorize(Sci.GetEndStyled(), nc.position);
                                 return;
 
                             case (uint) SciNotif.SCN_MARGINCLICK:

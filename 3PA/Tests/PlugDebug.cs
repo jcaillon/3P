@@ -38,6 +38,7 @@ using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using Lexer = _3PA.NppCore.Lexer;
 
 namespace _3PA.Tests {
     /// <summary>
@@ -83,9 +84,18 @@ namespace _3PA.Tests {
                 new List<string> {"ok", "cancel"},
                 true);
              */
+            /*Sci.StyleResetDefault();
+            Sci.StyleClearAll();
+            Sci.GetStyle(CSharpLexer.StyleDefault).ForeColor = Color.Black;
+            Sci.GetStyle(CSharpLexer.StyleKeyword).ForeColor = Color.Blue;
+            Sci.GetStyle(CSharpLexer.StyleIdentifier).ForeColor = Color.Teal;
+            Sci.GetStyle(CSharpLexer.StyleNumber).ForeColor = Color.Purple;
+            Sci.GetStyle(CSharpLexer.StyleString).ForeColor = Color.Red;
+            */
 
-            Plug.ModifyingNppConfig();
-            UserCommunication.Notify(Path.GetFileName("D:\\Repo"));
+            Style.SetSyntaxStyles();
+            Sci.Lexer = Lexer.Container;
+            Sci.Colorize(0, Sci.TextLength);
         }
         
         #endregion

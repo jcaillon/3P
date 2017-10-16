@@ -17,39 +17,43 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System.Diagnostics;
+using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
+
 namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlight {
-        #region real colorization todo
 
-        /*
+        #region real colorization todo
+        
         /// <summary>
         /// Called on STYLENEEDED notification
         /// </summary>
-        /// <param name="endPos"></param>
         public static void Colorize(int startPos, int endPos) {
             //------------
-            var watch = Stopwatch.StartNew();
+            //var watch = Stopwatch.StartNew();
             //------------
 
-            // redefine the styles
-            SetGeneralStyles();
+            var line = Sci.LineFromPosition(startPos);
+            var lineStartPos = Sci.GetLine(line).Position;
+            var column = startPos - lineStartPos;
+            
+            Sci.StartStyling(lineStartPos);
 
-            ProLexer tok = new ProLexer(Npp.GetDocumentText());
-            tok.Tokenize();
-            SynthaxHighlightVisitor vis = new SynthaxHighlightVisitor {
-                FromLine = Npp.LineFromPosition(startPos),
-                ToLine = Npp.LineFromPosition(endPos)
-            };
+            ProLexer tok = new ProLexer(Sci.GetTextByRange(lineStartPos, endPos), lineStartPos, line, column, 0, 0);
+            SyntaxHighlightVisitor vis = new SyntaxHighlightVisitor();
             tok.Accept(vis);
 
             //--------------
-            watch.Stop();
-            Npp.SetStatusbarLabel("derp = " + derp + "startPos = " + startPos + ", endPos = " + endPos + ", done in " + watch.ElapsedMilliseconds + " ms");
+            //watch.Stop();
+            //UserCommunication.Notify("startPos = " + startPos + ", endPos = " + endPos + ", done in " + watch.ElapsedMilliseconds + " ms");
             //------------
-            derp++;
+
+
         }
-        */
 
         #endregion
+
     }
 }

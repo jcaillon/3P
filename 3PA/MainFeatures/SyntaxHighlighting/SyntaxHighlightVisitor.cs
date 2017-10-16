@@ -19,6 +19,8 @@
 #endregion
 using System;
 using _3PA.MainFeatures.Parser;
+using _3PA.NppCore;
+using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlightVisitor : ILexerVisitor {
@@ -30,70 +32,60 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public int ToLine { get; set; }
 
         public void Visit(TokenComment tok) {
-            //if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Comment, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Comment);
         }
 
         public void Visit(TokenEol tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenEos tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenInclude tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Delimiter2);
         }
 
         public void Visit(TokenPreProcVariable tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenNumber tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenString tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.String, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Delimiter5);
         }
 
         public void Visit(TokenStringDescriptor tok) {
-            throw new NotImplementedException();
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenSymbol tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenEof tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenWord tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenWhiteSpace tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
         public void Visit(TokenUnknown tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
         }
 
-        public void Visit(TokenPreProcDirective tok) {}
+        public void Visit(TokenPreProcDirective tok) {
+            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int) UdlStyles.Default);
+        }
 
         public void PreVisit(Lexer lexer) {
         }
