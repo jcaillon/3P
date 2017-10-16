@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.ModificationsTag {
         #region Private
 
         private static void CommonTagAction(Action<FileTagObject> performAction) {
-            var filename = Npp.CurrentFile.FileName;
+            var filename = Npp.CurrentFileInfo.FileName;
             if (FileCustomInfo.Contains(filename)) {
                 var fileInfo = FileCustomInfo.GetLastFileTag(filename);
                 Sci.BeginUndoAction();

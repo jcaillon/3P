@@ -259,9 +259,9 @@ namespace _3PA.NppCore {
         }
 
         private static void NppBufferActivated() {
-            Npp.CurrentFile.Path = Npp.NppFileInfo.GetFullPathApi; // get info on the current file
+            Npp.CurrentFileInfo.Path = Npp.NppFileInfo.GetFullPathApi; // get info on the current file
             Plug.DoNppBufferActivated();
-            Npp.PreviousFile.Path = Npp.CurrentFile.Path; // save info on the "previous" file for the next buffer activated event
+            Npp.PreviousFileInfo.Path = Npp.CurrentFileInfo.Path; // save info on the "previous" file for the next buffer activated event
         }
 
         #endregion

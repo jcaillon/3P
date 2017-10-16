@@ -312,7 +312,7 @@ namespace _3PA {
             switch (message) {
                 // middle click : go to definition
                 case WinApi.Messages.WM_MBUTTONDOWN:
-                    if (Npp.CurrentFile.IsProgress) {
+                    if (Npp.CurrentFileInfo.IsProgress) {
                         if (KeyboardMonitor.GetModifiers.IsCtrl) {
                             Npp.GoBackFromDefinition();
                         } else {
@@ -439,7 +439,7 @@ namespace _3PA {
                     e.Control == item.Shortcut.IsCtrl &&
                     e.Shift == item.Shortcut.IsShift &&
                     e.Alt == item.Shortcut.IsAlt &&
-                    (item.Generic || Npp.CurrentFile.IsProgress)) {
+                    (item.Generic || Npp.CurrentFileInfo.IsProgress)) {
                     if (!isSpamming && item.OnClic != null) {
                         try {
                             item.OnClic(item);
@@ -467,8 +467,8 @@ namespace _3PA {
         /// </summary>
         public static void OnNppFileBeforeClose() {
             // remove the file from the opened files list
-            if (_openedFileList.Contains(Npp.CurrentFile.Path)) {
-                _openedFileList.Remove(Npp.CurrentFile.Path);
+            if (_openedFileList.Contains(Npp.CurrentFileInfo.Path)) {
+                _openedFileList.Remove(Npp.CurrentFileInfo.Path);
             }
         }
 
@@ -494,12 +494,12 @@ namespace _3PA {
             ApplyOptionsForScintilla();
 
             // if the file has just been opened
-            if (!_openedFileList.Contains(Npp.CurrentFile.Path)) {
-                _openedFileList.Add(Npp.CurrentFile.Path);
+            if (!_openedFileList.Contains(Npp.CurrentFileInfo.Path)) {
+                _openedFileList.Add(Npp.CurrentFileInfo.Path);
 
                 // need to auto change encoding?
                 if (Config.Instance.AutoSwitchEncodingTo != NppEncodingFormat._Automatic_default && !string.IsNullOrEmpty(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
-                    if (Npp.CurrentFile.Path.TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
+                    if (Npp.CurrentFileInfo.Path.TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
                         NppMenuCmd cmd;
                         if (Enum.TryParse(((int) Config.Instance.AutoSwitchEncodingTo).ToString(), true, out cmd))
                             Npp.RunCommand(cmd);
@@ -508,10 +508,10 @@ namespace _3PA {
             }
 
             // activate show space for conf files / deactivate if coming from a conf file
-            if (ShareExportConf.IsFileExportedConf(Npp.PreviousFile.Path))
+            if (ShareExportConf.IsFileExportedConf(Npp.PreviousFileInfo.Path))
                 if (Sci.ViewWhitespace != WhitespaceMode.Invisible && !Sci.ViewEol)
                     Sci.ViewWhitespace = _whitespaceMode;
-            if (ShareExportConf.IsFileExportedConf(Npp.CurrentFile.Path))
+            if (ShareExportConf.IsFileExportedConf(Npp.CurrentFileInfo.Path))
                 Sci.ViewWhitespace = WhitespaceMode.VisibleAlways;
 
             // close popups..
@@ -522,10 +522,10 @@ namespace _3PA {
                 OpenedFilesInfo.UpdateFileStatus();
             } else {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
+                    CodeExplorer.Instance.Toggle(Npp.CurrentFileInfo.IsProgress);
                 }
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Instance.Toggle(Npp.CurrentFile.IsProgress);
+                    FileExplorer.Instance.Toggle(Npp.CurrentFileInfo.IsProgress);
                 }
             }
 
@@ -553,9 +553,9 @@ namespace _3PA {
         /// </summary>
         public static void DoNppDocumentSaved() {
             // if it's a conf file, import it
-            ShareExportConf.TryToImportFile(Npp.CurrentFile.Path);
+            ShareExportConf.TryToImportFile(Npp.CurrentFileInfo.Path);
 
-            if (!Npp.CurrentFile.IsProgress)
+            if (!Npp.CurrentFileInfo.IsProgress)
                 return;
 
             // Display parser errors if any
@@ -649,7 +649,7 @@ namespace _3PA {
         /// When the user click on the margin
         /// </summary>
         public static void OnSciMarginClick(SCNotification nc) {
-            if (!Npp.CurrentFile.IsProgress)
+            if (!Npp.CurrentFileInfo.IsProgress)
                 return;
 
             // click on the error margin
@@ -698,7 +698,7 @@ namespace _3PA {
             ClosePopups();
             //Snippets.FinalizeCurrent();
 
-            if (!Npp.CurrentFile.IsProgress)
+            if (!Npp.CurrentFileInfo.IsProgress)
                 return;
 
             // update scope of code explorer (the selection img)
@@ -715,7 +715,7 @@ namespace _3PA {
         public static void OnPageScrolled() {
             ClosePopups();
             // parse the current part of the document
-            if (!Npp.CurrentFile.IsProgress)
+            if (!Npp.CurrentFileInfo.IsProgress)
                 ParserHandler.ParseDocumentAsap();
         }
 
@@ -760,14 +760,14 @@ namespace _3PA {
                 _initiatedScintilla[curScintilla] = 1;
             }
 
-            if (Npp.CurrentFile.IsProgress)
+            if (Npp.CurrentFileInfo.IsProgress)
                 ApplyPluginOptionsForScintilla();
             else
                 ApplyDefaultOptionsForScintilla();
         }
 
         internal static void ApplyPluginOptionsForScintilla() {
-            if (!_hasBeenInit || !Npp.PreviousFile.IsProgress) {
+            if (!_hasBeenInit || !Npp.PreviousFileInfo.IsProgress) {
                 // read default options
                 _tabWidth = Sci.TabWidth;
                 _indentWithTabs = Sci.UseTabs;
@@ -795,7 +795,7 @@ namespace _3PA {
 
         internal static void ApplyDefaultOptionsForScintilla() {
             // nothing has been done yet, no need to reset anything! same if we already were on a non progress file
-            if (!_hasBeenInit || !Npp.PreviousFile.IsProgress)
+            if (!_hasBeenInit || !Npp.PreviousFileInfo.IsProgress)
                 return;
 
             // apply default options
@@ -836,7 +836,7 @@ namespace _3PA {
         /// Called when the plugin is first used, suggests default options for npp
         /// </summary>
         internal static void FinishPluginInstall() {
-            object options = new Npp.NppConfig.NppConfigXmlOptions {
+            object options = new Npp.NppConf.NppConfigXmlOptions {
                 EnableMultiSelection = true,
                 DisableDefaultAutocompletion = true,
                 EnableBackupOnSave = true
@@ -848,7 +848,7 @@ namespace _3PA {
         /// Can be called at anytime to let the user modify notepad++ options
         /// </summary>
         internal static void ModifyingNppConfig() {
-            object options = new Npp.NppConfig.NppConfigXmlOptions {
+            object options = new Npp.NppConf.NppConfigXmlOptions {
                 EnableMultiSelection = Npp.ConfXml.MultiSelectionEnabled,
                 DisableDefaultAutocompletion = Npp.ConfXml.AutocompletionMode == 0,
                 EnableBackupOnSave = Npp.ConfXml.BackupMode != 0
@@ -857,7 +857,7 @@ namespace _3PA {
         }
 
         private static void ModifyingNppConfig(object opts, bool installMode) {
-            var options = opts as Npp.NppConfig.NppConfigXmlOptions;
+            var options = opts as Npp.NppConf.NppConfigXmlOptions;
             if (options != null) {
                 var buttons = installMode ? new List<string> { "Apply changes now" } : new List<string> { "Apply changes now (restart)", "Cancel" };
 

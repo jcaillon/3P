@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.Pro {
             if (Utils.IsSpamming("CorrectCodeIndentation", 1000))
                 return;
 
-            var parser = new Parser.Parser(Sci.Text, Npp.CurrentFile.Path, null, false);
+            var parser = new Parser.Parser(Sci.Text, Npp.CurrentFileInfo.Path, null, false);
 
             // in case of an incorrect document, warn the user
             var parserErrors = parser.ParseErrorsInHtml;
@@ -115,9 +115,9 @@ namespace _3PA.MainFeatures.Pro {
         /// Check the validity of a progress code in the point of view of the appbuilder (make sure it can be opened within the appbuilder)
         /// </summary>
         public static void DisplayParserErrors(bool silent = false) {
-            if (Npp.CurrentFile.IsProgress && !_displayParserErrorsIgnoredFiles.Contains(Npp.CurrentFile.Path)) {
+            if (Npp.CurrentFileInfo.IsProgress && !_displayParserErrorsIgnoredFiles.Contains(Npp.CurrentFileInfo.Path)) {
                 Task.Factory.StartNew(() => {
-                    var currentFilePath = Npp.CurrentFile.Path;
+                    var currentFilePath = Npp.CurrentFileInfo.Path;
                     var message = new StringBuilder();
                     message.Append("The analyzed file was :<br>" + currentFilePath.ToHtmlLink() + "<br>");
 

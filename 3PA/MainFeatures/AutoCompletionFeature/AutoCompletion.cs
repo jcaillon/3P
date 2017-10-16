@@ -152,16 +152,16 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             DoInLock(() => {
                 SetLangContext();
 
-                if (Npp.CurrentFile.IsProgress) {
+                if (Npp.CurrentFileInfo.IsProgress) {
                     // Progress files
                     _staticItems = Keywords.Instance.CompletionItems.ToList();
                     _staticItems.AddRange(DataBase.Instance.CompletionItems);
                 } else {
                     // Other files, get the keyword list from the xml
-                    if (Npp.CurrentFile.Lang == null) {
+                    if (Npp.CurrentFileInfo.Lang == null) {
                         _staticItems = new List<CompletionItem>();
                     } else {
-                        _staticItems = Npp.CurrentFile.Lang.AutoCompletionItems;
+                        _staticItems = Npp.CurrentFileInfo.Lang.AutoCompletionItems;
                     }
                 }
 
@@ -169,7 +169,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _staticItems.Sort(CompletionSortingClass<CompletionItem>.Instance);
 
                 if (OnUpdateStaticItems != null)
-                    OnUpdateStaticItems.Invoke(Npp.CurrentFile.IsProgress ? null : _staticItems);
+                    OnUpdateStaticItems.Invoke(Npp.CurrentFileInfo.IsProgress ? null : _staticItems);
             });
         }
 
@@ -181,17 +181,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             _additionalWordChar = new HashSet<char>();
             _childSeparators = new HashSet<char>();
 
-            if (Npp.CurrentFile.IsProgress) {
+            if (Npp.CurrentFileInfo.IsProgress) {
                 // Progress files
                 _additionalWordChar.Add('&');
                 _additionalWordChar.Add('-');
                 _childSeparators.Add(':');
 
-            } else if (Npp.CurrentFile.Lang != null)  {
+            } else if (Npp.CurrentFileInfo.Lang != null)  {
 
                 // Other files, get the keyword list and additional characters from the xml
-                if (Npp.CurrentFile.Lang.AdditionalWordChar != null) {
-                    foreach (var c in Npp.CurrentFile.Lang.AdditionalWordChar) {
+                if (Npp.CurrentFileInfo.Lang.AdditionalWordChar != null) {
+                    foreach (var c in Npp.CurrentFileInfo.Lang.AdditionalWordChar) {
                         if (!_additionalWordChar.Contains(c))
                             _additionalWordChar.Add(c);
                     }
@@ -211,7 +211,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 _additionalWordChar.Add('_');
 
             // Set options for this language
-            if (Npp.CurrentFile.IsProgress) {
+            if (Npp.CurrentFileInfo.IsProgress) {
                 InsertSelectedSuggestionOnWordEnd = Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd;
                 AutoCase = Config.Instance.AutoCompleteAutoCase;
                 FilterCaseMode = CaseMode.Insensitive;
@@ -252,7 +252,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // update the auto completion immediately?
             CurrentActiveTypes = ActiveTypes.Reset;
-            if (IsVisible && (_openedFromShortCut || Npp.CurrentFile.IsProgress))
+            if (IsVisible && (_openedFromShortCut || Npp.CurrentFileInfo.IsProgress))
                 UpdateAutocompletion();
         }
 
@@ -337,7 +337,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 }
 
                 // replace semicolon by a point
-                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && Npp.CurrentFile.IsProgress) {
+                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && Npp.CurrentFileInfo.IsProgress) {
                     _insertingWord = true;
                     _positionOfLastInsertion = Sci.ModifyTextAroundCaret(-1, 0, ".");
                     _insertingWord = false;
@@ -408,7 +408,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (outList == null || outList.Count == 0) {
                     // if the current word is directly preceded by a :, we are entering an object field/method
                     // for now, we then display the whole list of object keywords
-                    if (firstSeparator == ':' && Npp.CurrentFile.IsProgress) {
+                    if (firstSeparator == ':' && Npp.CurrentFileInfo.IsProgress) {
                         if (CurrentActiveTypes != ActiveTypes.KeywordObject) {
                             CurrentActiveTypes = ActiveTypes.KeywordObject;
                             DoInLock(() => { CurrentItems = _savedAllItems; });

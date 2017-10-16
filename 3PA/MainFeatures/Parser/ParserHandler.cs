@@ -111,9 +111,9 @@ namespace _3PA.MainFeatures.Parser {
                     // make sure to always parse the current file
                     Parser parser = null;
                     do {
-                        _lastFilePathParsed = Npp.CurrentFile.Path;
+                        _lastFilePathParsed = Npp.CurrentFileInfo.Path;
 
-                        if (Npp.CurrentFile.IsProgress) {
+                        if (Npp.CurrentFileInfo.IsProgress) {
                             parser = new Parser(Sci.Text, _lastFilePathParsed, null, true);
 
                             // visitor
@@ -145,7 +145,7 @@ namespace _3PA.MainFeatures.Parser {
                             if (OnEndSendCodeExplorerItems != null)
                                 OnEndSendCodeExplorerItems(null);
                         }
-                    } while (!_lastFilePathParsed.Equals(Npp.CurrentFile.Path));
+                    } while (!_lastFilePathParsed.Equals(Npp.CurrentFileInfo.Path));
 
                     if (parser != null) {
                         _lineInfo = new Dictionary<int, LineInfo>(parser.LineInfo);

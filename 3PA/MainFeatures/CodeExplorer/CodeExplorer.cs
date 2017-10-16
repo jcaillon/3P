@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void UpdateCurrentScope() {
             if (!IsVisible)
                 return;
-            UpdateCurrentScope(Npp.CurrentFile.IsProgress ? ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine) : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress ? ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine) : null);
         }
 
         public void OnStart() {
@@ -122,7 +122,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (!IsVisible)
                 return;
             int curLine = Sci.Line.CurrentLine;
-            UpdateCurrentScope(Npp.CurrentFile.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
         }
 
         #endregion

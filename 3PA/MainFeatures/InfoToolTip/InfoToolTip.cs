@@ -271,7 +271,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(HtmlHelper.FormatSubtitle("ORIGINS"));
                 if (parsedItem.Scope != null)
                     toDisplay.Append(HtmlHelper.FormatRow("Scope name", parsedItem.Scope.Name));
-                if (!Npp.CurrentFile.Path.Equals(parsedItem.FilePath))
+                if (!Npp.CurrentFileInfo.Path.Equals(parsedItem.FilePath))
                     toDisplay.Append(HtmlHelper.FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
             }
 

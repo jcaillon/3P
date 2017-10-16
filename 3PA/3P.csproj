@@ -209,12 +209,15 @@
     <Compile Include="MainFeatures\Pro\Deploy\FileToDeploy.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentHandler.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\ProExecutionHandleCompilation.cs" />
+    <Compile Include="NppCore\NppConf.cs" />
+    <Compile Include="NppCore\NppFileInfo.cs" />
     <Compile Include="NppCore\NppInterfaceForm\NppDockableDialogFakeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="NppCore\NppInterfaceForm\NppEmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="NppCore\NppStylers.cs" />
     <Compile Include="NppCore\SciApi.cs" />
     <Compile Include="NppCore\UiThread.cs" />
     <Compile Include="WindowsCore\RegistryWrapper.cs" />

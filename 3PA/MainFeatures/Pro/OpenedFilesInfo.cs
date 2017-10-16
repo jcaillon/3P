@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Information on the current file
         /// </summary>
         public static OpenedFileInfo CurrentOpenedFileInfo {
-            get { return GetOpenedFileInfo(Npp.CurrentFile.Path); }
+            get { return GetOpenedFileInfo(Npp.CurrentFileInfo.Path); }
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.Pro {
             _sessionInfo[fullPath].HasErrorsNotDisplayed = true;
 
             // Update info on the current file
-            if (fullPath.EqualsCi(Npp.CurrentFile.Path))
+            if (fullPath.EqualsCi(Npp.CurrentFileInfo.Path))
                 UpdateErrorsInScintilla();
         }
 
@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Updates the number of errors in the FileExplorer form and the file status
         /// </summary>
         public static void UpdateFileStatus() {
-            var currentFilePath = Npp.CurrentFile.Path;
+            var currentFilePath = Npp.CurrentFileInfo.Path;
 
             // UpdatedOperation event
             if (OnUpdatedOperation != null) {
@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures.Pro {
             // Updates the number of errors in the FileExplorer form and the file status
             UpdateFileStatus();
 
-            var currentFilePath = Npp.CurrentFile.Path;
+            var currentFilePath = Npp.CurrentFileInfo.Path;
             var marginError = Sci.GetMargin(ErrorMarginNumber);
 
             // need to clear scintilla for this file?
@@ -170,7 +170,7 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // check if current file is a progress and if we got info on it 
-            if (!Npp.CurrentFile.IsProgress || !_sessionInfo.ContainsKey(currentFilePath) || _sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0) {
+            if (!Npp.CurrentFileInfo.IsProgress || !_sessionInfo.ContainsKey(currentFilePath) || _sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0) {
                 if (marginError.Width > 0) {
                     marginError.Width = 1;
                     marginError.Width = 0;
@@ -262,7 +262,7 @@ namespace _3PA.MainFeatures.Pro {
                 _sessionInfo[filePath].FileErrors.Clear();
                 jobDone = true;
 
-                if (filePath.Equals(Npp.CurrentFile.Path)) {
+                if (filePath.Equals(Npp.CurrentFileInfo.Path)) {
                     ClearAnnotationsAndMarkers();
                     UpdateFileStatus();
                 } else
@@ -275,7 +275,7 @@ namespace _3PA.MainFeatures.Pro {
                     kpv.Value.FileErrors.Clear();
                     jobDone = true;
 
-                    if (kpv.Key.Equals(Npp.CurrentFile.Path)) {
+                    if (kpv.Key.Equals(Npp.CurrentFileInfo.Path)) {
                         ClearAnnotationsAndMarkers();
                         UpdateFileStatus();
                     } else
@@ -295,12 +295,12 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         /// <param name="line"></param>
         public static bool ClearLineErrors(int line) {
-            if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path))
+            if (!_sessionInfo.ContainsKey(Npp.CurrentFileInfo.Path))
                 return false;
 
             bool jobDone = false;
-            if (_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == line)) {
-                _sessionInfo[Npp.CurrentFile.Path].FileErrors.RemoveAll(error => error.Line == line);
+            if (_sessionInfo[Npp.CurrentFileInfo.Path].FileErrors.Exists(error => error.Line == line)) {
+                _sessionInfo[Npp.CurrentFileInfo.Path].FileErrors.RemoveAll(error => error.Line == line);
                 jobDone = true;
             }
 
@@ -311,8 +311,8 @@ namespace _3PA.MainFeatures.Pro {
             } else {
                 // we didn't manage to clear the error, (only visually, not in our records), 
                 // so clear everything, the user will have to compile again
-                _sessionInfo[Npp.CurrentFile.Path].FileErrors.Clear();
-                _sessionInfo[Npp.CurrentFile.Path].NeedToCleanScintilla = true;
+                _sessionInfo[Npp.CurrentFileInfo.Path].FileErrors.Clear();
+                _sessionInfo[Npp.CurrentFileInfo.Path].NeedToCleanScintilla = true;
             }
             return jobDone;
         }
@@ -335,18 +335,18 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static void ClearAnnotationsAndMarkers() {
             if (Sci.GetLine(0).MarkerGet() != 0) {
-                if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
-                    _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
-                    !_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == 0)) {
+                if (!_sessionInfo.ContainsKey(Npp.CurrentFileInfo.Path) ||
+                    _sessionInfo[Npp.CurrentFileInfo.Path].FileErrors == null ||
+                    !_sessionInfo[Npp.CurrentFileInfo.Path].FileErrors.Exists(error => error.Line == 0)) {
                     // The line 0 has an error marker when it shouldn't
                     ClearLine(0);
                 }
             }
             int nextLine = Sci.GetLine(0).MarkerNext(EveryMarkersMask);
             while (nextLine > -1) {
-                if (!_sessionInfo.ContainsKey(Npp.CurrentFile.Path) ||
-                    _sessionInfo[Npp.CurrentFile.Path].FileErrors == null ||
-                    !_sessionInfo[Npp.CurrentFile.Path].FileErrors.Exists(error => error.Line == nextLine)) {
+                if (!_sessionInfo.ContainsKey(Npp.CurrentFileInfo.Path) ||
+                    _sessionInfo[Npp.CurrentFileInfo.Path].FileErrors == null ||
+                    !_sessionInfo[Npp.CurrentFileInfo.Path].FileErrors.Exists(error => error.Line == nextLine)) {
                     // The line 0 has an error marker when it shouldn't
                     ClearLine(nextLine);
                 }
@@ -364,7 +364,7 @@ namespace _3PA.MainFeatures.Pro {
         /// When the user click the error margin but no error is cleaned, it goes to the next line with error instead
         /// </summary>
         public static void GoToNextError(int line) {
-            var currentFilePath = Npp.CurrentFile.Path;
+            var currentFilePath = Npp.CurrentFileInfo.Path;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
             int nextLine = Sci.GetLine(line).MarkerNext(EveryMarkersMask);
@@ -385,7 +385,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Go to the previous error
         /// </summary>
         public static void GoToPrevError(int line) {
-            var currentFilePath = Npp.CurrentFile.Path;
+            var currentFilePath = Npp.CurrentFileInfo.Path;
             var nbLines = Sci.Line.Count;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;

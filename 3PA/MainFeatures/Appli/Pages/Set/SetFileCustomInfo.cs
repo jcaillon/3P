@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// Call this method to update the content of the form according to the current document
         /// </summary>
         public void UpdateInfo() {
-            _filename = Npp.CurrentFile.FileName;
+            _filename = Npp.CurrentFileInfo.FileName;
 
             // populate combobox
             var list = new List<ItemCombo> {
@@ -221,7 +221,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_correctionDesc.Text = (_locFileTagObject.CorrectionDecription ?? "");
             fl_correctionDate.Text = _locFileTagObject.CorrectionDate;
 
-            lb_FileName.Text = @"<b>" + Npp.CurrentFile.FileName + @"</b>";
+            lb_FileName.Text = @"<b>" + Npp.CurrentFileInfo.FileName + @"</b>";
             var val = cb_info.SelectedValue.ToString();
             if (!val.Equals(FileCustomInfo.LastTag) && !val.Equals(FileCustomInfo.DefaultTag)) {
                 lb_SaveState.Text = @"<b>Info saved</b>";

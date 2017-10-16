@@ -26,6 +26,7 @@ namespace _3PA.NppCore {
     /// Use this class to communicate with scintilla
     /// </summary>
     internal class SciApi {
+
         #region Fields
 
         private Win32Api.Scintilla_DirectFunction _directFunction;

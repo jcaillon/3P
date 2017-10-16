@@ -425,7 +425,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            OpenedFilesInfo.ClearAllErrors(Npp.CurrentFile.Path);
+            OpenedFilesInfo.ClearAllErrors(Npp.CurrentFileInfo.Path);
             Sci.GrabFocus();
         }
 
