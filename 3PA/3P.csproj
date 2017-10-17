@@ -227,7 +227,6 @@
     <Compile Include="NppCore\SciSelection.cs" />
     <Compile Include="NppCore\SciStyle.cs" />
     <Compile Include="NppCore\UiThread.cs" />
-    <Compile Include="Tests\CsLexer.cs" />
     <Compile Include="WindowsCore\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />

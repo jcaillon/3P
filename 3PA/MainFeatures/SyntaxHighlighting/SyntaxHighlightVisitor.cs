@@ -23,8 +23,15 @@ using _3PA.NppCore;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
+
     internal class SyntaxHighlightVisitor : ILexerVisitor {
-        
+
+        private int _includeDepth;
+
+        public SyntaxHighlightVisitor(int includeDepth) {
+            _includeDepth = includeDepth;
+        }
+
         public void PreVisit(Lexer lexer) {
         }
 
@@ -41,6 +48,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenInclude tok) {
+            _includeDepth++;
             SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
         }
 
@@ -61,7 +69,11 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenSymbol tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            if (_includeDepth > 0 && tok.Value == "}") {
+                _includeDepth--;
+                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
+            } else 
+                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
         }
 
         public void Visit(TokenEof tok) {
@@ -69,7 +81,10 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenWord tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList2);
+            if (_includeDepth > 0)
+                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
+            else
+                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList2);
         }
 
         public void Visit(TokenWhiteSpace tok) {

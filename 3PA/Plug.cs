@@ -34,6 +34,7 @@ using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
 using _3PA._Resource;
@@ -791,6 +792,8 @@ namespace _3PA {
             Sci.CaretColor = currentStyle.CaretColor.ForeColor;
             Sci.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
             Sci.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
+
+            SyntaxHighlight.ActivateHighlight();
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
