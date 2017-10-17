@@ -70,7 +70,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // END OF FILE reached
             if (ch == Eof)
-                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
 
             switch (ch) {
                 case ' ':

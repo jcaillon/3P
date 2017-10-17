@@ -24,73 +24,71 @@ using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlightVisitor : ILexerVisitor {
-        /// <summary>
-        /// Only colorize from this line!
-        /// </summary>
-        public int FromLine { get; set; }
-
-        public int ToLine { get; set; }
-
-        public void Visit(TokenComment tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Comment);
-        }
-
-        public void Visit(TokenEol tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenEos tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenInclude tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Delimiter2);
-        }
-
-        public void Visit(TokenPreProcVariable tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenNumber tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenString tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Delimiter5);
-        }
-
-        public void Visit(TokenStringDescriptor tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenSymbol tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenEof tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenWord tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenWhiteSpace tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenUnknown tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int)UdlStyles.Default);
-        }
-
-        public void Visit(TokenPreProcDirective tok) {
-            Sci.SetStyling(tok.EndPosition - tok.StartPosition, (int) UdlStyles.Default);
-        }
-
+        
         public void PreVisit(Lexer lexer) {
         }
 
+        public void Visit(TokenComment tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Comment);
+        }
+
+        public void Visit(TokenEol tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenEos tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenInclude tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
+        }
+
+        public void Visit(TokenPreProcVariable tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList5);
+        }
+
+        public void Visit(TokenNumber tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Number);
+        }
+
+        public void Visit(TokenString tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter1);
+        }
+
+        public void Visit(TokenStringDescriptor tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenSymbol tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenEof tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenWord tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList2);
+        }
+
+        public void Visit(TokenWhiteSpace tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenUnknown tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+        }
+
+        public void Visit(TokenPreProcDirective tok) {
+            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList5);
+        }
+
         public void PostVisit() {
+        }
+
+        private void SetStyling(int length, UdlStyles style) {
+            Sci.SetStyling(length, (int)style);
         }
     }
 }

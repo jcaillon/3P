@@ -37,6 +37,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
 
@@ -83,8 +84,9 @@ namespace _3PA.Tests {
                 "Updated to version " + AssemblyInfo.Version,
                 new List<string> {"ok", "cancel"},
                 true);
-             */
-            /*Sci.StyleResetDefault();
+            */
+            /*
+            Sci.StyleResetDefault();
             Sci.StyleClearAll();
             Sci.GetStyle(CSharpLexer.StyleDefault).ForeColor = Color.Black;
             Sci.GetStyle(CSharpLexer.StyleKeyword).ForeColor = Color.Blue;
@@ -94,8 +96,7 @@ namespace _3PA.Tests {
             */
 
             Style.SetSyntaxStyles();
-            Sci.Lexer = Lexer.Container;
-            Sci.Colorize(0, Sci.TextLength);
+            SyntaxHighlight.ActivateHighlight();
         }
         
         #endregion

@@ -41,6 +41,7 @@ namespace _3PA.MainFeatures.Parser {
         protected string _data;
         protected int _dataLength;
         protected int _pos;
+        protected int _offset = 0;
         protected int _line = LineStartAt;
         protected int _column = ColumnStartAt;
 
@@ -124,7 +125,7 @@ namespace _3PA.MainFeatures.Parser {
         /// peek at the current pos + x token of the list, returns a new TokenEof if can't find
         /// </summary>
         public virtual Token PeekAtToken(int x) {
-            return _tokenPos + x >= _tokenList.Count || _tokenPos + x < 0 ? new TokenEof("", _startLine, _startCol, _startPos, _pos) : _tokenList[_tokenPos + x];
+            return _tokenPos + x >= _tokenList.Count || _tokenPos + x < 0 ? new TokenEof("", _startLine, _startCol, _startPos + _offset, _pos + _offset) : _tokenList[_tokenPos + x];
         }
 
         #endregion
@@ -212,27 +213,27 @@ namespace _3PA.MainFeatures.Parser {
 
             ReadChr();
 
-            return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
         
         protected virtual Token CreateEolToken(char ch) {
             ReadEol(ch);
-            return new TokenEol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenEol(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         protected virtual Token CreateUnknownToken() {
             ReadChr();
-            return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         protected virtual Token CreateEosToken() {
             ReadChr();
-            return new TokenEos(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenEos(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         protected virtual Token CreateSymbolToken() {
             ReadChr();
-            return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -250,7 +251,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
                 break;
             }
-            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -265,7 +266,7 @@ namespace _3PA.MainFeatures.Parser {
                 else
                     break;
             }
-            return new TokenWhiteSpace(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenWhiteSpace(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -296,7 +297,7 @@ namespace _3PA.MainFeatures.Parser {
                 } else
                     break;
             }
-            return new TokenNumber(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenNumber(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -323,7 +324,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 ReadChr();
             }
-            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         #endregion

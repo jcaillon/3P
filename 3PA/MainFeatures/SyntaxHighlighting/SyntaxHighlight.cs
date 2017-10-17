@@ -18,12 +18,16 @@
 // ========================================================================
 #endregion
 
-using System.Diagnostics;
+using System.Collections.Generic;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
+using Lexer = _3PA.NppCore.Lexer;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
+
     internal class SyntaxHighlight {
+
+
 
         #region real colorization todo
         
@@ -35,15 +39,19 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //var watch = Stopwatch.StartNew();
             //------------
 
-            var line = Sci.LineFromPosition(startPos);
-            var lineStartPos = Sci.GetLine(line).Position;
-            var column = startPos - lineStartPos;
-            
-            Sci.StartStyling(lineStartPos);
+            var startLine = Sci.LineFromPosition(startPos);
+            var startLinePos = Sci.GetLine(startLine).Position;
+            var startingLineInfo = _lineInfo.ContainsKey(startLine) ? _lineInfo[startLine] : new LexerLineInfo(0, 0, false, false);
+            _lineInfo.Clear();
 
-            ProLexer tok = new ProLexer(Sci.GetTextByRange(lineStartPos, endPos), lineStartPos, line, column, 0, 0);
+            Sci.StartStyling(startLinePos);
+
+            ProLexer tok = new ProLexer(Sci.GetTextByRange(startLinePos, endPos), startLinePos, startLine, 0, startingLineInfo.CommentDepth, startingLineInfo.IncludeDepth, startingLineInfo.InDoubleQuoteString, startingLineInfo.InSimpleQuoteString, PushLineInfo);
             SyntaxHighlightVisitor vis = new SyntaxHighlightVisitor();
+            vis.PreVisit(tok);
             tok.Accept(vis);
+            vis.PostVisit();
+
 
             //--------------
             //watch.Stop();
@@ -53,7 +61,34 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         }
 
+        public static void ActivateHighlight() {
+            Sci.Lexer = Lexer.Container;
+            _lineInfo.Clear();
+            Sci.Colorize(0, -1);
+        }
+
+        private static void PushLineInfo(int line, int commentDepth, int includeDepth, bool inDoubleQuoteString, bool inSimpleQuoteString) {
+            _lineInfo.Add(line, new LexerLineInfo(commentDepth, includeDepth, inDoubleQuoteString, inSimpleQuoteString));
+        }
+
         #endregion
+
+        private static Dictionary<int, LexerLineInfo> _lineInfo = new Dictionary<int, LexerLineInfo>();
+
+        internal class LexerLineInfo {
+
+            public int CommentDepth { get; set; }
+            public int IncludeDepth { get; set; }
+            public bool InDoubleQuoteString { get; set; }
+            public bool InSimpleQuoteString { get; set; }
+
+            public LexerLineInfo(int commentDepth, int includeDepth, bool inDoubleQuoteString, bool inSimpleQuoteString) {
+                CommentDepth = commentDepth;
+                IncludeDepth = includeDepth;
+                InDoubleQuoteString = inDoubleQuoteString;
+                InSimpleQuoteString = inSimpleQuoteString;
+            }
+        }
 
     }
 }

@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using _3PA.Lib;
 using _3PA.NppCore;
 
@@ -34,6 +36,8 @@ namespace _3PA.MainFeatures.Parser {
 
         private int _commentDepth;
         private int _includeDepth;
+        private bool _inDoubleQuoteString;
+        private bool _inSimpleQuoteString;
 
         // specific to progress, preprocess defined var can contain a ' or " but in that case,
         // the string ends at the end of the line no matter what. So we keep track on which line 
@@ -42,9 +46,14 @@ namespace _3PA.MainFeatures.Parser {
         // line of the last ~ symbol
         private int _tildeLastLine = -2;
 
+        /// <summary>
+        /// Sends you info on the depth of comment/include/string at the beginning of a line
+        /// </summary>
+        private Action<int, int, int, bool, bool> _pushLineInfo;
+
         #endregion
 
-        #region public accessor
+        #region public properties
 
         /// <summary>
         /// Returns the tokens list, we use a gap buffer because it costs less to insert/remove in the middle of the list, 
@@ -61,21 +70,29 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// constructor
         /// </summary>
-        public ProLexer(string data) {
-            _tokenList = new GapBuffer<Token>();
-            Construct(data);
+        public ProLexer(string data) : this(data, 0, 0, 0, 0, 0, false, false, null) {
         }
 
         /// <summary>
         /// Use this when you wish to tokenize only a partial string in a longer string
         /// Allows you to start with a comment depth different of 0
         /// </summary>
-        public ProLexer(string data, int pos, int line, int column, int commentDepth, int includeDepth) : this(data) {
-            _pos = pos;
-            _line = line;
-            _column = column;
-            _commentDepth = commentDepth;
-            _includeDepth = includeDepth;
+        public ProLexer(string data, int posOffset, int initLine, int initColumn, int initCommentDepth, int initIncludeDepth, bool initInDoubleQuoteString, bool initInSimpleQuoteString, Action<int, int, int, bool, bool> pushLineInfo) {
+            _offset = posOffset;
+            _line = initLine;
+            _column = initColumn;
+            _commentDepth = initCommentDepth;
+            _includeDepth = initIncludeDepth;
+            _pushLineInfo = pushLineInfo;
+            _inDoubleQuoteString = initInDoubleQuoteString;
+            _inSimpleQuoteString = initInSimpleQuoteString;
+
+            // push first line info
+            if (_pushLineInfo != null)
+                _pushLineInfo(_line, _commentDepth, _includeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
+
+            _tokenList = new GapBuffer<Token>();
+            Construct(data);
         }
 
         #endregion
@@ -91,7 +108,7 @@ namespace _3PA.MainFeatures.Parser {
             if (eol == '\r' && PeekAtChr(0) == '\n')
                 ReadChr();
 
-            // small exception for progress, to be able to interprete line like :
+            // small exception for progress, to be able to interpret line like :
             // &scope-define varname l'appel~\r\nest bon " 
             // make the scope define line virtually continue on the next line
             if (_startLine == _tildeLastLine)
@@ -99,6 +116,10 @@ namespace _3PA.MainFeatures.Parser {
 
             _line++;
             _column = ColumnStartAt;
+
+            // push current line info
+            if (_pushLineInfo != null)
+                _pushLineInfo(_line, _commentDepth, _includeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
         }
 
         /// <summary>
@@ -121,7 +142,11 @@ namespace _3PA.MainFeatures.Parser {
 
             // END OF FILE reached
             if (ch == Eof)
-                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+
+            // if we started in a string, read this token as a string
+            if (_inDoubleQuoteString || _inSimpleQuoteString)
+                return CreateStringToken(_inDoubleQuoteString ? '"' : '\'');
 
             // if we started in a comment, read this token as a comment
             if (_commentDepth > 0)
@@ -289,11 +314,11 @@ namespace _3PA.MainFeatures.Parser {
         /// reads a word with this format : .[\w_-]*((\.[\w_-~]*)?){1,}
         /// </summary>
         protected override Token CreateWordToken() {
-            return new TokenWord(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenWord(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         protected Token CreatePreProcDirectiveToken() {
-            return new TokenPreProcDirective(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenPreProcDirective(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -307,11 +332,11 @@ namespace _3PA.MainFeatures.Parser {
             if (ch == '&' || char.IsDigit(ch)) {
                 if (ch == '&')
                     ReadChr();
-                return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
             }
 
             // include file
-            return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -369,6 +394,10 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         protected override Token CreateStringToken(char strChar) {
             ReadChr();
+            if (strChar == '"')
+                _inDoubleQuoteString = true;
+            else
+                _inSimpleQuoteString = true;
             while (true) {
                 var ch = PeekAtChr(0);
                 if (ch == Eof)
@@ -404,7 +433,9 @@ namespace _3PA.MainFeatures.Parser {
 
                 ReadChr();
             }
-            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            _inDoubleQuoteString = false;
+            _inSimpleQuoteString = false;
+            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         /// <summary>
@@ -424,7 +455,7 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 ReadChr();
             }
-            return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
         }
 
         #endregion
