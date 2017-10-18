@@ -17,9 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
@@ -29,11 +28,39 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxHighlight {
 
         /// <summary>
+        /// Is the caret not in : an include, a string, a comment
+        /// </summary>
+        public static bool IsCarretInNormalContext(int curPos) {
+            try {
+                var curContext = (SciStyleId)Sci.GetStyleAt(curPos);
+                if (curPos <= 0)
+                    return true;
+                if (IsNormalContext(curContext))
+                    return true;
+                var prevContext = (SciStyleId)Sci.GetStyleAt(curPos - 1);
+                return IsNormalContext(prevContext);
+            } catch (Exception) {
+                // we can be here if the style ID isn't in the UdlStyles enum
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Is the caret not in : a string, a comment
+        /// </summary>
+        private static bool IsNormalContext(SciStyleId context) {
+            return context != SciStyleId.Comment
+                   && context != SciStyleId.DoubleQuote
+                   && context != SciStyleId.SimpleQuote
+                   && context != SciStyleId.SingleLineComment;
+        }
+
+        /// <summary>
         /// Called on STYLENEEDED notification
         /// </summary>
         public static void Colorize(int startPos, int endPos) {
             //------------
-            var watch = Stopwatch.StartNew();
+            //var watch = Stopwatch.StartNew();
             //------------
 
             var startLine = Sci.LineFromPosition(startPos);
@@ -47,22 +74,26 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             vis.PreVisit(tok);
             tok.Accept(vis);
             vis.PostVisit();
-
-
+            
             //--------------
-            watch.Stop();
+            //watch.Stop();
            //UserCommunication.Notify("startPos = " + startPos + ", endPos = " + endPos + ", done in " + watch.ElapsedMilliseconds + " ms");
             //------------
-
-
+            
         }
 
+        /// <summary>
+        /// Set scintilla to use the contained lexer
+        /// </summary>
         public static void ActivateHighlight() {
             Sci.Lexer = Lexer.Container;
             _lineInfo.Clear();
             Sci.Colorize(0, -1);
         }
 
+        /// <summary>
+        /// Allows to keeps track of certain info at the beginning of each line
+        /// </summary>
         private static void PushLineInfo(int line, int commentDepth, int includeDepth, bool inDoubleQuoteString, bool inSimpleQuoteString) {
             if (_lineInfo.ContainsKey(line))
                 _lineInfo[line] = new LexerLineInfo(commentDepth, includeDepth, inDoubleQuoteString, inSimpleQuoteString);

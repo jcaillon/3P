@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             get {
                 var outList = new List<Image>();
                 typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
-                    if (l == 0 || !Flags.HasFlag((ParseFlag) l))
+                    if (l == 0 || !Flags.HasFlag(l))
                         return;
                     Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)

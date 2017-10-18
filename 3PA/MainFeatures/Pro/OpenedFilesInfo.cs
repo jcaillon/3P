@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FilesInfo.cs) is part of 3P.
+// This file (OpenedFilesInfo.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -116,11 +116,11 @@ namespace _3PA.MainFeatures.Pro {
         public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight) {
             switch (fontWeight) {
                 case ErrorFontWeight.Bold:
-                    return (byte) (errorLevel + Style.ErrorAnnotBoldStyleOffset);
+                    return (byte) (errorLevel + ScintillaTheme.ErrorAnnotBoldStyleOffset);
                 case ErrorFontWeight.Italic:
-                    return (byte) (errorLevel + Style.ErrorAnnotItalicStyleOffset);
+                    return (byte) (errorLevel + ScintillaTheme.ErrorAnnotItalicStyleOffset);
                 default:
-                    return (byte) (errorLevel + Style.ErrorAnnotStandardStyleOffset);
+                    return (byte) (errorLevel + ScintillaTheme.ErrorAnnotStandardStyleOffset);
             }
         }
 
@@ -216,22 +216,22 @@ namespace _3PA.MainFeatures.Pro {
 
                     var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : ("Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber);
                     mess += fileError.FromProlint ? "): " : ", col " + fileError.Column + "): ";
-                    stylerHelper.Style(mess, (byte) (Style.ErrorAnnotBoldStyleOffset + fileError.Level));
+                    stylerHelper.Style(mess, (byte) (ScintillaTheme.ErrorAnnotBoldStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
 
                     mess = fileError.Message.BreakText(140);
-                    stylerHelper.Style(mess, (byte) (Style.ErrorAnnotStandardStyleOffset + fileError.Level));
+                    stylerHelper.Style(mess, (byte) (ScintillaTheme.ErrorAnnotStandardStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
 
                     if (Config.Instance.GlobalShowDetailedHelpForErrors && !string.IsNullOrEmpty(fileError.Help)) {
                         mess = "\nDetailed help: " + fileError.Help.BreakText(140);
-                        stylerHelper.Style(mess, (byte) (Style.ErrorAnnotItalicStyleOffset + fileError.Level));
+                        stylerHelper.Style(mess, (byte) (ScintillaTheme.ErrorAnnotItalicStyleOffset + fileError.Level));
                         lastMessage.Append(mess);
                     }
 
                     if (fileError.Times > 0) {
                         mess = "\nThis message above appeared " + fileError.Times + " times in the compiler log";
-                        stylerHelper.Style(mess, (byte) (Style.ErrorAnnotBoldStyleOffset + fileError.Level));
+                        stylerHelper.Style(mess, (byte) (ScintillaTheme.ErrorAnnotBoldStyleOffset + fileError.Level));
                         lastMessage.Append(mess);
                     }
 

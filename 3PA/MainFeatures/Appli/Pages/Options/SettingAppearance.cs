@@ -23,6 +23,7 @@ using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
@@ -88,7 +89,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // syntax combo
             cbSyntax.SelectedIndexChanged -= CbSyntaxSelectedIndexChanged;
-            cbSyntax.DataSource = Style.GetThemesList.Select(theme => theme.ThemeName).ToList();
+            cbSyntax.DataSource = ScintillaTheme.GetThemesList.Select(theme => theme.ThemeName).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
@@ -137,10 +138,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// Changing syntax theme
         /// </summary>
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            Style.Current = Style.GetThemesList[cbSyntax.SelectedIndex];
+            ScintillaTheme.CurrentTheme = ScintillaTheme.GetThemesList[cbSyntax.SelectedIndex];
             Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
             if (Npp.CurrentFileInfo.IsProgress) {
-                Style.SetSyntaxStyles();
+                ScintillaTheme.CurrentTheme.SetScintillaStyles();
                 Plug.ApplyOptionsForScintilla();
                 OpenedFilesInfo.UpdateFileStatus();
             }

@@ -650,7 +650,7 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\Keywords.cs" />
-    <Compile Include="MainFeatures\Style.cs" />
+    <Compile Include="MainFeatures\SyntaxHighlighting\ScintillaTheme.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
     <Compile Include="NppCore\Sci.cs" />
@@ -727,7 +727,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="_Resource\Data\Abbreviations" />
     <None Include="_Resource\Data\DeploymentRules" />
     <None Include="_Resource\Data\KeywordsList" />
     <None Include="_Resource\Data\KeywordsHelp" />
@@ -745,9 +744,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="_Resource\Data\UDL.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="_Resource\Html\Pages\home.html" />
     <Content Include="_Resource\Html\StyleSheet.css" />
     <Content Include="_Resource\Html\Pages\getting_started.txt" />

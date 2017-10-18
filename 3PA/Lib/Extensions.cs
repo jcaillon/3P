@@ -211,7 +211,7 @@ namespace _3PA.Lib {
 
         private static Dictionary<Type, List<Tuple<string, long>>> _enumTypeNameValueKeyPairs = new Dictionary<Type, List<Tuple<string, long>>>();
 
-        public static void ForEach<T>(this Type curType, Action<string, long> actionForEachNameValue) {
+        public static void ForEach<T>(this Type curType, Action<string, T> actionForEachNameValue) {
             if (!curType.IsEnum)
                 return;
             if (!_enumTypeNameValueKeyPairs.ContainsKey(curType)) {
@@ -223,7 +223,8 @@ namespace _3PA.Lib {
                 _enumTypeNameValueKeyPairs.Add(curType, list);
             }
             foreach (var tuple in _enumTypeNameValueKeyPairs[curType]) {
-                actionForEachNameValue(tuple.Item1, tuple.Item2);
+                T val = (T)Enum.Parse(curType, tuple.Item1);
+                actionForEachNameValue(tuple.Item1, val);
             }
         }
 

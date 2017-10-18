@@ -29,6 +29,7 @@ using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -96,7 +97,7 @@ namespace _3PA.MainFeatures {
                             Label = "Syntax highlighting themes list",
                             HandledItem = Config.FileSyntaxThemes,
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileSyntaxThemes, DataResources.SyntaxThemes),
-                            OnImport = line => Style.ImportList(),
+                            OnImport = line => ScintillaTheme.ImportList(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush

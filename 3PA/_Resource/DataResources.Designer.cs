@@ -63,16 +63,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] Abbreviations {
-            get {
-                object obj = ResourceManager.GetObject("Abbreviations", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] ApplicationThemes {
             get {
                 object obj = ResourceManager.GetObject("ApplicationThemes", resourceCulture);
@@ -207,21 +197,6 @@ namespace _3PA._Resource {
             get {
                 object obj = ResourceManager.GetObject("SyntaxThemes", resourceCulture);
                 return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to   &lt;UserLang name=&quot;OpenEdgeABL&quot; ext=&quot;p i t w cls dbg d df&quot; udlVersion=&quot;2.1&quot;&gt;
-        ///    &lt;Settings&gt;
-        ///      &lt;Global caseIgnored=&quot;yes&quot; allowFoldOfComments=&quot;no&quot; foldCompact=&quot;no&quot; forcePureLC=&quot;0&quot; decimalSeparator=&quot;0&quot; /&gt;
-        ///      &lt;Prefix Keywords1=&quot;no&quot; Keywords2=&quot;no&quot; Keywords3=&quot;no&quot; Keywords4=&quot;no&quot; Keywords5=&quot;no&quot; Keywords6=&quot;yes&quot; Keywords7=&quot;no&quot; Keywords8=&quot;no&quot; /&gt;
-        ///    &lt;/Settings&gt;
-        ///    &lt;KeywordLists&gt;
-        ///      &lt;Keywords name=&quot;Comments&quot;&gt;00&amp;amp;ANALYZE-SUSPEND 00&amp;amp;GLOBAL-DEFINE 00&amp;amp;SCOPED-DEFINE 00&amp;amp;SCOPED 00&amp;amp;GLOB 00&amp;am [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string UDL {
-            get {
-                return ResourceManager.GetString("UDL", resourceCulture);
             }
         }
     }

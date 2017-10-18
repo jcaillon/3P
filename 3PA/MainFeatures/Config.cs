@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures {
             public bool ShowTreeBranches = false;
 
             public bool GlobalShowDetailedHelpForErrors = true;
-            public bool UserFirstUse = true;
+            public int InstallStep = 0; // 0 first lauch, 1 npp options applied
             public bool NppOutdatedVersion = false;
 
             #endregion
@@ -164,11 +164,6 @@ namespace _3PA.MainFeatures {
                 Tooltip = "Toggle this option to prevent 3P from automatically checking for a new version of prolint on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
                 GroupName = "Updates")]
             public bool GlobalDontCheckProlintUpdates = false;
-
-            [ConfigAttribute(Label = "Do not install syntax highlighting on update",
-                Tooltip = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
-                GroupName = "Updates")]
-            public bool GlobalDontUpdateUdlOnUpdate = false;
 
             [ConfigAttribute(Label = "Use a webproxy for updates",
                 Tooltip = "Toggle this option to use the http(s) proxy defined below when querying updates from github",

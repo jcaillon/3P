@@ -25,6 +25,7 @@ using System.Text;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA._Resource;
 
@@ -70,9 +71,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <param name="toApplyOnFlag"></param>
         public virtual void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
             typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
-                if (l == 0 || !Flags.HasFlag((ParseFlag) l))
+                if (l == 0 || !Flags.HasFlag(l))
                     return;
-                toApplyOnFlag(s, (ParseFlag) l);
+                toApplyOnFlag(s, l);
             });
         }
 
@@ -134,7 +135,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get {
                 var outList = new List<Image>();
                 typeof(ParseFlag).ForEach<ParseFlag>((s, l) => {
-                    if (l == 0 || !Flags.HasFlag((ParseFlag) l))
+                    if (l == 0 || !Flags.HasFlag(l))
                         return;
                     Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)
@@ -627,7 +628,23 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Keyword
     /// </summary>
     internal class KeywordCompletionItem : CompletionItem {
+
+        private string _fullWord;
+        
         public KeywordType KeywordType { get; set; }
+
+        /// <summary>
+        /// The style to use when displaying this keyword in scintilla
+        /// </summary>
+        public SciStyleId KeywordSyntaxStyle { get; set; }
+
+        /// <summary>
+        /// Returns the full word, might be different from DisplayText in case of an abbreviation
+        /// </summary>
+        public string FullWord {
+            get { return Flags.HasFlag(ParseFlag.Abbreviation) ? _fullWord : DisplayText; }
+            set { _fullWord = value; }
+        }
 
         public override CompletionType Type {
             get { return CompletionType.Keyword; }
@@ -648,10 +665,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             // for abbreviations, find the complete keyword first
             string keyword = DisplayText;
-            if (KeywordType == KeywordType.Abbreviation) {
-                keyword = Keywords.Instance.GetFullKeyword(keyword);
-                toDisplay.Append(HtmlHelper.FormatRow("Abbreviation of", HtmlHelper.FormatSubString(keyword)));
+            if (!string.IsNullOrEmpty(_fullWord)) {
+                toDisplay.Append(HtmlHelper.FormatRow("Abbreviation of", HtmlHelper.FormatSubString(FullWord)));
             }
+
             string keyToFind = string.Join(" ", DisplayText, KeywordType);
 
             // for the keywords define and create, we try to match the second keyword that goes with it
@@ -704,17 +721,17 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// </summary>
     public enum KeywordType {
         // below are the types that go to the Keyword category
+        JumpStatement,
         Statement,
+        Type,
         Function,
         Operator,
         Option,
-        Type,
         Widget,
         Preprocessor,
         Handle,
         Event,
         Keyboard,
-        Abbreviation,
         Appbuilder,
         Unknow,
 
@@ -724,7 +741,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         Method
     }
 
+    /// <summary>
+    /// Keyword but displayed in the object category (i.e. after : )
+    /// </summary>
     internal class KeywordObjectCompletionItem : KeywordCompletionItem {
+
         public override CompletionType Type {
             get { return CompletionType.KeywordObject; }
         }

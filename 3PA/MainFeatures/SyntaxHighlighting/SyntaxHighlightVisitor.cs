@@ -17,7 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
+using System.Linq;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
@@ -36,73 +37,92 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenComment tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Comment);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Comment);
         }
 
         public void Visit(TokenEol tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.WhiteSpace);
         }
 
         public void Visit(TokenEos tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Default);
         }
 
         public void Visit(TokenInclude tok) {
             _includeDepth++;
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Include);
         }
 
         public void Visit(TokenPreProcVariable tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList5);
+            _includeDepth++;
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Include);
         }
 
         public void Visit(TokenNumber tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Number);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Number);
         }
 
         public void Visit(TokenString tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter1);
+            if (tok.Value != null && tok.Value[0] == '\'') {
+                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.SimpleQuote);
+            } else {
+                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.DoubleQuote);
+            }
         }
 
         public void Visit(TokenStringDescriptor tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Default);
         }
 
         public void Visit(TokenSymbol tok) {
             if (_includeDepth > 0 && tok.Value == "}") {
                 _includeDepth--;
-                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
+                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Include);
             } else 
-                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Default);
         }
 
         public void Visit(TokenEof tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.WhiteSpace);
         }
 
         public void Visit(TokenWord tok) {
+            SciStyleId style = SciStyleId.Default;
             if (_includeDepth > 0)
-                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Delimiter3);
-            else
-                SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList2);
+                style = SciStyleId.Include;
+            else {
+                var existingKeywords = Keywords.Instance.GetKeywordsByName(tok.Value);
+                if (existingKeywords != null && existingKeywords.Count > 0) {
+                    style = existingKeywords.First().KeywordSyntaxStyle;
+                }
+            }
+
+            //NormedVariables, // variables prefix (gc_, li_...)
+            /*"gc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "sc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "lc_", "lch_", "lda_", "ldt_", "ldz_", "ld_", "lh_", "li_", "ll_", "llg_", "lm_", "lrw_", "lr_", "lr_", "lwh_", "ipc_", "ipch_", "ipda_", "ipdt_", "ipdz_", "ipd_", "iph_", "ipi_", "ipl_", "iplg_", "ipm_", "iprw_", "ipr_", "ipr_", "ipwh_", "opc_", "opch_", "opda_", "opdt_", "opdz_", "opd_", "oph_", "opi_", "opl_", "oplg_", "opm_", "oprw_", "opr_", "opr_", "opwh_", "iop_", "iopc_", "iopch_", "iopda_", "iopdt_", "iopdz_", "iopd_", "ioph_", "iopi_", "iopl_", "ioplg_", "iopm_", "ioprw_", "iopr_", "iopr_", "iopwh_",  
+             */
+            //SpecialWord, // user trigram
+            /* (JCA) TODO FIXME BUG
+             * */
+            // operator + < = > * - / ^
+            SetStyling(tok.EndPosition - tok.StartPosition, style);
         }
 
         public void Visit(TokenWhiteSpace tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.WhiteSpace);
         }
 
         public void Visit(TokenUnknown tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.Default);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Default);
         }
 
         public void Visit(TokenPreProcDirective tok) {
-            SetStyling(tok.EndPosition - tok.StartPosition, UdlStyles.KeyWordsList5);
+            SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Preprocessor);
         }
 
         public void PostVisit() {
         }
 
-        private void SetStyling(int length, UdlStyles style) {
+        private void SetStyling(int length, SciStyleId style) {
             Sci.SetStyling(length, (int)style);
         }
     }

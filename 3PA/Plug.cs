@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -184,27 +183,27 @@ namespace _3PA {
             FileCustomInfo.Import();
 
             DelayedAction.StartNew(100, () => {
-                if (Config.Instance.UserFirstUse) {
-                    if (!Style.InstallUdl(true)) {
-                        // we are at the first notepad++ start
-                        Style.InstallUdl();
-                        FinishPluginInstall(); // will apply npp options and restart npp
-                        return;
-                    }
-                    // UDL already installed, we are at the second startup
+                if (Config.Instance.InstallStep == 0) {
+                    Config.Instance.InstallStep++;
+
+                    // we are at the first notepad++ start
+                    FinishPluginInstall(); // will apply npp options and restart npp
+                    return;
+                }
+                if (Config.Instance.InstallStep == 1) {
+                    Config.Instance.InstallStep++;
+
+                    // global options applied, we are at the second startup
                     UserCommunication.NotifyUnique("welcome", "Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P you should probably read the <b>getting started</b> section of the home page by clicking " + "go".ToHtmlLink("on this link right here") + ".<br><br><div align='right'>And as always... Enjoy!</div>", MessageImg.MsgInfo, "Fresh install", "Hello and welcome aboard!", args => {
                         Appli.ToggleView();
                         UserCommunication.CloseUniqueNotif("welcome");
                         args.Handled = true;
                     });
-                    Config.Instance.UserFirstUse = false;
                 } else if (!Config.Instance.NppStoppedCorrectly) {
                     // Npp didn't stop correctly, if the backup mode is activated, inform the user
                     if (Npp.ConfXml.BackupMode > 0) {
                         UserCommunication.Notify("It seems that notepad++ didn't stop correctly.<br>If you lost some modifications, don't forget that you have a backup folder here :<br><br><div>" + Npp.ConfXml.BackupDirectory.ToHtmlLink() + "</div>" + (Npp.ConfXml.BackupUseCustomDir ? "<div>" + Npp.ConfXml.CustomBackupDirectory.ToHtmlLink() + "</div>" : ""), MessageImg.MsgInfo, "Notepad++ crashed", "Backup folder location");
                     }
-                } else if (!Style.InstallUdl(true)) {
-                    Style.InstallUdl();
                 }
                 Config.Instance.NppStoppedCorrectly = false;
                 Config.Save();
@@ -783,16 +782,9 @@ namespace _3PA {
                 Sci.ViewWhitespace = WhitespaceMode.VisibleAlways;
 
             // apply style
-            Style.SetSyntaxStyles();
-            var currentStyle = Style.Current;
-            Sci.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
-            Sci.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
-            Sci.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
-            Sci.CaretLineBackColor = currentStyle.CaretLine.BackColor;
-            Sci.CaretColor = currentStyle.CaretColor.ForeColor;
-            Sci.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
-            Sci.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
+            ScintillaTheme.CurrentTheme.SetScintillaStyles();
 
+            // activate syntax highlighting
             SyntaxHighlight.ActivateHighlight();
         }
 
@@ -809,14 +801,7 @@ namespace _3PA {
             if (Sci.ViewWhitespace != WhitespaceMode.Invisible && !Sci.ViewEol)
                 Sci.ViewWhitespace = _whitespaceMode;
 
-            // read npp's stylers.xml file
-            Sci.SetIndentGuideColor(Npp.StylersXml.IndentGuideLineBg, Npp.StylersXml.IndentGuideLineFg);
-            Sci.SetWhiteSpaceColor(true, Color.Transparent, Npp.StylersXml.WhiteSpaceFg);
-            Sci.SetSelectionColor(true, Npp.StylersXml.SelectionBg, Color.Transparent);
-            Sci.CaretLineBackColor = Npp.StylersXml.CaretLineBg;
-            Sci.CaretColor = Npp.StylersXml.CaretFg;
-            Sci.SetFoldMarginColors(true, Npp.StylersXml.FoldMarginBg, Npp.StylersXml.FoldMarginFg);
-            Sci.SetFoldMarginMarkersColor(Npp.StylersXml.FoldMarginMarkerFg, Npp.StylersXml.FoldMarginMarkerBg, Npp.StylersXml.FoldMarginMarkerActiveFg);
+            ScintillaTheme.SetDefaultScintillaStyles();
         }
 
         #endregion

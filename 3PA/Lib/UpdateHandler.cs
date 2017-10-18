@@ -423,10 +423,6 @@ namespace _3PA.Lib {
 
                 Utils.DeleteFile(Config.UpdatePreviousVersion);
 
-                // update UDL
-                if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
-                    Style.InstallUdl();
-
                 // Special actions to take depending on the previous version?
                 if (!string.IsNullOrEmpty(previousVersion))
                     UpdateDoneFromVersion(previousVersion);

@@ -28,6 +28,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
 
@@ -109,8 +110,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // check caret context, dont display a tooltip for comments
-            var curContext = (UdlStyles) Sci.GetStyleAt(position);
-            if (curContext == UdlStyles.Comment || curContext == UdlStyles.Delimiter8)
+            var curContext = (SciStyleId) Sci.GetStyleAt(position);
+            if (curContext == SciStyleId.Comment)
                 return;
 
             // sets the tooltip content
@@ -121,7 +122,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // in strings, only functions trigger the tooltip
-            if ((curContext == UdlStyles.Delimiter1 || curContext == UdlStyles.Delimiter2 || curContext == UdlStyles.Delimiter4 || curContext == UdlStyles.Delimiter5) && _currentCompletionList.First().Type != CompletionType.Function)
+            if ((curContext == SciStyleId.DoubleQuote || curContext == SciStyleId.SimpleQuote) && _currentCompletionList.First().Type != CompletionType.Function)
                 return;
 
             SetToolTip();

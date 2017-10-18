@@ -26,6 +26,7 @@ using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
 
@@ -279,7 +280,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
             var nppCurrentPosition = Sci.CurrentPosition;
             var nppCurrentLine = Sci.Line.CurrentLine;
-            var isNormalContext = Style.IsCarretInNormalContext(nppCurrentPosition);
+            var isNormalContext = SyntaxHighlight.IsCarretInNormalContext(nppCurrentPosition);
             string strOnLeft = null;
 
             //----------------------

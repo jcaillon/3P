@@ -34,6 +34,7 @@ namespace YamuiFramework.Helper {
     /// that is used to fill the Color properties of the class that inherits from this one
     /// </summary>
     public class GenericThemeHolder {
+
         #region fields
 
         /// <summary>

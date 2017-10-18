@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             get {
                 var outList = new List<Image>();
                 typeof(FileFlag).ForEach<FileFlag>((s, l) => {
-                    if (l == 0 || !Flags.HasFlag((FileFlag) l))
+                    if (l == 0 || !Flags.HasFlag(l))
                         return;
                     Image tryImg = (Image) ImageResources.ResourceManager.GetObject(s);
                     if (tryImg != null)

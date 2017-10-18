@@ -35,6 +35,7 @@ using WixToolset.Dtf.Compression.Zip;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.SyntaxHighlighting;
@@ -95,8 +96,8 @@ namespace _3PA.Tests {
             Sci.GetStyle(CSharpLexer.StyleString).ForeColor = Color.Red;
             */
 
-            Style.SetSyntaxStyles();
-            SyntaxHighlight.ActivateHighlight();
+            UserCommunication.Notify(Keywords.Instance.GetKeywordsByName("variable").First().ToString());
+            UserCommunication.Notify(Keywords.Instance.GetKeywordsByName("vari").First().ToString());
         }
         
         #endregion

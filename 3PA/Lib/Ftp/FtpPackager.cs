@@ -96,7 +96,7 @@ namespace _3PA.Lib.Ftp {
                 credential = new NetworkCredential(userName, passWord);
 
             var modes = new List<EsslSupportMode>();
-            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add((EsslSupportMode)l); });
+            typeof(EsslSupportMode).ForEach<EsslSupportMode>((s, l) => { modes.Add(l); });
 
             ftp.DataConnectionMode = EDataConnectionMode.Passive;
             while (!ftp.Connected && ftp.DataConnectionMode == EDataConnectionMode.Passive) {

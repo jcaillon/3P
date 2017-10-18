@@ -32,6 +32,7 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Pro;
+using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;
@@ -362,8 +363,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     return;
 
                 // status text, take the last flag found
-                typeof(CurrentOperation).ForEach<CurrentOperation>((name, value) => {
-                    var flag = (CurrentOperation) value;
+                typeof(CurrentOperation).ForEach<CurrentOperation>((name, flag) => {
                     if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
                         lbStatus.Text = flag.GetAttribute<CurrentOperationAttr>().Name;
                     }
@@ -407,8 +407,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
 
                 // colors
-                t.add(lbNbErrors, "BackColor", Style.Current.GetErrorBg((int) updatedErrorsEventArgs.ErrorLevel));
-                t.add(lbNbErrors, "ForeColor", Style.Current.GetErrorFg((int) updatedErrorsEventArgs.ErrorLevel));
+                t.add(lbNbErrors, "BackColor", ScintillaTheme.CurrentTheme.GetErrorBg((int) updatedErrorsEventArgs.ErrorLevel));
+                t.add(lbNbErrors, "ForeColor", ScintillaTheme.CurrentTheme.GetErrorFg((int) updatedErrorsEventArgs.ErrorLevel));
 
                 // text
                 t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
