@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
@@ -87,6 +88,18 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// </summary>
         public static void ActivateHighlight() {
             Sci.Lexer = Lexer.Container;
+            Sci.SetProperty("fold", "1");
+            //Sci.SetProperty("fold.compact", "1");
+
+            // Configure a margin to display folding symbols
+            Sci.GetMargin(2).Type = MarginType.Symbol;
+            Sci.GetMargin(2).Mask = Sci.Marker.MaskFolders;
+            Sci.GetMargin(2).Sensitive = true;
+            Sci.GetMargin(2).Width = 20;
+
+            // Enable folding
+            Sci.AutomaticFold = AutomaticFold.Show | AutomaticFold.Click | AutomaticFold.Change;
+            
             _lineInfo.Clear();
             Sci.Colorize(0, -1);
         }

@@ -158,6 +158,24 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             Sci.CaretColor = GetStyle(SciStyleId.CaretColor).ForeColor;
             Sci.SetFoldMarginColors(true, GetStyle(SciStyleId.FoldMargin).BackColor, GetStyle(SciStyleId.FoldMargin).BackColor);
             Sci.SetFoldMarginMarkersColor(GetStyle(SciStyleId.FoldMargin).ForeColor, GetStyle(SciStyleId.FoldMargin).BackColor, GetStyle(SciStyleId.FoldActiveMarker).ForeColor);
+
+            
+            // Set colors for all folding markers
+            for (int i = Sci.Marker.FolderEnd; i <= Sci.Marker.FolderOpen; i++) {
+                var marker = Sci.GetMarker(i);
+                marker.SetForeColor(GetStyle(SciStyleId.Default).BackColor);
+                marker.SetBackColor(GetStyle(SciStyleId.Default).ForeColor);
+            }
+            /*
+            // Configure folding markers with respective symbols
+            Sci.GetMarker(Sci.Marker.FolderEnd).Symbol = MarkerSymbol.BoxPlusConnected;
+            Sci.GetMarker(Sci.Marker.Folder).Symbol = MarkerSymbol.BoxPlus;
+            Sci.GetMarker(Sci.Marker.FolderMidTail).Symbol = MarkerSymbol.TCorner;
+            Sci.GetMarker(Sci.Marker.FolderOpenMid).Symbol = MarkerSymbol.BoxMinusConnected;
+            Sci.GetMarker(Sci.Marker.FolderSub).Symbol = MarkerSymbol.VLine;
+            Sci.GetMarker(Sci.Marker.FolderTail).Symbol = MarkerSymbol.LCorner;
+            Sci.GetMarker(Sci.Marker.FolderOpen).Symbol = MarkerSymbol.BoxMinus;
+            */
         }
 
         private void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {

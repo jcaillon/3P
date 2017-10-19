@@ -375,6 +375,45 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
+        /// Passes the specified property name-value pair to the current <see cref="Lexer" />.
+        /// </summary>
+        /// <param name="name">The property name to set.</param>
+        /// <param name="value">
+        /// The property value. Values can refer to other property names using the syntax $(name), where 'name' is another property
+        /// name for the current <see cref="Lexer" />. When the property value is retrieved by a call to <see cref="GetPropertyExpanded" />
+        /// the embedded property name macro will be replaced (expanded) with that current property value.
+        /// </param>
+        /// <remarks>Property names are case-sensitive.</remarks>
+        public static unsafe void SetProperty(string name, string value) {
+            if (string.IsNullOrEmpty(name))
+                return;
+
+            var nameBytes = GetBytes(name, Encoding.ASCII, true);
+            var valueBytes = GetBytes(value ?? string.Empty, Encoding.ASCII, true);
+
+            fixed (byte* nb = nameBytes)
+            fixed (byte* vb = valueBytes) {
+                Api.Send(SciMsg.SCI_SETPROPERTY, new IntPtr(nb), new IntPtr(vb));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the automatic folding flags.
+        /// </summary>
+        /// <returns>
+        /// A bitwise combination of the AutomaticFold enumeration.
+        /// </returns>
+        public static AutomaticFold AutomaticFold {
+            get {
+                return (AutomaticFold)Api.Send(SciMsg.SCI_GETAUTOMATICFOLD);
+            }
+            set {
+                var automaticFold = (int)value;
+                Api.Send(SciMsg.SCI_SETAUTOMATICFOLD, new IntPtr(automaticFold));
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the ability to switch to rectangular selection mode while making a selection with the mouse.
         /// </summary>
         /// <returns>

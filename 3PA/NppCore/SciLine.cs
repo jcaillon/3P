@@ -341,9 +341,15 @@ namespace _3PA.NppCore {
                 set {
                     var bits = FoldLevel;
                     bits |= (int) value;
-
                     Api.Send(SciMsg.SCI_SETFOLDLEVEL, new IntPtr(Index), new IntPtr(bits));
                 }
+            }
+
+            public void SetFoldLevel(int level, FoldLevelFlags flag) {
+                var bits = level + (int) SciMsg.SC_FOLDLEVELBASE;
+                if (flag > FoldLevelFlags.None)
+                    bits |= (int)flag;
+                Api.Send(SciMsg.SCI_SETFOLDLEVEL, new IntPtr(Index), new IntPtr(bits));
             }
 
             /// <summary>

@@ -58,9 +58,20 @@ namespace _3PA.MainFeatures.Pro {
             StringBuilder x = new StringBuilder();
             var indentWidth = Sci.TabWidth;
             var i = 0;
+            var lastIdent = 0;
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
-                Sci.GetLine(i).Indentation = dic[i].BlockDepth * indentWidth;
+                var line = Sci.GetLine(i);
+                if (dic[i].BlockDepth > lastIdent) {
+                    line.SetFoldLevel(dic[i].BlockDepth, FoldLevelFlags.Header);
+                    lastIdent = dic[i].BlockDepth;
+                } else {
+                    line.SetFoldLevel(dic[i].BlockDepth, FoldLevelFlags.None);
+                    if (dic[i].BlockDepth < lastIdent)
+                        lastIdent = dic[i].BlockDepth;
+                    
+                }
+                line.Indentation = dic[i].BlockDepth * indentWidth;
                 if (!canIndentSafely)
                     x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;
