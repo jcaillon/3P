@@ -1977,7 +1977,7 @@ namespace _3PA.NppCore {
         /// allow changing the colour of the fold margin and fold margin highlight
         /// </summary>
         public static void SetFoldMarginMarkersColor(Color bgColor, Color fgColor, Color activeColor) {
-            for (int i = 0; i < 7; i++) {
+            for (int i = Marker.FolderEnd; i <= Marker.FolderOpen; i++) {
                 var marker = GetMarker(i + (int) SciMsg.SC_MARKNUM_FOLDEREND);
                 marker.SetBackColor(bgColor);
                 marker.SetForeColor(fgColor);

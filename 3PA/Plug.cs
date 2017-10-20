@@ -168,8 +168,8 @@ namespace _3PA {
             DataBase.Instance.OnDatabaseUpdate += AutoCompletion.SetStaticItems;
             AutoCompletion.OnUpdateStaticItems += ParserHandler.UpdateKnownStaticItems;
 
-            ParserHandler.OnEndSendCompletionItems += AutoCompletion.SetDynamicItems;
             ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
+            ParserHandler.OnEndSendCompletionItems += AutoCompletion.SetDynamicItems;
             ParserHandler.OnEndSendParserItems += CodeExplorer.Instance.OnParseEndParserItems;
             ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
             ParserHandler.OnEnd += CodeExplorer.Instance.OnParseEnd;
@@ -187,7 +187,7 @@ namespace _3PA {
                     Config.Instance.InstallStep++;
 
                     // we are at the first notepad++ start
-                    FinishPluginInstall(); // will apply npp options and restart npp
+                    Npp.ConfXml.FinishPluginInstall(); // will apply npp options and restart npp
                     return;
                 }
                 if (Config.Instance.InstallStep == 1) {
@@ -205,6 +205,7 @@ namespace _3PA {
                         UserCommunication.Notify("It seems that notepad++ didn't stop correctly.<br>If you lost some modifications, don't forget that you have a backup folder here :<br><br><div>" + Npp.ConfXml.BackupDirectory.ToHtmlLink() + "</div>" + (Npp.ConfXml.BackupUseCustomDir ? "<div>" + Npp.ConfXml.CustomBackupDirectory.ToHtmlLink() + "</div>" : ""), MessageImg.MsgInfo, "Notepad++ crashed", "Backup folder location");
                     }
                 }
+
                 Config.Instance.NppStoppedCorrectly = false;
                 Config.Save();
 
@@ -814,48 +815,6 @@ namespace _3PA {
         public static void ClosePopups() {
             AutoCompletion.Cloak();
             InfoToolTip.Cloak();
-        }
-
-        #endregion
-
-        #region Modify Npp configuration (config.xml)
-
-        /// <summary>
-        /// Called when the plugin is first used, suggests default options for npp
-        /// </summary>
-        internal static void FinishPluginInstall() {
-            object options = new Npp.NppConf.NppConfigXmlOptions {
-                EnableMultiSelection = true,
-                DisableDefaultAutocompletion = true,
-                EnableBackupOnSave = true
-            };
-            ModifyingNppConfig(options, true);
-        }
-
-        /// <summary>
-        /// Can be called at anytime to let the user modify notepad++ options
-        /// </summary>
-        internal static void ModifyingNppConfig() {
-            object options = new Npp.NppConf.NppConfigXmlOptions {
-                EnableMultiSelection = Npp.ConfXml.MultiSelectionEnabled,
-                DisableDefaultAutocompletion = Npp.ConfXml.AutocompletionMode == 0,
-                EnableBackupOnSave = Npp.ConfXml.BackupMode != 0
-            };
-            ModifyingNppConfig(options, false);
-        }
-
-        private static void ModifyingNppConfig(object opts, bool installMode) {
-            var options = opts as Npp.NppConf.NppConfigXmlOptions;
-            if (options != null) {
-                var buttons = installMode ? new List<string> { "Apply changes now" } : new List<string> { "Apply changes now (restart)", "Cancel" };
-
-                var awnser = UserCommunication.Input(ref opts, (installMode ? "You are almost done with the installation!<br>" : "") + "You can now setup some configurations for notepad++.<br><b>It is highly recommended to " + (installMode ? "let all the options toggled ON" : "toggle ON all the options") + "</b> :<br><br>", MessageImg.MsgUpdate, "3P setup", "Modifying notepad++ options", buttons);
-
-                if (installMode || awnser == 0) {
-                    Npp.ConfXml.ApplyNewOptions(options);
-                }
-
-            }
         }
 
         #endregion

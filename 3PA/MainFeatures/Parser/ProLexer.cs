@@ -40,8 +40,9 @@ namespace _3PA.MainFeatures.Parser {
 
         // specific to progress, preprocess defined var can contain a ' or " but in that case,
         // the string ends at the end of the line no matter what. So we keep track on which line 
-        // the the last preprocessed var was
+        // the last preprocessed var was
         private int _definePreProcLastLine = -2;
+
         // line of the last ~ symbol
         private int _tildeLastLine = -2;
 
@@ -60,6 +61,20 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public new GapBuffer<Token> GetTokensList {
             get { return (GapBuffer<Token>) _tokenList; }
+        }
+
+        /// <summary>
+        /// Include depth at position 0
+        /// </summary>
+        public int IncludeDepth {
+            get { return _includeDepth; }
+        }
+
+        /// <summary>
+        /// Initial position offset
+        /// </summary>
+        public int Offset {
+            get { return _offset; }
         }
 
         #endregion
@@ -88,7 +103,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // push first line info
             if (_pushLineInfo != null)
-                _pushLineInfo(_line, _commentDepth, _includeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
+                _pushLineInfo(_line, _commentDepth, IncludeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
 
             _tokenList = new GapBuffer<Token>();
             Construct(data);
@@ -118,7 +133,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // push current line info
             if (_pushLineInfo != null)
-                _pushLineInfo(_line, _commentDepth, _includeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
+                _pushLineInfo(_line, _commentDepth, IncludeDepth, _inDoubleQuoteString, _inSimpleQuoteString);
         }
 
         /// <summary>
@@ -141,7 +156,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // END OF FILE reached
             if (ch == Eof)
-                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
 
             // if we started in a string, read this token as a string
             if (_inDoubleQuoteString || _inSimpleQuoteString)
@@ -158,24 +173,25 @@ namespace _3PA.MainFeatures.Parser {
 
                 case '/':
                     var nextChar = PeekAtChr(1);
+                    var prevChar = PeekAtChrReverse(1);
                     // comment
                     if (nextChar == '*')
                         return CreateCommentToken();
                     // single line comment (if previous char is a whitespace)
-                    if (nextChar == '/' && char.IsWhiteSpace(PeekAtChrReverse(1)))
+                    if (nextChar == '/' && (char.IsWhiteSpace(prevChar) || prevChar == Eof))
                         return CreateSingleLineCommentToken();
                     // symbol
                     return CreateSymbolToken();
 
                 case '{':
                     // case of a preprocessed {&variable}/{1} or an include
-                    _includeDepth++;
+                    _includeDepth = IncludeDepth + 1;
                     return CreatePreprocessedToken();
 
                 case '}':
                     // end of include
-                    if (_includeDepth > 0)
-                        _includeDepth--;
+                    if (IncludeDepth > 0)
+                        _includeDepth = IncludeDepth - 1;
                     return CreateSymbolToken();
 
                 case '&':
@@ -193,12 +209,12 @@ namespace _3PA.MainFeatures.Parser {
                     var nextChr = PeekAtChr(1);
                     var prevChr = PeekAtChrReverse(1);
                     // number?
-                    if (char.IsWhiteSpace(prevChr) && char.IsDigit(nextChr)) {
+                    if (char.IsDigit(nextChr) && (char.IsWhiteSpace(prevChr) || prevChr == Eof)) {
                         ReadChr();
                         return CreateNumberToken();
                     }
                     // a word?
-                    if (!char.IsWhiteSpace(prevChr) && IsCharWord(nextChr)) {
+                    if (IsCharWord(nextChr) && !(char.IsWhiteSpace(prevChr) || prevChr == Eof)) {
                         return CreateWordToken();
                     }
                     return CreateSymbolToken();
@@ -313,11 +329,11 @@ namespace _3PA.MainFeatures.Parser {
         /// reads a word with this format : .[\w_-]*((\.[\w_-~]*)?){1,}
         /// </summary>
         protected override Token CreateWordToken() {
-            return new TokenWord(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+            return new TokenWord(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
         }
 
         protected Token CreatePreProcDirectiveToken() {
-            return new TokenPreProcDirective(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+            return new TokenPreProcDirective(ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
         }
 
         /// <summary>
@@ -331,11 +347,11 @@ namespace _3PA.MainFeatures.Parser {
             if (ch == '&' || char.IsDigit(ch)) {
                 if (ch == '&')
                     ReadChr();
-                return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+                return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
             }
 
             // include file
-            return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+            return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
         }
 
         /// <summary>
@@ -417,7 +433,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (ch == '\r' || ch == '\n') {
                     // a string continues at the next line... Except when it's on a &define line
                     // BUT we don't want to do that when we are defining parameters for an include...
-                    if (_definePreProcLastLine == _startLine && _includeDepth == 0)
+                    if (_definePreProcLastLine == _startLine && IncludeDepth == 0)
                         break;
 
                     ReadEol(ch);
@@ -434,7 +450,7 @@ namespace _3PA.MainFeatures.Parser {
             }
             _inDoubleQuoteString = false;
             _inSimpleQuoteString = false;
-            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
         }
 
         /// <summary>
@@ -454,7 +470,7 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 ReadChr();
             }
-            return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos + _offset, _pos + _offset);
+            return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
         }
 
         #endregion

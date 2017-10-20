@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Size = new Size(170, 24),
                     Text = @"Modify notepad++ options"
                 };
-                button.ButtonPressed += (sender, args) => Plug.ModifyingNppConfig();
+                button.ButtonPressed += (sender, args) => Npp.ConfXml.ModifyingNppConfig();
                 tooltip.SetToolTip(button, "Click to <b>modify notepad++ options</b>");
                 scrollPanel.ContentPanel.Controls.Add(button);
                 

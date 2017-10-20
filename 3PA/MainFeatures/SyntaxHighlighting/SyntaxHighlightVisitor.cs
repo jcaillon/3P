@@ -29,11 +29,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         private int _includeDepth;
 
-        public SyntaxHighlightVisitor(int includeDepth) {
-            _includeDepth = includeDepth;
-        }
+        private char[] _operatorChars = { '=', '+', '-', '/', '*', '^', '<', '>' };
 
         public void PreVisit(Lexer lexer) {
+            var proLexer = lexer as ProLexer;
+            if (proLexer != null) {
+                _includeDepth = proLexer.IncludeDepth;
+                Sci.StartStyling(proLexer.Offset);
+            }
         }
 
         public void Visit(TokenComment tok) {
@@ -75,11 +78,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenSymbol tok) {
+            SciStyleId style = SciStyleId.Default;
             if (_includeDepth > 0 && tok.Value == "}") {
                 _includeDepth--;
-                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Include);
-            } else 
-                SetStyling(tok.EndPosition - tok.StartPosition, SciStyleId.Default);
+                style = SciStyleId.Include;
+            } else if (tok.EndPosition - tok.StartPosition == 1 && _operatorChars.Contains(tok.Value[0])) {
+                style = SciStyleId.Operator;
+            }
+            SetStyling(tok.EndPosition - tok.StartPosition, style);
         }
 
         public void Visit(TokenEof tok) {
@@ -100,10 +106,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //NormedVariables, // variables prefix (gc_, li_...)
             /*"gc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "sc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "lc_", "lch_", "lda_", "ldt_", "ldz_", "ld_", "lh_", "li_", "ll_", "llg_", "lm_", "lrw_", "lr_", "lr_", "lwh_", "ipc_", "ipch_", "ipda_", "ipdt_", "ipdz_", "ipd_", "iph_", "ipi_", "ipl_", "iplg_", "ipm_", "iprw_", "ipr_", "ipr_", "ipwh_", "opc_", "opch_", "opda_", "opdt_", "opdz_", "opd_", "oph_", "opi_", "opl_", "oplg_", "opm_", "oprw_", "opr_", "opr_", "opwh_", "iop_", "iopc_", "iopch_", "iopda_", "iopdt_", "iopdz_", "iopd_", "ioph_", "iopi_", "iopl_", "ioplg_", "iopm_", "ioprw_", "iopr_", "iopr_", "iopwh_",  
              */
-            //SpecialWord, // user trigram
-            /* (JCA) TODO FIXME BUG
-             * */
-            // operator + < = > * - / ^
+
             SetStyling(tok.EndPosition - tok.StartPosition, style);
         }
 

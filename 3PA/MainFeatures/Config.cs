@@ -357,7 +357,7 @@ namespace _3PA.MainFeatures {
             [ConfigAttribute(Label = "Activate 'Show spaces' on progress files",
                 Tooltip = "Toggle on/off to activate the 'show spaces' notepad++ option when switching to a progress file<br>This option let the user see the spaces as dots and tabs as arrows in its document",
                 GroupName = "Code edition")]
-            public bool CodeShowSpaces = true;
+            public bool CodeShowSpaces = false;
 
             [ConfigAttribute(Label = "Disable auto update of function prototypes",
                 Tooltip = "Toggle on to prevent 3P from automatically updating your functions prototypes according to their implementation<br>You are still able to manually trigger the update through the menu",

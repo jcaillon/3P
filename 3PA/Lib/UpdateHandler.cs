@@ -463,8 +463,8 @@ namespace _3PA.Lib {
             if (!fromVersion.IsHigherVersionThan("1.7.3")) {
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
             }
-            if (!fromVersion.IsHigherVersionThan("1.7.5")) {
-                DelayedAction.StartNew(100, Plug.FinishPluginInstall);
+            if (!fromVersion.IsHigherVersionThan("1.7.6")) {
+                DelayedAction.StartNew(100, Npp.ConfXml.FinishPluginInstall);
             }
         }
 

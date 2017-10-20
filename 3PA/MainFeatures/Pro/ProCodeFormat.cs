@@ -62,11 +62,12 @@ namespace _3PA.MainFeatures.Pro {
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
                 var line = Sci.GetLine(i);
+                line.FoldLevel = (int)SciMsg.SC_FOLDLEVELBASE + dic[i].BlockDepth;
                 if (dic[i].BlockDepth > lastIdent) {
-                    line.SetFoldLevel(dic[i].BlockDepth, FoldLevelFlags.Header);
+                    if (i > 0)
+                        Sci.GetLine(i - 1).FoldLevelFlags = FoldLevelFlags.Header;
                     lastIdent = dic[i].BlockDepth;
                 } else {
-                    line.SetFoldLevel(dic[i].BlockDepth, FoldLevelFlags.None);
                     if (dic[i].BlockDepth < lastIdent)
                         lastIdent = dic[i].BlockDepth;
                     

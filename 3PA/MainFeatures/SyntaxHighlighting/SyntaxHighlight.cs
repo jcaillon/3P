@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using _3PA.MainFeatures.Parser;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
@@ -60,27 +59,16 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// Called on STYLENEEDED notification
         /// </summary>
         public static void Colorize(int startPos, int endPos) {
-            //------------
-            //var watch = Stopwatch.StartNew();
-            //------------
-
             var startLine = Sci.LineFromPosition(startPos);
             var startLinePos = Sci.GetLine(startLine).Position;
             var startingLineInfo = _lineInfo.ContainsKey(startLine) ? _lineInfo[startLine] : new LexerLineInfo(0, 0, false, false);
 
-            Sci.StartStyling(startLinePos);
-
             ProLexer tok = new ProLexer(Sci.GetTextByRange(startLinePos, endPos), startLinePos, startLine, 0, startingLineInfo.CommentDepth, startingLineInfo.IncludeDepth, startingLineInfo.InDoubleQuoteString, startingLineInfo.InSimpleQuoteString, PushLineInfo);
-            SyntaxHighlightVisitor vis = new SyntaxHighlightVisitor(startingLineInfo.IncludeDepth);
+
+            SyntaxHighlightVisitor vis = new SyntaxHighlightVisitor();
             vis.PreVisit(tok);
             tok.Accept(vis);
             vis.PostVisit();
-            
-            //--------------
-            //watch.Stop();
-           //UserCommunication.Notify("startPos = " + startPos + ", endPos = " + endPos + ", done in " + watch.ElapsedMilliseconds + " ms");
-            //------------
-            
         }
 
         /// <summary>
@@ -89,7 +77,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public static void ActivateHighlight() {
             Sci.Lexer = Lexer.Container;
             Sci.SetProperty("fold", "1");
-            //Sci.SetProperty("fold.compact", "1");
 
             // Configure a margin to display folding symbols
             Sci.GetMargin(2).Type = MarginType.Symbol;
