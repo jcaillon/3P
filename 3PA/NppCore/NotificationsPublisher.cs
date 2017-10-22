@@ -23,8 +23,6 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.SyntaxHighlighting;
-using _3PA.Tests;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
@@ -32,6 +30,7 @@ namespace _3PA.NppCore {
     /// This class calls the appropriate methods depending on the notifications received from both notepad++ and scintilla
     /// </summary>
     internal static class NotificationsPublisher {
+
         #region Members
 
         /// <summary>
@@ -110,7 +109,6 @@ namespace _3PA.NppCore {
                                 // called each time the user add a char in the current scintilla
                                 // It's actually better to use the SCI_MODIFIED instead, this notification
                                 // is not always called when it should! (ex not called for /t)
-                                //ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded((char)nc.ch));
                                 return;
 
                             case (uint) SciNotif.SCN_UPDATEUI:
@@ -165,7 +163,7 @@ namespace _3PA.NppCore {
 
                             case (uint) SciNotif.SCN_STYLENEEDED:
                                 // if we use the contained lexer, we will receive this notification and we will have to style the text
-                                SyntaxHighlight.Colorize(Sci.GetEndStyled(), nc.position);
+                                Plug.OnStyleNeeded(Sci.GetEndStyled(), nc.position);
                                 return;
 
                             case (uint) SciNotif.SCN_MARGINCLICK:
@@ -237,6 +235,7 @@ namespace _3PA.NppCore {
 
                             case (uint) NppNotif.NPPN_LANGCHANGED:
                                 // on lang type changed
+                                Plug.OnLangChanged();
                                 NppBufferActivated();
                                 return;
 

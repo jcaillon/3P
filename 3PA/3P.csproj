@@ -196,7 +196,7 @@
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
-    <Compile Include="MainFeatures\AutoCompletionFeature\NppLang.cs" />
+    <Compile Include="NppCore\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
     <Compile Include="MainFeatures\ModificationsTag\ModificationTag.cs" />
     <Compile Include="MainFeatures\ModificationsTag\ModificationTagTemplate.cs" />
@@ -445,6 +445,7 @@
     <Content Include="_Resource\Images\Menu\Miscellaneous.png" />
     <Content Include="_Resource\Images\Menu\ModificationTag.png" />
     <Content Include="_Resource\Images\Menu\ProDesktop.png" />
+    <Content Include="_Resource\Images\Menu\Progress.png" />
     <Content Include="_Resource\Images\Menu\ProgressHelp.png" />
     <Content Include="_Resource\Images\Menu\ProgressTools.png" />
     <Content Include="_Resource\Images\Menu\ProlintCode.png" />

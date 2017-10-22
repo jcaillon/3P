@@ -41,6 +41,7 @@ namespace _3PA.MainFeatures {
     /// It also has knowledge of the shortcuts for each item in the menu
     /// </summary>
     internal class AppliMenu {
+
         #region Core
 
         private static AppliMenu _instance;
@@ -288,6 +289,7 @@ namespace _3PA.MainFeatures {
             MainMenuList = new List<MenuItem> {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, item => Appli.Appli.ToggleView(), "Open_main_window", "Alt+Space") {Generic = true},
                 new MenuItem(this, "Show autocompletion at caret", ImageResources.Autocompletion, item => AutoCompletion.OnShowCompleteSuggestionList(), "Show_Suggestion_List", "Ctrl+Space") {Generic = true},
+                new MenuItem(this, "Read current file as progress", ImageResources.Progress, item => Plug.ReadCurrentFileAsProgress(), "Read_as_progress", null) {Generic = true},
                 new MenuItem(true) {Generic = true}, // --------------------------
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, item => ProMisc.Open4GlHelp(), "Open_4GL_help", "F1") {Generic = true},
                 new MenuItem(this, "Check syntax", ImageResources.CheckCode, item => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),

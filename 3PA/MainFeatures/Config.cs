@@ -490,11 +490,15 @@ namespace _3PA.MainFeatures {
             public int SyntaxHighlightThemeId = 0;
             public bool UseSyntaxHighlightTheme = true;
             
+            // SHORTCUTS (id, shortcut spec)
+            public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
+
             // stores at which did we last did a specific action
             public Dictionary<string, string> LastCallDateTime = new Dictionary<string, string>();
 
-            // SHORTCUTS (id, shortcut spec)
-            public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
+            // to know which file should be read as a progress and which not to
+            // <path, 0/1 = is progress or not>
+            public Dictionary<string, string> ProgressFileExeptions = new Dictionary<string, string>();
 
             #region methods
 

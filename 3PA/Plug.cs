@@ -583,6 +583,34 @@ namespace _3PA {
 
         #endregion
 
+        #region OnLangChanged
+
+        /// <summary>
+        /// Called when the user changed the language for the current file
+        /// </summary>
+        public static void OnLangChanged() {
+            Npp.CurrentFileInfo.SetAsNonProgress();
+            // Npp.CurrentFileInfo.Lang.LangName
+        }
+
+        public static void ReadCurrentFileAsProgress() {
+            Npp.CurrentFileInfo.SetAsProgress();
+            NotificationsPublisher.OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
+        }
+
+        #endregion
+
+        #region OnStyleNeeded
+
+        /// <summary>
+        /// If an container lexer is used, scintilla will call this event when a portion of the text needs to be styled
+        /// </summary>
+        public static void OnStyleNeeded(int startPos, int endPos){
+            SyntaxHighlight.Colorize(startPos, endPos);
+        }
+
+        #endregion
+
         #endregion
 
         #region On char typed

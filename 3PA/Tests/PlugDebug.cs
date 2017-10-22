@@ -28,19 +28,12 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using WixToolset.Dtf.Compression;
-using WixToolset.Dtf.Compression.Cab;
-using WixToolset.Dtf.Compression.Zip;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
-using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
-using Lexer = _3PA.NppCore.Lexer;
 
 namespace _3PA.Tests {
     /// <summary>
@@ -96,8 +89,7 @@ namespace _3PA.Tests {
             Sci.GetStyle(CSharpLexer.StyleString).ForeColor = Color.Red;
             */
 
-            UserCommunication.Notify(Keywords.Instance.GetKeywordsByName("variable").First().ToString());
-            UserCommunication.Notify(Keywords.Instance.GetKeywordsByName("vari").First().ToString());
+            UserCommunication.Notify(Npp.CurrentFileInfo.Lang.LangName);
         }
         
         #endregion

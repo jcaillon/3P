@@ -22,12 +22,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YamuiFramework.Helper;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
+using _3PA._Resource;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -464,6 +466,23 @@ namespace _3PA.Lib {
                 Utils.DeleteDirectory(Path.Combine(Npp.ConfigDirectory, "Libraries"), true);
             }
             if (!fromVersion.IsHigherVersionThan("1.7.6")) {
+                // delete old UDL
+                if (File.Exists(Npp.ConfXml.FileNppUserDefinedLang)) {
+                    var encoding = TextEncodingDetect.GetFileEncoding(Npp.ConfXml.FileNppUserDefinedLang);
+                    var fileContent = Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang, encoding);
+                    var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                    var matches = regex.Match(fileContent);
+                    if (matches.Success) {
+                        fileContent = regex.Replace(fileContent, "");
+
+                        // write to userDefinedLang.xml
+                        var copyPath = Path.Combine(Config.FolderUpdate, "userDefineLang.xml");
+                        Utils.FileWriteAllText(copyPath, fileContent, encoding);
+
+                        // replace default file by its copy on npp shutdown
+                        _3PUpdater.Instance.AddFileToMove(copyPath, Npp.ConfXml.FileNppUserDefinedLang);
+                    }
+                }
                 DelayedAction.StartNew(100, Npp.ConfXml.FinishPluginInstall);
             }
         }

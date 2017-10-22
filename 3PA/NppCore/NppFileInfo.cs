@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System.Collections.Generic;
 using System.Text;
 using _3PA.Lib;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
@@ -28,6 +29,14 @@ namespace _3PA.NppCore {
     internal static partial class Npp {
 
         private static NppFileInfo _currentFile;
+
+        /// <summary>
+        /// Keeps track of the files that were forced to be progress files and also files that were forced not to 
+        /// </summary>
+        public static Dictionary<string, string> ProgressFileExeptions {
+            // <path, 0/1 = is progress or not>
+            get { return Config.Instance.ProgressFileExeptions; }
+        }
 
         /// <summary>
         /// Get info and do stuff on the current file
@@ -57,8 +66,7 @@ namespace _3PA.NppCore {
                 get { return _path; }
                 set {
                     _path = value;
-                    var currentInternalLang = CurrentInternalLangName;
-                    IsProgress = _path.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress) || currentInternalLang.Equals("openedgeabl");
+                    IsProgress = (_path.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress) && CanReadAsProgress) || MustReadAsProgress;
                     _lang = null;
                 }
             }
@@ -148,6 +156,48 @@ namespace _3PA.NppCore {
                 Npp.Reload(Path, askConfirmation);
             }
 
+            /// <summary>
+            /// Returns true if the file can be considered as a progress file
+            /// </summary>
+            /// <returns></returns>
+            private bool CanReadAsProgress {
+                get { return !ProgressFileExeptions.ContainsKey(Path) || ProgressFileExeptions[Path] == "1"; }
+            }
+
+            /// <summary>
+            /// Returns true if the file must be considered as a progress file
+            /// </summary>
+            /// <returns></returns>
+            private bool MustReadAsProgress {
+                get { return ProgressFileExeptions.ContainsKey(Path) && ProgressFileExeptions[Path] == "1"; }
+            }
+
+            /// <summary>
+            /// Flag current file as non progress (force it even if the extension matches)
+            /// </summary>
+            public void SetAsNonProgress() {
+                if (IsProgress) {
+                    if (ProgressFileExeptions.ContainsKey(Path)) {
+                        ProgressFileExeptions[Path] = "0";
+                    } else {
+                        ProgressFileExeptions.Add(Path, "0");
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Flag the current file as a progress file even if the extension doesn't match
+            /// </summary>
+            public void SetAsProgress() {
+                if (!IsProgress) {
+                    if (ProgressFileExeptions.ContainsKey(Path)) {
+                        ProgressFileExeptions[Path] = "1";
+                    } else {
+                        ProgressFileExeptions.Add(Path, "1");
+                    }
+                }
+            }
+
             #endregion
         }
 
@@ -159,6 +209,5 @@ namespace _3PA.NppCore {
         public static NppFileInfo PreviousFileInfo {
             get { return _previousFile ?? (_previousFile = new NppFileInfo()); }
         }
-
     }
 }
