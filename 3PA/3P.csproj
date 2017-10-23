@@ -196,6 +196,7 @@
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
+    <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxFolding.cs" />
     <Compile Include="NppCore\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
     <Compile Include="MainFeatures\ModificationsTag\ModificationTag.cs" />

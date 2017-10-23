@@ -345,6 +345,9 @@ namespace _3PA.NppCore {
                 }
             }
 
+            /// <summary>
+            /// Set fold level and flag in one go
+            /// </summary>
             public void SetFoldLevel(int level, FoldLevelFlags flag) {
                 var bits = level + (int) SciMsg.SC_FOLDLEVELBASE;
                 if (flag != FoldLevelFlags.None)

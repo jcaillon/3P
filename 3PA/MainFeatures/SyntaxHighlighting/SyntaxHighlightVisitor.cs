@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+using System;
 using System.Linq;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
@@ -30,6 +31,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         private int _includeDepth;
 
         private char[] _operatorChars = { '=', '+', '-', '/', '*', '^', '<', '>' };
+
+        private string[] _normedVariables = {"gc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "sc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "lc_", "lch_", "lda_", "ldt_", "ldz_", "ld_", "lh_", "li_", "ll_", "llg_", "lm_", "lrw_", "lr_", "lr_", "lwh_", "ipc_", "ipch_", "ipda_", "ipdt_", "ipdz_", "ipd_", "iph_", "ipi_", "ipl_", "iplg_", "ipm_", "iprw_", "ipr_", "ipr_", "ipwh_", "opc_", "opch_", "opda_", "opdt_", "opdz_", "opd_", "oph_", "opi_", "opl_", "oplg_", "opm_", "oprw_", "opr_", "opr_", "opwh_", "iop_", "iopc_", "iopch_", "iopda_", "iopdt_", "iopdz_", "iopd_", "ioph_", "iopi_", "iopl_", "ioplg_", "iopm_", "ioprw_", "iopr_", "iopr_", "iopwh_"};
 
         public void PreVisit(Lexer lexer) {
             var proLexer = lexer as ProLexer;
@@ -101,12 +104,17 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
                 if (existingKeywords != null && existingKeywords.Count > 0) {
                     style = existingKeywords.First().KeywordSyntaxStyle;
                 }
+
+                // normed variables
+                if (style == SciStyleId.Default) {
+                    var pos = tok.Value.IndexOf("_", StringComparison.CurrentCultureIgnoreCase);
+                    if (pos > 0 && tok.Value.Length >= pos + 1) {
+                        var prefix = tok.Value.Substring(0, pos + 1);
+                        if (_normedVariables.Contains(prefix))
+                            style = SciStyleId.NormedVariables;
+                    }
+                }
             }
-
-            //NormedVariables, // variables prefix (gc_, li_...)
-            /*"gc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "sc_", "gch_", "gda_", "gdt_", "gdz_", "gd_", "gh_", "gi_", "gl_", "glg_", "gm_", "grw_", "gr_", "gr_", "gwh_", "lc_", "lch_", "lda_", "ldt_", "ldz_", "ld_", "lh_", "li_", "ll_", "llg_", "lm_", "lrw_", "lr_", "lr_", "lwh_", "ipc_", "ipch_", "ipda_", "ipdt_", "ipdz_", "ipd_", "iph_", "ipi_", "ipl_", "iplg_", "ipm_", "iprw_", "ipr_", "ipr_", "ipwh_", "opc_", "opch_", "opda_", "opdt_", "opdz_", "opd_", "oph_", "opi_", "opl_", "oplg_", "opm_", "oprw_", "opr_", "opr_", "opwh_", "iop_", "iopc_", "iopch_", "iopda_", "iopdt_", "iopdz_", "iopd_", "ioph_", "iopi_", "iopl_", "ioplg_", "iopm_", "ioprw_", "iopr_", "iopr_", "iopwh_",  
-             */
-
             SetStyling(tok.EndPosition - tok.StartPosition, style);
         }
 

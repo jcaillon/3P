@@ -171,6 +171,7 @@ namespace _3PA {
             ParserHandler.OnStart += CodeExplorer.Instance.OnStart;
             ParserHandler.OnEndSendCompletionItems += AutoCompletion.SetDynamicItems;
             ParserHandler.OnEndSendParserItems += CodeExplorer.Instance.OnParseEndParserItems;
+            ParserHandler.OnEndSendParserItems += SyntaxFolding.OnParseEndParserItems;
             ParserHandler.OnEndSendCodeExplorerItems += CodeExplorer.Instance.OnParseEndCodeExplorerItems;
             ParserHandler.OnEnd += CodeExplorer.Instance.OnParseEnd;
 
