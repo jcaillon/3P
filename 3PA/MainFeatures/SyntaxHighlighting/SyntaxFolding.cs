@@ -27,11 +27,13 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
     internal class SyntaxFolding {
 
         public static void OnParseEndParserItems(List<ParserError> arg1, Dictionary<int, LineInfo> lineInfos, List<ParsedItem> arg3) {
-            var lineInfoCopy = new Dictionary<int, LineInfo>(lineInfos);
-            
-            Task.Factory.StartNew(() => {
-                UiThread.Invoke(() => SetFolding(lineInfoCopy));
-            });
+            if (lineInfos != null) {
+                var lineInfoCopy = new Dictionary<int, LineInfo>(lineInfos);
+
+                Task.Factory.StartNew(() => {
+                    UiThread.Invoke(() => SetFolding(lineInfoCopy));
+                });
+            }
         }
 
         public static void SetFolding(Dictionary<int, LineInfo> lineInfos) {
