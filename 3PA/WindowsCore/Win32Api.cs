@@ -91,6 +91,10 @@ namespace _3PA.WindowsCore {
             return retval;
         }
 
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, IntPtr lParam) {
+            return SendMessage(hWnd, (uint) msg, wParam, lParam);
+        }
+
         public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam) {
             return SendMessage(hWnd, (uint) msg, wParam, new IntPtr(lParam));
         }

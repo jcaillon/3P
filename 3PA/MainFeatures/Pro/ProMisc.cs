@@ -512,5 +512,17 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
+
+
+        public static void ReadCurrentFileAsProgress() {
+            if (Npp.CurrentFileInfo.IsProgress) {
+                // reset to default lang through notepad++
+                Npp.CurrentLangId = Npp.CurrentLangId;
+                Npp.CurrentFileInfo.SetAsNonProgress();
+            } else {
+                Npp.CurrentFileInfo.SetAsProgress();
+            }
+            NotificationsPublisher.OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
+        }
     }
 }

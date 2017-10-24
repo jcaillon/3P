@@ -594,11 +594,6 @@ namespace _3PA {
             // Npp.CurrentFileInfo.Lang.LangName
         }
 
-        public static void ReadCurrentFileAsProgress() {
-            Npp.CurrentFileInfo.SetAsProgress();
-            NotificationsPublisher.OnNppNotification(new SCNotification((uint)NppNotif.NPPN_BUFFERACTIVATED)); // simulate buffer activated
-        }
-
         #endregion
 
         #region OnStyleNeeded

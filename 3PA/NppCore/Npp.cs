@@ -456,6 +456,9 @@ namespace _3PA.NppCore {
                 Win32Api.SendMessage(Handle, NppMsg.NPPM_GETCURRENTLANGTYPE, 0, out langId);
                 return (int) langId;
             }
+            set {
+                Win32Api.SendMessage(Handle, NppMsg.NPPM_SETCURRENTLANGTYPE, 0, value);
+            }
         }
 
         /// <summary>
