@@ -324,10 +324,10 @@ namespace _3PA.WindowsCore {
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < num; i++) {
                     IntPtr item = Marshal.AllocHGlobal(stringCapacity);
-                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i * IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) (_nativeArray.ToInt64() + (i * IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (num * IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) (_nativeArray.ToInt64() + (num * IntPtr.Size)), IntPtr.Zero);
             }
 
             public UnmanagedStringArray(List<string> lstStrings) {
@@ -335,10 +335,10 @@ namespace _3PA.WindowsCore {
                 _nativeItems = new List<IntPtr>();
                 for (int i = 0; i < lstStrings.Count; i++) {
                     IntPtr item = Marshal.StringToHGlobalUni(lstStrings[i]);
-                    Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (i * IntPtr.Size)), item);
+                    Marshal.WriteIntPtr((IntPtr) (_nativeArray.ToInt64() + (i * IntPtr.Size)), item);
                     _nativeItems.Add(item);
                 }
-                Marshal.WriteIntPtr((IntPtr) ((int) _nativeArray + (lstStrings.Count * IntPtr.Size)), IntPtr.Zero);
+                Marshal.WriteIntPtr((IntPtr) (_nativeArray.ToInt64() + (lstStrings.Count * IntPtr.Size)), IntPtr.Zero);
             }
 
             public IntPtr NativePointer {
