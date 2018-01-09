@@ -438,9 +438,14 @@ namespace _3PA.MainFeatures.Parser {
                 }
 
                 // if we have tokens insert, do it
-                if (valueTokens.Count > 0)
-                    InsertTokens(posAhead, valueTokens);
-                else {
+                if (valueTokens.Count > 0) {
+                    List<Token> copiedTokens = new List<Token>();
+                    foreach (var token in valueTokens) {
+                        var copiedToken = token.Copy(toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition);
+                        copiedTokens.Add(copiedToken);
+                    }
+                    InsertTokens(posAhead, copiedTokens);
+                } else {
                     // otherwise, make sure we don't have two TokenWord following each other
                     var prevToken = PeekAt(posAhead - 1);
                     var nextToken = PeekAt(posAhead);
@@ -477,12 +482,15 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // Pop all the then/else blocks that are on top
-            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount)
-                while (_context.BlockStack.Peek().IndentType == IndentType.ThenElse) {
+            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount) {
+                var peeked = _context.BlockStack.Peek();
+                while (peeked.IndentType == IndentType.Then || peeked.IndentType == IndentType.Else) {
                     _context.BlockStack.Pop();
                     if (_context.BlockStack.Count == 0)
                         break;
+                    peeked = _context.BlockStack.Peek();
                 }
+            }
 
             // This statement made the BlockState count go to 0
             if (_context.BlockStack.Count == 0) {
@@ -854,7 +862,8 @@ namespace _3PA.MainFeatures.Parser {
             /// <summary>
             /// A then/else means the indent is only applied until the next first statement ends
             /// </summary>
-            ThenElse
+            Then,
+            Else
         }
 
         #endregion

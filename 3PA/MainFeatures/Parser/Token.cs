@@ -43,7 +43,7 @@ namespace _3PA.MainFeatures.Parser {
             EndPosition = endPosition;
         }
 
-        public abstract Token Copy();
+        public abstract Token Copy(int line, int column, int startPosition, int endPosition);
 
         public abstract void Accept(ILexerVisitor visitor);
 
@@ -64,8 +64,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenComment(Value, Line, Column, StartPosition, EndPosition, IsSingleLine);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenComment(Value, line, column, startPosition, endPosition, IsSingleLine);
         }
     }
 
@@ -79,8 +79,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenPreProcDirective(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenPreProcDirective(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -94,8 +94,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenInclude(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenInclude(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -108,9 +108,9 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
-
-        public override Token Copy() {
-            return new TokenPreProcVariable(Value, Line, Column, StartPosition, EndPosition);
+        
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenPreProcVariable(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -124,8 +124,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenEos(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenEos(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -136,8 +136,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenUnknown(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenUnknown(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -148,8 +148,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenWord(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenWord(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -159,9 +159,9 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
-
-        public override Token Copy() {
-            return new TokenNumber(Value, Line, Column, StartPosition, EndPosition);
+        
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenNumber(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -175,8 +175,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenString(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenString(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -192,8 +192,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenStringDescriptor(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenStringDescriptor(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -204,8 +204,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenWhiteSpace(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenWhiteSpace(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -215,9 +215,9 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
-
-        public override Token Copy() {
-            return new TokenSymbol(Value, Line, Column, StartPosition, EndPosition);
+        
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenSymbol(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -231,8 +231,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public override Token Copy() {
-            return new TokenEol(Value, Line, Column, StartPosition, EndPosition);
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenEol(Value, line, column, startPosition, endPosition);
         }
     }
 
@@ -245,9 +245,9 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
-
-        public override Token Copy() {
-            return new TokenEof(Value, Line, Column, StartPosition, EndPosition);
+        
+        public override Token Copy(int line, int column, int startPosition, int endPosition) {
+            return new TokenEof(Value, line, column, startPosition, endPosition);
         }
     }
 }

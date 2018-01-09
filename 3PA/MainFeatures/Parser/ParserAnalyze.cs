@@ -87,7 +87,7 @@ namespace _3PA.MainFeatures.Parser {
 
                                 // in case of a then do: we have created 2 stacks for actually the same block, pop them both
                                 if (_context.BlockStack.Count > 0 &&
-                                    _context.BlockStack.Peek().IndentType == IndentType.ThenElse &&
+                                    _context.BlockStack.Peek().IndentType == IndentType.Then &&
                                     popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
                                     _context.BlockStack.Pop();
                             } else
@@ -95,7 +95,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "else":
                             // add a one time indent after a then or else
-                            PushBlockInfoToStack(IndentType.ThenElse, token.Line);
+                            PushBlockInfoToStack(IndentType.Else, token.Line);
                             NewStatement(token);
                             break;
                         case "define":
@@ -167,8 +167,12 @@ namespace _3PA.MainFeatures.Parser {
                                 PushBlockInfoToStack(IndentType.DoEnd, token.Line);
                             break;
                         case "then":
+                            // in case of a else if then we would have a double one time indent, so delete it
+                            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().IndentType == IndentType.Else)
+                                _context.BlockStack.Pop();
+
                             // add a one time indent after a then or else
-                            PushBlockInfoToStack(IndentType.ThenElse, token.Line);
+                            PushBlockInfoToStack(IndentType.Then, token.Line);
                             NewStatement(token);
                             break;
                         default:
@@ -1700,7 +1704,7 @@ namespace _3PA.MainFeatures.Parser {
                     // add this include to the references and modify each token
                     _parsedIncludes.Add(newInclude);
                     var includeNumber = (ushort) (_parsedIncludes.Count - 1);
-                    var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1).Select(token => token.Copy()).ToList();
+                    var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1).Select(token => token.Copy(token.Line, token.Column, token.StartPosition, token.EndPosition)).ToList();
                     tokens.ForEach(token => token.OwnerNumber = includeNumber);
 
                     // replace the tokens
