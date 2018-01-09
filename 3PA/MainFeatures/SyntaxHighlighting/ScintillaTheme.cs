@@ -121,28 +121,26 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// styles defined in the SyntaxHighlighting file
         /// </summary>
         public void SetScintillaStyles() {
-            if (Config.Instance.UseSyntaxHighlightTheme) {
-                // Default
-                SetFontStyle((byte) SciMsg.STYLE_DEFAULT, GetStyle(SciStyleId.Default));
-                SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, GetStyle(SciStyleId.Default));
+            // Default
+            SetFontStyle((byte) SciMsg.STYLE_DEFAULT, GetStyle(SciStyleId.Default));
+            SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, GetStyle(SciStyleId.Default));
 
-                foreach (var kpv in Items) {
-                    SetFontStyle((byte) kpv.Key, kpv.Value);
-                }
-
-                // line numbers
-                SetFontStyle((byte) SciMsg.STYLE_LINENUMBER, GetStyle(SciStyleId.LineNumberMargin));
-
-                // set url as strings
-                SetFontStyle(80, GetStyle(SciStyleId.SimpleQuote));
-
-                // brace highlighting
-                SetFontStyle((byte) SciMsg.STYLE_BRACELIGHT, GetStyle(SciStyleId.BraceHighLight));
-                SetFontStyle((byte) SciMsg.STYLE_BRACEBAD, GetStyle(SciStyleId.BadBraceHighLight));
-
-                // smart highlighting in npp
-                Sci.GetIndicator(29).ForeColor = GetStyle(SciStyleId.SmartHighLighting).ForeColor;
+            foreach (var kpv in Items) {
+                SetFontStyle((byte) kpv.Key, kpv.Value);
             }
+
+            // line numbers
+            SetFontStyle((byte) SciMsg.STYLE_LINENUMBER, GetStyle(SciStyleId.LineNumberMargin));
+
+            // set url as strings
+            SetFontStyle(80, GetStyle(SciStyleId.SimpleQuote));
+
+            // brace highlighting
+            SetFontStyle((byte) SciMsg.STYLE_BRACELIGHT, GetStyle(SciStyleId.BraceHighLight));
+            SetFontStyle((byte) SciMsg.STYLE_BRACEBAD, GetStyle(SciStyleId.BadBraceHighLight));
+
+            // smart highlighting in npp
+            Sci.GetIndicator(29).ForeColor = GetStyle(SciStyleId.SmartHighLighting).ForeColor;
 
             // Setting styles for errors 
             SetErrorStyles((byte) ErrorLevel.Information, GetStyle(SciStyleId.Error0));

@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.Pro {
             // try to read all the . and \
 
             // first look in the propath
-            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.FilesPatternProgress);
+            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.FilesPatternProgress.Replace("*", ""));
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one :<br>");
@@ -512,8 +512,7 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-
+        
         public static void ReadCurrentFileAsProgress() {
             if (Npp.CurrentFileInfo.IsProgress) {
                 // reset to default lang through notepad++

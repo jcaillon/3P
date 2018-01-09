@@ -5,3 +5,7 @@
 **Fixed issues :**
 
 - #185 : Remove the custom syntax highlight checkbox from the options page
+
+**Notes regarding cutom syntax themes :**
+
+Due to numerous changes of the syntax highlight feature, the custom colors configuration file has changed a bit. The conf file is in `%notepadplugins%\config\3P\Themes\_ThemesForSyntax.conf`. If you had a custom one, rename it. Then go to Options > Share Export config > click the export button for the syntax highlighting theme. You can then compare the default file to yours and put back your modifications.
