@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.tg_colorOn = new YamuiFramework.Controls.YamuiButtonToggle();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.cbSyntax = new YamuiFramework.Controls.YamuiComboBox();
@@ -48,7 +47,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tg_colorOn);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
             this.scrollPanel.ContentPanel.Controls.Add(this.cbSyntax);
@@ -77,18 +75,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.linkurl.TabIndex = 65;
             this.linkurl.TabStop = false;
             this.linkurl.Text = "How to customize the look of 3P?";
-            // 
-            // tg_colorOn
-            // 
-            this.tg_colorOn.BackGrndImage = null;
-            this.tg_colorOn.Location = new System.Drawing.Point(25, 251);
-            this.tg_colorOn.Name = "tg_colorOn";
-            this.tg_colorOn.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tg_colorOn.Size = new System.Drawing.Size(590, 16);
-            this.tg_colorOn.TabIndex = 63;
-            this.tg_colorOn.Text = "I\'m using my own User Defined Language";
-            this.tg_colorOn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.tg_colorOn.ToggleSize = 40;
             // 
             // htmlLabel1
             // 
@@ -120,8 +106,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbSyntax
             // 
-            this.cbSyntax.Location = new System.Drawing.Point(25, 273);
+            this.cbSyntax.BackGrndImage = null;
+            this.cbSyntax.GreyScaleBackGrndImage = null;
+            this.cbSyntax.IsFocused = false;
+            this.cbSyntax.IsHovered = false;
+            this.cbSyntax.IsPressed = false;
+            this.cbSyntax.Location = new System.Drawing.Point(25, 251);
             this.cbSyntax.Name = "cbSyntax";
+            this.cbSyntax.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbSyntax.Size = new System.Drawing.Size(277, 21);
             this.cbSyntax.TabIndex = 21;
             // 
@@ -132,14 +124,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 222);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
-            this.yamuiLabel1.Size = new System.Drawing.Size(169, 19);
+            this.yamuiLabel1.Size = new System.Drawing.Size(168, 19);
             this.yamuiLabel1.TabIndex = 20;
             this.yamuiLabel1.Text = "SYNTAX HIGHLIGHTING";
             // 
             // cbApplication
             // 
+            this.cbApplication.BackGrndImage = null;
+            this.cbApplication.GreyScaleBackGrndImage = null;
+            this.cbApplication.IsFocused = false;
+            this.cbApplication.IsHovered = false;
+            this.cbApplication.IsPressed = false;
             this.cbApplication.Location = new System.Drawing.Point(25, 50);
             this.cbApplication.Name = "cbApplication";
+            this.cbApplication.SetImgSize = new System.Drawing.Size(0, 0);
             this.cbApplication.Size = new System.Drawing.Size(277, 21);
             this.cbApplication.TabIndex = 19;
             // 
@@ -158,7 +156,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel20.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel20.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel20.Name = "yamuiLabel20";
-            this.yamuiLabel20.Size = new System.Drawing.Size(101, 19);
+            this.yamuiLabel20.Size = new System.Drawing.Size(100, 19);
             this.yamuiLabel20.TabIndex = 16;
             this.yamuiLabel20.Text = "APPLICATION";
             // 
@@ -197,7 +195,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private HtmlToolTip toolTip;
         private HtmlLabel htmlLabel7;
         private HtmlLabel htmlLabel1;
-        private YamuiButtonToggle tg_colorOn;
         private HtmlLabel linkurl;
     }
 }

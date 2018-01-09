@@ -488,7 +488,6 @@ namespace _3PA.MainFeatures {
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 0;
-            public bool UseSyntaxHighlightTheme = true;
             
             // SHORTCUTS (id, shortcut spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();

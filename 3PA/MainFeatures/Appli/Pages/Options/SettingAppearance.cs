@@ -62,15 +62,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 toolTip.SetToolTip(newColorPicker, "Click me to set a new accent color for the current theme");
             }
 
-            // toggle
-            tg_colorOn.ButtonPressed += TgOnCheckedChanged;
-            tg_colorOn.Checked = Config.Instance.UseSyntaxHighlightTheme;
-            UpdateToggle();
-
             // tooltips
             toolTip.SetToolTip(cbApplication, "Choose the theme you wish to use for the software");
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
-            toolTip.SetToolTip(tg_colorOn, "Toggle this option OFF if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this OFF, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this OFF, select the UDL to use from the Language menu before you can see any changes</i>");
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpCustomThemes + @"'>How to customize the look of 3P?</a>";
 
@@ -93,22 +87,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
-
-        private void TgOnCheckedChanged(object sender, EventArgs eventArgs) {
-            Config.Instance.UseSyntaxHighlightTheme = tg_colorOn.Checked;
-            UpdateToggle();
-        }
-
-        private void UpdateToggle() {
-            if (tg_colorOn.Checked) {
-                tg_colorOn.Text = @"Use the themes provided by 3P, select one below : ";
-                cbSyntax.Show();
-            } else {
-                tg_colorOn.Text = @"Use a custom User Defined Language";
-                cbSyntax.Hide();
-            }
-        }
-
+        
         /// <summary>
         /// Changing theme
         /// </summary>
