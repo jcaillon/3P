@@ -381,7 +381,7 @@ namespace _3PA.MainFeatures.Parser {
                 var count = 1;
                 while (true) {
                     var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol || curToken is TokenEof) break;
+                    if (curToken is TokenSymbol && curToken.Value == "}" || curToken is TokenEof) break;
                     ReplacePreProcVariablesAhead(posAhead + count);
                     count++;
                 }
@@ -402,7 +402,7 @@ namespace _3PA.MainFeatures.Parser {
                 count = 1;
                 while (true) {
                     var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol || curToken is TokenEof) break;
+                    if (curToken is TokenSymbol && curToken.Value == "}" || curToken is TokenEof) break;
                     count++;
                 }
                 count++;

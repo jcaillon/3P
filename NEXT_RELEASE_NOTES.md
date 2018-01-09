@@ -5,6 +5,8 @@
 **Fixed issues :**
 
 - #185 : Remove the custom syntax highlight checkbox from the options page
+- #181 : open the files in the propath on "Go to definition"
+- #186 : Parsing problem with preprocessed variables like `{&_proparse_ prolint-nowarn(noundo)}`
 
 **Notes regarding cutom syntax themes :**
 
