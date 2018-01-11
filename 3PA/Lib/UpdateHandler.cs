@@ -483,7 +483,6 @@ namespace _3PA.Lib {
                         _3PUpdater.Instance.AddFileToMove(copyPath, Npp.ConfXml.FileNppUserDefinedLang);
                     }
                 }
-                DelayedAction.StartNew(100, Npp.ConfXml.FinishPluginInstall);
             }
         }
 
