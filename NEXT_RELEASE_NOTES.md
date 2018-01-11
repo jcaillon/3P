@@ -8,6 +8,8 @@
 - #181 : open the files in the propath on "Go to definition"
 - #186 : Parsing problem with preprocessed variables like `{&_proparse_ prolint-nowarn(noundo)}`
 - #171 : indentation problem caused by the parser
+- #190 : Define parameter buffer not handled correctly
+- #191 : Wrong analysis of temp-table indexes
 
 **Notes regarding cutom syntax themes :**
 

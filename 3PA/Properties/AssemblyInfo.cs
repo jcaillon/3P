@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AssemblyInfo.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("LeCavalierCasta")]
 [assembly: AssemblyProduct("3P")]
-[assembly: AssemblyCopyright("Copyright (c) 2017 - Julien Caillon - GNU General Public License v3")]
+[assembly: AssemblyCopyright("Copyright (c) 2018 - Julien Caillon - GNU General Public License v3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -54,5 +54,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.7.6.1")]
+[assembly: AssemblyVersion("1.7.7.0")]
 //[assembly: AssemblyFileVersion("1.5.3.1")]

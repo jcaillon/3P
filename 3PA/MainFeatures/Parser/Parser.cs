@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Parser.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -442,6 +442,7 @@ namespace _3PA.MainFeatures.Parser {
                     List<Token> copiedTokens = new List<Token>();
                     foreach (var token in valueTokens) {
                         var copiedToken = token.Copy(toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition);
+						copiedToken.OwnerNumber = toReplaceToken.OwnerNumber;
                         copiedTokens.Add(copiedToken);
                     }
                     InsertTokens(posAhead, copiedTokens);

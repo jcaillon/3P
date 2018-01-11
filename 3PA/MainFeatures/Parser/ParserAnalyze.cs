@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserAnalyze.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -728,7 +728,8 @@ namespace _3PA.MainFeatures.Parser {
                         // matching the name
                         if (!(token is TokenWord)) break;
                         name = token.Value;
-                        if (type == ParseDefineType.Variable) state = 10;
+                        if (type == ParseDefineType.Variable) 
+                            state = 10;
                         if (type == ParseDefineType.Buffer) {
                             tempPrimitiveType = "buffer";
                             state = 81;
@@ -737,6 +738,11 @@ namespace _3PA.MainFeatures.Parser {
                             lowerToken = token.Value.ToLower();
                             switch (lowerToken) {
                                 case "buffer":
+                                    tempPrimitiveType = lowerToken;
+                                    type = ParseDefineType.Buffer;
+                                    flags |= ParseFlag.Parameter;
+                                    state = 80;
+                                    break;
                                 case "table":
                                 case "table-handle":
                                 case "dataset":
@@ -749,8 +755,10 @@ namespace _3PA.MainFeatures.Parser {
                                     break;
                             }
                         }
-                        if (isTempTable) state = 20;
-                        if (state != 1) break;
+                        if (isTempTable) 
+                            state = 20;
+                        if (state != 1) 
+                            break;
                         state = 99;
                         break;
 
@@ -906,10 +914,7 @@ namespace _3PA.MainFeatures.Parser {
                             state = 25;
                         } else {
                             // Otherwise, it's a field name
-                            var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
-                            if (found != null) {
-                                indexFields.Add(token.Value + indexSort);
-                            }
+                            indexFields.Add(token.Value + indexSort);
                         }
                         break;
 
@@ -1004,13 +1009,14 @@ namespace _3PA.MainFeatures.Parser {
                                 // if one of the index used is marked as primary
                                 if (index.ContainsFast("!")) {
                                     newTable.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
+                                    newTable.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
                                 }
-                                newTable.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
                             }
                         }
                     } else {
-                        // if there is no "use index", the tt uses the same index as the original table
-                        newTable.Indexes = newTable.LikeTable.Indexes.ToList();
+                        // if there is no "use index" and we didn't define new indexes, the tt uses the same index as the original table
+                        if (newTable.Indexes == null || newTable.Indexes.Count == 0)
+                            newTable.Indexes = newTable.LikeTable.Indexes.ToList();
                     }
                 }
 

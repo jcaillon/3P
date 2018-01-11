@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ParserVisitor.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -525,18 +525,7 @@ namespace _3PA.MainFeatures.Parser {
                     type = CompletionType.VariablePrimitive;
 
                     // To code explorer, program parameters
-                    if (_isBaseFile && pars.Scope is ParsedFile) {
-                        PushToCodeExplorer(
-                            GetExplorerListNode("Program parameters", CodeExplorerIconType.ProgramParameter),
-                            new ParameterCodeItem {
-                                DisplayText = pars.Name,
-                                Flags = pars.Flags,
-                                SubText = subString,
-                                DocumentOwner = pars.FilePath,
-                                GoToLine = pars.Line,
-                                GoToColumn = pars.Column
-                            });
-                    }
+                    PushToCodeExplorerAsParameter(pars);
                     break;
                 case ParseDefineType.Variable:
                     if (!String.IsNullOrEmpty(pars.ViewAs))
@@ -606,6 +595,9 @@ namespace _3PA.MainFeatures.Parser {
                 PushToCodeExplorer(parentNode, newNode);
             }
 
+            if (pars.Flags.HasFlag(ParseFlag.Parameter))
+                PushToCodeExplorerAsParameter(pars);
+
             // to completion data
             var curItem = CompletionItem.Factory.New(type) as TableCompletionItem;
             if (curItem != null) {
@@ -617,6 +609,26 @@ namespace _3PA.MainFeatures.Parser {
                 curItem.Flags = pars.Flags;
                 curItem.SubText = subString;
                 PushToAutoCompletion(curItem, pars);
+            }
+        }
+
+        private void PushToCodeExplorerAsParameter(ParsedItem pars) {
+            // To code explorer, program parameters
+            if (_isBaseFile && pars.Scope is ParsedFile) {
+                string subText = null;
+                var parsDefine = pars as ParsedDefine;
+                if (parsDefine != null)
+                    subText = parsDefine.PrimitiveType == ParsedPrimitiveType.Unknow ? parsDefine.Type.ToString() : parsDefine.PrimitiveType.ToString();
+                PushToCodeExplorer(
+                    GetExplorerListNode("Program parameters", CodeExplorerIconType.ProgramParameter),
+                    new ParameterCodeItem {
+                        DisplayText = pars.Name,
+                        Flags = pars.Flags,
+                        SubText = subText,
+                        DocumentOwner = pars.FilePath,
+                        GoToLine = pars.Line,
+                        GoToColumn = pars.Column
+                    });
             }
         }
 
