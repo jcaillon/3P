@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (HtmlBlockType.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
