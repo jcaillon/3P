@@ -233,7 +233,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         PreExecutionProgram = textbox7.Text,
                         PostExecutionProgram = textbox8.Text,
                         CmdLineParameters = flCmdLine.Text,
-                        DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo,
+                        DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : new Dictionary<string, string>(ProEnvironment.Current.DbConnectionInfo),
                         CompileLocally = tgCompLocally.Checked
                     };
 
