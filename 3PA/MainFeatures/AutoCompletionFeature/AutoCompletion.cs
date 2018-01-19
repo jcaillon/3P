@@ -305,9 +305,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 if (offset > 0 && strOnLeftLength > offset) {
 
                     bool hasAtLeastOneLetter = false;
+                    bool hasAtLeastOneDigit = false;
                     var checkOffset = offset;
-                    while (IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - checkOffset])) {
+                    while (strOnLeftLength - 1 - checkOffset > 0 && IsCharPartOfWord(strOnLeft[strOnLeftLength - 1 - checkOffset])) {
                         var ch = strOnLeft[strOnLeftLength - 1 - checkOffset];
+                        if (char.IsDigit(ch))
+                            hasAtLeastOneDigit = true;
                         if (char.IsLetter(ch)) {
                             hasAtLeastOneLetter = true;
                             break;
@@ -317,7 +320,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
                     // See if the char of the "word" we finished entering is actually part of a word
                     // (maybe not if, for instance, we just input 2 spaces consecutively)
-                    if (hasAtLeastOneLetter) {
+                    if (hasAtLeastOneLetter || (hasAtLeastOneDigit && !Npp.CurrentFileInfo.IsProgress && !Config.Instance.NppAutoCompleteIgnoreNumbers)) {
 
                         // automatically insert selected keyword of the completion list?
                         if (InsertSelectedSuggestionOnWordEnd && isVisible) {
