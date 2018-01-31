@@ -81,7 +81,8 @@ namespace _3PA.NppCore {
 
             // from userDefinedLang.xml
             try {
-                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, true);
+                if (File.Exists(Npp.ConfXml.FileNppUserDefinedLang))
+                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, true);
             } catch (Exception e) {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppUserDefinedLang);
             }
