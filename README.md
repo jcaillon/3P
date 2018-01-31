@@ -11,8 +11,8 @@
 [![Notepad++ v7.5.1+ required](https://img.shields.io/badge/Requires%20Notepad++-v7.3+-C7023D.svg)](https://notepad-plus-plus.org/download/v7.3.3.html)
 [![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/_3P/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![logo](https://github.com/jcaillon/3P/blob/gh-pages/images/notepad_and_3P.png)](http://jcaillon.github.io/3P/)
+[![logo](https://github.com/jcaillon/3P/blob/gh-pages/images/notepad_and_3P.png)](https://jcaillon.github.io/3P/)
 
-3P has a **[dedicated website](http://jcaillon.github.io/3P/)**, go check it out!
+3P has a **[dedicated website](https://jcaillon.github.io/3P/)**, go check it out!
 
 Old releases information can be found [here on the website](https://jcaillon.github.io/3P/#/versions)
