@@ -28,6 +28,7 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Parser {
+
     /// <summary>
     /// This class is not actually a parser "per say" but it extracts important information
     /// from the tokens created by the proLexer
@@ -245,7 +246,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionary
-            var current = new LineInfo(GetCurrentDepth(), _rootScope);
+            var current = new LineInfo(GetCurrentBlockDepth() + GetCurrentPreProcBlockDepth(), _rootScope);
             for (int i = proLexer.MaxLine; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
@@ -290,7 +291,7 @@ namespace _3PA.MainFeatures.Parser {
         #region Explore tokens list
 
         /// <summary>
-        /// Peek forward x tokens, returns an TokenEof if out of limits
+        /// Peek forward x tokens, returns an TokenEof if out of limits (can be used with negative values)
         /// </summary>
         private Token PeekAt(int x) {
             return (_tokenPos + x >= _tokenCount || _tokenPos + x < 0) ? new TokenEof("", -1, -1, -1, -1) : _tokenList[_tokenPos + x];
@@ -463,36 +464,28 @@ namespace _3PA.MainFeatures.Parser {
         /// called when a Eos token is found, store information on the statement's line
         /// </summary>
         private void NewStatement(Token token) {
+
             // store the line information for the base file
             if (_context.StatementFirstToken != null && _context.StatementFirstToken.OwnerNumber == 0) {
                 var statementStartLine = _context.StatementFirstToken.Line;
 
                 var currentScope = _context.Scope.ScopeType == ParsedScopeType.Root && _context.UibBlockStack.Count > 0 ? _context.UibBlockStack.Peek() : _context.Scope;
 
-                // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
-                var depth = GetCurrentDepth();
+                // remember the blockDepth of the current token's lin
+                var depth = GetCurrentBlockDepth() + GetCurrentPreProcBlockDepth();
                 if (!_lineInfo.ContainsKey(statementStartLine))
                     _lineInfo.Add(statementStartLine, new LineInfo(depth, currentScope));
 
-                // add missing values to the line dictionary (lines from start statement + 1 to end of statement have a depth + 1)
+                // add missing values to the line dictionary 
+                // (lines from start statement + 1 to end of statement have a depth + 1)
+                // (can have a depth + 2 if the statement contains a ELSE or THEN)
                 if (statementStartLine > -1 && token.Line > statementStartLine) {
                     for (int i = statementStartLine + 1; i <= token.Line; i++)
                         if (!_lineInfo.ContainsKey(i))
-                            _lineInfo.Add(i, new LineInfo(depth + 1, currentScope));
+                            _lineInfo.Add(i, new LineInfo(depth + (_context.StatementFirstWordLineAferThenOrElse > 0 && i > _context.StatementFirstWordLineAferThenOrElse ? 2 : 1), currentScope));
                 }
             }
-
-            // Pop all the then/else blocks that are on top
-            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount) {
-                var peeked = _context.BlockStack.Peek();
-                while (peeked.IndentType == IndentType.Then || peeked.IndentType == IndentType.Else) {
-                    _context.BlockStack.Pop();
-                    if (_context.BlockStack.Count == 0)
-                        break;
-                    peeked = _context.BlockStack.Peek();
-                }
-            }
-
+            
             // This statement made the BlockState count go to 0
             if (_context.BlockStack.Count == 0) {
                 // did we match an end of a proc, func or on event block?
@@ -510,6 +503,8 @@ namespace _3PA.MainFeatures.Parser {
             _context.StatementCount++;
             _context.StatementWordCount = 0;
             _context.StatementFirstToken = null;
+            _context.StatementFirstTokenPosition = 0;
+            _context.StatementFirstWordLineAferThenOrElse = 0;
             _context.IsTokenIsEos = true;
         }
 
@@ -517,18 +512,32 @@ namespace _3PA.MainFeatures.Parser {
         /// Returns the current block depth
         /// </summary>
         /// <returns></returns>
-        private int GetCurrentDepth() {
+        private int GetCurrentBlockDepth() {
             var depth = 0;
             var lastLine = -1;
-            bool lastStackThenDo = false;
             foreach (var blockInfo in _context.BlockStack) {
                 if (blockInfo.LineTriggerWord != lastLine)
                     depth++;
-                else if (depth == 1)
-                    lastStackThenDo = true;
                 lastLine = blockInfo.LineTriggerWord;
             }
-            if (depth > 0 && _context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.BlockStack.Peek().LineStart && !lastStackThenDo)
+            if (depth > 0 && _context.StatementFirstToken != null &&  _context.StatementFirstToken.Line == _context.BlockStack.Peek().LineStart)
+                depth--;
+            return depth;
+        }
+
+        /// <summary>
+        /// Returns the current preproc &amp;if / &amp;endif block depth
+        /// </summary>
+        /// <returns></returns>
+        private int GetCurrentPreProcBlockDepth() {
+            var depth = 0;
+            var lastLine = -1;
+            foreach (var blockInfo in _context.PreProcIfStack) {
+                if (blockInfo.Line != lastLine)
+                    depth++;
+                lastLine = blockInfo.Line;
+            }
+            if (depth > 0 && _context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.PreProcIfStack.Peek().Line)
                 depth--;
             return depth;
         }
@@ -536,10 +545,9 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Add a block info on top of the block Stack
         /// </summary>
-        /// <param name="indentType"></param>
         /// <param name="currentLine"></param>
-        private void PushBlockInfoToStack(IndentType indentType, int currentLine) {
-            _context.BlockStack.Push(new BlockInfo(_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : 0, currentLine, indentType, _context.StatementCount));
+        private void PushBlockInfoToStack(int currentLine) {
+            _context.BlockStack.Push(new BlockInfo(_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : 0, currentLine, _context.StatementCount));
         }
 
         /// <summary>
@@ -583,7 +591,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Returns token value or token value minus starting/ending quote of the token is a string
         /// </summary>
-        private string GetTokenStrippedValue(Token token) {
+        private static string GetTokenStrippedValue(Token token) {
             if (token is TokenString) {
                 var endsWithQuote = token.Value.EndsWith("\"") || token.Value.EndsWith("'");
                 return token.Value.Substring(1, token.Value.Length - (endsWithQuote ? 2 : 1));
@@ -594,7 +602,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Trim whitespaces tokens at the beginning and end of the list
         /// </summary>
-        private List<Token> TrimTokensList(List<Token> tokensList) {
+        private static List<Token> TrimTokensList(List<Token> tokensList) {
             while (tokensList.Count > 0 && tokensList[0] is TokenWhiteSpace) {
                 tokensList.RemoveAt(0);
             }
@@ -796,10 +804,18 @@ namespace _3PA.MainFeatures.Parser {
             /// </summary>
             public Token StatementFirstToken { get; set; }
 
+            public int StatementFirstTokenPosition { get; set; }
+
             /// <summary>
             /// True if the first word of the statement didn't match a known statement
             /// </summary>
             public bool StatementUnknownFirstWord { get; set; }
+
+            /// <summary>
+            /// We matched a THEN or ELSE in this statement, it will have the value of the line number of the next
+            /// word after a THEN or ELSE
+            /// </summary>
+            public int StatementFirstWordLineAferThenOrElse { get; set; }
 
             /// <summary>
             /// True if the current token (PeekAt(0)) should be considered as an end of statement
@@ -821,6 +837,12 @@ namespace _3PA.MainFeatures.Parser {
             /// to know if the document is correct or not
             /// </summary>
             public Stack<ParsedPreProcBlock> PreProcIfStack { get; set; }
+
+            /// <summary>
+            /// Allows to read the next word after a THEN or a ELSE as the first word of a statement to 
+            /// correctly read ASSIGN statement for instance...
+            /// </summary>
+            public bool ReadNextWordAsStatementStart { get; set; }
         }
 
         /// <summary>
@@ -837,34 +859,18 @@ namespace _3PA.MainFeatures.Parser {
             /// In case of a DO, it's necesseraly on the same line of the statement starting token
             /// </summary>
             public int LineTriggerWord { get; set; }
-
-            public IndentType IndentType { get; set; }
-
+            
             /// <summary>
             /// the total statement count at the moment this block was created
             /// </summary>
             public int StatementNumber { get; set; }
 
-            public BlockInfo(int lineStart, int lineTriggerWord, IndentType indentType, int statementNumber)
+            public BlockInfo(int lineStart, int lineTriggerWord, int statementNumber)
                 : this() {
                 LineStart = lineStart;
                 LineTriggerWord = lineTriggerWord;
-                IndentType = indentType;
                 StatementNumber = statementNumber;
             }
-        }
-
-        internal enum IndentType {
-            /// <summary>
-            /// A do-end means that the indent extends from the line with the DO to the line with the END
-            /// </summary>
-            DoEnd,
-
-            /// <summary>
-            /// A then/else means the indent is only applied until the next first statement ends
-            /// </summary>
-            Then,
-            Else
         }
 
         #endregion
@@ -877,6 +883,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Contains the info of a specific line number (built during the parsing)
     /// </summary>
     internal class LineInfo {
+
         /// <summary>
         /// Block depth for the current line (= number of indents)
         /// </summary>
@@ -955,7 +962,10 @@ namespace _3PA.MainFeatures.Parser {
         MismatchNumberOfIfEndIf,
 
         [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
-        UnexpectedIfEndIfBlockEnd
+        UnexpectedPreProcEndIf,
+
+        [Description("&THEN pre-processed statement matched without the corresponding &IF")]
+        UnexpectedPreprocThen
     }
 
     #endregion

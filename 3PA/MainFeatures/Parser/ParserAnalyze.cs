@@ -43,8 +43,10 @@ namespace _3PA.MainFeatures.Parser {
             if (_context.StatementFirstToken == null && (
                     token is TokenWord ||
                     token is TokenPreProcDirective ||
-                    token is TokenInclude))
+                    token is TokenInclude)) {
                 _context.StatementFirstToken = token;
+                _context.StatementFirstTokenPosition = _tokenPos;
+            }
 
             // matching a word
             if (token is TokenWord) {
@@ -62,7 +64,12 @@ namespace _3PA.MainFeatures.Parser {
                 }
 
                 // first word of a statement
-                if (_context.StatementWordCount == 0) {
+                if (_context.StatementWordCount == 0 || _context.ReadNextWordAsStatementStart) {
+                    if (_context.ReadNextWordAsStatementStart) {
+                        _context.ReadNextWordAsStatementStart = false;
+                        _context.StatementFirstWordLineAferThenOrElse = token.Line;
+                    }
+
                     // matches a definition statement at the beginning of a statement
                     switch (lowerTok) {
                         case "case":
@@ -78,25 +85,19 @@ namespace _3PA.MainFeatures.Parser {
                         case "repeat":
                         case "editing":
                             // increase block depth
-                            PushBlockInfoToStack(IndentType.DoEnd, token.Line);
+                            PushBlockInfoToStack(token.Line);
                             break;
                         case "end":
                             if (_context.BlockStack.Count > 0) {
                                 // decrease block depth
-                                var popped = _context.BlockStack.Pop();
-
-                                // in case of a then do: we have created 2 stacks for actually the same block, pop them both
-                                if (_context.BlockStack.Count > 0 &&
-                                    _context.BlockStack.Peek().IndentType == IndentType.Then &&
-                                    popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
-                                    _context.BlockStack.Pop();
+                                _context.BlockStack.Pop();
                             } else
                                 _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, 0, _parsedIncludes));
                             break;
                         case "else":
-                            // add a one time indent after a then or else
-                            PushBlockInfoToStack(IndentType.Else, token.Line);
-                            NewStatement(token);
+                            // after a else, we need to consider the next word like it's the start of a new statement
+                            // but we consider the whole else STATEMENT. as one single statement to correctly indent it!
+                            _context.ReadNextWordAsStatementStart = true;
                             break;
                         case "define":
                         case "def":
@@ -114,7 +115,7 @@ namespace _3PA.MainFeatures.Parser {
                                 if (_context.BlockStack.Count != 0)
                                     _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockStart, token, _context.BlockStack.Count, _parsedIncludes));
                                 _context.BlockStack.Clear();
-                                PushBlockInfoToStack(IndentType.DoEnd, token.Line);
+                                PushBlockInfoToStack(token.Line);
                             }
                             break;
                         case "function":
@@ -123,7 +124,7 @@ namespace _3PA.MainFeatures.Parser {
                                 if (_context.BlockStack.Count != 0)
                                     _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockStart, token, _context.BlockStack.Count, _parsedIncludes));
                                 _context.BlockStack.Clear();
-                                PushBlockInfoToStack(IndentType.DoEnd, token.Line);
+                                PushBlockInfoToStack(token.Line);
                             }
                             break;
                         case "on":
@@ -160,20 +161,21 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "do":
                             // matches a do in the middle of a statement (ex: ON CHOOSE OF xx DO:)
-                            PushBlockInfoToStack(IndentType.DoEnd, token.Line);
+                            PushBlockInfoToStack(token.Line);
                             break;
                         case "triggers":
                             if (PeekAtNextNonSpace(0) is TokenEos)
-                                PushBlockInfoToStack(IndentType.DoEnd, token.Line);
+                                PushBlockInfoToStack(token.Line);
                             break;
                         case "then":
-                            // in case of a else if then we would have a double one time indent, so delete it
-                            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().IndentType == IndentType.Else)
-                                _context.BlockStack.Pop();
-
-                            // add a one time indent after a then or else
-                            PushBlockInfoToStack(IndentType.Then, token.Line);
-                            NewStatement(token);
+                            // after a then, we need to consider the next word like it's the start of a new statement
+                            // but we consider the whole if then STATEMENT. as one single statement to correctly indent it!
+                            var firstTokenLower = _context.StatementFirstToken.Value.ToLower();
+                            if (firstTokenLower.Equals("if") || firstTokenLower.Equals("case"))
+                                _context.ReadNextWordAsStatementStart = true;
+                            break;
+                        case "otherwise":
+                            _context.ReadNextWordAsStatementStart = true;
                             break;
                         default:
                             // try to match a known word
@@ -207,32 +209,40 @@ namespace _3PA.MainFeatures.Parser {
                 var directiveLower = token.Value.ToLower();
 
                 switch (directiveLower) {
-                    case "&else":
-                        NewStatement(token);
-                        break;
-
-                    case "&if":
-                        _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
-                        break;
-
-                    case "&elseif":
                     case "&endif":
+                    case "&else":
+                    case "&elseif":
+                        // pop a block stack
                         if (_context.PreProcIfStack.Count > 0) {
                             var prevIf = _context.PreProcIfStack.Pop();
                             prevIf.EndBlockLine = token.Line;
                             prevIf.EndBlockPosition = token.EndPosition;
                         } else
-                            _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedIfEndIfBlockEnd, token, 0, _parsedIncludes));
+                            _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedPreProcEndIf, token, 0, _parsedIncludes));
 
-                        if (directiveLower == "&elseif") {
-                            _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
-                        } else {
-                            NewStatement(token);
+                        switch (directiveLower) {
+                            case "&endif":
+                                NewStatement(token);
+                                break;
+                            case "&else":
+                                // push a block to stack
+                                _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
+                                NewStatement(token);
+                                break;
                         }
                         break;
-
+                        
                     case "&then":
+                        var firstTokenLower = _context.StatementFirstToken.Value.ToLower();
+                        if (!(firstTokenLower.Equals("&if") || firstTokenLower.Equals("&elseif"))) {
+                            _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedPreprocThen, token, 0, _parsedIncludes));
+                        }
+                        // push a block to stack
+                        _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(_context.StatementFirstToken));
                         NewStatement(token);
+                        break;
+
+                    case "&if":
                         break;
 
                     default:
@@ -1208,18 +1218,21 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Matches a & IF.. & THEN pre-processed statement
+        /// Matches a & IF.. & THEN pre-processed statement (extract the evaluated expression in BlockDescription)
         /// </summary>
         private ParsedPreProcBlock CreateParsedIfEndIfPreProc(Token ifToken) {
+
+            var statementFirstTokenRelativePosition = _context.StatementFirstTokenPosition - _tokenPos;
+            int i = 1;
             _lastTokenWasSpace = true;
             StringBuilder expression = new StringBuilder();
 
-            do {
-                var token = PeekAt(1);
-                if (token is TokenPreProcDirective) break;
+            while (statementFirstTokenRelativePosition + i < 0) {
+                var token = PeekAt(statementFirstTokenRelativePosition + i);
                 if (token is TokenComment) continue;
                 AddTokenToStringBuilder(expression, token);
-            } while (MoveNext());
+                i++;
+            }
 
             var newIf = new ParsedPreProcBlock(String.Empty, ifToken) {
                 Type = ParsedPreProcBlockType.IfEndIf,
