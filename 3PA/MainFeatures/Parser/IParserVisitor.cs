@@ -17,9 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using _3PA.MainFeatures.Parser.Pro;
+
 namespace _3PA.MainFeatures.Parser {
     internal interface IParserVisitor {
-        void PreVisit(Parser parser);
+        void PreVisit(Pro.Parser parser);
         void Visit(ParsedWord pars);
         void Visit(ParsedFile pars);
         void Visit(ParsedPreProcBlock pars);

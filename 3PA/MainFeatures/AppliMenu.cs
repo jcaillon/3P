@@ -30,6 +30,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 using _3PA.Tests;
@@ -341,7 +342,8 @@ namespace _3PA.MainFeatures {
                         new MenuItem(this, "DebugTest1", ImageResources.TestTube, item => PlugDebug.DebugTest1(), "DebugTest1", "Ctrl+OemQuotes") {Generic = true},
                         new MenuItem(this, "DebugTest2", ImageResources.TestTube, item => PlugDebug.DebugTest2(), "DebugTest2", "Alt+OemQuotes") {Generic = true},
                         new MenuItem(this, "DebugTest3", ImageResources.TestTube, item => PlugDebug.DebugTest3(), "DebugTest3", "Shift+OemQuotes") {Generic = true},
-                        new MenuItem(this, "Parse current file", ImageResources.TestTube, item => PlugDebug.ParseCurrentFile(), "ParseCurrentFile", "") {Generic = true},
+                        new MenuItem(this, "Parse current file", ImageResources.TestTube, item => PlugDebug.ParseCurrentFile(), "ParseCurrentFile", "") {Generic = false},
+                        new MenuItem(this, "GetCurrentFileParsedDebugfile", ImageResources.TestTube, item => PlugDebug.GetCurrentFileParsedDebugfile(), "GetCurrentFileParsedDebugfile", "") {Generic = false},
                         new MenuItem(this, "Parse reference file", ImageResources.TestTube, item => PlugDebug.ParseReferenceFile(), "ParseReferenceFile", "") {Generic = true},
                         new MenuItem(this, "Parse all files", ImageResources.TestTube, item => PlugDebug.ParseAllFiles(), "ParseAllFiles", "") {Generic = true}
                     }) {

@@ -27,6 +27,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.ModificationsTag;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.MainFeatures.SyntaxHighlighting;

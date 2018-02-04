@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
@@ -253,7 +254,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
-                        curField.Type = Parser.Parser.ConvertStringToParsedPrimitiveType(curField.TempType);
+                        curField.Type = Parser.Pro.Parser.ConvertStringToParsedPrimitiveType(curField.TempType);
                         currentTable.Fields.Add(curField);
                         break;
                 }

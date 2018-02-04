@@ -17,12 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using _3PA.Lib;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Pro {
 
+    /// <inheritdoc />
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern

@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
 

@@ -19,6 +19,7 @@
 #endregion
 using YamuiFramework.Controls.YamuiList;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// <summary>

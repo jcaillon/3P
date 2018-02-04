@@ -30,7 +30,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.ModificationsTag;
-using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.MainFeatures.SyntaxHighlighting;

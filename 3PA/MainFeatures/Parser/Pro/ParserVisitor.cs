@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Pro;
 
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// This class sustains the auto completion list AND the code explorer list
     /// by visiting the parser and creating new completionData

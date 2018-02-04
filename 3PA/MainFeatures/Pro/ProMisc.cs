@@ -26,6 +26,7 @@ using YamuiFramework.Forms;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro.Deploy;
 using _3PA.NppCore;
 using _3PA.WindowsCore;

@@ -27,6 +27,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;

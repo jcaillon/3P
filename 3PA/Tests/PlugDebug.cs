@@ -32,6 +32,7 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
@@ -96,6 +97,23 @@ namespace _3PA.Tests {
 
         #region debug
 
+        public static void GetCurrentFileParsedDebugfile() {
+            // create unique temporary folder
+            var testDir = Path.Combine(Npp.ConfigDirectory, "Tests", "RunParserTests_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+            if (!Utils.CreateDirectory(testDir))
+                return;
+
+            var outLocation = Path.Combine(testDir, "dbglist_out.p");
+
+            var outSb = new StringBuilder();
+
+            new Parser(new ProLexer(Sci.Text), Npp.CurrentFileInfo.Path, null, false, outSb);
+
+            Utils.FileWriteAllText(outLocation, outSb.ToString());
+
+            UserCommunication.Notify("Done :<br>" + testDir.ToHtmlLink());
+        }
+
         public static void ParseReferenceFile() {
             RunParserTests(Utils.ReadAllText(Path.Combine(Npp.ConfigDirectory, "Tests", "Parser_in.p")));
         }
@@ -124,7 +142,7 @@ namespace _3PA.Tests {
                     ProLexer proLexer = new ProLexer(Utils.ReadAllText(file));
                     outStr += "ProLexer (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    Parser parser = new Parser(proLexer, "", null, true);
+                    Parser parser = new Parser(proLexer, "", null, true, null);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
                     if (parser.ParserErrors != null && parser.ParserErrors.Count > 0) {
@@ -212,7 +230,7 @@ namespace _3PA.Tests {
             watch = Stopwatch.StartNew();
             //------------
 
-            Parser parser = new Parser(proLexer, "", null, true);
+            Parser parser = new Parser(proLexer, "", null, true, null);
 
             //--------------
             watch.Stop();

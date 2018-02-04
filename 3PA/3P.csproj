@@ -196,6 +196,18 @@
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementOnEvent.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementDefine.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPreprocDirective.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPreprocIfBlock.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementProcedure.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementLabel.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementFunction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserReplaceIncludeAndPreprocVariables.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementRun.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementDynamicFunction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPublish.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserStatementSubscribe.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxFolding.cs" />
     <Compile Include="NppCore\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
@@ -296,7 +308,7 @@
     <Compile Include="NppCore\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Parser\ParserAnalyze.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserAnalyze.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
@@ -597,10 +609,10 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\DataBase.cs" />
-    <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserHandler.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
@@ -610,11 +622,11 @@
     </Compile>
     <Compile Include="MainFeatures\ModificationsTag\FileCustomInfo.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\Parser.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parser.cs" />
     <Compile Include="MainFeatures\Pro\ProMisc.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\ProLexer.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ProLexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
     <Compile Include="MainFeatures\Pro\ProEnvironment.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
@@ -643,7 +655,7 @@
     <Compile Include="MainFeatures\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
     <Compile Include="MainFeatures\Appli\Appli.cs" />
-    <Compile Include="MainFeatures\Parser\ParsedItem.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParsedItem.cs" />
     <Compile Include="MainFeatures\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
     <Compile Include="Lib\IniReader.cs" />

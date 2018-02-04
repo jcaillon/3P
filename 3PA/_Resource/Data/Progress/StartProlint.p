@@ -67,35 +67,35 @@ you can use the pre-processed variables defined below if you find them useful! *
 /*<inserted_3P_values>*/
 
 &IF DEFINED(PathFileToProlint) = 0 &THEN
-/* this block is only present for debug/tests purposes, the values below are
-overwritten when this file is run from 3P,
-you can set those values manually for your tests */
-&SCOPED-DEFINE PathFileToProlint ""
-&SCOPED-DEFINE PathProlintOutputFile ""
-&SCOPED-DEFINE PathToStartProlintProgram ""
-&SCOPED-DEFINE UserName ""
-&SCOPED-DEFINE PathActualFilePath ""
+    /* this block is only present for debug/tests purposes, the values below are
+    overwritten when this file is run from 3P,
+    you can set those values manually for your tests */
+    &SCOPED-DEFINE PathFileToProlint ""
+    &SCOPED-DEFINE PathProlintOutputFile ""
+    &SCOPED-DEFINE PathToStartProlintProgram ""
+    &SCOPED-DEFINE UserName ""
+    &SCOPED-DEFINE PathActualFilePath ""
 &ENDIF
 
 &IF DEFINED(FileApplicationName) = 0 &THEN
-&SCOPED-DEFINE FileApplicationName ""
-&SCOPED-DEFINE FileApplicationVersion ""
-&SCOPED-DEFINE FileWorkPackage ""
-&SCOPED-DEFINE FileBugID ""
-/* can either be 0 (or inferior) to prolint the whole file, or a number (or comma separated list of numbers) to prolint between tags */
-&SCOPED-DEFINE FileCorrectionNumber ""
-&SCOPED-DEFINE FileDate ""
-&SCOPED-DEFINE FileCorrectionDescription ""
+    &SCOPED-DEFINE FileApplicationName ""
+    &SCOPED-DEFINE FileApplicationVersion ""
+    &SCOPED-DEFINE FileWorkPackage ""
+    &SCOPED-DEFINE FileBugID ""
+    /* can either be 0 (or inferior) to prolint the whole file, or a number (or comma separated list of numbers) to prolint between tags */
+    &SCOPED-DEFINE FileCorrectionNumber ""
+    &SCOPED-DEFINE FileDate ""
+    &SCOPED-DEFINE FileCorrectionDescription ""
 &ENDIF
 
 &IF DEFINED(ModificationTagOpening) = 0 &THEN
-&SCOPED-DEFINE ModificationTagOpening ""
-&SCOPED-DEFINE ModificationTagEnding ""
+    &SCOPED-DEFINE ModificationTagOpening ""
+    &SCOPED-DEFINE ModificationTagEnding ""
 &ENDIF
 
 &IF DEFINED(PathDirectoryToProparseAssemblies) = 0 &THEN
-&SCOPED-DEFINE PathDirectoryToProlint ""
-&SCOPED-DEFINE PathDirectoryToProparseAssemblies ""
+    &SCOPED-DEFINE PathDirectoryToProlint ""
+    &SCOPED-DEFINE PathDirectoryToProparseAssemblies ""
 &ENDIF
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
@@ -121,14 +121,14 @@ FUNCTION GetSeverityLabel RETURNS CHARACTER PRIVATE
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD btPathGetDirectoryName Procedure
 FUNCTION btPathGetDirectoryName RETURNS CHARACTER
-  ( INPUT ipc_path AS CHARACTER ) FORWARD.
+    ( INPUT ipc_path AS CHARACTER ) FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD btPathGetFileName Procedure
 FUNCTION btPathGetFileName RETURNS CHARACTER
-  ( INPUT ipc_path AS CHARACTER ) FORWARD.
+    ( INPUT ipc_path AS CHARACTER ) FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -181,21 +181,21 @@ PROCEDURE MainProc:
     /*------------------------------------------------------------------------------
     Summary    : Main procedure
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE VARIABLE li_tag AS INTEGER NO-UNDO.
     DEFINE VARIABLE li_messageType AS INTEGER NO-UNDO INITIAL 3.
-
+    
     /* add the prolint directory to the propath */
     PROPATH = {&PathDirectoryToProlint} + "," + PROPATH.
-
+    
     /* Make sure to find the assemblies needed for prolint (proparse assemblies) */
     RUN ChangeAssembliesPath (INPUT {&PathDirectoryToProparseAssemblies}) NO-ERROR.
     IF ERROR-STATUS:ERROR THEN
         RETURN ERROR "Error when loading the prolint assemblies : " + RETURN-VALUE.
-
+    
     /* handles the results published by PROLINT */
     SUBSCRIBE TO "Prolint_AddResult" ANYWHERE.
-
+    
     /* start the prolint analysis */
     RUN prolint/core/prolint.p (
         INPUT "",
@@ -213,7 +213,7 @@ PROCEDURE MainProc:
         INPUT 5,
         INPUT "prolintOutputFile"
         ).
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -226,11 +226,11 @@ PROCEDURE GetFirstLintSource:
     /*------------------------------------------------------------------------------
     Summary    : returns the path of the first file to prolint
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE OUTPUT PARAMETER opc_filePath AS CHARACTER NO-UNDO.
-
+    
     RUN GetNextLintSource(OUTPUT opc_filePath).
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -243,14 +243,14 @@ PROCEDURE GetNextLintSource:
     /*------------------------------------------------------------------------------
     Summary    : returns the path of the next file to prolint (return ? to end the process)
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE OUTPUT PARAMETER opc_filePath AS CHARACTER NO-UNDO INITIAL ?.
-
+    
     ASSIGN
         gi_currentFile = gi_currentFile + 1
         opc_filePath = IF gi_currentFile <= NUM-ENTRIES({&PathFileToProlint}) THEN ENTRY(gi_currentFile, {&PathFileToProlint}) ELSE ?
-            .
-
+        .
+    
     RETURN "".
 
 END PROCEDURE.
@@ -264,16 +264,16 @@ PROCEDURE Prolint_AddResult:
     Summary    : This procedure is called by the outputhandler and aims to store the results of PROLINT
     (it filters the results to keep only the one we want)
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE INPUT PARAMETER pCompilationUnit  AS CHARACTER   NO-UNDO.  /* the sourcefile we're parsing (fullpath) */
     DEFINE INPUT PARAMETER pSourcefile       AS CHARACTER   NO-UNDO.  /* may be an includefile (fullpath)        */
     DEFINE INPUT PARAMETER pLineNumber       AS INTEGER     NO-UNDO.  /* line number in pSourceFile              */
     DEFINE INPUT PARAMETER pDescription      AS CHARACTER   NO-UNDO.  /* human-readable hint                     */
     DEFINE INPUT PARAMETER pRuleID           AS CHARACTER   NO-UNDO.  /* defines rule-program and maps to help   */
     DEFINE INPUT PARAMETER pSeverity         AS INTEGER     NO-UNDO.  /* importance of this rule, scale 0-9      */
-
+    
     DEFINE VARIABLE ll_toUse AS LOGICAL NO-UNDO INITIAL FALSE.
-
+    
     /* Here we can filter the result to actually take it into account... or not  */
     RUN Prolint_FilterResult (
         INPUT pCompilationUnit,
@@ -284,10 +284,10 @@ PROCEDURE Prolint_AddResult:
         INPUT pSeverity,
         OUTPUT ll_toUse
         ).
-
+    
     IF NOT ll_toUse THEN
         RETURN "".
-
+    
     /* 3P log */
     OUTPUT STREAM str_logout TO VALUE({&PathProlintOutputFile}) APPEND BINARY.
     PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
@@ -301,7 +301,7 @@ PROCEDURE Prolint_AddResult:
         ""
         ) SKIP.
     OUTPUT STREAM str_logout CLOSE.
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -317,7 +317,7 @@ PROCEDURE Prolint_FilterResult PRIVATE:
     Returns    :
     Remarks    :
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE INPUT PARAMETER pCompilationUnit  AS CHARACTER NO-UNDO.  /* the sourcefile we're parsing (fullpath) */
     DEFINE INPUT PARAMETER pSourcefile       AS CHARACTER NO-UNDO.  /* may be an includefile (fullpath)        */
     DEFINE INPUT PARAMETER pLineNumber       AS INTEGER   NO-UNDO.  /* line number in pSourceFile            */
@@ -325,22 +325,22 @@ PROCEDURE Prolint_FilterResult PRIVATE:
     DEFINE INPUT PARAMETER pRuleID           AS CHARACTER NO-UNDO.  /* defines rule-program and maps to help */
     DEFINE INPUT PARAMETER pSeverity         AS INTEGER   NO-UNDO.  /* importance of this rule, scale 0-9    */
     DEFINE OUTPUT PARAMETER opl_resultUsed     AS LOGICAL   NO-UNDO INITIAL FALSE.  /* Should return true to use this result, false otherwise */
-
+    
     IF pRuleID = "modificationtag" THEN DO:
         ASSIGN opl_resultUsed = TRUE.
         RETURN "".
     END.
-
+    
     IF NOT CAN-FIND(FIRST tt_rangesToProlint WHERE tt_rangesToProlint.cFileName = pSourcefile) THEN
         RUN Prolint_Differential_SetFilteredRanges (INPUT pCompilationUnit, INPUT pSourcefile).
-        
+    
     IF pLineNumber <= 0 OR
         CAN-FIND(FIRST tt_rangesToProlint WHERE tt_rangesToProlint.cFileName = pSourcefile AND
         pLineNumber >= tt_rangesToProlint.iLineBegin AND
         pLineNumber <= tt_rangesToProlint.iLineEnd)
         THEN
         ASSIGN opl_resultUsed = TRUE.
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -357,21 +357,21 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
     Returns    :
     Remarks    :
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE INPUT PARAMETER pCompilationUnit AS CHARACTER NO-UNDO.  /* the sourcefile we're parsing (fullpath) */
     DEFINE INPUT PARAMETER pSourcefile AS CHARACTER NO-UNDO.  /* may be an includefile (fullpath)        */
-
+    
     DEFINE VARIABLE li_tag AS INTEGER NO-UNDO.
-
+    
     DEFINE VARIABLE lc_line AS CHARACTER NO-UNDO.
     DEFINE VARIABLE li_lineNumber AS INTEGER NO-UNDO INITIAL 0.
     DEFINE VARIABLE li_tagColumn AS INTEGER NO-UNDO.
-
+    
     ASSIGN li_tag = INTEGER({&FileCorrectionNumber}) NO-ERROR.
     IF li_tag > 0 THEN DO:
-
+        
         EMPTY TEMP-TABLE tt_tagBlock.
-
+        
         INPUT STREAM str_source FROM VALUE(pSourcefile).
         REPEAT:
             /* Read next line */
@@ -380,33 +380,33 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
                 lc_line = TRIM(lc_line, "~r~n ")
                 li_lineNumber = li_lineNumber + 1
                 .
-
+            
             /* - Deal with non empty lines                          */
             /* - Exclude AppBuilder browse automatic definitions    */
             IF lc_line > "" AND NOT CAPS(lc_line) BEGINS "&SCOPED-DEFINE FIELDS-IN-QUERY-" THEN DO:
-
+                
                 /* Does the line owns a begining tag? */
                 ASSIGN li_tagColumn = INDEX(lc_line, {&ModificationTagOpening}).
-
+                
                 /* Because lc_line has been trimmed, li_tagColumn gives the tag type: */
                 /* - "block" if li_tagColumn = 1 */
                 /* - "inline" if li_tagColumn > 1 */
                 IF li_tagColumn > 1 THEN DO:
-
+                    
                     /* Warn if inline tag found inside block tag */
                     FIND FIRST tt_tagBlock NO-ERROR.
                     IF AVAILABLE(tt_tagBlock) THEN
                         RUN Prolint_AddResult (INPUT pCompilationUnit, INPUT pSourcefile, INPUT li_lineNumber, INPUT "Useless tag (line tag) detected : found inside another block tag starting at line " + STRING(tt_tagBlock.iLineBegin), INPUT "modificationtag", INPUT "-1").
-
+                    
                     RUN Prolint_Differential_AddFileRange (INPUT pSourcefile, INPUT li_lineNumber, INPUT li_lineNumber).
                 END.
                 ELSE IF li_tagColumn = 1 THEN DO:
-
+                    
                     /* Warn if tag found inside block tag */
                     FIND FIRST tt_tagBlock NO-ERROR.
                     IF AVAILABLE(tt_tagBlock) THEN
                         RUN Prolint_AddResult (INPUT pCompilationUnit, INPUT pSourcefile, INPUT li_lineNumber, INPUT "Invalid opening tag detected : found inside another block tag starting at line " + STRING(tt_tagBlock.iLineBegin), INPUT "modificationtag", INPUT "-1").
-
+                    
                     CREATE tt_tagBlock.
                     ASSIGN
                         tt_tagBlock.iLineBegin = li_lineNumber
@@ -414,7 +414,7 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
                         .
                     RELEASE tt_tagBlock.
                 END.
-
+                
                 /* Does the line owns an ending tag? */
                 ASSIGN li_tagColumn  = INDEX(lc_line, {&ModificationTagEnding}).
                 IF li_tagColumn >= 1 THEN DO:
@@ -429,17 +429,17 @@ PROCEDURE Prolint_Differential_SetFilteredRanges PRIVATE:
             END.
         END.
         INPUT STREAM str_source CLOSE.
-
+        
         /* Warn for unclosed tags */
         FOR EACH tt_tagBlock:
             RUN Prolint_AddResult (INPUT pCompilationUnit, INPUT pSourcefile, INPUT tt_tagBlock.iLineBegin, INPUT "Invalid block : the ending tag was not found", INPUT "modificationtag", INPUT "-1").
         END.
-
+    
     END.
     ELSE
         /* we lint the whole file but we warn about this */
         RUN Prolint_Differential_AddFileRange (INPUT pSourcefile, INPUT 1, INPUT 999999999).
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -455,11 +455,11 @@ PROCEDURE Prolint_Differential_AddFileRange PRIVATE:
     Returns    :
     Remarks    :
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE INPUT PARAMETER ipc_filePath AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER ipi_lineStart AS INTEGER NO-UNDO.
     DEFINE INPUT PARAMETER ipi_lineEnd AS INTEGER NO-UNDO.
-
+    
     CREATE tt_rangesToProlint.
     ASSIGN
         tt_rangesToProlint.cFileName = ipc_filePath
@@ -467,7 +467,7 @@ PROCEDURE Prolint_Differential_AddFileRange PRIVATE:
         tt_rangesToProlint.iLineEnd = ipi_lineEnd
         .
     RELEASE tt_rangesToProlint.
-
+    
     RETURN "".
 
 END PROCEDURE.
@@ -483,26 +483,26 @@ PROCEDURE ChangeAssembliesPath PRIVATE:
     Parameters:
     ipc_newPath = new assemblies path
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE INPUT PARAMETER ipc_newPath AS CHARACTER NO-UNDO.
-
+    
     DEFINE VARIABLE assemblyStore AS Progress.ClrBridge.AssemblyStore NO-UNDO.
-
+    
     assemblyStore = Progress.ClrBridge.AssemblyStore:Instance.
-
+    
     IF LENGTH(ipc_newPath) > 0 THEN DO:
         assemblyStore:AssembliesPath = ipc_newPath NO-ERROR.
         IF ERROR-STATUS:ERROR THEN
             RETURN ERROR-STATUS:GET-MESSAGE(1).
     END.
-
+    
     assemblyStore:Load() NO-ERROR.
     IF ERROR-STATUS:ERROR THEN
         RETURN ERROR-STATUS:GET-MESSAGE(1).
-
+    
     IF VALID-OBJECT(assemblyStore) THEN
         DELETE OBJECT assemblyStore NO-ERROR.
-
+    
     RETURN "".
 END PROCEDURE.
 
@@ -518,25 +518,25 @@ FUNCTION fi_get_profile RETURNS CHARACTER
     Summary    : returns the prolint profile name in function of the application name,
     it reads from prolint_profiles.d
     ------------------------------------------------------------------------------*/
-
+    
     DEFINE VARIABLE lc_filename AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_fullPath AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_fileType AS CHARACTER NO-UNDO.
-
+    
     IF ipc_appliName = ? OR ipc_appliName = "" THEN
         RETURN "3P".
-        
+    
     INPUT STREAM str_dir FROM OS-DIR({&PathDirectoryToProlint} + "\prolint\settings") .
     REPEAT:
         IMPORT STREAM str_dir lc_filename lc_fullPath lc_fileType.
         IF lc_filename = "." OR lc_filename = ".." THEN
             NEXT.
-
+        
         IF lc_fileType MATCHES "*D*" AND ipc_appliName MATCHES lc_filename THEN
             RETURN lc_filename.
     END.
     INPUT STREAM str_dir CLOSE.
-
+    
     RETURN "3P".
 
 END FUNCTION.
@@ -554,7 +554,7 @@ FUNCTION GetSeverityLabel RETURNS CHARACTER PRIVATE
     Returns    :
     Remarks    :
     ------------------------------------------------------------------------------*/
-
+    
     CASE ipi_prolintSeverity:
         WHEN 10 THEN
             RETURN "Critical".
@@ -569,7 +569,7 @@ FUNCTION GetSeverityLabel RETURNS CHARACTER PRIVATE
         OTHERWISE
             RETURN "Information".
     END CASE.
-
+    
     RETURN "NoErrors".
 
 END FUNCTION.
@@ -579,23 +579,23 @@ END FUNCTION.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION btPathGetDirectoryName Procedure
 FUNCTION btPathGetDirectoryName RETURNS CHARACTER
-  ( INPUT ipc_path AS CHARACTER ) :
-/*------------------------------------------------------------------------------
-  Summary    :
-  Parameters : <none>
-  Returns    :
-  Remarks    :
-------------------------------------------------------------------------------*/
-
+    ( INPUT ipc_path AS CHARACTER ) :
+    /*------------------------------------------------------------------------------
+    Summary    :
+    Parameters : <none>
+    Returns    :
+    Remarks    :
+    ------------------------------------------------------------------------------*/
+    
     DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
-
+    
     ASSIGN
         ipc_path = REPLACE(ipc_path, "~/", "~\")
         li_i = R-INDEX(ipc_path, "~\").
-
+    
     IF li_i = 0 THEN
         RETURN "".
-
+    
     RETURN SUBSTRING(ipc_path, 1, li_i).
 
 END FUNCTION.
@@ -605,23 +605,23 @@ END FUNCTION.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION btPathGetFileName Procedure
 FUNCTION btPathGetFileName RETURNS CHARACTER
-  ( INPUT ipc_path AS CHARACTER ) :
-/*------------------------------------------------------------------------------
-  Summary    :
-  Parameters : <none>
-  Returns    :
-  Remarks    :
-------------------------------------------------------------------------------*/
-
+    ( INPUT ipc_path AS CHARACTER ) :
+    /*------------------------------------------------------------------------------
+    Summary    :
+    Parameters : <none>
+    Returns    :
+    Remarks    :
+    ------------------------------------------------------------------------------*/
+    
     DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
-
+    
     ASSIGN
         ipc_path = REPLACE(ipc_path, "~/", "~\")
         li_i = R-INDEX(ipc_path, "~\").
-
+    
     IF li_i = 0 THEN
         RETURN ipc_path.
-
+    
     RETURN SUBSTRING(ipc_path, li_i + 1).
 
 END FUNCTION.

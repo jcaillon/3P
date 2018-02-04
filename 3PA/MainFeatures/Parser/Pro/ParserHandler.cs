@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Pro {
 
     internal static class ParserHandler {
 

@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {

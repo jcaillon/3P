@@ -19,6 +19,7 @@
 #endregion
 using System.Collections.Generic;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Parser.Pro;
 
 namespace _3PA.MainFeatures.Parser {
 

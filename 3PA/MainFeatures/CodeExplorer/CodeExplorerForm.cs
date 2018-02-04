@@ -25,6 +25,7 @@ using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;

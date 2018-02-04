@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,7 +28,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Pro {
 
     /// <summary>
     /// This class is not actually a parser "per say" but it extracts important information
@@ -192,12 +193,12 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor with a string instead of a proLexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) {}
+        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
-        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) {
+        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && KnownStaticItems != null;
@@ -235,8 +236,9 @@ namespace _3PA.MainFeatures.Parser {
             // Analyze
             _tokenList = proLexer.GetTokensList;
             _tokenCount = _tokenList.Count;
-            ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
-            ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
+            _tokenPos = -1;
+            ReplaceIncludeAndPreprocVariablesAhead(1); // replaces an include or a preproc var {&x} at token position 0
+            ReplaceIncludeAndPreprocVariablesAhead(2); // @position 1
             while (MoveNext()) {
                 try {
                     Analyze();
@@ -257,6 +259,14 @@ namespace _3PA.MainFeatures.Parser {
             // check that we match an &ENDIF for each &IF
             if (_context.PreProcIfStack.Count > 0)
                 _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(0), _context.PreProcIfStack.Count, _parsedIncludes));
+
+
+            //Returns the concatenation of all the tokens once the parsing is done
+            if (debugListOut != null) {
+                foreach (var token in _tokenList) {
+                    debugListOut.Append(token.Value);
+                }
+            }
 
             // dispose
             _context.BlockStack.Clear();
@@ -313,18 +323,12 @@ namespace _3PA.MainFeatures.Parser {
         /// Move to the next token
         /// </summary>
         private bool MoveNext() {
-            // before moving to the next token, we analyze the current token
-            if (!_context.IsTokenIsEos && PeekAt(0) is TokenWord) {
-                _context.StatementWordCount++;
-            }
-            _context.IsTokenIsEos = false;
-
             // move to the next token
             if (++_tokenPos >= _tokenCount)
                 return false;
 
-            // replace a pre proc var {&x} at current pos + 2
-            ReplacePreProcVariablesAhead(2);
+            //  analyze the current token
+            AnalyseForEachToken(PeekAt(0));
 
             return true;
         }
@@ -332,7 +336,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Replace the token at the current pos + x by the token given
         /// </summary>
-        public void ReplaceToken(int x, Token token) {
+        private void ReplaceToken(int x, Token token) {
             if (_tokenPos + x < _tokenCount)
                 _tokenList[_tokenPos + x] = token;
         }
@@ -340,14 +344,14 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Inserts tokens at the current pos + x
         /// </summary>
-        public void InsertTokens(int x, List<Token> tokens) {
+        private void InsertTokens(int x, List<Token> tokens) {
             if (_tokenPos + x < _tokenCount) {
                 _tokenList.InsertRange(_tokenPos + x, tokens);
                 _tokenCount = _tokenList.Count;
             }
         }
 
-        public void RemoveTokens(int x, int count) {
+        private void RemoveTokens(int x, int count) {
             if (_tokenPos + x + count <= _tokenCount) {
                 _tokenList.RemoveRange(_tokenPos + x, count);
                 _tokenCount = _tokenList.Count;
@@ -357,7 +361,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Returns a list of tokens for a given string
         /// </summary>
-        public List<Token> TokenizeString(string data) {
+        private List<Token> TokenizeString(string data) {
             var lexer = new ProLexer(data);
             var outList = lexer.GetTokensList.ToList();
             outList.RemoveAt(outList.Count - 1);
@@ -367,281 +371,6 @@ namespace _3PA.MainFeatures.Parser {
         #endregion
 
         #region utils
-
-        /// <summary>
-        /// If it is a pre-processed variable, replaces a token at "current position + posAhead" by its value
-        /// </summary>
-        private void ReplacePreProcVariablesAhead(int posAhead) {
-            // we check if the token + posAhead will be a preprocessed variable { & x} that needs to be replaced
-            var toReplaceToken = PeekAt(posAhead);
-
-            HashSet<string> replacedVar = null; // keep track of each var replaced here
-
-            while (toReplaceToken is TokenPreProcVariable) {
-                // replace the {&var} present within this {&var}
-                var count = 1;
-                while (true) {
-                    var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol && curToken.Value == "}" || curToken is TokenEof) break;
-                    ReplacePreProcVariablesAhead(posAhead + count);
-                    count++;
-                }
-
-                var nameToken = PeekAt(posAhead + 1);
-                var varName = (toReplaceToken.Value == "{" ? "" : "&") + nameToken.Value;
-                List<Token> valueTokens = null;
-
-                // make sure to not replace the same var name in the same replacement loop, if we do that
-                // this means we will go into an infinite loop
-                if (replacedVar == null)
-                    replacedVar = new HashSet<string>();
-                if (replacedVar.Contains(varName))
-                    break;
-                replacedVar.Add(varName);
-
-                // count nb of tokens composing this |{&|name|  |}| (will 3 or more depending if there are spaces after the name)
-                count = 1;
-                while (true) {
-                    var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol && curToken.Value == "}" || curToken is TokenEof) break;
-                    count++;
-                }
-                count++;
-
-                // remove the tokens composing |{&|name|  |}|
-                RemoveTokens(posAhead, count);
-
-                // do we have a definition for the var?
-                if (_parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables.ContainsKey(varName))
-                    valueTokens = _parsedIncludes[toReplaceToken.OwnerNumber].ScopedPreProcVariables[varName].ToList();
-                else if (_globalPreProcVariables.ContainsKey(varName))
-                    valueTokens = _globalPreProcVariables[varName].ToList();
-
-                if (valueTokens == null) {
-                    // if we don't have the definition for the variable, it must be replaced by an empty string
-                    valueTokens = new List<Token> {
-                        new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
-                    };
-                } else {
-                    // we have to "merge" the TokenWord at the beginning and end of what we are inserting, this allows to take care of
-                    // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
-                    var prevToken = PeekAt(posAhead - 1);
-                    if (valueTokens.FirstOrDefault() is TokenWord && prevToken is TokenWord) {
-                        // append previous word with the first word of the value tokens
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + valueTokens.First().Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, prevToken.EndPosition));
-                        valueTokens.RemoveAt(0);
-                    }
-                    var nextToken = PeekAt(posAhead);
-                    if (valueTokens.LastOrDefault() is TokenWord && nextToken is TokenWord) {
-                        ReplaceToken(posAhead, new TokenWord(valueTokens.Last().Value + nextToken.Value, nextToken.Line, nextToken.Column, nextToken.StartPosition, nextToken.EndPosition));
-                        valueTokens.RemoveAt(valueTokens.Count - 1);
-                    }
-                }
-
-                // if we have tokens insert, do it
-                if (valueTokens.Count > 0) {
-                    List<Token> copiedTokens = new List<Token>();
-                    foreach (var token in valueTokens) {
-                        var copiedToken = token.Copy(toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition);
-						copiedToken.OwnerNumber = toReplaceToken.OwnerNumber;
-                        copiedTokens.Add(copiedToken);
-                    }
-                    InsertTokens(posAhead, copiedTokens);
-                } else {
-                    // otherwise, make sure we don't have two TokenWord following each other
-                    var prevToken = PeekAt(posAhead - 1);
-                    var nextToken = PeekAt(posAhead);
-                    if (prevToken is TokenWord && PeekAt(posAhead) is TokenWord) {
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + nextToken.Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, nextToken.EndPosition));
-                        RemoveTokens(posAhead, 1);
-                    }
-                }
-                toReplaceToken = PeekAt(posAhead);
-            }
-        }
-
-        /// <summary>
-        /// called when a Eos token is found, store information on the statement's line
-        /// </summary>
-        private void NewStatement(Token token) {
-
-            // store the line information for the base file
-            if (_context.StatementFirstToken != null && _context.StatementFirstToken.OwnerNumber == 0) {
-                var statementStartLine = _context.StatementFirstToken.Line;
-
-                var currentScope = _context.Scope.ScopeType == ParsedScopeType.Root && _context.UibBlockStack.Count > 0 ? _context.UibBlockStack.Peek() : _context.Scope;
-
-                // remember the blockDepth of the current token's lin
-                var depth = GetCurrentBlockDepth() + GetCurrentPreProcBlockDepth();
-                if (!_lineInfo.ContainsKey(statementStartLine))
-                    _lineInfo.Add(statementStartLine, new LineInfo(depth, currentScope));
-
-                // add missing values to the line dictionary 
-                // (lines from start statement + 1 to end of statement have a depth + 1)
-                // (can have a depth + 2 if the statement contains a ELSE or THEN)
-                if (statementStartLine > -1 && token.Line > statementStartLine) {
-                    for (int i = statementStartLine + 1; i <= token.Line; i++)
-                        if (!_lineInfo.ContainsKey(i))
-                            _lineInfo.Add(i, new LineInfo(depth + (_context.StatementFirstWordLineAferThenOrElse > 0 && i > _context.StatementFirstWordLineAferThenOrElse ? 2 : 1), currentScope));
-                }
-            }
-            
-            // This statement made the BlockState count go to 0
-            if (_context.BlockStack.Count == 0) {
-                // did we match an end of a proc, func or on event block?
-                if (!(_context.Scope is ParsedFile)) {
-                    var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem && !(item is ParsedPreProcBlock));
-                    if (parsedScope != null) {
-                        parsedScope.EndBlockLine = token.Line;
-                        parsedScope.EndBlockPosition = token.EndPosition;
-                    }
-                    _context.Scope = _rootScope;
-                }
-            }
-
-            _context.StatementUnknownFirstWord = false;
-            _context.StatementCount++;
-            _context.StatementWordCount = 0;
-            _context.StatementFirstToken = null;
-            _context.StatementFirstTokenPosition = 0;
-            _context.StatementFirstWordLineAferThenOrElse = 0;
-            _context.IsTokenIsEos = true;
-        }
-
-        /// <summary>
-        /// Returns the current block depth
-        /// </summary>
-        /// <returns></returns>
-        private int GetCurrentBlockDepth() {
-            var depth = 0;
-            var lastLine = -1;
-            foreach (var blockInfo in _context.BlockStack) {
-                if (blockInfo.LineTriggerWord != lastLine)
-                    depth++;
-                lastLine = blockInfo.LineTriggerWord;
-            }
-            if (depth > 0 && _context.StatementFirstToken != null &&  _context.StatementFirstToken.Line == _context.BlockStack.Peek().LineStart)
-                depth--;
-            return depth;
-        }
-
-        /// <summary>
-        /// Returns the current preproc &amp;if / &amp;endif block depth
-        /// </summary>
-        /// <returns></returns>
-        private int GetCurrentPreProcBlockDepth() {
-            var depth = 0;
-            var lastLine = -1;
-            foreach (var blockInfo in _context.PreProcIfStack) {
-                if (blockInfo.Line != lastLine)
-                    depth++;
-                lastLine = blockInfo.Line;
-            }
-            if (depth > 0 && _context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.PreProcIfStack.Peek().Line)
-                depth--;
-            return depth;
-        }
-
-        /// <summary>
-        /// Add a block info on top of the block Stack
-        /// </summary>
-        /// <param name="currentLine"></param>
-        private void PushBlockInfoToStack(int currentLine) {
-            _context.BlockStack.Push(new BlockInfo(_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : 0, currentLine, _context.StatementCount));
-        }
-
-        /// <summary>
-        /// Call this method instead of adding the items directly in the list,
-        /// updates the scope and file name
-        /// </summary>
-        private void AddParsedItem(ParsedItem item, ushort ownerNumber) {
-            // add external flag + include line if needed
-            if (ownerNumber > 0 && ownerNumber < _parsedIncludes.Count) {
-                item.FilePath = _parsedIncludes[ownerNumber].FullFilePath;
-                item.IncludeLine = _parsedIncludes[ownerNumber].Line;
-                item.Flags |= ParseFlag.FromInclude;
-            } else {
-                item.FilePath = _filePathBeingParsed;
-            }
-
-            item.Scope = _context.Scope;
-
-            // add the item name's to the known temp tables?
-            if (!_knownWords.ContainsKey(item.Name) && item is ParsedTable)
-                _knownWords.Add(item.Name, CompletionType.Table);
-
-            _parsedItemList.Add(item);
-        }
-
-        /// <summary>
-        /// Append a token value to the StringBuilder, avoid adding too much spaces and new lines
-        /// </summary>
-        private void AddTokenToStringBuilder(StringBuilder strBuilder, Token token) {
-            if ((token is TokenEol || token is TokenWhiteSpace)) {
-                if (!_lastTokenWasSpace) {
-                    _lastTokenWasSpace = true;
-                    strBuilder.Append(" ");
-                }
-            } else {
-                _lastTokenWasSpace = false;
-                strBuilder.Append(token.Value);
-            }
-        }
-
-        /// <summary>
-        /// Returns token value or token value minus starting/ending quote of the token is a string
-        /// </summary>
-        private static string GetTokenStrippedValue(Token token) {
-            if (token is TokenString) {
-                var endsWithQuote = token.Value.EndsWith("\"") || token.Value.EndsWith("'");
-                return token.Value.Substring(1, token.Value.Length - (endsWithQuote ? 2 : 1));
-            }
-            return token.Value;
-        }
-
-        /// <summary>
-        /// Trim whitespaces tokens at the beginning and end of the list
-        /// </summary>
-        private static List<Token> TrimTokensList(List<Token> tokensList) {
-            while (tokensList.Count > 0 && tokensList[0] is TokenWhiteSpace) {
-                tokensList.RemoveAt(0);
-            }
-            while (tokensList.Count > 0 && tokensList[tokensList.Count - 1] is TokenWhiteSpace) {
-                tokensList.RemoveAt(tokensList.Count - 1);
-            }
-
-            return tokensList;
-        }
-
-        /// <summary>
-        /// Create a new parsed define item according to its type
-        /// </summary>
-        private ParsedDefine NewParsedDefined(string name, ParseFlag flags, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) {
-            // set flags
-            flags |= _context.Scope is ParsedFile ? ParseFlag.FileScope : ParseFlag.LocalScope;
-
-            switch (type) {
-                case ParseDefineType.Parameter:
-                    flags |= ParseFlag.Parameter;
-                    break;
-                case ParseDefineType.Buffer:
-                    flags |= ParseFlag.Buffer;
-
-                    var newBuffer = new ParsedBuffer(name, token, asLike, left, type, tempPrimitiveType, viewAs, bufferFor, ConvertStringToParsedPrimitiveType(tempPrimitiveType, asLike == ParsedAsLike.Like)) {
-                        TargetTable = FindAnyTableByName(bufferFor)
-                    };
-
-                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && !newBuffer.TargetTable.IsTempTable ? ParseFlag.MissingDbName : 0;
-                    newBuffer.Flags = flags;
-
-                    return newBuffer;
-                    
-            }
-            var newDefine = new ParsedDefine(name, token, asLike, left, type, tempPrimitiveType, viewAs, ConvertStringToParsedPrimitiveType(tempPrimitiveType, asLike == ParsedAsLike.Like)) {
-                Flags = flags
-            };
-            return newDefine;
-        }
 
         #region find primitive type
 
@@ -784,6 +513,7 @@ namespace _3PA.MainFeatures.Parser {
         /// contains the info on the current context (as we move through tokens)
         /// </summary>
         internal class ParseContext {
+
             /// <summary>
             /// Keep information on the current scope (file, procedure, function, trigger)
             /// </summary>
@@ -804,6 +534,9 @@ namespace _3PA.MainFeatures.Parser {
             /// </summary>
             public Token StatementFirstToken { get; set; }
 
+            /// <summary>
+            /// The position (in the token list) if the first token of the current statement
+            /// </summary>
             public int StatementFirstTokenPosition { get; set; }
 
             /// <summary>
@@ -816,11 +549,6 @@ namespace _3PA.MainFeatures.Parser {
             /// word after a THEN or ELSE
             /// </summary>
             public int StatementFirstWordLineAferThenOrElse { get; set; }
-
-            /// <summary>
-            /// True if the current token (PeekAt(0)) should be considered as an end of statement
-            /// </summary>
-            public bool IsTokenIsEos { get; set; }
 
             /// <summary>
             /// Keep tracks on blocks through a stack (a block == an indent)

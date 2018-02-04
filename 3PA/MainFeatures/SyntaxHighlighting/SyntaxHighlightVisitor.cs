@@ -21,6 +21,7 @@ using System;
 using System.Linq;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
