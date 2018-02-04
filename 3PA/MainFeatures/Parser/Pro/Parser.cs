@@ -24,6 +24,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.NppCore;
@@ -352,7 +353,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         private void RemoveTokens(int x, int count) {
-            if (_tokenPos + x + count <= _tokenCount) {
+            count = count.ClampMax(_tokenCount - _tokenPos - x);
+            if (_tokenPos + x + count <= _tokenCount && count > 0) {
                 _tokenList.RemoveRange(_tokenPos + x, count);
                 _tokenCount = _tokenList.Count;
             }

@@ -39,7 +39,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 var count = 1;
                 while (true) {
                     var curToken = PeekAt(posAhead + count);
-                    if (curToken is TokenSymbol && curToken.Value == "}" || curToken is TokenEof) break;
+                    if (curToken is TokenEof) return false; // we didn't match the end of the include, better not do anything
+                    if (curToken is TokenSymbol && curToken.Value == "}") break;
                     if (!ReplaceIncludeAndPreprocVariablesAhead(posAhead + count))
                         count++;
                 }
