@@ -84,7 +84,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <returns></returns>
         public static ParsedScopeItem GetScopeOfLine(int line) {
             ParsedScopeItem output = null;
-            DoInLock(() => { output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null; });
+            DoInLock(() => {
+                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null;
+            });
             return output;
         }
 

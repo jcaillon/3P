@@ -9,7 +9,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Matches a function definition (not the FORWARD prototype)
         /// </summary>
-        private bool CreateParsedFunction(Token functionToken) {
+        private ParsedFunction CreateParsedFunction(Token functionToken) {
             // info we will extract from the current statement :
             string name = null;
             string parsedReturnType = null;
@@ -17,6 +17,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             ParseFlag flags = 0;
             StringBuilder parameters = new StringBuilder();
             List<ParsedDefine> parametersList = null;
+            ParsedImplementation createdImp = null;
 
             _lastTokenWasSpace = true;
 
@@ -78,18 +79,18 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 }
             } while (MoveNext());
             if (name == null || parsedReturnType == null)
-                return false;
+                return null;
 
             // otherwise it needs to ends with : or .
             if (!(token is TokenEos))
-                return false;
+                return null;
 
             var returnType = ConvertStringToParsedPrimitiveType(parsedReturnType, false);
 
             // New prototype, we matched a forward or a IN
             if (state >= 99) {
                 ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, returnType) {
-                    Scope = _context.Scope,
+                    Scope =  GetCurrentBlock<ParsedScopeBlock>(),
                     FilePath = FilePathBeingParsed,
                     SimpleForward = state == 99, // allows us to know if we expect an implementation in this .p or not
                     EndPosition = token.EndPosition,
@@ -106,70 +107,54 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                 // case of a IN
                 if (!createdProto.SimpleForward) {
-                    // modify context
-                    _context.Scope = createdProto;
 
                     // add the parameters to the list
                     if (parametersList != null) {
                         createdProto.Parameters = new List<ParsedDefine>();
                         foreach (var parsedItem in parametersList) {
-                            AddParsedItem(parsedItem, functionToken.OwnerNumber);
                             createdProto.Parameters.Add(parsedItem);
                         }
                     }
-
-                    // reset context
-                    _context.Scope = _rootScope;
+                    
                 }
-
-                return false;
-            }
-
-            // New function
-            ParsedImplementation createdImp = new ParsedImplementation(name, functionToken, returnType) {
-                EndPosition = token.EndPosition,
-                Flags = flags,
-                Extend = extend ?? String.Empty,
-                ParametersString = parameters.ToString()
-            };
-
-            // it has a prototype?
-            if (_functionPrototype.ContainsKey(name)) {
-                // make sure it was a prototype!
-                var proto = _functionPrototype[name] as ParsedPrototype;
-                if (proto != null && proto.SimpleForward) {
-                    createdImp.HasPrototype = true;
-                    createdImp.PrototypeLine = proto.Line;
-                    createdImp.PrototypeColumn = proto.Column;
-                    createdImp.PrototypePosition = proto.Position;
-                    createdImp.PrototypeEndPosition = proto.EndPosition;
-
-                    // boolean to know if the implementation matches the prototype
-                    createdImp.PrototypeUpdated = (
-                        createdImp.Flags == proto.Flags &&
-                        createdImp.Extend.Equals(proto.Extend) &&
-                        createdImp.ReturnType.Equals(proto.ReturnType) &&
-                        createdImp.ParametersString.Equals(proto.ParametersString));
-                }
+                
             } else {
-                _functionPrototype.Add(name, createdImp);
-            }
 
-            AddParsedItem(createdImp, functionToken.OwnerNumber);
+                // New function
+                createdImp = new ParsedImplementation(name, functionToken, returnType) {
+                    EndPosition = token.EndPosition,
+                    Flags = flags,
+                    Extend = extend ?? String.Empty,
+                    ParametersString = parameters.ToString()
+                };
 
-            // modify context
-            _context.Scope = createdImp;
+                // it has a prototype?
+                if (_functionPrototype.ContainsKey(name)) {
+                    // make sure it was a prototype!
+                    var proto = _functionPrototype[name] as ParsedPrototype;
+                    if (proto != null && proto.SimpleForward) {
+                        createdImp.HasPrototype = true;
+                        createdImp.PrototypeLine = proto.Line;
+                        createdImp.PrototypeColumn = proto.Column;
+                        createdImp.PrototypePosition = proto.Position;
+                        createdImp.PrototypeEndPosition = proto.EndPosition;
 
-            // add the parameters to the list
-            if (parametersList != null) {
-                createdImp.Parameters = new List<ParsedDefine>();
-                foreach (var parsedItem in parametersList) {
-                    AddParsedItem(parsedItem, functionToken.OwnerNumber);
-                    createdImp.Parameters.Add(parsedItem);
+                        // boolean to know if the implementation matches the prototype
+                        createdImp.PrototypeUpdated = (
+                            createdImp.Flags == proto.Flags &&
+                            createdImp.Extend.Equals(proto.Extend) &&
+                            createdImp.ReturnType.Equals(proto.ReturnType) &&
+                            createdImp.ParametersString.Equals(proto.ParametersString));
+                    }
+                } else {
+                    _functionPrototype.Add(name, createdImp);
                 }
+
+                AddParsedItem(createdImp, functionToken.OwnerNumber);
+
             }
 
-            return true;
+            return createdImp;
         }
 
     }

@@ -338,7 +338,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Main block, definitions block...
         /// </summary>
         /// <param name="pars"></param>
-        public void Visit(ParsedPreProcBlock pars) {
+        public void Visit(ParsedScopePreProcBlock pars) {
             if (pars.Flags.HasFlag(ParseFlag.FromInclude))
                 return;
 
@@ -383,7 +383,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
             PushToCodeExplorer(parentNode, newNode);
         }
-
+        
         /// <summary>
         /// ON events
         /// </summary>

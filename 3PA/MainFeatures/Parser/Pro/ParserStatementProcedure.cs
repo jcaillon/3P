@@ -6,7 +6,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
          /// <summary>
         /// Matches a procedure definition
         /// </summary>
-        private bool CreateParsedProcedure(Token procToken) {
+        private ParsedProcedure CreateParsedProcedure(Token procToken) {
             /*
             PROCEDURE proc-name[ PRIVATE ] :
                 [procedure-body]
@@ -61,15 +61,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
 
-            if (state < 1) return false;
+            if (state < 1) 
+                return null;
+
             var newProc = new ParsedProcedure(name, procToken, leftStr.ToString(), externalDllName) {
                 // = end position of the EOS of the statement
                 EndPosition = token.EndPosition,
                 Flags = flags
             };
             AddParsedItem(newProc, procToken.OwnerNumber);
-            _context.Scope = newProc;
-            return true;
+
+            return newProc;
         }
 
     }

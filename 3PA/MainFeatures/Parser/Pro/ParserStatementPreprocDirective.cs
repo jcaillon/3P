@@ -12,7 +12,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// (in case of a scope-define we will analyse the words in the variable value when we actually use the variable,
         /// and in the other directive the words are garbage)
         /// </summary>
-        private void CreateParsedPreProcDirective(Token directiveToken) {
+        private ParsedScopePreProcBlock CreateParsedPreProcDirective(Token directiveToken) {
+
+            ParsedScopePreProcBlock newBlock = null;
 
             // info we will extract from the current statement :
             string variableName = null;
@@ -69,15 +71,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         break;
 
                     // it marks the beginning of an appbuilder block, it can only be at a root/File level, otherwise flag error
-                    if (!(_context.Scope is ParsedFile)) {
-                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockStart, directiveToken, 0, _parsedIncludes));
-                        _context.Scope = _rootScope;
+                    if (!( GetCurrentBlock<ParsedScopeBlock>() is ParsedFile)) {
+                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockStart, directiveToken, _context.BlockStack.Count, _parsedIncludes));
                     }
 
                     // we match a new block start but we didn't match the previous block end, flag error
-                    if (_context.UibBlockStack.Count > 0) {
-                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockStart, directiveToken, _context.UibBlockStack.Count, _parsedIncludes));
-                        _context.UibBlockStack.Clear();
+                    if (GetCurrentBlock<ParsedScopePreProcBlock>() != null) {
+                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockStart, directiveToken, _context.BlockStack.Count, _parsedIncludes));
                     }
 
                     // matching different intersting blocks
@@ -109,13 +109,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         type = ParsedPreProcBlockType.RunTimeAttributes;
                         blockName = "Runtime attributes";
                     }
-                    _context.UibBlockStack.Push(new ParsedPreProcBlock(blockName, directiveToken) {
+
+                    newBlock = new ParsedScopePreProcBlock(blockName, directiveToken) {
                         Type = type,
                         BlockDescription = textAfterDirective
-                    });
+                    };
 
                     // save the block description
-                    AddParsedItem(_context.UibBlockStack.Peek(), directiveToken.OwnerNumber);
+                    AddParsedItem(newBlock, directiveToken.OwnerNumber);
                     break;
 
                 case "&ANALYZE-RESUME":
@@ -124,21 +125,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         break;
 
                     // it marks the end of an appbuilder block, it can only be at a root/File level
-                    if (!(_context.Scope is ParsedFile)) {
-                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, directiveToken, 0, _parsedIncludes));
-                        _context.Scope = _rootScope;
+                    if (!( GetCurrentBlock<ParsedScopeBlock>() is ParsedFile)) {
+                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, directiveToken, _context.BlockStack.Count, _parsedIncludes));
                     }
-
-                    if (_context.UibBlockStack.Count == 0) {
-                        // we match an end w/o beggining, flag a mismatch
-                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, directiveToken, 0, _parsedIncludes));
-                    } else {
-                        // end position of the current appbuilder block
-                        var currentBlock = _context.UibBlockStack.Pop();
-                        currentBlock.EndBlockLine = directiveToken.Line;
-                        currentBlock.EndBlockPosition = directiveToken.EndPosition;
-                    }
-
                     break;
 
                 case "&UNDEFINE":
@@ -176,6 +165,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
             // since we didn't use MoveNext we also manually replace the includes ahead
             ReplaceIncludeAndPreprocVariablesAhead(1);
             ReplaceIncludeAndPreprocVariablesAhead(2);
+
+            return newBlock;
         }
         
         

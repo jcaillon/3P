@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures.Parser {
         void PreVisit(Pro.Parser parser);
         void Visit(ParsedWord pars);
         void Visit(ParsedFile pars);
-        void Visit(ParsedPreProcBlock pars);
+        void Visit(ParsedScopePreProcBlock pars);
         void Visit(ParsedImplementation pars);
         void Visit(ParsedPrototype pars);
         void Visit(ParsedProcedure pars);

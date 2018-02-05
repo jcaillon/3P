@@ -7,22 +7,20 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Matches a &amp;IF expression &amp;THEN pre-processed statement (extractes the evaluated expression in BlockDescription)
         /// </summary>
-        private ParsedPreProcBlock CreateParsedIfEndIfPreProc(Token ifToken) {
-
-            var statementFirstTokenRelativePosition = _context.StatementFirstTokenPosition - _tokenPos;
+        private ParsedScopePreProcIfBlock CreateParsedIfEndIfPreProc(Token ifToken) {
+            
             int i = 1;
             _lastTokenWasSpace = true;
             StringBuilder expression = new StringBuilder();
 
-            while (statementFirstTokenRelativePosition + i < 0) {
-                var token = PeekAt(statementFirstTokenRelativePosition + i);
+            while (i < 0) {
+                var token = PeekAt(i);
                 i++;
                 if (token is TokenComment) continue;
                 AddTokenToStringBuilder(expression, token);
             }
 
-            var newIf = new ParsedPreProcBlock(String.Empty, ifToken) {
-                Type = ParsedPreProcBlockType.IfEndIf,
+            var newIf = new ParsedScopePreProcIfBlock(ifToken.Value, ifToken) {
                 BlockDescription = expression.ToString()
             };
             AddParsedItem(newIf, ifToken.OwnerNumber);

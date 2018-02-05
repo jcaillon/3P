@@ -10,7 +10,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         /// <param name="onToken"></param>
         /// <returns></returns>
-        private void CreateParsedOnEvent(Token onToken) {
+        private ParsedOnStatement CreateParsedOnEvent(Token onToken) {
             /*
             ON event-list 
             {     ANYWHERE
@@ -37,6 +37,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             */
 
             // info we will extract from the current statement :
+            ParsedOnStatement newParsedOn = null;
             var eventList = new StringBuilder();
             var widgetList = new StringBuilder();
             int state = 0;
@@ -64,10 +65,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         if (token.Value.EqualsCi("anywhere")) {
                             // we match anywhere, need to return to match a block start
                             widgetList.Append("anywhere");
-                            var new1 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                            AddParsedItem(new1, onToken.OwnerNumber);
-                            _context.Scope = new1;
-                            return;
+                            newParsedOn = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
+                            AddParsedItem(newParsedOn, onToken.OwnerNumber);
+                            state = 99;
+                            break;
                         }
                         // if not anywhere, we expect an "of"
                         if (token.Value.EqualsCi("of")) {
@@ -77,10 +78,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                         // we matched a 'ON key-label key-function'
                         widgetList.Append(token.Value);
-                        var new3 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                        AddParsedItem(new3, onToken.OwnerNumber);
-                        _context.Scope = new3;
-                        return;
+                        newParsedOn = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
+                        AddParsedItem(newParsedOn, onToken.OwnerNumber);
+                        state = 99;
+                        break;
 
                     case 2:
                         // matching widget name
@@ -113,11 +114,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             }
                         }
 
-                        var new2 = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
-                        AddParsedItem(new2, onToken.OwnerNumber);
-                        _context.Scope = new2;
+                        newParsedOn = new ParsedOnStatement(eventList + " " + widgetList, onToken, eventList.ToString(), widgetList.ToString());
+                        AddParsedItem(newParsedOn, onToken.OwnerNumber);
 
-                        // matching a OR
+                        // matching a OR (in that case we can create several ParsedOnStatement in this method, but we should always return the last created)
                         if (token.Value.EqualsCi("or")) {
                             widgetList.Clear();
                             eventList.Clear();
@@ -126,9 +126,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         }
 
                         // end here
-                        return;
+                        state = 99;
+                        break;
                 }
             } while (MoveNext());
+
+            return newParsedOn;
         }
 
     }

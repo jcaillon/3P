@@ -142,7 +142,7 @@ namespace _3PA.Tests {
                     ProLexer proLexer = new ProLexer(Utils.ReadAllText(file));
                     outStr += "ProLexer (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    Parser parser = new Parser(proLexer, "", null, true, null);
+                    Parser parser = new Parser(proLexer, file, null, true, null);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
                     if (parser.ParserErrors != null && parser.ParserErrors.Count > 0) {
@@ -293,10 +293,10 @@ namespace _3PA.Tests {
             AppendEverything(pars);
         }
 
-        public void Visit(ParsedPreProcBlock pars) {
+        public void Visit(ParsedScopePreProcBlock pars) {
             AppendEverything(pars);
         }
-
+        
         public void Visit(ParsedImplementation pars) {
             AppendEverything(pars);
         }

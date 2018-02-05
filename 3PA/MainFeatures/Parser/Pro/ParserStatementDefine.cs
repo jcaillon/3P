@@ -455,7 +455,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 AddParsedItem(newDefine, defineToken.OwnerNumber);
 
                 // case of a parameters, add it to the current scope (if procedure)
-                var currentScope = _context.Scope as ParsedProcedure;
+                var currentScope =  GetCurrentBlock<ParsedScopeBlock>() as ParsedProcedure;
                 if (type == ParseDefineType.Parameter && currentScope != null) {
                     if (currentScope.Parameters == null)
                         currentScope.Parameters = new List<ParsedDefine>();

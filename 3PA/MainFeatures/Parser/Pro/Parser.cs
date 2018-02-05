@@ -200,6 +200,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Parses a text into a list of parsedItems
         /// </summary>
         public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
+
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && KnownStaticItems != null;
@@ -219,9 +220,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // init context
             _context = new ParseContext {
-                BlockStack = new Stack<BlockInfo>(),
-                PreProcIfStack = new Stack<ParsedPreProcBlock>(),
-                UibBlockStack = new Stack<ParsedPreProcBlock>()
+                BlockStack = new Stack<ParsedScopeItem>()
             };
 
             // create root item
@@ -229,10 +228,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 var rootToken = new TokenEos(null, 0, 0, 0, 0);
                 rootToken.OwnerNumber = 0;
                 _rootScope = new ParsedFile("Root", rootToken);
-                AddParsedItem(_rootScope, rootToken.OwnerNumber);
             } else
                 _rootScope = defaultScope;
-            _context.Scope = _rootScope;
+            _context.BlockStack.Push(_rootScope);
+            if (defaultScope == null) {
+                AddParsedItem(_rootScope, 0);
+            }
 
             // Analyze
             _tokenList = proLexer.GetTokensList;
@@ -247,21 +248,18 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     ErrorHandler.LogError(e, "Error while parsing the following file : " + filePathBeingParsed);
                 }
             }
-
-            // add missing values to the line dictionary
-            var current = new LineInfo(GetCurrentBlockDepth() + GetCurrentPreProcBlockDepth(), _rootScope);
-            for (int i = proLexer.MaxLine; i >= 0; i--) {
-                if (_lineInfo.ContainsKey(i))
-                    current = _lineInfo[i];
-                else
-                    _lineInfo.Add(i, current);
+            
+            // add missing values to the line dictionary (each line that correspond to the root scope)
+            var defaultLineinfo = new LineInfo(0, _rootScope);
+            for (int i = 0; i < proLexer.MaxLine; i++) {
+                if (!_lineInfo.ContainsKey(i))
+                    _lineInfo.Add(i, defaultLineinfo);
             }
 
             // check that we match an &ENDIF for each &IF
-            if (_context.PreProcIfStack.Count > 0)
-                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(0), _context.PreProcIfStack.Count, _parsedIncludes));
-
-
+            if (GetCurrentBlock<ParsedScopePreProcBlock>() != null)
+                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(0), _context.BlockStack.Count, _parsedIncludes));
+            
             //Returns the concatenation of all the tokens once the parsing is done
             if (debugListOut != null) {
                 foreach (var token in _tokenList) {
@@ -271,8 +269,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // dispose
             _context.BlockStack.Clear();
-            _context.PreProcIfStack.Clear();
-            _context.UibBlockStack.Clear();
             _context = null;
             _tokenList = null;
 
@@ -517,9 +513,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         internal class ParseContext {
 
             /// <summary>
-            /// Keep information on the current scope (file, procedure, function, trigger)
+            /// Keep tracks on blocks through a stack (a block == an indent)
             /// </summary>
-            public ParsedScopeItem Scope { get; set; }
+            public Stack<ParsedScopeItem> BlockStack { get; set; }
 
             /// <summary>
             /// Number of words count in the current statement
@@ -527,20 +523,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             public int StatementWordCount { get; set; }
 
             /// <summary>
-            /// The total number of statements found
-            /// </summary>
-            public int StatementCount { get; set; }
-
-            /// <summary>
             /// A statement can start with a word, pre-proc phrase or an include
             /// </summary>
             public Token StatementFirstToken { get; set; }
-
-            /// <summary>
-            /// The position (in the token list) if the first token of the current statement
-            /// </summary>
-            public int StatementFirstTokenPosition { get; set; }
-
+            
             /// <summary>
             /// True if the first word of the statement didn't match a known statement
             /// </summary>
@@ -553,54 +539,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             public int StatementFirstWordLineAferThenOrElse { get; set; }
 
             /// <summary>
-            /// Keep tracks on blocks through a stack (a block == an indent)
-            /// </summary>
-            public Stack<BlockInfo> BlockStack { get; set; }
-
-            /// <summary>
-            /// Stack of ANALYSE-SUSPEND/RESUME blocks
-            /// </summary>
-            public Stack<ParsedPreProcBlock> UibBlockStack { get; set; }
-
-            /// <summary>
-            /// To know the current depth for IF ENDIF pre-processed statement, allows us
-            /// to know if the document is correct or not
-            /// </summary>
-            public Stack<ParsedPreProcBlock> PreProcIfStack { get; set; }
-
-            /// <summary>
             /// Allows to read the next word after a THEN or a ELSE as the first word of a statement to 
             /// correctly read ASSIGN statement for instance...
             /// </summary>
             public bool ReadNextWordAsStatementStart { get; set; }
-        }
-
-        /// <summary>
-        /// Contains info on a block
-        /// </summary>
-        internal struct BlockInfo {
-            /// <summary>
-            /// The line of the first token of the statement that contains the "trigger word"
-            /// </summary>
-            public int LineStart { get; set; }
-
-            /// <summary>
-            /// The trigger word is the word token that creates a new block (e.g. FUNCTION or DO)
-            /// In case of a DO, it's necesseraly on the same line of the statement starting token
-            /// </summary>
-            public int LineTriggerWord { get; set; }
-            
-            /// <summary>
-            /// the total statement count at the moment this block was created
-            /// </summary>
-            public int StatementNumber { get; set; }
-
-            public BlockInfo(int lineStart, int lineTriggerWord, int statementNumber)
-                : this() {
-                LineStart = lineStart;
-                LineTriggerWord = lineTriggerWord;
-                StatementNumber = statementNumber;
-            }
         }
 
         #endregion
@@ -670,8 +612,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
     }
 
     internal enum ParserErrorType {
-        [Description("Unexpected block start, this type of block should be created at root level")]
-        UnexpectedBlockStart,
+        [Description("Unexpected block start, you can not nest functions, methods or procedures")]
+        ForbiddenNestedBlockStart,
 
         [Description("Unexpected block end, the start of this block has not been found")]
         UnexpectedBlockEnd,

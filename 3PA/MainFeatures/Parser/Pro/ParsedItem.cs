@@ -51,8 +51,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public string FilePath { get; set; }
 
         /// <summary>
-        /// When including a file, each item parsed has a definition line that corresponds to the line in the file where the item was parsed,
-        /// but we also need to need to know where, in the current file parsed, this include is, so we can know filter the items correctly... 
+        /// In an include file, each item parsed has this value which corresponds to the line at which the include was done in the base program.
+        /// This is used to filter the autocompletion to only variables that should be shown.
+        /// You can also test if this value is inferior to 0 to test if the parsed item belongs to the base program or an include
         /// The default value is -1 
         /// </summary>
         public int IncludeLine { get; set; }
@@ -81,7 +82,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public int EndPosition { get; set; }
 
         /// <summary>
-        /// Scope in which this item has been parsed
+        /// Scope in which this item has been parsed; will never be of type PreProcBlock / SimpleBlock because this field
+        /// is made to find the parent object of this item (file/function/procedure...)
         /// </summary>
         public ParsedScopeItem Scope { get; set; }
 
@@ -138,14 +140,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// Allows faster comparison against ParsedScopeItems (should have the same name as the CodeExplorerBranch Enum)
     /// </summary>
     internal enum ParsedScopeType {
-        Root,
-        Block,
+        Root = 1,
         Procedure,
         Function,
         OnEvent,
         Class,
         Method,
-        Constructor
+        Constructor,
+        
+        PreProcBlock,
+        PreProcIfBlock,
+        SimpleBlock,
     }
 
     #endregion
@@ -215,33 +220,43 @@ namespace _3PA.MainFeatures.Parser.Pro {
     #endregion
 
     #region procedural classes
-
+    
     /// <summary>
-    /// A simple word parsed in the file
+    /// A simple do, triggers... block. This type of block only exists to compute a correct indentation, it will not be exported by the parser
     /// </summary>
-    internal class ParsedWord : ParsedScopeItem {
+    internal class ParsedScopeSimpleBlock : ParsedScopeItem {
+
         public override void Accept(IParserVisitor visitor) {
-            visitor.Visit(this);
+            // no visits
         }
 
-        public ParsedWord(string name, Token token) : base(name, token, ParsedScopeType.Root) { }
+        public ParsedScopeSimpleBlock(string name, Token token) : base(name, token, ParsedScopeType.SimpleBlock) {
+        }
     }
 
     /// <summary>
-    /// The "root" scope of a file
+    /// A &amp;IF expression &amp;THEN kind of block. This type of block only exists to compute a correct indentation, it will not be exported by the parser
     /// </summary>
-    internal class ParsedFile : ParsedScopeItem {
+    internal class ParsedScopePreProcIfBlock : ParsedScopeItem {
+
+        /// <summary>
+        /// Everything after ANALYZE-SUSPEND
+        /// </summary>
+        public string BlockDescription { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
-            visitor.Visit(this);
+            // no visits
         }
 
-        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) {}
+        public ParsedScopePreProcIfBlock(string name, Token token) : base(name, token, ParsedScopeType.PreProcIfBlock) {
+        }
     }
-
+    
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedPreProcBlock : ParsedScopeItem {
+    internal class ParsedScopePreProcBlock : ParsedScopeItem {
+
         /// <summary>
         /// type of this block
         /// </summary>
@@ -256,8 +271,34 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedPreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {}
+        public ParsedScopePreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.PreProcBlock) {}
     }
+
+    /// <summary>
+    /// This class represents a scope that 
+    /// </summary>
+    internal class ParsedScopeBlock : ParsedScopeItem {
+
+        public override void Accept(IParserVisitor visitor) {
+            // no visits
+        }
+
+        public ParsedScopeBlock(string name, Token token, ParsedScopeType scopeType) : base(name, token, scopeType) {
+        }
+    }
+
+
+    /// <summary>
+    /// The "root" scope of a file
+    /// </summary>
+    internal class ParsedFile : ParsedScopeBlock {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) {}
+    }
+
 
     internal enum ParsedPreProcBlockType {
         Unknown,
@@ -268,16 +309,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
         Xftr,
         ProcedureSettings,
         CreateWindow,
-        RunTimeAttributes,
-
-        // before that, this is an ANALYSE-SUSPEND block, below are the other pre-processed block
-        IfEndIf
+        RunTimeAttributes
     }
 
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedProcedure : ParsedScopeItem {
+    internal class ParsedProcedure : ParsedScopeBlock {
         public string Left { get; private set; }
 
         public string ExternalDllName { get; private set; }
@@ -299,7 +337,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    internal abstract class ParsedFunction : ParsedScopeItem {
+    internal abstract class ParsedFunction : ParsedScopeBlock {
 
         public ParsedPrimitiveType ReturnType { get; private set; }
 
@@ -373,7 +411,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedOnStatement : ParsedScopeItem {
+    internal class ParsedOnStatement : ParsedScopeBlock {
         public string EventList { get; private set; }
         public string WidgetList { get; private set; }
 
@@ -387,6 +425,18 @@ namespace _3PA.MainFeatures.Parser.Pro {
             WidgetList = widgetList;
         }
     }
+
+    /// <summary>
+    /// A simple word parsed in the file
+    /// </summary>
+    internal class ParsedWord : ParsedItem {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedWord(string name, Token token) : base(name, token) { }
+    }
+
 
     /// <summary>
     /// found table in program
@@ -874,7 +924,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// Class
     /// </summary>
-    internal class ParsedClass : ParsedScopeItem {
+    internal class ParsedClass : ParsedScopeBlock {
         /// <summary>
         /// Super type name
         /// </summary>
@@ -903,7 +953,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// but we differentiate them with ParsedScopeType
     /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
     /// </summary>
-    internal class ParsedMethod : ParsedScopeItem {
+    internal class ParsedMethod : ParsedScopeBlock {
 
         /// <summary>
         /// Return type or VOID
@@ -928,7 +978,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// Constructor are very identical to method so they use the same parse object,
     /// but we differentiate them with ParsedScopeType
     /// </summary>
-    internal class ParsedConstructor : ParsedScopeItem {
+    internal class ParsedConstructor : ParsedScopeBlock {
 
         /// <summary>
         /// Return type or VOID
@@ -952,7 +1002,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// Method
     /// </summary>
-    internal class ParsedMethod : ParsedScopeItem {
+    internal class ParsedMethod : ParsedScopeBlock {
 
         /// <summary>
         /// Return type or VOID
@@ -978,7 +1028,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// Constructor are very identical to method so they use the same parse object,
     /// but we differentiate them with ParsedScopeType
     /// </summary>
-    internal class ParsedMethod : ParsedScopeItem {
+    internal class ParsedMethod : ParsedScopeBlock {
 
         /// <summary>
         /// Return type or VOID

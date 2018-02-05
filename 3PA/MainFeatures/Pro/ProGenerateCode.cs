@@ -375,18 +375,17 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
         /// otherwise returns null
         /// </summary>
-        private ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
+        private ParsedScopePreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
             // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
             var protoPreProcBlock = _parsedItems.Where(item => {
-                var blockItem = item as ParsedPreProcBlock;
-                if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
-                    blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
+                var blockItem = item as ParsedScopePreProcIfBlock;
+                if (blockItem != null && blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
                     return true;
                 return false;
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedScopePreProcBlock) item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
@@ -394,14 +393,14 @@ namespace _3PA.MainFeatures.Pro {
             // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
             var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
             protoPreProcBlock = _parsedItems.Where(item => {
-                var blockItem = item as ParsedPreProcBlock;
+                var blockItem = item as ParsedScopePreProcBlock;
                 if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
                     return true;
                 return false;
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock) item)) {
+            foreach (var item in protoPreProcBlock.Select(item => (ParsedScopePreProcBlock) item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
@@ -584,10 +583,10 @@ namespace _3PA.MainFeatures.Pro {
             }
             if (typeof(ParsedPrototype) == typeof(T)) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
-                var preprocessorBlock = _parsedItems.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
+                var preprocessorBlock = _parsedItems.FirstOrDefault(item => item is ParsedScopePreProcBlock && ((ParsedScopePreProcBlock) item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
                 if (preprocessorBlock != null) {
                     insertBefore = false;
-                    return ((ParsedPreProcBlock) preprocessorBlock).EndBlockPosition;
+                    return ((ParsedScopePreProcBlock) preprocessorBlock).EndBlockPosition;
                 }
             }
             if (typeof(ParsedProcedure) == typeof(T)) {

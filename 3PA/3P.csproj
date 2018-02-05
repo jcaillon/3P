@@ -207,6 +207,7 @@
     <Compile Include="MainFeatures\Parser\Pro\ParserStatementRun.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParserStatementDynamicFunction.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParserStatementPublish.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserParameterDefinitionSyntax.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParserStatementSubscribe.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxFolding.cs" />
     <Compile Include="NppCore\NppLang.cs" />
