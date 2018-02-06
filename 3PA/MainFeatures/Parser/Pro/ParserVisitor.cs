@@ -696,7 +696,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Set runPersistentIsInFile = false (default) to add items only to the completion list,
         /// set to true to also display proc/func in the code explorer tree if asked
         /// </summary>
-        private void LoadProcPersistent(string fileName, ParsedScopeItem scopeItem) {
+        private void LoadProcPersistent(string fileName, ParsedScopeBlock scopeItem) {
             ParserVisitor parserVisitor = ParseFile(fileName, scopeItem);
 
             // add info to the completion list
@@ -720,7 +720,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Remarks : it doesn't parse the document against known words since this is only useful for
         /// the CURRENT document and not for the others
         /// </summary>
-        private static ParserVisitor ParseFile(string filePath, ParsedScopeItem scopeItem) {
+        private static ParserVisitor ParseFile(string filePath, ParsedScopeBlock scopeItem) {
             ParserVisitor parserVisitor;
 
             // did we already parsed this file in a previous parse session? (if we are in CodeExplorerDisplayExternalItems mode we need to parse it again anyway)

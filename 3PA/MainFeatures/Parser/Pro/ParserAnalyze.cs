@@ -75,7 +75,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
                         case "end":
-                            // this case is actually handled in the NewStatement proc
+                            // decrease the block stack if we just finished an END statement
+                            // The end of the block is not on the END token however, it is on the next EOS, find it
+                            var nextEos = PeekAtNextType<TokenEos>(0);
+                            if (nextEos is TokenEos) {
+                                if (_context.BlockStack.Count <= 1 || (!CloseBlock<ParsedScopeBlock>(nextEos) && !CloseBlock<ParsedScopeSimpleBlock>(nextEos))) {
+                                    // we matched an end with no begin
+                                    _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
+                                }
+                            }
                             break;
                         case "else":
                             // after a else, we need to consider the next word like it's the start of a new statement
@@ -159,7 +167,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
                         case "triggers":
-                            if (PeekAtNextNonSpace(0) is TokenEos)
+                            if (PeekAtNextNonType<TokenWhiteSpace>(0) is TokenEos)
                                 _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
                         case "then":
@@ -206,7 +214,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             // we match an end w/o beggining, flag a mismatch
                             _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedPreProcEndIf, token, _context.BlockStack.Count, _parsedIncludes));
                         }
-
                         switch (directiveLower) {
                             case "&endif":
                                 NewStatement(token);
@@ -221,7 +228,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 _context.BlockStack.Push(CreateParsedIfEndIfPreProc(token));
                                 break;
                         }
-
                         break;
 
                     case "&then":
@@ -243,7 +249,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         var newBlock = CreateParsedPreProcDirective(token);
                         if (newBlock != null) {
                             _context.BlockStack.Push(newBlock);
-                        } else if (directiveLower.Equals("&analyze-resume")) {
+                        } else if (token.OwnerNumber == 0 && directiveLower.Equals("&analyze-resume")) {
                             if (!CloseBlock<ParsedScopePreProcBlock>(token)) {
                                 // we match an end w/o beggining, flag a mismatch
                                 _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
@@ -256,7 +262,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // potential function call
             else if (token is TokenSymbol && token.Value.Equals("(")) {
-                var prevToken = PeekAtNextNonSpace(0, true);
+                var prevToken = PeekAtNextNonType<TokenWhiteSpace>(0, true);
                 if (prevToken is TokenWord && _functionPrototype.ContainsKey(prevToken.Value))
                     AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false, true), token.OwnerNumber);
             }
@@ -294,27 +300,22 @@ namespace _3PA.MainFeatures.Parser.Pro {
         private void NewStatement(Token token) {
 
             if (_context.StatementFirstToken != null) {
-                
-                // decrease the block stack if we just finished an END statement
-                if (token is TokenEos && _context.StatementFirstToken.Value.ToLower().Equals("end")) {
-                    if (_context.BlockStack.Count <= 1 || !CloseBlock<ParsedScopeBlock>(token)) {
-                        // we matched an end with no begin
-                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
-                    }
-                }
-                
+                               
                 // store the line information for each line affected by the current statement
                 if (_context.StatementFirstToken.OwnerNumber == 0) { // OwnerNumber == 0 to only consider blocks in the base file (not in includes)...
                     
                     // current indentation, the preproc directives do not increase the indentation
-                    var depth = GetCurrentBlockDepth();
+                    var depth = GetBlockDepth(0);
+                    // the line below allows to not indent the first sentence that triggers the block...
+                    if (depth > 0) {
+                        if (_context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.BlockStack.Peek().Line)
+                            depth = GetBlockDepth(1);
+                    }
+
                     var statementStartLine = _context.StatementFirstToken.Line;
-
-                    ParsedScopeItem currentScope =  GetCurrentBlock<ParsedScopeBlock>();
-                    currentScope = currentScope == _rootScope ? GetCurrentBlock<ParsedScopePreProcBlock>() ?? currentScope : currentScope;
-
+                    
                     if (!_lineInfo.ContainsKey(statementStartLine))
-                        _lineInfo.Add(statementStartLine, new LineInfo(depth, currentScope));
+                        _lineInfo.Add(statementStartLine, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
 
                     // add missing values to the line dictionary 
                     // (lines from start statement + 1 to end of statement have a depth + 1)
@@ -322,12 +323,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     if (statementStartLine > -1 && token.Line > statementStartLine) {
                         for (int i = statementStartLine + 1; i <= token.Line; i++) {
                             if (!_lineInfo.ContainsKey(i)) {
-                                _lineInfo.Add(i, new LineInfo(depth + (_context.StatementFirstWordLineAferThenOrElse > 0 && i > _context.StatementFirstWordLineAferThenOrElse ? 2 : 1), currentScope));
+                                _lineInfo.Add(i, new LineInfo(depth + (_context.StatementFirstWordLineAferThenOrElse > 0 && i > _context.StatementFirstWordLineAferThenOrElse ? 2 : 1), GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
                             }
                         }
                     }
                 }
-
             }
 
             _context.StatementUnknownFirstWord = false;
@@ -336,6 +336,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
             _context.StatementFirstWordLineAferThenOrElse = 0;
         }
 
+        /// <summary>
+        /// Allows to specify that the topmost block of the given type for the current stack must be closed.
+        /// We fill in info on the block (ending position/line) as well as setting the correct depth for each line
+        /// of this block
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="token"></param>
+        /// <returns></returns>
         private bool CloseBlock<T>(Token token) where T : ParsedScopeItem {
 
             var currentBlock = _context.BlockStack.Peek() as T;
@@ -343,15 +351,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 currentBlock.EndBlockLine = token.Line;
                 currentBlock.EndBlockPosition = token.EndPosition;
 
-                int depth = GetCurrentBlockDepth();
-                int closeStatementLine = (_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : 0);
+                int depth = GetBlockDepth(0);
+                int closeStatementLine = (_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : token.Line);
 
                 // we just closed a block, fill the line info for all the lines of this block
                 if (currentBlock.IncludeLine <= 0) { // lastBlock.IncludeLine <= 0 to only consider blocks in the base file (not in includes)...
-                    var currentScope = (currentBlock as ParsedScopeBlock) ?? GetCurrentBlock<ParsedScopeBlock>();
+
                     for (int i = currentBlock.Line + 1; i <= closeStatementLine - 1; i++) {
                         if (!_lineInfo.ContainsKey(i)) {
-                            _lineInfo.Add(i, new LineInfo(depth + 1, currentScope));
+                            _lineInfo.Add(i, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
                         }
                     }
                 }
@@ -362,17 +370,21 @@ namespace _3PA.MainFeatures.Parser.Pro {
             return false;
         }
         
-
         /// <summary>
-        /// Returns the current block depth (we do not count PreProc block directives like analyze-suspend/resume)
+        /// Returns the current block depth if initialIndex = 0. Or the parent block depth if = 1.
+        /// (we do not count PreProc block directives like analyze-suspend/resume)
         /// </summary>
         /// <returns></returns>
-        private int GetCurrentBlockDepth() {
-            var depth = _context.BlockStack.Count(block => block.ScopeType != ParsedScopeType.PreProcBlock) - 1;  // -1 because we always have a block that represents the current file
-
-            // the line below allows to not indent the first sentence that triggers the block...
-            if (depth > 0 && _context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.BlockStack.Peek().Line)
-                depth--;
+        private int GetBlockDepth(int initialIndex) {
+            // -1 because we always have a block that represents the current file
+            var depth = -1;
+            var i = initialIndex;
+            while (i < _context.BlockStack.Count) {
+                if (_context.BlockStack.ElementAt(i).ScopeType != ParsedScopeType.PreProcBlock) {
+                    depth++;
+                }
+                i++;
+            }
             return depth;
         }
         

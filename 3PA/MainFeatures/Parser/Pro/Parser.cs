@@ -84,11 +84,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
         private List<ParserError> _parserErrors = new List<ParserError>();
 
         /// <summary>
-        /// Represent the FILE LEVEL scope
-        /// </summary>
-        private ParsedScopeItem _rootScope;
-
-        /// <summary>
         /// Result of the proLexer, list of tokens
         /// </summary>
         private GapBuffer<Token> _tokenList;
@@ -194,14 +189,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Constructor with a string instead of a proLexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
+        public Parser(string data, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
-        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
+        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
 
             // process inputs
+            ParsedScopeBlock rootScope;
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && KnownStaticItems != null;
 
@@ -227,12 +223,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
             if (defaultScope == null) {
                 var rootToken = new TokenEos(null, 0, 0, 0, 0);
                 rootToken.OwnerNumber = 0;
-                _rootScope = new ParsedFile("Root", rootToken);
+                rootScope = new ParsedFile("Root", rootToken);
             } else
-                _rootScope = defaultScope;
-            _context.BlockStack.Push(_rootScope);
+                rootScope = defaultScope;
+            _context.BlockStack.Push(rootScope);
             if (defaultScope == null) {
-                AddParsedItem(_rootScope, 0);
+                AddParsedItem(rootScope, 0);
             }
 
             // Analyze
@@ -250,8 +246,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
             
             // add missing values to the line dictionary (each line that correspond to the root scope)
-            var defaultLineinfo = new LineInfo(0, _rootScope);
-            for (int i = 0; i < proLexer.MaxLine; i++) {
+            var defaultLineinfo = new LineInfo(0, rootScope, rootScope);
+            for (int i = 0; i <= proLexer.MaxLine; i++) {
                 if (!_lineInfo.ContainsKey(i))
                     _lineInfo.Add(i, defaultLineinfo);
             }
@@ -308,10 +304,22 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Peek forward (or backward if goBackWard = true) until we match a token that is not a space token
         /// return found token
         /// </summary>
-        private Token PeekAtNextNonSpace(int start, bool goBackward = false) {
+        private Token PeekAtNextType<T>(int start, bool goBackward = false) where T : Token {
             int x = start + (goBackward ? -1 : 1);
             var tok = PeekAt(x);
-            while (tok is TokenWhiteSpace)
+            while (!(tok is T) && !(tok is TokenEof))
+                tok = PeekAt(goBackward ? x-- : x++);
+            return tok;
+        }
+
+        /// <summary>
+        /// Peek forward (or backward if goBackWard = true) until we match a token that is not a space token
+        /// return found token
+        /// </summary>
+        private Token PeekAtNextNonType<T>(int start, bool goBackward = false) where T : Token {
+            int x = start + (goBackward ? -1 : 1);
+            var tok = PeekAt(x);
+            while (tok is T && !(tok is TokenEof))
                 tok = PeekAt(goBackward ? x-- : x++);
             return tok;
         }
@@ -564,11 +572,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Scope for the current line
         /// </summary>
-        public ParsedScopeItem Scope { get; set; }
+        public ParsedScopeSection ExplorerScope { get; set; }
 
-        public LineInfo(int blockDepth, ParsedScopeItem scope) {
+        /// <summary>
+        /// Scope for the current line
+        /// </summary>
+        public ParsedScopeBlock VariableScope { get; set; }
+
+        public LineInfo(int blockDepth, ParsedScopeSection explorerScope, ParsedScopeBlock variableScope) {
             BlockDepth = blockDepth;
-            Scope = scope;
+            ExplorerScope = explorerScope;
+            VariableScope = variableScope;
         }
     }
 

@@ -27,10 +27,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// performances and handiness
     /// </summary>
     internal class CompletionFilterClass {
+
         #region private
 
         private int _currentLineNumber = -2;
-        private ParsedScopeItem _currentScope;
+        private ParsedScopeBlock _currentScope;
 
         #endregion
 
@@ -53,7 +54,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public bool UpdateConditions(int currentLineNumber, bool checkLine = true) {
             if (currentLineNumber != _currentLineNumber) {
                 _currentLineNumber = currentLineNumber;
-                _currentScope = ParserHandler.GetScopeOfLine(currentLineNumber);
+                _currentScope = ParserHandler.GetScopeOfLine<ParsedScopeBlock>(currentLineNumber);
                 if (!checkLine || !Config.Instance.AutoCompleteOnlyShowDefinedVar)
                     _currentLineNumber = -1;
                 return true;

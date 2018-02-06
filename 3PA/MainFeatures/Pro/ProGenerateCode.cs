@@ -69,7 +69,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Call this method to insert a new piece of code
         /// </summary>
-        public void InsertCode<T>() where T : ParsedScopeItem {
+        public void InsertCode<T>() where T : ParsedScopeBlock {
             IProCode codeCode;
             string insertText;
             string blockDescription;
@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.Pro {
             }
         }
 
-        public void DeleteCode<T>() where T : ParsedScopeItem {
+        public void DeleteCode<T>() where T : ParsedScopeBlock {
             // make a list of existing items for this type
             var existingList = _parsedItems.Where(item => item.GetType() == typeof(T)).Cast<T>().ToList();
 
@@ -375,9 +375,10 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
         /// otherwise returns null
         /// </summary>
-        private ParsedScopePreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
-            // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
-            var protoPreProcBlock = _parsedItems.Where(item => {
+        private ParsedScopeItem GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeBlock {
+
+            // try to find a &IF DEFINED(EXCLUDE- block that surrounds the scope
+            var protoPreProcIfBlock = _parsedItems.Where(item => {
                 var blockItem = item as ParsedScopePreProcIfBlock;
                 if (blockItem != null && blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
                     return true;
@@ -385,14 +386,14 @@ namespace _3PA.MainFeatures.Pro {
             }).ToList();
 
             // if we found a block that actually surrounds our parsedScopeItem then that's it
-            foreach (var item in protoPreProcBlock.Select(item => (ParsedScopePreProcBlock) item)) {
+            foreach (var item in protoPreProcIfBlock.Select(item => (ParsedScopePreProcIfBlock) item)) {
                 if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                     return item;
             }
 
             // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
             var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
-            protoPreProcBlock = _parsedItems.Where(item => {
+            var protoPreProcBlock = _parsedItems.Where(item => {
                 var blockItem = item as ParsedScopePreProcBlock;
                 if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
                     return true;
@@ -423,9 +424,9 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// Delete the given ParsedScopeItem whose name is qualified through proCode.Name
+        /// Delete the given ParsedScopeBlock whose name is qualified through proCode.Name
         /// </summary>
-        private void DeleteCode<T>(T toDelete) where T : ParsedScopeItem {
+        private void DeleteCode<T>(T toDelete) where T : ParsedScopeBlock {
             string preProcBlockType = null;
             if (typeof(ParsedImplementation) == typeof(T)) {
                 preProcBlockType = @"_FUNCTION";
@@ -436,16 +437,16 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // find a pre proc block that surrounds it
-            var protoPreProcBlock = GetPreProcBlock(toDelete, preProcBlockType);
+            var surroundingScope = GetPreProcBlock(toDelete, preProcBlockType);
 
             // we also want to delete the trailing new lines
-            int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : toDelete.EndBlockPosition);
+            int endPosition = (surroundingScope != null ? surroundingScope.EndBlockPosition : toDelete.EndBlockPosition);
             while (Sci.GetTextByRange(endPosition, endPosition + 2).Equals(Sci.GetEolString)) {
                 endPosition += 2;
             }
 
-            if (protoPreProcBlock != null) {
-                Sci.DeleteTextByRange(protoPreProcBlock.Position, endPosition);
+            if (surroundingScope != null) {
+                Sci.DeleteTextByRange(surroundingScope.Position, endPosition);
             } else {
                 // if not found, we just delete the proto statement
                 Sci.DeleteTextByRange(toDelete.Position, endPosition);
@@ -455,7 +456,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
-        private int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeItem {
+        private int GetCaretPositionForInsertion<T>(string codeName, ProInsertPosition insertPos, out bool insertBefore) where T : ParsedScopeBlock {
             insertBefore = false;
 
             // at caret position
@@ -550,9 +551,9 @@ namespace _3PA.MainFeatures.Pro {
             // is there already an item existing?
             if (refItem != null && preProcBlockType != null) {
                 // try to find a &IF DEFINED(EXCLUDE- block or a _UIB_BLOCK that surrounds the prototype
-                var preProcBlock = GetPreProcBlock(refItem, preProcBlockType);
-                if (preProcBlock != null)
-                    return (insertBefore ? preProcBlock.Position : preProcBlock.EndBlockPosition);
+                var surroundingScope = GetPreProcBlock(refItem, preProcBlockType);
+                if (surroundingScope != null)
+                    return (insertBefore ? surroundingScope.Position : surroundingScope.EndBlockPosition);
 
                 // otherwise return the position of the function itself
                 return insertBefore ? refItem.Position : refItem.EndBlockPosition;
@@ -596,9 +597,9 @@ namespace _3PA.MainFeatures.Pro {
                     insertBefore = true;
 
                     // try to find a &IF DEFINED(EXCLUDE- block that surrounds the func
-                    var preProcBlock = GetPreProcBlock(firstFunc, @"_FUNCTION");
-                    if (preProcBlock != null)
-                        return preProcBlock.Position;
+                    var surroundingScope = GetPreProcBlock(firstFunc, @"_FUNCTION");
+                    if (surroundingScope != null)
+                        return surroundingScope.Position;
 
                     return firstFunc.Position;
                 }

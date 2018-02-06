@@ -82,10 +82,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Returns Scope of the given line
         /// </summary>
         /// <returns></returns>
-        public static ParsedScopeItem GetScopeOfLine(int line) {
-            ParsedScopeItem output = null;
+        public static T GetScopeOfLine<T>(int line) where T : ParsedScopeSection {
+            T output = null;
             DoInLock(() => {
-                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].Scope : null;
+                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? (T) (typeof(T) == typeof(ParsedScopeBlock) ? _lineInfo[line].VariableScope : _lineInfo[line].ExplorerScope) : null;
             });
             return output;
         }

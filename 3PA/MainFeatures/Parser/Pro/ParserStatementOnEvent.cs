@@ -103,7 +103,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                         // matching a widget IN FRAME
                         if (token.Value.EqualsCi("in")) {
-                            var nextNonSpace = PeekAtNextNonSpace(1);
+                            var nextNonSpace = PeekAtNextNonType<TokenWhiteSpace>(1);
                             if (!(nextNonSpace is TokenWord && nextNonSpace.Value.Equals("frame"))) {
                                 // skip the whole IN FRAME XX
                                 MoveNext();

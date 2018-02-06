@@ -9,9 +9,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
     internal partial class Parser {
 
         /// <summary>
-        /// If it is an include, replaces a token at "current position + posAhead" by its value
-        /// matches an include file, will replace the tokens corresponding to the {include.i} by all the
-        /// tokens contained in the described file
+        /// If it is an {&amp;var} or {include.i}, replaces the token at "current position + posAhead" by a list of tokens.
+        /// In case of {&amp;var}, the list of tokens has been extracted when we found the GLOBAL/SCOPE-DEFINE.
+        /// In case of {include.i}, we will read the file and tokenize it, then we will have the list of token we need to replace.
         /// </summary>
         private bool ReplaceIncludeAndPreprocVariablesAhead(int posAhead) {
             /*
@@ -84,12 +84,21 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     valueTokens = GetPreProcVariableTokens(toReplaceToken, replaceName);
                 }
 
-                // do we have a definition for the var?
+                // do we have a definition for the var/include?
                 if (valueTokens == null) {
-                    // if we don't have the definition for the variable, it must be replaced by an empty whitespace
-                    valueTokens = new List<Token> {
-                        new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
-                    };
+                    // otherwise, make sure we don't have two TokenWord following each other
+                    var prevToken = PeekAt(posAhead - 1);
+                    var nextToken = PeekAt(posAhead);
+                    if (prevToken is TokenWord && PeekAt(posAhead) is TokenWord) {
+                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + nextToken.Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, nextToken.EndPosition));
+                        RemoveTokens(posAhead, 1);
+                    } else {
+                        // if we don't have the definition for the variable, it must be replaced by an empty whitespace
+                        valueTokens = new List<Token> {
+                            new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
+                        };
+                    }
+
                 } else {
                     // we have to "merge" the TokenWord at the beginning and end of what we are inserting, this allows to take care of
                     // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
@@ -107,16 +116,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 }
 
                 // if we have tokens insert, do it
-                if (valueTokens.Count > 0) {
+                if (valueTokens != null && valueTokens.Count > 0) {
                     InsertTokens(posAhead, valueTokens);
-                } else {
-                    // otherwise, make sure we don't have two TokenWord following each other
-                    var prevToken = PeekAt(posAhead - 1);
-                    var nextToken = PeekAt(posAhead);
-                    if (prevToken is TokenWord && PeekAt(posAhead) is TokenWord) {
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + nextToken.Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, nextToken.EndPosition));
-                        RemoveTokens(posAhead, 1);
-                    }
                 }
 
                 toReplaceToken = PeekAt(posAhead);

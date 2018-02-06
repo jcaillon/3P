@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// <summary>
         /// Should return true when the completion item survives the filter
         /// </summary>
-        public virtual bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public virtual bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             // check for scope
             if (ParsedBaseItem != null) {
                 var parsedItem = ParsedBaseItem as ParsedItem;
@@ -315,7 +315,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return toDisplay.ToString();
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             // check for scope
             if (!base.SurvivesFilter(currentLine, currentScope))
                 return false;
@@ -572,7 +572,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get { return ParsedBaseItem as ParsedPreProcVariable; }
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             var output = true;
             if (currentLine >= 0) {
                 // if preproc, check line of definition and undefine
@@ -608,7 +608,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get { return ParsedBaseItem as ParsedLabel; }
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             // check for scope
             if (!base.SurvivesFilter(currentLine, currentScope))
                 return false;
@@ -712,7 +712,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             return toDisplay.ToString();
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             return true;
         }
     }
@@ -755,7 +755,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             get { return ImageResources.KeywordObject; }
         }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             return true;
         }
     }
@@ -809,7 +809,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// </summary>
     internal abstract class TextCompletionItem : CompletionItem {
         
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             return true;
         }
 
@@ -852,7 +852,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public NppLangs.NppKeyword NppKeyword { get; set; }
 
-        public override bool SurvivesFilter(int currentLine, ParsedScopeItem currentScope) {
+        public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             return true;
         }
 

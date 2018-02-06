@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace _3PA.MainFeatures.Parser.Pro {
@@ -9,20 +10,35 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         private ParsedScopePreProcIfBlock CreateParsedIfEndIfPreProc(Token ifToken) {
             
-            int i = 1;
-            _lastTokenWasSpace = true;
             StringBuilder expression = new StringBuilder();
 
-            while (i < 0) {
-                var token = PeekAt(i);
-                i++;
-                if (token is TokenComment) continue;
-                AddTokenToStringBuilder(expression, token);
+            // do we need to extract an expression from this IF/ELSEIF? (or is it an ELSE)
+            if (ifToken.Value.ToLower().EndsWith("if")) {
+
+                int i = 1;
+                List<Token> expressiontokens = new List<Token>();
+
+                do {
+                    var token = PeekAt(i);
+                    if (token is TokenComment)
+                        continue;
+                    if (token is TokenEof)
+                        break;
+                    if (token is TokenPreProcDirective)
+                        break;
+                    expressiontokens.Add(token);
+                    i++;
+                } while (true);
+
+                foreach (var token in expressiontokens) {
+                    expression.Append(token.Value);
+                }
             }
 
             var newIf = new ParsedScopePreProcIfBlock(ifToken.Value, ifToken) {
                 BlockDescription = expression.ToString()
             };
+
             AddParsedItem(newIf, ifToken.OwnerNumber);
 
             return newIf;

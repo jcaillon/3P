@@ -85,7 +85,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Scope in which this item has been parsed; will never be of type PreProcBlock / SimpleBlock because this field
         /// is made to find the parent object of this item (file/function/procedure...)
         /// </summary>
-        public ParsedScopeItem Scope { get; set; }
+        public ParsedScopeBlock Scope { get; set; }
 
         public ParseFlag Flags { get; set; }
 
@@ -117,12 +117,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// end position of the EOS that closes the block, initiated to -1 by default
         /// </summary>
         public int EndBlockPosition { get; set; }
-
-        /// <summary>
-        /// If true, the block contains too much characters and will not be openable in the
-        /// appbuilder
-        /// </summary>
-        public bool TooLongForAppbuilder { get; set; }
 
         /// <summary>
         /// Allows faster comparison against ParsedScopeItems
@@ -220,11 +214,37 @@ namespace _3PA.MainFeatures.Parser.Pro {
     #endregion
 
     #region procedural classes
-    
+
     /// <summary>
-    /// A simple do, triggers... block. This type of block only exists to compute a correct indentation, it will not be exported by the parser
+    /// A scope that does not have a representation in the code explorer
     /// </summary>
-    internal class ParsedScopeSimpleBlock : ParsedScopeItem {
+    internal class ParsedScopeNoSection : ParsedScopeItem {
+
+        public override void Accept(IParserVisitor visitor) {
+            // no visits
+        }
+
+        public ParsedScopeNoSection(string name, Token token, ParsedScopeType scopeType) : base(name, token, scopeType) {
+        }
+    }
+
+    /// <summary>
+    /// A scope that has a representation in the code explorer
+    /// </summary>
+    internal class ParsedScopeSection : ParsedScopeItem {
+
+        public override void Accept(IParserVisitor visitor) {
+            // no visits
+        }
+
+        public ParsedScopeSection(string name, Token token, ParsedScopeType scopeType) : base(name, token, scopeType) {
+        }
+    }
+
+    /// <summary>
+    /// A simple do, triggers... block. This type of block only exists to compute a correct indentation
+    /// </summary>
+    internal class ParsedScopeSimpleBlock : ParsedScopeNoSection {
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
@@ -235,9 +255,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
     }
 
     /// <summary>
-    /// A &amp;IF expression &amp;THEN kind of block. This type of block only exists to compute a correct indentation, it will not be exported by the parser
+    /// A &amp;IF expression &amp;THEN kind of block. This type of block only exists to compute a correct indentation
     /// </summary>
-    internal class ParsedScopePreProcIfBlock : ParsedScopeItem {
+    internal class ParsedScopePreProcIfBlock : ParsedScopeNoSection {
 
         /// <summary>
         /// Everything after ANALYZE-SUSPEND
@@ -253,9 +273,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
     }
     
     /// <summary>
-    /// Procedure parsed item
+    /// Represents a pre-processed directive block (&amp;ANALYZE-SUSPEND and closed by &amp;ANALYZE-RESUME)
     /// </summary>
-    internal class ParsedScopePreProcBlock : ParsedScopeItem {
+    internal class ParsedScopePreProcBlock : ParsedScopeSection {
 
         /// <summary>
         /// type of this block
@@ -274,10 +294,31 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParsedScopePreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.PreProcBlock) {}
     }
 
+
+    internal enum ParsedPreProcBlockType {
+        Unknown,
+        FunctionForward,
+        MainBlock,
+        Definitions,
+        UibPreprocessorBlock,
+        Xftr,
+        ProcedureSettings,
+        CreateWindow,
+        RunTimeAttributes
+    }
+
     /// <summary>
-    /// This class represents a scope that 
+    /// This class represents a scope that can have variables defined in it. It will be used to filter the variables to show in the autocompletion
+    /// depending on where the cursor is. In openedge, a def var done in a do: end. block (for instance), is not limited to the DO but to the parent
+    /// scope that is a procedure or the file (for instance)
     /// </summary>
-    internal class ParsedScopeBlock : ParsedScopeItem {
+    internal class ParsedScopeBlock : ParsedScopeSection {
+        
+        /// <summary>
+        /// If true, the block contains too much characters and will not be openable in the
+        /// appbuilder
+        /// </summary>
+        public bool TooLongForAppbuilder { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
@@ -297,19 +338,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.Root) {}
-    }
-
-
-    internal enum ParsedPreProcBlockType {
-        Unknown,
-        FunctionForward,
-        MainBlock,
-        Definitions,
-        UibPreprocessorBlock,
-        Xftr,
-        ProcedureSettings,
-        CreateWindow,
-        RunTimeAttributes
     }
 
     /// <summary>

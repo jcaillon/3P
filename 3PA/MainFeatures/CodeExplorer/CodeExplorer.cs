@@ -22,7 +22,6 @@ using System.Linq;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
@@ -91,7 +90,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void UpdateCurrentScope() {
             if (!IsVisible)
                 return;
-            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress ? ParserHandler.GetScopeOfLine(Sci.Line.CurrentLine) : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress ? ParserHandler.GetScopeOfLine<ParsedScopeBlock>(Sci.Line.CurrentLine) : null);
         }
 
         public void OnStart() {
@@ -123,7 +122,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (!IsVisible)
                 return;
             int curLine = Sci.Line.CurrentLine;
-            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].Scope : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].ExplorerScope : null);
         }
 
         #endregion
@@ -133,7 +132,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Update the current scope in the form
         /// </summary>
-        private void UpdateCurrentScope(ParsedScopeItem currentScope) {
+        private void UpdateCurrentScope(ParsedScopeSection currentScope) {
             if (currentScope != null) {
                 Form.SafeInvoke(form => form.UpdateCurrentScope(currentScope.Name, Utils.GetImageFromStr(currentScope.ScopeType.ToString())));
             } else {

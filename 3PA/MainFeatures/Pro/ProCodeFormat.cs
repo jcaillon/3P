@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.Pro {
                 var line = Sci.GetLine(i);
                 line.Indentation = dic[i].BlockDepth * indentWidth;
                 if (!canIndentSafely)
-                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
+                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
                 i++;
             }
             Sci.EndUndoAction();
@@ -132,7 +132,7 @@ namespace _3PA.MainFeatures.Pro {
                     }
 
                     var blockTooLong = new StringBuilder();
-                    foreach (var scope in parser.ParsedItemsList.Where(item => item is ParsedImplementation || item is ParsedProcedure || item is ParsedOnStatement).Cast<ParsedScopeItem>()) {
+                    foreach (var scope in parser.ParsedItemsList.Where(item => item is ParsedImplementation || item is ParsedProcedure || item is ParsedOnStatement).Cast<ParsedScopeBlock>()) {
                         if (CheckForTooMuchChar(scope)) {
                             blockTooLong.AppendLine("<div>");
                             blockTooLong.AppendLine(" - " + (scope.FilePath + "|" + scope.Line).ToHtmlLink("Line " + (scope.Line + 1) + " : <b>" + scope.Name + "</b>") + " (" + NbExtraCharBetweenLines(scope.Line, scope.EndBlockLine) + " extra chars)");
@@ -173,7 +173,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Check the parse scope has too much char to allow it to be displayed in the appbuilder
         /// </summary>
         /// <param name="pars"></param>
-        private static bool CheckForTooMuchChar(ParsedScopeItem pars) {
+        private static bool CheckForTooMuchChar(ParsedScopeBlock pars) {
             // check length of block
             if (!pars.Flags.HasFlag(ParseFlag.FromInclude)) {
                 pars.TooLongForAppbuilder = NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) > 0;
