@@ -82,31 +82,31 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                     // matching different intersting blocks
                     var textAfterDirective = variableName + " " + definition.ToString().Trim();
-                    ParsedPreProcBlockType type = ParsedPreProcBlockType.Unknown;
+                    ParsedPreProcBlockType type = ParsedPreProcBlockType.Block;
                     string blockName = "Appbuilder block";
                     if (textAfterDirective.ContainsFast("_FUNCTION-FORWARD")) {
-                        type = ParsedPreProcBlockType.FunctionForward;
+                        type = ParsedPreProcBlockType.Prototype;
                         blockName = "Function prototype";
                     } else if (textAfterDirective.ContainsFast("_MAIN-BLOCK")) {
                         type = ParsedPreProcBlockType.MainBlock;
                         blockName = "Main block";
                     } else if (textAfterDirective.ContainsFast("_DEFINITIONS")) {
-                        type = ParsedPreProcBlockType.Definitions;
+                        type = ParsedPreProcBlockType.DefinitionBlock;
                         blockName = "Definitions";
                     } else if (textAfterDirective.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         type = ParsedPreProcBlockType.UibPreprocessorBlock;
                         blockName = "Pre-processor definitions";
                     } else if (textAfterDirective.ContainsFast("_XFTR")) {
-                        type = ParsedPreProcBlockType.Xftr;
+                        type = ParsedPreProcBlockType.XtfrBlock;
                         blockName = "Xtfr";
                     } else if (textAfterDirective.ContainsFast("_PROCEDURE-SETTINGS")) {
-                        type = ParsedPreProcBlockType.ProcedureSettings;
+                        type = ParsedPreProcBlockType.SettingsBlock;
                         blockName = "Procedure settings";
                     } else if (textAfterDirective.ContainsFast("_CREATE-WINDOW")) {
-                        type = ParsedPreProcBlockType.CreateWindow;
+                        type = ParsedPreProcBlockType.CreateWindowBlock;
                         blockName = "Window settings";
                     } else if (textAfterDirective.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
-                        type = ParsedPreProcBlockType.RunTimeAttributes;
+                        type = ParsedPreProcBlockType.RuntimeBlock;
                         blockName = "Runtime attributes";
                     }
 

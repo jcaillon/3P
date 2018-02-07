@@ -216,7 +216,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // init context
             _context = new ParseContext {
-                BlockStack = new Stack<ParsedScopeItem>()
+                BlockStack = new Stack<ParsedScope>()
             };
 
             // create root item
@@ -254,8 +254,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // check that we match an &ENDIF for each &IF
             if (GetCurrentBlock<ParsedScopePreProcBlock>() != null)
-                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(0), _context.BlockStack.Count, _parsedIncludes));
+                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
             
+            // check that we match an END. for each block
+            if (GetCurrentBlock<ParsedScopeBlock>() != rootScope)
+                _parserErrors.Add(new ParserError(ParserErrorType.MissingBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+                
+
             //Returns the concatenation of all the tokens once the parsing is done
             if (debugListOut != null) {
                 foreach (var token in _tokenList) {
@@ -523,7 +528,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             /// <summary>
             /// Keep tracks on blocks through a stack (a block == an indent)
             /// </summary>
-            public Stack<ParsedScopeItem> BlockStack { get; set; }
+            public Stack<ParsedScope> BlockStack { get; set; }
 
             /// <summary>
             /// Number of words count in the current statement
@@ -551,6 +556,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
             /// correctly read ASSIGN statement for instance...
             /// </summary>
             public bool ReadNextWordAsStatementStart { get; set; }
+
+            /// <summary>
+            /// Last ON block matched
+            /// </summary>
+            public ParsedScopeBlock LastOnBlock { get; set; } 
         }
 
         #endregion
@@ -631,6 +641,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
         [Description("Unexpected block end, the start of this block has not been found")]
         UnexpectedBlockEnd,
+
+        [Description("A block end seems to be missing")]
+        MissingBlockEnd,
 
         [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")]
         UnexpectedUibBlockStart,

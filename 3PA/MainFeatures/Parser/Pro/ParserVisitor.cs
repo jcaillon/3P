@@ -342,32 +342,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
             if (pars.Flags.HasFlag(ParseFlag.FromInclude))
                 return;
 
+            // only display special blocks on the explorer
+            if (pars.Type == ParsedPreProcBlockType.Prototype || pars.Type == ParsedPreProcBlockType.Block)
+                return;
+
+            // convert to explorer type
             CodeExplorerIconType type;
-            switch (pars.Type) {
-                case ParsedPreProcBlockType.MainBlock:
-                    type = CodeExplorerIconType.MainBlock;
-                    break;
-                case ParsedPreProcBlockType.Definitions:
-                    type = CodeExplorerIconType.DefinitionBlock;
-                    break;
-                case ParsedPreProcBlockType.UibPreprocessorBlock:
-                    type = CodeExplorerIconType.PreprocessorBlock;
-                    break;
-                case ParsedPreProcBlockType.Xftr:
-                    type = CodeExplorerIconType.XtfrBlock;
-                    break;
-                case ParsedPreProcBlockType.ProcedureSettings:
-                    type = CodeExplorerIconType.SettingsBlock;
-                    break;
-                case ParsedPreProcBlockType.CreateWindow:
-                    type = CodeExplorerIconType.CreateWindowBlock;
-                    break;
-                case ParsedPreProcBlockType.RunTimeAttributes:
-                    type = CodeExplorerIconType.RuntimeBlock;
-                    break;
-                default:
-                    return;
-            }
+            if (!Enum.TryParse(pars.Type.ToString(), out type))
+                return;
 
             // to code explorer
             CodeItem parentNode = type == CodeExplorerIconType.MainBlock ? null : GetExplorerListNode("AppBuilder blocks", CodeExplorerIconType.Block);
@@ -424,10 +406,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         public void Visit(ParsedPrototype pars) {
-            // only visit IN prototypes
+            // only visit IN prototypes (not FORWARD)
             if (pars.SimpleForward)
                 return;
-
+            
             // to code explorer
             PushToCodeExplorer(
                 GetExplorerListNode("Function prototypes", CodeExplorerIconType.Prototype),

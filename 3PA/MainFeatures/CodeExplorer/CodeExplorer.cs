@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void UpdateCurrentScope() {
             if (!IsVisible)
                 return;
-            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress ? ParserHandler.GetScopeOfLine<ParsedScopeBlock>(Sci.Line.CurrentLine) : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress ? ParserHandler.GetScopeOfLine<ParsedScopeSection>(Sci.Line.CurrentLine) : null);
         }
 
         public void OnStart() {
@@ -134,7 +134,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         private void UpdateCurrentScope(ParsedScopeSection currentScope) {
             if (currentScope != null) {
-                Form.SafeInvoke(form => form.UpdateCurrentScope(currentScope.Name, Utils.GetImageFromStr(currentScope.ScopeType.ToString())));
+                var preprocScope = currentScope as ParsedScopePreProcBlock;
+                Form.SafeInvoke(form => form.UpdateCurrentScope(currentScope.Name, Utils.GetImageFromStr(preprocScope != null ? preprocScope.Type.ToString() :  currentScope.ScopeType.ToString())));
             } else {
                 Form.SafeInvoke(form => form.UpdateCurrentScope(@"Not applicable", ImageResources.NotApplicable));
             }

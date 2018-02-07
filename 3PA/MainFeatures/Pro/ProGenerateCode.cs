@@ -375,7 +375,7 @@ namespace _3PA.MainFeatures.Pro {
         /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
         /// otherwise returns null
         /// </summary>
-        private ParsedScopeItem GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeBlock {
+        private ParsedScope GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeBlock {
 
             // try to find a &IF DEFINED(EXCLUDE- block that surrounds the scope
             var protoPreProcIfBlock = _parsedItems.Where(item => {

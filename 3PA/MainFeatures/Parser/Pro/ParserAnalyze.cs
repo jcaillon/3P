@@ -62,6 +62,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         case "case":
                         case "catch":
                         case "class":
+                        case "property":
                         case "constructor":
                         case "destructor":
                         case "finally":
@@ -71,7 +72,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         case "do":
                         case "repeat":
                         case "editing":
-                            // increase block depth
+                        case "trigger": // trigger procedure
+                            // increase block depth with a simple block
                             _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
                         case "end":
@@ -131,7 +133,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             // parse a ON statement
                             var newOn = CreateParsedOnEvent(token);
                             if (newOn != null) {
-                                _context.BlockStack.Push(newOn);
+                                // dont immediatly push it to the block stack because it doesn't necessarily have a trigger block (can only be a statement)
+                                _context.LastOnBlock = newOn;
                             }
                             break;
                         case "run":
@@ -163,10 +166,18 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             CreateParsedDynamicFunction(token);
                             break;
                         case "do":
-                            // matches a do in the middle of a statement (ex: ON CHOOSE OF xx DO:)
-                            _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
+                            // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:)
+                            var lastOnblock = _context.LastOnBlock as ParsedOnStatement;
+                            // last ON scope started during the current statement, we are on the case of a ON CHOOSE OF xx DO:
+                            if (lastOnblock != null && lastOnblock.Position == _context.StatementFirstToken.StartPosition) {
+                                lastOnblock.HasTriggerBlock = true;
+                                _context.BlockStack.Push(lastOnblock);
+                            } else {
+                                _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
+                            }
                             break;
                         case "triggers":
+                            // Trigger phrase : this is, for instance, to handle a block in a "CREATE MENU-ITEM" statement
                             if (PeekAtNextNonType<TokenWhiteSpace>(0) is TokenEos)
                                 _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
@@ -344,7 +355,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <typeparam name="T"></typeparam>
         /// <param name="token"></param>
         /// <returns></returns>
-        private bool CloseBlock<T>(Token token) where T : ParsedScopeItem {
+        private bool CloseBlock<T>(Token token) where T : ParsedScope {
 
             var currentBlock = _context.BlockStack.Peek() as T;
             if (currentBlock != null) {
@@ -392,7 +403,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Would be the same as BlockStack.Peek() but only returns the topmost block of given type
         /// </summary>
         /// <returns></returns>
-        private T GetCurrentBlock<T>() where T : ParsedScopeItem {
+        private T GetCurrentBlock<T>() where T : ParsedScope {
             T output = _context.BlockStack.Peek() as T;
             var i = 0;
             while (output == null) {

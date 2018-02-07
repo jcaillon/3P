@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// Parent class for procedure, function and OnEvent Items
     /// </summary>
-    internal abstract class ParsedScopeItem : ParsedItem {
+    internal abstract class ParsedScope : ParsedItem {
         /// <summary>
         /// line of the "end" keyword that ends the block
         /// </summary>
@@ -123,7 +123,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public ParsedScopeType ScopeType { get; private set; }
 
-        protected ParsedScopeItem(string name, Token token, ParsedScopeType scopeType)
+        protected ParsedScope(string name, Token token, ParsedScopeType scopeType)
             : base(name, token) {
             ScopeType = scopeType;
             EndBlockPosition = -1;
@@ -218,7 +218,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// A scope that does not have a representation in the code explorer
     /// </summary>
-    internal class ParsedScopeNoSection : ParsedScopeItem {
+    internal class ParsedScopeNoSection : ParsedScope {
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
@@ -231,7 +231,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// A scope that has a representation in the code explorer
     /// </summary>
-    internal class ParsedScopeSection : ParsedScopeItem {
+    internal class ParsedScopeSection : ParsedScope {
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
@@ -296,15 +296,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
 
     internal enum ParsedPreProcBlockType {
-        Unknown,
-        FunctionForward,
+        Block, // an unknown block
+        Prototype,
         MainBlock,
-        Definitions,
+        DefinitionBlock,
         UibPreprocessorBlock,
-        Xftr,
-        ProcedureSettings,
-        CreateWindow,
-        RunTimeAttributes
+        XtfrBlock,
+        SettingsBlock,
+        CreateWindowBlock,
+        RuntimeBlock
     }
 
     /// <summary>
@@ -442,6 +442,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
     internal class ParsedOnStatement : ParsedScopeBlock {
         public string EventList { get; private set; }
         public string WidgetList { get; private set; }
+
+        /// <summary>
+        /// True if this ON statement has a trigger block, false if it only has a trigger statement
+        /// </summary>
+        public bool HasTriggerBlock { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);

@@ -1713,16 +1713,6 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap PreprocessorBlock {
-            get {
-                object obj = ResourceManager.GetObject("PreprocessorBlock", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Previous {
             get {
                 object obj = ResourceManager.GetObject("Previous", resourceCulture);
@@ -2256,6 +2246,16 @@ namespace _3PA._Resource {
         internal static System.Drawing.Bitmap Turtle {
             get {
                 object obj = ResourceManager.GetObject("Turtle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap UibPreprocessorBlock {
+            get {
+                object obj = ResourceManager.GetObject("UibPreprocessorBlock", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -3,7 +3,6 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser.Pro {
     internal partial class Parser {
-
         /// <summary>
         /// Creates parsed item for ON CHOOSE OF XXX events
         /// (choose or anything else)
@@ -31,7 +30,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             [ OVERRIDE ]
             {trigger-block | REVERT }
 
-            ON key-labelkey-function 
+            ON key-label key-function 
 
             ON "WEB-NOTIFY" ANYWHERE  {trigger-block}
             */
@@ -43,9 +42,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
-                if (token is TokenEos) break;
-                if (token is TokenComment) continue;
-                if (state == 99) break;
+                if (token is TokenEos)
+                    break;
+                if (token is TokenComment)
+                    continue;
                 switch (state) {
                     case 0:
                         // matching event type
@@ -53,6 +53,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             eventList.Append((eventList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
                             state++;
                         }
+
                         break;
                     case 1:
                         // matching an event list?
@@ -60,7 +61,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             state--;
                             break;
                         }
-                        if (!(token is TokenWord)) break;
+
+                        if (!(token is TokenWord))
+                            break;
 
                         if (token.Value.EqualsCi("anywhere")) {
                             // we match anywhere, need to return to match a block start
@@ -70,6 +73,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             state = 99;
                             break;
                         }
+
                         // if not anywhere, we expect an "of"
                         if (token.Value.EqualsCi("of")) {
                             state++;
@@ -92,6 +96,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 state++;
                             }
                         }
+
                         break;
                     case 3:
                         // matching a widget list?
@@ -99,7 +104,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             state--;
                             break;
                         }
-                        if (!(token is TokenWord)) break;
+
+                        if (!(token is TokenWord))
+                            break;
 
                         // matching a widget IN FRAME
                         if (token.Value.EqualsCi("in")) {
@@ -129,10 +136,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         state = 99;
                         break;
                 }
+                if (state == 99)
+                    break;
             } while (MoveNext());
-
+            
             return newParsedOn;
         }
-
     }
 }

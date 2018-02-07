@@ -168,9 +168,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     case CodeExplorerIconType.Prototype:
                         return new PrototypeCodeItem();
 
+                    case CodeExplorerIconType.Block:
                     case CodeExplorerIconType.DefinitionBlock:
                     case CodeExplorerIconType.XtfrBlock:
-                    case CodeExplorerIconType.PreprocessorBlock:
+                    case CodeExplorerIconType.UibPreprocessorBlock:
                     case CodeExplorerIconType.SettingsBlock:
                     case CodeExplorerIconType.CreateWindowBlock:
                     case CodeExplorerIconType.RuntimeBlock:
@@ -232,7 +233,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         Block,
         DefinitionBlock,
         XtfrBlock,
-        PreprocessorBlock,
+        UibPreprocessorBlock,
         Prototype,
         SettingsBlock,
         CreateWindowBlock,
