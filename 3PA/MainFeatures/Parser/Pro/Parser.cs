@@ -252,9 +252,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     _lineInfo.Add(i, defaultLineinfo);
             }
 
-            // check that we match an &ENDIF for each &IF
+            // check that we match a RESUME for each SUSPEND
             if (GetCurrentBlock<ParsedScopePreProcBlock>() != null)
-                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+                _parserErrors.Add(new ParserError(ParserErrorType.MissingUibBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+
+            // check that we match an &ENDIF for each &IF
+            if (GetCurrentBlock<ParsedScopePreProcIfBlock>() != null)
+                _parserErrors.Add(new ParserError(ParserErrorType.MissingPreprocEndIf, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
             
             // check that we match an END. for each block
             if (GetCurrentBlock<ParsedScopeBlock>() != rootScope)
@@ -657,14 +661,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
         [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
         NotAllowedUibBlockEnd,
 
-        [Description("&IF pre-processed statement missing an &ENDIF")]
-        MismatchNumberOfIfEndIf,
+        [Description("A directive ANALYSE-RESUME seems to be missing")]
+        MissingUibBlockEnd,
 
         [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
         UnexpectedPreProcEndIf,
 
         [Description("&THEN pre-processed statement matched without the corresponding &IF")]
-        UnexpectedPreprocThen
+        UnexpectedPreprocThen,
+
+        [Description("&IF pre-processed statement missing an &ENDIF")]
+        MissingPreprocEndIf,
     }
 
     #endregion
