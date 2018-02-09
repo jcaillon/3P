@@ -118,18 +118,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     // save the block description
                     AddParsedItem(newBlock, directiveToken.OwnerNumber);
                     break;
-
-                case "&ANALYZE-RESUME":
-                    // we don't care about the blocks of include files
-                    if (directiveToken.OwnerNumber > 0)
-                        break;
-
-                    // it marks the end of an appbuilder block, it can only be at a root/File level
-                    if (!( GetCurrentBlock<ParsedScopeBlock>() is ParsedFile)) {
-                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, directiveToken, _context.BlockStack.Count, _parsedIncludes));
-                    }
-                    break;
-
+                    
                 case "&UNDEFINE":
                     if (variableName != null) {
                         var found = (ParsedPreProcVariable) _parsedItemList.FindLast(item => (item is ParsedPreProcVariable && item.Name.Equals(variableName)));

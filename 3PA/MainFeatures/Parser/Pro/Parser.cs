@@ -191,10 +191,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public Parser(string data, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
 
+        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) : this(proLexer.GetTokensList, filePathBeingParsed, defaultScope, matchKnownWords, debugListOut) {}
+
         /// <summary>
-        /// Parses a text into a list of parsedItems
+        /// Parses a list of tokens into a list of parsedItems
         /// </summary>
-        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
+        public Parser(GapBuffer<Token> tokens, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
 
             // process inputs
             ParsedScopeBlock rootScope;
@@ -232,7 +234,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
 
             // Analyze
-            _tokenList = proLexer.GetTokensList;
+            _tokenList = tokens;
             _tokenCount = _tokenList.Count;
             _tokenPos = -1;
             ReplaceIncludeAndPreprocVariablesAhead(1); // replaces an include or a preproc var {&x} at token position 0
@@ -247,10 +249,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
             
             // add missing values to the line dictionary (each line that correspond to the root scope)
             var defaultLineinfo = new LineInfo(0, rootScope, rootScope);
-            for (int i = 0; i <= proLexer.MaxLine; i++) {
+            for (int i = 0; i <= PeekAt(-1).Line; i++) {
                 if (!_lineInfo.ContainsKey(i))
                     _lineInfo.Add(i, defaultLineinfo);
             }
+
 
             // check that we match a RESUME for each SUSPEND
             if (GetCurrentBlock<ParsedScopePreProcBlock>() != null)
@@ -263,7 +266,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             // check that we match an END. for each block
             if (GetCurrentBlock<ParsedScopeBlock>() != rootScope)
                 _parserErrors.Add(new ParserError(ParserErrorType.MissingBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
-                
+              
 
             //Returns the concatenation of all the tokens once the parsing is done
             if (debugListOut != null) {
@@ -565,6 +568,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
             /// Last ON block matched
             /// </summary>
             public ParsedScopeBlock LastOnBlock { get; set; } 
+
+            /// <summary>
+            /// Useful to know if, during the last &amp;if / elseif / else / endif,
+            /// one of the if expression hsa been true. If not, we know that the &amp;else block will be true
+            /// </summary>
+            public bool LastPreprocIfwasTrue { get; set; }
         }
 
         #endregion
@@ -661,8 +670,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
         [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
         NotAllowedUibBlockEnd,
 
-        [Description("A directive ANALYSE-RESUME seems to be missing")]
+        [Description("A preprocessed directive ANALYSE-RESUME seems to be missing")]
         MissingUibBlockEnd,
+
+        [Description("A preprocessed directive should always be at the beggining of a new statement")]
+        UibBlockStartMustBeNewStatement,
 
         [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
         UnexpectedPreProcEndIf,

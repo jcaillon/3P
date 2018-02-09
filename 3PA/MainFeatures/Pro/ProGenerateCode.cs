@@ -380,7 +380,7 @@ namespace _3PA.MainFeatures.Pro {
             // try to find a &IF DEFINED(EXCLUDE- block that surrounds the scope
             var protoPreProcIfBlock = _parsedItems.Where(item => {
                 var blockItem = item as ParsedScopePreProcIfBlock;
-                if (blockItem != null && blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
+                if (blockItem != null && blockItem.EvaluatedExpression.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
                     return true;
                 return false;
             }).ToList();

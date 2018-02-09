@@ -42,6 +42,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
+                if (token is TokenPreProcDirective) 
+                    // this is the case of an empty ON statement that will not end by a . but is still compilable... 
+                    // we just hope this is in a analyze suspend/resume block
+                    break;
                 if (token is TokenEos)
                     break;
                 if (token is TokenComment)

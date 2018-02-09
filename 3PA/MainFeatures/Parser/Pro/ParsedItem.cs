@@ -260,9 +260,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
     internal class ParsedScopePreProcIfBlock : ParsedScopeNoSection {
 
         /// <summary>
-        /// Everything after ANALYZE-SUSPEND
+        /// The if "expression" then
         /// </summary>
-        public string BlockDescription { get; set; }
+        public string EvaluatedExpression { get; set; }
+
+        /// <summary>
+        /// The result of the if "expression" then
+        /// </summary>
+        public bool ExpressionResult { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
