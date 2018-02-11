@@ -502,9 +502,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Returns token value or token value minus starting/ending quote of the token is a string
         /// </summary>
         private static string GetTokenStrippedValue(Token token) {
-            if (token is TokenString) {
-                var endsWithQuote = token.Value.EndsWith("\"") || token.Value.EndsWith("'");
-                return token.Value.Substring(1, token.Value.Length - (endsWithQuote ? 2 : 1));
+            if (token is TokenString && !string.IsNullOrEmpty(token.Value)) {
+                var beginsWithQuote = token.Value.First().Equals('"') || token.Value.First().Equals('\'');
+                var endsWithQuote = token.Value.Last().Equals('"') || token.Value.Last().Equals('\'');
+                if (token.Value.Length == 2 && beginsWithQuote && endsWithQuote)
+                    return string.Empty;
+                if (token.Value.Length == 1 && (beginsWithQuote || endsWithQuote))
+                    return string.Empty;
+                return token.Value.Substring(beginsWithQuote ? 1 : 0, token.Value.Length - (endsWithQuote ? 1 : 0) - (beginsWithQuote ? 1 : 0));
             }
             return token.Value;
         }
@@ -516,11 +521,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
             while (tokensList.Count > 0 && tokensList[0] is TokenWhiteSpace) {
                 tokensList.RemoveAt(0);
             }
-
             while (tokensList.Count > 0 && tokensList[tokensList.Count - 1] is TokenWhiteSpace) {
                 tokensList.RemoveAt(tokensList.Count - 1);
             }
-
             return tokensList;
         }
 

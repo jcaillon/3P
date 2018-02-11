@@ -584,14 +584,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// The dictionary contains the association between parameter name -> value
         /// passed with the include file; either 1->value or & name->value 
         /// depending on the way parameters were passed to the include
-        /// The value is tokenized and we store the list of tokens here. During parsing, 
+        /// During parsing, 
         /// we will inject those tokens in place of the {& varname}
         /// 
-        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
+        /// Contains a dictionary in which each variable name known corresponds to its value
         /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// or & DEFINE variables from the current file
         /// </summary>
-        public Dictionary<string, List<Token>> ScopedPreProcVariables { get; set; }
+        public Dictionary<string, string> ScopedPreProcVariables { get; set; }
 
         /// <summary>
         /// if null, that means this ParsedIncludeFile is actually the procedure being parsed,
@@ -609,7 +609,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, Token token, Dictionary<string, List<Token>> scopedPreProcVariables, string fullFilePath, ParsedIncludeFile parent)
+        public ParsedIncludeFile(string name, Token token, Dictionary<string, string> scopedPreProcVariables, string fullFilePath, ParsedIncludeFile parent)
             : base(name, token) {
             ScopedPreProcVariables = scopedPreProcVariables;
             FullFilePath = fullFilePath;

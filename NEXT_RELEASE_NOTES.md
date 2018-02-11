@@ -2,6 +2,7 @@
 
 - Changed the way include files are treated by the parser; they are now treated the same way as {&var} which allows more complex usage of include files like {{inc.i}} (where inc.i contains an include name)
 - #204 : The parser now handles &IF everywhere
+- #203 : The aprser now correctly reads and interprets ALL includes, even when they are within strings!
 
 **Fixed issues :**
 

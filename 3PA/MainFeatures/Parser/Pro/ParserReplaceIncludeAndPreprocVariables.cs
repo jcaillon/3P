@@ -5,9 +5,7 @@ using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser.Pro {
-
     internal partial class Parser {
-
         /// <summary>
         /// If it is an {&amp;var} or {include.i}, replaces the token at "current position + posAhead" by a list of tokens.
         /// In case of {&amp;var}, the list of tokens has been extracted when we found the GLOBAL/SCOPE-DEFINE.
@@ -27,14 +25,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
             */
 
             bool weReplacedSomething = false;
-            
+
             // we check if the token + posAhead will be an include that needs to be replaced
             var toReplaceToken = PeekAt(posAhead);
 
             HashSet<string> replacedName = null; // keep track of replacement here
 
             while (toReplaceToken is TokenInclude || toReplaceToken is TokenPreProcVariable) {
-                
                 // replace the {include} present within this {include}
                 var count = 1;
                 while (true) {
@@ -44,6 +41,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     if (!ReplaceIncludeAndPreprocVariablesAhead(posAhead + count))
                         count++;
                 }
+
                 count++; // number of tokens composing this include
 
                 // get the caracteristics of this include
@@ -53,12 +51,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     if (toReplaceToken is TokenInclude) {
                         parsedInclude = CreateParsedIncludeFile(toReplaceToken, posAhead, posAhead + count - 1);
                         if (parsedInclude != null)
-                            replaceName = parsedInclude.FullFilePath;
+                            replaceName = !string.IsNullOrEmpty(parsedInclude.FullFilePath) ? parsedInclude.FullFilePath : parsedInclude.Name;
                     } else {
                         replaceName = (toReplaceToken.Value == "{" ? "" : "&") + PeekAt(posAhead + 1).Value;
                     }
                 }
-                
+
                 // remove the tokens composing this include
                 RemoveTokens(posAhead, count);
 
@@ -71,53 +69,64 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 // make sure to not replace the same include in the same replacement loop, if we do that
                 // this means we will go into an infinite loop
                 if (replacedName == null)
-                    replacedName = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) { _parsedIncludes[0].FullFilePath };
+                    replacedName = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) {_parsedIncludes[0].FullFilePath};
                 if (replacedName.Contains(replaceName))
                     break;
                 replacedName.Add(replaceName);
-                
+
+                var prevToken = PeekAt(posAhead - 1);
+
                 // get the list of tokens that will replace this include
                 List<Token> valueTokens;
                 if (toReplaceToken is TokenInclude) {
-                    valueTokens = GetIncludeFileTokens(toReplaceToken, parsedInclude);
+                    valueTokens = GetIncludeFileTokens(prevToken as TokenString, parsedInclude);
                 } else {
-                    valueTokens = GetPreProcVariableTokens(toReplaceToken, replaceName);
+                    valueTokens = GetPreProcVariableTokens(prevToken as TokenString, toReplaceToken, replaceName);
                 }
 
                 // do we have a definition for the var/include?
-                if (valueTokens == null) {
-                    // otherwise, make sure we don't have two TokenWord following each other
-                    var prevToken = PeekAt(posAhead - 1);
-                    var nextToken = PeekAt(posAhead);
-                    if (prevToken is TokenWord && PeekAt(posAhead) is TokenWord) {
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + nextToken.Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, nextToken.EndPosition));
-                        RemoveTokens(posAhead, 1);
-                    } else {
-                        // if we don't have the definition for the variable, it must be replaced by an empty whitespace
-                        valueTokens = new List<Token> {
-                            new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition)
-                        };
-                    }
-
-                } else {
+                if (valueTokens != null) {
                     // we have to "merge" the TokenWord at the beginning and end of what we are inserting, this allows to take care of
-                    // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
-                    var prevToken = PeekAt(posAhead - 1);
-                    if (valueTokens.FirstOrDefault() is TokenWord && prevToken is TokenWord) {
-                        // append previous word with the first word of the value tokens
-                        ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + valueTokens.First().Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, prevToken.EndPosition));
+                    // cases like : DEF VAR lc_{&val}_end AS CHAR NO-UNDO.
+                    if (MergeTokenAtPosition(posAhead - 1, valueTokens.FirstOrDefault() as TokenWord, true)) {
                         valueTokens.RemoveAt(0);
                     }
-                    var nextToken = PeekAt(posAhead);
-                    if (valueTokens.LastOrDefault() is TokenWord && nextToken is TokenWord) {
-                        ReplaceToken(posAhead, new TokenWord(valueTokens.Last().Value + nextToken.Value, nextToken.Line, nextToken.Column, nextToken.StartPosition, nextToken.EndPosition));
+
+                    if (MergeTokenAtPosition(posAhead, valueTokens.LastOrDefault() as TokenWord, false)) {
                         valueTokens.RemoveAt(valueTokens.Count - 1);
+                    }
+
+                    // if we are in this case : MESSAGE "begin{include.i}end". we must try to merge this into one single string
+                    prevToken = PeekAt(posAhead - 1);
+                    var nextToken = PeekAt(posAhead);
+                    if (prevToken is TokenString && nextToken is TokenString) {
+                        while (MergeTokenAtPosition(posAhead - 1, valueTokens.FirstOrDefault(), true)) {
+                            var weMergedAString = valueTokens.FirstOrDefault() is TokenString;
+                            valueTokens.RemoveAt(0);
+                            if (weMergedAString) 
+                                // to handle the particular case where include.i contains something like :
+                                // word". MESSAGE "anothre mess
+                                break;
+                        }
+
+                        while (MergeTokenAtPosition(posAhead, valueTokens.LastOrDefault(), false)) {
+                            var weMergedAString = valueTokens.LastOrDefault() is TokenString;
+                            valueTokens.RemoveAt(valueTokens.Count - 1);
+                            if (weMergedAString)
+                                break;
+                        }
                     }
                 }
 
                 // if we have tokens insert, do it
                 if (valueTokens != null && valueTokens.Count > 0) {
                     InsertTokens(posAhead, valueTokens);
+                } else {
+                    // make sure we don't have two TokenWord following each other, or we must merge them
+                    if (MergeTokenAtPosition(posAhead - 1, PeekAt(posAhead) as TokenWord, true) ||
+                        MergeTokenAtPosition(posAhead - 1, PeekAt(posAhead) as TokenString, true)) {
+                        RemoveTokens(posAhead, 1);
+                    }
                 }
 
                 toReplaceToken = PeekAt(posAhead);
@@ -127,7 +136,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         private ParsedIncludeFile CreateParsedIncludeFile(Token bracketToken, int startPos, int endPos) {
-
             // info we will extract from the current statement :
             ParsedIncludeFile newInclude = null;
             string fileName = "";
@@ -135,7 +143,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             bool expectingFirstArg = true;
             string argName = null;
             int argNumber = 1;
-            var parameters = new Dictionary<string, List<Token>>(_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables, StringComparer.CurrentCultureIgnoreCase); // the scoped variable of this procedure will be available in the include file
+            var parameters = new Dictionary<string, string>(_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables, StringComparer.CurrentCultureIgnoreCase); // the scoped variable of this procedure will be available in the include file
 
             var state = 0;
             for (int i = startPos + 1; i <= endPos - 1; i++) {
@@ -148,6 +156,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             fileName += GetTokenStrippedValue(token);
                             state++;
                         }
+
                         break;
 
                     case 1:
@@ -168,7 +177,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 // case of a {file.i "arg1" arg2}
                             } else if (!(token is TokenEol || token is TokenWhiteSpace)) {
                                 if (!parameters.ContainsKey(argNumber.ToString()))
-                                    parameters.Add(argNumber.ToString(), TokenizeString(GetTokenStrippedValue(token)));
+                                    parameters.Add(argNumber.ToString(), GetTokenStrippedValue(token));
                                 argNumber++;
                                 expectingFirstArg = false;
                             }
@@ -180,15 +189,16 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                         argName = token.Value;
                                 } else if (!(token is TokenEol || token is TokenWhiteSpace || token.Value == "=")) {
                                     if (!parameters.ContainsKey(argName))
-                                        parameters.Add(argName, TokenizeString(GetTokenStrippedValue(token)));
+                                        parameters.Add(argName, GetTokenStrippedValue(token));
                                     argName = null;
                                 }
                             } else if (!(token is TokenEol || token is TokenWhiteSpace)) {
                                 if (!parameters.ContainsKey(argNumber.ToString()))
-                                    parameters.Add(argNumber.ToString(), TokenizeString(GetTokenStrippedValue(token)));
+                                    parameters.Add(argNumber.ToString(), GetTokenStrippedValue(token));
                                 argNumber++;
                             }
                         }
+
                         break;
                 }
             }
@@ -200,9 +210,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                 // always add the parameter "0" which it the filename
                 if (parameters.ContainsKey("0"))
-                    parameters["0"] = new List<Token> {new TokenWord(Path.GetFileName(fullFilePath ?? fileName), 0, 0, 0, 0)};
+                    parameters["0"] = Path.GetFileName(fullFilePath ?? fileName);
                 else
-                    parameters.Add("0", new List<Token> {new TokenWord(Path.GetFileName(fullFilePath ?? fileName), 0, 0, 0, 0)});
+                    parameters.Add("0", Path.GetFileName(fullFilePath ?? fileName));
 
                 newInclude = new ParsedIncludeFile(fileName, bracketToken, parameters, fullFilePath, _parsedIncludes[bracketToken.OwnerNumber]);
 
@@ -215,14 +225,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Returns the list of tokens corresponding to the given include
         /// </summary>
-        /// <param name="bracketToken"></param>
-        /// <param name="parsedInclude"></param>
-        /// <returns></returns>
-        private List<Token> GetIncludeFileTokens(Token bracketToken, ParsedIncludeFile parsedInclude) {
-
+        private List<Token> GetIncludeFileTokens(TokenString previousTokenString, ParsedIncludeFile parsedInclude) {
             // Parse the include file ?
             if (!string.IsNullOrEmpty(parsedInclude.FullFilePath)) {
-
                 ProLexer proLexer;
 
                 // did we already parsed this file in a previous parse session?
@@ -230,19 +235,28 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     proLexer = SavedLexerInclude[parsedInclude.FullFilePath];
                 } else {
                     // Parse it
-                    proLexer = new ProLexer(Utils.ReadAllText(parsedInclude.FullFilePath));
+                    if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
+                        proLexer = new ProLexer(Utils.ReadAllText(parsedInclude.FullFilePath), previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'');
+                    } else {
+                        proLexer = new ProLexer(Utils.ReadAllText(parsedInclude.FullFilePath));
+                    }
                     if (!SavedLexerInclude.ContainsKey(parsedInclude.FullFilePath))
                         SavedLexerInclude.Add(parsedInclude.FullFilePath, proLexer);
                 }
 
-                // add this include to the references and modify each token
                 _parsedIncludes.Add(parsedInclude);
                 var includeNumber = (ushort) (_parsedIncludes.Count - 1);
-                var tokens = proLexer.GetTokensList.ToList().GetRange(0, proLexer.GetTokensList.Count - 1).Select(token => token.Copy(token.Line, token.Column, token.StartPosition, token.EndPosition)).ToList();
-                tokens.ForEach(token => token.OwnerNumber = includeNumber);
-
-                return tokens;
-
+                
+                // add this include to the references and modify each token
+                // Remove EOF
+                List<Token> copiedTokens = new List<Token>();
+                for (int i = 0; i < proLexer.GetTokensList.Count - 1; i++) {
+                    var token = proLexer.GetTokensList[i];
+                    var copiedToken = token.Copy(token.Line, token.Column, token.StartPosition, token.EndPosition);
+                    copiedToken.OwnerNumber = includeNumber;
+                    copiedTokens.Add(copiedToken);
+                }
+                return copiedTokens;
             }
 
             parsedInclude.Flags |= ParseFlag.NotFound;
@@ -252,29 +266,52 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Returns the list of tokens corresponding to the {&amp;variable} to replace
         /// </summary>
-        /// <param name="bracketToken"></param>
-        /// <param name="varName"></param>
-        /// <returns></returns>
-        private List<Token> GetPreProcVariableTokens(Token bracketToken, string varName) {
+        private List<Token> GetPreProcVariableTokens(TokenString previousTokenString, Token bracketToken, string varName) {
             List<Token> valueTokens;
+            string value;
 
             // do we have a definition for the var?
             if (_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables.ContainsKey(varName))
-                valueTokens = _parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables[varName].ToList();
+                value = _parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables[varName];
             else if (_globalPreProcVariables.ContainsKey(varName))
-                valueTokens = _globalPreProcVariables[varName].ToList();
+                value = _globalPreProcVariables[varName];
             else
                 return null;
 
+            // Parse it
+            if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
+                valueTokens = new ProLexer(value, previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'').GetTokensList.ToList();
+            } else {
+                valueTokens = new ProLexer(value).GetTokensList.ToList();
+            }
+
+            // Remove EOF
             List<Token> copiedTokens = new List<Token>();
-            foreach (var token in valueTokens) {
-                var copiedToken = token.Copy(bracketToken.Line, bracketToken.Column, bracketToken.StartPosition, bracketToken.EndPosition);
+            for (int i = 0; i < valueTokens.Count - 1; i++) {
+                var copiedToken = valueTokens[i].Copy(bracketToken.Line, bracketToken.Column, bracketToken.StartPosition, bracketToken.EndPosition);
                 copiedToken.OwnerNumber = bracketToken.OwnerNumber;
                 copiedTokens.Add(copiedToken);
             }
-
             return copiedTokens;
         }
 
+        /// <summary>
+        /// Merge the values of two tokens of the same type (return true if it does)
+        /// The merge is done at the givent @position and using the given @token value
+        /// </summary>
+        private bool MergeTokenAtPosition<T>(int position, T token, bool appendTokenValue) where T : Token {
+            var tokenAtPos = PeekAt(position);
+            if (token != null && tokenAtPos is T) {
+                // append previous word with the first word of the value tokens
+                Token newToken;
+                if (typeof(T) == typeof(TokenWord))
+                    newToken = new TokenWord(appendTokenValue ? tokenAtPos.Value + token.Value : token.Value + tokenAtPos.Value, tokenAtPos.Line, tokenAtPos.Column, tokenAtPos.StartPosition, tokenAtPos.EndPosition);
+                else
+                    newToken = new TokenString(appendTokenValue ? tokenAtPos.Value + token.Value : token.Value + tokenAtPos.Value, tokenAtPos.Line, tokenAtPos.Column, tokenAtPos.StartPosition, tokenAtPos.EndPosition);
+                ReplaceToken(position, newToken);
+                return true;
+            }
+            return false;
+        }
     }
 }

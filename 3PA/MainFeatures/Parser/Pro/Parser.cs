@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 using YamuiFramework.Helper;
 using _3PA.Lib;
@@ -128,7 +127,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// or & DEFINE variables from the current file
         /// </summary>
-        private Dictionary<string, List<Token>> _globalPreProcVariables = new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase);
+        private Dictionary<string, string> _globalPreProcVariables = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
@@ -209,8 +208,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     "root",
                     new TokenEos(null, 0, 0, 0, 0),
                     // the preprocessed variable {0} equals to the filename...
-                    new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase) {
-                        {"0", new List<Token> {new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0)}}
+                    new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
+                        {"0", Path.GetFileName(FilePathBeingParsed)}
                     },
                     _filePathBeingParsed,
                     null)
@@ -268,7 +267,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 _parserErrors.Add(new ParserError(ParserErrorType.MissingBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
               
 
-            //Returns the concatenation of all the tokens once the parsing is done
+            // returns the concatenation of all the tokens once the parsing is done
             if (debugListOut != null) {
                 foreach (var token in _tokenList) {
                     debugListOut.Append(token.Value);
@@ -375,17 +374,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 _tokenCount = _tokenList.Count;
             }
         }
-
-        /// <summary>
-        /// Returns a list of tokens for a given string
-        /// </summary>
-        private List<Token> TokenizeString(string data) {
-            var lexer = new ProLexer(data);
-            var outList = lexer.GetTokensList.ToList();
-            outList.RemoveAt(outList.Count - 1);
-            return outList;
-        }
-
+        
         #endregion
 
         #region utils
@@ -436,7 +425,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// conversion
         /// </summary>
         private ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            if (String.IsNullOrEmpty(str)) {
+            if (string.IsNullOrEmpty(str)) {
                 return ParsedPrimitiveType.Unknow;
             }
 

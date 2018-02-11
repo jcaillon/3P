@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser.Pro {
@@ -18,7 +17,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // info we will extract from the current statement :
             string variableName = null;
-            List<Token> tokensList = new List<Token>();
+            StringBuilder definition = new StringBuilder();
 
             var count = 0;
             while (true) {
@@ -42,11 +41,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     continue;
                 }
 
-                tokensList.Add(token);
-            }
-            
-            StringBuilder definition = new StringBuilder();
-            foreach (var token in tokensList) {
                 definition.Append(token.Value);
             }
             
@@ -130,21 +124,22 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // We matched a new preprocessed variable?
             if (flags > 0 && !string.IsNullOrEmpty(variableName)) {
-                AddParsedItem(new ParsedPreProcVariable(variableName, directiveToken, 0, definition.ToString().Trim()) {
+                var newVar = new ParsedPreProcVariable(variableName, directiveToken, 0, definition.ToString().Trim()) {
                     Flags = flags
-                }, directiveToken.OwnerNumber);
+                };
+                AddParsedItem(newVar, directiveToken.OwnerNumber);
 
                 // add it to the know variables (either to the global scope or to the local scope)
                 if (flags.HasFlag(ParseFlag.Global)) {
                     if (_globalPreProcVariables.ContainsKey("&" + variableName))
-                        _globalPreProcVariables["&" + variableName] = TrimTokensList(tokensList);
+                        _globalPreProcVariables["&" + variableName] = newVar.Value;
                     else
-                        _globalPreProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
+                        _globalPreProcVariables.Add("&" + variableName, newVar.Value);
                 } else {
                     if (_parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.ContainsKey("&" + variableName))
-                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables["&" + variableName] = TrimTokensList(tokensList);
+                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables["&" + variableName] = newVar.Value;
                     else
-                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.Add("&" + variableName, TrimTokensList(tokensList));
+                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.Add("&" + variableName, newVar.Value);
                 }
             }
 

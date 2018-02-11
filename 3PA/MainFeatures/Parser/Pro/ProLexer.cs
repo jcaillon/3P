@@ -90,6 +90,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         /// <summary>
+        /// constructor
+        /// </summary>
+        public ProLexer(string data, bool initInDoubleQuoteString, bool initInSimpleQuoteString) : this(data, 0, 0, 0, 0, 0, initInDoubleQuoteString, initInSimpleQuoteString, null) {
+        }
+
+        /// <summary>
         /// Use this when you wish to tokenize only a partial string in a longer string
         /// Allows you to start with a comment depth different of 0
         /// </summary>
@@ -160,13 +166,31 @@ namespace _3PA.MainFeatures.Parser.Pro {
             if (ch == Eof)
                 return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
 
-            // if we started in a string, read this token as a string
-            if (_inDoubleQuoteString || _inSimpleQuoteString)
-                return CreateStringToken(_inDoubleQuoteString ? '"' : '\'');
-
             // if we started in a comment, read this token as a comment
             if (_commentDepth > 0)
                 return CreateCommentToken();
+
+            // treat includes first
+            switch (ch) {
+                case '{':
+                    // case of a preprocessed {&variable}/{1} or an include
+                    _includeDepth = IncludeDepth + 1;
+                    return CreatePreprocessedToken();
+
+                case '}':
+                    // end of include
+                    if (IncludeDepth > 0)
+                        _includeDepth = IncludeDepth - 1;
+                    return CreateSymbolToken();
+            }
+
+            // if we are in a string, read this token as a string
+            if (_includeDepth == 0 && (_inDoubleQuoteString || _inSimpleQuoteString)) {
+                if (ch != '"' && ch != '\'') {
+                    ReadChr();
+                }
+                return CreateStringToken(_inDoubleQuoteString ? '"' : '\'');
+            }
 
             switch (ch) {
                 case '~':
@@ -183,17 +207,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     if (nextChar == '/' && (char.IsWhiteSpace(prevChar) || prevChar == Eof))
                         return CreateSingleLineCommentToken();
                     // symbol
-                    return CreateSymbolToken();
-
-                case '{':
-                    // case of a preprocessed {&variable}/{1} or an include
-                    _includeDepth = IncludeDepth + 1;
-                    return CreatePreprocessedToken();
-
-                case '}':
-                    // end of include
-                    if (IncludeDepth > 0)
-                        _includeDepth = IncludeDepth - 1;
                     return CreateSymbolToken();
 
                 case '&':
@@ -242,6 +255,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 case '"':
                 case '\'':
                     // quoted string (read until unescaped ' or ")
+                    ReadChr();
                     return CreateStringToken(ch);
 
                 case ':':
@@ -410,7 +424,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         /// <returns></returns>
         protected override Token CreateStringToken(char strChar) {
-            ReadChr();
             if (strChar == '"')
                 _inDoubleQuoteString = true;
             else
@@ -441,13 +454,19 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     ReadEol(ch);
                     continue;
                 }
+
                 // quote char
                 if (ch == strChar) {
                     ReadChr();
                     break; // done reading
-                    // keep on reading
                 }
 
+                // include or preproc var {&
+                if (ch == '{') {
+                    return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos + Offset, _pos + Offset);
+                }
+
+                // keep on reading
                 ReadChr();
             }
             _inDoubleQuoteString = false;
