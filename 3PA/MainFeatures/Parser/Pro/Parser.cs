@@ -238,13 +238,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     ErrorHandler.LogError(e, "Error while parsing the following file : " + filePathBeingParsed);
                 }
             }
-            
-            // add missing values to the line dictionary (each line that correspond to the root scope)
-            var defaultLineinfo = new LineInfo(0, rootScope, rootScope);
-            for (int i = 0; i <= PeekAt(-1).Line; i++) {
-                if (!_lineInfo.ContainsKey(i))
-                    _lineInfo.Add(i, defaultLineinfo);
-            }
+            AddLineInfo(PeekAt(-1));
             
             // check for parser errors
             while (_context.BlockStack.Count > 1) {
@@ -537,11 +531,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             public bool StatementUnknownFirstWord { get; set; }
 
             /// <summary>
-            /// We matched a THEN or ELSE in this statement, it will have the value of the line number of the next
-            /// word after a THEN or ELSE
+            /// Current count of statements in the program
             /// </summary>
-            public int StatementFirstWordLineAferThenOrElse { get; set; }
-
+            public int StatementCount { get; set; }
+            
             /// <summary>
             /// Allows to read the next word after a THEN or a ELSE as the first word of a statement to 
             /// correctly read ASSIGN statement for instance...

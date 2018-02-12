@@ -20,7 +20,7 @@
 
 #endregion
 
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Text;
 using _3PA.MainFeatures.AutoCompletionFeature;
@@ -47,11 +47,29 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 if (_context.StatementWordCount == 1 || _context.ReadNextWordAsStatementStart) {
                     if (_context.ReadNextWordAsStatementStart) {
                         _context.ReadNextWordAsStatementStart = false;
-                        _context.StatementFirstWordLineAferThenOrElse = token.Line;
+                    }
+
+                    // if we are not continuing a IF ... THEN with a ELSE we should pop all single indent block
+                    if (!lowerTok.Equals("else")) {
+                        var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
+                        while (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
+                            _context.BlockStack.Pop();
+                            topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
+                        }
                     }
 
                     // matches a definition statement at the beginning of a statement
                     switch (lowerTok) {
+                        case "else":
+                            // after a else, we need to consider the next word like it's the start of a new statement
+                            // but we consider the whole else STATEMENT. as one single statement to correctly indent it!
+                            _context.ReadNextWordAsStatementStart = true;
+                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
+                            break;
+                        case "otherwise":
+                            _context.ReadNextWordAsStatementStart = true;
+                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
+                            break;
                         case "case":
                         case "catch":
                         case "class":
@@ -65,7 +83,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         case "do":
                         case "repeat":
                         case "editing":
-                        case "trigger": // trigger procedure
+                            // case of a THEN DO: for instance, we dont want to keep 2 block (=2 indent), we pop the THEN block
+                            // and only keep the DO block
+                            var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
+                            if (topScope != null && _context.StatementCount == topScope.StatementNumber ) {
+                                _context.BlockStack.Pop();
+                            }
                             // increase block depth with a simple block
                             _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             break;
@@ -79,11 +102,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                     _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
                                 }
                             }
-                            break;
-                        case "else":
-                            // after a else, we need to consider the next word like it's the start of a new statement
-                            // but we consider the whole else STATEMENT. as one single statement to correctly indent it!
-                            _context.ReadNextWordAsStatementStart = true;
                             break;
                         case "define":
                         case "def":
@@ -130,6 +148,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 _context.LastOnBlock = newOn;
                             }
                             break;
+                        case "trigger": 
+                            // trigger procedure
+                            // TODO handle trigger procedure
+                            break;
                         case "run":
                             // Parse a run statement
                             CreateParsedRun(token);
@@ -155,8 +177,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     // not the first word of a statement
 
                     switch (lowerTok) {
-                        case "dynamic-function":
-                            CreateParsedDynamicFunction(token);
+                        case "then":
+                            // after a then, we need to consider the next word like it's the start of a new statement
+                            // but we consider the whole if then STATEMENT. as one single statement to correctly indent it!
+                            _context.ReadNextWordAsStatementStart = true;
+                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
                             break;
                         case "do":
                             // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:)
@@ -169,20 +194,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
                             }
                             break;
+                        case "dynamic-function":
+                            CreateParsedDynamicFunction(token);
+                            break;
                         case "triggers":
                             // Trigger phrase : this is, for instance, to handle a block in a "CREATE MENU-ITEM" statement
                             if (PeekAtNextNonType<TokenWhiteSpace>(0) is TokenEos)
                                 _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
-                            break;
-                        case "then":
-                            // after a then, we need to consider the next word like it's the start of a new statement
-                            // but we consider the whole if then STATEMENT. as one single statement to correctly indent it!
-                            var firstTokenLower = _context.StatementFirstToken.Value.ToLower();
-                            if (firstTokenLower.Equals("if") || firstTokenLower.Equals("case"))
-                                _context.ReadNextWordAsStatementStart = true;
-                            break;
-                        case "otherwise":
-                            _context.ReadNextWordAsStatementStart = true;
                             break;
                         default:
                             // try to match a known word
@@ -338,6 +356,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 }
                 if (matched)
                     MoveNext();
+
+            } else if (token is TokenEol) {
+                AddLineInfo(token);
             }
 
         }
@@ -350,42 +371,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// called when a Eos token is found, store information on the statement's line
         /// </summary>
         private void NewStatement(Token token) {
-
-            if (_context.StatementFirstToken != null) {
-                               
-                // store the line information for each line affected by the current statement
-                if (_context.StatementFirstToken.OwnerNumber == 0) { // OwnerNumber == 0 to only consider blocks in the base file (not in includes)...
-                    
-                    // current indentation, the preproc directives do not increase the indentation
-                    var depth = GetBlockDepth(0);
-                    // the line below allows to not indent the first sentence that triggers the block...
-                    if (depth > 0) {
-                        if (_context.StatementFirstToken != null && _context.StatementFirstToken.Line == _context.BlockStack.Peek().Line)
-                            depth = GetBlockDepth(1);
-                    }
-
-                    var statementStartLine = _context.StatementFirstToken.Line;
-                    
-                    if (!_lineInfo.ContainsKey(statementStartLine))
-                        _lineInfo.Add(statementStartLine, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
-
-                    // add missing values to the line dictionary 
-                    // (lines from start statement + 1 to end of statement have a depth + 1)
-                    // (can have a depth + 2 if the statement contains a ELSE or THEN)
-                    if (statementStartLine > -1 && token.Line > statementStartLine) {
-                        for (int i = statementStartLine + 1; i <= token.Line; i++) {
-                            if (!_lineInfo.ContainsKey(i)) {
-                                _lineInfo.Add(i, new LineInfo(depth + (_context.StatementFirstWordLineAferThenOrElse > 0 && i > _context.StatementFirstWordLineAferThenOrElse ? 2 : 1), GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
-                            }
-                        }
-                    }
-                }
-            }
-
+            AddLineInfo(token);
+            _context.StatementCount++;
             _context.StatementUnknownFirstWord = false;
             _context.StatementWordCount = 0;
             _context.StatementFirstToken = null;
-            _context.StatementFirstWordLineAferThenOrElse = 0;
         }
 
         /// <summary>
@@ -397,50 +387,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <param name="token"></param>
         /// <returns></returns>
         private bool CloseBlock<T>(Token token) where T : ParsedScope {
-
+            while (_context.BlockStack.Peek() is ParsedScopeSimpleSingleBlock) {
+                _context.BlockStack.Pop();
+            }
             var currentBlock = _context.BlockStack.Peek() as T;
             if (currentBlock != null) {
                 currentBlock.EndBlockLine = token.Line;
                 currentBlock.EndBlockPosition = token.EndPosition;
-
-                int depth = GetBlockDepth(0);
-                int closeStatementLine = (_context.StatementFirstToken != null ? _context.StatementFirstToken.Line : token.Line);
-
-                // we just closed a block, fill the line info for all the lines of this block
-                if (currentBlock.IncludeLine <= 0) { // lastBlock.IncludeLine <= 0 to only consider blocks in the base file (not in includes)...
-
-                    for (int i = currentBlock.Line + 1; i <= closeStatementLine - 1; i++) {
-                        if (!_lineInfo.ContainsKey(i)) {
-                            _lineInfo.Add(i, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
-                        }
-                    }
-                }
-                
                 _context.BlockStack.Pop();
                 return true;
             }
             return false;
-        }
-        
-        /// <summary>
-        /// Returns the current block depth if initialIndex = 0. Or the parent block depth if = 1.
-        /// (we do not count PreProc block directives like analyze-suspend/resume)
-        /// </summary>
-        /// <returns></returns>
-        private int GetBlockDepth(int initialIndex) {
-            // -1 because we always have a block that represents the current file
-            var depth = -1;
-            var i = initialIndex;
-            while (i < _context.BlockStack.Count) {
-                if (_context.BlockStack.ElementAt(i).ScopeType != ParsedScopeType.PreProcBlock) {
-                    // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
-                    var preprocIf = _context.BlockStack.ElementAt(i) as ParsedScopePreProcIfBlock;
-                    if (preprocIf == null || !preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-"))
-                        depth++;
-                }
-                i++;
-            }
-            return depth;
         }
         
         /// <summary>
@@ -458,7 +415,94 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
             return output;
         }
+        
+        /// <summary>
+        /// Add info on the line of the given token
+        /// </summary>
+        /// <param name="token"></param>
+        private void AddLineInfo(Token token) {
+            // OwnerNumber > 0 to only consider lines in the base file (not in includes)...
+            if (token.OwnerNumber > 0)
+                return;
 
+            var curLine = token.Line;
+            
+            if (!_lineInfo.ContainsKey(curLine)) {
+                
+                int depth = GetDepth(curLine);
+                
+                // for the current statement
+                if (_context.StatementFirstToken != null) {
+
+                    if (!_lineInfo.ContainsKey(_context.StatementFirstToken.Line)) {
+                        _lineInfo.Add(_context.StatementFirstToken.Line, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                    }
+                    
+                    if (curLine > _context.StatementFirstToken.Line) {
+                        var block = _context.BlockStack.Peek();
+                        var statementDepth = depth;
+                        //if (_context.StatementFirstToken.Line > block.Line)
+                        //    depth++;
+                        if (!(block is ParsedScopeSimpleSingleBlock) || curLine > block.Line + 1)
+                            statementDepth++;
+
+                        // fill missing info for previous lines
+                        for (int i = _context.StatementFirstToken.Line + 1; i <= curLine; i++) {
+                            if (!_lineInfo.ContainsKey(i)) {
+                                _lineInfo.Add(i, new LineInfo(statementDepth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                            }
+                        }
+                    }
+                }
+
+                // fill missing info for previous lines
+                if (_lineInfo.Count > 0) {
+                    var lastKnowLine = _lineInfo.Last();
+                    for (int i = lastKnowLine.Key + 1; i <= curLine - 1; i++) {
+                        if (!_lineInfo.ContainsKey(i)) {
+                            _lineInfo.Add(i, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                        }
+                    }
+                }
+                
+                if (!_lineInfo.ContainsKey(curLine)) {
+                    _lineInfo.Add(curLine, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                }
+
+            }
+            
+            // Then/otherwise only increase the indentation for a single statement
+            var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
+            if (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
+                _context.BlockStack.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Get current depth (indentation level)
+        /// </summary>
+        private int GetDepth(int curLine) {
+            // compute current depth
+            // -1 because we always have a block that represents the current file
+            var depth = -1;
+            var i = 0;
+            while (i < _context.BlockStack.Count) {
+                var block = _context.BlockStack.ElementAt(i);
+                // preproc block (analyze-suspend) do not increase indentation
+                if (block.ScopeType != ParsedScopeType.PreProcBlock) {
+                    var preprocIf = block as ParsedScopePreProcIfBlock;
+                    // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
+                    if (preprocIf == null || !preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
+                        // only the lines AFTER the start of the block should be indent
+                        if (curLine > block.Line) {
+                            depth++;
+                        }
+                    }
+                }
+                i++;
+            }
+            return Math.Max(depth, 0);
+        }
 
         /// <summary>
         /// Call this method instead of adding the items directly in the list,
@@ -513,20 +557,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
             return token.Value;
         }
-
-        /// <summary>
-        /// Trim whitespaces tokens at the beginning and end of the list
-        /// </summary>
-        private static List<Token> TrimTokensList(List<Token> tokensList) {
-            while (tokensList.Count > 0 && tokensList[0] is TokenWhiteSpace) {
-                tokensList.RemoveAt(0);
-            }
-            while (tokensList.Count > 0 && tokensList[tokensList.Count - 1] is TokenWhiteSpace) {
-                tokensList.RemoveAt(tokensList.Count - 1);
-            }
-            return tokensList;
-        }
-
+        
         /// <summary>
         /// Create a new parsed define item according to its type
         /// </summary>

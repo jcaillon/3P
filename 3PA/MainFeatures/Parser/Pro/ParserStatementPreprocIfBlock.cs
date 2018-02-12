@@ -29,6 +29,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         break;
                     if (token is TokenPreProcDirective)
                         break;
+                    if (token is TokenEol) {
+                        AddLineInfo(token);
+                    }
                     expressionTokens.Add(token);
                 } while (true);
 

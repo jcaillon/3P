@@ -25,15 +25,19 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 // need to replace in case we use for instance a {&var} in a scope-define value
                 ReplaceIncludeAndPreprocVariablesAhead(count);
                 var token = PeekAt(count);
-                if (token is TokenEof) break;
-                if (token is TokenComment) continue;
+                if (token is TokenEof) 
+                    break;
+                if (token is TokenComment) 
+                    continue;
                 // a ~ allows for a eol but we don't control if it's an eol because if it's something else we probably parsed it wrong anyway (in the lexer)
                 if (token is TokenSymbol && token.Value == "~") {
                     if (PeekAt(count + 1) is TokenEol)
                         count++;
                     continue;
                 }
-                if (token is TokenEol) break;
+                if (token is TokenEol) {
+                    break;
+                }
 
                 // read the first word after the directive
                 if (string.IsNullOrEmpty(variableName) && token is TokenWord) {
@@ -135,6 +139,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             // we directly set the new token position there (it will be the EOL after this directive)
             _tokenPos += count;
+
+            AddLineInfo(PeekAt(0));
 
             // since we didn't use MoveNext we also manually replace the includes ahead
             ReplaceIncludeAndPreprocVariablesAhead(1);
