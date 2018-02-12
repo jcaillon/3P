@@ -553,15 +553,15 @@ namespace _3PA.MainFeatures {
 
         // HELP URL
         public static string UrlWebSite {
-            get { return @"http://jcaillon.github.io/3P/"; }
+            get { return @"https://jcaillon.github.io/3P/"; }
         }
 
         public static string UrlHelpSetEnv {
-            get { return @"http://jcaillon.github.io/3P/#/set-environment"; }
+            get { return @"https://jcaillon.github.io/3P/#/set-environment"; }
         }
 
         public static string UrlHelpCustomThemes {
-            get { return @"http://jcaillon.github.io/3P/#/custom-themes"; }
+            get { return @"https://jcaillon.github.io/3P/#/custom-themes"; }
         }
 
         public static string UrlCheckReleases {
@@ -569,11 +569,11 @@ namespace _3PA.MainFeatures {
         }
 
         public static string UrlHelpDeploy {
-            get { return @"http://jcaillon.github.io/3P/#/deployment"; }
+            get { return @"https://jcaillon.github.io/3P/#/deployment"; }
         }
 
         public static string UrlHelpDeployRules {
-            get { return @"http://jcaillon.github.io/3P/#/deployment-rules"; }
+            get { return @"https://jcaillon.github.io/3P/#/deployment-rules"; }
         }
 
         /// <summary>

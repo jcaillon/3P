@@ -121,14 +121,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// the [0] will designate the current procedure file, [1] the first include and so on...
         /// </summary>
         private List<ParsedIncludeFile> _parsedIncludes = new List<ParsedIncludeFile>();
-
-        /// <summary>
-        /// Contains a dictionary in which each variable name known corresponds to its value tokenized
-        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
-        /// or & DEFINE variables from the current file
-        /// </summary>
-        private Dictionary<string, string> _globalPreProcVariables = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-
+        
         #endregion
 
         #region Public properties

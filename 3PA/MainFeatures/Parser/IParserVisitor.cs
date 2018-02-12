@@ -41,5 +41,6 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(ParsedFoundTableUse pars);
         void Visit(ParsedEvent pars);
         void PostVisit();
+        void Visit(ParsedUsedPreProcVariable pars);
     }
 }

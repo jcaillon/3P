@@ -47,6 +47,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 // get the caracteristics of this include
                 string replaceName = null;
                 ParsedIncludeFile parsedInclude = null;
+                string preprocValue = null;
                 if (count >= 3) {
                     if (toReplaceToken is TokenInclude) {
                         parsedInclude = CreateParsedIncludeFile(toReplaceToken, posAhead, posAhead + count - 1);
@@ -54,6 +55,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             replaceName = !string.IsNullOrEmpty(parsedInclude.FullFilePath) ? parsedInclude.FullFilePath : parsedInclude.Name;
                     } else {
                         replaceName = (toReplaceToken.Value == "{" ? "" : "&") + PeekAt(posAhead + 1).Value;
+                        preprocValue = CreateUsedPreprocVariable(toReplaceToken, replaceName);
                     }
                 }
 
@@ -67,7 +69,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     break;
 
                 // make sure to not replace the same include in the same replacement loop, if we do that
-                // this means we will go into an infinite loop
+                // this means we will go into an infinite loop case of a {&{&one}} with one=two and two=one
                 if (replacedName == null)
                     replacedName = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) {_parsedIncludes[0].FullFilePath};
                 if (replacedName.Contains(replaceName))
@@ -81,7 +83,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 if (toReplaceToken is TokenInclude) {
                     valueTokens = GetIncludeFileTokens(prevToken as TokenString, parsedInclude);
                 } else {
-                    valueTokens = GetPreProcVariableTokens(prevToken as TokenString, toReplaceToken, replaceName);
+                    valueTokens = GetPreProcVariableTokens(prevToken as TokenString, toReplaceToken, preprocValue);
                 }
 
                 // do we have a definition for the var/include?
@@ -135,6 +137,22 @@ namespace _3PA.MainFeatures.Parser.Pro {
             return weReplacedSomething;
         }
 
+        /// <summary>
+        /// Creates the preproc variable reference to be seen in the explorer
+        /// </summary>
+        private string CreateUsedPreprocVariable(Token bracketToken, string varName) {
+
+            // do we have a definition for the var?
+            string value = GetPreProcVariableValue(bracketToken.OwnerNumber, varName);
+            
+            AddParsedItem(new ParsedUsedPreProcVariable(varName, bracketToken, value == null), bracketToken.OwnerNumber);
+
+            return value;
+        }
+
+        /// <summary>
+        /// Create the include reference to be seen in the explorer
+        /// </summary>
         private ParsedIncludeFile CreateParsedIncludeFile(Token bracketToken, int startPos, int endPos) {
             // info we will extract from the current statement :
             ParsedIncludeFile newInclude = null;
@@ -266,18 +284,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Returns the list of tokens corresponding to the {&amp;variable} to replace
         /// </summary>
-        private List<Token> GetPreProcVariableTokens(TokenString previousTokenString, Token bracketToken, string varName) {
-            List<Token> valueTokens;
-            string value;
-
+        private List<Token> GetPreProcVariableTokens(TokenString previousTokenString, Token bracketToken, string value) {
             // do we have a definition for the var?
-            if (_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables.ContainsKey(varName))
-                value = _parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables[varName];
-            else if (_globalPreProcVariables.ContainsKey(varName))
-                value = _globalPreProcVariables[varName];
-            else
+            if (value == null)
                 return null;
 
+            List<Token> valueTokens;
+            
             // Parse it
             if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
                 valueTokens = new ProLexer(value, previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'').GetTokensList.ToList();
@@ -312,6 +325,27 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// set a preprocessed variable to its owner. Input ownerNumber to 0 for a global variable
+        /// </summary>
+        private void SetPreProcVariableValue(int ownerNumber, string variableName, string variableValue) {
+            if (_parsedIncludes[ownerNumber].ScopedPreProcVariables.ContainsKey("&" + variableName))
+                _parsedIncludes[ownerNumber].ScopedPreProcVariables["&" + variableName] = variableValue;
+            else
+                _parsedIncludes[ownerNumber].ScopedPreProcVariables.Add("&" + variableName, variableValue);
+        }
+
+        /// <summary>
+        /// Get a preprocessed variable value
+        /// </summary>
+        private string GetPreProcVariableValue(int ownerNumber, string variableName) {
+            if (_parsedIncludes[ownerNumber].ScopedPreProcVariables.ContainsKey(variableName))
+                return _parsedIncludes[ownerNumber].ScopedPreProcVariables[variableName];
+            if (_parsedIncludes[0].ScopedPreProcVariables.ContainsKey(variableName))
+                return _parsedIncludes[0].ScopedPreProcVariables[variableName];
+            return null;
         }
     }
 }

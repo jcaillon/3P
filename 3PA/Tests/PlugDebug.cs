@@ -134,7 +134,7 @@ namespace _3PA.Tests {
             var watch2 = Stopwatch.StartNew();
 
             foreach (var file in Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
-                if (file.TestAgainstListOfPatterns(Config.Instance.FilesPatternProgress)) {
+                if (file.TestAgainstListOfPatterns(Config.Instance.FilesPatternCompilable)) {
                     string outStr = file + " >>> ";
 
                     var watch = Stopwatch.StartNew();
@@ -283,6 +283,10 @@ namespace _3PA.Tests {
             }
 
             Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedUsedPreProcVariable pars) {
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedWord pars) {

@@ -130,17 +130,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 AddParsedItem(newVar, directiveToken.OwnerNumber);
 
                 // add it to the know variables (either to the global scope or to the local scope)
-                if (flags.HasFlag(ParseFlag.Global)) {
-                    if (_globalPreProcVariables.ContainsKey("&" + variableName))
-                        _globalPreProcVariables["&" + variableName] = newVar.Value;
-                    else
-                        _globalPreProcVariables.Add("&" + variableName, newVar.Value);
-                } else {
-                    if (_parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.ContainsKey("&" + variableName))
-                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables["&" + variableName] = newVar.Value;
-                    else
-                        _parsedIncludes[directiveToken.OwnerNumber].ScopedPreProcVariables.Add("&" + variableName, newVar.Value);
-                }
+                SetPreProcVariableValue(flags.HasFlag(ParseFlag.Global) ? 0 : directiveToken.OwnerNumber, variableName, newVar.Value);
             }
 
             // we directly set the new token position there (it will be the EOL after this directive)

@@ -199,7 +199,28 @@ namespace _3PA.MainFeatures.Parser.Pro {
             _parser = null;
         }
 
+        /// <summary>
+        /// All the references of {&amp;variable} found
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedUsedPreProcVariable pars) {
+            // To code explorer
+            PushToCodeExplorer(
+                GetExplorerListNode("Preprocessed variables usage", CodeExplorerIconType.PreprocessedVariable),
+                new PreprocVarCodeItem {
+                    DisplayText = pars.Name,
+                    Flags = pars.Flags,
+                    SubText = null,
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column
+                });
+        }
 
+        /// <summary>
+        /// Unknow word found in the program
+        /// </summary>
+        /// <param name="pars"></param>
         public void Visit(ParsedWord pars) {
 
         }

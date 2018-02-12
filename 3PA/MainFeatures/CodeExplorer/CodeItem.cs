@@ -247,6 +247,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         MainBlock,
 
         Include,
+        PreprocessedVariable,
 
         ExternalProcedure,
         Procedure,
@@ -340,6 +341,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         public override Image ItemTypeImage {
             get { return ImageResources.Include; }
+        }
+    }
+
+    internal class PreprocVarCodeItem : CodeItem {
+        public override CodeExplorerIconType Type {
+            get { return CodeExplorerIconType.PreprocessedVariable; }
+        }
+
+        public override Image ItemTypeImage {
+            get { return ImageResources.PreprocessedVariable; }
         }
     }
 

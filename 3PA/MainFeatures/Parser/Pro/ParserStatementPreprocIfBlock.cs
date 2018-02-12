@@ -20,6 +20,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 int i = 0;
                 do {
                     i++;
+                    // need to replace in case we use for instance a {&var} in a scope-define value
+                    ReplaceIncludeAndPreprocVariablesAhead(i);
                     var token = PeekAt(i);
                     if (token is TokenComment)
                         continue;

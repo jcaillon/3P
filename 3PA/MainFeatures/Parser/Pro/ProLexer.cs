@@ -37,6 +37,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
         private int _commentDepth;
         private int _includeDepth;
+        private int _includeDepthWhenEnteringString;
         private bool _inDoubleQuoteString;
         private bool _inSimpleQuoteString;
 
@@ -108,6 +109,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             _pushLineInfo = pushLineInfo;
             _inDoubleQuoteString = initInDoubleQuoteString;
             _inSimpleQuoteString = initInSimpleQuoteString;
+            _includeDepthWhenEnteringString = _inDoubleQuoteString || _inSimpleQuoteString ?_includeDepth : 0;
 
             // push first line info
             if (_pushLineInfo != null)
@@ -185,7 +187,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
 
             // if we are in a string, read this token as a string
-            if (_includeDepth == 0 && (_inDoubleQuoteString || _inSimpleQuoteString)) {
+            if (_includeDepthWhenEnteringString == _includeDepth && (_inDoubleQuoteString || _inSimpleQuoteString)) {
                 if (ch != '"' && ch != '\'') {
                     ReadChr();
                 }
@@ -428,6 +430,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 _inDoubleQuoteString = true;
             else
                 _inSimpleQuoteString = true;
+            _includeDepthWhenEnteringString = _includeDepth;
             while (true) {
                 var ch = PeekAtChr(0);
                 if (ch == Eof)

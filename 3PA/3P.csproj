@@ -543,6 +543,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\Number.png" />
     <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Preprocessed.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\PreprocessedVariable.png" />
     <Content Include="_Resource\Images\ParserItem\Type\UibPreprocessorBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Procedure.png" />
     <Content Include="_Resource\Images\ParserItem\Type\ProgramParameter.png" />

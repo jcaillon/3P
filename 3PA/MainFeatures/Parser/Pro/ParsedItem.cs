@@ -600,8 +600,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParsedIncludeFile Parent { get; private set; }
 
         /// <summary>
-        /// Full path of the include file (when actually found in the propath
-        /// null otherwise)
+        /// Full path of the include file (when actually found in the propath null otherwise)
         /// </summary>
         public string FullFilePath { get; private set; }
 
@@ -631,6 +630,20 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParsedPreProcVariable(string name, Token token, int undefinedLine, string value) : base(name, token) {
             UndefinedLine = undefinedLine;
             Value = value;
+        }
+    }
+
+    /// <summary>
+    /// Pre-processed var parsed item
+    /// </summary>
+    internal class ParsedUsedPreProcVariable : ParsedItem {
+        
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedUsedPreProcVariable(string name, Token token, bool notFound) : base(name, token) {
+            Flags = notFound ? ParseFlag.NotFound : 0;
         }
     }
 
