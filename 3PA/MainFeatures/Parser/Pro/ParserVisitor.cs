@@ -204,17 +204,26 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedUsedPreProcVariable pars) {
+            var preproc = new PreprocVarCodeItem {
+                DisplayText = pars.Name,
+                Flags = pars.Flags,
+                SubText = null,
+                DocumentOwner = pars.FilePath,
+                GoToLine = pars.Line,
+                GoToColumn = pars.Column
+            };
+
             // To code explorer
-            PushToCodeExplorer(
-                GetExplorerListNode("Preprocessed variables usage", CodeExplorerIconType.PreprocessedVariable),
-                new PreprocVarCodeItem {
-                    DisplayText = pars.Name,
-                    Flags = pars.Flags,
-                    SubText = null,
-                    DocumentOwner = pars.FilePath,
-                    GoToLine = pars.Line,
-                    GoToColumn = pars.Column
-                });
+            if (pars.Flags.HasFlag(ParseFlag.NotFound)) {
+                PushToCodeExplorer(
+                    GetExplorerListNode("Missing includes/variables", CodeExplorerIconType.MissingInclude),
+                    preproc);
+            } else {
+                // To code explorer
+                PushToCodeExplorer(
+                    GetExplorerListNode("Preprocessed variables usage", CodeExplorerIconType.PreprocessedVariable),
+                    preproc);
+            }
         }
 
         /// <summary>
@@ -325,17 +334,26 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedIncludeFile pars) {
-            // To code explorer
-            PushToCodeExplorer(
-                GetExplorerListNode("Includes", CodeExplorerIconType.Include),
-                new IncludeCodeItem {
-                    DisplayText = pars.Name,
-                    Flags = pars.Flags,
-                    SubText = null,
-                    DocumentOwner = pars.FilePath,
-                    GoToLine = pars.Line,
-                    GoToColumn = pars.Column
-                });
+
+            var inc = new IncludeCodeItem {
+                DisplayText = pars.Name,
+                Flags = pars.Flags,
+                SubText = null,
+                DocumentOwner = pars.FilePath,
+                GoToLine = pars.Line,
+                GoToColumn = pars.Column
+            };
+
+            if (pars.Flags.HasFlag(ParseFlag.NotFound)) {
+                PushToCodeExplorer(
+                    GetExplorerListNode("Missing includes/variables", CodeExplorerIconType.MissingInclude),
+                    inc);
+            } else {
+                // To code explorer
+                PushToCodeExplorer(
+                    GetExplorerListNode("Includes", CodeExplorerIconType.Include),
+                    inc);
+            }
         }
 
         /// <summary>

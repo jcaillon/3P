@@ -239,6 +239,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         CreateWindowBlock,
         RuntimeBlock,
 
+        MissingInclude,
+
         ProgramParameter,
         Parameter,
 
@@ -247,7 +249,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         MainBlock,
 
         Include,
-        PreprocessedVariable,
 
         ExternalProcedure,
         Procedure,
@@ -270,6 +271,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         Browse,
 
+        PreprocessedVariable,
         TempTableUsed,
         TableUsed
     }

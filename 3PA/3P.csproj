@@ -539,6 +539,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\LangWord.png" />
     <Content Include="_Resource\Images\ParserItem\Type\MainBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Method.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\MissingInclude.png" />
     <Content Include="_Resource\Images\ParserItem\Type\NotApplicable.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Number.png" />
     <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
