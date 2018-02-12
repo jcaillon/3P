@@ -259,6 +259,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         break;
                 }
             });
+
+            foreach (var dataBase in _dataBases) {
+                foreach (var table in dataBase.Tables) {
+                    // sort fields by primary then by name
+                    table.Fields.Sort((x, y) => {
+                        var compare = y.Flags.HasFlag(ParseFlag.Primary).CompareTo(x.Flags.HasFlag(ParseFlag.Primary));
+                        if (compare != 0)
+                            return compare;
+                        return string.Compare(x.Name, y.Name, StringComparison.CurrentCultureIgnoreCase);
+                    });
+                }
+            }
         }
 
         #endregion

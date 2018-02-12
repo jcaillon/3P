@@ -26,7 +26,6 @@ using System.Threading;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.MainFeatures.AutoCompletionFeature;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Pro;
 using _3PA.MainFeatures.SyntaxHighlighting;
@@ -235,7 +234,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
-            var popupMinWidth = 250;
+            var popupMinWidth = 350;
             var toDisplay = new StringBuilder();
 
             GoToDefinitionFile = null;
@@ -247,14 +246,31 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             CurrentWord = item.DisplayText;
 
+            var parsedItem = item.ParsedBaseItem as ParsedItem;
+
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
+
+            // name and type
             toDisplay.Append(
                 "<div class='ToolTipName' style=\"background-repeat: no-repeat; background-position: left center; background-image: url('" + item.Type + "'); padding-left: 25px; padding-top: 6px; padding-bottom: 6px;\">" + @"
-                    <div>" + item.DisplayText + @"</div>
+                    <div>" + item.DisplayText + (_currentCompletionList.Count > 1 ? " (" + (IndexToShow + 1) + "/<a href='nexttooltip'>" + _currentCompletionList.Count + "</a>)" : "") + @"</div>
                     <div class='ToolTipSubString'>" + item.Type + @"</div>
                 </div>");
 
+            // help on tooltip controls
+            toDisplay.Append(@"<div class='ToolTipHelp'>");
+            toDisplay.Append(@"<div>Prevent auto-close [HIT CTRL ONCE]</div>");
+            if (_currentCompletionList.Count > 1)
+                toDisplay.Append("<div><a href='nexttooltip'>Read next tooltip</a> ... " + (IndexToShow + 1) + "/" + _currentCompletionList.Count + @" [CTRL + <span class='ToolTipDownArrow'>" + (char) 242 + "</span>]</div>");
+            if (parsedItem != null && item.FromParser) {
+                toDisplay.Append(@"<div><a href='gotodefinition'>Go to definition</a> [" + Config.Instance.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "]</div>");
+                GoToDefinitionPoint = new Point(parsedItem.Line, parsedItem.Column);
+                GoToDefinitionFile = parsedItem.FilePath;
+            }
+            toDisplay.Append(@"</div>");
+
+            
             if (item is TableCompletionItem) {
                 popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
             }
@@ -265,16 +281,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
             } catch (Exception e) {
                 toDisplay.Append("Error when appending info :<br>" + e + "<br>");
             }
-
-            var parsedItem = item.ParsedBaseItem as ParsedItem;
-
+            
             // parsed item?
             if (parsedItem != null && item.FromParser) {
                 toDisplay.Append(HtmlHelper.FormatSubtitle("ORIGINS"));
                 if (parsedItem.Scope != null)
                     toDisplay.Append(HtmlHelper.FormatRow("Scope name", parsedItem.Scope.Name));
                 if (!Npp.CurrentFileInfo.Path.Equals(parsedItem.FilePath))
-                    toDisplay.Append(HtmlHelper.FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
+                    toDisplay.Append(HtmlHelper.FormatRow("Owner file", "<a href='gotoownerfile#" + parsedItem.FilePath + "'>" + parsedItem.FilePath + "</a>"));
             }
 
             // Flags
@@ -284,21 +298,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(HtmlHelper.FormatSubtitle("FLAGS"));
                 toDisplay.Append(flagStrBuilder);
             }
-
-            toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
-                [HIT CTRL ONCE] Prevent auto-close");
-
-            // parsed item?
-            if (parsedItem != null && item.FromParser) {
-                toDisplay.Append(@"<br>[" + Config.Instance.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
-                GoToDefinitionPoint = new Point(parsedItem.Line, parsedItem.Column);
-                GoToDefinitionFile = parsedItem.FilePath;
-            }
-            if (_currentCompletionList.Count > 1)
-                toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char) 242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
-            toDisplay.Append("</div>");
-            toDisplay.Append(_currentCompletionList.Count > 1 ? @"<div class='ToolTipCount'>" + (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"</div>" : "");
-
+            
+            // tooltip end
             toDisplay.Append("</div>");
 
             _form.SetText(toDisplay.ToString(), popupMinWidth);

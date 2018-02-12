@@ -4,6 +4,10 @@
 - #204 : The parser now handles &IF everywhere
 - #203 : The aprser now correctly reads and interprets ALL includes, even when they are within strings!
 - Use of preprocessed variable which are not found by the parser are now displayed in the code explorer
+- #199 : 
+	- Fields of tables are now sorted by names by default (instead of order number previously)
+	- In tooltips fields that are part of the primary index are always shown on top
+	- Moved the shortcuts help from bottom to top in tooltips (to be able to see the hit CTRL once even if the tooltip is long)
 
 **Fixed issues :**
 

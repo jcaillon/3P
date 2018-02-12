@@ -116,38 +116,32 @@ ul {
     font-weight: bold;
     font-size: 13px;
     background-color: @FormAltBack;
-    margin-bottom: 5px;
 }
+.ToolTipSubString {
+	color: @SubTextFore;
+	font-weight: bold;
+}
+.ToolTipHelp {
+	background-color: @FormAltBack;
+	padding: 4px;
+	padding-top: 0px;
+	font-size: 11px;
+	margin-bottom: 5px;
+	text-align: right;
+}
+
 .ToolTipCount {
     background-color: @FormAltBack;
     font-weight: bold;
-    font-style: italic;
+	font-style: italic;
     font-size: 11px;
     text-align: right;
-    padding-right: 3px;
-}
-.ToolTipDisplayText {
-    font-weight: bold;
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-.ToolTipBottomGoTo {
-    background-color: @FormAltBack;
-    margin-top: 10px;
-    padding: 4px;
-    font-size: 11px;
-}
-.ToolGotoDefinition:link {
-    color: @GenericLinkColor;
-    text-decoration: underline;
+	padding: 4px;
+	margin-top: 5px;
 }
 .ToolTipDownArrow {
     font-family: wingdings;
     font-style: normal;
-}
-.ToolTipSubString {
-    color: @SubTextFore;
-    font-weight: bold;
 }
 .ToolTipRowWithImg {
     padding-bottom: 5px;
