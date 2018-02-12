@@ -29,14 +29,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         break;
                     if (token is TokenPreProcDirective)
                         break;
-                    if (token is TokenEol) {
-                        AddLineInfo(token);
-                    }
                     expressionTokens.Add(token);
                 } while (true);
 
                 // we directly set the new token position there (it will be just 1 token before the &THEN)
                 _tokenPos += i - 1;
+
+                AddLineInfo(PeekAt(0));
 
                 // since we didn't use MoveNext we also manually replace the includes ahead
                 ReplaceIncludeAndPreprocVariablesAhead(1);
