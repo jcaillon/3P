@@ -561,7 +561,7 @@ namespace _3PA {
                 return;
 
             // Display parser errors if any
-            if (Config.Instance.DisplayParserErrorsOnSave) {
+            if (Config.Instance.DisplayParserErrorsOnSave && Npp.CurrentFileInfo.IsCompilable) {
                 ProCodeFormat.DisplayParserErrors(true);
             }
 

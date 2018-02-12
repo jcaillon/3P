@@ -8,6 +8,7 @@
 	- Fields of tables are now sorted by names by default (instead of order number previously)
 	- In tooltips fields that are part of the primary index are always shown on top
 	- Moved the shortcuts help from bottom to top in tooltips (to be able to see the hit CTRL once even if the tooltip is long)
+- #205 : The "check code validity" notification that is displayed on document save will now close itself if you fix the file problem and save again. It also only triggers on progress compilable files
 
 **Fixed issues :**
 

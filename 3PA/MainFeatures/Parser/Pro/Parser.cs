@@ -245,20 +245,22 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 if (!_lineInfo.ContainsKey(i))
                     _lineInfo.Add(i, defaultLineinfo);
             }
-
-
-            // check that we match a RESUME for each SUSPEND
-            if (GetCurrentBlock<ParsedScopePreProcBlock>() != null)
-                _parserErrors.Add(new ParserError(ParserErrorType.MissingUibBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
-
-            // check that we match an &ENDIF for each &IF
-            if (GetCurrentBlock<ParsedScopePreProcIfBlock>() != null)
-                _parserErrors.Add(new ParserError(ParserErrorType.MissingPreprocEndIf, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
             
-            // check that we match an END. for each block
-            if (GetCurrentBlock<ParsedScopeBlock>() != rootScope)
-                _parserErrors.Add(new ParserError(ParserErrorType.MissingBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
-              
+            // check for parser errors
+            while (_context.BlockStack.Count > 1) {
+                ParsedScope scope = _context.BlockStack.Pop();
+                // check that we match a RESUME for each SUSPEND
+                if (scope is ParsedScopePreProcBlock)
+                    _parserErrors.Add(new ParserError(ParserErrorType.MissingUibBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+
+                // check that we match an &ENDIF for each &IF
+                else if (scope is ParsedScopePreProcIfBlock)
+                    _parserErrors.Add(new ParserError(ParserErrorType.MissingPreprocEndIf, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+            
+                // check that we match an END. for each block
+                else
+                    _parserErrors.Add(new ParserError(ParserErrorType.MissingBlockEnd, PeekAt(-1), _context.BlockStack.Count, _parsedIncludes));
+            }
 
             // returns the concatenation of all the tokens once the parsing is done
             if (debugListOut != null) {

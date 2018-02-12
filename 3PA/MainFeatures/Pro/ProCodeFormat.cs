@@ -120,6 +120,9 @@ namespace _3PA.MainFeatures.Pro {
             if (Npp.CurrentFileInfo.IsProgress && !_displayParserErrorsIgnoredFiles.Contains(Npp.CurrentFileInfo.Path)) {
                 Task.Factory.StartNew(() => {
                     var currentFilePath = Npp.CurrentFileInfo.Path;
+
+                    UserCommunication.CloseUniqueNotif("DisplayParserErrors" + currentFilePath);
+
                     var message = new StringBuilder();
                     message.Append("The analyzed file was :<br>" + currentFilePath.ToHtmlLink() + "<br>");
 
@@ -127,7 +130,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var parserErrors = parser.ParseErrorsInHtml;
                     if (!string.IsNullOrEmpty(parserErrors)) {
-                        message.Append("<br>The parser found the following syntax errors :<br>");
+                        message.Append("<br>The parser found syntax errors.<br>You should consider solving those issues in the given order :<br>");
                         message.Append(parserErrors);
                     }
 
@@ -156,10 +159,10 @@ namespace _3PA.MainFeatures.Pro {
                             message.Append("<br><br>" + "disable".ToHtmlLink("Click here to disable the automatic check for this file"));
                     }
 
-                    UserCommunication.NotifyUnique("DisplayParserErrors", message.ToString(), noProb ? MessageImg.MsgOk : MessageImg.MsgWarning, "Check code validity", "Analysis results", args => {
+                    UserCommunication.NotifyUnique("DisplayParserErrors" + currentFilePath, message.ToString(), noProb ? MessageImg.MsgOk : MessageImg.MsgWarning, "Check code validity", "Analysis results", args => {
                         if (args.Link.Equals("disable")) {
                             args.Handled = true;
-                            UserCommunication.CloseUniqueNotif("DisplayParserErrors");
+                            UserCommunication.CloseUniqueNotif("DisplayParserErrors" + currentFilePath);
                             if (!_displayParserErrorsIgnoredFiles.Contains(currentFilePath))
                                 _displayParserErrorsIgnoredFiles.Add(currentFilePath);
                         }
