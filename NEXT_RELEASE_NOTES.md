@@ -2,14 +2,14 @@
 
 - Changed the way include files are treated by the parser; they are now treated the same way as {&var} which allows more complex usage of include files like {{inc.i}} (where inc.i contains an include name)
 - #204 : The parser now handles &IF everywhere
-- #203 : The aprser now correctly reads and interprets ALL includes, even when they are within strings!
-- Use of preprocessed variable which are not found by the parser are now displayed in the code explorer
+- #203 : The parser now correctly reads and interprets ALL includes, even when they are within strings!
+- #207 : Missing includes and missing preprocessed variables are now displayed in a new branch of the code explorer "Missing includes/variables" which allows to solve PROPATH problems faster
 - #199 : 
 	- Fields of tables are now sorted by names by default (instead of order number previously)
 	- In tooltips fields that are part of the primary index are always shown on top
 	- Moved the shortcuts help from bottom to top in tooltips (to be able to see the hit CTRL once even if the tooltip is long)
 - #205 : The "check code validity" notification that is displayed on document save will now close itself if you fix the file problem and save again. It also only triggers on progress compilable files
-- #207 : Missing includes and missing preprocessed variables are now displayed in a new branch of the code explorer "Missing includes/variables" which allows to solve PROPATH problems faster
+- #208 : 3P can now indent correctly very complex code (it actually does a better job than developper studio)
 
 **Fixed issues :**
 

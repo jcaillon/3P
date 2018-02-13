@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.Pro {
             _logPath = Path.Combine(_localTempDir, "run.log");
             _dbLogPath = Path.Combine(_localTempDir, "db.ko");
             _notifPath = Path.Combine(_localTempDir, "postExecution.notif");
-            _propath = (_localTempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).Trim().Trim(',');
+            _propath = (_localTempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).Trim().Trim(',') + "\r\n";
             _propathFilePath = Path.Combine(_localTempDir, "progress.propath");
             Utils.FileWriteAllText(_propathFilePath, _propath, Encoding.Default);
 
