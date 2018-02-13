@@ -257,15 +257,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// <summary>
     /// Corresponds to a single time indent block after a THEN or OTHERWISE...
     /// </summary>
-    internal class ParsedScopeSimpleSingleBlock : ParsedScopeNoSection {
+    internal class ParsedScopeOneStatementIndentBlock : ParsedScopeNoSection {
         
         public int StatementNumber { get; private set; }
+
+        public int LineOfNextWord { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             // no visits
         }
 
-        public ParsedScopeSimpleSingleBlock(string name, Token token, int statementNumber) : base(name, token, ParsedScopeType.SimpleBlock) {
+        public ParsedScopeOneStatementIndentBlock(string name, Token token, int statementNumber) : base(name, token, ParsedScopeType.SimpleBlock) {
             StatementNumber = statementNumber;
         }
     }

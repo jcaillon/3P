@@ -19,7 +19,6 @@
 #endregion
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;
 
@@ -42,14 +41,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             var lastIdent = 0;
             while (lineInfos.ContainsKey(i)) {
                 var line = Sci.GetLine(i);
-                line.SetFoldLevel(lineInfos[i].BlockDepth, FoldLevelFlags.None);
-                if (lineInfos[i].BlockDepth > lastIdent) {
+                line.SetFoldLevel(lineInfos[i].BlockDepth + lineInfos[i].ExtraStatementDepth, FoldLevelFlags.None);
+                if (lineInfos[i].BlockDepth + lineInfos[i].ExtraStatementDepth > lastIdent) {
                     if (i > 0)
                         Sci.GetLine(i - 1).FoldLevelFlags = FoldLevelFlags.Header;
-                    lastIdent = lineInfos[i].BlockDepth;
+                    lastIdent = lineInfos[i].BlockDepth + lineInfos[i].ExtraStatementDepth;
                 } else {
                     if (lineInfos[i].BlockDepth < lastIdent)
-                        lastIdent = lineInfos[i].BlockDepth;
+                        lastIdent = lineInfos[i].BlockDepth + lineInfos[i].ExtraStatementDepth;
 
                 }
                 i++;

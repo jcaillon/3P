@@ -132,10 +132,10 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             END.
             /* for each connected db */
             REPEAT gi_db = 1 TO NUM-DBS:
-                CREATE ALIAS "DICTDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
+                CREATE ALIAS "TPALDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
                 RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)) NO-ERROR.
                 fi_output_last_error().
-                DELETE ALIAS "DICTDB".
+                DELETE ALIAS "TPALDB".
             END.
         END.
         WHEN "PROVERSION" THEN DO:

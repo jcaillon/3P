@@ -19,3 +19,4 @@
 - #200 : Exception raised when the userDefineLang.xml file is not found
 - #201 : Indentation problems for ELSE DO: blocks
 - #202 : Indentation improvement for preprocessed &IF &ENDIF blocks
+- #211 : Impossible to check syntax with openedge v9.1

@@ -250,7 +250,7 @@ namespace _3PA.Tests {
             var i = 0;
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
-                lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExplorerScope + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
+                lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExtraStatementDepth + " , " + dic[i].ExplorerScope + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
                 i++;
             }
             Utils.FileWriteAllText(outLocation, lineInfo.ToString());

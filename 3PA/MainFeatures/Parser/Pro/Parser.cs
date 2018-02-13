@@ -238,7 +238,19 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     ErrorHandler.LogError(e, "Error while parsing the following file : " + filePathBeingParsed);
                 }
             }
-            AddLineInfo(PeekAt(-1));
+            AddLineInfo(PeekAt(-1)); // add info on last line
+            PopOneStatementIndentBlock(); // make sure to pop the final block
+
+
+            // add missing values to the line dictionary
+            // missing values will be for the lines within a multilines comment/string for which we didn't match an EOL to add line info
+            var currentLineInfo = _lineInfo[PeekAt(-1).Line];
+            for (int i = PeekAt(-1).Line - 1; i >= 0; i--) {
+                if (!_lineInfo.ContainsKey(i))
+                    _lineInfo.Add(i, currentLineInfo);
+                else
+                    currentLineInfo = _lineInfo[i];
+            }
             
             // check for parser errors
             while (_context.BlockStack.Count > 1) {
@@ -569,6 +581,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public int BlockDepth { get; set; }
 
+        public int ExtraStatementDepth { get; set; }
+
         /// <summary>
         /// Scope for the current line
         /// </summary>
@@ -579,8 +593,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public ParsedScopeBlock VariableScope { get; set; }
 
-        public LineInfo(int blockDepth, ParsedScopeSection explorerScope, ParsedScopeBlock variableScope) {
+        public LineInfo(int blockDepth, int extraStatementDepth, ParsedScopeSection explorerScope, ParsedScopeBlock variableScope) {
             BlockDepth = blockDepth;
+            ExtraStatementDepth = extraStatementDepth;
             ExplorerScope = explorerScope;
             VariableScope = variableScope;
         }

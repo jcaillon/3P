@@ -19,10 +19,10 @@ PUT STREAM str_out UNFORMATTED "#<Table name>|<Table CRC>" SKIP.
 
 /* Write table information */
 /* Format is: <Table name>|<Table CRC> */
-FOR EACH DICTDB._FILE NO-LOCK WHERE NOT DICTDB._FILE._HIDDEN AND DICTDB._FILE._Tbl-Type = "T":
+FOR EACH TPALDB._FILE NO-LOCK WHERE NOT TPALDB._FILE._HIDDEN AND TPALDB._FILE._Tbl-Type = "T":
     PUT STREAM str_out UNFORMATTED
-        ipc_baseName + "." + TRIM(fi_subst(DICTDB._FILE._FILE-NAME)) + gc_sep +
-        fi_subst(STRING(DICTDB._FILE._CRC))
+        ipc_baseName + "." + TRIM(fi_subst(TPALDB._FILE._FILE-NAME)) + gc_sep +
+        fi_subst(STRING(TPALDB._FILE._CRC))
         SKIP.
 END.
 

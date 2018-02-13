@@ -62,9 +62,9 @@ namespace _3PA.MainFeatures.Pro {
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
                 var line = Sci.GetLine(i);
-                line.Indentation = dic[i].BlockDepth * indentWidth;
+                line.Indentation = (dic[i].BlockDepth + dic[i].ExtraStatementDepth) * indentWidth;
                 if (!canIndentSafely)
-                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
+                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExtraStatementDepth + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
                 i++;
             }
             Sci.EndUndoAction();

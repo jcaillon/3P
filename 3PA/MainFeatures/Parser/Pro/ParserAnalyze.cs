@@ -47,28 +47,24 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 if (_context.StatementWordCount == 1 || _context.ReadNextWordAsStatementStart) {
                     if (_context.ReadNextWordAsStatementStart) {
                         _context.ReadNextWordAsStatementStart = false;
-                    }
 
-                    // if we are not continuing a IF ... THEN with a ELSE we should pop all single indent block
-                    if (!lowerTok.Equals("else")) {
-                        var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
-                        while (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
-                            _context.BlockStack.Pop();
-                            topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
-                        }
+                        // remember the line of the next token after a then/else/otherwise (useful for indenting statements)
+                        var lastOnIndent = GetCurrentBlock<ParsedScopeOneStatementIndentBlock>();
+                        if (lastOnIndent != null)
+                            lastOnIndent.LineOfNextWord = token.Line;
                     }
-
+                    
                     // matches a definition statement at the beginning of a statement
                     switch (lowerTok) {
                         case "else":
                             // after a else, we need to consider the next word like it's the start of a new statement
                             // but we consider the whole else STATEMENT. as one single statement to correctly indent it!
                             _context.ReadNextWordAsStatementStart = true;
-                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
+                            PushNewOneStatementIndentBlock(token);
                             break;
                         case "otherwise":
                             _context.ReadNextWordAsStatementStart = true;
-                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
+                            PushNewOneStatementIndentBlock(token);
                             break;
                         case "case":
                         case "catch":
@@ -85,7 +81,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         case "editing":
                             // case of a THEN DO: for instance, we dont want to keep 2 block (=2 indent), we pop the THEN block
                             // and only keep the DO block
-                            var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
+                            var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
                             if (topScope != null && _context.StatementCount == topScope.StatementNumber ) {
                                 _context.BlockStack.Pop();
                             }
@@ -121,7 +117,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                     _parserErrors.Add(new ParserError(ParserErrorType.ForbiddenNestedBlockStart, token, _context.BlockStack.Count, _parsedIncludes));
                                 _context.BlockStack.Push(newProc);
                             }
-
                             break;
                         case "function":
                             // parse a function definition
@@ -138,7 +133,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                     }
                                 }
                             }
-
                             break;
                         case "on":
                             // parse a ON statement
@@ -180,8 +174,17 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         case "then":
                             // after a then, we need to consider the next word like it's the start of a new statement
                             // but we consider the whole if then STATEMENT. as one single statement to correctly indent it!
-                            _context.ReadNextWordAsStatementStart = true;
-                            _context.BlockStack.Push(new ParsedScopeSimpleSingleBlock(token.Value, token, _context.StatementCount));
+                            var firstTokenLower = _context.StatementFirstToken.Value.ToLower();
+                            switch (firstTokenLower) {
+                                case "if":
+                                case "when":
+                                case "else":
+                                case "otherwise":
+                                    // only indent after a THEN if it was not used as a ternary expression
+                                    _context.ReadNextWordAsStatementStart = true;
+                                    PushNewOneStatementIndentBlock(token);
+                                    break;
+                            }
                             break;
                         case "do":
                             // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:)
@@ -218,7 +221,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                     }
                                 }
                             }
-
                             break;
                     }
                 }
@@ -267,8 +269,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
             // end of statement
             else if (token is TokenEos) {
                 // match a label if there was only one word followed by : in the statement
-                if (_context.StatementUnknownFirstWord && _context.StatementWordCount == 2 && token.Value.Equals(":"))
+                if (_context.StatementUnknownFirstWord && _context.StatementWordCount == 1 && token.Value.Equals(":"))
                     CreateParsedLabel(token);
+
                 NewStatement(token);
             }
         }
@@ -287,6 +290,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 // starting a new statement, we need to remember its starting line
                 if (_context.StatementFirstToken == null) {
                     _context.StatementFirstToken = token;
+                    
+                    // if we are not continuing a IF ... THEN with a ELSE we should pop all single indent block
+                    if (!token.Value.ToLower().Equals("else")) {
+                        var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
+                        while (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
+                            _context.BlockStack.Pop();
+                            topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
+                        }
+                    }
                 }
 
                 _context.StatementWordCount++;
@@ -359,6 +371,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             } else if (token is TokenEol) {
                 AddLineInfo(token);
+
+                // keywords like then/otherwise only increase the indentation for a single statement,
+                // if the statement it indented is over then pop the indent block
+                PopOneStatementIndentBlock();
             }
 
         }
@@ -387,7 +403,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <param name="token"></param>
         /// <returns></returns>
         private bool CloseBlock<T>(Token token) where T : ParsedScope {
-            while (_context.BlockStack.Peek() is ParsedScopeSimpleSingleBlock) {
+            while (_context.BlockStack.Peek() is ParsedScopeOneStatementIndentBlock) {
                 _context.BlockStack.Pop();
             }
             var currentBlock = _context.BlockStack.Peek() as T;
@@ -429,79 +445,98 @@ namespace _3PA.MainFeatures.Parser.Pro {
             
             if (!_lineInfo.ContainsKey(curLine)) {
                 
-                int depth = GetDepth(curLine);
-                
-                // for the current statement
-                if (_context.StatementFirstToken != null) {
 
-                    if (!_lineInfo.ContainsKey(_context.StatementFirstToken.Line)) {
-                        _lineInfo.Add(_context.StatementFirstToken.Line, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
-                    }
-                    
-                    if (curLine > _context.StatementFirstToken.Line) {
-                        var block = _context.BlockStack.Peek();
-                        var statementDepth = depth;
-                        //if (_context.StatementFirstToken.Line > block.Line)
-                        //    depth++;
-                        if (!(block is ParsedScopeSimpleSingleBlock) || curLine > block.Line + 1)
-                            statementDepth++;
-
-                        // fill missing info for previous lines
-                        for (int i = _context.StatementFirstToken.Line + 1; i <= curLine; i++) {
-                            if (!_lineInfo.ContainsKey(i)) {
-                                _lineInfo.Add(i, new LineInfo(statementDepth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                // compute current depth
+                // -1 because we always have a block that represents the current file
+                var depth = -1;
+                var iloop = 0;
+                while (iloop < _context.BlockStack.Count) {
+                    var block = _context.BlockStack.ElementAt(iloop);
+                    // preproc block (analyze-suspend) do not increase indentation
+                    if (block.ScopeType != ParsedScopeType.PreProcBlock) {
+                        var preprocIf = block as ParsedScopePreProcIfBlock;
+                        // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
+                        if (preprocIf == null || !preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
+                            // only the lines AFTER the start of the block should be indent
+                            if (curLine > block.Line) {
+                                depth++;
                             }
                         }
                     }
+                    iloop++;
                 }
+                depth = Math.Max(depth, 0);
 
-                // fill missing info for previous lines
-                if (_lineInfo.Count > 0) {
-                    var lastKnowLine = _lineInfo.Last();
-                    for (int i = lastKnowLine.Key + 1; i <= curLine - 1; i++) {
-                        if (!_lineInfo.ContainsKey(i)) {
-                            _lineInfo.Add(i, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                
+                // fill lines info for the current statement
+                if (_context.StatementFirstToken != null) {
+
+                    // first line of the statement
+                    if (!_lineInfo.ContainsKey(_context.StatementFirstToken.Line)) {
+                        _lineInfo.Add(_context.StatementFirstToken.Line, new LineInfo(depth, 0, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                    }
+                    
+                    // other lines of the statement
+                    if (curLine > _context.StatementFirstToken.Line) {
+
+                        // compute if we need to add an extra indent on this line of the statement
+                        // this is to indent stuff like :
+                        // DEFINE VAR
+                        //      lc_name as CHAR NO-UNDO.
+                        var extraStatementDepth = 0;
+                        var block = _context.BlockStack.Peek();
+                        var blockOneStatementIndent = block as ParsedScopeOneStatementIndentBlock;
+                        if (blockOneStatementIndent != null && 
+                            blockOneStatementIndent.LineOfNextWord > blockOneStatementIndent.Line && 
+                            curLine > blockOneStatementIndent.Line + 1)
+                            extraStatementDepth = 1;
+                        else if (blockOneStatementIndent == null && curLine > block.Line + 1)
+                            extraStatementDepth = 1;
+
+                        // fill missing info on the lines of the statement
+                        for (int i = _context.StatementFirstToken.Line + 1; i <= curLine; i++) {
+                            if (!_lineInfo.ContainsKey(i)) {
+                                _lineInfo.Add(i, new LineInfo(depth, extraStatementDepth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                            } else if (extraStatementDepth == 0 && _lineInfo[i].ExtraStatementDepth > 0) {
+                                // at some point for this statement we added an extra indent but now tis line is at extra = 0, restore the previous lines to 0 aswell
+                                // WHEN 1 OR 
+                                // WHEN 3 OR <- this would be indented if not for this rule
+                                // WHEN 2 THEN
+                                //     MESSAGE "ok".
+                                _lineInfo[i].ExtraStatementDepth = 0;
+                            }
                         }
                     }
-                }
-                
-                if (!_lineInfo.ContainsKey(curLine)) {
-                    _lineInfo.Add(curLine, new LineInfo(depth, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
-                }
 
-            }
-            
-            // Then/otherwise only increase the indentation for a single statement
-            var topScope = _context.BlockStack.Peek() as ParsedScopeSimpleSingleBlock;
-            if (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
-                _context.BlockStack.Pop();
+                } else {
+                    _lineInfo.Add(curLine, new LineInfo(depth, 0, GetCurrentBlock<ParsedScopeSection>(), GetCurrentBlock<ParsedScopeBlock>()));
+                }
             }
         }
 
         /// <summary>
-        /// Get current depth (indentation level)
+        /// Push a new one statement indent block with a condition
         /// </summary>
-        private int GetDepth(int curLine) {
-            // compute current depth
-            // -1 because we always have a block that represents the current file
-            var depth = -1;
-            var i = 0;
-            while (i < _context.BlockStack.Count) {
-                var block = _context.BlockStack.ElementAt(i);
-                // preproc block (analyze-suspend) do not increase indentation
-                if (block.ScopeType != ParsedScopeType.PreProcBlock) {
-                    var preprocIf = block as ParsedScopePreProcIfBlock;
-                    // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
-                    if (preprocIf == null || !preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
-                        // only the lines AFTER the start of the block should be indent
-                        if (curLine > block.Line) {
-                            depth++;
-                        }
-                    }
-                }
-                i++;
+        private void PushNewOneStatementIndentBlock(Token token) {
+            var currentBlock = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
+            // safety to not indent twice if there are two THEN in the same line 
+            // IF TRUE THEN IF TRUE THEN
+            //     MESSAGE "ok".
+            if (currentBlock != null && currentBlock.Line == token.Line)
+                return;
+            _context.BlockStack.Push(new ParsedScopeOneStatementIndentBlock(token.Value, token, _context.StatementCount));
+        }
+
+        /// <summary>
+        /// Pop one statement indent block if needed
+        /// </summary>
+        private void PopOneStatementIndentBlock() {
+            // keywords like then/otherwise only increase the indentation for a single statement,
+            // if the statement it indented is over then pop the indent block
+            var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
+            if (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
+                _context.BlockStack.Pop();
             }
-            return Math.Max(depth, 0);
         }
 
         /// <summary>

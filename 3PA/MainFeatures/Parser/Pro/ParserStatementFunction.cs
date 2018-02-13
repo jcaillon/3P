@@ -150,6 +150,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     _functionPrototype.Add(name, createdImp);
                 }
 
+                // add the parameters to the list
+                if (parametersList != null) {
+                    createdImp.Parameters = new List<ParsedDefine>();
+                    foreach (var parsedItem in parametersList) {
+                        createdImp.Parameters.Add(parsedItem);
+                    }
+                }
+
                 AddParsedItem(createdImp, functionToken.OwnerNumber);
 
             }
