@@ -24,8 +24,9 @@ This file was created with the 3P :  https://jcaillon.github.io/3P/
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
     
-    &SCOPED-DEFINE dbExtractCandoTblType "T,S"
-    &SCOPED-DEFINE dbExtractCandoTblName "*"
+    &SCOPED-DEFINE DatabaseExtractCandoTblType "T,S"
+    &SCOPED-DEFINE DatabaseExtractCandoTblName "*"
+    &SCOPED-DEFINE DatabaseAliasList ""
 &ENDIF
 &SCOPED-DEFINE verHigherThan11 INTEGER(ENTRY(1, PROVERSION, '.')) >= 11
 &SCOPED-DEFINE CanAnalyse {&AnalysisMode} AND {&verHigherThan11}
@@ -80,6 +81,7 @@ fi_write(INPUT {&LogPath}, INPUT "").
         ASSIGN llg_propath = SUBSTRING(llg_propath, 1, 31190 - LENGTH(PROPATH)).
     ASSIGN PROPATH = TRIM(TRIM(STRING(llg_propath)), ",") + "," + PROPATH.
 &ELSE
+    /* COPY-LOB and LONGCHAR do not exist */
     DEFINE VARIABLE lc_propath AS CHARACTER NO-UNDO.
     INPUT STREAM str_rw FROM VALUE({&PropathFilePath}) NO-ECHO.
     REPEAT:
@@ -89,6 +91,7 @@ fi_write(INPUT {&LogPath}, INPUT "").
     ASSIGN PROPATH = TRIM(TRIM(lc_propath), ",") + "," + PROPATH.
 &ENDIF
 
+
 /* Connect the database(s) */
 &IF {&DbConnectString} > "" &THEN
     CONNECT VALUE(fi_add_connec_try({&DbConnectString})) NO-ERROR.
@@ -96,9 +99,21 @@ fi_write(INPUT {&LogPath}, INPUT "").
         ASSIGN gl_dbKo = TRUE.
 &ENDIF
 
+/* Create aliases */
+&IF {&DatabaseAliasList} > "" &THEN
+    REPEAT gi_db = 1 TO NUM-ENTRIES({&DatabaseAliasList}, ";"):
+        IF NUM-ENTRIES(ENTRY(gi_db, {&DatabaseAliasList}, ";")) = 2 THEN DO:
+            CREATE ALIAS VALUE(ENTRY(1, ENTRY(gi_db, {&DatabaseAliasList}, ";"))) FOR DATABASE VALUE(ENTRY(2, ENTRY(gi_db, {&DatabaseAliasList}, ";"))) NO-ERROR.
+            IF fi_output_last_error_db() THEN
+                ASSIGN gl_dbKo = TRUE.
+        END.
+        ELSE
+            ASSIGN gc_lastError = gc_lastError + "Invalid ALIAS format, please correct it : " + QUOTER(ENTRY(gi_db, {&DatabaseAliasList}, ";")) + "~n".
+    END.
+&ENDIF
+
 
 SUBSCRIBE "eventToPublishToNotifyTheUserAfterExecution" ANYWHERE RUN-PROCEDURE "pi_feedNotification".
-
 
 /* Pre-execution program */
 &IF {&PreExecutionProgram} > "" &THEN
@@ -138,10 +153,12 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             END.
             /* for each connected db */
             REPEAT gi_db = 1 TO NUM-DBS:
-                CREATE ALIAS "TPALDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
-                RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db), INPUT {&dbExtractCandoTblType}, INPUT {&dbExtractCandoTblName}) NO-ERROR.
-                fi_output_last_error().
-                DELETE ALIAS "TPALDB".
+                CREATE ALIAS "TPALDB" FOR DATABASE VALUE(LDBNAME(gi_db)) NO-ERROR.
+                IF NOT fi_output_last_error() THEN DO:
+                    RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db), INPUT {&DatabaseExtractCandoTblType}, INPUT {&DatabaseExtractCandoTblName}) NO-ERROR.
+                    fi_output_last_error().
+                    DELETE ALIAS "TPALDB".
+                END.
             END.
         END.
         WHEN "PROVERSION" THEN DO:
@@ -199,6 +216,17 @@ IF NOT gl_dbKo THEN
 
 UNSUBSCRIBE TO "eventToPublishToNotifyTheUserAfterExecution".
 
+/* Delete all aliases */
+REPEAT gi_db = 1 TO NUM-ALIASES:
+    DELETE ALIAS VALUE(ALIAS(gi_db)).
+END.
+
+/* Disconnect all db */
+REPEAT gi_db = 1 TO NUM-DBS:
+    DISCONNECT VALUE(LDBNAME(gi_db)) NO-ERROR.
+END.
+
+
 IF gc_lastError > "" THEN
     fi_write(INPUT {&LogPath}, INPUT gc_lastError).
 
@@ -208,18 +236,18 @@ QUIT.
 
 /* **********************  Internal Procedures  *********************** */
 
-/* if PROVERSION >= 11 */
-&IF {&verHigherThan11} &THEN
-    PROCEDURE pi_handleCompilErrors PRIVATE:
-        /*------------------------------------------------------------------------------
-        Purpose: save any compilation error into a log file
-        Parameters:  <none>
-        ------------------------------------------------------------------------------*/
-        
-        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
+PROCEDURE pi_handleCompilErrors PRIVATE:
+    /*------------------------------------------------------------------------------
+    Purpose: save any compilation error into a log file
+    Parameters:  <none>
+    ------------------------------------------------------------------------------*/
+    
+    DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO INITIAL "".
+    
+    /* if PROVERSION >= 11 */
+    &IF {&verHigherThan11} &THEN
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
-        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO INITIAL "".
-        
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
             DO li_i = 1 TO COMPILER:NUM-MESSAGES:
                 ASSIGN lc_msg = lc_msg + SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8&9",
@@ -251,25 +279,7 @@ QUIT.
                     ).
             END.
         END.
-        
-        IF lc_msg > "" THEN
-            fi_write(INPUT {&OutputPath}, INPUT lc_msg).
-        
-        ERROR-STATUS:ERROR = NO.
-        
-        RETURN "".
-        
-    END PROCEDURE.
-&ELSE
-    PROCEDURE pi_handleCompilErrors PRIVATE:
-        /*------------------------------------------------------------------------------
-        Purpose: save any compilation error into a log file
-        Parameters:  <none>
-        ------------------------------------------------------------------------------*/
-        
-        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
-        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO INITIAL "".
-        
+    &ELSE
         IF COMPILER:ERROR OR COMPILER:WARNING OR ERROR-STATUS:ERROR THEN DO:
             IF RETURN-VALUE > "" THEN
                 ASSIGN lc_msg = RETURN-VALUE + "~n".
@@ -291,16 +301,17 @@ QUIT.
                 "~r~n"
                 ).
         END.
-        
-        IF lc_msg > "" THEN
-            fi_write(INPUT {&OutputPath}, INPUT lc_msg).
-        
-        ERROR-STATUS:ERROR = NO.
-        
-        RETURN "".
-        
-    END PROCEDURE.
-&ENDIF
+    &ENDIF
+    
+    IF lc_msg > "" THEN
+        fi_write(INPUT {&OutputPath}, INPUT lc_msg).
+    
+    ERROR-STATUS:ERROR = NO.
+    
+    RETURN "".
+    
+END PROCEDURE.
+
 
 PROCEDURE pi_compileList PRIVATE:
     /*------------------------------------------------------------------------------
@@ -369,12 +380,12 @@ PROCEDURE pi_compileList PRIVATE:
                         SAVE INTO VALUE(tt_list.outdir)
                         LISTING VALUE(tt_list.lis)
                         &IF {&verHigherThan11} AND NOT {&CanAnalyse} &THEN
-                        XREF-XML VALUE(tt_list.xrf)
-                    &ELSE
-                        XREF VALUE(tt_list.xrf)
+                            XREF-XML VALUE(tt_list.xrf)
+                        &ELSE
+                            XREF VALUE(tt_list.xrf)
                         &ENDIF
-                DEBUG-LIST VALUE(tt_list.dbg)
-                    NO-ERROR.
+                        DEBUG-LIST VALUE(tt_list.dbg)
+                        NO-ERROR.
             &ENDIF
         &ENDIF
         
@@ -432,7 +443,7 @@ END PROCEDURE.
             
             /* need to find the right .r code in the directories created during compilation */
             RUN pi_findInFolders (INPUT lc_rcode, INPUT ipc_compilationDir) NO-ERROR.
-            ASSIGN 
+            ASSIGN
                 lc_rcodePath = RETURN-VALUE
                 FILE-INFO:FILE-NAME = lc_rcodePath.
         END.
@@ -469,7 +480,7 @@ END PROCEDURE.
         END.
         INPUT STREAM str_rw CLOSE.
         
-        ASSIGN 
+        ASSIGN
             lc_crcList = LEFT-TRIM(lc_crcList, ",")
             lc_tableList = LEFT-TRIM(lc_tableList, ",")
             .

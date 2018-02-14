@@ -484,6 +484,7 @@ namespace _3PA.Lib {
                 }
             }
             if (!fromVersion.IsHigherVersionThan("1.7.8")) {
+                // delete old database dump
                 try {
                     if (Directory.Exists(Config.FolderDatabase)) {
                         foreach (string file in Directory.EnumerateFiles(Config.FolderDatabase, "*.dump", SearchOption.TopDirectoryOnly)) {

@@ -55,8 +55,10 @@ namespace _3PA.MainFeatures.Pro {
             public string CurrentDb = "";
             public string ExtraPf = "";
             
-            public string DbExtractCandoTblType = "T";
-            public string DbExtractCandoTblName = "*";
+            public string DatabaseExtractCandoTblType = "T";
+            public string DatabaseExtractCandoTblName = "*";
+
+            public string DatabaseAliasList = "";
 
             // propath
             public string IniPath = "";
@@ -117,6 +119,11 @@ namespace _3PA.MainFeatures.Pro {
                 DbConnectionInfo = toCopy.DbConnectionInfo;
                 CurrentDb = toCopy.CurrentDb;
                 ExtraPf = toCopy.ExtraPf;
+
+                DatabaseAliasList = toCopy.DatabaseAliasList;
+                DatabaseExtractCandoTblName = toCopy.DatabaseExtractCandoTblName;
+                DatabaseExtractCandoTblType = toCopy.DatabaseExtractCandoTblType;
+
                 IniPath = toCopy.IniPath;
                 ExtraProPath = toCopy.ExtraProPath;
 

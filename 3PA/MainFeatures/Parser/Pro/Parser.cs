@@ -238,13 +238,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     ErrorHandler.LogError(e, "Error while parsing the following file : " + filePathBeingParsed);
                 }
             }
-            AddLineInfo(PeekAt(-1)); // add info on last line
+            AddLineInfo(_tokenList[_tokenList.Count - 1]); // add info on last line
             PopOneStatementIndentBlock(0); // make sure to pop the final block
 
 
             // add missing values to the line dictionary
             // missing values will be for the lines within a multilines comment/string for which we didn't match an EOL to add line info
-            var currentLineInfo = _lineInfo[PeekAt(-1).Line];
+            var currentLineInfo = _lineInfo[_tokenList[_tokenList.Count - 1].Line];
             for (int i = PeekAt(-1).Line - 1; i >= 0; i--) {
                 if (!_lineInfo.ContainsKey(i))
                     _lineInfo.Add(i, currentLineInfo);

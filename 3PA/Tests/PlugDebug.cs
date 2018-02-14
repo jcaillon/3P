@@ -44,12 +44,6 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            if (Directory.Exists(Config.FolderDatabase)) {
-                foreach (string file in Directory.EnumerateFiles(Config.FolderDatabase, "*.dump", SearchOption.TopDirectoryOnly)) {
-                    File.Delete(file);
-                }
-            }
-            UserCommunication.Notify("delete dump files");
         }
         
         public static void DebugTest2() {

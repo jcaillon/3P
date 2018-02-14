@@ -273,8 +273,9 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("NotificationOutputPath", _notifPath.PreProcQuoter());
             SetPreprocessedVar("PreExecutionProgram", ProEnv.PreExecutionProgram.Trim().PreProcQuoter());
             SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().PreProcQuoter());
-            SetPreprocessedVar("dbExtractCandoTblType", ProEnv.DbExtractCandoTblType.Trim().PreProcQuoter());
-            SetPreprocessedVar("dbExtractCandoTblName", ProEnv.DbExtractCandoTblName.Trim().PreProcQuoter());
+            SetPreprocessedVar("DatabaseExtractCandoTblType", ProEnv.DatabaseExtractCandoTblType.Trim().PreProcQuoter());
+            SetPreprocessedVar("DatabaseExtractCandoTblName", ProEnv.DatabaseExtractCandoTblName.Trim().PreProcQuoter());
+            SetPreprocessedVar("DatabaseAliasList", ProEnv.DatabaseAliasList.Trim().Trim(';').PreProcQuoter());
 
             // prepare the .p runner
             _runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");
@@ -482,12 +483,8 @@ namespace _3PA.MainFeatures.Pro {
 
                 } else if (new FileInfo(_logPath).Length > 0) {
                     // else if the log isn't empty, something went wrong
-
-                    var logContent = Utils.ReadAllText(_logPath, Encoding.Default).Trim();
-                    if (!string.IsNullOrEmpty(logContent)) {
-                        UserCommunication.NotifyUnique("ExecutionFailed", "An error occurred in the progress execution, details :<div class='ToolTipcodeSnippet'>" + logContent + "</div>", MessageImg.MsgError, "Progress execution", "Critical error", null, 0, 600);
-                        ExecutionFailed = true;
-                    }
+                    UserCommunication.NotifyUnique("ExecutionFailed", "An error occurred in the progress execution, details :<div class='ToolTipcodeSnippet'>" + Utils.ReadAndFormatLogToHtml(_logPath) + "</div>", MessageImg.MsgError, "Progress execution", "Critical error", null, 0, 600);
+                    ExecutionFailed = true;
                 }
 
                 // if the db log file exists, then the connect statement failed, warn the user

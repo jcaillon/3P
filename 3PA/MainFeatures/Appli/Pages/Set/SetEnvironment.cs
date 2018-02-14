@@ -89,6 +89,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
             toolTip.SetToolTip(btDbView, "Click here to <b>view</b> the content of the file holding the database structure info for 3P");
 
+            toolTip.SetToolTip(htmlLabel13, "You can filter the tables that will be fetched for the autocompletion by their table type :<br>- T : User Data Table<br>- S : Virtual System Table<br>- V : SQL View<br>And by their name : (`_FILE` for instance)");
+            toolTip.SetToolTip(flCanDoTblType, "Only the tables with a type that CAN-DO this value will be fetched for the autocompletion<br><br>Below is the equivalent progress code that will be used :<div class='ToolTipcodeSnippet'>CAN-DO(this_value, DB._FILE._Tbl-Type)</div><br>For instance, you can use the following value to fetch ALL the tables :<div class='ToolTipcodeSnippet'>*</div>Or just the user and system tables :<div class='ToolTipcodeSnippet'>T,S</div><br>Here is the list of all the possible values :<div class='ToolTipcodeSnippet'>- T : User Data Table<br>- S : Virtual System Table<br>- V : SQL View</div>");
+            toolTip.SetToolTip(flCanDoTblName, "Only the tables with a name that CAN-DO this value will be fetched for the autocompletion<br><br>Below is the equivalent progress code that will be used :<div class='ToolTipcodeSnippet'>CAN-DO(this_value, DB._FILE._FILE-NAME)</div><br>Here is an example to fetch all user tables but only 4 particular system tables:<div class='ToolTipcodeSnippet'>_Sequence,_FILE,_INDEX,_FIELD,!_*,*</div><i>You have to set T,S in the table type CAN-DO for this example...</i>");
+
+            textTool = "You can define a list of aliases that will be automatically created for your database<br>just before any progress execution<br>The aliases will also appear in the autocompletion<br>Separate each ALIAS creation by a <b>;</b><br>In each ALIAS creation give the ALIAS_NAME,DATABASE_NAME<br><br>For instance :<div class='ToolTipcodeSnippet'>ALIAS,DATABASE;ALIAS2,DATABASE;...</div>";
+            toolTip.SetToolTip(flListAliases, textTool);
+            toolTip.SetToolTip(htmlLabel14, textTool);
+
             textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1</div>";
             toolTip.SetToolTip(flExtraPf, textTool);
             toolTip.SetToolTip(htmlLabel8, textTool);
@@ -224,6 +232,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         Suffix = flSuffix.Text,
                         Label = flLabel.Text,
                         ExtraPf = flExtraPf.Text,
+                        DatabaseExtractCandoTblType = flCanDoTblType.Text,
+                        DatabaseExtractCandoTblName = flCanDoTblName.Text,
+                        DatabaseAliasList = flListAliases.Text,
                         IniPath = textbox2.Text,
                         ExtraProPath = flExtraProPath.Text,
                         BaseLocalPath = textbox3.Text,
@@ -375,6 +386,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         flSuffix.Text = ProEnvironment.Current.Suffix;
                         flLabel.Text = ProEnvironment.Current.Label;
                         flExtraPf.Text = ProEnvironment.Current.ExtraPf;
+                        flCanDoTblType.Text = ProEnvironment.Current.DatabaseExtractCandoTblType;
+                        flCanDoTblName.Text = ProEnvironment.Current.DatabaseExtractCandoTblName;
+                        flListAliases.Text = ProEnvironment.Current.DatabaseAliasList;
                         flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                         flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
                         flDatabase.Text = ProEnvironment.Current.GetCurrentDb();

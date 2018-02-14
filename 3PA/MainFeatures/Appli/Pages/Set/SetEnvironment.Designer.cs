@@ -29,6 +29,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.htmlLabel16 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel15 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel14 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.flListAliases = new YamuiFramework.Controls.YamuiTextBox();
+            this.flCanDoTblName = new YamuiFramework.Controls.YamuiTextBox();
+            this.htmlLabel13 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.flCanDoTblType = new YamuiFramework.Controls.YamuiTextBox();
             this.htmlLabel12 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btleft8 = new YamuiFramework.Controls.YamuiButtonImage();
             this.textbox8 = new YamuiFramework.Controls.YamuiTextBox();
@@ -121,6 +128,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel16);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel15);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel14);
+            this.scrollPanel.ContentPanel.Controls.Add(this.flListAliases);
+            this.scrollPanel.ContentPanel.Controls.Add(this.flCanDoTblName);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel13);
+            this.scrollPanel.ContentPanel.Controls.Add(this.flCanDoTblType);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel12);
             this.scrollPanel.ContentPanel.Controls.Add(this.btleft8);
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox8);
@@ -204,6 +218,109 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
+            // htmlLabel16
+            // 
+            this.htmlLabel16.AutoSize = false;
+            this.htmlLabel16.AutoSizeHeightOnly = true;
+            this.htmlLabel16.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel16.BaseStylesheet = null;
+            this.htmlLabel16.IsSelectionEnabled = false;
+            this.htmlLabel16.Location = new System.Drawing.Point(512, 253);
+            this.htmlLabel16.Name = "htmlLabel16";
+            this.htmlLabel16.Size = new System.Drawing.Size(35, 15);
+            this.htmlLabel16.TabIndex = 186;
+            this.htmlLabel16.TabStop = false;
+            this.htmlLabel16.Text = "Name";
+            // 
+            // htmlLabel15
+            // 
+            this.htmlLabel15.AutoSize = false;
+            this.htmlLabel15.AutoSizeHeightOnly = true;
+            this.htmlLabel15.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel15.BaseStylesheet = null;
+            this.htmlLabel15.IsSelectionEnabled = false;
+            this.htmlLabel15.Location = new System.Drawing.Point(193, 253);
+            this.htmlLabel15.Name = "htmlLabel15";
+            this.htmlLabel15.Size = new System.Drawing.Size(35, 15);
+            this.htmlLabel15.TabIndex = 185;
+            this.htmlLabel15.TabStop = false;
+            this.htmlLabel15.Text = "Type";
+            // 
+            // htmlLabel14
+            // 
+            this.htmlLabel14.AutoSize = false;
+            this.htmlLabel14.AutoSizeHeightOnly = true;
+            this.htmlLabel14.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel14.BaseStylesheet = null;
+            this.htmlLabel14.IsSelectionEnabled = false;
+            this.htmlLabel14.Location = new System.Drawing.Point(30, 279);
+            this.htmlLabel14.Name = "htmlLabel14";
+            this.htmlLabel14.Size = new System.Drawing.Size(137, 15);
+            this.htmlLabel14.TabIndex = 183;
+            this.htmlLabel14.TabStop = false;
+            this.htmlLabel14.Text = "<b>Database aliases list</b>";
+            // 
+            // flListAliases
+            // 
+            this.flListAliases.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.flListAliases.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flListAliases.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flListAliases.CustomBackColor = System.Drawing.Color.Empty;
+            this.flListAliases.CustomForeColor = System.Drawing.Color.Empty;
+            this.flListAliases.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flListAliases.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flListAliases.Location = new System.Drawing.Point(193, 279);
+            this.flListAliases.Name = "flListAliases";
+            this.flListAliases.Size = new System.Drawing.Size(678, 20);
+            this.flListAliases.TabIndex = 184;
+            this.flListAliases.Tag = "";
+            this.flListAliases.WaterMark = null;
+            // 
+            // flCanDoTblName
+            // 
+            this.flCanDoTblName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flCanDoTblName.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flCanDoTblName.CustomBackColor = System.Drawing.Color.Empty;
+            this.flCanDoTblName.CustomForeColor = System.Drawing.Color.Empty;
+            this.flCanDoTblName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flCanDoTblName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flCanDoTblName.Location = new System.Drawing.Point(553, 253);
+            this.flCanDoTblName.Name = "flCanDoTblName";
+            this.flCanDoTblName.Size = new System.Drawing.Size(250, 20);
+            this.flCanDoTblName.TabIndex = 182;
+            this.flCanDoTblName.Tag = "";
+            this.flCanDoTblName.WaterMark = null;
+            // 
+            // htmlLabel13
+            // 
+            this.htmlLabel13.AutoSize = false;
+            this.htmlLabel13.AutoSizeHeightOnly = true;
+            this.htmlLabel13.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel13.BaseStylesheet = null;
+            this.htmlLabel13.IsSelectionEnabled = false;
+            this.htmlLabel13.Location = new System.Drawing.Point(30, 253);
+            this.htmlLabel13.Name = "htmlLabel13";
+            this.htmlLabel13.Size = new System.Drawing.Size(154, 15);
+            this.htmlLabel13.TabIndex = 180;
+            this.htmlLabel13.TabStop = false;
+            this.htmlLabel13.Text = "<b>Tables extraction filters</b>";
+            // 
+            // flCanDoTblType
+            // 
+            this.flCanDoTblType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flCanDoTblType.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flCanDoTblType.CustomBackColor = System.Drawing.Color.Empty;
+            this.flCanDoTblType.CustomForeColor = System.Drawing.Color.Empty;
+            this.flCanDoTblType.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flCanDoTblType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flCanDoTblType.Location = new System.Drawing.Point(234, 253);
+            this.flCanDoTblType.Name = "flCanDoTblType";
+            this.flCanDoTblType.Size = new System.Drawing.Size(250, 20);
+            this.flCanDoTblType.TabIndex = 181;
+            this.flCanDoTblType.Tag = "";
+            this.flCanDoTblType.WaterMark = null;
+            // 
             // htmlLabel12
             // 
             this.htmlLabel12.AutoSize = false;
@@ -211,7 +328,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel12.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel12.BaseStylesheet = null;
             this.htmlLabel12.IsSelectionEnabled = false;
-            this.htmlLabel12.Location = new System.Drawing.Point(30, 517);
+            this.htmlLabel12.Location = new System.Drawing.Point(30, 569);
             this.htmlLabel12.Name = "htmlLabel12";
             this.htmlLabel12.Size = new System.Drawing.Size(137, 15);
             this.htmlLabel12.TabIndex = 178;
@@ -226,7 +343,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft8.IsFocused = false;
             this.btleft8.IsHovered = false;
             this.btleft8.IsPressed = false;
-            this.btleft8.Location = new System.Drawing.Point(170, 517);
+            this.btleft8.Location = new System.Drawing.Point(170, 569);
             this.btleft8.Margin = new System.Windows.Forms.Padding(0);
             this.btleft8.Name = "btleft8";
             this.btleft8.SetImgSize = new System.Drawing.Size(0, 0);
@@ -245,7 +362,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox8.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox8.Location = new System.Drawing.Point(193, 517);
+            this.textbox8.Location = new System.Drawing.Point(193, 569);
             this.textbox8.Name = "textbox8";
             this.textbox8.Size = new System.Drawing.Size(678, 20);
             this.textbox8.TabIndex = 179;
@@ -261,7 +378,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright8.IsFocused = false;
             this.btright8.IsHovered = false;
             this.btright8.IsPressed = false;
-            this.btright8.Location = new System.Drawing.Point(874, 517);
+            this.btright8.Location = new System.Drawing.Point(874, 569);
             this.btright8.Margin = new System.Windows.Forms.Padding(0);
             this.btright8.Name = "btright8";
             this.btright8.SetImgSize = new System.Drawing.Size(0, 0);
@@ -277,7 +394,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel11.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel11.BaseStylesheet = null;
             this.htmlLabel11.IsSelectionEnabled = false;
-            this.htmlLabel11.Location = new System.Drawing.Point(30, 491);
+            this.htmlLabel11.Location = new System.Drawing.Point(30, 543);
             this.htmlLabel11.Name = "htmlLabel11";
             this.htmlLabel11.Size = new System.Drawing.Size(137, 15);
             this.htmlLabel11.TabIndex = 174;
@@ -292,7 +409,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft7.IsFocused = false;
             this.btleft7.IsHovered = false;
             this.btleft7.IsPressed = false;
-            this.btleft7.Location = new System.Drawing.Point(170, 491);
+            this.btleft7.Location = new System.Drawing.Point(170, 543);
             this.btleft7.Margin = new System.Windows.Forms.Padding(0);
             this.btleft7.Name = "btleft7";
             this.btleft7.SetImgSize = new System.Drawing.Size(0, 0);
@@ -311,7 +428,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox7.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox7.Location = new System.Drawing.Point(193, 491);
+            this.textbox7.Location = new System.Drawing.Point(193, 543);
             this.textbox7.Name = "textbox7";
             this.textbox7.Size = new System.Drawing.Size(678, 20);
             this.textbox7.TabIndex = 175;
@@ -327,7 +444,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright7.IsFocused = false;
             this.btright7.IsHovered = false;
             this.btright7.IsPressed = false;
-            this.btright7.Location = new System.Drawing.Point(874, 491);
+            this.btright7.Location = new System.Drawing.Point(874, 543);
             this.btright7.Margin = new System.Windows.Forms.Padding(0);
             this.btright7.Name = "btright7";
             this.btright7.SetImgSize = new System.Drawing.Size(0, 0);
@@ -371,7 +488,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
             this.htmlLabel1.IsSelectionEnabled = false;
-            this.htmlLabel1.Location = new System.Drawing.Point(30, 361);
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 413);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(137, 15);
             this.htmlLabel1.TabIndex = 169;
@@ -498,7 +615,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel4.Location = new System.Drawing.Point(0, 83);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel4.Name = "yamuiLabel4";
-            this.yamuiLabel4.Size = new System.Drawing.Size(191, 19);
+            this.yamuiLabel4.Size = new System.Drawing.Size(190, 19);
             this.yamuiLabel4.TabIndex = 95;
             this.yamuiLabel4.Text = "DETAILS OF THE SELECTION";
             // 
@@ -649,7 +766,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
             this.htmlLabel2.IsSelectionEnabled = false;
-            this.htmlLabel2.Location = new System.Drawing.Point(30, 252);
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 304);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(122, 60);
             this.htmlLabel2.TabIndex = 111;
@@ -665,7 +782,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft2.IsFocused = false;
             this.btleft2.IsHovered = false;
             this.btleft2.IsPressed = false;
-            this.btleft2.Location = new System.Drawing.Point(170, 252);
+            this.btleft2.Location = new System.Drawing.Point(170, 304);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
             this.btleft2.SetImgSize = new System.Drawing.Size(0, 0);
@@ -683,7 +800,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright2.IsFocused = false;
             this.btright2.IsHovered = false;
             this.btright2.IsPressed = false;
-            this.btright2.Location = new System.Drawing.Point(874, 252);
+            this.btright2.Location = new System.Drawing.Point(874, 304);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.SetImgSize = new System.Drawing.Size(0, 0);
@@ -702,7 +819,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox2.Location = new System.Drawing.Point(193, 253);
+            this.textbox2.Location = new System.Drawing.Point(193, 305);
             this.textbox2.Name = "textbox2";
             this.textbox2.Size = new System.Drawing.Size(678, 20);
             this.textbox2.TabIndex = 130;
@@ -720,7 +837,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraProPath.CustomForeColor = System.Drawing.Color.Empty;
             this.flExtraProPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flExtraProPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flExtraProPath.Location = new System.Drawing.Point(193, 279);
+            this.flExtraProPath.Location = new System.Drawing.Point(193, 331);
             this.flExtraProPath.Multiline = true;
             this.flExtraProPath.Name = "flExtraProPath";
             this.flExtraProPath.Size = new System.Drawing.Size(678, 50);
@@ -734,7 +851,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
             this.htmlLabel3.IsSelectionEnabled = false;
-            this.htmlLabel3.Location = new System.Drawing.Point(30, 335);
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 387);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel3.TabIndex = 112;
@@ -749,7 +866,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft3.IsFocused = false;
             this.btleft3.IsHovered = false;
             this.btleft3.IsPressed = false;
-            this.btleft3.Location = new System.Drawing.Point(170, 335);
+            this.btleft3.Location = new System.Drawing.Point(170, 387);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.SetImgSize = new System.Drawing.Size(0, 0);
@@ -768,7 +885,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox3.Location = new System.Drawing.Point(193, 335);
+            this.textbox3.Location = new System.Drawing.Point(193, 387);
             this.textbox3.Name = "textbox3";
             this.textbox3.Size = new System.Drawing.Size(678, 20);
             this.textbox3.TabIndex = 128;
@@ -784,7 +901,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.IsFocused = false;
             this.btright3.IsHovered = false;
             this.btright3.IsPressed = false;
-            this.btright3.Location = new System.Drawing.Point(874, 335);
+            this.btright3.Location = new System.Drawing.Point(874, 387);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.SetImgSize = new System.Drawing.Size(0, 0);
@@ -801,7 +918,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
             this.htmlLabel4.IsSelectionEnabled = false;
-            this.htmlLabel4.Location = new System.Drawing.Point(30, 387);
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 439);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(137, 15);
             this.htmlLabel4.TabIndex = 113;
@@ -816,7 +933,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft4.IsFocused = false;
             this.btleft4.IsHovered = false;
             this.btleft4.IsPressed = false;
-            this.btleft4.Location = new System.Drawing.Point(170, 387);
+            this.btleft4.Location = new System.Drawing.Point(170, 439);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.SetImgSize = new System.Drawing.Size(0, 0);
@@ -835,7 +952,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox4.Location = new System.Drawing.Point(193, 387);
+            this.textbox4.Location = new System.Drawing.Point(193, 439);
             this.textbox4.Name = "textbox4";
             this.textbox4.Size = new System.Drawing.Size(678, 20);
             this.textbox4.TabIndex = 127;
@@ -851,7 +968,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.IsFocused = false;
             this.btright4.IsHovered = false;
             this.btright4.IsPressed = false;
-            this.btright4.Location = new System.Drawing.Point(874, 387);
+            this.btright4.Location = new System.Drawing.Point(874, 439);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.SetImgSize = new System.Drawing.Size(0, 0);
@@ -868,7 +985,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.tgCompLocally.IsFocused = false;
             this.tgCompLocally.IsHovered = false;
             this.tgCompLocally.IsPressed = false;
-            this.tgCompLocally.Location = new System.Drawing.Point(298, 363);
+            this.tgCompLocally.Location = new System.Drawing.Point(298, 415);
             this.tgCompLocally.Name = "tgCompLocally";
             this.tgCompLocally.SetImgSize = new System.Drawing.Size(0, 0);
             this.tgCompLocally.Size = new System.Drawing.Size(35, 16);
@@ -879,7 +996,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.lblLocally.AutoSize = true;
             this.lblLocally.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.lblLocally.Location = new System.Drawing.Point(193, 364);
+            this.lblLocally.Location = new System.Drawing.Point(193, 416);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";
             this.lblLocally.Size = new System.Drawing.Size(99, 12);
@@ -894,7 +1011,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
             this.htmlLabel5.IsSelectionEnabled = false;
-            this.htmlLabel5.Location = new System.Drawing.Point(30, 413);
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 465);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel5.TabIndex = 114;
@@ -909,7 +1026,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft5.IsFocused = false;
             this.btleft5.IsHovered = false;
             this.btleft5.IsPressed = false;
-            this.btleft5.Location = new System.Drawing.Point(170, 413);
+            this.btleft5.Location = new System.Drawing.Point(170, 465);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.SetImgSize = new System.Drawing.Size(0, 0);
@@ -928,7 +1045,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox5.Location = new System.Drawing.Point(193, 413);
+            this.textbox5.Location = new System.Drawing.Point(193, 465);
             this.textbox5.Name = "textbox5";
             this.textbox5.Size = new System.Drawing.Size(678, 20);
             this.textbox5.TabIndex = 126;
@@ -944,7 +1061,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright5.IsFocused = false;
             this.btright5.IsHovered = false;
             this.btright5.IsPressed = false;
-            this.btright5.Location = new System.Drawing.Point(874, 413);
+            this.btright5.Location = new System.Drawing.Point(874, 465);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.SetImgSize = new System.Drawing.Size(0, 0);
@@ -960,7 +1077,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
             this.htmlLabel6.IsSelectionEnabled = false;
-            this.htmlLabel6.Location = new System.Drawing.Point(30, 439);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 491);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(154, 15);
             this.htmlLabel6.TabIndex = 115;
@@ -977,7 +1094,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
             this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flCmdLine.Location = new System.Drawing.Point(193, 439);
+            this.flCmdLine.Location = new System.Drawing.Point(193, 491);
             this.flCmdLine.Name = "flCmdLine";
             this.flCmdLine.Size = new System.Drawing.Size(678, 20);
             this.flCmdLine.TabIndex = 125;
@@ -990,7 +1107,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
             this.htmlLabel7.IsSelectionEnabled = false;
-            this.htmlLabel7.Location = new System.Drawing.Point(30, 465);
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 517);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel7.TabIndex = 116;
@@ -1005,7 +1122,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft6.IsFocused = false;
             this.btleft6.IsHovered = false;
             this.btleft6.IsPressed = false;
-            this.btleft6.Location = new System.Drawing.Point(170, 465);
+            this.btleft6.Location = new System.Drawing.Point(170, 517);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.SetImgSize = new System.Drawing.Size(0, 0);
@@ -1024,7 +1141,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox6.Location = new System.Drawing.Point(193, 465);
+            this.textbox6.Location = new System.Drawing.Point(193, 517);
             this.textbox6.Name = "textbox6";
             this.textbox6.Size = new System.Drawing.Size(678, 20);
             this.textbox6.TabIndex = 124;
@@ -1040,7 +1157,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright6.IsFocused = false;
             this.btright6.IsHovered = false;
             this.btright6.IsPressed = false;
-            this.btright6.Location = new System.Drawing.Point(874, 465);
+            this.btright6.Location = new System.Drawing.Point(874, 517);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.SetImgSize = new System.Drawing.Size(0, 0);
@@ -1057,7 +1174,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDelete.IsFocused = false;
             this.btDelete.IsHovered = false;
             this.btDelete.IsPressed = false;
-            this.btDelete.Location = new System.Drawing.Point(394, 543);
+            this.btDelete.Location = new System.Drawing.Point(394, 595);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDelete.Size = new System.Drawing.Size(70, 24);
@@ -1087,7 +1204,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btEdit.IsFocused = false;
             this.btEdit.IsHovered = false;
             this.btEdit.IsPressed = false;
-            this.btEdit.Location = new System.Drawing.Point(193, 543);
+            this.btEdit.Location = new System.Drawing.Point(193, 595);
             this.btEdit.Name = "btEdit";
             this.btEdit.SetImgSize = new System.Drawing.Size(20, 20);
             this.btEdit.Size = new System.Drawing.Size(57, 24);
@@ -1103,7 +1220,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btAdd.IsFocused = false;
             this.btAdd.IsHovered = false;
             this.btAdd.IsPressed = false;
-            this.btAdd.Location = new System.Drawing.Point(256, 543);
+            this.btAdd.Location = new System.Drawing.Point(256, 595);
             this.btAdd.Name = "btAdd";
             this.btAdd.SetImgSize = new System.Drawing.Size(20, 20);
             this.btAdd.Size = new System.Drawing.Size(59, 24);
@@ -1119,7 +1236,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btCopy.IsFocused = false;
             this.btCopy.IsHovered = false;
             this.btCopy.IsPressed = false;
-            this.btCopy.Location = new System.Drawing.Point(321, 543);
+            this.btCopy.Location = new System.Drawing.Point(321, 595);
             this.btCopy.Name = "btCopy";
             this.btCopy.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCopy.Size = new System.Drawing.Size(67, 24);
@@ -1180,7 +1297,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btSave.IsFocused = false;
             this.btSave.IsHovered = false;
             this.btSave.IsPressed = false;
-            this.btSave.Location = new System.Drawing.Point(193, 543);
+            this.btSave.Location = new System.Drawing.Point(193, 595);
             this.btSave.Name = "btSave";
             this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
             this.btSave.Size = new System.Drawing.Size(62, 24);
@@ -1196,7 +1313,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btCancel.IsFocused = false;
             this.btCancel.IsHovered = false;
             this.btCancel.IsPressed = false;
-            this.btCancel.Location = new System.Drawing.Point(261, 543);
+            this.btCancel.Location = new System.Drawing.Point(261, 595);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCancel.Size = new System.Drawing.Size(71, 24);
@@ -1275,9 +1392,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.areaLeftButtons.BackColor = System.Drawing.Color.Red;
             this.areaLeftButtons.Enabled = false;
-            this.areaLeftButtons.Location = new System.Drawing.Point(166, 133);
+            this.areaLeftButtons.Location = new System.Drawing.Point(166, 114);
             this.areaLeftButtons.Name = "areaLeftButtons";
-            this.areaLeftButtons.Size = new System.Drawing.Size(18, 399);
+            this.areaLeftButtons.Size = new System.Drawing.Size(18, 470);
             this.areaLeftButtons.TabIndex = 168;
             this.areaLeftButtons.Visible = false;
             // 
@@ -1289,7 +1406,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaEnv.Enabled = false;
             this.areaEnv.Location = new System.Drawing.Point(3, 185);
             this.areaEnv.Name = "areaEnv";
-            this.areaEnv.Size = new System.Drawing.Size(897, 347);
+            this.areaEnv.Size = new System.Drawing.Size(897, 399);
             this.areaEnv.TabIndex = 165;
             this.areaEnv.Visible = false;
             // 
@@ -1395,5 +1512,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButtonImage btleft7;
         private YamuiTextBox textbox7;
         private YamuiButtonImage btright7;
+        private HtmlLabel htmlLabel13;
+        private YamuiTextBox flCanDoTblType;
+        private HtmlLabel htmlLabel14;
+        private YamuiTextBox flListAliases;
+        private YamuiTextBox flCanDoTblName;
+        private HtmlLabel htmlLabel16;
+        private HtmlLabel htmlLabel15;
     }
 }
