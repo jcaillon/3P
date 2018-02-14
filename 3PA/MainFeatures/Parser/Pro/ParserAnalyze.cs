@@ -624,7 +624,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         TargetTable = FindAnyTableByName(bufferFor)
                     };
 
-                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && newBuffer.TargetTable.TableType != ParsedTableType.TT ? ParseFlag.MissingDbName : 0;
+                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && !newBuffer.TargetTable.IsTempTable ? ParseFlag.MissingDbName : 0;
                     newBuffer.Flags = flags;
 
                     return newBuffer;

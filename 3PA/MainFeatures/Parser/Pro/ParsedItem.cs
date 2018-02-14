@@ -850,14 +850,24 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public string ProgressVersion { get; private set; }
         public List<ParsedTable> Tables { get; private set; }
 
-        public ParsedDataBase(string logicalName, string physicalName, string progressVersion, List<ParsedTable> tables)
+        /// <summary>
+        /// if this database is actualy an alias, this is the name of the referenced database (otherwise null)
+        /// </summary>
+        public string AliasOf { get; private set; }
+
+        public bool IsAlias {
+            get { return !string.IsNullOrEmpty(AliasOf); }
+        }
+
+        public ParsedDataBase(string logicalName, string physicalName, string progressVersion, List<ParsedTable> tables, string aliasOf)
             : base(logicalName) {
             PhysicalName = physicalName;
             ProgressVersion = progressVersion;
             Tables = tables;
+            AliasOf = aliasOf;
         }
     }
-
+    
     /// <summary>
     /// Table or temp table parsed item
     /// </summary>
@@ -891,6 +901,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public List<ParsedField> Fields { get; set; }
         public List<ParsedIndex> Indexes { get; set; }
         public List<ParsedTrigger> Triggers { get; set; }
+
+        public bool IsTempTable {
+            get { return TableType == ParsedTableType.TT; }
+        }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);

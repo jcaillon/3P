@@ -507,7 +507,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         private ParsedTable FindTempTableByName(string name) {
             return _parsedItemList.Find(item => {
                 var tt = item as ParsedTable;
-                return tt != null && tt.TableType == ParsedTableType.TT && tt.Name.EqualsCi(name);
+                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
             }) as ParsedTable;
         }
 

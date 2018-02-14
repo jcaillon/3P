@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using YamuiFramework.Controls.YamuiList;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA.NppCore;
@@ -459,6 +458,9 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
 
         public override string ToString() {
             var toDisplay = new StringBuilder();
+            if (ParsedDataBase.IsAlias) {
+                toDisplay.Append(HtmlHelper.FormatRow("Is an ALIAS of", ParsedDataBase.AliasOf));
+            }
             toDisplay.Append(HtmlHelper.FormatRow("Logical name", ParsedDataBase.Name));
             toDisplay.Append(HtmlHelper.FormatRow("Physical name", ParsedDataBase.PhysicalName));
             toDisplay.Append(HtmlHelper.FormatRow("Progress version", ParsedDataBase.ProgressVersion));
@@ -524,7 +526,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     }
                 }
 
-                toDisplay.Append(HtmlHelper.FormatSubtitle("Extra information"));
+                toDisplay.Append(HtmlHelper.FormatSubtitle("EXTRA INFORMATION"));
                 toDisplay.Append(HtmlHelper.FormatRow("Hidden", table.Hidden.ToString()));
                 toDisplay.Append(HtmlHelper.FormatRow("Frozen", table.Frozen.ToString()));
                 toDisplay.Append(HtmlHelper.FormatRow("Table type", table.TableType.GetDescription()));

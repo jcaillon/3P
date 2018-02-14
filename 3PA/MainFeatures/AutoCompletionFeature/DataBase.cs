@@ -158,6 +158,13 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
+        /// List of aliases following the format : ALIAS,LOGICALNAME;ALIAS2,LOGIC;ALIAS3,LOGIC2...
+        /// </summary>
+        private string GetAliasesList {
+            get { return ProEnvironment.Current.DatabaseAliasList; }
+        }
+
+        /// <summary>
         /// This method parses the output of the .p procedure that exports the database info
         /// and fills _dataBases
         /// It then updates the parser with the new info
@@ -183,7 +190,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[3],
                             splitted[4],
                             splitted[5],
-                            new List<ParsedTable>());
+                            new List<ParsedTable>(),
+                            null);
                         _dataBases.Add(currentDb);
                         break;
                     case 'S':
@@ -266,9 +274,27 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 }
             });
 
+            // copy the databases for each aliases
+            foreach (var aliasCreation in GetAliasesList.Trim().Trim(';').Split(';')) {
+                var splitted = aliasCreation.Split(',');
+                if (splitted.Length == 2) {
+                    if (!string.IsNullOrWhiteSpace(splitted[0]) && !string.IsNullOrWhiteSpace(splitted[1])) {
+                        var foundDb = FindDatabaseByName(splitted[1].Trim());
+                        if (foundDb != null) {
+                            _dataBases.Add(new ParsedDataBase(
+                                splitted[0].Trim(), 
+                                foundDb.PhysicalName, 
+                                foundDb.ProgressVersion, 
+                                foundDb.Tables, 
+                                foundDb.Name));
+                        }
+                    }
+                }
+            }
+
+            // sort all fields by primary then by name
             foreach (var dataBase in _dataBases) {
                 foreach (var table in dataBase.Tables) {
-                    // sort fields by primary then by name
                     table.Fields.Sort((x, y) => {
                         var compare = y.Flags.HasFlag(ParseFlag.Primary).CompareTo(x.Flags.HasFlag(ParseFlag.Primary));
                         if (compare != 0)
