@@ -369,6 +369,11 @@ namespace _3PA.MainFeatures {
                 GroupName = "Code edition")]
             public bool DisplayParserErrorsOnSave = true;
 
+            [ConfigAttribute(Label = "Prefixes of normed variables",
+                Tooltip = "A comma separated list of prefixes that represents a 'correct' naming convention for variables<br>For instance : `g_,l_,i_`",
+                GroupName = "Code edition")]
+            public string NormedVariablesPrefixes = "";
+            
             #endregion
 
             #region FILE EXPLORER
