@@ -6,6 +6,8 @@
 DEFINE INPUT PARAMETER gc_FileName AS CHARACTER NO-UNDO.
 DEFINE INPUT PARAMETER ipc_baseName AS CHARACTER NO-UNDO. /* */
 DEFINE INPUT PARAMETER ipc_physicalName AS CHARACTER NO-UNDO. /* */
+DEFINE INPUT PARAMETER ipc_candoTableType AS CHARACTER NO-UNDO. /* */
+DEFINE INPUT PARAMETER ipc_candoFileName AS CHARACTER NO-UNDO. /* */
 
 DEFINE VARIABLE gc_sep AS CHARACTER NO-UNDO INITIAL "~t".
 DEFINE VARIABLE gc_fieldList AS CHARACTER NO-UNDO INITIAL "".
@@ -21,7 +23,7 @@ FUNCTION fi_subst RETURNS CHARACTER(gc_text AS CHARACTER) FORWARD.
 /* Format is: H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version> */
 PUT STREAM str_out UNFORMATTED "#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>" SKIP.
 PUT STREAM str_out UNFORMATTED "#S|<Sequence name>|<Sequence num>" SKIP.
-PUT STREAM str_out UNFORMATTED "#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>" SKIP.
+PUT STREAM str_out UNFORMATTED "#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>|<Hidden? 0/1>|<Frozen? 0/1>|<Table type>" SKIP.
 PUT STREAM str_out UNFORMATTED "#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>" SKIP.
 PUT STREAM str_out UNFORMATTED "#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>" SKIP.
 PUT STREAM str_out UNFORMATTED "#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>" SKIP.
@@ -46,7 +48,7 @@ END.
 
 /* Write table information */
 /* Format is: T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description> */
-FOR EACH TPALDB._FILE NO-LOCK WHERE NOT TPALDB._FILE._HIDDEN AND TPALDB._FILE._Tbl-Type = "T":
+FOR EACH TPALDB._FILE NO-LOCK WHERE CAN-DO(ipc_candoTableType, TPALDB._FILE._Tbl-Type) AND CAN-DO(ipc_candoFileName, TPALDB._FILE._FILE-NAME):
     PUT STREAM str_out UNFORMATTED "# ______________________________________________________________" SKIP.
     PUT STREAM str_out UNFORMATTED    
         "T" + gc_sep +
@@ -54,7 +56,10 @@ FOR EACH TPALDB._FILE NO-LOCK WHERE NOT TPALDB._FILE._HIDDEN AND TPALDB._FILE._T
         fi_subst(STRING(TPALDB._FILE._FILE-NUMBER)) + gc_sep +
         fi_subst(STRING(TPALDB._FILE._CRC)) + gc_sep +
         TRIM(fi_subst(TPALDB._FILE._DUMP-NAME)) + gc_sep +
-        TRIM(fi_subst(TPALDB._FILE._DESC))
+        TRIM(fi_subst(TPALDB._FILE._DESC)) + gc_sep +
+        (IF TPALDB._FILE._HIDDEN THEN "1" ELSE "0") + gc_sep +
+        (IF TPALDB._FILE._Frozen THEN "1" ELSE "0") + gc_sep +
+        TRIM(fi_subst(TPALDB._FILE._Tbl-Type))
         SKIP.
 
     /* Write triggers information */

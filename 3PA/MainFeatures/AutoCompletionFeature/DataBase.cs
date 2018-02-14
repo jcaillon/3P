@@ -154,7 +154,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         private string GetOutputName {
-            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.GetCurrentDb()).ToValidFileName().ToLower() + ".dump"; }
+            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.GetCurrentDb()).ToValidFileName().ToLower() + ".dbdump"; }
         }
 
         /// <summary>
@@ -196,9 +196,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         break;
                     case 'T':
                         // table
-                        //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
-                        if (splitted.Length != 6 || currentDb == null)
+                        //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>|<Hidden? 0/1>|<Frozen? 0/1>|<Table type>
+                        if (splitted.Length != 9 || currentDb == null)
                             return;
+                        ParsedTableType tblType;
+                        if (!Enum.TryParse(splitted[8].Trim(), true, out tblType))
+                            tblType = ParsedTableType.T;
                         currentTable = new ParsedTable(
                             splitted[1],
                             defaultToken,
@@ -208,11 +211,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[5],
                             "",
                             null,
-                            false,
                             new List<ParsedField>(),
                             new List<ParsedIndex>(),
                             new List<ParsedTrigger>(),
-                            "");
+                            "",
+                            splitted[6].Equals("1"),
+                            splitted[7].Equals("1"),
+                            tblType
+                            );
                         currentDb.Tables.Add(currentTable);
                         break;
                     case 'X':

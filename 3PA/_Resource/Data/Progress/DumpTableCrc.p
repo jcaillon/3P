@@ -6,6 +6,8 @@
 DEFINE INPUT PARAMETER gc_FileName AS CHARACTER NO-UNDO.
 DEFINE INPUT PARAMETER ipc_baseName AS CHARACTER NO-UNDO. /* */
 DEFINE INPUT PARAMETER ipc_physicalName AS CHARACTER NO-UNDO. /* */
+DEFINE INPUT PARAMETER ipc_candoTableType AS CHARACTER NO-UNDO. /* */
+DEFINE INPUT PARAMETER ipc_candoFileName AS CHARACTER NO-UNDO. /* */
 
 DEFINE VARIABLE gc_sep AS CHARACTER NO-UNDO INITIAL "~t".
 
@@ -19,7 +21,7 @@ PUT STREAM str_out UNFORMATTED "#<Table name>|<Table CRC>" SKIP.
 
 /* Write table information */
 /* Format is: <Table name>|<Table CRC> */
-FOR EACH TPALDB._FILE NO-LOCK WHERE NOT TPALDB._FILE._HIDDEN AND TPALDB._FILE._Tbl-Type = "T":
+FOR EACH TPALDB._FILE NO-LOCK WHERE CAN-DO(ipc_candoTableType, TPALDB._FILE._Tbl-Type) AND CAN-DO(ipc_candoFileName, TPALDB._FILE._FILE-NAME):
     PUT STREAM str_out UNFORMATTED
         ipc_baseName + "." + TRIM(fi_subst(TPALDB._FILE._FILE-NAME)) + gc_sep +
         fi_subst(STRING(TPALDB._FILE._CRC))

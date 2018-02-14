@@ -253,7 +253,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // name and type
             toDisplay.Append(
-                "<div class='ToolTipName' style=\"background-repeat: no-repeat; background-position: left center; background-image: url('" + item.Type + "'); padding-left: 25px; padding-top: 6px; padding-bottom: 6px;\">" + @"
+                "<div class='ToolTipName' style=\"background-repeat: no-repeat; background-position: left center; background-image: url('" + item.Type + "'); padding-left: 25px;\">" + @"
                     <div>" + item.DisplayText + (_currentCompletionList.Count > 1 ? " (" + (IndexToShow + 1) + "/<a href='nexttooltip'>" + _currentCompletionList.Count + "</a>)" : "") + @"</div>
                     <div class='ToolTipSubString'>" + item.Type + @"</div>
                 </div>");
@@ -299,6 +299,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(flagStrBuilder);
             }
             
+            toDisplay.Append("<div class='ToolTipBottom'></div>");
+
             // tooltip end
             toDisplay.Append("</div>");
 

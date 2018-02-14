@@ -29,7 +29,6 @@ using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
-using _3PA._Resource;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -482,6 +481,17 @@ namespace _3PA.Lib {
                         // replace default file by its copy on npp shutdown
                         _3PUpdater.Instance.AddFileToMove(copyPath, Npp.ConfXml.FileNppUserDefinedLang);
                     }
+                }
+            }
+            if (!fromVersion.IsHigherVersionThan("1.7.8")) {
+                try {
+                    if (Directory.Exists(Config.FolderDatabase)) {
+                        foreach (string file in Directory.EnumerateFiles(Config.FolderDatabase, "*.dump", SearchOption.TopDirectoryOnly)) {
+                            File.Delete(file);
+                        }
+                    }
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e);
                 }
             }
         }

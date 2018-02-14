@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.SyntaxHighlighting;
 using _3PA._Resource;

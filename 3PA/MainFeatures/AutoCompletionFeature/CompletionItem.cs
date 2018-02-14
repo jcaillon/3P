@@ -523,6 +523,11 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         toDisplay.Append(HtmlHelper.FormatRow(parsedIndex.Name, (parsedIndex.Flag != ParsedIndexFlag.None ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
                     }
                 }
+
+                toDisplay.Append(HtmlHelper.FormatSubtitle("Extra information"));
+                toDisplay.Append(HtmlHelper.FormatRow("Hidden", table.Hidden.ToString()));
+                toDisplay.Append(HtmlHelper.FormatRow("Frozen", table.Frozen.ToString()));
+                toDisplay.Append(HtmlHelper.FormatRow("Table type", table.TableType.GetDescription()));
             }
 
             return toDisplay.ToString();

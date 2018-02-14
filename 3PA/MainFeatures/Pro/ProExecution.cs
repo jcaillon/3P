@@ -203,6 +203,8 @@ namespace _3PA.MainFeatures.Pro {
                 {"NotificationOutputPath", "\"\""},
                 {"PreExecutionProgram", "\"\""},
                 {"PostExecutionProgram", "\"\""},
+                {"dbExtractCandoTblType", "\"\""},
+                {"dbExtractCandoTblName", "\"\""},
             };
         }
 
@@ -271,6 +273,8 @@ namespace _3PA.MainFeatures.Pro {
             SetPreprocessedVar("NotificationOutputPath", _notifPath.PreProcQuoter());
             SetPreprocessedVar("PreExecutionProgram", ProEnv.PreExecutionProgram.Trim().PreProcQuoter());
             SetPreprocessedVar("PostExecutionProgram", ProEnv.PostExecutionProgram.Trim().PreProcQuoter());
+            SetPreprocessedVar("dbExtractCandoTblType", ProEnv.DbExtractCandoTblType.Trim().PreProcQuoter());
+            SetPreprocessedVar("dbExtractCandoTblName", ProEnv.DbExtractCandoTblName.Trim().PreProcQuoter());
 
             // prepare the .p runner
             _runnerPath = Path.Combine(_localTempDir, "run_" + DateTime.Now.ToString("HHmmssfff") + ".p");

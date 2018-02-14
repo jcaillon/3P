@@ -116,6 +116,8 @@ ul {
     font-weight: bold;
     font-size: 13px;
     background-color: @FormAltBack;
+    padding: 4px;
+    padding-bottom: 0px;
 }
 .ToolTipSubString {
 	color: @SubTextFore;
@@ -129,15 +131,11 @@ ul {
 	margin-bottom: 5px;
 	text-align: right;
 }
-
-.ToolTipCount {
-    background-color: @FormAltBack;
-    font-weight: bold;
-	font-style: italic;
-    font-size: 11px;
-    text-align: right;
+.ToolTipBottom {
+	background-color: @FormAltBack;
 	padding: 4px;
 	margin-top: 5px;
+    height: 5px;
 }
 .ToolTipDownArrow {
     font-family: wingdings;

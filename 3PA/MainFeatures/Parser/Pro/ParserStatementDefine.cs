@@ -397,7 +397,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     likeTableMatch = FindAnyTableByName(likeTable);
                 }
 
-                var newTable = new ParsedTable(name, defineToken, "", "", name, "", likeTable, likeTableMatch, true, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString()) {
+                var newTable = new ParsedTable(name, defineToken, "", "", name, "", likeTable, likeTableMatch, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString(), false, false, ParsedTableType.TT) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition,
                     Flags = flags

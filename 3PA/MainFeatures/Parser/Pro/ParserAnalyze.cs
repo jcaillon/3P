@@ -188,13 +188,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
                             break;
                         case "do":
                             // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:)
+                            var newBlock = new ParsedScopeSimpleBlock(token.Value, token);
                             var lastOnblock = _context.LastOnBlock as ParsedOnStatement;
                             // last ON scope started during the current statement, we are on the case of a ON CHOOSE OF xx DO:
                             if (lastOnblock != null && lastOnblock.Position == _context.StatementFirstToken.StartPosition) {
-                                lastOnblock.HasTriggerBlock = true;
+                                lastOnblock.TriggerBlock = newBlock;
                                 _context.BlockStack.Push(lastOnblock);
                             } else {
-                                _context.BlockStack.Push(new ParsedScopeSimpleBlock(token.Value, token));
+                                _context.BlockStack.Push(newBlock);
                             }
                             break;
                         case "dynamic-function":
@@ -293,11 +294,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     
                     // if we are not continuing a IF ... THEN with a ELSE we should pop all single indent block
                     if (!token.Value.ToLower().Equals("else")) {
-                        var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
-                        while (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
-                            _context.BlockStack.Pop();
-                            topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
-                        }
+                        PopOneStatementIndentBlock(0);
                     }
                 }
 
@@ -369,12 +366,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 if (matched)
                     MoveNext();
 
+            // End of line
             } else if (token is TokenEol) {
                 AddLineInfo(token);
 
                 // keywords like then/otherwise only increase the indentation for a single statement,
                 // if the statement it indented is over then pop the indent block
-                PopOneStatementIndentBlock();
+                PopOneStatementIndentBlock(1);
             }
 
         }
@@ -445,25 +443,36 @@ namespace _3PA.MainFeatures.Parser.Pro {
             
             if (!_lineInfo.ContainsKey(curLine)) {
                 
-
                 // compute current depth
                 // -1 because we always have a block that represents the current file
                 var depth = -1;
                 var iloop = 0;
                 while (iloop < _context.BlockStack.Count) {
                     var block = _context.BlockStack.ElementAt(iloop);
-                    // preproc block (analyze-suspend) do not increase indentation
-                    if (block.ScopeType != ParsedScopeType.PreProcBlock) {
-                        var preprocIf = block as ParsedScopePreProcIfBlock;
-                        // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
-                        if (preprocIf == null || !preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
-                            // only the lines AFTER the start of the block should be indent
-                            if (curLine > block.Line) {
-                                depth++;
-                            }
-                        }
-                    }
                     iloop++;
+
+                    // do not indent &ANALYZE-SUSPEND blocks
+                    if (block.ScopeType == ParsedScopeType.PreProcBlock) {
+                        continue;
+                    }
+
+                    // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
+                    var preprocIf = block as ParsedScopePreProcIfBlock;
+                    if (preprocIf != null && preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
+                        continue;
+                    }
+
+                    var onBlock = block as ParsedOnStatement;
+                    if (onBlock != null && curLine <= onBlock.TriggerBlock.Line) {
+                        // ON CHOOSE OF bt_profileRename IN FRAME DEFAULT-FRAME
+                        // DO: <- this would be indented if not for this rule
+                        continue;
+                    }
+                        
+                    // only the lines AFTER the start of the block should be indent
+                    if (curLine > block.Line) {
+                        depth++;
+                    }
                 }
                 depth = Math.Max(depth, 0);
 
@@ -479,19 +488,19 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     // other lines of the statement
                     if (curLine > _context.StatementFirstToken.Line) {
 
-                        // compute if we need to add an extra indent on this line of the statement
-                        // this is to indent stuff like :
-                        // DEFINE VAR
-                        //      lc_name as CHAR NO-UNDO.
                         var extraStatementDepth = 0;
                         var block = _context.BlockStack.Peek();
                         var blockOneStatementIndent = block as ParsedScopeOneStatementIndentBlock;
-                        if (blockOneStatementIndent != null && 
-                            blockOneStatementIndent.LineOfNextWord > blockOneStatementIndent.Line && 
-                            curLine > blockOneStatementIndent.Line + 1)
+                        if (blockOneStatementIndent != null && blockOneStatementIndent.LineOfNextWord > blockOneStatementIndent.Line && curLine > blockOneStatementIndent.Line + 1) {
+                            // IF TRUE THEN
+                            //     ASSIGN
+                            //         lc_ "ok". <- this would NOT be indented if not for this rule
                             extraStatementDepth = 1;
-                        else if (blockOneStatementIndent == null && curLine > block.Line + 1)
+                        } else if (blockOneStatementIndent == null && curLine > block.Line + 1 && !(block is ParsedOnStatement)) {
+                            // DEFINE VARIABLE
+                            //     lc_fuck AS CHARACTER NO-UNDO.  <- this would NOT be indented if not for this rule
                             extraStatementDepth = 1;
+                        }
 
                         // fill missing info on the lines of the statement
                         for (int i = _context.StatementFirstToken.Line + 1; i <= curLine; i++) {
@@ -530,12 +539,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Pop one statement indent block if needed
         /// </summary>
-        private void PopOneStatementIndentBlock() {
+        private void PopOneStatementIndentBlock(int maxPop) {
             // keywords like then/otherwise only increase the indentation for a single statement,
             // if the statement it indented is over then pop the indent block
+            int i = 0;
             var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
-            if (topScope != null && _context.StatementCount > topScope.StatementNumber ) {
+            while (topScope != null && _context.StatementCount > topScope.StatementNumber && (maxPop == 0 || i < maxPop)) {
                 _context.BlockStack.Pop();
+                topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
+                i++;
             }
         }
 
@@ -612,7 +624,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         TargetTable = FindAnyTableByName(bufferFor)
                     };
 
-                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && !newBuffer.TargetTable.IsTempTable ? ParseFlag.MissingDbName : 0;
+                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && newBuffer.TargetTable.TableType != ParsedTableType.TT ? ParseFlag.MissingDbName : 0;
                     newBuffer.Flags = flags;
 
                     return newBuffer;

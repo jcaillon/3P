@@ -54,6 +54,9 @@ namespace _3PA.MainFeatures.Pro {
             public Dictionary<string, string> DbConnectionInfo = new Dictionary<string, string>();
             public string CurrentDb = "";
             public string ExtraPf = "";
+            
+            public string DbExtractCandoTblType = "T";
+            public string DbExtractCandoTblName = "*";
 
             // propath
             public string IniPath = "";
@@ -78,6 +81,7 @@ namespace _3PA.MainFeatures.Pro {
 
             public string PreExecutionProgram = "";
             public string PostExecutionProgram = "";
+            
 
             #endregion
 

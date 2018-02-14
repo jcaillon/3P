@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace _3PA.MainFeatures.Parser.Pro {
 
@@ -467,9 +468,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public string WidgetList { get; private set; }
 
         /// <summary>
-        /// True if this ON statement has a trigger block, false if it only has a trigger statement
+        /// not null if this ON statement has a trigger block
         /// </summary>
-        public bool HasTriggerBlock { get; set; }
+        public ParsedScopeSimpleBlock TriggerBlock { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -866,10 +867,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
 
-        /// <summary>
-        /// To know if the table is a temptable
-        /// </summary>
-        public bool IsTempTable { get; private set; }
+        public bool Hidden { get; private set; }
+        public bool Frozen { get; private set; }
+        public ParsedTableType TableType { get; private set; }
 
         /// <summary>
         /// From database, represents the description of the table
@@ -896,19 +896,33 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string strLikeTable, ParsedTable likeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex) : base(name, token) {
+        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string strLikeTable, ParsedTable likeTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex, bool hidden, bool frozen, ParsedTableType tableType) : base(name, token) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
             Description = description;
-            IsTempTable = isTempTable;
             Fields = fields;
             Indexes = indexes;
             Triggers = triggers;
             UseIndex = useIndex;
+            Hidden = hidden;
+            Frozen = frozen;
+            TableType = tableType;
             LikeTable = likeTable;
             StringLikeTable = strLikeTable;
         }
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    internal enum ParsedTableType {
+        [Description("User Data Table")]
+        T,
+        [Description("Virtual System Table")]
+        S,
+        [Description("SQL View")]
+        V,
+        [Description("Temp Table")]
+        TT                              
     }
 
     /// <summary>

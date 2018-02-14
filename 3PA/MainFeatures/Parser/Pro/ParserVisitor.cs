@@ -603,11 +603,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
             
             if (pars.TargetTable != null) {
                 subString = pars.TargetTable.Name;
-                type = pars.TargetTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
+                type = pars.TargetTable.TableType == ParsedTableType.TT ? CompletionType.TempTable : CompletionType.Table;
 
                 // To code explorer, list buffers and associated tables
-                var parentNode = pars.TargetTable.IsTempTable ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
-                var newNode = CodeItem.Factory.New(pars.TargetTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
+                var parentNode = pars.TargetTable.TableType == ParsedTableType.TT ? GetExplorerListNode("Temp-tables used", CodeExplorerIconType.TempTableUsed) : GetExplorerListNode("Tables used", CodeExplorerIconType.TableUsed);
+                var newNode = CodeItem.Factory.New(pars.TargetTable.TableType == ParsedTableType.TT ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table);
                 newNode.DisplayText = pars.Name;
                 newNode.Flags = pars.Flags;
                 newNode.SubText = null;

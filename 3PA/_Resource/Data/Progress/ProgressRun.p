@@ -23,6 +23,9 @@ This file was created with the 3P :  https://jcaillon.github.io/3P/
     &SCOPED-DEFINE AnalysisMode FALSE
     &SCOPED-DEFINE ToCompileListFile "files.list"
     &SCOPED-DEFINE CompileProgressionFile "compile.progression"
+    
+    &SCOPED-DEFINE dbExtractCandoTblType "T,S"
+    &SCOPED-DEFINE dbExtractCandoTblName "*"
 &ENDIF
 &SCOPED-DEFINE verHigherThan11 INTEGER(ENTRY(1, PROVERSION, '.')) >= 11
 &SCOPED-DEFINE CanAnalyse {&AnalysisMode} AND {&verHigherThan11}
@@ -68,6 +71,7 @@ SESSION:APPL-ALERT-BOXES = YES.
 /* Make sure to create this log, otherwise the C# side would think something went wrong */
 fi_write(INPUT {&LogPath}, INPUT "").
 
+
 /* Assign the PROPATH here */
 &IF {&verHigherThan11} &THEN
     DEFINE VARIABLE llg_propath AS LONGCHAR NO-UNDO.
@@ -92,7 +96,9 @@ fi_write(INPUT {&LogPath}, INPUT "").
         ASSIGN gl_dbKo = TRUE.
 &ENDIF
 
+
 SUBSCRIBE "eventToPublishToNotifyTheUserAfterExecution" ANYWHERE RUN-PROCEDURE "pi_feedNotification".
+
 
 /* Pre-execution program */
 &IF {&PreExecutionProgram} > "" &THEN
@@ -113,8 +119,8 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
     
     CASE {&ExecutionType} :
         WHEN "CHECKSYNTAX" OR
-            WHEN "COMPILE" OR
-            WHEN "GENERATEDEBUGFILE" OR
+        WHEN "COMPILE" OR
+        WHEN "GENERATEDEBUGFILE" OR
         WHEN "RUN" THEN DO:
             RUN pi_compileList NO-ERROR.
             fi_output_last_error().
@@ -133,7 +139,7 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             /* for each connected db */
             REPEAT gi_db = 1 TO NUM-DBS:
                 CREATE ALIAS "TPALDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
-                RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)) NO-ERROR.
+                RUN {&CurrentFilePath} (INPUT {&OutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db), INPUT {&dbExtractCandoTblType}, INPUT {&dbExtractCandoTblName}) NO-ERROR.
                 fi_output_last_error().
                 DELETE ALIAS "TPALDB".
             END.
