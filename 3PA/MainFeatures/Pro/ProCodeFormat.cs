@@ -56,13 +56,19 @@ namespace _3PA.MainFeatures.Pro {
             // start indenting
             Sci.BeginUndoAction();
 
+            var indentStartLine = Sci.LineFromPosition(Sci.SelectionStart);
+            var indentEndLine = Sci.LineFromPosition(Sci.SelectionEnd);
+
             StringBuilder x = new StringBuilder();
             var indentWidth = Sci.TabWidth;
             var i = 0;
             var dic = parser.LineInfo;
             while (dic.ContainsKey(i)) {
-                var line = Sci.GetLine(i);
-                line.Indentation = (dic[i].BlockDepth + dic[i].ExtraStatementDepth) * indentWidth;
+                if (indentStartLine == indentEndLine || (i >= indentStartLine && i <= indentEndLine)) {
+                    var line = Sci.GetLine(i);
+                    line.Indentation = (dic[i].BlockDepth + dic[i].ExtraStatementDepth) * indentWidth;
+                }
+
                 if (!canIndentSafely)
                     x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExtraStatementDepth + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
                 i++;
