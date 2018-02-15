@@ -203,8 +203,9 @@ namespace _3PA.MainFeatures.Pro {
                 {"NotificationOutputPath", "\"\""},
                 {"PreExecutionProgram", "\"\""},
                 {"PostExecutionProgram", "\"\""},
-                {"dbExtractCandoTblType", "\"\""},
-                {"dbExtractCandoTblName", "\"\""},
+                {"DatabaseExtractCandoTblType", "\"\""},
+                {"DatabaseExtractCandoTblName", "\"\""},
+                {"DatabaseAliasList", "\"\""},
             };
         }
 
