@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
         /// <summary>
         /// If it is an {&amp;var} or {include.i}, replaces the token at "current position + posAhead" by a list of tokens.
@@ -246,20 +247,20 @@ namespace _3PA.MainFeatures.Parser.Pro {
         private List<Token> GetIncludeFileTokens(TokenString previousTokenString, ParsedIncludeFile parsedInclude) {
             // Parse the include file ?
             if (!string.IsNullOrEmpty(parsedInclude.FullFilePath)) {
-                ProLexer proLexer;
+                ProTokenizer proTokenizer;
 
                 // did we already parsed this file in a previous parse session?
                 if (SavedLexerInclude.ContainsKey(parsedInclude.FullFilePath)) {
-                    proLexer = SavedLexerInclude[parsedInclude.FullFilePath];
+                    proTokenizer = SavedLexerInclude[parsedInclude.FullFilePath];
                 } else {
                     // Parse it
                     if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
-                        proLexer = new ProLexer(Utils.ReadAllText(parsedInclude.FullFilePath), previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'');
+                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.FullFilePath), previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'');
                     } else {
-                        proLexer = new ProLexer(Utils.ReadAllText(parsedInclude.FullFilePath));
+                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.FullFilePath));
                     }
                     if (!SavedLexerInclude.ContainsKey(parsedInclude.FullFilePath))
-                        SavedLexerInclude.Add(parsedInclude.FullFilePath, proLexer);
+                        SavedLexerInclude.Add(parsedInclude.FullFilePath, proTokenizer);
                 }
 
                 _parsedIncludes.Add(parsedInclude);
@@ -268,8 +269,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 // add this include to the references and modify each token
                 // Remove EOF
                 List<Token> copiedTokens = new List<Token>();
-                for (int i = 0; i < proLexer.GetTokensList.Count - 1; i++) {
-                    var token = proLexer.GetTokensList[i];
+                for (int i = 0; i < proTokenizer.GetTokensList.Count - 1; i++) {
+                    var token = proTokenizer.GetTokensList[i];
                     var copiedToken = token.Copy(token.Line, token.Column, token.StartPosition, token.EndPosition);
                     copiedToken.OwnerNumber = includeNumber;
                     copiedTokens.Add(copiedToken);
@@ -293,9 +294,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
             
             // Parse it
             if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
-                valueTokens = new ProLexer(value, previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'').GetTokensList.ToList();
+                valueTokens = new ProTokenizer(value, previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'').GetTokensList.ToList();
             } else {
-                valueTokens = new ProLexer(value).GetTokensList.ToList();
+                valueTokens = new ProTokenizer(value).GetTokensList.ToList();
             }
 
             // Remove EOF

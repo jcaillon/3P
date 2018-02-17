@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
 
          /// <summary>

@@ -18,8 +18,8 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
-    internal interface ILexerVisitor {
-        void PreVisit(Lexer lexer);
+    internal interface ITokenizerVisitor {
+        void PreVisit(Tokenizer lexer);
         void Visit(TokenComment tok);
         void Visit(TokenEol tok);
         void Visit(TokenEos tok);

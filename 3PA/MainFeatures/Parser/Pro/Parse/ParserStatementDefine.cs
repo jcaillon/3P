@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
 
         /// <summary>
@@ -275,8 +275,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     case 24:
                         // define temp-table : match a primitive type or a field in db
                         if (!(token is TokenWord)) break;
-                        currentField.TempType = token.Value;
-                        currentField.Type = ConvertStringToParsedPrimitiveType(token.Value, currentField.AsLike == ParsedAsLike.Like);
+                        currentField.TempPrimitiveType = token.Value;
                         // push the field to the fields list
                         fields.Add(currentField);
                         state = 20;
@@ -387,71 +386,25 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
             if (state <= 1)
                 return;
+
+            if (!string.IsNullOrEmpty(indexName))
+                indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields));
+
             if (isTempTable) {
+                // TEMP-TABLE
 
-                if (!String.IsNullOrEmpty(indexName))
-                    indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields));
-
-                ParsedTable likeTableMatch = null;
-                if (!String.IsNullOrEmpty(likeTable)) {
-                    likeTableMatch = FindAnyTableByName(likeTable);
-                }
-
-                var newTable = new ParsedTable(name, defineToken, "", "", name, "", likeTable, likeTableMatch, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString(), false, false, ParsedTableType.TT) {
+                var newTable = new ParsedTable(name, defineToken, ParsedTableType.TT, null, null, name, null, likeTable, fields, indexList, new List<ParsedTrigger>(), useIndex.ToString(), false, false) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition,
                     Flags = flags
                 };
 
-                // temp table is LIKE another table? copy fields
-                if (newTable.LikeTable != null) {
-                    // add the fields of the found table (minus the primary information)
-                    foreach (var field in newTable.LikeTable.Fields) {
-                        newTable.Fields.Add(
-                            new ParsedField(field.Name, field.TempType, field.Format, field.Order, 0, field.InitialValue, field.Description, field.AsLike) {
-                                Type = field.Type
-                            });
-                    }
-
-                    // handles the use-index
-                    if (!String.IsNullOrEmpty(newTable.UseIndex)) {
-                        // add only the indexes that are used
-                        foreach (var index in newTable.UseIndex.Split(',')) {
-                            var foundIndex = newTable.LikeTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
-                            if (foundIndex != null) {
-                                newTable.Indexes.Add(new ParsedIndex(foundIndex.Name, foundIndex.Flag, foundIndex.FieldsList.ToList()));
-                                // if one of the index used is marked as primary
-                                if (index.ContainsFast("!")) {
-                                    newTable.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
-                                    newTable.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
-                                }
-                            }
-                        }
-                    } else {
-                        // if there is no "use index" and we didn't define new indexes, the tt uses the same index as the original table
-                        if (newTable.Indexes == null || newTable.Indexes.Count == 0)
-                            newTable.Indexes = newTable.LikeTable.Indexes.ToList();
-                    }
-                }
-
-                // browse all the indexes and set the according flags to each field of the index
-                foreach (var index in newTable.Indexes) {
-                    foreach (var fieldName in index.FieldsList) {
-                        var foundfield = newTable.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
-                        if (foundfield != null) {
-                            if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
-                                foundfield.Flags |= ParseFlag.Primary;
-                            foundfield.Flags |= ParseFlag.Index;
-                        }
-                    }
-                }
-
                 AddParsedItem(newTable, defineToken.OwnerNumber);
 
             } else {              
-                
-                var newDefine = NewParsedDefined(name, flags, defineToken, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor);
-                newDefine.EndPosition = token.EndPosition;
+                // other DEFINE
+
+                var newDefine = NewParsedDefined(name, flags, defineToken, token, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor);
                 AddParsedItem(newDefine, defineToken.OwnerNumber);
 
                 // case of a parameters, add it to the current scope (if procedure)
@@ -463,6 +416,35 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 }
 
             }
+        }
+
+        /// <summary>
+        /// Create a new parsed define item according to its type
+        /// </summary>
+        private ParsedDefine NewParsedDefined(string name, ParseFlag flags, Token defineToken, Token endToken, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) {
+
+            // set flags
+            flags |=  GetCurrentBlock<ParsedScopeBlock>() is ParsedFile ? ParseFlag.FileScope : ParseFlag.LocalScope;
+
+            if (type == ParseDefineType.Parameter) {
+                flags |= ParseFlag.Parameter;
+            }
+
+            if (tempPrimitiveType.Equals("buffer")) {
+                flags |= ParseFlag.Buffer;
+                return new ParsedBuffer(name, defineToken, asLike, left, type, null, viewAs, bufferFor) {
+                    Flags = flags,
+                    EndPosition = endToken.EndPosition,
+                    PrimitiveType = ParsedPrimitiveType.Buffer
+                };
+            }
+
+            var newDefine = new ParsedDefine(name, defineToken, asLike, left, type, tempPrimitiveType, viewAs) {
+                Flags = flags,
+                EndPosition = endToken.EndPosition
+            };
+
+            return newDefine;
         }
 
     }

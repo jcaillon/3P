@@ -574,12 +574,15 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Equivalent to Equals but case insensitive
+        /// Equivalent to Equals but case insensitive + handles null values
         /// </summary>
         /// <param name="s"></param>
         /// <param name="comp"></param>
         /// <returns></returns>
         public static bool EqualsCi(this string s, string comp) {
+            if (s == null || comp == null) {
+                return s == null && comp == null;
+            }
             //string.Equals(a, b, StringComparison.CurrentCultureIgnoreCase);
             return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase);
         }

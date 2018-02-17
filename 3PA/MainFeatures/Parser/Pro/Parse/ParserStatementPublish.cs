@@ -1,8 +1,7 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
 
         /// <summary>

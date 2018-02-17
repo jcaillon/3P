@@ -23,7 +23,7 @@ using _3PA.MainFeatures.Parser.Pro;
 
 namespace _3PA.MainFeatures.Parser {
 
-    internal class TextLexerVisitor : ILexerVisitor {
+    internal class TextTokenizerVisitor : ITokenizerVisitor {
 
         #region Properties
 
@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Life and death
 
-        public TextLexerVisitor(string filePath) {
+        public TextTokenizerVisitor(string filePath) {
             FilePath = filePath;
             _rootScope = new ParsedFile("Root", new TokenEos(null, 0, 0, 0, 0));
         }
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Visits
 
-        public void PreVisit(Lexer lexer) {
+        public void PreVisit(Tokenizer lexer) {
             if (ParsedCompletionItemsList == null)
                 ParsedCompletionItemsList = new List<CompletionItem>();
             if (KnownWords == null)

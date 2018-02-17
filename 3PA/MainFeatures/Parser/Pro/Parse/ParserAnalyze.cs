@@ -25,7 +25,7 @@ using System.Linq;
 using System.Text;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
     internal partial class Parser {
 
@@ -604,39 +604,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             }
             return token.Value;
         }
-        
-        /// <summary>
-        /// Create a new parsed define item according to its type
-        /// </summary>
-        private ParsedDefine NewParsedDefined(string name, ParseFlag flags, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) {
-
-            // set flags
-            flags |=  GetCurrentBlock<ParsedScopeBlock>() is ParsedFile ? ParseFlag.FileScope : ParseFlag.LocalScope;
-
-            switch (type) {
-                case ParseDefineType.Parameter:
-                    flags |= ParseFlag.Parameter;
-                    break;
-                case ParseDefineType.Buffer:
-                    flags |= ParseFlag.Buffer;
-
-                    var newBuffer = new ParsedBuffer(name, token, asLike, left, type, tempPrimitiveType, viewAs, bufferFor, ConvertStringToParsedPrimitiveType(tempPrimitiveType, asLike == ParsedAsLike.Like)) {
-                        TargetTable = FindAnyTableByName(bufferFor)
-                    };
-
-                    flags |= !bufferFor.Contains(".") && newBuffer.TargetTable != null && !newBuffer.TargetTable.IsTempTable ? ParseFlag.MissingDbName : 0;
-                    newBuffer.Flags = flags;
-
-                    return newBuffer;
-            }
-
-            var newDefine = new ParsedDefine(name, token, asLike, left, type, tempPrimitiveType, viewAs, ConvertStringToParsedPrimitiveType(tempPrimitiveType, asLike == ParsedAsLike.Like)) {
-                Flags = flags
-            };
-
-            return newDefine;
-        }
-        
+       
         #endregion
     }
 }

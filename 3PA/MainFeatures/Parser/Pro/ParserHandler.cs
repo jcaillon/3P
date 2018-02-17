@@ -25,6 +25,10 @@ using System.Threading;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
+using _3PA.MainFeatures.Parser.Pro.Parse;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
+using _3PA.MainFeatures.Parser.Pro.Visit;
+using _3PA.MainFeatures.Parser.Text;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
@@ -112,12 +116,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                 DoInLock(() => {
                     // make sure to always parse the current file
-                    Parser parser = null;
+                    Parse.Parser parser = null;
                     do {
                         _lastFilePathParsed = Npp.CurrentFileInfo.Path;
 
                         if (Npp.CurrentFileInfo.IsProgress) {
-                            parser = new Parser(Sci.Text, _lastFilePathParsed, null, true);
+                            parser = new Parse.Parser(Sci.Text, _lastFilePathParsed, null, true);
 
                             // visitor
                             var visitor = new ParserVisitor(true);
@@ -132,8 +136,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
                                 OnEndSendCodeExplorerItems(visitor.ParsedExplorerItemsList);
 
                         } else {
-                            var textLexer = new TextLexer(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars);
-                            var textVisitor = new TextLexerVisitor(_lastFilePathParsed) {
+                            var textLexer = new TextTokenizer(Sci.GetTextAroundFirstVisibleLine(Config.Instance.NppAutoCompleteMaxLengthToParse), AutoCompletion.CurrentLangAdditionalChars);
+                            var textVisitor = new TextTokenizerVisitor(_lastFilePathParsed) {
                                 IgnoreNumbers = Config.Instance.NppAutoCompleteIgnoreNumbers,
                                 MinWordLengthRequired = Config.Instance.NppAutoCompleteMinWordLengthRequired,
                                 KnownWords = KnownWords != null ? new HashSet<string>(KnownWords, AutoCompletion.ParserStringComparer) : new HashSet<string>(AutoCompletion.ParserStringComparer)
@@ -195,7 +199,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
         /// </summary>
-        public static Dictionary<string, ProLexer> SavedLexerInclude = new Dictionary<string, ProLexer>(StringComparer.CurrentCultureIgnoreCase);
+        public static Dictionary<string, ProTokenizer> SavedLexerInclude = new Dictionary<string, ProTokenizer>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// A dictionary of known keywords and database info

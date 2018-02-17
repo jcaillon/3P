@@ -45,7 +45,7 @@ namespace _3PA.MainFeatures.Parser {
 
         public abstract Token Copy(int line, int column, int startPosition, int endPosition);
 
-        public abstract void Accept(ILexerVisitor visitor);
+        public abstract void Accept(ITokenizerVisitor visitor);
 
     }
 
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Parser {
             IsSingleLine = isSingleLine;
         }
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenPreProcDirective : Token {
         public TokenPreProcDirective(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenPreProcVariable : Token {
         public TokenPreProcVariable(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
         
@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenEos : Token {
         public TokenEos(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -132,7 +132,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenUnknown : Token {
         public TokenUnknown(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -144,7 +144,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenWord : Token {
         public TokenWord(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenNumber : Token {
         public TokenNumber(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
         
@@ -171,7 +171,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenString : Token {
         public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -188,7 +188,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenStringDescriptor : Token {
         public TokenStringDescriptor(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -200,7 +200,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenWhiteSpace : Token {
         public TokenWhiteSpace(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -212,7 +212,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenSymbol : Token {
         public TokenSymbol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
         
@@ -227,7 +227,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenEol : Token {
         public TokenEol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
 
@@ -242,7 +242,7 @@ namespace _3PA.MainFeatures.Parser {
     internal class TokenEof : Token {
         public TokenEof(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) {}
 
-        public override void Accept(ILexerVisitor visitor) {
+        public override void Accept(ITokenizerVisitor visitor) {
             visitor.Visit(this);
         }
         

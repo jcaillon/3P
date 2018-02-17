@@ -27,7 +27,8 @@ using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Pro;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Visit {
+
     /// <summary>
     /// This class sustains the auto completion list AND the code explorer list
     /// by visiting the parser and creating new completionData
@@ -63,7 +64,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Reference of the parser being visited
         /// </summary>
-        private Parser _parser;
+        private Parse.Parser _parser;
 
         #endregion
 
@@ -175,7 +176,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// To be executed before the visit starts
         /// </summary>
-        public void PreVisit(Parser parser) {
+        public void PreVisit(Parse.Parser parser) {
             _parser = parser;
 
             // if this document is in the Saved parsed visitors, we remove it now and we will add it back when it is parsed
@@ -424,6 +425,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         public void Visit(ParsedImplementation pars) {
+
+            pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.TempReturnType, false);
+
             // to code explorer
             PushToCodeExplorer(
                 GetExplorerListNode("Functions", CodeExplorerIconType.Function),
@@ -445,6 +449,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         }
 
         public void Visit(ParsedPrototype pars) {
+            
+            pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.TempReturnType, false);
+
             // only visit IN prototypes (not FORWARD)
             if (pars.SimpleForward)
                 return;
@@ -540,6 +547,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedDefine pars) {
+
+            pars.PrimitiveType = ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like);
+
             var subString = pars.PrimitiveType == ParsedPrimitiveType.Unknow ? pars.Type.ToString() : pars.PrimitiveType.ToString();
             CompletionType type;
             switch (pars.Type) {
@@ -550,7 +560,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     PushToCodeExplorerAsParameter(pars);
                     break;
                 case ParseDefineType.Variable:
-                    if (!String.IsNullOrEmpty(pars.ViewAs))
+                    if (!string.IsNullOrEmpty(pars.ViewAs))
                         type = CompletionType.Widget;
                     else if ((int) pars.PrimitiveType < 30)
                         type = CompletionType.VariablePrimitive;
@@ -598,9 +608,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Buffers
         /// </summary>
         public void Visit(ParsedBuffer pars) {
+            
+            pars.TargetTable = FindAnyTableByName(pars.BufferFor);
+            pars.Flags |= !pars.BufferFor.Contains(".") && pars.TargetTable != null && !pars.TargetTable.IsTempTable ? ParseFlag.MissingDbName : 0;
+            
             var subString = "?";
             var type = CompletionType.TempTable;
-            
+
             if (pars.TargetTable != null) {
                 subString = pars.TargetTable.Name;
                 type = pars.TargetTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
@@ -617,6 +631,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 PushToCodeExplorer(parentNode, newNode);
             }
 
+            // parameter buffer?
             if (pars.Flags.HasFlag(ParseFlag.Parameter))
                 PushToCodeExplorerAsParameter(pars);
 
@@ -658,7 +673,61 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// Defined Temptables
         /// </summary>
         public void Visit(ParsedTable pars) {
-            string subStr = string.IsNullOrEmpty(pars.StringLikeTable) ? "" : (pars.LikeTable != null ? @"Like " + pars.LikeTable.Name : @"Like ??");
+            
+            if (!string.IsNullOrEmpty(pars.TempLikeTable)) {
+                pars.LikeTable = FindAnyTableByName(pars.TempLikeTable);
+            }
+            
+            foreach (var field in pars.Fields) {
+                field.PrimitiveType = ConvertStringToParsedPrimitiveType(field.TempPrimitiveType, field.AsLike == ParsedAsLike.Like);
+            }
+
+            // temp table is LIKE another table? copy fields
+            if (pars.LikeTable != null) {
+
+                // add the fields of the found table (minus the primary information)
+                foreach (var field in pars.LikeTable.Fields) {
+                    pars.Fields.Add(
+                        new ParsedField(field.Name, field.TempPrimitiveType, field.Format, field.Order, 0, field.InitialValue, field.Description, field.AsLike) {
+                            PrimitiveType = field.PrimitiveType
+                        });
+                }
+
+                // handles the use-index
+                if (!string.IsNullOrEmpty(pars.UseIndex)) {
+                    // add only the indexes that are used
+                    foreach (var index in pars.UseIndex.Split(',')) {
+                        var foundIndex = pars.LikeTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
+                        if (foundIndex != null) {
+                            pars.Indexes.Add(new ParsedIndex(foundIndex.Name, foundIndex.Flag, foundIndex.FieldsList.ToList()));
+                            // if one of the index used is marked as primary
+                            if (index.ContainsFast("!")) {
+                                pars.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
+                                pars.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
+                            }
+                        }
+                    }
+                } else {
+                    // if there is no "use index" and we didn't define new indexes, the tt uses the same index as the original table
+                    if (pars.Indexes == null || pars.Indexes.Count == 0)
+                        pars.Indexes = pars.LikeTable.Indexes.ToList();
+                }
+            }
+
+            // browse all the indexes and set the according flags to each field of the index
+            foreach (var index in pars.Indexes) {
+                foreach (var fieldName in index.FieldsList) {
+                    var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
+                    if (foundfield != null) {
+                        if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
+                            foundfield.Flags |= ParseFlag.Primary;
+                        foundfield.Flags |= ParseFlag.Index;
+                    }
+                }
+            }
+            
+
+            string subStr = string.IsNullOrEmpty(pars.TempLikeTable) ? "" : (pars.LikeTable != null ? @"Like " + pars.LikeTable.Name : @"Like ??");
 
             // to auto completion
             var parsedTable = new TempTableCompletionItem {
@@ -672,7 +741,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
                 curField.ParsedBaseItem = field;
                 curField.FromParser = true;
-                curField.SubText = field.Type.ToString();
+                curField.SubText = field.PrimitiveType.ToString();
                 curField.Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name);
                 curField.Flags = field.Flags & ~ParseFlag.Primary;
                 curField.ParentItem = parsedTable;
@@ -696,6 +765,131 @@ namespace _3PA.MainFeatures.Parser.Pro {
         #endregion
 
         #region helper
+        
+        /// <summary>
+        /// Returns a primitive type from a string
+        /// </summary>
+        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str) {
+            str = str.ToLower();
+
+            // AS
+            switch (str) {
+                case "com-handle":
+                    return ParsedPrimitiveType.Comhandle;
+                case "datetime-tz":
+                    return ParsedPrimitiveType.Datetimetz;
+                case "unsigned-short":
+                    return ParsedPrimitiveType.UnsignedShort;
+                case "unsigned-long":
+                    return ParsedPrimitiveType.UnsignedLong;
+                case "table-handle":
+                    return ParsedPrimitiveType.TableHandle;
+                case "dataset-handle":
+                    return ParsedPrimitiveType.DatasetHandle;
+                case "widget-handle":
+                    return ParsedPrimitiveType.WidgetHandle;
+                default:
+                    ParsedPrimitiveType primType;
+                    if (Enum.TryParse(str, true, out primType))
+                        return primType;
+                    break;
+            }
+
+            // try to find the complete word in abbreviations list
+            var completeStr = Keywords.Instance.GetFullKeyword(str);
+            if (completeStr != null) {
+                ParsedPrimitiveType primType;
+                if (Enum.TryParse(completeStr, true, out primType))
+                    return primType;
+            }
+
+            return ParsedPrimitiveType.Unknow;
+        }
+
+                /// <summary>
+        /// conversion
+        /// </summary>
+        private ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
+            if (string.IsNullOrEmpty(str)) {
+                return ParsedPrimitiveType.Unknow;
+            }
+
+            str = str.ToLower();
+            // LIKE
+            if (analyseLike)
+                return FindPrimitiveTypeOfLike(str);
+            return ConvertStringToParsedPrimitiveType(str);
+        }
+
+        /// <summary>
+        /// Search through the available completionData to find the primitive type of a 
+        /// "like xx" phrase
+        /// </summary>
+        private ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
+            // determines the format
+            var nbPoints = likeStr.CountOccurences(".");
+            var splitted = likeStr.Split('.');
+
+            // if it's another var
+            if (nbPoints == 0) {
+                var foundVar = _parser.ParsedItemsList.Find(data => {
+                    var def = data as ParsedDefine;
+                    return def != null && def.Type != ParseDefineType.Buffer && def.PrimitiveType != ParsedPrimitiveType.Unknow && def.Name.EqualsCi(likeStr);
+                }) as ParsedDefine;
+                return foundVar != null ? foundVar.PrimitiveType : ParsedPrimitiveType.Unknow;
+            }
+
+            // Search the databases
+            var foundField = DataBase.Instance.FindFieldByName(likeStr);
+            if (foundField != null)
+                return foundField.PrimitiveType;
+
+            var tableName = splitted[nbPoints == 2 ? 1 : 0];
+            var fieldName = splitted[nbPoints == 2 ? 2 : 1];
+
+            // Search in temp tables
+            if (nbPoints != 1)
+                return ParsedPrimitiveType.Unknow;
+
+            var foundTtable = FindAnyTableOrBufferByName(tableName);
+            if (foundTtable == null)
+                return ParsedPrimitiveType.Unknow;
+
+            var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
+            return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.PrimitiveType;
+        }
+
+        /// <summary>
+        /// finds a ParsedTable for the input name, it can either be a database table,
+        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// </summary>
+        private ParsedTable FindAnyTableOrBufferByName(string name) {
+            // temptable or table
+            var foundTable = FindAnyTableByName(name);
+            if (foundTable != null)
+                return foundTable;
+            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
+            var foundBuffer = _parser.ParsedItemsList.Find(data => data is ParsedBuffer && data.Name.EqualsCi(name)) as ParsedBuffer;
+            return foundBuffer != null ? FindAnyTableByName(foundBuffer.BufferFor) : null;
+        }
+
+        /// <summary>
+        /// Find the table referenced among database and defined temp tables; 
+        /// name is the table's name (can also be BASE.TABLE)
+        /// </summary>
+        private ParsedTable FindAnyTableByName(string name) {
+            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name);
+        }
+
+        /// <summary>
+        /// Find a temptable by name
+        /// </summary>
+        private ParsedTable FindTempTableByName(string name) {
+            return _parser.ParsedItemsList.Find(item => {
+                var tt = item as ParsedTable;
+                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
+            }) as ParsedTable;
+        }
 
         private static List<CompletionItem> GetTableCompletionItemChildren(TableCompletionItem table, List<ParsedField> parsedFields) {
             return parsedFields.Select(field => {
@@ -703,7 +897,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
                 curField.ParsedBaseItem = field;
                 curField.FromParser = true;
-                curField.SubText = field.Type.ToString();
+                curField.SubText = field.PrimitiveType.ToString();
                 curField.Ranking = AutoCompletion.FindRankingOfParsedItem(field.Name);
                 curField.Flags = field.Flags & ~ParseFlag.Primary;
                 curField.ParentItem = table;
@@ -749,7 +943,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 parserVisitor = SavedPersistent[filePath];
             } else {
                 // Parse it
-                var ablParser = new Parser(Utils.ReadAllText(filePath), filePath, scopeItem, false);
+                var ablParser = new Parse.Parser(Utils.ReadAllText(filePath), filePath, scopeItem, false);
                 parserVisitor = new ParserVisitor(false);
                 ablParser.Accept(parserVisitor);
             }

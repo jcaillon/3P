@@ -395,6 +395,12 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 } else {
                     toDisplay.Append("Has none");
                 }
+
+                if (!string.IsNullOrEmpty(funcImplem.Extend)) {
+                    toDisplay.Append(HtmlHelper.FormatSubtitle("EXTRA INFO"));
+                    toDisplay.Append(HtmlHelper.FormatRow("Extend", funcImplem.Extend));
+                }
+
             } else {
                 toDisplay.Append(HtmlHelper.FormatSubtitle("DEFINED IN"));
                 toDisplay.Append("Function defined in an external procedure or is a web service operation");
@@ -473,6 +479,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
     /// Table
     /// </summary>
     internal class TableCompletionItem : CompletionItem {
+
         public override CompletionType Type {
             get { return CompletionType.Table; }
         }
@@ -495,8 +502,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             if (table != null) {
-                if (!string.IsNullOrEmpty(table.StringLikeTable)) {
-                    toDisplay.Append(HtmlHelper.FormatRow("Is like", table.LikeTable == null ? "Unknown table [" + table.StringLikeTable + "]" : table.LikeTable.Name));
+                if (!string.IsNullOrEmpty(table.TempLikeTable)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Is like", table.LikeTable == null ? "Unknown table [" + table.TempLikeTable + "]" : table.LikeTable.Name));
                 }
 
                 if (!string.IsNullOrEmpty(table.Description)) {
@@ -507,7 +514,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     toDisplay.Append(HtmlHelper.FormatSubtitle("FIELDS [x" + table.Fields.Count + "]"));
                     toDisplay.Append("<table width='100%;'>");
                     foreach (var parsedField in table.Fields) {
-                        toDisplay.Append("<tr><td><img src='" + (parsedField.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flags.HasFlag(ParseFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (string.IsNullOrEmpty(parsedField.InitialValue) ? "DEFAULT" : parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.Quoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
+                        toDisplay.Append("<tr><td><img src='" + (parsedField.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flags.HasFlag(ParseFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.PrimitiveType + "</td><td style='padding-right: 8px'> = " + (string.IsNullOrEmpty(parsedField.InitialValue) ? "DEFAULT" : parsedField.PrimitiveType == ParsedPrimitiveType.Character ? parsedField.InitialValue.Quoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
                     }
                     toDisplay.Append("</table>");
                 }
@@ -527,9 +534,15 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 }
 
                 toDisplay.Append(HtmlHelper.FormatSubtitle("EXTRA INFORMATION"));
+                toDisplay.Append(HtmlHelper.FormatRow("Table type", table.TableType.GetDescription()));
                 toDisplay.Append(HtmlHelper.FormatRow("Hidden", table.Hidden.ToString()));
                 toDisplay.Append(HtmlHelper.FormatRow("Frozen", table.Frozen.ToString()));
-                toDisplay.Append(HtmlHelper.FormatRow("Table type", table.TableType.GetDescription()));
+                if (!string.IsNullOrEmpty(table.Id)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Table ID", table.Id));
+                }
+                if (!string.IsNullOrEmpty(table.Crc)) {
+                    toDisplay.Append(HtmlHelper.FormatRow("Table CRC", table.Crc));
+                }
             }
 
             return toDisplay.ToString();
@@ -786,7 +799,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override string ToString() {
             var toDisplay = new StringBuilder();
             if (ParsedField.AsLike == ParsedAsLike.Like) {
-                toDisplay.Append(HtmlHelper.FormatRow("Is LIKE", ParsedField.TempType));
+                toDisplay.Append(HtmlHelper.FormatRow("Is LIKE", ParsedField.TempPrimitiveType));
             }
             toDisplay.Append(HtmlHelper.FormatRow("Type", HtmlHelper.FormatSubString(SubText)));
             toDisplay.Append(HtmlHelper.FormatRow("Owner table", ((TableCompletionItem) ParentItem).DisplayText));

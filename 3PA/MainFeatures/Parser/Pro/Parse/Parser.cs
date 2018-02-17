@@ -26,9 +26,11 @@ using System.Text;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletionFeature;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
+using _3PA.MainFeatures.Parser.Pro.Visit;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
     /// <summary>
     /// This class is not actually a parser "per say" but it extracts important information
@@ -55,12 +57,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the proLexer to use them when we need it
         /// </summary>
-        private Dictionary<string, ProLexer> SavedLexerInclude {
+        private Dictionary<string, ProTokenizer> SavedLexerInclude {
             get { return ParserHandler.SavedLexerInclude; }
         }
 
-        private static ProLexer NewLexerFromData(string data) {
-            return new ProLexer(data);
+        private static ProTokenizer NewLexerFromData(string data) {
+            return new ProTokenizer(data);
         }
 
         #endregion
@@ -183,7 +185,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public Parser(string data, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
 
-        public Parser(ProLexer proLexer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) : this(proLexer.GetTokensList, filePathBeingParsed, defaultScope, matchKnownWords, debugListOut) {}
+        public Parser(ProTokenizer proTokenizer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) : this(proTokenizer.GetTokensList, filePathBeingParsed, defaultScope, matchKnownWords, debugListOut) {}
 
         /// <summary>
         /// Parses a list of tokens into a list of parsedItems
@@ -375,143 +377,6 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 _tokenCount = _tokenList.Count;
             }
         }
-        
-        #endregion
-
-        #region utils
-
-        #region find primitive type
-
-        /// <summary>
-        /// Returns a primitive type from a string
-        /// </summary>
-        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str) {
-            str = str.ToLower();
-
-            // AS
-            switch (str) {
-                case "com-handle":
-                    return ParsedPrimitiveType.Comhandle;
-                case "datetime-tz":
-                    return ParsedPrimitiveType.Datetimetz;
-                case "unsigned-short":
-                    return ParsedPrimitiveType.UnsignedShort;
-                case "unsigned-long":
-                    return ParsedPrimitiveType.UnsignedLong;
-                case "table-handle":
-                    return ParsedPrimitiveType.TableHandle;
-                case "dataset-handle":
-                    return ParsedPrimitiveType.DatasetHandle;
-                case "widget-handle":
-                    return ParsedPrimitiveType.WidgetHandle;
-                default:
-                    ParsedPrimitiveType primType;
-                    if (Enum.TryParse(str, true, out primType))
-                        return primType;
-                    break;
-            }
-
-            // try to find the complete word in abbreviations list
-            var completeStr = Keywords.Instance.GetFullKeyword(str);
-            if (completeStr != null) {
-                ParsedPrimitiveType primType;
-                if (Enum.TryParse(completeStr, true, out primType))
-                    return primType;
-            }
-
-            return ParsedPrimitiveType.Unknow;
-        }
-
-        /// <summary>
-        /// conversion
-        /// </summary>
-        private ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            if (string.IsNullOrEmpty(str)) {
-                return ParsedPrimitiveType.Unknow;
-            }
-
-            str = str.ToLower();
-            // LIKE
-            if (analyseLike)
-                return FindPrimitiveTypeOfLike(str);
-            return ConvertStringToParsedPrimitiveType(str);
-        }
-
-        /// <summary>
-        /// Search through the available completionData to find the primitive type of a 
-        /// "like xx" phrase
-        /// </summary>
-        private ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
-            // determines the format
-            var nbPoints = likeStr.CountOccurences(".");
-            var splitted = likeStr.Split('.');
-
-            // if it's another var
-            if (nbPoints == 0) {
-                var foundVar = _parsedItemList.Find(data => {
-                    var def = data as ParsedDefine;
-                    return def != null && def.Type != ParseDefineType.Buffer && def.PrimitiveType != ParsedPrimitiveType.Unknow && def.Name.EqualsCi(likeStr);
-                }) as ParsedDefine;
-                return foundVar != null ? foundVar.PrimitiveType : ParsedPrimitiveType.Unknow;
-            }
-
-            // Search the databases
-            var foundField = DataBase.Instance.FindFieldByName(likeStr);
-            if (foundField != null)
-                return foundField.Type;
-
-            var tableName = splitted[nbPoints == 2 ? 1 : 0];
-            var fieldName = splitted[nbPoints == 2 ? 2 : 1];
-
-            // Search in temp tables
-            if (nbPoints != 1)
-                return ParsedPrimitiveType.Unknow;
-
-            var foundTtable = FindAnyTableOrBufferByName(tableName);
-            if (foundTtable == null)
-                return ParsedPrimitiveType.Unknow;
-
-            var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
-            return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
-        }
-
-        #endregion
-
-        #region find table, buffer, temptable
-
-        /// <summary>
-        /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temptable, or a buffer name (in which case we return the associated table)
-        /// </summary>
-        private ParsedTable FindAnyTableOrBufferByName(string name) {
-            // temptable or table
-            var foundTable = FindAnyTableByName(name);
-            if (foundTable != null)
-                return foundTable;
-            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
-            var foundBuffer = _parsedItemList.Find(data => data is ParsedBuffer && data.Name.EqualsCi(name)) as ParsedBuffer;
-            return foundBuffer != null ? FindAnyTableByName(foundBuffer.BufferFor) : null;
-        }
-
-        /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
-        /// </summary>
-        private ParsedTable FindAnyTableByName(string name) {
-            return DataBase.Instance.FindTableByName(name) ?? FindTempTableByName(name);
-        }
-
-        /// <summary>
-        /// Find a temptable by name
-        /// </summary>
-        private ParsedTable FindTempTableByName(string name) {
-            return _parsedItemList.Find(item => {
-                var tt = item as ParsedTable;
-                return tt != null && tt.IsTempTable && tt.Name.EqualsCi(name);
-            }) as ParsedTable;
-        }
-
-        #endregion
         
         #endregion
 

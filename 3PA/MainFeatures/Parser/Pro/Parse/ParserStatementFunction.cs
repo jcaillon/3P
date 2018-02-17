@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
 
         /// <summary>
@@ -85,11 +84,11 @@ namespace _3PA.MainFeatures.Parser.Pro {
             if (!(token is TokenEos))
                 return null;
 
-            var returnType = ConvertStringToParsedPrimitiveType(parsedReturnType, false);
+            
 
             // New prototype, we matched a forward or a IN
             if (state >= 99) {
-                ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, returnType) {
+                ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, parsedReturnType) {
                     Scope =  GetCurrentBlock<ParsedScopeBlock>(),
                     FilePath = FilePathBeingParsed,
                     SimpleForward = state == 99, // allows us to know if we expect an implementation in this .p or not
@@ -97,7 +96,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     EndBlockLine = token.Line,
                     EndBlockPosition = token.EndPosition,
                     Flags = flags,
-                    Extend = extend ?? String.Empty,
+                    Extend = extend,
                     ParametersString = parameters.ToString()
                 };
                 if (!_functionPrototype.ContainsKey(name))
@@ -121,10 +120,10 @@ namespace _3PA.MainFeatures.Parser.Pro {
             } else {
 
                 // New function
-                createdImp = new ParsedImplementation(name, functionToken, returnType) {
+                createdImp = new ParsedImplementation(name, functionToken, parsedReturnType) {
                     EndPosition = token.EndPosition,
                     Flags = flags,
-                    Extend = extend ?? String.Empty,
+                    Extend = extend,
                     ParametersString = parameters.ToString()
                 };
 
@@ -142,9 +141,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
                         // boolean to know if the implementation matches the prototype
                         createdImp.PrototypeUpdated = (
                             createdImp.Flags == proto.Flags &&
-                            createdImp.Extend.Equals(proto.Extend) &&
-                            createdImp.ReturnType.Equals(proto.ReturnType) &&
-                            createdImp.ParametersString.Equals(proto.ParametersString));
+                            createdImp.Extend.EqualsCi(proto.Extend) &&
+                            createdImp.TempReturnType.EqualsCi(proto.TempReturnType) &&
+                            createdImp.ParametersString.EqualsCi(proto.ParametersString));
                     }
                 } else {
                     _functionPrototype.Add(name, createdImp);

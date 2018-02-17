@@ -17,15 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.Collections.Generic;
 
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Text {
 
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
-    internal class TextLexer : Lexer {
+    internal class TextTokenizer : Tokenizer {
 
         #region public accessor
 
@@ -41,7 +42,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// constructor
         /// </summary>
-        public TextLexer(string data, HashSet<char> additionnalCharacters) {
+        public TextTokenizer(string data, HashSet<char> additionnalCharacters) {
             AdditionnalCharacters = additionnalCharacters;
             Construct(data);
         }

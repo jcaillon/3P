@@ -41,7 +41,7 @@ namespace _3PA.MainFeatures.Pro {
             if (Utils.IsSpamming("CorrectCodeIndentation", 1000))
                 return;
 
-            var parser = new Parser.Pro.Parser(Sci.Text, Npp.CurrentFileInfo.Path, null, false);
+            var parser = new Parser.Pro.Parse.Parser(Sci.Text, Npp.CurrentFileInfo.Path, null, false);
 
             // in case of an incorrect document, warn the user
             var parserErrors = parser.ParseErrorsInHtml;
@@ -132,7 +132,7 @@ namespace _3PA.MainFeatures.Pro {
                     var message = new StringBuilder();
                     message.Append("The analyzed file was :<br>" + currentFilePath.ToHtmlLink() + "<br>");
 
-                    var parser = new Parser.Pro.Parser(Sci.Text, currentFilePath, null, false);
+                    var parser = new Parser.Pro.Parse.Parser(Sci.Text, currentFilePath, null, false);
 
                     var parserErrors = parser.ParseErrorsInHtml;
                     if (!string.IsNullOrEmpty(parserErrors)) {

@@ -22,14 +22,14 @@ using System;
 using _3PA.Lib;
 using _3PA.NppCore;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Tokenize {
 
     /// <inheritdoc />
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
-    internal class ProLexer : Lexer {
+    internal class ProTokenizer : Tokenizer {
 
         #region private fields
 
@@ -87,20 +87,20 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// constructor
         /// </summary>
-        public ProLexer(string data) : this(data, 0, 0, 0, 0, 0, false, false, null) {
+        public ProTokenizer(string data) : this(data, 0, 0, 0, 0, 0, false, false, null) {
         }
 
         /// <summary>
         /// constructor
         /// </summary>
-        public ProLexer(string data, bool initInDoubleQuoteString, bool initInSimpleQuoteString) : this(data, 0, 0, 0, 0, 0, initInDoubleQuoteString, initInSimpleQuoteString, null) {
+        public ProTokenizer(string data, bool initInDoubleQuoteString, bool initInSimpleQuoteString) : this(data, 0, 0, 0, 0, 0, initInDoubleQuoteString, initInSimpleQuoteString, null) {
         }
 
         /// <summary>
         /// Use this when you wish to tokenize only a partial string in a longer string
         /// Allows you to start with a comment depth different of 0
         /// </summary>
-        public ProLexer(string data, int posOffset, int initLine, int initColumn, int initCommentDepth, int initIncludeDepth, bool initInDoubleQuoteString, bool initInSimpleQuoteString, Action<int, int, int, bool, bool> pushLineInfo) {
+        public ProTokenizer(string data, int posOffset, int initLine, int initColumn, int initCommentDepth, int initIncludeDepth, bool initInDoubleQuoteString, bool initInSimpleQuoteString, Action<int, int, int, bool, bool> pushLineInfo) {
             _offset = posOffset;
             _line = initLine;
             _column = initColumn;

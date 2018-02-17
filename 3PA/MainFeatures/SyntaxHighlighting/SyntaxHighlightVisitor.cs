@@ -22,12 +22,13 @@ using System.Linq;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
 using _3PA.NppCore;
-using Lexer = _3PA.MainFeatures.Parser.Lexer;
+using Tokenizer = _3PA.MainFeatures.Parser.Tokenizer;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
 
-    internal class SyntaxHighlightVisitor : ILexerVisitor {
+    internal class SyntaxHighlightVisitor : ITokenizerVisitor {
 
         private int _includeDepth;
 
@@ -35,8 +36,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         public string[] NormedVariablesPrefixes { get; set; }
 
-        public void PreVisit(Lexer lexer) {
-            var proLexer = lexer as ProLexer;
+        public void PreVisit(Tokenizer lexer) {
+            var proLexer = lexer as ProTokenizer;
             if (proLexer != null) {
                 _includeDepth = proLexer.IncludeDepth;
                 Sci.StartStyling(proLexer.Offset);

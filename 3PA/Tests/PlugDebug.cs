@@ -33,6 +33,9 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Parse;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
+using _3PA.MainFeatures.Parser.Pro.Visit;
 using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
 
@@ -106,7 +109,7 @@ namespace _3PA.Tests {
 
             var outSb = new StringBuilder();
 
-            new Parser(new ProLexer(Sci.Text), Npp.CurrentFileInfo.Path, null, false, outSb);
+            new Parser(new ProTokenizer(Sci.Text), Npp.CurrentFileInfo.Path, null, false, outSb);
 
             Utils.FileWriteAllText(outLocation, outSb.ToString());
 
@@ -138,10 +141,10 @@ namespace _3PA.Tests {
 
                     var watch = Stopwatch.StartNew();
 
-                    ProLexer proLexer = new ProLexer(Utils.ReadAllText(file));
+                    ProTokenizer proTokenizer = new ProTokenizer(Utils.ReadAllText(file));
                     outStr += "ProLexer (" + watch.ElapsedMilliseconds + " ms), ";
 
-                    Parser parser = new Parser(proLexer, file, null, true, null);
+                    Parser parser = new Parser(proTokenizer, file, null, true, null);
                     outStr += "Parser (" + watch.ElapsedMilliseconds + " ms), ";
 
                     if (parser.ParserErrors != null && parser.ParserErrors.Count > 0) {
@@ -209,14 +212,14 @@ namespace _3PA.Tests {
             var watch = Stopwatch.StartNew();
             //------------
 
-            ProLexer proLexer = new ProLexer(content);
+            ProTokenizer proTokenizer = new ProTokenizer(content);
 
             //--------------
             watch.Stop();
             //--------------
 
             OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
-            proLexer.Accept(lexerVisitor);
+            proTokenizer.Accept(lexerVisitor);
             Utils.FileWriteAllText(outLocation, lexerVisitor.Output.ToString());
             File.AppendAllText(perfFile, @"LEXER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
 
@@ -229,7 +232,7 @@ namespace _3PA.Tests {
             watch = Stopwatch.StartNew();
             //------------
 
-            Parser parser = new Parser(proLexer, "", null, true, null);
+            Parser parser = new Parser(proTokenizer, "", null, true, null);
 
             //--------------
             watch.Stop();
@@ -363,7 +366,7 @@ namespace _3PA.Tests {
         }
     }
 
-    internal class OutputLexerVisitor : ILexerVisitor {
+    internal class OutputLexerVisitor : ITokenizerVisitor {
         public int NbItems;
         public StringBuilder Output = new StringBuilder();
 
@@ -449,7 +452,7 @@ namespace _3PA.Tests {
             NbItems++;
         }
 
-        public void PreVisit(MainFeatures.Parser.Lexer lexer) {
+        public void PreVisit(MainFeatures.Parser.Tokenizer lexer) {
         }
 
         public void PostVisit() {

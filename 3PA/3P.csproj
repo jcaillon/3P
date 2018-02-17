@@ -196,27 +196,27 @@
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementOnEvent.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementDefine.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPreprocDirective.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPreprocIfBlock.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementProcedure.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementLabel.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementFunction.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserReplaceIncludeAndPreprocVariables.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementRun.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementDynamicFunction.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementPublish.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserParameterDefinitionSyntax.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ParserStatementSubscribe.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementOnEvent.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementDefine.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPreprocDirective.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPreprocIfBlock.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementProcedure.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementLabel.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementFunction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserReplaceIncludeAndPreprocVariables.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementRun.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementDynamicFunction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPublish.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserParameterDefinitionSyntax.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementSubscribe.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxFolding.cs" />
     <Compile Include="NppCore\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />
     <Compile Include="MainFeatures\ModificationsTag\ModificationTag.cs" />
     <Compile Include="MainFeatures\ModificationsTag\ModificationTagTemplate.cs" />
-    <Compile Include="MainFeatures\Parser\Lexer.cs" />
-    <Compile Include="MainFeatures\Parser\TextLexer.cs" />
-    <Compile Include="MainFeatures\Parser\TextLexerVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Tokenizer.cs" />
+    <Compile Include="MainFeatures\Parser\Text\TextTokenizer.cs" />
+    <Compile Include="MainFeatures\Parser\Text\TextTokenizerVisitor.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentRules.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileDeployed.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\FileToCompile.cs" />
@@ -309,7 +309,7 @@
     <Compile Include="NppCore\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Parser\Pro\ParserAnalyze.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParserAnalyze.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\Deployer.cs" />
     <Compile Include="MainFeatures\Pro\Deploy\DeploymentProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
@@ -532,6 +532,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\FieldPk.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Function.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Include.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Interface.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Keyword.png" />
     <Content Include="_Resource\Images\ParserItem\Type\KeywordObject.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Label.png" />
@@ -545,6 +546,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\OnEvent.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Preprocessed.png" />
     <Content Include="_Resource\Images\ParserItem\Type\PreprocessedVariable.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Property.png" />
     <Content Include="_Resource\Images\ParserItem\Type\UibPreprocessorBlock.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Procedure.png" />
     <Content Include="_Resource\Images\ParserItem\Type\ProgramParameter.png" />
@@ -564,6 +566,7 @@
     <Content Include="_Resource\Images\ParserItem\Type\TempTable.png" />
     <Content Include="_Resource\Images\ParserItem\Type\TempTableUsed.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Unsubscribe.png" />
+    <Content Include="_Resource\Images\ParserItem\Type\Using.png" />
     <Content Include="_Resource\Images\ParserItem\Type\VariableComplex.png" />
     <Content Include="_Resource\Images\ParserItem\Type\VariablePrimitive.png" />
     <Content Include="_Resource\Images\ParserItem\Type\Widget.png" />
@@ -612,7 +615,7 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Parser\Pro\ParserVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Visit\ParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletionFeature\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParserHandler.cs" />
@@ -624,12 +627,12 @@
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\ModificationsTag\FileCustomInfo.cs" />
-    <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\Parser.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Visit\IParserVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\Parser.cs" />
     <Compile Include="MainFeatures\Pro\ProMisc.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\Pro\ProLexer.cs" />
+    <Compile Include="MainFeatures\Parser\ITokenizerVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Tokenize\ProTokenizer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
     <Compile Include="MainFeatures\Pro\ProEnvironment.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">

@@ -2,7 +2,7 @@
 using System.Text;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Parser.Pro {
+namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
                             // create a variable for this function scope
                             if (!string.IsNullOrEmpty(paramName)) {
-                                parametersList.Add(NewParsedDefined(paramName, flags, functionToken, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor));
+                                parametersList.Add(NewParsedDefined(paramName, flags, functionToken, token, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor));
                             }
 
                             paramName = "";

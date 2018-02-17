@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using _3PA.MainFeatures.Parser.Pro.Visit;
 
 namespace _3PA.MainFeatures.Parser.Pro {
 
@@ -391,7 +392,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// </summary>
     internal abstract class ParsedFunction : ParsedScopeBlock {
 
-        public ParsedPrimitiveType ReturnType { get; private set; }
+        public string TempReturnType { get; private set; }
+
+        public ParsedPrimitiveType ReturnType { get; set; }
 
         /// <summary>
         /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
@@ -406,9 +409,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
         public List<ParsedDefine> Parameters { get; set; }
 
-        protected ParsedFunction(string name, Token token, ParsedPrimitiveType returnType) : base(name, token, ParsedScopeType.Function) {
-            ReturnType = returnType;
-            Extend = String.Empty;
+        protected ParsedFunction(string name, Token token, string tempReturnType) : base(name, token, ParsedScopeType.Function) {
+            TempReturnType = tempReturnType;
         }
     }
 
@@ -426,8 +428,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedPrototype(string name, Token token, ParsedPrimitiveType returnType) : base(name, token, returnType) {
-            Extend = String.Empty;
+        public ParsedPrototype(string name, Token token, string tempReturnType) : base(name, token, tempReturnType) {
         }
     }
 
@@ -454,9 +455,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedImplementation(string name, Token token, ParsedPrimitiveType returnType)
-            : base(name, token, returnType) {
-            Extend = String.Empty;
+        public ParsedImplementation(string name, Token token, string tempReturnType) : base(name, token, tempReturnType) {
         }
     }
 
@@ -692,7 +691,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// (Used for variables) contains the primitive type of the variable
         /// </summary>
-        public ParsedPrimitiveType PrimitiveType { get; private set; }
+        public ParsedPrimitiveType PrimitiveType { get; set; }
 
         /// <summary>
         /// first word after "view-as"
@@ -703,14 +702,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, ParsedPrimitiveType primitiveType)
+        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs)
             : base(name, token) {
             AsLike = asLike;
             Left = left;
             Type = type;
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
-            PrimitiveType = primitiveType;
         }
     }
 
@@ -837,7 +835,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedBuffer(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, ParsedPrimitiveType primitiveType) : base(name, token, asLike, left, type, tempPrimitiveType, viewAs, primitiveType) {
+        public ParsedBuffer(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) : base(name, token, asLike, left, type, tempPrimitiveType, viewAs) {
             BufferFor = bufferFor;
         }
     }
@@ -889,9 +887,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// If this table is like another, link to said other
         /// </summary>
-        public ParsedTable LikeTable { get; private set; }
+        public ParsedTable LikeTable { get; set; }
 
-        public string StringLikeTable { get; private set; }
+        /// <summary>
+        /// If this table is like another, link to said other
+        /// </summary>
+        public string TempLikeTable { get; private set; }
 
         /// <summary>
         /// if temptable and temptable is "like" another table, contains the USE-INDEX 
@@ -910,7 +911,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string strLikeTable, ParsedTable likeTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex, bool hidden, bool frozen, ParsedTableType tableType) : base(name, token) {
+        public ParsedTable(string name, Token token, ParsedTableType tableType, string id, string crc, string dumpName, string description, string strLikeTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string useIndex, bool hidden, bool frozen) : base(name, token) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
@@ -922,8 +923,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             Hidden = hidden;
             Frozen = frozen;
             TableType = tableType;
-            LikeTable = likeTable;
-            StringLikeTable = strLikeTable;
+            TempLikeTable = strLikeTable;
         }
     }
 
@@ -947,9 +947,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// When parsing, we store the value of the "primitive-type" in there, 
         /// with the visitor, we convert this to a ParsedPrimitiveType later
         /// </summary>
-        public string TempType { get; set; }
-
-        public ParsedPrimitiveType Type { get; set; }
+        public string TempPrimitiveType { get; set; }
+        public ParsedPrimitiveType PrimitiveType { get; set; }
         public string Format { get; set; }
         public int Order { get; set; }
         public ParseFlag Flags { get; set; }
@@ -961,8 +960,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public ParsedAsLike AsLike { get; set; }
 
-        public ParsedField(string name, string lcTempType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) : base(name) {
-            TempType = lcTempType;
+        public ParsedField(string name, string lcTempPrimitiveType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) : base(name) {
+            TempPrimitiveType = lcTempPrimitiveType;
             Format = format;
             Order = order;
             Flags = flags;

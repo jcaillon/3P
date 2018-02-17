@@ -47,7 +47,7 @@ namespace _3PA.MainFeatures.Pro {
 
         private HashSet<string> _ignoredFiles = new HashSet<string>();
 
-        private Parser.Pro.Parser _parser;
+        private Parser.Pro.Parse.Parser _parser;
 
         private List<ParsedItem> _parsedItems;
 
@@ -614,7 +614,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Parse the current document
         /// </summary>
         private void ParseNow() {
-            _parser = new Parser.Pro.Parser(Sci.Text, Npp.CurrentFileInfo.Path, null, false);
+            _parser = new Parser.Pro.Parse.Parser(Sci.Text, Npp.CurrentFileInfo.Path, null, false);
             _parsedItems = _parser.ParsedItemsList.Where(item => !item.Flags.HasFlag(ParseFlag.FromInclude)).ToNonNullList();
         }
 

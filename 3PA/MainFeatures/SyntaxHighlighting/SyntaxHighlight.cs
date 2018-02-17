@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Tokenize;
 using _3PA.NppCore;
 using Lexer = _3PA.NppCore.Lexer;
 
@@ -63,7 +64,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             var startLinePos = Sci.GetLine(startLine).Position;
             var startingLineInfo = _lineInfo.ContainsKey(startLine) ? _lineInfo[startLine] : new LexerLineInfo(0, 0, false, false);
 
-            ProLexer tok = new ProLexer(Sci.GetTextByRange(startLinePos, endPos), startLinePos, startLine, 0, startingLineInfo.CommentDepth, startingLineInfo.IncludeDepth, startingLineInfo.InDoubleQuoteString, startingLineInfo.InSimpleQuoteString, PushLineInfo);
+            ProTokenizer tok = new ProTokenizer(Sci.GetTextByRange(startLinePos, endPos), startLinePos, startLine, 0, startingLineInfo.CommentDepth, startingLineInfo.IncludeDepth, startingLineInfo.InDoubleQuoteString, startingLineInfo.InSimpleQuoteString, PushLineInfo);
 
             var vis = new SyntaxHighlightVisitor {
                 NormedVariablesPrefixes = Config.Instance.NormedVariablesPrefixes.Split(',')

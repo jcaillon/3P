@@ -24,6 +24,7 @@ using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Visit;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {
@@ -213,19 +214,18 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         currentTable = new ParsedTable(
                             splitted[1],
                             defaultToken,
+                            tblType,
                             splitted[2],
                             splitted[3],
                             splitted[4],
                             splitted[5],
-                            "",
                             null,
                             new List<ParsedField>(),
                             new List<ParsedIndex>(),
                             new List<ParsedTrigger>(),
-                            "",
+                            null,
                             splitted[6].Equals("1"),
-                            splitted[7].Equals("1"),
-                            tblType
+                            splitted[7].Equals("1")
                             );
                         currentDb.Tables.Add(currentTable);
                         break;
@@ -268,7 +268,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
-                        curField.Type = Parser.Pro.Parser.ConvertStringToParsedPrimitiveType(curField.TempType);
+                        curField.PrimitiveType = ParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempPrimitiveType);
                         currentTable.Fields.Add(curField);
                         break;
                 }
@@ -378,7 +378,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                     foreach (var field in table.Fields) {
                         CompletionItem curField = CompletionItem.Factory.New(field.Flags.HasFlag(ParseFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field);
                         curField.DisplayText = field.Name.ConvertCase(Config.Instance.AutoCompleteDatabaseWordCaseMode);
-                        curField.SubText = field.Type.ToString();
+                        curField.SubText = field.PrimitiveType.ToString();
                         curField.ParsedBaseItem = field;
                         curField.Ranking = 0;
                         curField.Flags = field.Flags & ~ParseFlag.Primary;

@@ -18,11 +18,9 @@
 // ========================================================================
 #endregion
 
-using _3PA.MainFeatures.Parser.Pro;
-
-namespace _3PA.MainFeatures.Parser {
+namespace _3PA.MainFeatures.Parser.Pro.Visit {
     internal interface IParserVisitor {
-        void PreVisit(Pro.Parser parser);
+        void PreVisit(Parse.Parser parser);
         void Visit(ParsedWord pars);
         void Visit(ParsedFile pars);
         void Visit(ParsedScopePreProcBlock pars);

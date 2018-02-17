@@ -23,6 +23,7 @@ using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Parse;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
 using _3PA._Resource;

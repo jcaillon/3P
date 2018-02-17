@@ -26,7 +26,7 @@ namespace _3PA.MainFeatures.Parser {
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
-    internal class Lexer {
+    internal class Tokenizer {
 
         #region private const
 
@@ -75,13 +75,13 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Constructor
 
-        public Lexer() { }
+        public Tokenizer() { }
 
         /// <summary>
         /// constructor, data is the input string to tokenize
         /// call Tokenize() to do the work
         /// </summary>
-        public Lexer(string data) {
+        public Tokenizer(string data) {
             Construct(data);
         }
 
@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.Parser {
         /// (you must call the Tokenize() methode before that!)
         /// </summary>
         /// <param name="visitor"></param>
-        public virtual void Accept(ILexerVisitor visitor) {
+        public virtual void Accept(ITokenizerVisitor visitor) {
             visitor.PreVisit(this);
             foreach (Token token in _tokenList) {
                 token.Accept(visitor);
