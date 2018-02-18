@@ -4,8 +4,10 @@
         /// <summary>
         /// Creates a label parsed item
         /// </summary>
-        private void CreateParsedLabel(Token labelToken) {
-            AddParsedItem(new ParsedLabel(_context.StatementFirstToken.Value, _context.StatementFirstToken), labelToken.OwnerNumber);
+        private ParsedLabel CreateParsedLabel(Token labelToken) {
+            var newLabel = new ParsedLabel(_context.CurrentStatement.FirstToken.Value, _context.CurrentStatement.FirstToken);
+            AddParsedItem(newLabel, labelToken.OwnerNumber);
+            return newLabel;
         }
 
     }

@@ -61,14 +61,15 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Event published when the parser has done its job and it's time to get the results
         /// </summary>
-        public static event Action<List<ParserError>, Dictionary<int, LineInfo>, List<ParsedItem>> OnEndSendParserItems;
+        public static event Action<List<ParserError>, Dictionary<int, ParsedLineInfo>, List<ParsedItem>> OnEndSendParserItems;
 
         #endregion
 
         #region Private fields
 
         private static string _lastFilePathParsed;
-        private static Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
+
+        private static Dictionary<int, ParsedLineInfo> _lineInfo = new Dictionary<int, ParsedLineInfo>();
 
         private static AsapButDelayableAction _parseAction;
 
@@ -89,7 +90,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public static T GetScopeOfLine<T>(int line) where T : ParsedScopeSection {
             T output = null;
             DoInLock(() => {
-                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? (T) (typeof(T) == typeof(ParsedScopeBlock) ? _lineInfo[line].VariableScope : _lineInfo[line].ExplorerScope) : null;
+                output = _lineInfo != null && _lineInfo.ContainsKey(line) ? _lineInfo[line].GetTopMostBlock<T>() : null;
             });
             return output;
         }
@@ -155,7 +156,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
                     } while (!_lastFilePathParsed.Equals(Npp.CurrentFileInfo.Path));
 
                     if (parser != null) {
-                        _lineInfo = new Dictionary<int, LineInfo>(parser.LineInfo);
+                        _lineInfo = new Dictionary<int, ParsedLineInfo>(parser.LineInfo);
                     }
 
                     // send parserItems
@@ -199,7 +200,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the lexer to use them when we need it
         /// </summary>
-        public static Dictionary<string, ProTokenizer> SavedLexerInclude = new Dictionary<string, ProTokenizer>(StringComparer.CurrentCultureIgnoreCase);
+        public static Dictionary<string, ProTokenizer> SavedTokenizerInclude = new Dictionary<string, ProTokenizer>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// A dictionary of known keywords and database info
@@ -228,7 +229,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             DoInLock(() => {
                 RunPersistentFiles.Clear();
                 SavedPersistent.Clear();
-                SavedLexerInclude.Clear();
+                SavedTokenizerInclude.Clear();
             });
         }
 

@@ -196,6 +196,8 @@
     <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ProgressCopy.cs" />
     <Compile Include="Lib\RecurentAction.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParsedLineInfo.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\ParserError.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementOnEvent.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementDefine.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPreprocDirective.cs" />

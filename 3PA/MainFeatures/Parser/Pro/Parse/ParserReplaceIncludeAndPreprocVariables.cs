@@ -250,8 +250,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 ProTokenizer proTokenizer;
 
                 // did we already parsed this file in a previous parse session?
-                if (SavedLexerInclude.ContainsKey(parsedInclude.FullFilePath)) {
-                    proTokenizer = SavedLexerInclude[parsedInclude.FullFilePath];
+                if (SavedTokenizerInclude.ContainsKey(parsedInclude.FullFilePath)) {
+                    proTokenizer = SavedTokenizerInclude[parsedInclude.FullFilePath];
                 } else {
                     // Parse it
                     if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
@@ -259,8 +259,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     } else {
                         proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.FullFilePath));
                     }
-                    if (!SavedLexerInclude.ContainsKey(parsedInclude.FullFilePath))
-                        SavedLexerInclude.Add(parsedInclude.FullFilePath, proTokenizer);
+                    if (!SavedTokenizerInclude.ContainsKey(parsedInclude.FullFilePath))
+                        SavedTokenizerInclude.Add(parsedInclude.FullFilePath, proTokenizer);
                 }
 
                 _parsedIncludes.Add(parsedInclude);

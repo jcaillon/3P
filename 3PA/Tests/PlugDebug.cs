@@ -251,8 +251,9 @@ namespace _3PA.Tests {
             StringBuilder lineInfo = new StringBuilder();
             var i = 0;
             var dic = parser.LineInfo;
+            var dic2 = ProCodeFormat.GetIndentation(parser.LineInfo);
             while (dic.ContainsKey(i)) {
-                lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExtraStatementDepth + " , " + dic[i].ExplorerScope + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
+                lineInfo.AppendLine(i + 1 + " > " + dic2[i].BlockDepth + " , " + dic2[i].ExtraStatementDepth + " , " + dic[i].BlockStack.Peek() + " , " + dic[i].BlockStack.Peek().ScopeType + " , " + dic[i].BlockStack.Peek().Name);
                 i++;
             }
             Utils.FileWriteAllText(outLocation, lineInfo.ToString());

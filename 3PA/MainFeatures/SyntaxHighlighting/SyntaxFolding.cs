@@ -21,18 +21,19 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.MainFeatures.Parser.Pro.Parse;
+using _3PA.MainFeatures.Pro;
 using _3PA.NppCore;
+using LineInfo = _3PA.MainFeatures.Pro.LineInfo;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
 
     internal class SyntaxFolding {
 
-        public static void OnParseEndParserItems(List<ParserError> arg1, Dictionary<int, LineInfo> lineInfos, List<ParsedItem> arg3) {
+        public static void OnParseEndParserItems(List<ParserError> arg1, Dictionary<int, ParsedLineInfo> lineInfos, List<ParsedItem> arg3) {
             if (lineInfos != null) {
-                var lineInfoCopy = new Dictionary<int, LineInfo>(lineInfos);
-
+                var lineInfoCopy = new Dictionary<int, ParsedLineInfo>(lineInfos);
                 Task.Factory.StartNew(() => {
-                    UiThread.Invoke(() => SetFolding(lineInfoCopy));
+                    UiThread.Invoke(() => SetFolding(ProCodeFormat.GetIndentation(lineInfoCopy)));
                 });
             }
         }

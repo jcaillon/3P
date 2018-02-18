@@ -514,6 +514,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// Label
     /// </summary>
     internal class ParsedLabel : ParsedItem {
+
+        /// <summary>
+        /// The block that this label describes
+        /// </summary>
+        public ParsedScopeSimpleBlock Block { get; set; }
+
         public int UndefinedLine { get; set; }
 
         public override void Accept(IParserVisitor visitor) {

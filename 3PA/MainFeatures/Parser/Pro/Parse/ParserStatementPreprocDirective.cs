@@ -121,7 +121,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     if (variableName != null) {
                         var found = (ParsedPreProcVariable) _parsedItemList.FindLast(item => (item is ParsedPreProcVariable && item.Name.Equals(variableName)));
                         if (found != null)
-                            found.UndefinedLine = _context.StatementFirstToken.Line;
+                            found.UndefinedLine = _context.CurrentStatement.FirstToken.Line;
                     }
                     break;
             }

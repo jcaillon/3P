@@ -119,11 +119,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Called when the parser ends
         /// </summary>
-        public void OnParseEndParserItems(List<ParserError> parserErrors, Dictionary<int, LineInfo> lineInfo, List<ParsedItem> parsedItems) {
+        public void OnParseEndParserItems(List<ParserError> parserErrors, Dictionary<int, ParsedLineInfo> lineInfo, List<ParsedItem> parsedItems) {
             if (!IsVisible)
                 return;
             int curLine = Sci.Line.CurrentLine;
-            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].ExplorerScope : null);
+            UpdateCurrentScope(Npp.CurrentFileInfo.IsProgress && lineInfo != null && lineInfo.ContainsKey(curLine) ? lineInfo[curLine].GetTopMostBlock<ParsedScopeSection>() : null);
         }
 
         #endregion

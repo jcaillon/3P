@@ -24,13 +24,99 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
+using _3PA.MainFeatures.Parser.Pro.Parse;
 using _3PA.NppCore;
 
 namespace _3PA.MainFeatures.Pro {
 
     internal static class ProCodeFormat {
+
+        public static Dictionary<int, LineInfo> GetIndentation(Dictionary<int, ParsedLineInfo> lineInfos) {
+
+            var output = new Dictionary<int, LineInfo>();
+
+            foreach (var kpv in lineInfos) {
+
+                int curLine = kpv.Key;
+                ParsedLineInfo lineInfo = kpv.Value;
+
+                // compute current depth
+                // -1 because we always have a block that represents the current file
+                var depth = -1;
+                var iloop = 0;
+                while (iloop < lineInfo.BlockStack.Count) {
+                    var block = lineInfo.BlockStack.ElementAt(iloop);
+                    iloop++;
+
+                    // do not indent &ANALYZE-SUSPEND blocks
+                    if (block.ScopeType == ParsedScopeType.PreProcBlock) {
+                        continue;
+                    }
+
+                    // do not indent &IF DEFINED(EXCLUDE-btinitalto) = 0 &THEN
+                    var preprocIf = block as ParsedScopePreProcIfBlock;
+                    if (preprocIf != null && preprocIf.EvaluatedExpression.StartsWith("DEFINED(EXCLUDE-")) {
+                        continue;
+                    }
+
+                    var onBlock = block as ParsedOnStatement;
+                    if (onBlock != null && curLine <= onBlock.TriggerBlock.Line) {
+                        // ON CHOOSE OF bt_profileRename IN FRAME DEFAULT-FRAME
+                        // DO: <- this would be indented if not for this rule
+                        continue;
+                    }
+                        
+                    // only the lines AFTER the start of the block should be indent
+                    if (curLine > block.Line) {
+                        depth++;
+                    }
+                }
+                depth = Math.Max(depth, 0);
+                
+                    
+                // other lines of the statement
+                if (curLine > lineInfo.StatementStartLine) {
+
+                    // first line of the statement
+                    if (!output.ContainsKey(lineInfo.StatementStartLine)) {
+                        output.Add(lineInfo.StatementStartLine, new LineInfo(depth, 0));
+                    }
+
+                    var extraStatementDepth = 0;
+                    var block = lineInfo.BlockStack.Peek();
+                    var blockOneStatementIndent = block as ParsedScopeOneStatementIndentBlock;
+                    if (blockOneStatementIndent != null && blockOneStatementIndent.LineOfNextWord > blockOneStatementIndent.Line && curLine > blockOneStatementIndent.Line + 1) {
+                        // IF TRUE THEN
+                        //     ASSIGN
+                        //         lc_ "ok". <- this would NOT be indented if not for this rule
+                        extraStatementDepth = 1;
+                    } else if (blockOneStatementIndent == null && curLine > block.Line + 1 && !(block is ParsedOnStatement)) {
+                        // DEFINE VARIABLE
+                        //     lc_fuck AS CHARACTER NO-UNDO.  <- this would NOT be indented if not for this rule
+                        extraStatementDepth = 1;
+                    }
+
+                    // fill missing info on the lines of the statement
+                    for (int i = lineInfo.StatementStartLine + 1; i <= curLine; i++) {
+                        if (!output.ContainsKey(i)) {
+                            output.Add(i, new LineInfo(depth, extraStatementDepth));
+                        } else if (extraStatementDepth == 0 && output[i].ExtraStatementDepth > 0) {
+                            // at some point for this statement we added an extra indent but now tis line is at extra = 0, restore the previous lines to 0 aswell
+                            // WHEN 1 OR 
+                            // WHEN 3 OR <- this would be indented if not for this rule
+                            // WHEN 2 THEN
+                            //     MESSAGE "ok".
+                            output[i].ExtraStatementDepth = 0;
+                        }
+                    }
+                } else if (!output.ContainsKey(curLine)) {
+                    output.Add(curLine, new LineInfo(depth, 0));
+                }
+            }
+
+            return output;
+        }
 
         /// <summary>
         /// Tries to re-indent the code of the whole document
@@ -46,40 +132,27 @@ namespace _3PA.MainFeatures.Pro {
             // in case of an incorrect document, warn the user
             var parserErrors = parser.ParseErrorsInHtml;
             if (!string.IsNullOrEmpty(parserErrors)) {
-                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still try to format your code but the result is not guaranteed (worst case scenario you can press CTRL+Z).<br>Please confirm that you want to proceed", MessageImg.MsgQuestion, "Correct indentation", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + parserErrors + "<br>You can still try to format your code but the result is not guaranteed (worst case scenario you can press CTRL+Z).<br>If the code compiles successfully and the document is incorrectly formatted, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.UrlIssues.ToHtmlLink() + "<br><br>Please confirm that you want to proceed", MessageImg.MsgQuestion, "Correct indentation", "Problems spotted", new List<string> { "Continue", "Abort" }) != 0)
                     return;
             }
-
-            var linesLogFile = Path.Combine(Config.FolderTemp, "lines.log");
-            var canIndentSafely = string.IsNullOrEmpty(parserErrors);
-
+            
             // start indenting
             Sci.BeginUndoAction();
 
             var indentStartLine = Sci.LineFromPosition(Sci.SelectionStart);
             var indentEndLine = Sci.LineFromPosition(Sci.SelectionEnd);
-
-            StringBuilder x = new StringBuilder();
+            
             var indentWidth = Sci.TabWidth;
             var i = 0;
-            var dic = parser.LineInfo;
+            var dic = GetIndentation(parser.LineInfo);
             while (dic.ContainsKey(i)) {
                 if (indentStartLine == indentEndLine || (i >= indentStartLine && i <= indentEndLine)) {
                     var line = Sci.GetLine(i);
                     line.Indentation = (dic[i].BlockDepth + dic[i].ExtraStatementDepth) * indentWidth;
                 }
-
-                if (!canIndentSafely)
-                    x.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].ExtraStatementDepth + " , " + dic[i].ExplorerScope.ScopeType + " , " + dic[i].ExplorerScope.Name);
                 i++;
             }
             Sci.EndUndoAction();
-
-            // if we didn't parse the code correctly or if there are grammar errors
-            if (!canIndentSafely) {
-                Utils.FileWriteAllText(linesLogFile, x.ToString());
-                UserCommunication.Notify("If the code compiles successfully and the document is incorrectly formatted, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br>" + Config.UrlIssues.ToHtmlLink() + (Config.IsDeveloper ? "<br><br>Lines report log :<br>" + linesLogFile.ToHtmlLink() : ""), MessageImg.MsgRip, "Correct indentation", "Incorrect grammar", null, 10);
-            }
         }
 
         /// <summary>
@@ -200,5 +273,23 @@ namespace _3PA.MainFeatures.Pro {
         }
 
 
+    }
+
+    /// <summary>
+    /// Contains the info of a specific line number (built during the parsing)
+    /// </summary>
+    internal class LineInfo {
+
+        /// <summary>
+        /// Block depth for the current line (= number of indents)
+        /// </summary>
+        public int BlockDepth { get; set; }
+
+        public int ExtraStatementDepth { get; set; }
+
+        public LineInfo(int blockDepth, int extraStatementDepth) {
+            BlockDepth = blockDepth;
+            ExtraStatementDepth = extraStatementDepth;
+        }
     }
 }

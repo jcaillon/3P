@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using YamuiFramework.Helper;
@@ -57,12 +56,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the proLexer to use them when we need it
         /// </summary>
-        private Dictionary<string, ProTokenizer> SavedLexerInclude {
-            get { return ParserHandler.SavedLexerInclude; }
-        }
-
-        private static ProTokenizer NewLexerFromData(string data) {
-            return new ProTokenizer(data);
+        private Dictionary<string, ProTokenizer> SavedTokenizerInclude {
+            get { return ParserHandler.SavedTokenizerInclude; }
         }
 
         #endregion
@@ -77,25 +72,14 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// Contains the information of each line parsed
         /// </summary>
-        private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
+        private Dictionary<int, ParsedLineInfo> _lineInfo = new Dictionary<int, ParsedLineInfo>();
 
         /// <summary>
         /// list of errors found by the parser
         /// </summary>
         private List<ParserError> _parserErrors = new List<ParserError>();
 
-        /// <summary>
-        /// Result of the proLexer, list of tokens
-        /// </summary>
-        private GapBuffer<Token> _tokenList;
-
-        private int _tokenCount;
-        private int _tokenPos = -1;
-
-        /// <summary>
-        /// Contains the current information of the statement's context (in which proc it is, which scope...)
-        /// </summary>
-        private ParseContext _context;
+        private List<ParsedStatement> _parsedStatementList = new List<ParsedStatement>();
 
         /// <summary>
         /// Path to the file being parsed (is added to the parseItem info)
@@ -104,13 +88,26 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
         private bool _lastTokenWasSpace;
 
+        private bool _matchKnownWords;
+
+        /// <summary>
+        /// Result of the proLexer, list of tokens
+        /// </summary>
+        private GapBuffer<Token> _tokenList;
+
+        private int _tokenCount;
+        private int _tokenPos = -1;
+        
+        /// <summary>
+        /// Contains the current information of the statement's context (in which proc it is, which scope...)
+        /// </summary>
+        private ParseContext _context;
+
         /// <summary>
         /// Contains all the words parsed
         /// </summary>
         private Dictionary<string, CompletionType> _knownWords = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
-
-        private bool _matchKnownWords;
-
+        
         /// <summary>
         /// Useful to remember where the function prototype was defined (Point is line, column)
         /// </summary>
@@ -123,7 +120,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// the [0] will designate the current procedure file, [1] the first include and so on...
         /// </summary>
         private List<ParsedIncludeFile> _parsedIncludes = new List<ParsedIncludeFile>();
-        
+
+
         #endregion
 
         #region Public properties
@@ -131,7 +129,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// dictionary of *line, line info*
         /// </summary>
-        public Dictionary<int, LineInfo> LineInfo {
+        public Dictionary<int, ParsedLineInfo> LineInfo {
             get { return _lineInfo; }
         }
 
@@ -148,7 +146,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         public List<ParsedItem> ParsedItemsList {
             get { return _parsedItemList; }
         }
-
+        
         /// <summary>
         /// Returns a string that describes the errors found by the parser (relative to block start/end)
         /// Returns null if no errors were found
@@ -183,7 +181,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// Constructor with a string instead of a proLexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
+        public Parser(string data, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords) : this(new ProTokenizer(data), filePathBeingParsed, defaultScope, matchKnownWords, null) {}
 
         public Parser(ProTokenizer proTokenizer, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) : this(proTokenizer.GetTokensList, filePathBeingParsed, defaultScope, matchKnownWords, debugListOut) {}
 
@@ -193,15 +191,16 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         public Parser(GapBuffer<Token> tokens, string filePathBeingParsed, ParsedScopeBlock defaultScope, bool matchKnownWords, StringBuilder debugListOut) {
 
             // process inputs
-            ParsedScopeBlock rootScope;
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && KnownStaticItems != null;
+
+            var rootToken = new TokenEos(null, 0, 0, 0, 0) { OwnerNumber = 0 };
 
             // the first of this list represents the file currently being parsed
             _parsedIncludes.Add(
                 new ParsedIncludeFile(
                     "root",
-                    new TokenEos(null, 0, 0, 0, 0),
+                    rootToken,
                     // the preprocessed variable {0} equals to the filename...
                     new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
                         {"0", Path.GetFileName(FilePathBeingParsed)}
@@ -212,16 +211,13 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
             // init context
             _context = new ParseContext {
-                BlockStack = new Stack<ParsedScope>()
+                BlockStack = new Stack<ParsedScope>(),
+                CurrentStatement = new ParsedStatement(rootToken),
+                CurrentStatementIsEnded = true
             };
 
             // create root item
-            if (defaultScope == null) {
-                var rootToken = new TokenEos(null, 0, 0, 0, 0);
-                rootToken.OwnerNumber = 0;
-                rootScope = new ParsedFile("Root", rootToken);
-            } else
-                rootScope = defaultScope;
+            var rootScope = defaultScope ?? new ParsedFile("Root", rootToken);
             _context.BlockStack.Push(rootScope);
             if (defaultScope == null) {
                 AddParsedItem(rootScope, 0);
@@ -242,8 +238,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             }
             AddLineInfo(_tokenList[_tokenList.Count - 1]); // add info on last line
             PopOneStatementIndentBlock(0); // make sure to pop the final block
-
-
+            
             // add missing values to the line dictionary
             // missing values will be for the lines within a multilines comment/string for which we didn't match an EOL to add line info
             var currentLineInfo = _lineInfo[_tokenList[_tokenList.Count - 1].Line];
@@ -278,13 +273,16 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             }
 
             // dispose
-            _context.BlockStack.Clear();
+            _context.BlockStack = null;
             _context = null;
             _tokenList = null;
+            _functionPrototype = null;
+            _parsedIncludes = null;
+            _knownWords = null;
 
             // if we are parsing an include file that was saved for later use, update it
-            if (SavedLexerInclude.ContainsKey(filePathBeingParsed))
-                SavedLexerInclude.Remove(filePathBeingParsed);
+            if (SavedTokenizerInclude.ContainsKey(filePathBeingParsed))
+                SavedTokenizerInclude.Remove(filePathBeingParsed);
         }
 
         #endregion
@@ -385,32 +383,14 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// contains the info on the current context (as we move through tokens)
         /// </summary>
-        internal class ParseContext {
+        private class ParseContext {
 
             /// <summary>
             /// Keep tracks on blocks through a stack (a block == an indent)
             /// </summary>
             public Stack<ParsedScope> BlockStack { get; set; }
 
-            /// <summary>
-            /// Number of words count in the current statement
-            /// </summary>
-            public int StatementWordCount { get; set; }
-
-            /// <summary>
-            /// A statement can start with a word, pre-proc phrase or an include
-            /// </summary>
-            public Token StatementFirstToken { get; set; }
-            
-            /// <summary>
-            /// True if the first word of the statement didn't match a known statement
-            /// </summary>
-            public bool StatementUnknownFirstWord { get; set; }
-
-            /// <summary>
-            /// Current count of statements in the program
-            /// </summary>
-            public int StatementCount { get; set; }
+            public ParsedStatement CurrentStatement { get; set; }
             
             /// <summary>
             /// Allows to read the next word after a THEN or a ELSE as the first word of a statement to 
@@ -423,125 +403,40 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             /// </summary>
             public ParsedScopeBlock LastOnBlock { get; set; } 
 
+            public ParsedLabel LastLabel { get; set; }
+
             /// <summary>
             /// Useful to know if, during the last &amp;if / elseif / else / endif,
             /// one of the if expression hsa been true. If not, we know that the &amp;else block will be true
             /// </summary>
             public bool LastPreprocIfwasTrue { get; set; }
+
+            public bool CurrentStatementIsEnded { get; set; }
         }
 
+        private class ParsedStatement {
+
+            /// <summary>
+            /// A statement can start with a word, pre-proc phrase or an include
+            /// </summary>
+            public Token FirstToken { get; private set; }
+            
+            /// <summary>
+            /// True if the first word of the statement didn't match a known statement
+            /// </summary>
+            public bool UnknownFirstWord { get; set; }
+
+            /// <summary>
+            /// Number of words count in the current statement
+            /// </summary>
+            public int WordCount { get; set; }
+
+            public ParsedStatement(Token firstToken) {
+                FirstToken = firstToken;
+            }
+        }
+        
         #endregion
 
     }
-
-    #region LineInfo
-
-    /// <summary>
-    /// Contains the info of a specific line number (built during the parsing)
-    /// </summary>
-    internal class LineInfo {
-
-        /// <summary>
-        /// Block depth for the current line (= number of indents)
-        /// </summary>
-        public int BlockDepth { get; set; }
-
-        public int ExtraStatementDepth { get; set; }
-
-        /// <summary>
-        /// Scope for the current line
-        /// </summary>
-        public ParsedScopeSection ExplorerScope { get; set; }
-
-        /// <summary>
-        /// Scope for the current line
-        /// </summary>
-        public ParsedScopeBlock VariableScope { get; set; }
-
-        public LineInfo(int blockDepth, int extraStatementDepth, ParsedScopeSection explorerScope, ParsedScopeBlock variableScope) {
-            BlockDepth = blockDepth;
-            ExtraStatementDepth = extraStatementDepth;
-            ExplorerScope = explorerScope;
-            VariableScope = variableScope;
-        }
-    }
-
-    #endregion
-
-    #region ParserError
-
-    internal class ParserError {
-        /// <summary>
-        /// Type of the error
-        /// </summary>
-        public ParserErrorType Type { get; set; }
-
-        /// <summary>
-        /// Line at which the error happened
-        /// </summary>
-        public int TriggerLine { get; set; }
-
-        /// <summary>
-        /// Position at which the error happened
-        /// </summary>
-        public int TriggerPosition { get; set; }
-
-        /// <summary>
-        /// Stack count at the moment of the error (the type of stack will depend on the error)
-        /// </summary>
-        public int StackCount { get; set; }
-
-        /// <summary>
-        /// Can either be in the procedure parser or in an include file
-        /// </summary>
-        public string FullFilePath { get; set; }
-
-        public ParserError(ParserErrorType type, Token triggerToken, int stackCount, List<ParsedIncludeFile> includeFiles) {
-            Type = type;
-            TriggerLine = triggerToken.Line;
-            TriggerPosition = triggerToken.StartPosition;
-            StackCount = stackCount;
-            FullFilePath = includeFiles[triggerToken.OwnerNumber].FullFilePath;
-        }
-    }
-
-    internal enum ParserErrorType {
-        [Description("Unexpected block start, you can not nest functions, methods or procedures")]
-        ForbiddenNestedBlockStart,
-
-        [Description("Unexpected block end, the start of this block has not been found")]
-        UnexpectedBlockEnd,
-
-        [Description("A block end seems to be missing")]
-        MissingBlockEnd,
-
-        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")]
-        UnexpectedUibBlockStart,
-
-        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")]
-        UnexpectedUibBlockEnd,
-
-        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")]
-        NotAllowedUibBlockStart,
-
-        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
-        NotAllowedUibBlockEnd,
-
-        [Description("A preprocessed directive ANALYSE-RESUME seems to be missing")]
-        MissingUibBlockEnd,
-
-        [Description("A preprocessed directive should always be at the beggining of a new statement")]
-        UibBlockStartMustBeNewStatement,
-
-        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
-        UnexpectedPreProcEndIf,
-
-        [Description("&THEN pre-processed statement matched without the corresponding &IF")]
-        UnexpectedPreprocThen,
-
-        [Description("&IF pre-processed statement missing an &ENDIF")]
-        MissingPreprocEndIf,
-    }
-
-    #endregion
 }

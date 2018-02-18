@@ -169,6 +169,13 @@ namespace _3PA.Lib {
             return -1;
         }
 
+        public static Stack<T> CloneStack<T>(this Stack<T> original) {
+            var arr = new T[original.Count];
+            original.CopyTo(arr, 0);
+            Array.Reverse(arr);
+            return new Stack<T>(arr);
+        }
+
         #endregion
 
         #region int

@@ -521,19 +521,10 @@ namespace _3PA.MainFeatures.Parser.Pro.Visit {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedLabel pars) {
-            // find the end line of the labeled block
-            var line = pars.Line + 1;
-            var depth = _parser.LineInfo.ContainsKey(pars.Line) ? _parser.LineInfo[pars.Line].BlockDepth : 0;
-            bool wentIntoBlock = false;
-            while (_parser.LineInfo.ContainsKey(line)) {
-                if (!wentIntoBlock && _parser.LineInfo[line].BlockDepth > depth) {
-                    wentIntoBlock = true;
-                    depth = _parser.LineInfo[line].BlockDepth;
-                } else if (wentIntoBlock && _parser.LineInfo[line].BlockDepth < depth)
-                    break;
-                line++;
+            // find the end line of the labeled 
+            if (pars.Block != null) {
+                pars.UndefinedLine = pars.Block.EndBlockLine;
             }
-            pars.UndefinedLine = line;
 
             // to completion data
             PushToAutoCompletion(new LabelCompletionItem {
