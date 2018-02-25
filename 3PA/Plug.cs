@@ -159,7 +159,9 @@ namespace _3PA {
         internal static void DoPlugStart() {
             if (OnPlugReady != null)
                 OnPlugReady();
-            
+
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.Instance.UpdateDatabaseInfo;
