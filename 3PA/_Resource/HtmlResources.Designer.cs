@@ -19,7 +19,7 @@ namespace _3PA._Resource {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class HtmlResources {
@@ -90,7 +90,7 @@ namespace _3PA._Resource {
         ///
         ///## Setting an environment ##
         ///
-        ///3P has a lot of features that are available immediately, like the autocompletion or the s [rest of string was truncated]&quot;;.
+        ///3P has a lot of features that are available immediately, like the autocompletion or the sy [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string getting_started {
             get {
@@ -104,7 +104,7 @@ namespace _3PA._Resource {
         ///&lt;table style=&quot;margin: 0; width: 100%;&quot;&gt;
         ///    &lt;tr&gt;
         ///        &lt;td style=&quot;width: 160px&quot;&gt;
-        ///            &lt;img src=&quot;logo150x150&quot; width=&quot;150&quot; height=&quot;150&quot; /&gt;
+        ///            &lt;img src=&quot;Logo150x150&quot; width=&quot;150&quot; height=&quot;150&quot; /&gt;
         ///        &lt;/td&gt;
         ///        &lt;td&gt;
         ///            &lt;div style=&quot;margin-bottom: 5px;&quot;&gt;
@@ -132,9 +132,13 @@ namespace _3PA._Resource {
         ///    width: 70%;
         ///}
         ///
-        ///a:link {
+        ///a {
         ///    color: @GenericLinkColor;
         ///    text-decoration: underline;
+        ///}
+        ///
+        ///.linkSeparator {
+        ///    color: @SubTextFore;
         ///}
         ///
         ///pre {
@@ -144,9 +148,7 @@ namespace _3PA._Resource {
         ///
         ///code {
         ///    background-color: @FormAltBack;
-        ///    padding-left: 5px;
-        ///    padding-right: 5px;
-        ///    Font: 11px &quot; [rest of string was truncated]&quot;;.
+        ///    padding-left: 5px [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string StyleSheet {
             get {

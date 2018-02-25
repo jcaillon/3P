@@ -10,7 +10,7 @@
     <RootNamespace>_3PA</RootNamespace>
     <AssemblyName>3P</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -31,59 +31,42 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>
     </ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>false</Optimize>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Optimize>true</Optimize>
     <LangVersion>4</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RGiesecke.DllExport.Metadata, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8f52d83c1a22df51, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnmanagedExports.1.2.7\lib\net\RGiesecke.DllExport.Metadata.dll</HintPath>
+    <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
+      <HintPath>$(SolutionDir)packages\DllExport.1.6.0\gcache\metalib\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
       <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -765,7 +748,6 @@
     <None Include="_Resource\Data\Snippets" />
     <None Include="_Resource\Data\SyntaxThemes" />
     <None Include="_Resource\Data\ApplicationThemes" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="_Resource\Html\Pages\home.html" />
@@ -796,48 +778,88 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for 3P
-set NPPFOLDERNAME=3P_notepad++
-if "$(PlatformName)" == "x64" (
-	set NPPFOLDERNAME=3P_notepad++x64
-)
 
-if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( 
-	echo [INFO] Copying output files to %25NPPFOLDERNAME%25 folder...
-	if exist "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" (
-		copy /Y "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName)$(TargetExt)" &gt;nul
-	)
-	if exist "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" (
-		copy /Y "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
-	)
-)
+set NPPFOLDERNAME=3P_notepad++
+set CPUNAME=x86
+set RELEASENAME=3P.zip
+call :copytonotepad
+call :ziprelease
+
+set NPPFOLDERNAME=3P_notepad++x64
+set CPUNAME=x64
+set RELEASENAME=3P_x64.zip
+call :copytonotepad
+call :ziprelease
+
+exit 0
+
+
+REM zip release
+:ziprelease
+
+echo [INFO] Zipping release Releases\%25RELEASENAME%25
 
 WHERE 7z &gt;nul 2&gt;nul
 IF not "%25ERRORLEVEL%25" == "0" (
 	echo 7z.exe not found in the path, can't create the .zip releases
 	goto :label_end
-) 
-
-set RELEASENAME=3P.zip
-if "$(PlatformName)" == "x64" (
-	set RELEASENAME=3P_x64.zip
 )
-
-echo [INFO] Zipping files into a release named %25RELEASENAME%25...
 
 md "$(SolutionDir)\Releases" &gt;nul 2&gt;nul
 del /Q "$(SolutionDir)\Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
-7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName)$(TargetExt)" &gt;nul
-7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(PlatformName)\Debug\$(TargetName).pdb" &gt;nul
+
+echo [INFO] Adding bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)
+
+7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" &gt;nul
+if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
+	7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
+)
+exit /b 0
 
 
-:label_end
-exit 0</PostBuildEvent>
+REM copy files to the notepad++ folder for dev purposes
+:copytonotepad
+
+echo [INFO] Copying output files to ..\%25NPPFOLDERNAME%25\plugins\
+
+if exist "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\" ( 
+	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetFileName)" &gt;nul
+	if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
+		copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
+	)
+)
+
+exit /b 0
+</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>if not exist "$(SolutionDir)packages" ( 
+	echo [INFO] Getting needed package
+	DllExport -action Update
+)</PreBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <DllExportIdent>8319FAEE-D7D1-4E76-8ABC-3B96D32BAD6F</DllExportIdent>
+    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
+    <DllExportNamespace>RGiesecke.DllExport</DllExportNamespace>
+    <DllExportDDNSCecil>true</DllExportDDNSCecil>
+    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>false</DllExportGenExpLib>
+    <DllExportOurILAsm>false</DllExportOurILAsm>
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+    <DllExportTimeout>30000</DllExportTimeout>
+    <DllExportPeCheck>2</DllExportPeCheck>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets" Condition="Exists('$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets')" Label="8337224c9ad9e356" />
+  <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
+    <Warning Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="We can't find 'DllExport.bat' in '$(SolutionDir)' - https://github.com/3F/DllExport" />
+    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command="cd &quot;$(SolutionDir)&quot; &amp; DllExport.bat -action Restore" />
+  </Target>
+  <Target Name="DllExportRPkgDynamicImport" BeforeTargets="PostBuildEvent" DependsOnTargets="GetFrameworkPaths" Condition="'$(DllExportModImported)' != 'true' And '$(DllExportRPkgDyn)' != 'false'">
+    <MSBuild BuildInParallel="true" UseResultsCache="true" Projects="$(MSBuildProjectFullPath)" Properties="DllExportRPkgDyn=true" Targets="Build" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
