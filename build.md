@@ -10,6 +10,13 @@
 - Read all the info here : https://github.com/3F/DllExport
 - If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
 
+
+## Update Notepad++ plugin manager ##
+
+- For the x86 version, it happens here : https://npppm.bruderste.in/
+- For the x64 version, at the moment, it happens here : https://github.com/bruderstein/npp-plugins-x64
+
+
 ## When releasing (Note to myself) : ##
 
 ### Manual chores ###
