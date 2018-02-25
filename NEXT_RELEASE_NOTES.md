@@ -1,35 +1,17 @@
 Hello everyone,
 
-**Important notes :**
+### Important notes :###
 
-The database structure information are reset in this version, you will need to extract them again from the environment page!
+Since February 22 the 3P automatic updater is not working and displays a message saying it failed to query the github API.
 
-**Improvements :**
+The 3P updater is using the [github API](https://developer.github.com/v3/) to check for new releases and download the .zip file. Last Thursday, GitHub turned off some weak crypto standards; including TLSv1.1. [You can read about this here.](https://githubengineering.com/crypto-removal-notice/)
 
-- Changed the way include files are treated by the parser; they are now treated the same way as {&var} which allows more complex usage of include files like {{inc.i}} (where inc.i contains an include name)
-- #204 : The parser now handles &IF everywhere
-- #203 : The parser now correctly reads and interprets ALL includes, even when they are within strings!
-- #207 : Missing includes and missing preprocessed variables are now displayed in a new branch of the code explorer "Missing includes/variables" which allows to solve PROPATH problems faster
-- #199 : 
-	- Fields of tables are now sorted by names by default (instead of order number previously)
-	- In tooltips fields that are part of the primary index are always shown on top
-	- Moved the shortcuts help from bottom to top in tooltips (to be able to see the hit CTRL once even if the tooltip is long)
-- #205 : The "check code validity" notification that is displayed on document save will now close itself if you fix the file problem and save again. It also only triggers on progress compilable files
-- #208 : 3P can now indent correctly very complex code (it actually does a better job than developper studio)
-- Added more information on tables (in the tooltip) : is hidden, is frozen and table type (T,S,V)
-- #152 : you can now choose the table types you want to show in the autocompletion, you are also able to filter the tables extracted by names (this allows you to, for instance, show the _FILE table and its fields in the autocompletion) - the option can be found in the set environment page, you can filter the tables that will be fetched for the autocompletion by their table type (`T,S` with T : User Data Table, S : Virtual System Table, V : SQL View) and their name (`_Sequence,_FILE,_INDEX,_FIELD,!_*,*` for instance to fetch all the user tables and a few interesting system tables)
-- #187 : Automatically create aliases for the database and show the aliases in the autocompletion - the option can be found in the set environment page, you have to set a list of `ALIAS,DATABASE;ALIAS2,DATABASE;...`
-- #184 : In the option > code edition, you can now set a comma separated list of prefixes that represent a "good" naming convention for your variables. Each defined variable that start with one of those prefixes will be highlighted in a different color
-- #210 : CTRL-I which allows you to correct the indentation of you document can now correct the indentation only for the lines of your selection (if multiple lines are selected; otherwise it will indent the whole document)
+How is it related you ask? I've build 3P around the .NET framework v4.0... which only supports TLSv1.1. This is the default security protocol and also the latest protocol supported by this version. This means we have to upgrade the project to [.NET 4.6](https://www.microsoft.com/en-US/download/details.aspx?id=48130). That also means that 3P will not be able to run on windows versions inferior to windows vista.
 
-**Fixed issues :**
 
-- #192 : Problem when duplicating an environment, then deleting some databases
-- #194 : Bug with the autocompletion after typing a number and "." on an empty document
-- Fixed a problem with the option "insert suggestion on word end" for numbers on non progress documents
-- #200 : Exception raised when the userDefineLang.xml file is not found
-- #201 : Indentation problems for ELSE DO: blocks
-- #202 : Indentation improvement for preprocessed &IF &ENDIF blocks
-- #211 : Impossible to check syntax with openedge v9.1
+### Improvements :###
 
-Enjoy
+
+
+### Fixed issues :###
+

@@ -21,7 +21,6 @@ using System;
 using System.IO;
 using System.Net;
 using _3PA.MainFeatures;
-using _3PA.NppCore;
 
 namespace _3PA.Lib {
 
@@ -38,6 +37,9 @@ namespace _3PA.Lib {
                 // ping once x hours
                 if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.PostPingEveryXMin)) {
                     var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
+                    webServiceJson.OnInitHttpWebRequest += request => {
+                        request.Proxy = Config.Instance.GetWebClientProxy();
+                    };
                     webServiceJson.AddToReq("UUID", UniqueId);
                     webServiceJson.AddToReq("userName", Name);
                     webServiceJson.AddToReq("version", AssemblyInfo.Version);
@@ -106,17 +108,16 @@ namespace _3PA.Lib {
             // handle spam (10s min between 2 posts)
             if (Utils.IsSpamming("SendComment", 10000))
                 return false;
-
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, url);
-
-            // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
-            wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config.GitHubBasicAuthenticationToken);
-            wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.SoftwareVersion + " ####\r\n" +
-                                message
-            );
+            wb.OnInitHttpWebRequest += request => {
+                request.Proxy = Config.Instance.GetWebClientProxy();
+                request.UserAgent = "3pUser";
+                request.Headers.Add("Authorization", "token " + Config.GitHubOAuth2Token);
+            };
+            wb.AddToReq("body", message);
+            wb.OnRequestEnded += json => { UserCommunication.Notify((json.ResponseException != null ? json.ResponseException.ToString() : "") + "\r\n" + json.StatusCodeResponse + ":" + (json.StatusDescriptionResponse ?? "") + "\r\n" + (json.JsonResponse ?? "")); };
             wb.Execute();
-
+            
             return false;
         }
 

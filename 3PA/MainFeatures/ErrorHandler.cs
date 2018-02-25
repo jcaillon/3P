@@ -151,6 +151,10 @@ namespace _3PA.MainFeatures {
         /// </summary>
         private static void SendBugReport(ExceptionInfo bugReport) {
             var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostBugsWebWervice);
+            wb.OnInitHttpWebRequest += request => {
+                request.Proxy = Config.Instance.GetWebClientProxy();
+                request.UserAgent = Config.GitHubUserAgent;
+            };
             wb.Serialize(bugReport);
 
             // save the request in a file

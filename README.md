@@ -16,3 +16,9 @@
 3P has a **[dedicated website](https://jcaillon.github.io/3P/)**, go check it out!
 
 Old releases information can be found [here on the website](https://jcaillon.github.io/3P/#/versions)
+
+### IMPORTANT MESSAGE ###
+
+**The 3P updater is UNAVAILABLE for all the versions prior to v1.8.1!!!**
+**You MUST install the [latest .NET framework](https://www.microsoft.com/en-us/download/details.aspx?id=56116)** (or at least [.NET 4.6](https://www.microsoft.com/en-US/download/details.aspx?id=48130) in order to be able to use the next releases of 3P (v1.8.1 and above)!!!
+Read this issue to understand why : [https://github.com/jcaillon/3P/issues/214](https://github.com/jcaillon/3P/issues/214)

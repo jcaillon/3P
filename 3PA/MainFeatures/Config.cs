@@ -538,7 +538,7 @@ namespace _3PA.MainFeatures {
         #region public fields
 
         public static string RequiredNppVersion {
-            get { return "v7.5.1"; }
+            get { return "v7.5.4"; }
         }
         
         /// <summary>
@@ -546,10 +546,6 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static ConfigObject Instance {
             get { return _instance ?? (_instance = Init()); }
-        }
-
-        public static string WebclientUserAgent {
-            get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; }
         }
 
         public static string UrlIssues {
@@ -724,19 +720,22 @@ namespace _3PA.MainFeatures {
         public static string FileUpdaterLst {
             get { return Path.Combine(Path.GetDirectoryName(FileUpdaterExe) ?? "", "3pUpdater.lst"); }
         }
-
-        // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
-        public static string GitHubBasicAuthenticationToken {
-            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
+        
+        public static string GitHubUserAgent {
+            get { return "3pUser"; }
         }
 
-        public static int UpdateCheckEveryXMin = 8 * 60;
+        public static string GitHubOAuth2Token {
+            get { return @"c0889d95f28d1e77b1ebf2b7a0a75bc193106c20"; }
+        }
+
+        public static int UpdateCheckEveryXMin = 12 * 60;
 
         /// <summary>
         /// Url for the github webservices
         /// </summary>
         public static string UpdateReleasesApi {
-            get { return IsDeveloper && !string.IsNullOrEmpty(Instance.DebugReleasesApi) ? Instance.DebugReleasesApi : @"https://api.github.com/repos/jcaillon/3P/releases"; }
+            get { return IsDeveloper && !string.IsNullOrEmpty(Instance.DebugReleasesApi) ? Instance.DebugReleasesApi : @"https://api.github.com/repos/jcaillon/3P/releases?page=1&per_page=10"; }
         }
 
         public static string UpdateVersionLog {
@@ -762,7 +761,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static string ProlintReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/prolint/releases"; }
+            get { return @"https://api.github.com/repos/jcaillon/prolint/releases?page=1&per_page=10"; }
         }
         
         public static string ProlintStartProcedure {
@@ -775,7 +774,7 @@ namespace _3PA.MainFeatures {
 
         // Proparse.net
         public static string ProparseReleasesApi {
-            get { return @"https://api.github.com/repos/jcaillon/proparse/releases"; }
+            get { return @"https://api.github.com/repos/jcaillon/proparse/releases?page=1&per_page=10"; }
         }
 
         public static string ProparseGitHubAssetName {

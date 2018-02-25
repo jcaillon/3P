@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -158,7 +159,7 @@ namespace _3PA {
         internal static void DoPlugStart() {
             if (OnPlugReady != null)
                 OnPlugReady();
-
+            
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.Instance.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.Instance.UpdateDatabaseInfo;

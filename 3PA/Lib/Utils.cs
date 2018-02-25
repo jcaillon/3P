@@ -28,7 +28,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -583,21 +582,6 @@ namespace _3PA.Lib {
             if (t.Seconds > 0)
                 return string.Format("{0:D2}s", t.Seconds);
             return string.Format("{0:D3}ms", t.Milliseconds);
-        }
-
-        /// <summary>
-        /// Allows to download the given file asynchronously
-        /// </summary>
-        public static void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
-            using (WebClient wc = new WebClient()) {
-                wc.Proxy = Config.Instance.GetWebClientProxy();
-                wc.Headers.Add("user-agent", Config.WebclientUserAgent);
-                if (setWebClient != null)
-                    setWebClient(wc);
-                if (handler != null)
-                    wc.DownloadFileCompleted += handler;
-                wc.DownloadFileAsync(new Uri(url), downloadPath);
-            }
         }
 
         /// <summary>

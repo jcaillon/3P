@@ -39,9 +39,24 @@ namespace _3PA.Lib {
         public string GitHubReleaseApi { get; set; }
 
         /// <summary>
-        /// Basic authen for github api
+        /// Basic authen for github api : Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
         /// </summary>
         public string BasicAuthenticationToken { get; set; }
+
+        /// <summary>
+        /// OAuth2 Token for github api
+        /// </summary>
+        public string OAuth2Token { get; set; }
+
+        /// <summary>
+        /// UserAgent mandatory for the github API
+        /// </summary>
+        public string UserAgent { get; set; }
+
+        /// <summary>
+        /// Web proxy to use
+        /// </summary>
+        public IWebProxy Proxy { get; set; }
 
         /// <summary>
         /// Local version of the soft that will be compared to the distant one
@@ -113,7 +128,16 @@ namespace _3PA.Lib {
                     TimeOut = 3000
                 };
                 wb.OnInitHttpWebRequest += request => {
-                    request.Headers.Add("Authorization", "Basic " + BasicAuthenticationToken);
+                    request.UserAgent = UserAgent ?? "unknown";
+                    if (Proxy != null) {
+                        request.Proxy = Proxy;
+                    }
+                    if (!string.IsNullOrEmpty(BasicAuthenticationToken)) {
+                        request.Headers.Add("Authorization", "Basic " + BasicAuthenticationToken);
+                    }
+                    if (!string.IsNullOrEmpty(OAuth2Token)) {
+                        request.Headers.Add("Authorization", "token " + OAuth2Token);
+                    }
                     request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 
                 };
@@ -184,7 +208,7 @@ namespace _3PA.Lib {
                                     StartingUpdate(this, LatestReleaseInfo, e);
 
                                 if (!e.CancelDownload) {
-                                    Utils.DownloadFile(url, downloadFile, OnAssetDownloaded);
+                                    DownloadFile(url, downloadFile, OnAssetDownloaded);
                                 }
                             } else {
                                 if (ErrorOccured != null)
@@ -240,6 +264,25 @@ namespace _3PA.Lib {
                 return release.assets.First(asset => asset.name.EqualsCi(AssetName)).browser_download_url;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Allows to download the given file asynchronously
+        /// </summary>
+        public void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
+            using (WebClient wc = new WebClient()) {
+                wc.Headers.Add("User-Agent", UserAgent ?? "unknown");
+                if (Proxy != null) {
+                    wc.Proxy = Proxy;
+                }
+                if (setWebClient != null) {
+                    setWebClient(wc);
+                }
+                if (handler != null) {
+                    wc.DownloadFileCompleted += handler;
+                }
+                wc.DownloadFileAsync(new Uri(url), downloadPath);
+            }
         }
 
         #endregion

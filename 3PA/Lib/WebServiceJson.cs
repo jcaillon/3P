@@ -24,7 +24,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
     public class WebServiceJson {
@@ -141,10 +140,8 @@ namespace _3PA.Lib {
                     // init request
                     _httpRequest = WebRequest.Create(Url) as HttpWebRequest;
                     if (_httpRequest != null) {
-                        _httpRequest.Proxy = Config.Instance.GetWebClientProxy();
                         _httpRequest.Method = Method.ToString().ToUpper();
                         _httpRequest.ContentType = "application/json";
-                        _httpRequest.UserAgent = Config.WebclientUserAgent;
                         _httpRequest.ReadWriteTimeout = TimeOut;
                         _httpRequest.Timeout = TimeOut;
                     }
@@ -210,7 +207,6 @@ namespace _3PA.Lib {
             try {
                 // post in UTF8  
                 var byteArray = Encoding.UTF8.GetBytes(JsonRequest.ToString());
-
                 using (Stream writer = _httpRequest.GetRequestStream()) {
                     writer.Write(byteArray, 0, byteArray.Length);
                     writer.Flush();

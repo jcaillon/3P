@@ -47,6 +47,8 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
+
+            User.SendComment("hello", "https://api.github.com/repos/3pUser/yolo/issues/1/comments");
         }
         
         public static void DebugTest2() {
