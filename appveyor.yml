@@ -2,8 +2,6 @@ version: '{branch}.{build}'
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
-before_build:
-- cmd: DllExport -action Update
 build:
   project: 3P.sln
   verbosity: minimal

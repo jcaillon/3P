@@ -1,20 +1,14 @@
 ## Build info : ##
 
-### To be able to compile this project you need to ###
-
-- You might have a missing librairy/exe when compiling, install the [SDK for .net 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=8279)
-- If it still doesn't work, install [this](https://developer.microsoft.com/en-us/windows/downloads/windows-8-sdk)
-- or [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159)
-
 ### How to configure DLLExport ###
 
 - Execute `DllExport.bat -action Configure`
 - This download packages\DllExport.1.6.0
 - Select your .sln solution file
-- Choose a namespace for the DllExport : `System.Runtime.InteropServices` and target x86 + x64
+- Choose a namespace for the DllExport : `RGiesecke.DllExport` and target x86 + x64
 - Click apply
 - Read all the info here : https://github.com/3F/DllExport
-
+- If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
 
 ## When releasing (Note to myself) : ##
 
