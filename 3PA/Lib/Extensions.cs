@@ -502,6 +502,16 @@ namespace _3PA.Lib {
             try {
                 var splitLocal = localVersion.TrimStart('v').Split('.').Select(s => int.Parse(s.Trim())).ToList();
                 var splitDistant = distantVersion.TrimStart('v').Split('.').Select(s => int.Parse(s.Trim())).ToList();
+                for (int j = splitLocal.Count - 1; j >= 0; j--) {
+                    if (splitLocal[j] == 0) {
+                        splitLocal.RemoveAt(j);
+                    }
+                }
+                for (int j = splitDistant.Count - 1; j >= 0; j--) {
+                    if (splitDistant[j] == 0) {
+                        splitDistant.RemoveAt(j);
+                    }
+                }
                 var i = 0;
                 while (i <= (splitLocal.Count - 1) && i <= (splitDistant.Count - 1)) {
                     if (splitLocal[i] > splitDistant[i])
@@ -510,9 +520,9 @@ namespace _3PA.Lib {
                         return false;
                     i++;
                 }
-                if (splitLocal.Sum() == splitDistant.Sum() && trueIfEqual)
+                if (splitLocal.Count == splitDistant.Count && trueIfEqual)
                     return true;
-                if (splitLocal.Sum() > splitDistant.Sum())
+                if (splitLocal.Count > splitDistant.Count)
                     return true;
             } catch (Exception) {
                 // would happen if the input strings are incorrect
