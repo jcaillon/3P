@@ -10,7 +10,7 @@
     <RootNamespace>_3PA</RootNamespace>
     <AssemblyName>3P</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -47,9 +47,10 @@
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <LangVersion>4</LangVersion>
+    <LangVersion>6</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -57,10 +58,12 @@
     </DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>embedded</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>6</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
@@ -805,14 +808,19 @@ IF not "%25ERRORLEVEL%25" == "0" (
 	goto :label_end
 )
 
-md "$(SolutionDir)\Releases" &gt;nul 2&gt;nul
-del /Q "$(SolutionDir)\Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
+md "$(SolutionDir)Releases" &gt;nul 2&gt;nul
+del /Q "$(SolutionDir)Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
+
+
+echo [INFO] Adding netFrameworkChecker\NetFrameworkChecker.exe
+
+7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(SolutionDir)netFrameworkChecker\NetFrameworkChecker.exe" &gt;nul
 
 echo [INFO] Adding bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)
 
-7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" &gt;nul
+7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" &gt;nul
 if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-	7z a "$(SolutionDir)\Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
+	7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
 )
 exit /b 0
 

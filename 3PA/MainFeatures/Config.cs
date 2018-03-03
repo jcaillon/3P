@@ -725,10 +725,10 @@ namespace _3PA.MainFeatures {
             get { return "3pUser"; }
         }
 
-        public static string GitHubOAuth2Token {
-            get { return @"92c90472780eb30bc39ec40d9cd1e1a3fdfeca1e"; }
+        public static string GitHubToken {
+            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
         }
-
+        
         public static int UpdateCheckEveryXMin = 12 * 60;
 
         /// <summary>
