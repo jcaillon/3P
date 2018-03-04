@@ -211,7 +211,6 @@ namespace _3PA {
                 }
 
                 Config.Instance.NppStoppedCorrectly = false;
-                Config.Save();
 
                 // check if an update was done and start checking for new updates
                 Updater<MainUpdaterWrapper>.Instance.CheckForUpdateDoneAndStartCheckingForUpdates();
@@ -240,6 +239,7 @@ namespace _3PA {
             // Make sure to give the focus to scintilla on startup
             Sci.GrabFocus();
 
+            DelayedAction.StartNew(1000, Config.Save);
         }
 
         #endregion

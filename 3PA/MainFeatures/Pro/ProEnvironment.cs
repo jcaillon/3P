@@ -148,82 +148,31 @@ namespace _3PA.MainFeatures.Pro {
             #endregion
 
             #region Handle connection string
-
-            public string GetCurrentDb() {
-                if (string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.Count > 0) {
-                    CurrentDb = DbConnectionInfo.First().Key;
-                }
-                return CurrentDb;
-            }
-
-            /// <summary>
-            /// Returns the currently selected database's .pf for the current environment
-            /// </summary>
-            public string GetPfPath() {
-                CurrentDb = GetCurrentDb();
-                if (!string.IsNullOrEmpty(CurrentDb)) {
-                    if (DbConnectionInfo.ContainsKey(CurrentDb))
-                        return DbConnectionInfo[CurrentDb];
-
-                    if (DbConnectionInfo.Count > 0) {
-                        CurrentDb = DbConnectionInfo.First().Key;
-                        return DbConnectionInfo[CurrentDb];
-                    }
-                }
-                return string.Empty;
-            }
-
-            public bool RemoveCurrentPfPath() {
-                if (!string.IsNullOrEmpty(CurrentDb) && DbConnectionInfo.ContainsKey(CurrentDb)) {
-                    DbConnectionInfo.Remove(CurrentDb);
-                    SetCurrent(null, null, null);
-                    return true;
-                }
-                return false;
-            }
-
-            public bool AddPfPath(string name, string path) {
-                if (!string.IsNullOrEmpty(name) && !DbConnectionInfo.ContainsKey(name)) {
-                    DbConnectionInfo.Add(name, path);
-                    SetCurrent(null, null, name);
-                    return true;
-                }
-                return false;
-            }
-
-            public bool ModifyPfPath(string name, string path) {
-                if (!string.IsNullOrEmpty(name) && (!DbConnectionInfo.ContainsKey(name) || name.Equals(CurrentDb))) {
-                    DbConnectionInfo.Remove(CurrentDb);
-                    DbConnectionInfo.Add(name, path);
-                    SetCurrent(null, null, name);
-                    return true;
-                }
-                return false;
-            }
-
+            
             /// <summary>
             /// Returns the database connection string (complete with .pf + extra)
             /// </summary>
             public string ConnectionString {
                 get {
-                    var connectionString = new StringBuilder();
-                    if (File.Exists(GetPfPath())) {
-                        Utils.ForEachLine(GetPfPath(), new byte[0], (nb, line) => {
-                            var commentPos = line.IndexOf("#", StringComparison.CurrentCultureIgnoreCase);
-                            if (commentPos == 0)
-                                return;
-                            if (commentPos > 0)
-                                line = line.Substring(0, commentPos);
-                            line = line.Trim();
-                            if (!string.IsNullOrEmpty(line)) {
-                                connectionString.Append(" ");
-                                connectionString.Append(line);
-                            }
-                        });
-                        connectionString.Append(" ");
-                    }
-                    connectionString.Append(ExtraPf.Trim());
-                    return connectionString.ToString().Replace("\n", " ").Replace("\r", "");
+                    var cstring =ExtraPf.Trim();
+                    cstring = Regex.Replace(cstring, @"-pf\s+(?:""([^""]+)""|(\S+))", match => {
+                        var pfFile = match.Groups[1].Value;
+                        var connectionString = new StringBuilder();
+                        if (File.Exists(pfFile)) {
+                            Utils.ForEachLine(pfFile, new byte[0], (nb, line) => {
+                                var commentPos = line.IndexOf("#", StringComparison.CurrentCultureIgnoreCase);
+                                if (commentPos == 0)
+                                    return;
+                                if (commentPos > 0)
+                                    line = line.Substring(0, commentPos);
+                                connectionString.Append(" ").Append(line);
+                            });
+                        } else {
+                            return match.Groups[0].Value;
+                        }
+                        return connectionString.ToString();
+                    }, RegexOptions.Singleline);
+                    return Regex.Replace(cstring, @"\s+", " ", RegexOptions.Singleline);
                 }
             }
             
@@ -458,8 +407,21 @@ namespace _3PA.MainFeatures.Pro {
                         _listOfEnv = new List<ProEnvironmentObject> {new ProEnvironmentObject {Name = "Default", Label = "A default environment (empty)"}};
                     } else
                         Object2Xml<ProEnvironmentObject>.LoadFromFile(_listOfEnv, Config.FileProEnv);
+
+                    CleanDbDictionnary(_listOfEnv);
                 }
                 return _listOfEnv;
+            }
+        }
+
+        private static void CleanDbDictionnary(List<ProEnvironmentObject> listOfEnv) {
+            foreach (var environmentObject in listOfEnv) {
+                if (environmentObject.DbConnectionInfo != null) {
+                    foreach (var pf in environmentObject.DbConnectionInfo) {
+                        environmentObject.ExtraPf += (!string.IsNullOrEmpty(environmentObject.ExtraPf) ? "\r\n" : "") + "-pf " + pf.Value;
+                    }
+                    environmentObject.DbConnectionInfo.Clear();
+                }
             }
         }
 

@@ -455,12 +455,12 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Uses ProQuoter then make sure to escape every ~ with a double ~~
+        /// Escape every ~ with a double ~~ and replace a quoter string "string" with QUOTER("string")
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
         public static string PreProcQuoter(this string text) {
-            return text.ProQuoter().Replace("~", "~~");
+            return Regex.Replace(text.ProQuoter(), "~\"(?<quotedstring>[^\"]*)~\"", "\" + QUOTER(\"${quotedstring}\") + \"").Replace("~", "~~");
         }
 
         /// <summary>

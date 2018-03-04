@@ -73,19 +73,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flSuffix, "This field is optional, you can have several suffixes for a<br>given environment, or you can just use different environment names if it's enough for you");
             toolTip.SetToolTip(flLabel, "The label for this environment (has no use beside being more meaningful than the name)");
 
-            var textTool = "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>";
-            toolTip.SetToolTip(cbDatabase, textTool);
-            cbDatabase.WaterMark = "No database registered for this environment";
-            toolTip.SetToolTip(lbl_listdb, textTool);
-
-            toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
-            toolTip.SetToolTip(textbox1, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
-
-            toolTip.SetToolTip(btDbEdit, "Click to <b>edit</b> this database definition (name and .pf path)");
-            toolTip.SetToolTip(btDbAdd, "Click to <b>add</b> a new database definition (name and .pf path)<br>for the current environment");
-            toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
-            toolTip.SetToolTip(btDbSave, "Click to <b>save</b> your modifications");
-            toolTip.SetToolTip(btDbCancel, "Click to <b>cancel</b> your modifications");
             toolTip.SetToolTip(btDbDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
             toolTip.SetToolTip(btDbView, "Click here to <b>view</b> the content of the file holding the database structure info for 3P");
 
@@ -93,11 +80,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flCanDoTblType, "Only the tables with a type that CAN-DO this value will be fetched for the autocompletion<br><br>Below is the equivalent progress code that will be used :<div class='ToolTipcodeSnippet'>CAN-DO(this_value, DB._FILE._Tbl-Type)</div><br>For instance, you can use the following value to fetch ALL the tables :<div class='ToolTipcodeSnippet'>*</div>Or just the user and system tables :<div class='ToolTipcodeSnippet'>T,S</div><br>Here is the list of all the possible values :<div class='ToolTipcodeSnippet'>- T : User Data Table<br>- S : Virtual System Table<br>- V : SQL View</div>");
             toolTip.SetToolTip(flCanDoTblName, "Only the tables with a name that CAN-DO this value will be fetched for the autocompletion<br><br>Below is the equivalent progress code that will be used :<div class='ToolTipcodeSnippet'>CAN-DO(this_value, DB._FILE._FILE-NAME)</div><br>Here is an example to fetch all user tables but only 4 particular system tables:<div class='ToolTipcodeSnippet'>_Sequence,_FILE,_INDEX,_FIELD,!_*,*</div><i>You have to set T,S in the table type CAN-DO for this example...</i>");
 
-            textTool = "You can define a list of aliases that will be automatically created for your database<br>just before any progress execution<br>The aliases will also appear in the autocompletion<br>Separate each ALIAS creation by a <b>;</b><br>In each ALIAS creation give the ALIAS_NAME,DATABASE_NAME<br><br>For instance :<div class='ToolTipcodeSnippet'>ALIAS,DATABASE;ALIAS2,DATABASE;...</div>";
+            var textTool = "You can define a list of aliases that will be automatically created for your database<br>just before any progress execution<br>The aliases will also appear in the autocompletion<br>Separate each ALIAS creation by a <b>;</b><br>In each ALIAS creation give the ALIAS_NAME,DATABASE_NAME<br><br>For instance :<div class='ToolTipcodeSnippet'>ALIAS,DATABASE;ALIAS2,DATABASE;...</div>";
             toolTip.SetToolTip(flListAliases, textTool);
             toolTip.SetToolTip(htmlLabel14, textTool);
 
-            textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1</div>";
+            textTool = "You can set a database connection string that will used to connect<br>3P to your database(s).<br>It is requied if you want the autocompletion on tables/fields.<br><br>This string is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><br><br>Below is an example of content to connect 3 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1 -ld mydb<br>-pf C:\\mypath\\db.pf</div>";
             toolTip.SetToolTip(flExtraPf, textTool);
             toolTip.SetToolTip(htmlLabel8, textTool);
 
@@ -150,25 +137,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btEdit.BackGrndImage = ImageResources.Edit;
             btCopy.BackGrndImage = ImageResources.Copy;
             btDelete.BackGrndImage = ImageResources.Del;
-
-            btDbAdd.BackGrndImage = ImageResources.Add;
-            btDbCancel.BackGrndImage = ImageResources.Cancel;
-            btDbSave.BackGrndImage = ImageResources.Save;
-            btDbEdit.BackGrndImage = ImageResources.Edit;
-            btDbDelete.BackGrndImage = ImageResources.Del;
-
+            
             btEdit.ButtonPressed += BtModifyOnButtonPressed;
             btAdd.ButtonPressed += BtAddOnButtonPressed;
             btCopy.ButtonPressed += BtduplicateOnButtonPressed;
             btDelete.ButtonPressed += BtDeleteOnButtonPressed;
             btSave.ButtonPressed += BtSaveOnButtonPressed;
             btCancel.ButtonPressed += BtCancelOnButtonPressed;
-
-            btDbEdit.ButtonPressed += BtDbEditOnButtonPressed;
-            btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
-            btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
-            btDbSave.ButtonPressed += BtDbSaveOnButtonPressed;
-            btDbCancel.ButtonPressed += BtDbCancelOnButtonPressed;
 
             btDbDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
             btDbDownload.ButtonPressed += BtDownloadOnButtonPressed;
@@ -178,7 +153,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             cbName.SelectedIndexChangedByUser += cbName_SelectedIndexChanged;
             cbSuffix.SelectedIndexChangedByUser += cbSuffix_SelectedIndexChanged;
-            cbDatabase.SelectedIndexChangedByUser += cbDatabase_SelectedIndexChanged;
 
             _currentMode = ViewMode.Edit;
             ToggleMode(ViewMode.Select);
@@ -202,22 +176,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private bool Save() {
             switch (_currentMode) {
-                case ViewMode.DbDelete:
-                    ProEnvironment.Current.RemoveCurrentPfPath();
-                    break;
-
                 case ViewMode.Delete:
                     ProEnvironment.DeleteCurrent();
                     break;
-
-                case ViewMode.DbAdd:
-                case ViewMode.DbEdit:
-                    if (!(_currentMode == ViewMode.DbAdd ? ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text) : ProEnvironment.Current.ModifyPfPath(flDatabase.Text, textbox1.Text))) {
-                        BlinkTextBox(flDatabase, ThemeManager.Current.GenericErrorColor);
-                        return false;
-                    }
-                    break;
-
+                    
                 case ViewMode.Add:
                 case ViewMode.Edit:
                 case ViewMode.Copy:
@@ -269,9 +231,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             Add,
             Copy,
             Delete,
-            DbEdit,
-            DbAdd,
-            DbDelete
         }
 
         private void ToggleMode(ViewMode mode) {
@@ -279,13 +238,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 BeginInvoke((Action) delegate {
                     // mode
                     var isAddOrEdit = (mode == ViewMode.Add || mode == ViewMode.Copy || mode == ViewMode.Edit);
-                    var isDbAddOrEdit = (mode == ViewMode.DbAdd || mode == ViewMode.DbEdit);
                     var isSelect = (mode == ViewMode.Select);
 
                     // selection
                     flName.Visible = flSuffix.Visible = flLabel.Visible = isAddOrEdit;
                     cbName.Visible = cbSuffix.Visible = !isAddOrEdit;
-                    cbName.Enabled = cbSuffix.Enabled = !isAddOrEdit && !isDbAddOrEdit;
+                    cbName.Enabled = cbSuffix.Enabled = !isAddOrEdit;
                     txLabel.Text = ProEnvironment.Current.Label;
 
                     // Fill combo boxes
@@ -300,9 +258,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                             // Combo box env letter
                             var envLetterList = envList.Where(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name)).Select(environnement => environnement.Suffix).ToList();
-
-                            // empty database cb
-                            cbDatabase.DataSource = new List<string>();
+                            
                             if (envLetterList.Count > 0) {
                                 // hide the combo if there is only one item
                                 if (envLetterList.Count == 1) {
@@ -313,17 +269,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                                     selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Suffix));
                                     cbSuffix.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
                                 }
-
-                                // Combo box database
-                                var dic = envList.FirstOrDefault(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name) && environnement.Suffix.EqualsCi(ProEnvironment.Current.Suffix));
-                                if (dic != null) {
-                                    var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
-                                    if (databaseList.Count > 0) {
-                                        cbDatabase.DataSource = databaseList;
-                                        selectedIdx = databaseList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.GetCurrentDb()));
-                                        cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
-                                    }
-                                }
                             } else {
                                 cbSuffix.Hide();
                             }
@@ -333,35 +278,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             btAdd.BackColor = ThemeManager.Current.AccentColor;
                         }
                     }
-
-                    // handle pf dictionnary
-                    flDatabase.Visible = isDbAddOrEdit;
-                    cbDatabase.Visible = !flDatabase.Visible;
-
-                    // entering or leaving DB add/edit mode
-                    if (isDbAddOrEdit || _currentMode == ViewMode.DbAdd || _currentMode == ViewMode.DbEdit) {
-                        flDatabase.Enabled = textbox1.Enabled = isDbAddOrEdit;
-                        areaEnv.SetPropertyOnArea("Visible", !isDbAddOrEdit);
-                        areaDb.SetPropertyOnArea("Visible", !isDbAddOrEdit);
-                        areaLeftButtons.SetPropertyOnArea("Enabled", isDbAddOrEdit);
-                    }
-
-                    // entering or leaving add/edit mode
-                    else if (isAddOrEdit || _currentMode == ViewMode.Add || _currentMode == ViewMode.Copy || _currentMode == ViewMode.Edit) {
-                        EnableAllTextBoxes(isAddOrEdit);
-                        areaPf.SetPropertyOnArea("Visible", !isAddOrEdit);
-                        areaDb.SetPropertyOnArea("Visible", !isAddOrEdit);
-                        areaLeftButtons.SetPropertyOnArea("Enabled", isAddOrEdit);
-                    }
+                    
+                    EnableAllTextBoxes(isAddOrEdit);
+                    areaDb.SetPropertyOnArea("Visible", !isAddOrEdit);
+                    areaLeftButtons.SetPropertyOnArea("Enabled", isAddOrEdit);
+                    
 
                     // update the download database button
                     UpdateDownloadButton();
-
-                    // buttons to handle pf files
-                    btDbAdd.Visible = btDbEdit.Visible = btDbDelete.Visible = isSelect;
-                    btDbSave.Visible = btDbCancel.Visible = isDbAddOrEdit;
-                    btDbDelete.Enabled = ProEnvironment.Current.DbConnectionInfo.Count >= 1;
-
+                    
                     // buttons modify/new/duplicate/delete
                     btEdit.Visible = btAdd.Visible = btDelete.Visible = btCopy.Visible = isSelect;
                     btSave.Visible = btCancel.Visible = isAddOrEdit;
@@ -373,13 +298,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             if (control is YamuiTextBox)
                                 ((YamuiTextBox) control).Text = string.Empty;
                         }
-                        cbDatabase.DataSource = new List<string>();
                         var defaultEnv = new ProEnvironment.ProEnvironmentObject();
                         tgCompLocally.Checked = defaultEnv.CompileLocally;
-                    } else if (mode == ViewMode.DbAdd) {
-                        // reset fields when adding a new pf
-                        flDatabase.Text = string.Empty;
-                        textbox1.Text = string.Empty;
+                        flCanDoTblType.Text = defaultEnv.DatabaseExtractCandoTblType;
+                        flCanDoTblName.Text = defaultEnv.DatabaseExtractCandoTblName;
                     } else {
                         // fill details
                         flName.Text = ProEnvironment.Current.Name;
@@ -391,8 +313,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         flListAliases.Text = ProEnvironment.Current.DatabaseAliasList;
                         flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
                         flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
-                        flDatabase.Text = ProEnvironment.Current.GetCurrentDb();
-                        textbox1.Text = ProEnvironment.Current.GetPfPath();
                         textbox2.Text = ProEnvironment.Current.IniPath;
                         textbox3.Text = ProEnvironment.Current.BaseLocalPath;
                         textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
@@ -406,17 +326,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                     // blink when changing mode
                     if (mode != _currentMode && mode != ViewMode.Select) {
-                        if (isAddOrEdit) {
-                            BlinkButton(btSave, ThemeManager.Current.AccentColor);
-                            BlinkButton(btCancel, ThemeManager.Current.AccentColor);
-                            ActiveControl = btSave;
-                        } else {
-                            BlinkButton(btDbSave, ThemeManager.Current.AccentColor);
-                            BlinkButton(btDbCancel, ThemeManager.Current.AccentColor);
-                            ActiveControl = btDbSave;
-                        }
+                        BlinkButton(btSave, ThemeManager.Current.AccentColor);
+                        BlinkButton(btCancel, ThemeManager.Current.AccentColor);
+                        ActiveControl = btSave;
                     } else if (mode != _currentMode && mode == ViewMode.Select)
-                        ActiveControl = _currentMode == ViewMode.Edit ? btEdit : btDbEdit;
+                        ActiveControl = btEdit;
 
                     // save current mode
                     _currentMode = mode;
@@ -503,39 +417,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         #endregion
-
-        #region db management
-
-        private void BtDbCancelOnButtonPressed(object sender, EventArgs eventArgs) {
-            ToggleMode(ViewMode.Select);
-        }
-
-        private void BtDbSaveOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (Save())
-                ToggleMode(ViewMode.Select);
-        }
-
-        private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"});
-            if (answ == 0 || answ == 1) {
-                if (answ == 1)
-                    _unsafeDelete = true;
-                _currentMode = ViewMode.DbDelete;
-                if (Save())
-                    ToggleMode(ViewMode.Select);
-            }
-        }
-
-        private void BtDbEditOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            ToggleMode(ViewMode.DbEdit);
-        }
-
-        private void BtDbAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            ToggleMode(ViewMode.DbAdd);
-        }
-
-        #endregion
-
+        
         #region combo-boxes
 
         /// <summary>
@@ -558,18 +440,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 return;
             ProEnvironment.SetCurrent(null, cbSuffix.SelectedItem.ToString(), null);
             ToggleMode(ViewMode.Select);
-        }
-
-        /// <summary>
-        /// when changing database
-        /// </summary>
-        /// <param name="sender"></param>
-        private void cbDatabase_SelectedIndexChanged(YamuiComboBox sender) {
-            if (ProEnvironment.Current.GetCurrentDb().Equals(cbDatabase.SelectedItem.ToString()))
-                return;
-            ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
-            textbox1.Text = ProEnvironment.Current.GetPfPath();
-            ProEnvironment.SaveList();
         }
 
         #endregion

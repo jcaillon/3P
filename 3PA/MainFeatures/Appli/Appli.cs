@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.NppCore;
 using _3PA.WindowsCore;

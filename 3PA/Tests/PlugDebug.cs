@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -62,34 +63,6 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest3() {
-            /*
-            UserCommunication.Notify(Npp.CurrentInternalLangName.ProQuoter() + "<br>Versus : " + Npp.NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)).ProQuoter());
-            MeasureIt(() => {
-                var parser = new NppAutoCompParser(Utils.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
-                UserCommunication.Notify(parser.GetWordsList.Count.ToString());
-            });
-             */
-            //UserCommunication.Notify(Path.GetExtension(Npp.CurrentFile.Path) + " = " + NppLangs.Instance.GetLangName(Path.GetExtension(Npp.CurrentFile.Path)) + " > " + NppLangs.Instance.GetLangDescription(Path.GetExtension(Npp.CurrentFile.Path)).Keywords.Count);
-            //RunParserTests(Npp.Text);
-            /*
-            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
-                MessageImg.MsgUpdate,
-                "A new version has been installed!",
-                "Updated to version " + AssemblyInfo.Version,
-                new List<string> {"ok", "cancel"},
-                true);
-            */
-            /*
-            Sci.StyleResetDefault();
-            Sci.StyleClearAll();
-            Sci.GetStyle(CSharpLexer.StyleDefault).ForeColor = Color.Black;
-            Sci.GetStyle(CSharpLexer.StyleKeyword).ForeColor = Color.Blue;
-            Sci.GetStyle(CSharpLexer.StyleIdentifier).ForeColor = Color.Teal;
-            Sci.GetStyle(CSharpLexer.StyleNumber).ForeColor = Color.Purple;
-            Sci.GetStyle(CSharpLexer.StyleString).ForeColor = Color.Red;
-            */
-
-            UserCommunication.Notify(Npp.CurrentFileInfo.Lang.LangName);
         }
         
         #endregion

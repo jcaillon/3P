@@ -155,7 +155,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         /// </summary>
         /// <returns></returns>
         private string GetOutputName {
-            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix + "_" + ProEnvironment.Current.GetCurrentDb()).ToValidFileName().ToLower() + ".dbdump"; }
+            get { return (ProEnvironment.Current.Name + "_" + ProEnvironment.Current.Suffix).ToValidFileName().ToLower() + ".dbdump"; }
         }
 
         /// <summary>
