@@ -117,6 +117,8 @@ namespace YamuiFramework.Controls {
             get { return _selectAllTextOnActivate; }
             set { _selectAllTextOnActivate = value; }
         }
+        
+        public override bool AllowDrop { get; set; } = true;
 
         #endregion
 
@@ -230,6 +232,32 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        #endregion
+
+        #region Dragdrop
+
+        protected override void OnDragEnter(DragEventArgs drgevent) {
+            base.OnDragEnter(drgevent);
+            if (drgevent.Data.GetDataPresent(DataFormats.FileDrop))  
+                drgevent.Effect = DragDropEffects.Link;  
+            else if (drgevent.Data.GetDataPresent(DataFormats.StringFormat))  
+                drgevent.Effect = DragDropEffects.Copy;  
+            else 
+                drgevent.Effect = DragDropEffects.None;  
+        }
+        
+        protected override void OnDragDrop(DragEventArgs drgevent) {
+            base.OnDragDrop(drgevent);
+            if (drgevent.Data.GetDataPresent(DataFormats.FileDrop)) {
+                var files = drgevent.Data.GetData(DataFormats.FileDrop) as string[];
+                if (files != null) {
+                    Text = string.Join(Multiline ? "\r\n" : ",", files);
+                }
+            } else if (drgevent.Data.GetDataPresent(DataFormats.StringFormat)) {
+                Text = drgevent.Data.GetData(DataFormats.FileDrop) as string ?? "";
+            }
+        }
 
         #endregion
 

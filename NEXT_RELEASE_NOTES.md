@@ -16,6 +16,7 @@ How is it related you ask? I've build 3P around the .NET framework v4.0 which on
 
 ### Improvements :###
 
+- Allow drag and drop on textboxes! *finally*
 - #215 : Remove multiple database configuration per environment
 
 ### Fixed issues :###

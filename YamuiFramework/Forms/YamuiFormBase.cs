@@ -26,6 +26,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
+
     /// <summary>
     /// Form class that implements interesting utilities + shadow + onpaint + movable/resizable borderless
     /// </summary>
@@ -41,25 +42,17 @@ namespace YamuiFramework.Forms {
 
         private bool _reverseX;
         private bool _reverseY;
-        private bool _isResizable = true;
-        private bool _isMovable = true;
 
         #endregion
 
         #region Properties
 
         [Category("Yamui")]
-        public bool Movable {
-            get { return _isMovable; }
-            set { _isMovable = value; }
-        }
+        public bool Movable { get; set; } = true;
 
         [Category("Yamui")]
-        public bool Resizable {
-            get { return _isResizable; }
-            set { _isResizable = value; }
-        }
-
+        public bool Resizable { get; set; } = true;
+        
         #endregion
 
         #region constructor
