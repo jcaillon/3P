@@ -58,7 +58,7 @@
     </DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
-    <DebugType>embedded</DebugType>
+    <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -820,7 +820,9 @@ echo [INFO] Adding bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)
 
 7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" &gt;nul
 if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-	7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
+    if "$(ConfigurationName)" == "Debug" (
+	    7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
+    )
 )
 exit /b 0
 

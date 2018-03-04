@@ -63,6 +63,10 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest3() {
+            var x = 0;
+            var y = 10 / x;
+            x = y;
+            y = x;
         }
         
         #endregion
