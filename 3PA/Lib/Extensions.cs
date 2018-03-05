@@ -505,11 +505,15 @@ namespace _3PA.Lib {
                 for (int j = splitLocal.Count - 1; j >= 0; j--) {
                     if (splitLocal[j] == 0) {
                         splitLocal.RemoveAt(j);
+                    } else {
+                        break;
                     }
                 }
                 for (int j = splitDistant.Count - 1; j >= 0; j--) {
                     if (splitDistant[j] == 0) {
                         splitDistant.RemoveAt(j);
+                    } else {
+                        break;
                     }
                 }
                 var i = 0;
