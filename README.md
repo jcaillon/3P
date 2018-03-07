@@ -24,3 +24,9 @@ Old releases information can be found [here on the website](https://jcaillon.git
 **You MUST install the [latest .NET framework](https://www.microsoft.com/en-us/download/details.aspx?id=56116)** (or at least [.NET 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53344) in order to be able to use the next releases of 3P (v1.8.1 and above)!!!
 
 Related issue : [Error 3P.dll is not valid notepad++ plugin / critical error at startup / about .net 4.6.2 requirement](https://github.com/jcaillon/3P/issues/217)
+
+## Jetbrain ##
+
+This project was developped using an opensource license of the **awesome** :
+
+[![resharper](https://github.com/jcaillon/3P/blob/gh-pages/images/resharper.png)](https://www.jetbrains.com/)
