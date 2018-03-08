@@ -138,6 +138,7 @@ namespace _3PA.Lib {
                     if (!string.IsNullOrEmpty(OAuth2Token)) {
                         request.Headers.Add("Authorization", "token " + OAuth2Token);
                     }
+                    request.Accept = "application/vnd.github.v3+json";
                     request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 
                 };

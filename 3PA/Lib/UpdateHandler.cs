@@ -158,6 +158,7 @@ namespace _3PA.Lib {
             } else {
                 AlwaysShowNotifications = alwaysShowNotifications;
                 Updater.GetPreReleases = Config.Instance.UserGetsPreReleases;
+                Updater.Proxy = Config.Instance.GetWebClientProxy();
                 if (!_updating) {
                     _updating = true;
                     Updater.CheckForUpdates();

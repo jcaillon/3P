@@ -162,9 +162,6 @@ namespace _3PA.Lib {
                         // get the response
                         GetResponse();
                     }
-
-                    if (OnRequestEnded != null)
-                        OnRequestEnded(this);
                 } catch (WebException e) {
                     ResponseException = e;
                     HandleWebException(e);
@@ -172,6 +169,8 @@ namespace _3PA.Lib {
                     ResponseException = e;
                     StatusCodeResponse = HttpStatusCode.BadRequest;
                 }
+                if (OnRequestEnded != null)
+                    OnRequestEnded(this);
             });
         }
 
