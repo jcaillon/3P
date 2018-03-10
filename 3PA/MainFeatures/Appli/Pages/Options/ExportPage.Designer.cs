@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportPage));
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.topAuto = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btDownloadAll = new YamuiFramework.Controls.YamuiButtonImage();
             this.btRefresh = new YamuiFramework.Controls.YamuiButtonImage();
@@ -43,8 +42,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tooltip
@@ -65,29 +62,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.topAuto);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDownloadAll);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btRefresh);
-            this.scrollPanel.ContentPanel.Controls.Add(this.topDistant);
-            this.scrollPanel.ContentPanel.Controls.Add(this.topLocDate);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btHistoric);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btOpen);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_directory);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btBrowse);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_about);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.topAuto);
+            this.Controls.Add(this.btDownloadAll);
+            this.Controls.Add(this.btRefresh);
+            this.Controls.Add(this.topDistant);
+            this.Controls.Add(this.topLocDate);
+            this.Controls.Add(this.htmlLabel3);
+            this.Controls.Add(this.btHistoric);
+            this.Controls.Add(this.btOpen);
+            this.Controls.Add(this.fl_directory);
+            this.Controls.Add(this.btBrowse);
+            this.Controls.Add(this.yamuiLabel2);
+            this.Controls.Add(this.lbl_about);
+            this.Controls.Add(this.yamuiLabel1);
             // 
             // topAuto
             // 
@@ -249,12 +236,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "ExportPage";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -262,7 +245,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         private HtmlToolTip tooltip;
-        private YamuiScrollPanel scrollPanel;
         private YamuiLabel yamuiLabel1;
         private HtmlLabel lbl_about;
         private YamuiLabel yamuiLabel2;

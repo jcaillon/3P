@@ -201,7 +201,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             DeploymentRules.OnDeployConfigurationUpdate += OnShow;
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion
@@ -418,8 +418,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 lbl_report.Text = text;
 
                 // Activate scrollbars if needed
-                scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
-                Height = lbl_report.Location.Y + lbl_report.Height + 20;
+                RefreshVirtualPanelHeight();
             });
         }
 

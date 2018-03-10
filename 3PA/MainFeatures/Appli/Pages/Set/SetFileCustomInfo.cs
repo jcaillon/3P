@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_correctionDesc.TextChanged += YamuiTextBoxOnTextChanged;
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion

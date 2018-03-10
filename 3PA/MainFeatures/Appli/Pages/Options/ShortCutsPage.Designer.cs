@@ -28,12 +28,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.static_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.static_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.static_title = new YamuiFramework.Controls.YamuiLabel();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tooltip
@@ -54,19 +51,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.static_name);
-            this.scrollPanel.ContentPanel.Controls.Add(this.static_keys);
-            this.scrollPanel.ContentPanel.Controls.Add(this.static_title);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.static_name);
+            this.Controls.Add(this.static_keys);
+            this.Controls.Add(this.static_title);
             // 
             // static_name
             // 
@@ -109,12 +96,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "ShortCutsPage";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -122,7 +105,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         private HtmlToolTip tooltip;
-        private YamuiScrollPanel scrollPanel;
         private YamuiLabel static_title;
         private HtmlLabel static_keys;
         private HtmlLabel static_name;

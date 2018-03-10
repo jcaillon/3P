@@ -285,11 +285,6 @@ namespace YamuiFramework.Controls {
                 return false;
             }
             _animSmokeScreen.Refresh();
-
-            // show the background image or not
-            var firstScrollPage = Utilities.GetFirst(_currentPage, typeof(YamuiScrollPanel));
-            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPanel) firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
-
             _animSmokeScreen.GoHide = false;
 
             return true;

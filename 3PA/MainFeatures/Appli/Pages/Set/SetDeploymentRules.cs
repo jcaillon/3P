@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             DeploymentRules.OnDeployConfigurationUpdate += UpdateList;
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion
@@ -71,8 +71,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // build the html
             html_list.Text = DeploymentRules.BuildHtmlTableForRules(DeploymentRules.GetFullDeployRulesList);
 
-            scrollPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
-            scrollPanel.OnResizedContentPanel();
+            RefreshVirtualPanelHeight();
         }
 
         #endregion

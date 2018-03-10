@@ -26,41 +26,20 @@ namespace _3PA.MainFeatures.Appli.Pages {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // scrollPanel
-            // 
-            // 
-            // scrollPanel.ContentPanel
-            // 
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
             // 
             // Template
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "Template";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
 
     }
 }

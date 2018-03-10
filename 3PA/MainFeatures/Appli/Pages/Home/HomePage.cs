@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
                 }
             };
 
-            yamuiScrollPage1.ContentPanel.Height = html.Height;
+            RefreshVirtualPanelHeight();
         }
 
         #endregion

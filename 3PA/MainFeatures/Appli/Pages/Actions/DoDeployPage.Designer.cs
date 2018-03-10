@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// </summary>
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.btOpenHook = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lbl_deployDir = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -68,8 +67,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.btReport = new YamuiFramework.Controls.YamuiButton();
             this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
             this.btTest = new YamuiFramework.Controls.YamuiButton();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tooltip
@@ -90,54 +87,44 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.btTest);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btOpenHook);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_deployDir);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btStart);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btReset);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.toggleAutoUpdateSourceDir);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel11);
-            this.scrollPanel.ContentPanel.Controls.Add(this.toggleOnlyGenerateRcode);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btSeeRules);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lblCurEnv);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel9);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDelete);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btSaveAs);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btSave);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btRules);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_rules);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_report);
-            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.title);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btBrowse);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btUndo);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_directory);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btOpen);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btHistoric);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.toggleRecurs);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.toggleMono);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btReport);
-            this.scrollPanel.ContentPanel.Controls.Add(this.progressBar);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.btTest);
+            this.Controls.Add(this.btOpenHook);
+            this.Controls.Add(this.htmlLabel5);
+            this.Controls.Add(this.lbl_deployDir);
+            this.Controls.Add(this.btStart);
+            this.Controls.Add(this.btReset);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.toggleAutoUpdateSourceDir);
+            this.Controls.Add(this.htmlLabel11);
+            this.Controls.Add(this.toggleOnlyGenerateRcode);
+            this.Controls.Add(this.btSeeRules);
+            this.Controls.Add(this.lblCurEnv);
+            this.Controls.Add(this.htmlLabel9);
+            this.Controls.Add(this.htmlLabel8);
+            this.Controls.Add(this.btDelete);
+            this.Controls.Add(this.btSaveAs);
+            this.Controls.Add(this.btSave);
+            this.Controls.Add(this.cbName);
+            this.Controls.Add(this.btRules);
+            this.Controls.Add(this.lbl_rules);
+            this.Controls.Add(this.lbl_report);
+            this.Controls.Add(this.linkurl);
+            this.Controls.Add(this.title);
+            this.Controls.Add(this.btBrowse);
+            this.Controls.Add(this.btUndo);
+            this.Controls.Add(this.fl_directory);
+            this.Controls.Add(this.btOpen);
+            this.Controls.Add(this.btHistoric);
+            this.Controls.Add(this.htmlLabel3);
+            this.Controls.Add(this.htmlLabel2);
+            this.Controls.Add(this.toggleRecurs);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.toggleMono);
+            this.Controls.Add(this.htmlLabel4);
+            this.Controls.Add(this.fl_nbProcess);
+            this.Controls.Add(this.btCancel);
+            this.Controls.Add(this.btReport);
+            this.Controls.Add(this.progressBar);
             // 
             // btOpenHook
             // 
@@ -685,12 +672,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "DoDeployPage";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -698,7 +681,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
 
         private HtmlToolTip tooltip;
-        private YamuiScrollPanel scrollPanel;
         private YamuiLabel title;
         private YamuiButtonImage btHistoric;
         private YamuiButtonImage btOpen;

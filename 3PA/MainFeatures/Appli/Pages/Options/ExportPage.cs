@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             InitializeComponent();
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
 
             // browse
             btBrowse.BackGrndImage = ImageResources.SelectFile;
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = confLine.Label
                 };
                 tooltip.SetToolTip(label, "File or folder handled :<br>" + confLine.HandledItem);
-                scrollPanel.ContentPanel.Controls.Add(label);
+                Controls.Add(label);
 
                 // switch, auto update?
                 var toggleControl = new YamuiCheckBox {
@@ -106,7 +106,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = confLine
                 };
                 toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
-                scrollPanel.ContentPanel.Controls.Add(toggleControl);
+                Controls.Add(toggleControl);
                 tooltip.SetToolTip(toggleControl, "Check this option to automatically fetch the most recent version of the file<br>This update occurs on notepad++ startup and each time you refresh the local/distant file status");
                 xPos += 25;
 
@@ -122,7 +122,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Visible = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "The distant version is more recent than the local one<br>Press this button to <b>fetch</b> the distant version");
                 xPos += 30;
 
@@ -137,7 +137,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @"???",
                     Name = "datel_" + iNbLine
                 };
-                scrollPanel.ContentPanel.Controls.Add(date);
+                Controls.Add(date);
                 xPos += 140;
 
                 // local open
@@ -153,7 +153,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
                 strButton.MouseDown += OpenFileOnMouseDown;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
                 xPos += 20;
 
@@ -169,7 +169,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Name = "bti_" + iNbLine
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>import</b> this file<br>It reads its content and use it in this session of 3P");
                 xPos += 20;
 
@@ -185,7 +185,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>export</b> this file to a local version,<br>you will use the exported file instead of the embedded file in 3P");
                 xPos += 20;
 
@@ -201,7 +201,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>delete</b> the local version of your file,<br>you will use the embedded (default) file of 3P instead");
                 xPos += 40;
 
@@ -216,7 +216,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @"???",
                     Name = "dated_" + iNbLine
                 };
-                scrollPanel.ContentPanel.Controls.Add(date);
+                Controls.Add(date);
                 xPos += 140;
 
                 // distant open
@@ -232,7 +232,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
                 strButton.MouseDown += OpenFileOnMouseDown;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
                 xPos += 20;
 
@@ -248,7 +248,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>fetch</b> this file from the shared directory,<br>replacing the local one");
                 xPos += 20;
 
@@ -264,7 +264,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                scrollPanel.ContentPanel.Controls.Add(strButton);
+                Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>push</b> the local file to the shared directory,<br>replacing any existing file");
 
                 yPos += label.Height + 15;
@@ -272,7 +272,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // Activate scrollbars
-            scrollPanel.ContentPanel.Height = yPos + 50;
+            Height = yPos + 50;
         }
 
         #endregion
@@ -338,7 +338,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void BtDownloadAllOnButtonPressed(object sender, EventArgs eventArgs) {
             var iNbLine = 0;
             foreach (var confLine in ShareExportConf.List) {
-                if (((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Visible) {
+                if (((YamuiButtonImage) Controls["btm_" + iNbLine]).Visible) {
                     if (confLine.OnFetch != null)
                         confLine.OnFetch(confLine);
                 }
@@ -438,42 +438,42 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                             foreach (var confLine in ShareExportConf.List) {
                                 // open
-                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
+                                ((YamuiButtonImage) Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
 
                                 // import
-                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
+                                ((YamuiButtonImage) Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
 
                                 if (confLine.IsDir) {
                                     // hide export/delete
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bte_" + iNbLine]).Hide();
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btd_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) Controls["bte_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) Controls["btd_" + iNbLine]).Hide();
                                 } else {
                                     // export
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
+                                    ((YamuiButtonImage) Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
 
                                     // delete
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
+                                    ((YamuiButtonImage) Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
                                 }
 
                                 // distant open
-                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
+                                ((YamuiButtonImage) Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
 
                                 // fetch
-                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+                                ((YamuiButtonImage) Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
 
                                 // push
-                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+                                ((YamuiButtonImage) Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
 
-                                ((HtmlLabel) scrollPanel.ContentPanel.Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
+                                ((HtmlLabel) Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
 
-                                ((HtmlLabel) scrollPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
+                                ((HtmlLabel) Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
 
                                 // maj button
                                 if (confLine.NeedUpdate) {
                                     nbMaj++;
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
+                                    ((YamuiButtonImage) Controls["btm_" + iNbLine]).Show();
                                 } else
-                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) Controls["btm_" + iNbLine]).Hide();
 
                                 iNbLine++;
                             }

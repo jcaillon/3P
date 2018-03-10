@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiScrollPanel.cs) is part of YamuiFramework.
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (YamuiScrollPage.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,42 +20,34 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-    [Designer(typeof(ScrollPageDesigner))]
-    public class YamuiScrollPanel : UserControl {
-        #region fields
+    
+    public class YamuiScrollPanel : ScrollableControl {
 
-        /// <summary>
-        /// The base UserControl should be used to add controls, add them to this panel!
-        /// This internal panel has a fixed size, the outer UserControl which is YamuiScrollPage
-        /// adapts to the size you want, and then displays portion of the internal panel corresponding
-        /// to what has been scrolled
-        /// </summary>
-        [Category("Yamui")]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public YamuiInternalPanel ContentPanel {
-            get { return _contentPanel; }
-        }
+        /*
+         * With AutoScroll set to false, you can change VerticalScroll.Minimum, VerticalScroll.Maximum, VerticalScroll.Visible values.
+         * However, you cannot change VerticalScroll.Value!!!  Wtf!  If you set it to a non-zero value, it resets itself to zero.
+         * Instead, you must set AutoScrollPosition = new Point( 0, desired_vertical_scroll_value );
+         * And finally, SURPRISE, when you assign positive values, it flips them to negative values
+         * So if you check AutoScrollPosition.X, it will be negative!  Assign it positive, it comes back negative.
+         */
+
+        #region fields
+                
+        [Browsable(false)]
+        public override bool AutoScroll { get; set; } = false;
 
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool NoBackgroundImage {
-            get { return _noBackgroundImage; }
-            set {
-                _contentPanel.DontUseTransparentBackGround = value;
-                _noBackgroundImage = value;
-            }
-        }
+        public bool NoBackgroundImage { get; set; }
 
-        private bool _noBackgroundImage;
-
-        private YamuiInternalPanel _contentPanel;
         private Point _lastMouseMove;
         private int _thumbPadding = 2;
 
@@ -64,8 +56,14 @@ namespace YamuiFramework.Controls {
         /// </summary>
         public bool HasScrolls { get; private set; }
 
-        private Rectangle _barRectangle;
-        private Rectangle _thumbRectangle;
+        /// <summary>
+        /// Maximum 'height' of this panel if we wanted to show it all w/o scrolls
+        /// </summary>
+        private int VirtualPanelHeight { get; set; }
+
+        private RectangleF _barRectangle;
+        private RectangleF _thumbRectangle;
+        private float _thumbRectangleRealHeight;
 
         private bool _isPressed;
         private bool _isHovered;
@@ -81,17 +79,15 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
-
-            _contentPanel = new YamuiInternalPanel {
-                Location = new Point(0, 0),
-                Width = Width,
-                Height = Height,
-                OwnerPanel = this
-            };
-            Controls.Add(_contentPanel);
-
             _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
             _thumbRectangle = new Rectangle(Width - 10 + 2, 2, 6, Height - 4);
+
+            VerticalScroll.Enabled = true;
+            VerticalScroll.Visible = false;
+            VerticalScroll.Minimum = 0;
+
+            HorizontalScroll.Enabled = false;
+            HorizontalScroll.Visible = false;
         }
 
         #endregion
@@ -101,7 +97,7 @@ namespace YamuiFramework.Controls {
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
-            if (!HasScrolls && !NoBackgroundImage && !DesignMode) {
+            if (!NoBackgroundImage && !DesignMode) {
                 var img = YamuiThemeManager.CurrentThemeImage;
                 if (img != null) {
                     Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
@@ -146,7 +142,7 @@ namespace YamuiFramework.Controls {
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
                     // delta negative when scrolling up
                     var delta = -((short) (message.WParam.ToInt64() >> 16));
-                    DoScroll(Math.Sign(delta)*_thumbRectangle.Height/2);
+                    DoScroll(Math.Sign(delta)*_thumbRectangleRealHeight/2);
                     break;
 
                 case (int) WinApi.Messages.WM_LBUTTONDOWN:
@@ -204,101 +200,114 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
+        #region Keep maximum scroll updated
+
+        protected override void OnControlAdded(ControlEventArgs e) {
+            base.OnControlAdded(e);
+            if (e.Control != null && e.Control.Top + e.Control.Height > VirtualPanelHeight) {
+                VirtualPanelHeight = e.Control.Top + e.Control.Height;
+                OnResizedVirtualPanel();
+            }
+        }
+
+        protected override void OnControlRemoved(ControlEventArgs e) {
+            base.OnControlRemoved(e);
+            if (e.Control != null && e.Control.Top + e.Control.Height >= VirtualPanelHeight) {
+                RefreshVirtualPanelHeight();
+            }
+        }
+
+        /// <summary>
+        /// Compute the virtual panel height
+        /// </summary>
+        public void RefreshVirtualPanelHeight() {
+            foreach (Control control in Controls) {
+                if (control.Top + control.Height > VirtualPanelHeight) {
+                    VirtualPanelHeight = control.Top +control.Height;
+                }
+            }
+            OnResizedVirtualPanel();
+        }
+
+        #endregion
+
         #region core
 
-        private void DoScroll(int delta) {
+        private void DoScroll(float delta) {
             // minimum Y position
             if (_thumbRectangle.Y + delta < (_barRectangle.Y + _thumbPadding)) {
-                _thumbRectangle.Location = new Point(_thumbRectangle.X, _barRectangle.Y + _thumbPadding);
+                _thumbRectangle.Location = new PointF(_thumbRectangle.X, _barRectangle.Y + _thumbPadding);
             } else {
                 // maximum Y position
                 if (_thumbRectangle.Y + delta > _barRectangle.Height + _barRectangle.Y - _thumbRectangle.Height - _thumbPadding) {
-                    _thumbRectangle.Location = new Point(_thumbRectangle.X, _barRectangle.Height + _barRectangle.Y - _thumbRectangle.Height - _thumbPadding);
+                    _thumbRectangle.Location = new PointF(_thumbRectangle.X, _barRectangle.Height + _barRectangle.Y - _thumbRectangle.Height - _thumbPadding);
                 } else {
                     // apply delta
-                    _thumbRectangle.Location = new Point(_thumbRectangle.X, _thumbRectangle.Y + delta);
+                    _thumbRectangle.Location = new PointF(_thumbRectangle.X, _thumbRectangle.Y + delta);
                 }
             }
+            Invalidate();
             // Set panel positon from thumb position
             SetPanelPosition();
-            Invalidate();
         }
 
         /// <summary>
         /// Sets the position of the content panel in function of the thumb position in the scroll bar
         /// </summary>
         private void SetPanelPosition() {
+            if (VerticalScroll.Maximum != VirtualPanelHeight) {
+                // okay, this is yet another weird thing but to be able to use 
+                // AutoScrollPosition setter as expected, we have to do the thing below 
+                VerticalScroll.Maximum = VirtualPanelHeight;
+                VerticalScroll.Visible = true;
+                var fuckingHack = AutoScrollPosition;
+                VerticalScroll.Visible = false;
+            }
+            
             // maximum free space to scroll in the bar
             float barScrollSpace = (_barRectangle.Height - _thumbPadding*2) - _thumbRectangle.Height;
             if (barScrollSpace <= 0) {
-                _contentPanel.Top = 0;
+                AutoScrollPosition = new Point(0, 0);
             } else {
                 float percentScrolled = ((_thumbRectangle.Y - (_barRectangle.Y + _thumbPadding))/barScrollSpace)*100;
                 // maximum free space to scroll in the panel
-                float scrollSpace = _contentPanel.Height - Height;
+                float scrollSpace = VirtualPanelHeight - Height;
                 // % in the scroll bar to % in the panel
-                _contentPanel.Top = (int) (scrollSpace/100*percentScrolled)*-1;
+                AutoScrollPosition = new Point(0, (int) (scrollSpace/100*percentScrolled));
             }
         }
-
+        
+        
         protected override void OnResize(EventArgs e) {
-            // in designer mode, we need the internal panel to fit the page so the user don't get confused
-            if (DesignMode) {
-                _contentPanel.Location = new Point(0, 0);
-                _contentPanel.Width = Width;
-                _contentPanel.Height = Height;
-            }
-
             _barRectangle.Height = Height;
             _barRectangle.X = Width - _barRectangle.Width;
             _thumbRectangle.X = Width - _barRectangle.Width + _thumbPadding;
 
-            OnResizedContentPanel();
+            RefreshVirtualPanelHeight();
 
             base.OnResize(e);
         }
 
-        public void OnResizedContentPanel() {
+        private void OnResizedVirtualPanel() {
+            
             // if the content is not too tall, no need to display the scroll bars
-            if (_contentPanel.Height <= Height) {
-                _contentPanel.Width = Width;
+            if (VirtualPanelHeight <= Height) {
+                if (HasScrolls)
+                    Padding = new Padding(Padding.Left, Padding.Top, Math.Max(Padding.Right - 10, 0), Padding.Bottom);
                 HasScrolls = false;
             } else {
                 // thumb heigh is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = Math.Max((int) (_barRectangle.Height*((float) Height/_contentPanel.Height)) - _thumbPadding*2, 10);
-                _contentPanel.Width = Width - 10;
+                _thumbRectangleRealHeight = _barRectangle.Height * ((float) Height / VirtualPanelHeight);
+                _thumbRectangle.Height = Math.Max(_thumbRectangleRealHeight - _thumbPadding * 2, 10);
+                if (!HasScrolls)
+                    Padding = new Padding(Padding.Left, Padding.Top, Math.Min(Padding.Right + 10, Width), Padding.Bottom);
                 HasScrolls = true;
             }
-
-            if (!NoBackgroundImage)
-                _contentPanel.DontUseTransparentBackGround = HasScrolls;
 
             DoScroll(0);
         }
 
         #endregion
-
-        #region internal content panel
-
-        public class YamuiInternalPanel : YamuiSimplePanel {
-            public YamuiScrollPanel OwnerPanel { get; set; }
-
-            public new DockStyle Dock {
-                get { return base.Dock; }
-                set {
-                    OwnerPanel.Dock = value;
-                    base.Dock = DockStyle.None;
-                }
-            }
-        }
-
-        #endregion
-    }
-
-    internal class ScrollPageDesigner : ParentControlDesigner {
-        public override void Initialize(IComponent component) {
-            base.Initialize(component);
-            EnableDesignMode(((YamuiScrollPanel) Control).ContentPanel, "ContentPanel");
-        }
+        
     }
 }

@@ -68,6 +68,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
     /// </para>
     /// </summary>
     public class HtmlPanel : ScrollableControl {
+
         #region Fields and Consts
 
         /// <summary>

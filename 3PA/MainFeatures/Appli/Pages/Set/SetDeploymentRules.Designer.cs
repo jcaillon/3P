@@ -27,15 +27,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.bt_import = new YamuiFramework.Controls.YamuiButton();
             this.bt_modify = new YamuiFramework.Controls.YamuiButton();
             this.html_list = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -43,21 +40,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_import);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_modify);
-            this.scrollPanel.ContentPanel.Controls.Add(this.html_list);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.linkurl);
+            this.Controls.Add(this.bt_import);
+            this.Controls.Add(this.bt_modify);
+            this.Controls.Add(this.html_list);
+            this.Controls.Add(this.yamuiLabel2);
             // 
             // linkurl
             // 
@@ -130,19 +117,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "SetDeploymentRules";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
         private HtmlToolTip toolTip;
         private YamuiLabel yamuiLabel2;
         private YamuiButton bt_modify;

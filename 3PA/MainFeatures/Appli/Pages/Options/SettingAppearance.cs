@@ -69,7 +69,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpCustomThemes + @"'>How to customize the look of 3P?</a>";
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion

@@ -74,6 +74,7 @@ namespace YamuiFramework.Forms {
         /// Create a new notification, to be displayed with Show() later
         /// </summary>
         public YamuiNotification(string htmlTitle, string htmlMessage, int duration, Screen screenToUse = null, int formMinWidth = 0, int formMaxWidth = 0, int formMaxHeight = 0, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
+
             // close all notif button
             CloseAllBox = true;
             OnCloseAllNotif = CloseAllNotif;
@@ -90,9 +91,7 @@ namespace YamuiFramework.Forms {
                 formMaxHeight = _screen.WorkingArea.Height - 20;
             if (formMinWidth == 0)
                 formMinWidth = 300;
-
-            contentPanel.NoBackgroundImage = true;
-
+            
             // Set title, it will define a new minimum width for the message box
             var space = FormButtonWidth + BorderWidth*2 + titleLabel.Location.X + 5;
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
@@ -106,12 +105,11 @@ namespace YamuiFramework.Forms {
             // set content label
             space = Padding.Left + Padding.Right;
             contentLabel.SetNeededSize(htmlMessage, formMinWidth - space, formMaxWidth - space, true);
-            contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + space, (Padding.Top + Padding.Bottom + contentLabel.Height).ClampMax(formMaxHeight));
+            Size = new Size(contentLabel.Width + space, (Padding.Top + Padding.Bottom + contentLabel.Height).ClampMax(formMaxHeight));
             if (contentPanel.HasScrolls)
                 Width += 10;
             MinimumSize = Size;

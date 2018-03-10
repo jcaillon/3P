@@ -33,25 +33,17 @@ namespace YamuiFramework.Forms {
             this.contentLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this._errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.titleLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.contentPanel.ContentPanel.SuspendLayout();
             this.contentPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // contentPanel
             // 
-            // 
-            // contentPanel.ContentPanel
-            // 
-            this.contentPanel.ContentPanel.Controls.Add(this.contentLabel);
-            this.contentPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.contentPanel.ContentPanel.Name = "ContentPanel";
-            this.contentPanel.ContentPanel.OwnerPanel = this.contentPanel;
-            this.contentPanel.ContentPanel.Size = new System.Drawing.Size(290, 270);
-            this.contentPanel.ContentPanel.TabIndex = 0;
+            this.contentPanel.Controls.Add(this.contentLabel);
             this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.contentPanel.Location = new System.Drawing.Point(5, 50);
             this.contentPanel.Name = "contentPanel";
+            this.contentPanel.NoBackgroundImage = true;
             this.contentPanel.Size = new System.Drawing.Size(290, 270);
             this.contentPanel.TabIndex = 4;
             // 
@@ -100,12 +92,12 @@ namespace YamuiFramework.Forms {
             this.MinimizeBox = false;
             this.Name = "YamuiNotification";
             this.Padding = new System.Windows.Forms.Padding(5, 50, 5, 5);
+            this.Resizable = false;
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "YamuiFormMessageBox";
-            this.contentPanel.ContentPanel.ResumeLayout(false);
             this.contentPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).EndInit();
             this.ResumeLayout(false);

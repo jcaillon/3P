@@ -24,6 +24,7 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     [ToolboxBitmap(typeof(Panel))]
     public class YamuiTableLayoutPanel : TableLayoutPanel {
         #region Fields

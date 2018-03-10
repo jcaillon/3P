@@ -68,6 +68,9 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
+    <Compile Include="Controls\YamuiScrollPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -94,9 +97,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\YamuiScrollList.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\YamuiScrollPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiButtonImage.cs">

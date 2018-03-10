@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // sets buttons behavior
-            foreach (var control in scrollPanel.ContentPanel.Controls) {
+            foreach (var control in Controls) {
                 if (control is YamuiButtonImage) {
                     var x = (YamuiButtonImage) control;
                     if (x.Name.StartsWith("btleft")) {
@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             ProEnvironment.OnEnvironmentChange += () => ToggleMode(ViewMode.Select);
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion
@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                     if (mode == ViewMode.Add) {
                         // reset fields when adding a new env
-                        foreach (var control in scrollPanel.ContentPanel.Controls) {
+                        foreach (var control in Controls) {
                             if (control is YamuiTextBox)
                                 ((YamuiTextBox) control).Text = string.Empty;
                         }
@@ -528,7 +528,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// false to disable all textboxes of the form, true to enable
         /// </summary>
         private void EnableAllTextBoxes(bool newStatus) {
-            foreach (var control in scrollPanel.ContentPanel.Controls) {
+            foreach (var control in Controls) {
                 if (control is YamuiTextBox)
                     ((YamuiTextBox) control).Enabled = newStatus;
             }

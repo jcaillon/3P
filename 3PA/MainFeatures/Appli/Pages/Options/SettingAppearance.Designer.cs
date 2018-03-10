@@ -27,7 +27,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -37,8 +36,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this._simplePanelAccentColor = new YamuiFramework.Controls.YamuiSimplePanel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -46,24 +43,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbSyntax);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbApplication);
-            this.scrollPanel.ContentPanel.Controls.Add(this._simplePanelAccentColor);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel20);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.linkurl);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.cbSyntax);
+            this.Controls.Add(this.yamuiLabel1);
+            this.Controls.Add(this.cbApplication);
+            this.Controls.Add(this._simplePanelAccentColor);
+            this.Controls.Add(this.yamuiLabel20);
             // 
             // linkurl
             // 
@@ -174,19 +161,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "SettingAppearance";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
         private YamuiComboBox cbSyntax;
         private YamuiLabel yamuiLabel1;
         private YamuiComboBox cbApplication;

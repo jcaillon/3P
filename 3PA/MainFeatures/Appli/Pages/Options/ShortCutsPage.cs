@@ -53,7 +53,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region on show
 
         public override void OnShow() {
-            foreach (Control control in scrollPanel.ContentPanel.Controls) {
+            foreach (Control control in Controls) {
                 if (!control.Name.StartsWith("static"))
                     control.Dispose();
             }
@@ -69,7 +69,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = item.ItemId,
                     TabStop = false
                 };
-                scrollPanel.ContentPanel.Controls.Add(imgButton);
+                Controls.Add(imgButton);
 
                 // name
                 var label = new HtmlLabel {
@@ -80,7 +80,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     IsSelectionEnabled = false,
                     Text = item.DisplayText
                 };
-                scrollPanel.ContentPanel.Controls.Add(label);
+                Controls.Add(label);
 
                 // keys
                 var button = new YamuiButton {
@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     TabStop = true,
                     BackGrndImage = item.ItemImage
                 };
-                scrollPanel.ContentPanel.Controls.Add(button);
+                Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;
                 tooltip.SetToolTip(button, "<b>" + item.DisplayText + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
@@ -106,7 +106,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = item.ItemId,
                     TabStop = false
                 };
-                scrollPanel.ContentPanel.Controls.Add(button);
+                Controls.Add(button);
                 button.ButtonPressed += UndoButtonOnButtonPressed;
                 tooltip.SetToolTip(button, "Click this button to reset the shortcut to its default value");
 
@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = item.ItemId,
                     TabStop = false
                 };
-                scrollPanel.ContentPanel.Controls.Add(button);
+                Controls.Add(button);
                 button.ButtonPressed += ButtonDeleteOnButtonPressed;
                 tooltip.SetToolTip(button, "Click this button to clear this shortcut");
 
@@ -127,11 +127,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // Activate scrollbars
-            scrollPanel.ContentPanel.Height = yPos + 20;
+            Height = yPos + 20;
             Height = yPos;
 
             // dynamically reorder the controls for a correct tab order on notepad++
-            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+            SetTabOrder.RemoveAndAddForTabOrder(this);
         }
 
         #endregion
@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // take into account the changes
             NotificationsPublisher.SetHooks();
 
-            ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
+            ((YamuiButton) Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
         }
 
         private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
@@ -159,7 +159,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             _waitingInput = true;
             KeyboardMonitor.Instance.KeyDownByPass += OnNewShortcutPressed;
 
-            var button = ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]);
+            var button = ((YamuiButton) Controls["bt" + _currentItemId]);
 
             button.Text = @"Enter a new shortcut (or press ESCAPE)";
             button.UseCustomBackColor = true;
@@ -176,12 +176,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // take into account the changes
             NotificationsPublisher.SetHooks();
 
-            ((YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
+            ((YamuiButton) Controls["bt" + _currentItemId]).Text = "";
         }
 
         private bool OnNewShortcutPressed(KeyEventArgs e) {
             bool stopListening = true;
-            var button = (YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
+            var button = (YamuiButton) Controls["bt" + _currentItemId];
 
             // the user presses escape to cancel the current shortcut modification
             if (e.KeyCode == Keys.Escape) {

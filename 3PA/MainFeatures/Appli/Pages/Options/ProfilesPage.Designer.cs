@@ -27,7 +27,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.yamuiFilteredTypeTreeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
             this.yamuiScrollList1 = new YamuiFramework.Controls.YamuiList.YamuiScrollList();
             this.yamuiFilteredTypeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeList();
@@ -43,8 +42,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlToolTip1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -52,30 +49,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiFilteredTypeTreeList1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiScrollList1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiFilteredTypeList1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btMinus);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btPlus);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flFilter1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.YamuiFilteredList1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.yamuiFilteredTypeTreeList1);
+            this.Controls.Add(this.yamuiScrollList1);
+            this.Controls.Add(this.yamuiFilteredTypeList1);
+            this.Controls.Add(this.btMinus);
+            this.Controls.Add(this.btPlus);
+            this.Controls.Add(this.yamuiButton4);
+            this.Controls.Add(this.yamuiButton3);
+            this.Controls.Add(this.yamuiButton2);
+            this.Controls.Add(this.flFilter1);
+            this.Controls.Add(this.yamuiButton1);
+            this.Controls.Add(this.YamuiFilteredList1);
+            this.Controls.Add(this.yamuiLabel3);
+            this.Controls.Add(this.yamuiLabel2);
+            this.Controls.Add(this.yamuiLabel1);
             // 
             // yamuiFilteredTypeTreeList1
             // 
@@ -265,19 +252,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "ProfilesPage";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel1;

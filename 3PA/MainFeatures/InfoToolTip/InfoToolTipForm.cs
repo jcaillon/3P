@@ -32,7 +32,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #region fields
 
-        private YamuiScrollPanel _panel;
+        private YamuiPage _panel;
         private HtmlLabel _labelContent;
 
         #endregion
@@ -45,7 +45,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             Padding = new Padding(5);
 
             // add scroll page
-            _panel = new YamuiScrollPanel {
+            _panel = new YamuiPage {
                 Dock = DockStyle.Fill,
                 NoBackgroundImage = true
             };
@@ -57,8 +57,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 Location = new Point(0, 0),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            _panel.ContentPanel.Location = new Point(0, 0);
-            _panel.ContentPanel.Controls.Add(_labelContent);
+            _panel.Location = new Point(0, 0);
+            _panel.Controls.Add(_labelContent);
 
             Size = new Size(50, 50);
         }
@@ -78,8 +78,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width / 2 - 20);
 
-            _panel.ContentPanel.Size = _labelContent.Size;
-            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
+            _panel.Size = _labelContent.Size;
+            Size = new Size(_panel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
 
             // Too tall?
             if (_labelContent.Height > (screen.WorkingArea.Height / 2 - 10)) {

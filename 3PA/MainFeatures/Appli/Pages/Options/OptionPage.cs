@@ -83,7 +83,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         // ReSharper disable once AccessToModifiedClosure
                         yPos += 10;
                     lastCategory = attribute.GroupName;
-                    scrollPanel.ContentPanel.Controls.Add(new YamuiLabel {
+                    Controls.Add(new YamuiLabel {
                         AutoSize = true,
                         Function = FontFunction.Heading,
                         Location = new Point(0, yPos),
@@ -92,8 +92,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     yPos += 30;
                 }
 
-                scrollPanel.ContentPanel.Controls.Add(InsertInputForItem(property, attribute, ref yPos));
-                scrollPanel.ContentPanel.Controls.Add(InsertLabelForItem(attribute, ref yPos));
+                Controls.Add(InsertInputForItem(property, attribute, ref yPos));
+                Controls.Add(InsertLabelForItem(attribute, ref yPos));
             });
 
             yPos += 15;
@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 updateButton.ButtonPressed += (sender, args) => Updater<MainUpdaterWrapper>.Instance.CheckForUpdate();
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
-                scrollPanel.ContentPanel.Controls.Add(updateButton);
+                Controls.Add(updateButton);
 
                 updateButton = new YamuiButton {
                     Location = new Point(185, yPos),
@@ -122,7 +122,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Updater<ProparseUpdaterWrapper>.Instance.CheckForUpdate();
                 };
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
-                scrollPanel.ContentPanel.Controls.Add(updateButton);
+                Controls.Add(updateButton);
 
                 yPos += updateButton.Height + 5;
             }
@@ -137,12 +137,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 button.ButtonPressed += (sender, args) => Npp.ConfXml.ModifyingNppConfig();
                 tooltip.SetToolTip(button, "Click to <b>modify notepad++ options</b>");
-                scrollPanel.ContentPanel.Controls.Add(button);
+                Controls.Add(button);
                 
                 yPos += button.Height + 5;
             }
 
-            scrollPanel.ContentPanel.Height = yPos + 50;
+            Height = yPos + 50;
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 TabStop = false
             };
             undoButton.ButtonPressed += OnUndoButton;
-            scrollPanel.ContentPanel.Controls.Add(undoButton);
+            Controls.Add(undoButton);
             tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
 
             // add tooltip on the control
@@ -353,7 +353,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             bool needApplySetting = false;
 
             // refresh stuff on screen
-            foreach (Control inputControl in scrollPanel.ContentPanel.Controls) {
+            foreach (Control inputControl in Controls) {
                 if (inputControl.Name.StartsWith("option_")) {
                     
                     var property = (FieldInfo)inputControl.Tag;

@@ -28,7 +28,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetFtp));
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
             this.bt_reset = new YamuiFramework.Controls.YamuiButton();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
@@ -51,8 +50,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_user = new YamuiFramework.Controls.YamuiTextBox();
             this.bt_test = new YamuiFramework.Controls.YamuiButton();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -60,37 +57,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_reset);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_about);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_timeout);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel9);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_remoteDir);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_password);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cb_info);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_host);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_port);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_user);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_test);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.yamuiButton1);
+            this.Controls.Add(this.bt_reset);
+            this.Controls.Add(this.yamuiLabel2);
+            this.Controls.Add(this.lbl_about);
+            this.Controls.Add(this.fl_timeout);
+            this.Controls.Add(this.htmlLabel4);
+            this.Controls.Add(this.htmlLabel9);
+            this.Controls.Add(this.btleft1);
+            this.Controls.Add(this.htmlLabel8);
+            this.Controls.Add(this.fl_remoteDir);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.fl_password);
+            this.Controls.Add(this.htmlLabel3);
+            this.Controls.Add(this.htmlLabel2);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.yamuiLabel1);
+            this.Controls.Add(this.cb_info);
+            this.Controls.Add(this.fl_host);
+            this.Controls.Add(this.fl_port);
+            this.Controls.Add(this.fl_user);
+            this.Controls.Add(this.bt_test);
             // 
             // yamuiButton1
             // 
@@ -334,19 +321,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "SetFtp";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
         private YamuiComboBox cb_info;
         private YamuiTextBox fl_host;
         private YamuiTextBox fl_port;

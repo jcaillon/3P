@@ -131,28 +131,26 @@ namespace YamuiFramework.Forms {
             space = Padding.Left + Padding.Right;
             contentLabel.SetNeededSize(htmlMessage ?? string.Empty, (cumButtonWidth + ButtonPadding + BorderWidth*2 + 20).ClampMin(formMinWidth - space), maxWidthInPanel);
             contentLabel.Width = (formMinWidth - space).ClampMin(contentLabel.Width);
-            contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
             contentLabel.Anchor = contentLabel.Anchor | AnchorStyles.Right;
             var yPos = contentLabel.Location.Y + contentLabel.Height;
 
             // ensure a minimum width if there is no message
-            contentPanel.ContentPanel.Width = (formMinWidth - space).ClampMin(contentPanel.ContentPanel.Width);
+            contentLabel.Width = (formMinWidth - space).ClampMin(contentLabel.Width);
 
             // if there was an object data passed on, need to set up inputs for the user to fill in
             if (HasData) {
                 // Build rows for each item
                 yPos += 10;
                 for (int i = 0; i < _items.Count; i++) {
-                    contentPanel.ContentPanel.Controls.Add(InsertInputForItem(i, ref yPos));
-                    contentPanel.ContentPanel.Controls.Add(InsertLabelForItem(i, ref yPos));
+                    contentPanel.Controls.Add(InsertInputForItem(i, ref yPos));
+                    contentPanel.Controls.Add(InsertLabelForItem(i, ref yPos));
                 }
-                contentPanel.ContentPanel.Height = yPos;
             }
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + space, (Padding.Top + Padding.Bottom + yPos).ClampMax(formMaxHeight));
+            Size = new Size(contentLabel.Width + space, (Padding.Top + Padding.Bottom + yPos).ClampMax(formMaxHeight));
             if (contentPanel.HasScrolls) {
                 _hasScrollMessage = true;
                 Width += 10;
@@ -180,7 +178,7 @@ namespace YamuiFramework.Forms {
             if (_hasScrollMessage)
                 ActiveControl = contentLabel;
             else if (HasData)
-                ActiveControl = contentPanel.ContentPanel.Controls.Find("input0", false).FirstOrDefault();
+                ActiveControl = contentPanel.Controls.Find("input0", false).FirstOrDefault();
             else
                 ActiveControl = Controls.Find("yamuiButton0", false).FirstOrDefault();
         }
@@ -267,7 +265,7 @@ namespace YamuiFramework.Forms {
                 val = ((FieldInfo) item).GetValue(DataObject);
 
             string strValue = val.ConvertToStr();
-            var inputWidth = contentPanel.ContentPanel.Width - _dataLabelWidth - InputPadding*3;
+            var inputWidth = contentPanel.Width - _dataLabelWidth - InputPadding*3;
 
             // Build control type
             Control retVal;
@@ -351,7 +349,7 @@ namespace YamuiFramework.Forms {
                 var itemType = GetItemType(item);
 
                 // Get value from control
-                Control c = contentPanel.ContentPanel.Controls["input" + i];
+                Control c = contentPanel.Controls["input" + i];
                 object val;
                 if (c is YamuiButtonToggle)
                     val = ((YamuiButtonToggle) c).Checked;

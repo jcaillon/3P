@@ -28,7 +28,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.htmlLabel16 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel15 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel14 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -95,8 +94,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
             this.cbName = new YamuiFramework.Controls.YamuiComboBox();
             this.areaLeftButtons = new YamuiFramework.Controls.YamuiArea();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolTip
@@ -115,82 +112,72 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel16);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel15);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel14);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flListAliases);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flCanDoTblName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel13);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flCanDoTblType);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel12);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel11);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel10);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel9);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbView);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbDeleteDownload);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbDownload);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flSuffix);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flLabel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.txLabel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel8);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flExtraPf);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flExtraProPath);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompLocally);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lblLocally);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel6);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flCmdLine);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btleft6);
-            this.scrollPanel.ContentPanel.Controls.Add(this.textbox6);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btright6);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDelete);
-            this.scrollPanel.ContentPanel.Controls.Add(this.flName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btEdit);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btAdd);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btCopy);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btSave);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.areaDb);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbSuffix);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.areaLeftButtons);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.htmlLabel16);
+            this.Controls.Add(this.htmlLabel15);
+            this.Controls.Add(this.htmlLabel14);
+            this.Controls.Add(this.flListAliases);
+            this.Controls.Add(this.flCanDoTblName);
+            this.Controls.Add(this.htmlLabel13);
+            this.Controls.Add(this.flCanDoTblType);
+            this.Controls.Add(this.htmlLabel12);
+            this.Controls.Add(this.btleft8);
+            this.Controls.Add(this.textbox8);
+            this.Controls.Add(this.btright8);
+            this.Controls.Add(this.htmlLabel11);
+            this.Controls.Add(this.btleft7);
+            this.Controls.Add(this.textbox7);
+            this.Controls.Add(this.btright7);
+            this.Controls.Add(this.htmlLabel10);
+            this.Controls.Add(this.htmlLabel9);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.btDbView);
+            this.Controls.Add(this.btDbDeleteDownload);
+            this.Controls.Add(this.btDbDownload);
+            this.Controls.Add(this.yamuiLabel1);
+            this.Controls.Add(this.linkurl);
+            this.Controls.Add(this.flSuffix);
+            this.Controls.Add(this.flLabel);
+            this.Controls.Add(this.txLabel);
+            this.Controls.Add(this.yamuiLabel4);
+            this.Controls.Add(this.yamuiLabel3);
+            this.Controls.Add(this.htmlLabel8);
+            this.Controls.Add(this.flExtraPf);
+            this.Controls.Add(this.htmlLabel2);
+            this.Controls.Add(this.btleft2);
+            this.Controls.Add(this.btright2);
+            this.Controls.Add(this.textbox2);
+            this.Controls.Add(this.flExtraProPath);
+            this.Controls.Add(this.htmlLabel3);
+            this.Controls.Add(this.btleft3);
+            this.Controls.Add(this.textbox3);
+            this.Controls.Add(this.btright3);
+            this.Controls.Add(this.htmlLabel4);
+            this.Controls.Add(this.btleft4);
+            this.Controls.Add(this.textbox4);
+            this.Controls.Add(this.btright4);
+            this.Controls.Add(this.tgCompLocally);
+            this.Controls.Add(this.lblLocally);
+            this.Controls.Add(this.htmlLabel5);
+            this.Controls.Add(this.btleft5);
+            this.Controls.Add(this.textbox5);
+            this.Controls.Add(this.btright5);
+            this.Controls.Add(this.htmlLabel6);
+            this.Controls.Add(this.flCmdLine);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.btleft6);
+            this.Controls.Add(this.textbox6);
+            this.Controls.Add(this.btright6);
+            this.Controls.Add(this.btDelete);
+            this.Controls.Add(this.flName);
+            this.Controls.Add(this.btEdit);
+            this.Controls.Add(this.btAdd);
+            this.Controls.Add(this.btCopy);
+            this.Controls.Add(this.btSave);
+            this.Controls.Add(this.btCancel);
+            this.Controls.Add(this.areaDb);
+            this.Controls.Add(this.cbSuffix);
+            this.Controls.Add(this.cbName);
+            this.Controls.Add(this.areaLeftButtons);
             // 
             // htmlLabel16
             // 
@@ -1208,12 +1195,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "SetEnvironment";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1221,7 +1204,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         private HtmlToolTip toolTip;
-        private YamuiScrollPanel scrollPanel;
         private YamuiLabel lblLocally;
         private YamuiComboBox cbName;
         private YamuiComboBox cbSuffix;

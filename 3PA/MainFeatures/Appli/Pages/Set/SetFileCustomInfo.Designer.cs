@@ -28,7 +28,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetFileCustomInfo));
-            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.bt_delete = new YamuiFramework.Controls.YamuiButton();
@@ -59,8 +58,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.btTemplate = new YamuiFramework.Controls.YamuiButton();
             this.bt_SaveState = new YamuiFramework.Controls.YamuiPictureBox();
-            this.scrollPanel.ContentPanel.SuspendLayout();
-            this.scrollPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).BeginInit();
             this.SuspendLayout();
             // 
@@ -69,45 +66,35 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
-            this.scrollPanel.ContentPanel.Controls.Add(this.btTemplate);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_about);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_delete);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lb_FileName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_SaveState);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lb_SaveState);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel9);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel6);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cb_info);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_appliName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_appliVersion);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_workPackage);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_bugId);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_correctionNb);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_correctionDate);
-            this.scrollPanel.ContentPanel.Controls.Add(this.fl_correctionDesc);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_ok);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_cancel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_today);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_default);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bt_clear);
-            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.ContentPanel.Name = "ContentPanel";
-            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.TabIndex = 0;
-            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.TabIndex = 0;
+            this.Controls.Add(this.btTemplate);
+            this.Controls.Add(this.lbl_about);
+            this.Controls.Add(this.yamuiLabel2);
+            this.Controls.Add(this.bt_delete);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.lb_FileName);
+            this.Controls.Add(this.bt_SaveState);
+            this.Controls.Add(this.lb_SaveState);
+            this.Controls.Add(this.htmlLabel9);
+            this.Controls.Add(this.htmlLabel6);
+            this.Controls.Add(this.htmlLabel5);
+            this.Controls.Add(this.htmlLabel4);
+            this.Controls.Add(this.htmlLabel3);
+            this.Controls.Add(this.htmlLabel2);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.yamuiLabel1);
+            this.Controls.Add(this.cb_info);
+            this.Controls.Add(this.fl_appliName);
+            this.Controls.Add(this.fl_appliVersion);
+            this.Controls.Add(this.fl_workPackage);
+            this.Controls.Add(this.fl_bugId);
+            this.Controls.Add(this.fl_correctionNb);
+            this.Controls.Add(this.fl_correctionDate);
+            this.Controls.Add(this.fl_correctionDesc);
+            this.Controls.Add(this.bt_ok);
+            this.Controls.Add(this.bt_cancel);
+            this.Controls.Add(this.bt_today);
+            this.Controls.Add(this.bt_default);
+            this.Controls.Add(this.bt_clear);
             // 
             // lbl_about
             // 
@@ -526,20 +513,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.scrollPanel);
             this.Name = "SetFileCustomInfo";
             this.Size = new System.Drawing.Size(900, 650);
-            this.scrollPanel.ContentPanel.ResumeLayout(false);
-            this.scrollPanel.ContentPanel.PerformLayout();
-            this.scrollPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private YamuiScrollPanel scrollPanel;
+        
         private YamuiComboBox cb_info;
         private YamuiTextBox fl_appliName;
         private YamuiTextBox fl_appliVersion;
