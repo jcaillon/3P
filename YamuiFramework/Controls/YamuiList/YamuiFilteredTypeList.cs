@@ -479,7 +479,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             if (_currentButtonIndex > _typeButtons.Count - 1) _currentButtonIndex = 0;
             if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
-            SetActiveType(new List<int> {_typeButtons.ElementAt(_currentButtonIndex).Key});
+            SetActiveType(new List<int> {_typeList.ElementAt(_currentButtonIndex)});
 
             return true;
         }
