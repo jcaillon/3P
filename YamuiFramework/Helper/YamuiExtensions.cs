@@ -105,6 +105,18 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Forces a value between a minimum and a maximum
         /// </summary>
+        public static float Clamp(this float value, float min, float max) {
+            if (value < min)
+                return min;
+            if (value > max)
+                return max;
+            return value;
+        }
+
+
+        /// <summary>
+        /// Forces a value between a minimum and a maximum
+        /// </summary>
         public static int Clamp(this int value, int min, int max) {
             if (value < min)
                 return min;

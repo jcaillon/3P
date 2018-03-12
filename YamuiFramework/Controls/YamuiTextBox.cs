@@ -28,8 +28,13 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
+    // https://gist.github.com/Ciantic/471698 : keyboard event listener
+
     [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
-    public sealed class YamuiTextBox : TextBox {
+    public sealed class YamuiTextBox : TextBox, IYamuiControl {
+
+
         #region private
 
         private bool _selectAllTextOnActivate = true;
@@ -141,6 +146,7 @@ namespace YamuiFramework.Controls {
         private const int OcmCommand = 0x2111;
 
         protected override void WndProc(ref Message m) {
+            
             // Send WM_MOUSEWHEEL messages to the parent
             if (!Multiline && m.Msg == (int) WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
             else base.WndProc(ref m);
@@ -282,6 +288,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     internal class YamuiRegularTextBox2Designer : ControlDesigner {

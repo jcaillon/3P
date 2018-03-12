@@ -51,14 +51,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
                     args.Handled = true;
                 }
             };
-
-            RefreshVirtualPanelHeight();
         }
 
         #endregion
 
         public override void OnShow() {
-            ActiveControl = html;
             base.OnShow();
         }
     }

@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;
@@ -30,6 +31,7 @@ using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.HtmlRenderer.WinForms {
+
     /// <summary>
     /// Provides HTML rendering using the text property.<br/>
     /// WinForms control that will render html content in it's client rectangle.<br/>
@@ -67,7 +69,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
     /// Raised when an error occurred during html rendering.<br/>
     /// </para>
     /// </summary>
-    public class HtmlPanel : ScrollableControl {
+    public class HtmlPanel : YamuiScrollPanel {
 
         #region Fields and Consts
 
@@ -75,12 +77,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// Underline html container instance.
         /// </summary>
         protected HtmlContainer _htmlContainer;
-
-        /// <summary>
-        /// The current border style of the control
-        /// </summary>
-        protected BorderStyle _borderStyle;
-
+        
         /// <summary>
         /// the raw base stylesheet data used in the control
         /// </summary>
@@ -117,12 +114,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// Creates a new HtmlPanel and sets a basic css for it's styling.
         /// </summary>
         public HtmlPanel() {
-            AutoScroll = true;
-            BackColor = SystemColors.Window;
-            DoubleBuffered = true;
-            SetStyle(ControlStyles.ResizeRedraw, true);
-            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-
             _htmlContainer = new HtmlContainer();
             _htmlContainer.LinkClicked += OnLinkClicked;
             _htmlContainer.BoxClicked += OnBoxClicked;
@@ -162,12 +153,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
                 }
             }
         }
-
-        /// <summary>
-        ///   Raised when the BorderStyle property value changes.
-        /// </summary>
-        [Category("Property Changed")]
-        public event EventHandler BorderStyleChanged;
 
         /// <summary>
         /// Raised when the user clicks on a link in the html.<br/>
@@ -275,23 +260,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             get { return _useSystemCursors; }
             set { _useSystemCursors = value; }
         }
-
-        /// <summary>
-        /// Gets or sets the border style.
-        /// </summary>
-        /// <value>The border style.</value>
-        [Category("Appearance")]
-        [DefaultValue(typeof(BorderStyle), "None")]
-        public virtual BorderStyle BorderStyle {
-            get { return _borderStyle; }
-            set {
-                if (BorderStyle != value) {
-                    _borderStyle = value;
-                    OnBorderStyleChanged(EventArgs.Empty);
-                }
-            }
-        }
-
+        
         /// <summary>
         /// Is content selection is enabled for the rendered html (default - true).<br/>
         /// If set to 'false' the rendered html will be static only with ability to click on links.
@@ -336,17 +305,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
                 //_htmlContainer.SetHtml(_text, _baseCssData);
             }
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the container enables the user to scroll to any controls placed outside of its visible boundaries. 
-        /// </summary>
-        [Browsable(true)]
-        [Description("Sets a value indicating whether the container enables the user to scroll to any controls placed outside of its visible boundaries.")]
-        public override bool AutoScroll {
-            get { return base.AutoScroll; }
-            set { base.AutoScroll = value; }
-        }
-
+        
         /// <summary>
         /// Get the currently selected text segment in the html.
         /// </summary>
@@ -402,29 +361,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
 
         #region Private methods
 
-#if !MONO
-        /// <summary>
-        /// Override to support border for the control.
-        /// </summary>
-        protected override CreateParams CreateParams {
-            get {
-                CreateParams createParams = base.CreateParams;
-
-                switch (_borderStyle) {
-                    case BorderStyle.FixedSingle:
-                        createParams.Style |= Win32Utils.WsBorder;
-                        break;
-
-                    case BorderStyle.Fixed3D:
-                        createParams.ExStyle |= Win32Utils.WsExClientEdge;
-                        break;
-                }
-
-                return createParams;
-            }
-        }
-#endif
-
         /// <summary>
         /// Perform the layout of the html in the control.
         /// </summary>
@@ -475,13 +411,21 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
                 }
             }
         }
+        
+        /// <summary>
+        /// On html renderer scroll request adjust the scrolling of the panel to the requested location.
+        /// </summary>
+        protected virtual void OnScrollChange(HtmlScrollEventArgs e) {
+            UpdateScroll(new Point((int) e.X, (int) e.Y));
+        }
 
         /// <summary>
-        /// Set focus on the control for keyboard scrollbars handling.
+        /// Adjust the scrolling of the panel to the requested location.
         /// </summary>
-        protected override void OnClick(EventArgs e) {
-            base.OnClick(e);
-            Focus();
+        /// <param name="location">the location to adjust the scroll to</param>
+        protected virtual void UpdateScroll(Point location) {
+            AutoScrollPosition = location;
+            _htmlContainer.ScrollOffset = AutoScrollPosition;
         }
 
         /// <summary>
@@ -527,46 +471,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             base.OnMouseDoubleClick(e);
             if (_htmlContainer != null)
                 _htmlContainer.HandleMouseDoubleClick(this, e);
-        }
-
-        /// <summary>
-        /// Handle key down event for selection, copy and scrollbars handling.
-        /// </summary>
-        protected override void OnKeyDown(KeyEventArgs e) {
-            base.OnKeyDown(e);
-            if (_htmlContainer != null)
-                _htmlContainer.HandleKeyDown(this, e);
-            if (e.KeyCode == Keys.Up) {
-                VerticalScroll.Value = Math.Max(VerticalScroll.Value - 70, VerticalScroll.Minimum);
-                PerformLayout();
-            } else if (e.KeyCode == Keys.Down) {
-                VerticalScroll.Value = Math.Min(VerticalScroll.Value + 70, VerticalScroll.Maximum);
-                PerformLayout();
-            } else if (e.KeyCode == Keys.PageDown) {
-                VerticalScroll.Value = Math.Min(VerticalScroll.Value + 400, VerticalScroll.Maximum);
-                PerformLayout();
-            } else if (e.KeyCode == Keys.PageUp) {
-                VerticalScroll.Value = Math.Max(VerticalScroll.Value - 400, VerticalScroll.Minimum);
-                PerformLayout();
-            } else if (e.KeyCode == Keys.End) {
-                VerticalScroll.Value = VerticalScroll.Maximum;
-                PerformLayout();
-            } else if (e.KeyCode == Keys.Home) {
-                VerticalScroll.Value = VerticalScroll.Minimum;
-                PerformLayout();
-            }
-        }
-
-        /// <summary>
-        ///   Raises the <see cref="BorderStyleChanged" /> event.
-        /// </summary>
-        protected virtual void OnBorderStyleChanged(EventArgs e) {
-            UpdateStyles();
-
-            var handler = BorderStyleChanged;
-            if (handler != null) {
-                handler(this, e);
-            }
         }
 
         /// <summary>
@@ -624,48 +528,13 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
                 PerformLayout();
             Invalidate();
         }
-
-        /// <summary>
-        /// On html renderer scroll request adjust the scrolling of the panel to the requested location.
-        /// </summary>
-        protected virtual void OnScrollChange(HtmlScrollEventArgs e) {
-            UpdateScroll(new Point((int) e.X, (int) e.Y));
-        }
-
-        /// <summary>
-        /// Adjust the scrolling of the panel to the requested location.
-        /// </summary>
-        /// <param name="location">the location to adjust the scroll to</param>
-        protected virtual void UpdateScroll(Point location) {
-            AutoScrollPosition = location;
-            _htmlContainer.ScrollOffset = AutoScrollPosition;
-        }
-
+        
         /// <summary>
         /// call mouse move to handle paint after scroll or html change affecting mouse cursor.
         /// </summary>
         protected virtual void InvokeMouseMove() {
             var mp = PointToClient(MousePosition);
             _htmlContainer.HandleMouseMove(this, new MouseEventArgs(MouseButtons.None, 0, mp.X, mp.Y, 0));
-        }
-
-        /// <summary>
-        /// Used to add arrow keys to the handled keys in <see cref="OnKeyDown"/>.
-        /// </summary>
-        protected override bool IsInputKey(Keys keyData) {
-            switch (keyData) {
-                case Keys.Right:
-                case Keys.Left:
-                case Keys.Up:
-                case Keys.Down:
-                    return true;
-                case Keys.Shift | Keys.Right:
-                case Keys.Shift | Keys.Left:
-                case Keys.Shift | Keys.Up:
-                case Keys.Shift | Keys.Down:
-                    return true;
-            }
-            return base.IsInputKey(keyData);
         }
 
 #if !MONO

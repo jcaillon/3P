@@ -328,9 +328,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     if (mode != _currentMode && mode != ViewMode.Select) {
                         BlinkButton(btSave, ThemeManager.Current.AccentColor);
                         BlinkButton(btCancel, ThemeManager.Current.AccentColor);
-                        ActiveControl = btSave;
+                        btSave.Focus();
                     } else if (mode != _currentMode && mode == ViewMode.Select)
-                        ActiveControl = btEdit;
+                        btEdit.Focus();
 
                     // save current mode
                     _currentMode = mode;

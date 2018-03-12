@@ -511,8 +511,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // SetFileCustomInfo
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "SetFileCustomInfo";
             this.Size = new System.Drawing.Size(900, 650);
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).EndInit();

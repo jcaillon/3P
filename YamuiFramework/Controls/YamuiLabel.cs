@@ -40,7 +40,7 @@ namespace YamuiFramework.Controls {
 
     [Designer("YamuiFramework.Controls.YamuiLabelDesigner")]
     [ToolboxBitmap(typeof(Label))]
-    public class YamuiLabel : Label {
+    public class YamuiLabel : Label, IYamuiControl {
         #region Fields
 
         [DefaultValue(false)]
@@ -98,6 +98,7 @@ namespace YamuiFramework.Controls {
         public YamuiLabel() {
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.SupportsTransparentBackColor |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.Selectable |
@@ -149,7 +150,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Overridden Methods
-
+        
         public override Size GetPreferredSize(Size proposedSize) {
             Size preferredSize;
             base.GetPreferredSize(proposedSize);
@@ -161,13 +162,18 @@ namespace YamuiFramework.Controls {
 
             return preferredSize;
         }
-
+        
         protected override void OnEnabledChanged(EventArgs e) {
             base.OnEnabledChanged(e);
             Invalidate();
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+            base.SetBoundsCore(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height, BoundsSpecified.All);
+        }
     }
 
     #region designer

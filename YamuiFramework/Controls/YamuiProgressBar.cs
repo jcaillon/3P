@@ -31,7 +31,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiProgressBarDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
-    public class YamuiProgressBar : UserControl {
+    public class YamuiProgressBar : YamuiControl {
         #region fields
 
         private float _progress;
@@ -370,6 +370,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+        
     }
 
     public enum CenterElement {

@@ -33,7 +33,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// A control that allows you to display a list of items super efficiently,
     /// use SetItems to start
     /// </summary>
-    public class YamuiScrollList : UserControl {
+    public class YamuiScrollList : YamuiUserControl {
         #region constants
 
         /// <summary>
@@ -1098,5 +1098,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
+        
     }
 }

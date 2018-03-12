@@ -416,9 +416,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 lbl_report.Visible = true;
 
                 lbl_report.Text = text;
-
-                // Activate scrollbars if needed
-                RefreshVirtualPanelHeight();
             });
         }
 

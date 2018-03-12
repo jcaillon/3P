@@ -27,7 +27,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(TrackBar))]
     [DefaultEvent("Scroll")]
-    public class YamuiSlider : UserControl {
+    public class YamuiSlider : YamuiControl {
         #region Fields
 
         private int _trackerValue = 50;
@@ -148,7 +148,7 @@ namespace YamuiFramework.Controls {
                 ValueChanged(this, EventArgs.Empty);
         }
 
-        public new event ScrollEventHandler Scroll;
+        public event ScrollEventHandler Scroll;
 
         private void OnScroll(ScrollEventType scrollType, int newValue) {
             if (Scroll != null)
@@ -402,5 +402,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
     }
 }

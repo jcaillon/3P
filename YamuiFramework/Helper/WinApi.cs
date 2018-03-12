@@ -17,6 +17,7 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -76,17 +77,64 @@ namespace YamuiFramework.Helper {
         }
 
         [StructLayout(LayoutKind.Sequential)]
+        public class COMRECT {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+            
+            public COMRECT() {
+            }
+
+            public COMRECT(Rectangle r) {
+                left = r.X;
+                top = r.Y;
+                right = r.Right;
+                bottom = r.Bottom;
+            }
+
+            
+            public COMRECT(int left, int top, int right, int bottom) {
+                this.left = left;
+                this.top = top;
+                this.right = right;
+                this.bottom = bottom;
+            }
+            
+            public static COMRECT FromXYWH(int x, int y, int width, int height) {
+                return new COMRECT(x, y, x + width, y + height);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
         public struct RECT {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
 
             public RECT(int left, int top, int right, int bottom) {
-                Left = left;
-                Top = top;
-                Right = right;
-                Bottom = bottom;
+                this.left = left;
+                this.top = top;
+                this.right = right;
+                this.bottom = bottom;
+            }
+
+            public RECT(Rectangle r) {
+                left = r.Left;
+                top = r.Top;
+                right = r.Right;
+                bottom = r.Bottom;
+            }
+
+            public static RECT FromXYWH(int x, int y, int width, int height) {
+                return new RECT(x, y, x + width, y + height);
+            }
+
+            public Size Size {
+                get {
+                    return new Size(right - left, bottom - top);
+                }
             }
         }
 
@@ -728,9 +776,22 @@ namespace YamuiFramework.Helper {
         // Changes the client size of a control
         public const int EM_SETRECT = 0xB3;
 
+        public static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
+
+        public const int SW_SCROLLCHILDREN = 0x0001;
+
+        public const int SW_INVALIDATE = 0x0002;
+
+        public const int SW_ERASE = 0x0004;
+
+        public const int SW_SMOOTHSCROLL = 0x0010;
+
         #endregion
 
         #region API Calls
+
+        [DllImport("user32.dll", SetLastError=true, ExactSpelling=true, CharSet=CharSet.Auto)]
+        public static extern int  ScrollWindowEx(HandleRef hWnd, int nXAmount, int nYAmount, COMRECT rectScrollRegion, ref RECT rectClip, HandleRef hrgnUpdate, ref RECT prcUpdate, int flags);
 
         /// <summary>
         /// Returns a rectangle representing the topleft / bottomright corners of the window

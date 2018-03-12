@@ -29,7 +29,9 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
+
     public sealed partial class YamuiNotification : YamuiFormToolWindow {
+
         #region Static
 
         private static List<YamuiNotification> _openNotifications = new List<YamuiNotification>();
@@ -93,6 +95,7 @@ namespace YamuiFramework.Forms {
                 formMinWidth = 300;
             
             // Set title, it will define a new minimum width for the message box
+            titleLabel.Location = new Point(5, 5);
             var space = FormButtonWidth + BorderWidth*2 + titleLabel.Location.X + 5;
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
             formMinWidth = formMinWidth.ClampMin(titleLabel.Width + space);
@@ -100,7 +103,6 @@ namespace YamuiFramework.Forms {
             newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 8 : 0);
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
-            titleLabel.Location = new Point(5, 5);
 
             // set content label
             space = Padding.Left + Padding.Right;
@@ -110,7 +112,7 @@ namespace YamuiFramework.Forms {
 
             // set form size
             Size = new Size(contentLabel.Width + space, (Padding.Top + Padding.Bottom + contentLabel.Height).ClampMax(formMaxHeight));
-            if (contentPanel.HasScrolls)
+            if (contentPanel.VertScroll.HasScroll)
                 Width += 10;
             MinimumSize = Size;
 

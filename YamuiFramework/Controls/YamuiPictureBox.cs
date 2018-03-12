@@ -26,7 +26,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiImageDesigner")]
-    public class YamuiPictureBox : PictureBox {
+    public class YamuiPictureBox : PictureBox, IYamuiControl {
         private Image _backGrndImage;
 
         #region Properties
@@ -90,6 +90,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     internal class YamuiImageDesigner : ControlDesigner {

@@ -70,8 +70,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void UpdateList() {
             // build the html
             html_list.Text = DeploymentRules.BuildHtmlTableForRules(DeploymentRules.GetFullDeployRulesList);
-
-            RefreshVirtualPanelHeight();
         }
 
         #endregion

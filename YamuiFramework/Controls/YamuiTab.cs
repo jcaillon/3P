@@ -32,7 +32,7 @@ namespace YamuiFramework.Controls {
     /// <summary>
     /// Basically, this class is a better tabControl, documentation to be done later 
     /// </summary>
-    public sealed class YamuiTab : UserControl {
+    public sealed class YamuiTab : YamuiUserControl {
         #region Fields
 
         public bool GoBackButtonHasTabStop = false;
@@ -354,6 +354,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+        
     }
 
     #region Menu specs

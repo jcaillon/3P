@@ -68,6 +68,11 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
+    <Compile Include="Controls\IYamuiControl.cs" />
+    <Compile Include="Controls\YamuiControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\YamuiScrollHandler.cs" />
     <Compile Include="Controls\YamuiScrollPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -75,7 +80,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiArea.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\ListItem.cs" />
     <Compile Include="Controls\YamuiList\YamuiFilterBox.cs">
@@ -127,10 +132,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiProgressBar.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiProgressIndicator.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiColorRadioButton.cs">
       <SubType>Component</SubType>
@@ -148,9 +153,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiSlider.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\YamuiUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Fonts\FontManager.cs" />

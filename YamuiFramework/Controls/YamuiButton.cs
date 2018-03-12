@@ -33,7 +33,7 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
-    public class YamuiButton : Button {
+    public class YamuiButton : Button, IYamuiControl {
         #region Properties
 
         /// <summary>
@@ -365,6 +365,10 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     internal class YamuiButtonDesigner : ControlDesigner {

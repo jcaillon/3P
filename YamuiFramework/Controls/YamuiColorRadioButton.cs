@@ -29,7 +29,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiColorRadioButtonDesigner")]
     [ToolboxBitmap(typeof(RadioButton))]
-    public class YamuiColorRadioButton : RadioButton {
+    public class YamuiColorRadioButton : RadioButton, IYamuiControl {
         #region Fields
 
         [DefaultValue(false)]
@@ -165,6 +165,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     internal class YamuiColorRadioButtonDesigner : ControlDesigner {

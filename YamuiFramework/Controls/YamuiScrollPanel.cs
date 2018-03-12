@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiScrollPage.cs) is part of YamuiFramework.
@@ -16,57 +17,71 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using System.Windows.Forms.Design;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-    
-    public class YamuiScrollPanel : ScrollableControl {
-
-        /*
-         * With AutoScroll set to false, you can change VerticalScroll.Minimum, VerticalScroll.Maximum, VerticalScroll.Visible values.
-         * However, you cannot change VerticalScroll.Value!!!  Wtf!  If you set it to a non-zero value, it resets itself to zero.
-         * Instead, you must set AutoScrollPosition = new Point( 0, desired_vertical_scroll_value );
-         * And finally, SURPRISE, when you assign positive values, it flips them to negative values
-         * So if you check AutoScrollPosition.X, it will be negative!  Assign it positive, it comes back negative.
-         */
-
+    [Designer(typeof(YamuiScrollPanelDesigner))]
+    public class YamuiScrollPanel : ScrollableControl, IYamuiControl {
         #region fields
-                
-        [Browsable(false)]
-        public override bool AutoScroll { get; set; } = false;
 
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool NoBackgroundImage { get; set; }
 
-        private Point _lastMouseMove;
-        private int _thumbPadding = 2;
+        /*
+        [DefaultValue(2)]
+        [Category("Yamui")]
+        public int ThumbPadding { get; set; }
+
+        [DefaultValue(10)]
+        [Category("Yamui")]
+        public int ScrollBarWidth { get; set; }
+        */
+
+        [Browsable(false)]
+        public YamuiScrollHandler VertScroll { get; }
+        
+        [Browsable(false)]
+        public YamuiScrollHandler HoriScroll { get; }
 
         /// <summary>
-        /// Exposes the states of the scroll bars, true if they are displayed
+        /// Can this control have vertical scroll?
         /// </summary>
-        public bool HasScrolls { get; private set; }
-
+        [DefaultValue(true)]
+        public bool CanHasHScroll {
+            get { return _canHasHScroll; }
+            set {
+                _canHasHScroll = value;
+                VertScroll.Enabled = _canHasHScroll;
+                PerformLayout();
+            }
+        }
+        
         /// <summary>
-        /// Maximum 'height' of this panel if we wanted to show it all w/o scrolls
+        /// Can this control have vertical scroll?
         /// </summary>
-        private int VirtualPanelHeight { get; set; }
+        [DefaultValue(true)]
+        public bool CanHasVScroll {
+            get { return _canHasVScroll; }
+            set {
+                _canHasVScroll = value;
+                VertScroll.Enabled = _canHasVScroll;
+                PerformLayout();
+            }
+        }
 
-        private RectangleF _barRectangle;
-        private RectangleF _thumbRectangle;
-        private float _thumbRectangleRealHeight;
-
-        private bool _isPressed;
-        private bool _isHovered;
+        private bool _canHasVScroll = true;
+        private bool _canHasHScroll = true;
 
         #endregion
 
@@ -78,14 +93,22 @@ namespace YamuiFramework.Controls {
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.DoubleBuffer |
+                ControlStyles.Selectable |
                 ControlStyles.Opaque, true);
-            _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
-            _thumbRectangle = new Rectangle(Width - 10 + 2, 2, 6, Height - 4);
 
-            VerticalScroll.Enabled = true;
+            VertScroll = new YamuiScrollHandler(true, this) {
+                Enabled = CanHasVScroll
+            };
+            HoriScroll = new YamuiScrollHandler(false, this) {
+                Enabled = CanHasHScroll
+            };
+
+            VScroll = false;
+            VerticalScroll.Enabled = false;
             VerticalScroll.Visible = false;
-            VerticalScroll.Minimum = 0;
 
+            HScroll = false;
             HorizontalScroll.Enabled = false;
             HorizontalScroll.Visible = false;
         }
@@ -95,6 +118,7 @@ namespace YamuiFramework.Controls {
         #region Paint
 
         protected override void OnPaint(PaintEventArgs e) {
+            
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             if (!NoBackgroundImage && !DesignMode) {
@@ -105,209 +129,139 @@ namespace YamuiFramework.Controls {
                 }
             }
 
-            if (HasScrolls)
-                OnPaintForeground(e);
-        }
-
-        protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color thumbColor = YamuiThemeManager.Current.ScrollBarsFg(false, _isHovered, _isPressed, Enabled);
-            Color barColor = YamuiThemeManager.Current.ScrollBarsBg(false, _isHovered, _isPressed, Enabled);
-            DrawScrollBar(e.Graphics, thumbColor, barColor);
-        }
-
-        private void DrawScrollBar(Graphics g, Color thumbColor, Color barColor) {
-            if (barColor != Color.Transparent) {
-                using (var b = new SolidBrush(barColor)) {
-                    g.FillRectangle(b, _barRectangle);
-                }
-            }
-            using (var b = new SolidBrush(thumbColor)) {
-                g.FillRectangle(b, _thumbRectangle);
-            }
+            VertScroll.Paint(e);
+            HoriScroll.Paint(e);
         }
 
         #endregion
 
         #region Handle windows messages
 
+        //[DebuggerStepThrough]
         [SecuritySafeCritical]
         protected override void WndProc(ref Message message) {
-            if (HasScrolls)
-                HandleWindowsProc(message);
+            VertScroll.HandleWindowsProc(message);
+            HoriScroll.HandleWindowsProc(message);
             base.WndProc(ref message);
         }
-
-        private void HandleWindowsProc(Message message) {
-            switch (message.Msg) {
-                case (int) WinApi.Messages.WM_MOUSEWHEEL:
-                    // delta negative when scrolling up
-                    var delta = -((short) (message.WParam.ToInt64() >> 16));
-                    DoScroll(Math.Sign(delta)*_thumbRectangleRealHeight/2);
-                    break;
-
-                case (int) WinApi.Messages.WM_LBUTTONDOWN:
-                    var mousePosRelativeToThis = PointToClient(MousePosition);
-
-                    // mouse in scrollbar
-                    if (_barRectangle.Contains(mousePosRelativeToThis)) {
-                        var thumbRect = _thumbRectangle;
-                        thumbRect.X -= _thumbPadding;
-                        thumbRect.Width += _thumbPadding*2;
-
-                        // mouse in thumb
-                        if (thumbRect.Contains(mousePosRelativeToThis)) {
-                            _isPressed = true;
-                            _lastMouseMove = PointToScreen(MousePosition);
-                            Invalidate();
-                        } else {
-                            DoScroll(mousePosRelativeToThis.Y - _thumbRectangle.Y);
-                        }
-                    }
-                    break;
-
-                case (int) WinApi.Messages.WM_LBUTTONUP:
-                    if (_isPressed) {
-                        _isPressed = false;
-                        Invalidate();
-                    }
-                    break;
-
-                case (int) WinApi.Messages.WM_MOUSEMOVE:
-                    // hover thumb
-                    var controlPos = PointToScreen(Location);
-                    var mousePosInControl = new Point(MousePosition.X - controlPos.X, MousePosition.Y - controlPos.Y);
-                    if (_thumbRectangle.Contains(mousePosInControl)) {
-                        _isHovered = true;
-                        Invalidate();
-                    } else {
-                        if (_isHovered) {
-                            _isHovered = false;
-                            Invalidate();
-                        }
-                    }
-                    // move thumb
-                    if (_isPressed) {
-                        Point currentlMouse = PointToScreen(MousePosition);
-                        if (_lastMouseMove != currentlMouse) {
-                            DoScroll(currentlMouse.Y - _lastMouseMove.Y);
-                        }
-                        _lastMouseMove = currentlMouse;
-                    }
-
-                    break;
-            }
-        }
-
-        #endregion
-
-        #region Keep maximum scroll updated
-
-        protected override void OnControlAdded(ControlEventArgs e) {
-            base.OnControlAdded(e);
-            if (e.Control != null && e.Control.Top + e.Control.Height > VirtualPanelHeight) {
-                VirtualPanelHeight = e.Control.Top + e.Control.Height;
-                OnResizedVirtualPanel();
-            }
-        }
-
-        protected override void OnControlRemoved(ControlEventArgs e) {
-            base.OnControlRemoved(e);
-            if (e.Control != null && e.Control.Top + e.Control.Height >= VirtualPanelHeight) {
-                RefreshVirtualPanelHeight();
-            }
-        }
-
-        /// <summary>
-        /// Compute the virtual panel height
-        /// </summary>
-        public void RefreshVirtualPanelHeight() {
-            foreach (Control control in Controls) {
-                if (control.Top + control.Height > VirtualPanelHeight) {
-                    VirtualPanelHeight = control.Top +control.Height;
-                }
-            }
-            OnResizedVirtualPanel();
-        }
-
+        
         #endregion
 
         #region core
-
-        private void DoScroll(float delta) {
-            // minimum Y position
-            if (_thumbRectangle.Y + delta < (_barRectangle.Y + _thumbPadding)) {
-                _thumbRectangle.Location = new PointF(_thumbRectangle.X, _barRectangle.Y + _thumbPadding);
-            } else {
-                // maximum Y position
-                if (_thumbRectangle.Y + delta > _barRectangle.Height + _barRectangle.Y - _thumbRectangle.Height - _thumbPadding) {
-                    _thumbRectangle.Location = new PointF(_thumbRectangle.X, _barRectangle.Height + _barRectangle.Y - _thumbRectangle.Height - _thumbPadding);
-                } else {
-                    // apply delta
-                    _thumbRectangle.Location = new PointF(_thumbRectangle.X, _thumbRectangle.Y + delta);
-                }
+        
+        /// <summary>
+        /// Perform the layout of the control
+        /// </summary>
+        protected override void OnLayout(LayoutEventArgs levent) {
+            base.OnLayout(levent);
+            if (!string.IsNullOrEmpty(levent.AffectedProperty) && levent.AffectedProperty.Equals("Bounds")) {
+                VertScroll.HandleOnLayout(levent);
+                HoriScroll.HandleOnLayout(levent);
             }
-            Invalidate();
-            // Set panel positon from thumb position
-            SetPanelPosition();
+        }
+        
+        /// <summary>
+        /// Handle key down event for selection, copy and scrollbars handling.
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e) {
+            base.OnKeyDown(e);
+            VertScroll.HandleOnKeyDown(e);
+            HoriScroll.HandleOnKeyDown(e);
         }
 
         /// <summary>
-        /// Sets the position of the content panel in function of the thumb position in the scroll bar
+        /// Used to add arrow keys to the handled keys in <see cref="OnKeyDown"/>.
         /// </summary>
-        private void SetPanelPosition() {
-            if (VerticalScroll.Maximum != VirtualPanelHeight) {
-                // okay, this is yet another weird thing but to be able to use 
-                // AutoScrollPosition setter as expected, we have to do the thing below 
-                VerticalScroll.Maximum = VirtualPanelHeight;
-                VerticalScroll.Visible = true;
-                var fuckingHack = AutoScrollPosition;
-                VerticalScroll.Visible = false;
-            }
-            
-            // maximum free space to scroll in the bar
-            float barScrollSpace = (_barRectangle.Height - _thumbPadding*2) - _thumbRectangle.Height;
-            if (barScrollSpace <= 0) {
-                AutoScrollPosition = new Point(0, 0);
-            } else {
-                float percentScrolled = ((_thumbRectangle.Y - (_barRectangle.Y + _thumbPadding))/barScrollSpace)*100;
-                // maximum free space to scroll in the panel
-                float scrollSpace = VirtualPanelHeight - Height;
-                // % in the scroll bar to % in the panel
-                AutoScrollPosition = new Point(0, (int) (scrollSpace/100*percentScrolled));
-            }
+        protected override bool IsInputKey(Keys keyData) {
+            if (VertScroll.HandleIsInputKey(keyData))
+                return true;
+            if (HoriScroll.HandleIsInputKey(keyData))
+                return true;
+            return base.IsInputKey(keyData);
         }
         
-        
-        protected override void OnResize(EventArgs e) {
-            _barRectangle.Height = Height;
-            _barRectangle.X = Width - _barRectangle.Width;
-            _thumbRectangle.X = Width - _barRectangle.Width + _thumbPadding;
-
-            RefreshVirtualPanelHeight();
-
-            base.OnResize(e);
+        /// <summary>
+        /// Set focus on the control for keyboard scrollbars handling
+        /// </summary>
+        protected override void OnClick(EventArgs e) {
+            base.OnClick(e);
+            Focus();
         }
-
-        private void OnResizedVirtualPanel() {
-            
-            // if the content is not too tall, no need to display the scroll bars
-            if (VirtualPanelHeight <= Height) {
-                if (HasScrolls)
-                    Padding = new Padding(Padding.Left, Padding.Top, Math.Max(Padding.Right - 10, 0), Padding.Bottom);
-                HasScrolls = false;
-            } else {
-                // thumb heigh is a ratio of displayed height and the content panel height
-                _thumbRectangleRealHeight = _barRectangle.Height * ((float) Height / VirtualPanelHeight);
-                _thumbRectangle.Height = Math.Max(_thumbRectangleRealHeight - _thumbPadding * 2, 10);
-                if (!HasScrolls)
-                    Padding = new Padding(Padding.Left, Padding.Top, Math.Min(Padding.Right + 10, Width), Padding.Bottom);
-                HasScrolls = true;
-            }
-
-            DoScroll(0);
+        
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
         }
 
         #endregion
-        
+
+        #region Hide not relevant properties from designer
+
+        [Browsable(false)]
+        public override bool AutoScroll { get; set; } = false;
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public override Font Font {
+            get { return base.Font; }
+            set { base.Font = value; }
+        }
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public override Color ForeColor {
+            get { return base.ForeColor; }
+            set { base.ForeColor = value; }
+        }
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public override bool AllowDrop {
+            get { return base.AllowDrop; }
+            set { base.AllowDrop = value; }
+        }
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public override RightToLeft RightToLeft {
+            get { return base.RightToLeft; }
+            set { base.RightToLeft = value; }
+        }
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public override Cursor Cursor {
+            get { return base.Cursor; }
+            set { base.Cursor = value; }
+        }
+
+        /// <summary>
+        /// Not applicable.
+        /// </summary>
+        [Browsable(false)]
+        public new bool UseWaitCursor {
+            get { return base.UseWaitCursor; }
+            set { base.UseWaitCursor = value; }
+        }
+
+        #endregion
+
+    }
+
+    internal class YamuiScrollPanelDesigner : ControlDesigner {
+        protected override void PreFilterProperties(IDictionary properties) {
+            properties.Remove("AutoScrollMargin");
+            properties.Remove("AutoScrollMinSize");
+            base.PreFilterProperties(properties);
+        }
     }
 }

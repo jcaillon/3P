@@ -30,8 +30,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
             // 
             // Template
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "Template";
             this.Size = new System.Drawing.Size(900, 650);
             this.ResumeLayout(false);

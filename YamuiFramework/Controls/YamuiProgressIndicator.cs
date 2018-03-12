@@ -30,7 +30,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiProgressIndicatorDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
-    public class YamuiProgressIndicator : UserControl {
+    public class YamuiProgressIndicator : Control, IYamuiControl {
         #region fields
 
         [DefaultValue(false)]
@@ -191,6 +191,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     struct UnitVector {

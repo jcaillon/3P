@@ -30,7 +30,7 @@ namespace YamuiFramework.Controls {
     /// each item is clickable and triggers the TabPressed event that provides
     /// the clicked index
     /// </summary>
-    public class YamuiTabButtons : Button {
+    public class YamuiTabButtons : YamuiControl {
         #region Fields
 
         /// <summary>
@@ -297,6 +297,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
     }
 
     public sealed class TabPressedEventArgs : EventArgs {

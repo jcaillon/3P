@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
@@ -76,7 +77,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
     /// Raised when an error occurred during html rendering.<br/>
     /// </para>
     /// </summary>
-    public class HtmlLabel : Control {
+    public class HtmlLabel : YamuiControl {
         #region Fields and Consts
 
         /// <summary>
@@ -177,6 +178,19 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
         public void SetNeededSize(string content, int minWidth, int maxWidth, bool dontSquareIt = false) {
+
+            /* _htmlContainer.MaxSize = new SizeF(ClientSize.Width - Padding.Horizontal, 0);
+
+                using (var g = CreateGraphics()) {
+                    _htmlContainer.PerformLayout(g);
+                }
+
+                AutoScrollMinSize = Size.Round(new SizeF(_htmlContainer.ActualSize.Width + Padding.Horizontal, _htmlContainer.ActualSize.Height));
+             *
+             *
+             *
+             */
+
             Width = Helper.Utilities.MeasureHtmlPrefWidth(content, minWidth, maxWidth);
             Text = content;
 

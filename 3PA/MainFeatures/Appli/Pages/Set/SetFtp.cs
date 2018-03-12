@@ -45,7 +45,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         public override void OnShow() {
-            ActiveControl = bt_test;
+            bt_test.Focus();
             base.OnShow();
         }
 

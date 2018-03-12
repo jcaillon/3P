@@ -24,7 +24,7 @@ using System.Reflection;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Controls {
-    public class YamuiArea : UserControl {
+    public class YamuiArea : YamuiControl {
         #region constructor
 
         public YamuiArea() {
@@ -102,5 +102,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+        
     }
 }

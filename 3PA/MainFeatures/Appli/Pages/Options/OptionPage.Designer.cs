@@ -54,12 +54,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // errorProvider
             // 
-            this.errorProvider.ContainerControl = this;
+            //this.errorProvider.ContainerControl = this;
             // 
             // OptionPage
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.Name = "OptionPage";
             this.Size = new System.Drawing.Size(900, 650);

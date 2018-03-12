@@ -31,7 +31,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This usercontrol displays a filter box (textbox + buttons) that should be associated
     /// to a yamuiFilteredTypeList or treeList
     /// </summary>
-    public class YamuiFilterBox : UserControl {
+    public class YamuiFilterBox : YamuiUserControl {
         #region Constant
 
         private const string ModeButtonSearchTooltip = "The current mode is <b>Search mode</b><br>Click to <b>switch to filter mode</b>";
@@ -336,5 +336,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         #endregion
+        
     }
 }

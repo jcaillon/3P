@@ -30,7 +30,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiCheckBoxDesigner")]
     [ToolboxBitmap(typeof(CheckBox))]
-    public class YamuiCheckBox : CheckBox {
+    public class YamuiCheckBox : CheckBox, IYamuiControl {
 
         #region Fields
 
@@ -234,6 +234,10 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 
     internal class YamuiCheckBoxDesigner : ControlDesigner {

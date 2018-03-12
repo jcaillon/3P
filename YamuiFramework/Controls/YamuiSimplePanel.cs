@@ -25,7 +25,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(Panel))]
-    public class YamuiSimplePanel : Panel {
+    public class YamuiSimplePanel : Panel, IYamuiControl {
         #region Fields
 
         [DefaultValue(false)]
@@ -83,5 +83,9 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public void UpdateBoundsPublic() {
+            UpdateBounds();
+        }
     }
 }

@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
 
             UpdateView();
-            ActiveControl = cb_info;
+            cb_info.Focus();
         }
 
         #endregion

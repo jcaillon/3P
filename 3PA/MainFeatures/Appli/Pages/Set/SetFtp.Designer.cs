@@ -319,8 +319,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // SetFtp
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "SetFtp";
             this.Size = new System.Drawing.Size(900, 650);
             this.ResumeLayout(false);

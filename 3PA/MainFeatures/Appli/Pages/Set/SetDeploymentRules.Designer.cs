@@ -115,8 +115,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // SetDeploymentRules
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "SetDeploymentRules";
             this.Size = new System.Drawing.Size(900, 650);
             this.ResumeLayout(false);
