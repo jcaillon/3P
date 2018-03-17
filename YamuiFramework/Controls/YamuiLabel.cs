@@ -17,6 +17,7 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -110,25 +111,40 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Paint Methods
-
+        
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
+            // code from the base Control from windows
+            if (Parent != null) {
+
+                // how to move the rendering area and setup it's size
+                // (we want to translate it to the parent's origin)
+
+                // moving the clipping rectangle to the parent coordinate system
                 clipRect.Offset(Location);
-                PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                GraphicsState state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
+                //Rectangle newClipRect = new Rectangle(clipRect.Left + Left, clipRect.Top + Top, clipRect.Width, clipRect.Height);
+                             
+                //GraphicsState state = graphics.Save();
+                //graphics.SmoothingMode = SmoothingMode.HighSpeed;
+
+                using (PaintEventArgs np = new PaintEventArgs(graphics, clipRect)) {
+                    try {
+                        graphics.TranslateTransform(-Left, -Top);
+                        InvokePaintBackground(Parent, np);
+                        InvokePaint(Parent, np);
+                    }
+                    finally {
+                        //graphics.Restore(state);
+                        np.Graphics.TranslateClip(-Left, -Top);
+                    }
                 }
             }
+            else {
+                // For whatever reason, our parent can't paint our background, but we need some kind of background
+                // since we're transparent
+                graphics.FillRectangle(SystemBrushes.Control, clipRect);
+            }
         }
-
+        
         protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected override void OnPaint(PaintEventArgs e) {
@@ -172,7 +188,7 @@ namespace YamuiFramework.Controls {
 
         public void UpdateBoundsPublic() {
             UpdateBounds();
-            base.SetBoundsCore(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height, BoundsSpecified.All);
+            SetBoundsCore(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height, BoundsSpecified.All);
         }
     }
 

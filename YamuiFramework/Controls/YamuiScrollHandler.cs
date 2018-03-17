@@ -126,7 +126,7 @@ namespace YamuiFramework.Controls {
                 return;
 
             InvalidateScrollBar();
-
+            
             Rectangle cr = _parent.ClientRectangle;
             WinApi.RECT rcClip = WinApi.RECT.FromXYWH(cr.X, cr.Y, cr.Width - ScrollBarThickness, cr.Height);
             WinApi.RECT rcUpdate = WinApi.RECT.FromXYWH(cr.X, cr.Y, cr.Width - ScrollBarThickness, cr.Height);
@@ -142,11 +142,13 @@ namespace YamuiFramework.Controls {
                 | WinApi.SW_ERASE
                 | WinApi.SW_SCROLLCHILDREN
                 | WinApi.SW_SMOOTHSCROLL);
-
+                                    
             // note : .net does an UpdateChildrenBound here but i find it is not necessary atm
             // (see SetDisplayRectLocation(0, deltaVerticalValue);)
 
             UpdateChildrenBound();
+            
+            //((YamuiScrollPanel)_parent).ScrollIt(deltaValue);
 
             _parent.Refresh(); // not critical but help reduce flickering
         }
@@ -179,10 +181,6 @@ namespace YamuiFramework.Controls {
         }
 
         public void HandleWindowsProc(Message message) {
-            if (message.Msg == (int) WinApi.Messages.WM_SHOWWINDOW) {
-                UpdateChildrenBound();
-            }
-
             if (!HasScroll)
                 return;
 
@@ -242,7 +240,6 @@ namespace YamuiFramework.Controls {
                     }
 
                     break;
-                    
             }
         }
 
@@ -256,8 +253,7 @@ namespace YamuiFramework.Controls {
                     MaximumValue = controlReach;
                 }
             }
-
-            var prevHasScroll = HasScroll;
+            
             MaximumValue -= ParentLenght;
 
             // if the content is not too tall, no need to display the scroll bars
@@ -267,15 +263,6 @@ namespace YamuiFramework.Controls {
                 HasScroll = true;
                 Value = Value;
                 InvalidateScrollBar();
-            }
-
-            // add/remove padding for the scrollbar
-            if (prevHasScroll != HasScroll) {
-                if (IsVertical) {
-                    _parent.Padding = new Padding(_parent.Padding.Left, _parent.Padding.Top, (_parent.Padding.Right + (HasScroll ? ScrollBarThickness : -ScrollBarThickness)).ClampMin(0), _parent.Padding.Bottom);
-                } else {
-                    _parent.Padding = new Padding(_parent.Padding.Left, _parent.Padding.Top, _parent.Padding.Right, (_parent.Padding.Right + (HasScroll ? ScrollBarThickness : -ScrollBarThickness)).ClampMin(0));
-                }
             }
             
         }

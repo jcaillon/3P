@@ -31,7 +31,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// This usercontrol displays a filter box (textbox + buttons) that should be associated
     /// to a yamuiFilteredTypeList or treeList
     /// </summary>
-    public class YamuiFilterBox : YamuiUserControl {
+    public class YamuiFilterBox : YamuiControl {
         #region Constant
 
         private const string ModeButtonSearchTooltip = "The current mode is <b>Search mode</b><br>Click to <b>switch to filter mode</b>";
@@ -124,7 +124,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     _filterBox.SelectionStart = value.Length;
                     _filterBox.SelectionLength = 0;
                 }
-                ActiveControl = _filterBox;
+                FocusFilter();
             }
         }
 
@@ -291,7 +291,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 _tooltip.SetToolTip(button, ModeButtonSearchTooltip);
             }
 
-            ActiveControl = _filterBox;
+            FocusFilter();
         }
 
         /// <summary>
@@ -307,11 +307,11 @@ namespace YamuiFramework.Controls.YamuiList {
 
         public void ClearAndFocusFilter() {
             _filterBox.Text = "";
-            ActiveControl = _filterBox;
+            FocusFilter();
         }
 
         public void FocusFilter() {
-            ActiveControl = _filterBox;
+            _filterBox.Focus();
         }
 
         #endregion

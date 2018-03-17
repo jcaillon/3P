@@ -38,20 +38,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.SuspendLayout();
             // 
-            // scrollPanel
-            // 
-            // 
-            // scrollPanel.ContentPanel
-            // 
-            this.Controls.Add(this.linkurl);
-            this.Controls.Add(this.htmlLabel1);
-            this.Controls.Add(this.htmlLabel7);
-            this.Controls.Add(this.cbSyntax);
-            this.Controls.Add(this.yamuiLabel1);
-            this.Controls.Add(this.cbApplication);
-            this.Controls.Add(this._simplePanelAccentColor);
-            this.Controls.Add(this.yamuiLabel20);
-            // 
             // linkurl
             // 
             this.linkurl.BackColor = System.Drawing.Color.Transparent;
@@ -159,9 +145,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // SettingAppearance
             // 
+            this.Controls.Add(this.linkurl);
+            this.Controls.Add(this.htmlLabel1);
+            this.Controls.Add(this.htmlLabel7);
+            this.Controls.Add(this.cbSyntax);
+            this.Controls.Add(this.yamuiLabel1);
+            this.Controls.Add(this.cbApplication);
+            this.Controls.Add(this._simplePanelAccentColor);
+            this.Controls.Add(this.yamuiLabel20);
             this.Name = "SettingAppearance";
             this.Size = new System.Drawing.Size(900, 650);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 

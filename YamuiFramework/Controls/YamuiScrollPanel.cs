@@ -32,6 +32,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer(typeof(YamuiScrollPanelDesigner))]
     public class YamuiScrollPanel : ScrollableControl, IYamuiControl {
+
         #region fields
 
         [DefaultValue(false)]
@@ -97,20 +98,16 @@ namespace YamuiFramework.Controls {
                 ControlStyles.Selectable |
                 ControlStyles.Opaque, true);
 
-            VertScroll = new YamuiScrollHandler(true, this) {
-                Enabled = CanHasVScroll
-            };
-            HoriScroll = new YamuiScrollHandler(false, this) {
-                Enabled = CanHasHScroll
-            };
+            VertScroll = new YamuiScrollHandler(true, this);
+            HoriScroll = new YamuiScrollHandler(false, this);
 
-            VScroll = false;
-            VerticalScroll.Enabled = false;
-            VerticalScroll.Visible = false;
-
-            HScroll = false;
-            HorizontalScroll.Enabled = false;
-            HorizontalScroll.Visible = false;
+            base.VScroll = false;
+            base.VerticalScroll.Enabled = false;
+            base.VerticalScroll.Visible = false;
+            
+            base.HScroll = false;
+            base.HorizontalScroll.Enabled = false;
+            base.HorizontalScroll.Visible = false;
         }
 
         #endregion
@@ -192,12 +189,95 @@ namespace YamuiFramework.Controls {
             UpdateBounds();
         }
 
+        /// <summary>
+        /// Correct original padding as we need extra space for the scrollbars
+        /// </summary>
+        public new Padding Padding {
+            get {
+                var basePadding = base.Padding;
+                if (!DesignMode) {
+                    if (HoriScroll.HasScroll) {
+                        basePadding.Bottom = basePadding.Bottom + HoriScroll.ScrollBarThickness;
+                    }
+
+                    if (VertScroll.HasScroll) {
+                        basePadding.Right = basePadding.Right + VertScroll.ScrollBarThickness;
+                    }
+                }
+                return basePadding;
+            }
+            set {
+                base.Padding = value;
+            }
+        }
+
+        /// <summary>
+        /// Very important to display the correct scroll value when coming back to a scrolled panel.
+        /// Try without it and watch for yourself
+        /// </summary>
+        public override Rectangle DisplayRectangle {
+            get {
+                Rectangle rect = ClientRectangle;
+                if (VertScroll.HasScroll)
+                    rect.Y = -VertScroll.Value;
+                    rect.Width -= HoriScroll.ScrollBarThickness;
+                if (HoriScroll.HasScroll) {
+                    rect.X = -HoriScroll.Value;
+                    rect.Height -= VertScroll.ScrollBarThickness;
+                }
+                return rect;
+            }
+        }
+
+        [Browsable(false)]
+        public new Point AutoScrollPosition {
+            get { return new Point(HoriScroll.HasScroll ? HoriScroll.Value : 0, VertScroll.HasScroll ? VertScroll.Value : 0); }
+            set {
+                if (HoriScroll.HasScroll)
+                    HoriScroll.Value = value.X;
+                if (VertScroll.HasScroll)
+                    VertScroll.Value = value.Y;
+            }
+        }
+
+        [Browsable(false)]
+        public new Size AutoScrollMinSize {
+            get {
+                return new Size(HoriScroll.MaximumValue, VertScroll.MaximumValue);
+            }
+            set {
+                // TODO : 
+            }
+        }
+
+        public new void ScrollControlIntoView(Control control) {
+            
+        }
+
         #endregion
 
         #region Hide not relevant properties from designer
 
         [Browsable(false)]
-        public override bool AutoScroll { get; set; } = false;
+        public override bool AutoScroll => false;
+
+        [Browsable(false)]
+        public new bool VScroll => false;
+
+        [Browsable(false)]
+        public new bool HScroll => false;
+
+        [Browsable(false)]
+        public new Size AutoScrollMargin => new Size();
+
+        [Browsable(false)]
+        public new DockPaddingEdges DockPadding => null;
+
+        [Browsable(false)]
+        public new HScrollProperties HorizontalScroll => null;
+
+        [Browsable(false)]
+        public new HScrollProperties VerticalScroll => null;
 
         /// <summary>
         /// Not applicable.

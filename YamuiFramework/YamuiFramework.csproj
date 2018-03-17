@@ -84,25 +84,25 @@
     </Compile>
     <Compile Include="Controls\YamuiList\ListItem.cs" />
     <Compile Include="Controls\YamuiList\YamuiFilterBox.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\YamuiFilteredList.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\YamuiFilteredTypeList.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\MoreTypesForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\YamuiFilteredTypeTreeList.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\YamuiScrollList.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiButtonImage.cs">
       <SubType>Component</SubType>
@@ -144,7 +144,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiTab.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiTabButtons.cs">
       <SubType>Component</SubType>

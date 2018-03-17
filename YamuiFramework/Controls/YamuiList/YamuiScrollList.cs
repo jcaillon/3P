@@ -33,7 +33,7 @@ namespace YamuiFramework.Controls.YamuiList {
     /// A control that allows you to display a list of items super efficiently,
     /// use SetItems to start
     /// </summary>
-    public class YamuiScrollList : YamuiUserControl {
+    public class YamuiScrollList : YamuiControl {
         #region constants
 
         /// <summary>
@@ -286,10 +286,15 @@ namespace YamuiFramework.Controls.YamuiList {
                         if (FocusGained != null)
                             FocusGained(this);
                     } else {
-                        if (!Controls.Contains(ActiveControl)) {
+                        _isFocused = false;
+                        foreach (Control control in Controls) {
+                            if (control.Focused) {
+                                _isFocused = true;
+                            }
+                        }
+                        if (!_isFocused) {
                             if (FocusLost != null)
                                 FocusLost(this);
-                            _isFocused = false;
                         }
                     }
                 }
@@ -897,7 +902,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     break;
 
                 default:
-                    ListItem newItem = null;
+                    ListItem newItem;
                     do {
                         switch (pressedKey) {
                             case Keys.Up:
@@ -998,7 +1003,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void GrabFocus() {
             if (_nbRowDisplayed > 0)
-                ActiveControl = _rows[0];
+                _rows[0].Focus();
         }
 
         /// <summary>

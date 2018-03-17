@@ -32,7 +32,8 @@ namespace YamuiFramework.Controls {
     /// <summary>
     /// Basically, this class is a better tabControl, documentation to be done later 
     /// </summary>
-    public sealed class YamuiTab : YamuiUserControl {
+    public sealed class YamuiTab : YamuiControl {
+
         #region Fields
 
         public bool GoBackButtonHasTabStop = false;
@@ -73,7 +74,6 @@ namespace YamuiFramework.Controls {
             _owner = owner;
 
             // padding
-            Padding = new Padding(XOffsetPage, YOffsetPage, 0, 0);
             TabStop = false;
         }
 
@@ -172,8 +172,10 @@ namespace YamuiFramework.Controls {
                 _secondaryButtons.UpdateList(CurrentSecondaryMenuList, _currentPoint.Y);
 
                 // display the new page
+                _currentPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                _currentPage.Location = new Point(XOffsetPage, YOffsetPage);
+                _currentPage.Size = new Size(Width - XOffsetPage, Height - YOffsetPage);
                 Controls.Add(_currentPage);
-                _currentPage.Dock = DockStyle.Fill;
                 _currentPage.Invalidate();
 
                 Application.DoEvents();
@@ -181,8 +183,7 @@ namespace YamuiFramework.Controls {
                 // tab animation (do if needed)
                 if (doAnimate)
                     TabAnimatorStart();
-
-                ActiveControl = _currentPage;
+                
                 _currentPage.Focus();
 
                 // Execute the page OnShow method
@@ -299,6 +300,15 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        public new Padding Padding {
+            get {
+                return new Padding(XOffsetPage, YOffsetPage, 0, 0);
+            }
+            set {
+                base.Padding = value;
+            }
+        }
 
         #region Paint
 

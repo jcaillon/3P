@@ -125,11 +125,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 yPos += label.Height + 15;
             }
-
-            // Activate scrollbars
-            Height = yPos + 20;
-            Height = yPos;
-
+            
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(this);
         }
