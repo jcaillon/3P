@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
+    
     public class YamuiScrollHandler {
+
+        public event Action<YamuiScrollHandler, int, int> OnValueChange;
 
         public bool IsVertical { get; }
 
@@ -15,49 +18,97 @@ namespace YamuiFramework.Controls {
 
         public bool Enabled { get; set; } = true;
 
-        public int ScrollBarThickness { get; set; } = 15;
-        
+        public int BarThickness { get; set; } = 15;
+
+        public int SmallChange {
+            get {
+                return _smallChange == 0 ? LengthAvailable / 10 : _smallChange;
+            }
+            set { _smallChange = value; }
+        }
+
+        public int LargeChange {
+            get {
+                return _largeChange == 0 ? LengthAvailable / 2 : _largeChange;
+            }
+            set { _largeChange = value; }
+        }
+
+        public Padding Padding { get; set; } = new Padding(0);
+
         /// <summary>
         /// Exposes the states of the scroll bars, true if they are displayed
         /// </summary>
         public bool HasScroll { get; private set; }
 
-        private int ParentLenght => IsVertical ? _parent.Height : _parent.Width;
-        
-        private int ParentOpposedLenght => IsVertical ? _parent.Width : _parent.Height;
-        
         /// <summary>
-        /// Maximum 'height' of this panel if we wanted to show it all w/o scrolls
+        /// Maximum length of this panel if we wanted to show it all w/o scrolls
         /// </summary>
-        public int MaximumValue { get; private set; }
+        public int LengthToRepresent { get; private set; }
+
+        /// <summary>
+        /// Maximum length really available to show the content
+        /// </summary>
+        public int LengthAvailable { get; private set; }
+
+        public bool UpdateLength(int lengthToRepresent, int lengthAvailable) {
+
+            LengthToRepresent = lengthToRepresent; 
+            LengthAvailable = lengthAvailable; 
+
+            // if the content is not too tall, no need to display the scroll bars
+            if (MaximumValue <= 0 || !Enabled) {
+                HasScroll = false;
+                Value = 0;
+            } else {
+                HasScroll = true;
+                Value = Value;
+            }
+
+            return HasScroll;
+        } 
 
         public int Value {
             get { return _value; }
             set {
                 var previousValue = _value;
-                _value = value.Clamp(0, MaximumValue);
-                SetDisplayRectLocation(previousValue - _value);
+                _value = value.Clamp(MinimumValue, MaximumValue);
+                InvalidateScrollBar();
+                OnValueChange?.Invoke(this, previousValue, _value);
             }
         }
 
         [Browsable(false)]
-        public float ValuePercent {
-            get { return (float) Value / MaximumValue; }
+        public double ValuePercent {
+            get { return (double) Value / MaximumValue; }
             set { Value = (int) (MaximumValue * value); }
         }
+        
+        public const int MinimumValue = 0;
+
+        public int MaximumValue => LengthToRepresent - LengthAvailable;
+        
+        private int ParentLenght => IsVertical ? _parent.Height : _parent.Width;
+        
+        public int BarOffset => IsVertical ? Padding.Top : Padding.Left;
+
+        public int BarOpposedOffset => (IsVertical ? _parent.Width - Padding.Right : _parent.Height - Padding.Bottom) - BarThickness;
+
+        public int BarLength => ParentLenght - (IsVertical ? Padding.Vertical : Padding.Horizontal);
 
         public Rectangle BarRect => IsVertical ? 
-            new Rectangle(ParentOpposedLenght - ScrollBarThickness, 0, ScrollBarThickness, ParentLenght) : 
-            new Rectangle(0, ParentOpposedLenght - ScrollBarThickness, ParentLenght, ScrollBarThickness);
+            new Rectangle(BarOpposedOffset, BarOffset, BarThickness, BarLength) : 
+            new Rectangle(BarOffset, BarOpposedOffset, BarLength, BarThickness);
         
-        private float BarScrollSpace => ParentLenght - ThumbLenght - ThumbPadding * 2;
+        private int BarScrollSpace => BarLength - ThumbLenght - ThumbPadding * 2;
 
-        // thumb length is a ratio of displayed height and the content panel height
-        public int ThumbLenght => ((int) ((ParentLenght - ThumbPadding * 2) * ((float) ParentLenght / MaximumValue))).ClampMin(ScrollBarThickness);
+        public int ThumbLenght => ((int) Math.Floor((BarLength - ThumbPadding * 2) * ((double) LengthAvailable / LengthToRepresent))).ClampMin(BarThickness);
+
+        public int ThumbThickness => BarThickness - ThumbPadding * 2;
 
         public Rectangle ThumbRect => IsVertical ? 
-            new Rectangle(ParentOpposedLenght - ScrollBarThickness + ThumbPadding, 0 + ThumbPadding + (int) (BarScrollSpace * ValuePercent), ScrollBarThickness - ThumbPadding * 2, ThumbLenght) : 
-            new Rectangle(0 + ThumbPadding + (int) (BarScrollSpace * ValuePercent), ParentOpposedLenght - ScrollBarThickness + ThumbPadding, ThumbLenght, ScrollBarThickness - ThumbPadding * 2);
+            new Rectangle(BarOpposedOffset + ThumbPadding, BarOffset + ThumbPadding + (int) (BarScrollSpace * ValuePercent), ThumbThickness, ThumbLenght) : 
+            new Rectangle(BarOffset + ThumbPadding + (int) (BarScrollSpace * ValuePercent), BarOpposedOffset + ThumbPadding, ThumbLenght, ThumbThickness);
 
         public bool IsPressed {
             get { return _isPressed; }
@@ -85,13 +136,13 @@ namespace YamuiFramework.Controls {
         private bool _isHovered;
 
         private int _mouseMoveInThumbPosition;
-
+        private int _smallChange;
+        private int _largeChange;
 
         public YamuiScrollHandler(bool isVertical, Control parent) {
             IsVertical = isVertical;
             _parent = parent;
         }
-
 
         #region Paint
 
@@ -114,54 +165,7 @@ namespace YamuiFramework.Controls {
         }
         
         #endregion
-
         
-        /// <summary>
-        /// The actual scroll magic is here
-        /// </summary>
-        /// <param name="deltaValue"></param>
-        private void SetDisplayRectLocation(int deltaValue) {
-
-            if (deltaValue == 0 || !HasScroll)
-                return;
-
-            InvalidateScrollBar();
-            
-            Rectangle cr = _parent.ClientRectangle;
-            WinApi.RECT rcClip = WinApi.RECT.FromXYWH(cr.X, cr.Y, cr.Width - ScrollBarThickness, cr.Height);
-            WinApi.RECT rcUpdate = WinApi.RECT.FromXYWH(cr.X, cr.Y, cr.Width - ScrollBarThickness, cr.Height);
-            WinApi.ScrollWindowEx(
-                new HandleRef(this, _parent.Handle),
-                IsVertical ? 0 : deltaValue,
-                IsVertical ? deltaValue : 0,
-                null,
-                ref rcClip,
-                WinApi.NullHandleRef,
-                ref rcUpdate,
-                WinApi.SW_INVALIDATE
-                | WinApi.SW_ERASE
-                | WinApi.SW_SCROLLCHILDREN
-                | WinApi.SW_SMOOTHSCROLL);
-                                    
-            // note : .net does an UpdateChildrenBound here but i find it is not necessary atm
-            // (see SetDisplayRectLocation(0, deltaVerticalValue);)
-
-            UpdateChildrenBound();
-            
-            //((YamuiScrollPanel)_parent).ScrollIt(deltaValue);
-
-            _parent.Refresh(); // not critical but help reduce flickering
-        }
-
-        private void UpdateChildrenBound() {
-            foreach (Control control in _parent.Controls) {
-                var yamuiControl = control as IYamuiControl;
-                if (yamuiControl != null && control.IsHandleCreated) {
-                    yamuiControl.UpdateBoundsPublic();
-                }
-            }
-        }
-
         /// <summary>
         /// Redraw the scrollbar
         /// </summary>
@@ -174,9 +178,9 @@ namespace YamuiFramework.Controls {
         /// </summary>
         private void MoveThumb(int newThumbPos) {
             if (IsVertical) {
-                ValuePercent = (newThumbPos - ThumbPadding) / BarScrollSpace;
+                ValuePercent = (double) (newThumbPos - ThumbPadding) / BarScrollSpace;
             } else {
-                ValuePercent = (newThumbPos - ThumbPadding) / BarScrollSpace;
+                ValuePercent = (double) (newThumbPos - ThumbPadding) / BarScrollSpace;
             }
         }
 
@@ -188,7 +192,7 @@ namespace YamuiFramework.Controls {
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
                     // delta negative when scrolling up
                     var delta = -(short) (message.WParam.ToInt64() >> 16);
-                    Value += Math.Sign(delta) * ParentLenght / 2;
+                    Value += Math.Sign(delta) * LengthAvailable / 2;
                     break;
 
                 case (int) WinApi.Messages.WM_LBUTTONDOWN:
@@ -240,72 +244,51 @@ namespace YamuiFramework.Controls {
                     }
 
                     break;
+
+                case (int) WinApi.Messages.WM_KEYDOWN:
+                case (int) WinApi.Messages.WM_IME_KEYDOWN:
+                    // need the parent control to override OnPreviewKeyDown or IsInputKey
+
+                    var key = (Keys) (message.WParam.ToInt64());
+                    long context = message.LParam.ToInt64();
+
+                    // on key down
+                    if (!IsBitSet(context, 31)) {
+                        if (IsVertical) {
+                            if (key == Keys.Up) {
+                                Value -= SmallChange;
+                            } else if (key == Keys.Down) {
+                                Value += SmallChange;
+                            } else if (key == Keys.PageUp) {
+                                Value -= LargeChange;
+                            } else if (key == Keys.PageDown) {
+                                Value += LargeChange;
+                            } else if (key == Keys.End) {
+                                Value = MaximumValue;
+                            } else if (key == Keys.Home) {
+                                Value = MinimumValue;
+                            }
+                        } else {
+                            if (key == Keys.Left) {
+                                Value -= SmallChange;
+                            } else if (key == Keys.Right) {
+                                Value += SmallChange;
+                            }
+                        }
+
+                    }
+
+                    break;
             }
         }
 
-        public void HandleOnLayout(LayoutEventArgs levent) {
-            
-            MaximumValue = 0;
-            foreach (Control control in _parent.Controls) {
-                int controlReach = IsVertical ? control.Top + control.Height : control.Left + control.Width;
-                controlReach += Value;
-                if (controlReach > MaximumValue) {
-                    MaximumValue = controlReach;
-                }
-            }
-            
-            MaximumValue -= ParentLenght;
-
-            // if the content is not too tall, no need to display the scroll bars
-            if (MaximumValue <= 0 || !Enabled) {
-                HasScroll = false;
-            } else {
-                HasScroll = true;
-                Value = Value;
-                InvalidateScrollBar();
-            }
-            
+        /// <summary>
+        /// Returns true if the bit at the given position is set to true
+        /// </summary>
+        private static bool IsBitSet(long b, int pos) {
+            return (b & (1 << pos)) != 0;
         }
-
-        public void HandleOnKeyDown(KeyEventArgs e) {
-            if (IsVertical) {
-                if (e.KeyCode == Keys.Up) {
-                    Value -= 70;
-                } else if (e.KeyCode == Keys.Down) {
-                    Value += 70;
-                } else if (e.KeyCode == Keys.PageUp) {
-                    Value -= 400;
-                } else if (e.KeyCode == Keys.PageDown) {
-                    Value += 400;
-                } else if (e.KeyCode == Keys.End) {
-                    Value = MaximumValue;
-                } else if (e.KeyCode == Keys.Home) {
-                    Value = 0;
-                }
-            } else {
-                if (e.KeyCode == Keys.Left) {
-                    Value -= 70;
-                } else if (e.KeyCode == Keys.Right) {
-                    Value += 70;
-                }
-            }
-        }
-
-        public bool HandleIsInputKey(Keys keyData) {
-            switch (keyData) {
-                case Keys.Right:
-                case Keys.Left:
-                case Keys.Up:
-                case Keys.Down:
-                    return true;
-                case Keys.Shift | Keys.Right:
-                case Keys.Shift | Keys.Left:
-                case Keys.Shift | Keys.Up:
-                case Keys.Shift | Keys.Down:
-                    return true;
-            }
-
-            return false;
-        }
+        
     }
+    
 }

@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -46,24 +45,6 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Paint
-
-        protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
-                clipRect.Offset(Location);
-                var e = new PaintEventArgs(graphics, clipRect);
-                var state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
-                }
-            }
-        }
 
         protected override void OnPaintBackground(PaintEventArgs e) {}
 

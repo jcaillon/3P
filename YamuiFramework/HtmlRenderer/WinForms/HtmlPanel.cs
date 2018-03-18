@@ -145,7 +145,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
                 _text = value;
                 base.Text = value;
                 if (!IsDisposed) {
-                    VertScroll.Value = 0;
+                    VerticalScroll.Value = 0;
                     _htmlContainer.SetHtml((_text.StartsWith(@"<html") ? _text : @"<html><body>" + _text + @"</body><html>"), YamuiThemeManager.CurrentThemeCss);
                     PerformLayout();
                     Invalidate();

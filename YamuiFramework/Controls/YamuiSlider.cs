@@ -25,6 +25,7 @@ using System.Windows.Forms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     [ToolboxBitmap(typeof(TrackBar))]
     [DefaultEvent("Scroll")]
     public class YamuiSlider : YamuiControl {
@@ -159,41 +160,13 @@ namespace YamuiFramework.Controls {
 
         #region Paint Methods
 
-        protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
-                clipRect.Offset(Location);
-                PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                GraphicsState state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
-                }
-            }
-        }
-
-        protected override void OnPaintBackground(PaintEventArgs e) {}
-
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
-                Invalidate();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
-            }
+            Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, false);
+            if (backColor != Color.Transparent) {
+                e.Graphics.Clear(backColor);
+            } else
+                PaintTransparentBackground(e.Graphics, DisplayRectangle);
+            OnPaintForeground(e);
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {

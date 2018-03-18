@@ -31,6 +31,7 @@ namespace YamuiFramework.Controls {
     /// the clicked index
     /// </summary>
     public class YamuiTabButtons : YamuiControl {
+
         #region Fields
 
         /// <summary>

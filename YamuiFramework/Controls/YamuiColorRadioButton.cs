@@ -30,6 +30,7 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiColorRadioButtonDesigner")]
     [ToolboxBitmap(typeof(RadioButton))]
     public class YamuiColorRadioButton : RadioButton, IYamuiControl {
+
         #region Fields
 
         [DefaultValue(false)]

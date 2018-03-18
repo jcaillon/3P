@@ -22,7 +22,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
@@ -30,18 +30,10 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
-    #region Enums
-
-    public enum LabelMode {
-        Default,
-        Selectable
-    }
-
-    #endregion
-
     [Designer("YamuiFramework.Controls.YamuiLabelDesigner")]
     [ToolboxBitmap(typeof(Label))]
-    public class YamuiLabel : Label, IYamuiControl {
+    public class YamuiLabel : YamuiControl {
+
         #region Fields
 
         [DefaultValue(false)]
@@ -59,6 +51,7 @@ namespace YamuiFramework.Controls {
         public FontFunction Function {
             get { return _function; }
             set {
+                MeasureTextCache.InvalidateCache();
                 _function = value;
                 Margin = _function == FontFunction.Heading ? new Padding(5, 18, 5, 7) : new Padding(3, 3, 3, 3);
             }
@@ -91,6 +84,30 @@ namespace YamuiFramework.Controls {
         protected override Padding DefaultPadding {
             get { return new Padding(0); }
         }
+        
+        /// <devdoc>
+        ///    <para>
+        ///       Gets or sets the text in the Label. Since we can have multiline support
+        ///       this property just overides the base to pluck in the Multiline editor.
+        ///    </para>
+        /// </devdoc>
+        [
+            Editor("System.ComponentModel.Design.MultilineStringEditor", typeof(UITypeEditor)),
+            SettingsBindable(true)
+        ]
+        public override string Text {
+            get {
+                return base.Text;
+            }
+            set {
+                base.Text = value;
+                Invalidate();
+            }
+        }
+
+        [DefaultValue(ContentAlignment.TopLeft)]
+        [Category("Yamui")]
+        public ContentAlignment TextAlign { get; set; }
 
         #endregion
 
@@ -104,7 +121,13 @@ namespace YamuiFramework.Controls {
                 ControlStyles.UserPaint |
                 ControlStyles.Selectable |
                 ControlStyles.AllPaintingInWmPaint |
-                ControlStyles.Opaque, true);
+                ControlStyles.Opaque, 
+                true);
+            
+            SetStyle(
+                ControlStyles.FixedHeight |
+                ControlStyles.Selectable, 
+                false);
             TabStop = false;
         }
 
@@ -112,40 +135,7 @@ namespace YamuiFramework.Controls {
 
         #region Paint Methods
         
-        protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            // code from the base Control from windows
-            if (Parent != null) {
-
-                // how to move the rendering area and setup it's size
-                // (we want to translate it to the parent's origin)
-
-                // moving the clipping rectangle to the parent coordinate system
-                clipRect.Offset(Location);
-                //Rectangle newClipRect = new Rectangle(clipRect.Left + Left, clipRect.Top + Top, clipRect.Width, clipRect.Height);
-                             
-                //GraphicsState state = graphics.Save();
-                //graphics.SmoothingMode = SmoothingMode.HighSpeed;
-
-                using (PaintEventArgs np = new PaintEventArgs(graphics, clipRect)) {
-                    try {
-                        graphics.TranslateTransform(-Left, -Top);
-                        InvokePaintBackground(Parent, np);
-                        InvokePaint(Parent, np);
-                    }
-                    finally {
-                        //graphics.Restore(state);
-                        np.Graphics.TranslateClip(-Left, -Top);
-                    }
-                }
-            }
-            else {
-                // For whatever reason, our parent can't paint our background, but we need some kind of background
-                // since we're transparent
-                graphics.FillRectangle(SystemBrushes.Control, clipRect);
-            }
-        }
-        
-        protected override void OnPaintBackground(PaintEventArgs e) {}
+        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
             Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
@@ -168,15 +158,13 @@ namespace YamuiFramework.Controls {
         #region Overridden Methods
         
         public override Size GetPreferredSize(Size proposedSize) {
-            Size preferredSize;
-            base.GetPreferredSize(proposedSize);
+            //base.GetPreferredSize(proposedSize);
+            //proposedSize = new Size(int.MaxValue, int.MaxValue);
+            //using (var g = CreateGraphics()) {
+            //    preferredSize = TextRenderer.MeasureText(g, Text, FontManager.GetFont(Function), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
+            //}
 
-            using (var g = CreateGraphics()) {
-                proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, Text, FontManager.GetFont(Function), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
-            }
-
-            return preferredSize;
+            return MeasureTextCache.GetTextSize(Text, Font, proposedSize, FontManager.GetTextFormatFlags(TextAlign));
         }
         
         protected override void OnEnabledChanged(EventArgs e) {
@@ -184,12 +172,18 @@ namespace YamuiFramework.Controls {
             Invalidate();
         }
 
+        [DefaultValue(false), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
+        public new bool TabStop {
+            get {
+                return base.TabStop;
+            }
+            set {
+                base.TabStop = value;
+            }
+        }
+
         #endregion
 
-        public void UpdateBoundsPublic() {
-            UpdateBounds();
-            SetBoundsCore(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height, BoundsSpecified.All);
-        }
     }
 
     #region designer

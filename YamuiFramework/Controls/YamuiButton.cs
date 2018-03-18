@@ -34,6 +34,7 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
     public class YamuiButton : Button, IYamuiControl {
+
         #region Properties
 
         /// <summary>

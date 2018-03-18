@@ -151,7 +151,7 @@ namespace YamuiFramework.Forms {
 
             // set form size
             Size = new Size(contentLabel.Width + space, (Padding.Top + Padding.Bottom + yPos).ClampMax(formMaxHeight));
-            if (contentPanel.VertScroll.HasScroll) {
+            if (contentPanel.VerticalScroll.HasScroll) {
                 _hasScrollMessage = true;
                 Width += 10;
             }

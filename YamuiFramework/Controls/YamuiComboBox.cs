@@ -38,6 +38,7 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(ComboBox))]
     [DefaultEvent("SelectedIndexChangedByUser")]
     public sealed class YamuiComboBox : YamuiButton {
+
         #region private
 
         private string _waterMark = "";

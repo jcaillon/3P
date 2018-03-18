@@ -30,7 +30,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiProgressIndicatorDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
-    public class YamuiProgressIndicator : Control, IYamuiControl {
+    public class YamuiProgressIndicator : YamuiControl {
         #region fields
 
         [DefaultValue(false)]
@@ -98,24 +98,6 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region paint
-
-        protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
-                clipRect.Offset(Location);
-                PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                GraphicsState state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
-                }
-            }
-        }
 
         protected override void OnPaintBackground(PaintEventArgs e) {}
 
@@ -191,10 +173,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
-
-        public void UpdateBoundsPublic() {
-            UpdateBounds();
-        }
+        
     }
 
     struct UnitVector {

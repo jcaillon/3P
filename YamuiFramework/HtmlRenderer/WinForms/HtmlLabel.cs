@@ -78,6 +78,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
     /// </para>
     /// </summary>
     public class HtmlLabel : YamuiControl {
+
         #region Fields and Consts
 
         /// <summary>
