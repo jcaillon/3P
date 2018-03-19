@@ -107,7 +107,7 @@ namespace YamuiFramework.Controls {
 
         [DefaultValue(ContentAlignment.TopLeft)]
         [Category("Yamui")]
-        public ContentAlignment TextAlign { get; set; }
+        public ContentAlignment TextAlign { get; set; } = ContentAlignment.TopLeft;
 
         #endregion
 

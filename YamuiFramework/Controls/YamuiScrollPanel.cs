@@ -25,7 +25,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Helper;
@@ -83,9 +82,32 @@ namespace YamuiFramework.Controls {
                 PerformLayout();
             }
         }
+        
+        [Browsable(false)]
+        public Point AutoScrollPosition {
+            get { return new Point(HorizontalScroll.HasScroll ? HorizontalScroll.Value : 0, VerticalScroll.HasScroll ? VerticalScroll.Value : 0); }
+            set {
+                if (HorizontalScroll.HasScroll)
+                    HorizontalScroll.Value = value.X;
+                if (VerticalScroll.HasScroll)
+                    VerticalScroll.Value = value.Y;
+            }
+        }
+
+        [Browsable(false)]
+        public Size AutoScrollMinSize {
+            get {
+                return new Size(HorizontalScroll.LengthToRepresentMinSize, VerticalScroll.LengthToRepresentMinSize);
+            }
+            set {
+                HorizontalScroll.LengthToRepresentMinSize = value.Width;
+                VerticalScroll.LengthToRepresentMinSize = value.Height;
+            }
+        }
 
         private bool _vScroll = true;
         private bool _hScroll = true;
+        private Size _preferedSize;
 
         #endregion
 
@@ -102,11 +124,17 @@ namespace YamuiFramework.Controls {
                 ControlStyles.Opaque, true);
 
             VerticalScroll = new YamuiScrollHandler(true, this);
-            VerticalScroll.OnValueChange += VerticalScrollOnOnValueChange;
+            VerticalScroll.OnValueChange += ScrollOnOnValueChange;
             HorizontalScroll = new YamuiScrollHandler(false, this);
+            HorizontalScroll.OnValueChange += ScrollOnOnValueChange;
         }
 
-        private void VerticalScrollOnOnValueChange(YamuiScrollHandler yamuiScrollHandler, int previousValue, int newValue) {
+        ~YamuiScrollPanel() {
+            VerticalScroll.OnValueChange -= ScrollOnOnValueChange;
+            HorizontalScroll.OnValueChange -= ScrollOnOnValueChange;
+        }
+
+        private void ScrollOnOnValueChange(YamuiScrollHandler yamuiScrollHandler, int previousValue, int newValue) {
             SetDisplayRectLocation(yamuiScrollHandler, previousValue - newValue);
         }
 
@@ -132,7 +160,7 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region core
+        #region handle windows events
         
         /// <summary>
         /// redirect all input key to keydown
@@ -141,53 +169,105 @@ namespace YamuiFramework.Controls {
             e.IsInputKey = true;
             base.OnPreviewKeyDown(e);
         }
-        
+
         /// <summary>
-        /// Set focus on the control for keyboard scrollbars handling
+        /// Handle keydown
         /// </summary>
-        protected override void OnClick(EventArgs e) {
-            base.OnClick(e);
-            Focus();
+        protected override void OnKeyDown(KeyEventArgs e) {
+            e.Handled = HorizontalScroll.HandleKeyDown(e) || VerticalScroll.HandleKeyDown(e);
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
-        //[DebuggerStepThrough]
-        [SecuritySafeCritical]
-        protected override void WndProc(ref Message message) {
-            bool wasHandled;
-            if (HorizontalScroll.IsActive) {
-                wasHandled = HorizontalScroll.HandleWindowsProc(message) || VerticalScroll.HandleWindowsProc(message);
-            } else {
-                wasHandled = VerticalScroll.HandleWindowsProc(message) || HorizontalScroll.HandleWindowsProc(message);
-            }
-
-            if (!wasHandled)
-                base.WndProc(ref message);
-        }
-
-
-
-        
         /// <summary>
-        /// Perform the layout of the control
+        /// Handle mouse wheel
+        /// </summary>
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            if (HorizontalScroll.IsHovered) {
+                HorizontalScroll.HandleScroll(e);
+            } else {
+                VerticalScroll.HandleScroll(e);
+            }
+            base.OnMouseWheel(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e) {
+            HorizontalScroll.HandleMouseDown(e);
+            VerticalScroll.HandleMouseDown(e);
+            Focus();
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e) {
+            HorizontalScroll.HandleMouseUp(e);
+            VerticalScroll.HandleMouseUp(e);
+            base.OnMouseUp(e);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e) {
+            HorizontalScroll.HandleMouseMove(e);
+            VerticalScroll.HandleMouseMove(e);
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e) {
+            HorizontalScroll.HandleMouseLeave(e);
+            VerticalScroll.HandleMouseLeave(e);
+            base.OnMouseLeave(e);
+        }
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
+        }
+        
+        protected override void OnResize(EventArgs e) {
+            ApplyPreferedSize(_preferedSize);
+            base.OnResize(e);
+        }
+
+        /// <summary>
+        /// Perform the layout of the control (call SuspendLayout/ResumeLayout to temporaly stop calling this method)
         /// </summary>
         protected override void OnLayout(LayoutEventArgs levent) {
             base.OnLayout(levent);
             if (!string.IsNullOrEmpty(levent.AffectedProperty) && levent.AffectedProperty.Equals("Bounds")) {
-                OnLayoutChanged();
+                if (levent.AffectedControl != null && levent.AffectedControl != this) {
+                    // when a child item changes bounds
+                    UpdatePreferedSizeIfNeeded(levent.AffectedControl);
+                    ApplyPreferedSize(_preferedSize);
+                }
             }
         }
 
+        #endregion
+
+        #region core
+
+        /// <summary>
+        /// Control the controls added
+        /// </summary>
+        protected override void OnControlAdded(ControlEventArgs e) {
+            base.OnControlAdded(e);
+            if (!(e.Control is IYamuiControl)) {
+                throw new Exception("All controls added to this panel should implement " + nameof(IYamuiControl));
+            }
+        }
+
+        /// <summary>
+        /// Override, called at the end of initializeComponent() in forms made with the designer
+        /// </summary>
         public new void PerformLayout() {
-            OnLayoutChanged();
+            ApplyPreferedSize(PreferedSize());
             base.PerformLayout();
         }
 
-        private void OnLayoutChanged() {
-            var size = PreferedSize;
-
+        private void ApplyPreferedSize(Size size) {
             bool needBothScroll = VerticalScroll.UpdateLength(size.Height, Height) &&
                 HorizontalScroll.UpdateLength(size.Width, Width);
-            
             if (needBothScroll) {
                 HorizontalScroll.ExtraEndPadding = VerticalScroll.BarThickness;
                 VerticalScroll.ExtraEndPadding = HorizontalScroll.BarThickness;
@@ -236,21 +316,26 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        private Size PreferedSize {
-            get {
-                int heigth = 0;
-                int width = 0;
-                foreach (Control control in Controls) {
-                    int controlReach = control.Top + control.Height + VerticalScroll.Value;
-                    if (controlReach > heigth) {
-                        heigth = controlReach;
-                    }
-                    controlReach = control.Left + control.Width + HorizontalScroll.Value;
-                    if (controlReach > width) {
-                        width = controlReach;
-                    }
-                }
-                return new Size(width, heigth);
+        /// <summary>
+        /// Get prefered size, i.e. the size we would need to display all the child controls at the same time
+        /// </summary>
+        /// <returns></returns>
+        private Size PreferedSize() {
+            _preferedSize = new Size(0, 0);
+            foreach (Control control in Controls) {
+                UpdatePreferedSizeIfNeeded(control);
+            }
+            return _preferedSize;
+        }
+
+        private void UpdatePreferedSizeIfNeeded(Control control) {
+            int controlReach = control.Top + control.Height + VerticalScroll.Value;
+            if (controlReach > _preferedSize.Height) {
+                _preferedSize.Height = controlReach;
+            }
+            controlReach = control.Left + control.Width + HorizontalScroll.Value;
+            if (controlReach > _preferedSize.Width) {
+                _preferedSize.Width = controlReach;
             }
         }
 
@@ -290,27 +375,6 @@ namespace YamuiFramework.Controls {
                     rect.Height -= VerticalScroll.BarThickness;
                 }
                 return rect;
-            }
-        }
-
-        [Browsable(false)]
-        public Point AutoScrollPosition {
-            get { return new Point(HorizontalScroll.HasScroll ? HorizontalScroll.Value : 0, VerticalScroll.HasScroll ? VerticalScroll.Value : 0); }
-            set {
-                if (HorizontalScroll.HasScroll)
-                    HorizontalScroll.Value = value.X;
-                if (VerticalScroll.HasScroll)
-                    VerticalScroll.Value = value.Y;
-            }
-        }
-
-        [Browsable(false)]
-        public Size AutoScrollMinSize {
-            get {
-                return new Size(HorizontalScroll.MaximumValue, VerticalScroll.MaximumValue);
-            }
-            set {
-                // TODO : 
             }
         }
 

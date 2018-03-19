@@ -459,7 +459,10 @@ namespace YamuiFramework.Controls {
 
             // draw the down arrow
             using (SolidBrush b = new SolidBrush(foreColor)) {
-                e.Graphics.FillPolygon(b, new[] {new Point(ClientRectangle.Width - 20, ClientRectangle.Height/2 - 2), new Point(ClientRectangle.Width - 9, ClientRectangle.Height/2 - 2), new Point(ClientRectangle.Width - 15, ClientRectangle.Height/2 + 4)});
+                var arrowRectangle = ClientRectangle;
+                arrowRectangle.X = arrowRectangle.Width - 20;
+                arrowRectangle.Width = 20;
+                e.Graphics.FillPolygon(b, Utilities.GetArrowPolygon(arrowRectangle, AnchorStyles.Bottom));
             }
 
             // text
