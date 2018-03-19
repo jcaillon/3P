@@ -132,19 +132,40 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region Handle windows messages
+        #region core
+        
+        /// <summary>
+        /// redirect all input key to keydown
+        /// </summary>
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
+            e.IsInputKey = true;
+            base.OnPreviewKeyDown(e);
+        }
+        
+        /// <summary>
+        /// Set focus on the control for keyboard scrollbars handling
+        /// </summary>
+        protected override void OnClick(EventArgs e) {
+            base.OnClick(e);
+            Focus();
+        }
 
         //[DebuggerStepThrough]
         [SecuritySafeCritical]
         protected override void WndProc(ref Message message) {
-            VerticalScroll.HandleWindowsProc(message);
-            HorizontalScroll.HandleWindowsProc(message);
-            base.WndProc(ref message);
-        }
-        
-        #endregion
+            bool wasHandled;
+            if (HorizontalScroll.IsActive) {
+                wasHandled = HorizontalScroll.HandleWindowsProc(message) || VerticalScroll.HandleWindowsProc(message);
+            } else {
+                wasHandled = VerticalScroll.HandleWindowsProc(message) || HorizontalScroll.HandleWindowsProc(message);
+            }
 
-        #region core
+            if (!wasHandled)
+                base.WndProc(ref message);
+        }
+
+
+
         
         /// <summary>
         /// Perform the layout of the control
@@ -164,31 +185,16 @@ namespace YamuiFramework.Controls {
         private void OnLayoutChanged() {
             var size = PreferedSize;
 
-            VerticalScroll.UpdateLength(size.Height, Height);
-
-            // vertical scroll is up and we also need horizontal scrolling
-            if (VerticalScroll.HasScroll && size.Width > Width) {
-                HorizontalScroll.Padding = new Padding(0, 0, VerticalScroll.BarThickness, 0);
-            }
-
-            HorizontalScroll.UpdateLength(size.Width, Width);
+            bool needBothScroll = VerticalScroll.UpdateLength(size.Height, Height) &&
+                HorizontalScroll.UpdateLength(size.Width, Width);
             
-        }
-
-        /// <summary>
-        /// redirect all input key to keydown
-        /// </summary>
-        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            e.IsInputKey = true;
-            base.OnPreviewKeyDown(e);
-        }
-        
-        /// <summary>
-        /// Set focus on the control for keyboard scrollbars handling
-        /// </summary>
-        protected override void OnClick(EventArgs e) {
-            base.OnClick(e);
-            Focus();
+            if (needBothScroll) {
+                HorizontalScroll.ExtraEndPadding = VerticalScroll.BarThickness;
+                VerticalScroll.ExtraEndPadding = HorizontalScroll.BarThickness;
+            } else {
+                HorizontalScroll.ExtraEndPadding = 0;
+                VerticalScroll.ExtraEndPadding = 0;
+            }
         }
 
         /// <summary>
