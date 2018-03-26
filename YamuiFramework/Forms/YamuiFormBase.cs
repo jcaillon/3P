@@ -138,7 +138,7 @@ namespace YamuiFramework.Forms {
         /// test in which part of the form the cursor is in, it allows to resize a borderless window
         /// </summary>
         protected virtual WinApi.HitTest HitTestNca(IntPtr lparam) {
-            var cursorLocation = new Point((short) lparam, (short) ((int) lparam >> 16));
+            var cursorLocation = new Point(lparam.ToInt32());
 
             // top left
             if (RectangleToScreen(new Rectangle(0, 0, ResizeHitDetectionSize, ResizeHitDetectionSize)).Contains(cursorLocation))

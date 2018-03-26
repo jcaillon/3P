@@ -122,27 +122,24 @@ namespace YamuiFramework.Controls {
         /// Maximum length really available to show the content (set with <see cref="UpdateLength"/>)
         /// </summary>
         public int LengthAvailable { get; private set; }
+        
+        public int DrawLength { get; private set; }
 
-        /// <summary>
-        /// Length of the opposed side available to show the content, allows to position the scroll bar in its parent (set with <see cref="UpdateLength"/>)
-        /// </summary>
-        public int OpposedLengthAvailable { get; private set; }
+        public int OpposedDrawLength { get; private set; }
 
         /// <summary>
         /// Update the length to represent as well as the length really available.
         /// This effectively defines the ratio between thumb length and bar length. 
         /// Returns whether or not the scrollbar is needed
         /// </summary>
-        /// <param name="lengthToRepresent"></param>
-        /// <param name="lengthAvailable"></param>
-        /// <param name="opposedLengthAvailable"></param>
         /// <returns></returns>
-        public bool UpdateLength(int lengthToRepresent, int lengthAvailable, int opposedLengthAvailable) {
+        public bool UpdateLength(int lengthToRepresent, int lengthAvailable, int drawLength, int opposedDrawLength) {
             LengthToRepresent = lengthToRepresent;
             if (LengthToRepresentMinSize > 0)
                 LengthToRepresent = LengthToRepresent.ClampMin(LengthToRepresentMinSize);
             LengthAvailable = lengthAvailable;
-            OpposedLengthAvailable = opposedLengthAvailable;
+            DrawLength = drawLength;
+            OpposedDrawLength = opposedDrawLength;
             AnalyzeScrollNeeded();
             return HasScroll;
         } 
@@ -246,11 +243,11 @@ namespace YamuiFramework.Controls {
 
         public int MaximumValue => (LengthToRepresent - LengthAvailable).ClampMin(0);
         
-        private int BarOpposedOffset => OpposedLengthAvailable - BarThickness;
+        private int BarOpposedOffset => OpposedDrawLength - BarThickness;
 
         private int ThumbThickness => BarThickness - ThumbPadding * 2;
 
-        private int BarLength => LengthAvailable - ExtraEndPadding;
+        private int BarLength => DrawLength - ExtraEndPadding;
         
         protected bool CanDisplayThumb => BarScrollSpace > 0;
 
@@ -435,7 +432,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        public void HandleMouseLeave(EventArgs e) {
+        public void HandleMouseLeave() {
             IsHovered = false;
             IsButtonUpHovered = false;
             IsButtonDownHovered = false;
@@ -590,7 +587,7 @@ namespace YamuiFramework.Controls {
                     break;
 
                 case (int) WinApi.Messages.WM_MOUSELEAVE:
-                    HandleMouseLeave(new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+                    HandleMouseLeave();
                     break;
             }
 

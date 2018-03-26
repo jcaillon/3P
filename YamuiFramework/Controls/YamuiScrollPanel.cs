@@ -101,6 +101,9 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        [Browsable(false)]
+        public bool HasScroll => VerticalScroll.HasScroll || HorizontalScroll.HasScroll;
+
         private bool _vScroll = true;
         private bool _hScroll = true;
         private Size _preferedSize;
@@ -113,6 +116,7 @@ namespace YamuiFramework.Controls {
 
         public YamuiScrollPanel() {
             SetStyle(
+                ControlStyles.UserMouse |
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
@@ -121,10 +125,16 @@ namespace YamuiFramework.Controls {
                 ControlStyles.Selectable |
                 ControlStyles.Opaque, true);
 
-            VerticalScroll = new YamuiScrollHandler(true, this);
+            VerticalScroll = new YamuiScrollHandler(true, this) {
+                SmallChange = 70,
+                LargeChange = 400
+            };
             VerticalScroll.OnValueChange += ScrollOnOnValueChange;
             VerticalScroll.OnRedrawScrollBars += OnRedrawScrollBars;
-            HorizontalScroll = new YamuiScrollHandler(false, this);
+            HorizontalScroll = new YamuiScrollHandler(false, this) {
+                SmallChange = 70,
+                LargeChange = 400
+            };
             HorizontalScroll.OnValueChange += ScrollOnOnValueChange;
             HorizontalScroll.OnRedrawScrollBars += OnRedrawScrollBars;
         }
@@ -233,70 +243,13 @@ namespace YamuiFramework.Controls {
             if (!e.Handled)
                 base.OnKeyDown(e);
         }
-
-        /// <summary>
-        /// Handle mouse wheel
-        /// </summary>
-        protected override void OnMouseWheel(MouseEventArgs e) {
-            if (HorizontalScroll.IsHovered) {
-                HorizontalScroll.HandleScroll(e);
-            } else {
-                VerticalScroll.HandleScroll(e);
-            }
-
-            base.OnMouseWheel(e);
-        }
-
-        protected override void OnMouseDown(MouseEventArgs e) {
-            HorizontalScroll.HandleMouseDown(e);
-            VerticalScroll.HandleMouseDown(e);
-            Focus();
-            base.OnMouseDown(e);
-        }
-
-        protected override void OnMouseUp(MouseEventArgs e) {
-            HorizontalScroll.HandleMouseUp(e);
-            VerticalScroll.HandleMouseUp(e);
-            base.OnMouseUp(e);
-        }
-
-        protected override void OnMouseMove(MouseEventArgs e) {
-            HorizontalScroll.HandleMouseMove(e);
-            VerticalScroll.HandleMouseMove(e);
-            base.OnMouseMove(e);
-        }
-
-        protected override void OnMouseLeave(EventArgs e) {
-            HorizontalScroll.HandleMouseLeave(e);
-            VerticalScroll.HandleMouseLeave(e);
-            base.OnMouseLeave(e);
-        }
-
+        
         /// <summary>
         /// Programatically triggers the OnKeyDown event
         /// </summary>
         public bool PerformKeyDown(KeyEventArgs e) {
             OnKeyDown(e);
             return e.Handled;
-        }
-
-        protected override void OnResize(EventArgs e) {
-            ApplyPreferedSize(_preferedSize);
-            base.OnResize(e);
-        }
-
-        /// <summary>
-        /// Perform the layout of the control (call SuspendLayout/ResumeLayout to temporaly stop calling this method)
-        /// </summary>
-        protected override void OnLayout(LayoutEventArgs levent) {
-            base.OnLayout(levent);
-            if (!string.IsNullOrEmpty(levent.AffectedProperty) && levent.AffectedProperty.Equals("Bounds")) {
-                if (levent.AffectedControl != null && levent.AffectedControl != this) {
-                    // when a child item changes bounds
-                    UpdatePreferedSizeIfNeeded(levent.AffectedControl);
-                    ApplyPreferedSize(_preferedSize);
-                }
-            }
         }
 
         protected override void WndProc(ref Message m) {
@@ -327,45 +280,95 @@ namespace YamuiFramework.Controls {
                     //Return Zero
                     m.Result = IntPtr.Zero;
                     break;
+
                 case (int) WinApi.Messages.WM_NCPAINT:
                     PaintScrollBars();
                     // we handled everything
                     m.Result = IntPtr.Zero;
                     break;
-                case (int) WinApi.Messages.WM_NCMOUSEMOVE:
-                    Point point = new Point(m.LParam.ToInt32());
-                    var mousePosRelativeToThis = PointToClient(Cursor.Position);
-                    if (point.X != mousePosRelativeToThis.X) {
 
+                case (int) WinApi.Messages.WM_NCHITTEST:
+                    // we need to correctly handle this if we want the non client area events (WM_NC*) to fire properly!
+                    var point = PointToClient(new Point(m.LParam.ToInt32()));
+                    if (!ClientRectangle.Contains(point)) {
+                        m.Result = (IntPtr) WinApi.HitTest.HTBORDER;
+                    } else { 
+                        base.WndProc(ref m);
                     }
-                    VerticalScroll.HandleMouseMove(new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
                     break;
-                default: {
+
+                case (int) WinApi.Messages.WM_MOUSEWHEEL:
+                    if (HasScroll) {
+                        // delta negative when scrolling up
+                        var delta = (short) (m.WParam.ToInt64() >> 16);
+                        var mouseEvent1 = new MouseEventArgs(MouseButtons.None, 0, 0, 0, delta);
+                        if (HorizontalScroll.IsHovered) {
+                            HorizontalScroll.HandleScroll(mouseEvent1);
+                        } else {
+                            VerticalScroll.HandleScroll(mouseEvent1);
+                        }
+                    } else {
+                        // propagate the event
+                        base.WndProc(ref m);
+                    }
+                    break;
+                    
+                case (int) WinApi.Messages.WM_NCMOUSELEAVE:
+                    VerticalScroll.HandleMouseLeave();
+                    HorizontalScroll.HandleMouseLeave();  
                     base.WndProc(ref m);
                     break;
-                }
+                    
+                case (int) WinApi.Messages.WM_MOUSEMOVE:
+                    if (VerticalScroll.IsThumbPressed)
+                        VerticalScroll.HandleMouseMove(null);
+                    if (HorizontalScroll.IsThumbPressed)
+                        HorizontalScroll.HandleMouseMove(null);
+                    base.WndProc(ref m);
+                    break;
+
+                case (int) WinApi.Messages.WM_NCMOUSEMOVE:
+                    // track mouse leaving
+                    WinApi.TRACKMOUSEEVENT tme = new WinApi.TRACKMOUSEEVENT();
+                    tme.cbSize = (uint)Marshal.SizeOf(tme);
+                    tme.dwFlags = (uint) (WinApi.TMEFlags.TME_LEAVE | WinApi.TMEFlags.TME_NONCLIENT);
+                    tme.hwndTrack = Handle;
+                    WinApi.TrackMouseEvent(tme);
+
+                    var point2 = PointToClient(new Point(m.LParam.ToInt32()));
+                    var mouseEvent2 = new MouseEventArgs(MouseButtons.None, 0, point2.X, point2.Y, 0);
+                    VerticalScroll.HandleMouseMove(mouseEvent2);  
+                    HorizontalScroll.HandleMouseMove(mouseEvent2);  
+                    base.WndProc(ref m);
+                    break;
+
+                case (int) WinApi.Messages.WM_NCLBUTTONDOWN:
+                    var point3 = PointToClient(new Point(m.LParam.ToInt32()));
+                    var mouseEvent3 = new MouseEventArgs(MouseButtons.Left, 0, point3.X, point3.Y, 0);
+                    VerticalScroll.HandleMouseDown(mouseEvent3);  
+                    HorizontalScroll.HandleMouseDown(mouseEvent3);
+                    Focus();
+                    // here we forward to base button down because it has a internal focus mecanism that we want to exploit
+                    // if we don't do that, the mouse MOVE events are not fired outside the bounds of this control!
+                    m.Msg = (int) WinApi.Messages.WM_LBUTTONDOWN;
+                    base.WndProc(ref m);
+                    break;
+
+                case (int) WinApi.Messages.WM_NCLBUTTONUP:
+                case (int) WinApi.Messages.WM_LBUTTONUP:
+                    var point4 = PointToClient(new Point(m.LParam.ToInt32()));
+                    var mouseEvent4 = new MouseEventArgs(MouseButtons.Left, 0, point4.X, point4.Y, 0);
+                    VerticalScroll.HandleMouseUp(mouseEvent4);  
+                    HorizontalScroll.HandleMouseUp(mouseEvent4);
+                    // here we forward this message to base WM_LBUTTONUP to release the internal focus on this control
+                    m.Msg = (int) WinApi.Messages.WM_LBUTTONUP;
+                    base.WndProc(ref m);
+                    break;
+
+                default:
+                    base.WndProc(ref m);
+                    break;
             }
-        }
-
-        public static void TrackNcMouseLeave(Control control)
-        {
-            TRACKMOUSEEVENT tme = new TRACKMOUSEEVENT();
-            tme.cbSize = (uint)Marshal.SizeOf(tme);
-            tme.dwFlags = 2 | 0x10; // TME_LEAVE | TME_NONCLIENT
-            tme.hwndTrack = control.Handle;
-            TrackMouseEvent(tme);
-        }
-
-        [DllImport("user32")]
-        public static extern bool TrackMouseEvent([In, Out] TRACKMOUSEEVENT lpEventTrack);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class TRACKMOUSEEVENT
-        {
-            public uint cbSize;
-            public uint dwFlags;
-            public IntPtr hwndTrack;
-            public uint dwHoverTime;
         }
 
         private void AdjustClientArea(ref WinApi.RECT rect) {
@@ -374,6 +377,25 @@ namespace YamuiFramework.Controls {
             }
             if (VerticalScroll.HasScroll) {
                 rect.right -= VerticalScroll.BarThickness;
+            }
+        }
+
+        protected override void OnResize(EventArgs e) {
+            ApplyPreferedSize(_preferedSize);
+            base.OnResize(e);
+        }
+
+        /// <summary>
+        /// Perform the layout of the control (call SuspendLayout/ResumeLayout to temporaly stop calling this method)
+        /// </summary>
+        protected override void OnLayout(LayoutEventArgs levent) {
+            base.OnLayout(levent);
+            if (!string.IsNullOrEmpty(levent.AffectedProperty) && levent.AffectedProperty.Equals("Bounds")) {
+                if (levent.AffectedControl != null && levent.AffectedControl != this) {
+                    // when a child item changes bounds
+                    UpdatePreferedSizeIfNeeded(levent.AffectedControl);
+                    ApplyPreferedSize(_preferedSize);
+                }
             }
         }
 
@@ -401,9 +423,16 @@ namespace YamuiFramework.Controls {
 
         private void ApplyPreferedSize(Size size) {
             _needBothScroll = false;
-            _needBothScroll = VerticalScroll.UpdateLength(size.Height, Height, Width) &&
-                                  HorizontalScroll.UpdateLength(size.Width, Width, Height);
-            if (_needBothScroll) {
+            var needHorizontalScroll = HorizontalScroll.HasScroll;
+            var needVerticalScroll = VerticalScroll.UpdateLength(size.Height, Height - (needHorizontalScroll ? HorizontalScroll.BarThickness : 0), Height, Width);
+            HorizontalScroll.UpdateLength(size.Width, Width - (needVerticalScroll ? VerticalScroll.BarThickness : 0), Width, Height);
+
+            if (needHorizontalScroll != HorizontalScroll.HasScroll) {
+                needHorizontalScroll = HorizontalScroll.HasScroll;
+                needVerticalScroll = VerticalScroll.UpdateLength(size.Height, Height - (needHorizontalScroll ? HorizontalScroll.BarThickness : 0), Height, Width);
+            }
+
+            if (needVerticalScroll && needHorizontalScroll) {
                 HorizontalScroll.ExtraEndPadding = VerticalScroll.BarThickness;
                 VerticalScroll.ExtraEndPadding = HorizontalScroll.BarThickness;
                 _leftoverBar = new Rectangle(Width - VerticalScroll.BarThickness, Height - HorizontalScroll.BarThickness, HorizontalScroll.ExtraEndPadding, VerticalScroll.ExtraEndPadding);

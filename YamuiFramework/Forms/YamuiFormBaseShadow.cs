@@ -26,6 +26,7 @@ namespace YamuiFramework.Forms {
     /// Form class that implements interesting utilities + shadow + onpaint + movable borderless
     /// </summary>
     public class YamuiFormBaseShadow : YamuiFormBase {
+
         #region Constants
 
         // for the shadow

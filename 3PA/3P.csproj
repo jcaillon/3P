@@ -846,6 +846,16 @@ exit /b 0
     <PreBuildEvent>if not exist "$(SolutionDir)packages" ( 
 	echo [INFO] Getting needed package
 	DllExport -action Update
+)
+
+echo [INFO] Copying YamuiFramework\bin\$(ConfigurationName)\YamuiFramework.dll to 3PA\_Resource\Dependencies\YamuiFramework.dll
+
+md "$(SolutionDir)3PA\_Resource\Dependencies\" &gt;nul 2&gt;nul
+
+copy /Y "$(SolutionDir)YamuiFramework\bin\$(ConfigurationName)\YamuiFramework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\YamuiFramework.dll" &gt;nul
+if not "%25ERRORLEVEL%25" == "0" (
+	echo [ERROR] COPY ERROR
+	exit 1
 )</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
