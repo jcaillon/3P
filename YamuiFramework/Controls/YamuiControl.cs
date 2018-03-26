@@ -6,7 +6,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
-    public class YamuiControl : Control, IYamuiControl {
+    public class YamuiControl : Control, IScrollableControl {
 
         #region IYamuiControl
 

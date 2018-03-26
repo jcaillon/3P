@@ -27,6 +27,7 @@ namespace YamuiFramework.Forms {
     /// Form class that adds a fade in/out animation on form show/close
     /// </summary>
     public class YamuiFormBaseFadeIn : YamuiFormBase {
+
         #region Private
 
         private bool _closingAnimationOnGoing;

@@ -176,7 +176,7 @@ namespace YamuiFramework.Controls {
                 _currentPage.Location = new Point(XOffsetPage, YOffsetPage);
                 _currentPage.Size = new Size(Width - XOffsetPage, Height - YOffsetPage);
                 Controls.Add(_currentPage);
-                _currentPage.Invalidate();
+                _currentPage.UpdateBoundsPublic();
 
                 Application.DoEvents();
 

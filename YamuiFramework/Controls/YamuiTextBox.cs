@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTextBox.cs) is part of YamuiFramework.
@@ -16,11 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
@@ -28,19 +32,10 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     // https://gist.github.com/Ciantic/471698 : keyboard event listener
 
     [Designer("YamuiFramework.Controls.YamuiRegularTextBox2Designer")]
-    public sealed class YamuiTextBox : TextBox, IYamuiControl {
-
-
-        #region private
-
-        private bool _selectAllTextOnActivate = true;
-        private bool _appliedPadding;
-
-        #endregion
+    public sealed class YamuiTextBox : TextBox, IScrollableControl {
 
         #region Fields
 
@@ -118,11 +113,8 @@ namespace YamuiFramework.Controls {
         /// If true, when the textbox is activated, the whole text is selected
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool SelectAllTextOnActivate {
-            get { return _selectAllTextOnActivate; }
-            set { _selectAllTextOnActivate = value; }
-        }
-        
+        public bool SelectAllTextOnActivate { get; set; } = true;
+
         public override bool AllowDrop { get; set; } = true;
 
         #endregion
@@ -139,29 +131,49 @@ namespace YamuiFramework.Controls {
             MinimumSize = new Size(20, 20);
         }
 
+        ~YamuiTextBox() {
+        }
+
         #endregion
 
         #region Custom paint
 
-        private const int OcmCommand = 0x2111;
-
         protected override void WndProc(ref Message m) {
-            
-            // Send WM_MOUSEWHEEL messages to the parent
-            if (!Multiline && m.Msg == (int) WinApi.Messages.WM_MOUSEWHEEL) WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
-            else base.WndProc(ref m);
-
-            if ((m.Msg == (int) WinApi.Messages.WM_PAINT) || (m.Msg == OcmCommand)) {
-                // Apply a padding INSIDE the textbox (so we can draw the border!)
-                if (!_appliedPadding) {
-                    ApplyInternalPadding();
-                    _appliedPadding = true;
-                } else {
-                    using (Graphics graphics = CreateGraphics()) {
-                        CustomPaint(graphics);
+            /*
+            if (m.Msg == (int) WinApi.Messages.WM_PAINT) {
+                //DrawHelper.HandleWmPaint(ref m, this, CustomPaint2);
+                var hdc = WinApi.GetDC(new HandleRef(this, Handle));
+                if (hdc == IntPtr.Zero) {
+                    return;
+                }
+                try {
+                    using (BufferedGraphics bg = BufferedGraphicsManager.Current.Allocate(hdc, ClientRectangle)) {
+                        Graphics g = bg.Graphics;
+                        g.SetClip(ClientRectangle);
+                        CustomPaint(g);
+                        bg.Render();
                     }
+                } finally {
+                    WinApi.ReleaseDC(new HandleRef(this, Handle), new HandleRef(null, hdc));
                 }
             }
+            */
+            // Send WM_MOUSEWHEEL messages to the parent
+            if (!Multiline && m.Msg == (int) WinApi.Messages.WM_MOUSEWHEEL)
+                WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
+            else
+                base.WndProc(ref m);
+
+            if (m.Msg == (int) WinApi.Messages.WM_PAINT) {
+                using (var graphics = CreateGraphics()) {
+                    CustomPaint(graphics);
+                }
+            }
+        }
+
+        protected override void OnResize(EventArgs e) {
+            base.OnResize(e);
+            ApplyInternalPadding();
         }
 
         public void ApplyInternalPadding() {
@@ -173,6 +185,8 @@ namespace YamuiFramework.Controls {
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
+
+            //g.Clear(BackColor);
 
             if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
                 TextFormatFlags flags = TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis;
@@ -191,12 +205,14 @@ namespace YamuiFramework.Controls {
                         clientRectangle.Offset(0, 2);
                         break;
                 }
+
                 TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonWatermarkFore, flags);
             }
 
             // draw border
-            using (Pen p = new Pen(borderColor))
+            using (Pen p = new Pen(borderColor)) {
                 g.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));
+            }
         }
 
         #endregion
@@ -245,14 +261,14 @@ namespace YamuiFramework.Controls {
 
         protected override void OnDragEnter(DragEventArgs drgevent) {
             base.OnDragEnter(drgevent);
-            if (drgevent.Data.GetDataPresent(DataFormats.FileDrop))  
-                drgevent.Effect = DragDropEffects.Link;  
-            else if (drgevent.Data.GetDataPresent(DataFormats.StringFormat))  
-                drgevent.Effect = DragDropEffects.Copy;  
-            else 
-                drgevent.Effect = DragDropEffects.None;  
+            if (drgevent.Data.GetDataPresent(DataFormats.FileDrop))
+                drgevent.Effect = DragDropEffects.Link;
+            else if (drgevent.Data.GetDataPresent(DataFormats.StringFormat))
+                drgevent.Effect = DragDropEffects.Copy;
+            else
+                drgevent.Effect = DragDropEffects.None;
         }
-        
+
         protected override void OnDragDrop(DragEventArgs drgevent) {
             base.OnDragDrop(drgevent);
             if (drgevent.Data.GetDataPresent(DataFormats.FileDrop)) {
@@ -284,6 +300,7 @@ namespace YamuiFramework.Controls {
                     return true;
                 }
             }
+
             return e.Handled;
         }
 

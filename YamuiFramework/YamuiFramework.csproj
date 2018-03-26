@@ -68,7 +68,7 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
-    <Compile Include="Controls\IYamuiControl.cs" />
+    <Compile Include="Controls\IScrollableControl.cs" />
     <Compile Include="Controls\YamuiControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -199,6 +199,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
+    <Compile Include="Helper\DrawHelper.cs" />
     <Compile Include="Helper\GenericThemeHolder.cs" />
     <Compile Include="Helper\NativeTextRenderer.cs" />
     <Compile Include="Helper\TabOrderManager.cs" />
@@ -355,15 +356,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for YamuiFramework 
-echo [INFO] Copying YamuiFramework\bin\$(ConfigurationName)\$(TargetFileName) to 3PA\_Resource\Dependencies\$(TargetFileName)
-
-md "$(SolutionDir)3PA\_Resource\Dependencies\" &gt;nul 2&gt;nul
-
-copy /Y "$(SolutionDir)YamuiFramework\bin\$(ConfigurationName)\$(TargetFileName)" "$(SolutionDir)3PA\_Resource\Dependencies\$(TargetFileName)" &gt;nul
-if not "%25ERRORLEVEL%25" == "0" (
-	echo [ERROR] COPY ERROR
-	exit 1
-)
 
 exit 0</PostBuildEvent>
   </PropertyGroup>

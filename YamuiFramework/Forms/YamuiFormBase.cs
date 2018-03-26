@@ -31,6 +31,11 @@ namespace YamuiFramework.Forms {
     /// Form class that implements interesting utilities + shadow + onpaint + movable/resizable borderless
     /// </summary>
     public class YamuiFormBase : Form {
+
+        //TODO : see what is done here..
+        // https://github.com/Sardau/Sardauscan/tree/master/Sardauscan/Gui/Forms
+        // https://github.com/mganss/BorderlessForm
+
         #region Constants
 
         public const int BorderWidth = 2;

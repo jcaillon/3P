@@ -26,7 +26,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiImageDesigner")]
-    public class YamuiPictureBox : PictureBox, IYamuiControl {
+    public class YamuiPictureBox : PictureBox, IScrollableControl {
         private Image _backGrndImage;
 
         #region Properties

@@ -25,7 +25,7 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(Panel))]
-    public class YamuiSimplePanel : Panel, IYamuiControl {
+    public class YamuiSimplePanel : Panel, IScrollableControl {
         #region Fields
 
         [DefaultValue(false)]

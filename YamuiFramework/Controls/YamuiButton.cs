@@ -33,7 +33,7 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
     [DefaultEvent("ButtonPressed")]
-    public class YamuiButton : Button, IYamuiControl {
+    public class YamuiButton : Button, IScrollableControl {
 
         #region Properties
 

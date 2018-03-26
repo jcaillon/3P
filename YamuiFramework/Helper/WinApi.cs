@@ -1,4 +1,5 @@
 ﻿#region header
+
 // ========================================================================
 // Copyright (c) 2018 - Julien Caillon (julien.caillon@gmail.com)
 // This file (WinApi.cs) is part of YamuiFramework.
@@ -16,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
+
 #endregion
 
 using System;
@@ -82,9 +84,8 @@ namespace YamuiFramework.Helper {
             public int top;
             public int right;
             public int bottom;
-            
-            public COMRECT() {
-            }
+
+            public COMRECT() { }
 
             public COMRECT(Rectangle r) {
                 left = r.X;
@@ -93,14 +94,13 @@ namespace YamuiFramework.Helper {
                 bottom = r.Bottom;
             }
 
-            
             public COMRECT(int left, int top, int right, int bottom) {
                 this.left = left;
                 this.top = top;
                 this.right = right;
                 this.bottom = bottom;
             }
-            
+
             public static COMRECT FromXYWH(int x, int y, int width, int height) {
                 return new COMRECT(x, y, x + width, y + height);
             }
@@ -132,9 +132,7 @@ namespace YamuiFramework.Helper {
             }
 
             public Size Size {
-                get {
-                    return new Size(right - left, bottom - top);
-                }
+                get { return new Size(right - left, bottom - top); }
             }
         }
 
@@ -152,6 +150,63 @@ namespace YamuiFramework.Helper {
             public IntPtr hwndFrom;
             public IntPtr idFrom;
             public int code;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct NCCALCSIZE_PARAMS {
+            /// <summary>
+            /// Contains the new coordinates of a window that has been moved or resized, that is, it is the proposed new window coordinates.
+            /// </summary>
+            public RECT rectProposed;
+
+            /// <summary>
+            /// Contains the coordinates of the window before it was moved or resized.
+            /// </summary>
+            public RECT rectBeforeMove;
+
+            /// <summary>
+            /// Contains the coordinates of the window's client area before the window was moved or resized.
+            /// </summary>
+            public RECT rectClientBeforeMove;
+
+            /// <summary>
+            /// Pointer to a WINDOWPOS structure that contains the size and position values specified in the operation that moved or resized the window.
+            /// </summary>
+            public WINDOWPOS lpPos;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWPOS {
+            internal IntPtr hwnd;
+            internal IntPtr hWndInsertAfter;
+            internal int x;
+            internal int y;
+            internal int cx;
+            internal int cy;
+            internal uint flags;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PAINTSTRUCT {
+            public IntPtr hdc;
+
+            public bool fErase;
+
+            // rcPaint was a by-value RECT structure
+            public int rcPaint_left;
+            public int rcPaint_top;
+            public int rcPaint_right;
+            public int rcPaint_bottom;
+            public bool fRestore;
+            public bool fIncUpdate;
+            public int reserved1;
+            public int reserved2;
+            public int reserved3;
+            public int reserved4;
+            public int reserved5;
+            public int reserved6;
+            public int reserved7;
+            public int reserved8;
         }
 
         #endregion
@@ -461,6 +516,7 @@ namespace YamuiFramework.Helper {
             SC_TASKLIST = 0xF130,
             SC_SCREENSAVE = 0xF140,
             SC_HOTKEY = 0xF150,
+
             //#if(WINVER >= 0x0400) //Win95
             SC_DEFAULT = 0xF160,
             SC_MONITORPOWER = 0xF170,
@@ -765,9 +821,66 @@ namespace YamuiFramework.Helper {
             VerticalRedraw = 0x1
         }
 
+        [Flags]
+        public enum RedrawWindowFlags : uint {
+            ///<summary>Invalidates lprcUpdate or hrgnUpdate (only one may be non-NULL). 
+            ///If both are NULL, the entire window is invalidated.</summary>
+            Invalidate = 0x1,
+
+            ///<summary>Causes a WM_PAINT message to be posted to the window regardless of 
+            ///whether any portion of the window is invalid.</summary>
+            InternalPaint = 0x2,
+
+            ///<summary>Causes the window to receive a WM_ERASEBKGND message when the window 
+            ///is repainted. The <b>Invalidate</b> flag must also be specified; otherwise, 
+            ///<b>Erase</b> has no effect.</summary>
+            Erase = 0x4,
+
+            ///<summary>Validates lprcUpdate or hrgnUpdate (only one may be non-NULL). If both 
+            ///are NULL, the entire window is validated. This flag does not affect internal 
+            ///WM_PAINT messages.</summary>
+            Validate = 0x8,
+
+            ///<summary>Suppresses any pending internal WM_PAINT messages. This flag does not 
+            ///affect WM_PAINT messages resulting from a non-NULL update area.</summary>
+            NoInternalPaint = 0x10,
+
+            ///<summary>Suppresses any pending WM_ERASEBKGND messages.</summary>
+            NoErase = 0x20,
+
+            ///<summary>Excludes child windows, if any, from the repainting operation.</summary>
+            NoChildren = 0x40,
+
+            ///<summary>Includes child windows, if any, in the repainting operation.</summary>
+            AllChildren = 0x80,
+
+            ///<summary>Causes the affected windows (as specified by the <b>AllChildren</b> and <b>NoChildren</b> flags) to 
+            ///receive WM_NCPAINT, WM_ERASEBKGND, and WM_PAINT messages, if necessary, before the function returns.</summary>
+            UpdateNow = 0x100,
+
+            ///<summary>Causes the affected windows (as specified by the <b>AllChildren</b> and <b>NoChildren</b> flags) 
+            ///to receive WM_NCPAINT and WM_ERASEBKGND messages, if necessary, before the function returns. 
+            ///WM_PAINT messages are received at the ordinary time.</summary>
+            EraseNow = 0x200,
+
+            ///<summary>Causes any part of the nonclient area of the window that intersects the update region 
+            ///to receive a WM_NCPAINT message. The <b>Invalidate</b> flag must also be specified; otherwise, 
+            ///<b>Frame</b> has no effect. The WM_NCPAINT message is typically not sent during the execution of 
+            ///RedrawWindow unless either <b>UpdateNow</b> or <b>EraseNow</b> is specified.</summary>
+            Frame = 0x400,
+
+            ///<summary>Suppresses any pending WM_NCPAINT messages. This flag must be used with <b>Validate</b> and 
+            ///is typically used with <b>NoChildren</b>. <b>NoFrame</b> should be used with care, as it could cause parts 
+            ///of a window to be painted improperly.</summary>
+            NoFrame = 0x800
+        }
+
         #endregion
 
         #region Fields
+
+        public static readonly IntPtr TRUE = new IntPtr(1);
+        public static readonly IntPtr FALSE = IntPtr.Zero;
 
         // Remove menu
         public const int MF_BYPOSITION = 0x400;
@@ -790,8 +903,61 @@ namespace YamuiFramework.Helper {
 
         #region API Calls
 
-        [DllImport("user32.dll", SetLastError=true, ExactSpelling=true, CharSet=CharSet.Auto)]
-        public static extern int  ScrollWindowEx(HandleRef hWnd, int nXAmount, int nYAmount, COMRECT rectScrollRegion, ref RECT rectClip, HandleRef hrgnUpdate, ref RECT prcUpdate, int flags);
+        [DllImport("user32.dll")]
+        public static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, RedrawWindowFlags flags);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, Int32 wMsg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
+        public static extern int ScrollWindowEx(HandleRef hWnd, int nXAmount, int nYAmount, COMRECT rectScrollRegion, ref RECT rectClip, HandleRef hrgnUpdate, ref RECT prcUpdate, int flags);
+        
+        [DllImport("user32.dll", ExactSpelling = true, EntryPoint = "GetDC", CharSet = CharSet.Auto)]
+        private static extern IntPtr IntGetDC(HandleRef hWnd);
+
+        /// <summary>
+        /// Device context for the client area
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <returns></returns>
+        public static IntPtr GetDC(HandleRef hWnd) {
+            return IntGetDC(hWnd);
+        }
+
+        [DllImport("user32.dll", ExactSpelling = true, EntryPoint = "GetWindowDC", CharSet = CharSet.Auto)]
+        private static extern IntPtr IntGetWindowDC(HandleRef hWnd);
+
+        /// <summary>
+        /// Device context for the non client area
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <returns></returns>
+        public static IntPtr GetWindowDC(HandleRef hWnd) {
+            return IntGetWindowDC(hWnd);
+        }
+
+        [DllImport("user32.dll", ExactSpelling = true, EntryPoint = "ReleaseDC", CharSet = CharSet.Auto)]
+        private static extern int IntReleaseDC(HandleRef hWnd, HandleRef hDC);
+
+        public static int ReleaseDC(HandleRef hWnd, HandleRef hDC) {
+            return IntReleaseDC(hWnd, hDC);
+        }
+
+        [DllImport("user32.dll", ExactSpelling = true, EntryPoint = "EndPaint", CharSet = CharSet.Auto)]
+        private static extern bool IntEndPaint(HandleRef hWnd, ref PAINTSTRUCT lpPaint);
+
+        public static bool EndPaint(HandleRef hWnd, [In, MarshalAs(UnmanagedType.LPStruct)]
+            ref PAINTSTRUCT lpPaint) {
+            return IntEndPaint(hWnd, ref lpPaint);
+        }
+
+        [DllImport("user32.dll", ExactSpelling = true, EntryPoint = "BeginPaint", CharSet = CharSet.Auto)]
+        private static extern IntPtr IntBeginPaint(HandleRef hWnd, [In, Out] ref PAINTSTRUCT lpPaint);
+
+        public static IntPtr BeginPaint(HandleRef hWnd, [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+            ref PAINTSTRUCT lpPaint) {
+            return IntBeginPaint(hWnd, ref lpPaint);
+        }
 
         /// <summary>
         /// Returns a rectangle representing the topleft / bottomright corners of the window
@@ -841,7 +1007,7 @@ namespace YamuiFramework.Helper {
         /// <returns>
         /// The handle of the window that currently has focus.
         /// </returns>
-        [DllImport("user32")]
+        [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
         /// <summary>
@@ -853,7 +1019,7 @@ namespace YamuiFramework.Helper {
         /// <returns>
         /// True if the window was focused; False otherwise.
         /// </returns>
-        [DllImport("user32")]
+        [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
@@ -886,7 +1052,8 @@ namespace YamuiFramework.Helper {
             uint wVirtKey,
             uint wScanCode,
             byte[] lpKeyState,
-            [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)] StringBuilder pwszBuff,
+            [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)]
+            StringBuilder pwszBuff,
             int cchBuff,
             uint wFlags);
 
@@ -938,6 +1105,7 @@ namespace YamuiFramework.Helper {
                     break;
                 }
             }
+
             return ch;
         }
 
@@ -947,10 +1115,12 @@ namespace YamuiFramework.Helper {
             if (shift) {
                 keyboardState[(int) Keys.ShiftKey] = 0xff;
             }
+
             if (altGr) {
                 keyboardState[(int) Keys.ControlKey] = 0xff;
                 keyboardState[(int) Keys.Menu] = 0xff;
             }
+
             ToUnicode((uint) key, 0, keyboardState, buf, 256, 0);
             return buf.ToString();
         }

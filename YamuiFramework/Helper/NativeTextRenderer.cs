@@ -23,27 +23,33 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace YamuiFramework.Helper {
+
     /// <summary>      
     /// Wrapper for GDI text rendering functions<br/>      
     /// This class is not thread-safe as GDI function should be called from the UI thread.      
     ///  </summary>      
     public sealed class NativeTextRenderer : IDisposable {
+
+        // Good reads :
+        // https://support.microsoft.com/en-us/help/311221/info-interoperability-between-gdi-and-gdi
+        // https://theartofdev.com/2013/08/12/using-native-gdi-for-text-rendering-in-c/
+
         #region Fields and Consts
 
         /// <summary>
         /// used for <see cref="MeasureString(string,System.Drawing.Font,float,out int,out int)"/> calculation.
         /// </summary>
-        private static readonly int[] _charFit = new int[1];
+        private static readonly int[] CharFit = new int[1];
 
         /// <summary>
         /// used for <see cref="MeasureString(string,System.Drawing.Font,float,out int,out int)"/> calculation.
         /// </summary>
-        private static readonly int[] _charFitWidth = new int[1000];
+        private static readonly int[] CharFitWidth = new int[1000];
 
         /// <summary>
         /// cache of all the font used not to create same font again and again
         /// </summary>
-        private static readonly Dictionary<string, Dictionary<float, Dictionary<FontStyle, IntPtr>>> _fontsCache = new Dictionary<string, Dictionary<float, Dictionary<FontStyle, IntPtr>>>(StringComparer.InvariantCultureIgnoreCase);
+        private static readonly Dictionary<string, Dictionary<float, Dictionary<FontStyle, IntPtr>>> FontsCache = new Dictionary<string, Dictionary<float, Dictionary<FontStyle, IntPtr>>>(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// The wrapped WinForms graphics object
@@ -104,9 +110,9 @@ namespace YamuiFramework.Helper {
             SetFont(font);
 
             var size = new Size();
-            GetTextExtentExPoint(_hdc, str, str.Length, (int) Math.Round(maxWidth), _charFit, _charFitWidth, ref size);
-            charFit = _charFit[0];
-            charFitWidth = charFit > 0 ? _charFitWidth[charFit - 1] : 0;
+            GetTextExtentExPoint(_hdc, str, str.Length, (int) Math.Round(maxWidth), CharFit, CharFitWidth, ref size);
+            charFit = CharFit[0];
+            charFitWidth = charFit > 0 ? CharFitWidth[charFit - 1] : 0;
             return size;
         }
 
@@ -211,7 +217,7 @@ namespace YamuiFramework.Helper {
         private static IntPtr GetCachedHFont(Font font) {
             IntPtr hfont = IntPtr.Zero;
             Dictionary<float, Dictionary<FontStyle, IntPtr>> dic1;
-            if (_fontsCache.TryGetValue(font.Name, out dic1)) {
+            if (FontsCache.TryGetValue(font.Name, out dic1)) {
                 Dictionary<FontStyle, IntPtr> dic2;
                 if (dic1.TryGetValue(font.Size, out dic2)) {
                     dic2.TryGetValue(font.Style, out hfont);
@@ -219,12 +225,12 @@ namespace YamuiFramework.Helper {
                     dic1[font.Size] = new Dictionary<FontStyle, IntPtr>();
                 }
             } else {
-                _fontsCache[font.Name] = new Dictionary<float, Dictionary<FontStyle, IntPtr>>();
-                _fontsCache[font.Name][font.Size] = new Dictionary<FontStyle, IntPtr>();
+                FontsCache[font.Name] = new Dictionary<float, Dictionary<FontStyle, IntPtr>>();
+                FontsCache[font.Name][font.Size] = new Dictionary<FontStyle, IntPtr>();
             }
 
             if (hfont == IntPtr.Zero) {
-                _fontsCache[font.Name][font.Size][font.Style] = hfont = font.ToHfont();
+                FontsCache[font.Name][font.Size][font.Style] = hfont = font.ToHfont();
             }
 
             return hfont;

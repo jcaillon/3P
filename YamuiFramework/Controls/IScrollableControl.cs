@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Controls {
-    interface IYamuiControl {
+
+    interface IScrollableControl {
 
         /// <summary>
         /// Should call the protected method UpdateBounds which... updates bounds

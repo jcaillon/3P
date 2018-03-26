@@ -32,7 +32,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiRadioButtonDesigner")]
     [ToolboxBitmap(typeof(RadioButton))]
-    public class YamuiRadioButton : RadioButton, IYamuiControl {
+    public class YamuiRadioButton : RadioButton, IScrollableControl {
         #region Fields
 
         [DefaultValue(false)]

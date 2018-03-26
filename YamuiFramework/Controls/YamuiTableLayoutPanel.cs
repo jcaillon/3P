@@ -26,7 +26,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
 
     [ToolboxBitmap(typeof(Panel))]
-    public class YamuiTableLayoutPanel : TableLayoutPanel, IYamuiControl {
+    public class YamuiTableLayoutPanel : TableLayoutPanel, IScrollableControl {
         #region Fields
 
         [DefaultValue(false)]

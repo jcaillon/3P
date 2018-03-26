@@ -31,7 +31,7 @@ namespace YamuiFramework.Controls {
 
     [Designer("YamuiFramework.Controls.YamuiCheckBoxDesigner")]
     [ToolboxBitmap(typeof(CheckBox))]
-    public class YamuiCheckBox : CheckBox, IYamuiControl {
+    public class YamuiCheckBox : CheckBox, IScrollableControl {
 
         #region Fields
 

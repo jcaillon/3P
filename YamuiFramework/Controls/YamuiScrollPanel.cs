@@ -31,10 +31,8 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-
     [Designer(typeof(YamuiScrollPanelDesigner))]
     public class YamuiScrollPanel : YamuiControl {
-
         #region fields
 
         [DefaultValue(false)]
@@ -53,7 +51,7 @@ namespace YamuiFramework.Controls {
 
         [Browsable(false)]
         public YamuiScrollHandler VerticalScroll { get; }
-        
+
         [Browsable(false)]
         public YamuiScrollHandler HorizontalScroll { get; }
 
@@ -69,7 +67,7 @@ namespace YamuiFramework.Controls {
                 PerformLayout();
             }
         }
-        
+
         /// <summary>
         /// Can this control have vertical scroll?
         /// </summary>
@@ -82,7 +80,7 @@ namespace YamuiFramework.Controls {
                 PerformLayout();
             }
         }
-        
+
         [Browsable(false)]
         public Point AutoScrollPosition {
             get { return new Point(HorizontalScroll.HasScroll ? HorizontalScroll.Value : 0, VerticalScroll.HasScroll ? VerticalScroll.Value : 0); }
@@ -96,9 +94,7 @@ namespace YamuiFramework.Controls {
 
         [Browsable(false)]
         public Size AutoScrollMinSize {
-            get {
-                return new Size(HorizontalScroll.LengthToRepresentMinSize, VerticalScroll.LengthToRepresentMinSize);
-            }
+            get { return new Size(HorizontalScroll.LengthToRepresentMinSize, VerticalScroll.LengthToRepresentMinSize); }
             set {
                 HorizontalScroll.LengthToRepresentMinSize = value.Width;
                 VerticalScroll.LengthToRepresentMinSize = value.Height;
@@ -108,7 +104,9 @@ namespace YamuiFramework.Controls {
         private bool _vScroll = true;
         private bool _hScroll = true;
         private Size _preferedSize;
-
+        private Rectangle _leftoverBar;
+        private bool _needBothScroll;
+        
         #endregion
 
         #region constructor
@@ -125,8 +123,10 @@ namespace YamuiFramework.Controls {
 
             VerticalScroll = new YamuiScrollHandler(true, this);
             VerticalScroll.OnValueChange += ScrollOnOnValueChange;
+            VerticalScroll.OnRedrawScrollBars += OnRedrawScrollBars;
             HorizontalScroll = new YamuiScrollHandler(false, this);
             HorizontalScroll.OnValueChange += ScrollOnOnValueChange;
+            HorizontalScroll.OnRedrawScrollBars += OnRedrawScrollBars;
         }
 
         ~YamuiScrollPanel() {
@@ -138,12 +138,20 @@ namespace YamuiFramework.Controls {
             SetDisplayRectLocation(yamuiScrollHandler, previousValue - newValue);
         }
 
+        private void OnRedrawScrollBars() {
+            Invalidate();
+            PaintScrollBars();
+        }
+
         #endregion
 
         #region Paint
 
+        /// <summary>
+        /// Paint scrollpanel background
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e) {
-            
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             if (!NoBackgroundImage && !DesignMode) {
@@ -153,15 +161,62 @@ namespace YamuiFramework.Controls {
                     e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
                 }
             }
+        }
 
-            VerticalScroll.Paint(e);
+        private void PaintScrollBars() {
+            if (!IsHandleCreated)
+                return;
+            var hdc = WinApi.GetWindowDC(new HandleRef(this, Handle));
+            if (hdc == IntPtr.Zero) {
+                return;
+            }
+            try {
+                // paint the left over between the 2 scrolls (the small square)
+                if (_needBothScroll) {
+                    PaintOnRectangle(hdc, ref _leftoverBar, PaintLeftOver);
+                }
+                if (VerticalScroll.HasScroll) {
+                    var verticalBar = VerticalScroll.BarRect;
+                    PaintOnRectangle(hdc, ref verticalBar, PaintVerticalScroll);
+                }
+                if (HorizontalScroll.HasScroll) {
+                    var horizontalBar = HorizontalScroll.BarRect;
+                    PaintOnRectangle(hdc, ref horizontalBar, PaintHorizontalScroll);
+                }
+            } finally {
+                WinApi.ReleaseDC(new HandleRef(this, Handle), new HandleRef(null, hdc));
+            }
+        }
+
+        private void PaintLeftOver(PaintEventArgs e) {
+            using (var b = new SolidBrush(YamuiThemeManager.Current.ScrollNormalBack)) {
+                e.Graphics.FillRectangle(b, e.ClipRectangle);
+            }
+        }
+
+        private void PaintHorizontalScroll(PaintEventArgs e) {
             HorizontalScroll.Paint(e);
+        }
+
+        private void PaintVerticalScroll(PaintEventArgs e) {
+            VerticalScroll.Paint(e);
+        }
+
+        private void PaintOnRectangle(IntPtr winDc, ref Rectangle rect, Action<PaintEventArgs> paint) {
+            using (BufferedGraphics bg = BufferedGraphicsManager.Current.Allocate(winDc, rect)) {
+                Graphics g = bg.Graphics;
+                g.SetClip(rect);
+                using (PaintEventArgs e = new PaintEventArgs(g, rect)) {
+                    paint(e);
+                }
+                bg.Render();
+            }
         }
 
         #endregion
 
         #region handle windows events
-        
+
         /// <summary>
         /// redirect all input key to keydown
         /// </summary>
@@ -188,6 +243,7 @@ namespace YamuiFramework.Controls {
             } else {
                 VerticalScroll.HandleScroll(e);
             }
+
             base.OnMouseWheel(e);
         }
 
@@ -223,7 +279,7 @@ namespace YamuiFramework.Controls {
             OnKeyDown(e);
             return e.Handled;
         }
-        
+
         protected override void OnResize(EventArgs e) {
             ApplyPreferedSize(_preferedSize);
             base.OnResize(e);
@@ -243,8 +299,86 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        #endregion
+        protected override void WndProc(ref Message m) {
+            if (DesignMode) {
+                base.WndProc(ref m);
+                return;
+            }
 
+            switch (m.Msg) {
+                case (int) WinApi.Messages.WM_NCCALCSIZE:
+                    //Get Window Rect
+                    var formRect = new Rectangle();
+                    WinApi.GetWindowRect(m.HWnd, ref formRect);
+
+                    //Check WPARAM
+                    if (m.WParam != IntPtr.Zero) {
+                        // When TRUE, LPARAM Points to a NCCALCSIZE_PARAMS structure
+                        var nccsp = (WinApi.NCCALCSIZE_PARAMS) Marshal.PtrToStructure(m.LParam, typeof(WinApi.NCCALCSIZE_PARAMS));
+                        AdjustClientArea(ref nccsp.rectProposed);
+                        Marshal.StructureToPtr(nccsp, m.LParam, true);
+                    } else {
+                        // When FALSE, LPARAM Points to a RECT structure
+                        var clnRect = (WinApi.RECT) Marshal.PtrToStructure(m.LParam, typeof(WinApi.RECT));
+                        AdjustClientArea(ref clnRect);
+                        Marshal.StructureToPtr(clnRect, m.LParam, true);
+                    }
+
+                    //Return Zero
+                    m.Result = IntPtr.Zero;
+                    break;
+                case (int) WinApi.Messages.WM_NCPAINT:
+                    PaintScrollBars();
+                    // we handled everything
+                    m.Result = IntPtr.Zero;
+                    break;
+                case (int) WinApi.Messages.WM_NCMOUSEMOVE:
+                    Point point = new Point(m.LParam.ToInt32());
+                    var mousePosRelativeToThis = PointToClient(Cursor.Position);
+                    if (point.X != mousePosRelativeToThis.X) {
+
+                    }
+                    VerticalScroll.HandleMouseMove(new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+                    break;
+                default: {
+                    base.WndProc(ref m);
+                    break;
+                }
+            }
+        }
+
+        public static void TrackNcMouseLeave(Control control)
+        {
+            TRACKMOUSEEVENT tme = new TRACKMOUSEEVENT();
+            tme.cbSize = (uint)Marshal.SizeOf(tme);
+            tme.dwFlags = 2 | 0x10; // TME_LEAVE | TME_NONCLIENT
+            tme.hwndTrack = control.Handle;
+            TrackMouseEvent(tme);
+        }
+
+        [DllImport("user32")]
+        public static extern bool TrackMouseEvent([In, Out] TRACKMOUSEEVENT lpEventTrack);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class TRACKMOUSEEVENT
+        {
+            public uint cbSize;
+            public uint dwFlags;
+            public IntPtr hwndTrack;
+            public uint dwHoverTime;
+        }
+
+        private void AdjustClientArea(ref WinApi.RECT rect) {
+            if (HorizontalScroll.HasScroll) {
+                rect.bottom -= HorizontalScroll.BarThickness;
+            }
+            if (VerticalScroll.HasScroll) {
+                rect.right -= VerticalScroll.BarThickness;
+            }
+        }
+
+        #endregion
+        
         #region core
 
         /// <summary>
@@ -252,8 +386,8 @@ namespace YamuiFramework.Controls {
         /// </summary>
         protected override void OnControlAdded(ControlEventArgs e) {
             base.OnControlAdded(e);
-            if (!(e.Control is IYamuiControl)) {
-                throw new Exception("All controls added to this panel should implement " + nameof(IYamuiControl));
+            if (!(e.Control is IScrollableControl)) {
+                throw new Exception("All controls added to this panel should implement " + nameof(IScrollableControl));
             }
         }
 
@@ -266,11 +400,13 @@ namespace YamuiFramework.Controls {
         }
 
         private void ApplyPreferedSize(Size size) {
-            bool needBothScroll = VerticalScroll.UpdateLength(size.Height, Height) &&
-                HorizontalScroll.UpdateLength(size.Width, Width);
-            if (needBothScroll) {
+            _needBothScroll = false;
+            _needBothScroll = VerticalScroll.UpdateLength(size.Height, Height, Width) &&
+                                  HorizontalScroll.UpdateLength(size.Width, Width, Height);
+            if (_needBothScroll) {
                 HorizontalScroll.ExtraEndPadding = VerticalScroll.BarThickness;
                 VerticalScroll.ExtraEndPadding = HorizontalScroll.BarThickness;
+                _leftoverBar = new Rectangle(Width - VerticalScroll.BarThickness, Height - HorizontalScroll.BarThickness, HorizontalScroll.ExtraEndPadding, VerticalScroll.ExtraEndPadding);
             } else {
                 HorizontalScroll.ExtraEndPadding = 0;
                 VerticalScroll.ExtraEndPadding = 0;
@@ -281,7 +417,6 @@ namespace YamuiFramework.Controls {
         /// The actual scroll magic is here
         /// </summary>
         private void SetDisplayRectLocation(YamuiScrollHandler scroll, int deltaValue) {
-
             if (deltaValue == 0 || !scroll.HasScroll)
                 return;
 
@@ -301,15 +436,15 @@ namespace YamuiFramework.Controls {
                 | WinApi.SW_ERASE
                 | WinApi.SW_SCROLLCHILDREN
                 | WinApi.SW_SMOOTHSCROLL);
-                                    
+
             UpdateChildrenBound();
-            
+
             Refresh(); // not critical but help reduce flickering
         }
 
         private void UpdateChildrenBound() {
             foreach (Control control in Controls) {
-                var yamuiControl = control as IYamuiControl;
+                var yamuiControl = control as IScrollableControl;
                 if (yamuiControl != null && control.IsHandleCreated) {
                     yamuiControl.UpdateBoundsPublic();
                 }
@@ -325,6 +460,7 @@ namespace YamuiFramework.Controls {
             foreach (Control control in Controls) {
                 UpdatePreferedSizeIfNeeded(control);
             }
+
             return _preferedSize;
         }
 
@@ -333,33 +469,13 @@ namespace YamuiFramework.Controls {
             if (controlReach > _preferedSize.Height) {
                 _preferedSize.Height = controlReach;
             }
+
             controlReach = control.Left + control.Width + HorizontalScroll.Value;
             if (controlReach > _preferedSize.Width) {
                 _preferedSize.Width = controlReach;
             }
         }
-
-        /// <summary>
-        /// Correct original padding as we need extra space for the scrollbars
-        /// </summary>
-        public new Padding Padding {
-            get {
-                var basePadding = base.Padding;
-                if (!DesignMode) {
-                    if (HorizontalScroll.HasScroll) {
-                        basePadding.Bottom = basePadding.Bottom + HorizontalScroll.BarThickness;
-                    }
-                    if (VerticalScroll.HasScroll) {
-                        basePadding.Right = basePadding.Right + VerticalScroll.BarThickness;
-                    }
-                }
-                return basePadding;
-            }
-            set {
-                base.Padding = value;
-            }
-        }
-
+        
         /// <summary>
         /// Very important to display the correct scroll value when coming back to a scrolled panel.
         /// Try without it and watch for yourself
@@ -369,21 +485,19 @@ namespace YamuiFramework.Controls {
                 Rectangle rect = ClientRectangle;
                 if (VerticalScroll.HasScroll)
                     rect.Y = -VerticalScroll.Value;
-                    rect.Width -= HorizontalScroll.BarThickness;
+                rect.Width -= HorizontalScroll.BarThickness;
                 if (HorizontalScroll.HasScroll) {
                     rect.X = -HorizontalScroll.Value;
                     rect.Height -= VerticalScroll.BarThickness;
                 }
+
                 return rect;
             }
         }
 
-        public void ScrollControlIntoView(Control control) {
-            
-        }
+        public void ScrollControlIntoView(Control control) { }
 
         #endregion
-
     }
 
     internal class YamuiScrollPanelDesigner : ControlDesigner {
