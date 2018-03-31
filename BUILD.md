@@ -3,11 +3,12 @@
 ## Notes :
 
 > This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
+>
 > I'm currently using visual studio 2017 and can not guarantee the build on prior versions
+
 
 ### Getting the Source Code
 
-First, you'll need to clone the repo from the GitHub repository. To do this using the command-line version of Git,
 you'll need to issue the following command in your terminal:
 
     git clone --recursive https://github.com/jcaillon/3P.git
@@ -42,6 +43,16 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
 ```
 
+
+# ANALYZE
+
+Using [coverity](https://scan.coverity.com/download?tab=csharp)
+
+```
+cd 3P
+cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
+7z a 3P.zip ./cov-int/*
+```
 
 # RELEASE
 

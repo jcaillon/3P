@@ -19,7 +19,7 @@ Old releases information can be found [here on the website](https://jcaillon.git
 
 ## Build information
 
-[How to build this project](BUILD.md)
+Details/help on [how to build this project](BUILD.md)
 
 ## IMPORTANT MESSAGE
 
