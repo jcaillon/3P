@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Controls.YamuiList;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.FileExplorer {
     partial class FileExplorerForm {
@@ -27,27 +29,27 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.btGetHelp = new YamuiFramework.Controls.YamuiButtonImage();
-            this.lbNbErrors = new YamuiFramework.Controls.YamuiLabel();
-            this.lbErrorText = new YamuiFramework.Controls.YamuiLabel();
-            this.btClearAllErrors = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btNextError = new YamuiFramework.Controls.YamuiButtonImage();
-            this.lbStatus = new YamuiFramework.Controls.YamuiLabel();
-            this.btPrevError = new YamuiFramework.Controls.YamuiButtonImage();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
-            this.btDirectory = new YamuiFramework.Controls.YamuiButtonImage();
-            this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
-            this.btGotoDir = new YamuiFramework.Controls.YamuiButtonImage();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.lblEnv = new YamuiFramework.Controls.YamuiLabel();
-            this.btEnvList = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btEnvModify = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btStopExecution = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btBringProcessToFront = new YamuiFramework.Controls.YamuiButtonImage();
-            this.filterbox = new YamuiFramework.Controls.YamuiList.YamuiFilterBox();
-            this.yamuiList = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
+            this.toolTipHtml = new HtmlToolTip();
+            this.btGetHelp = new YamuiButtonImage();
+            this.lbNbErrors = new YamuiLabel();
+            this.lbErrorText = new YamuiLabel();
+            this.btClearAllErrors = new YamuiButtonImage();
+            this.btNextError = new YamuiButtonImage();
+            this.lbStatus = new YamuiLabel();
+            this.btPrevError = new YamuiButtonImage();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.yamuiLabel3 = new YamuiLabel();
+            this.btDirectory = new YamuiButtonImage();
+            this.lbDirectory = new YamuiLabel();
+            this.btGotoDir = new YamuiButtonImage();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.lblEnv = new YamuiLabel();
+            this.btEnvList = new YamuiButtonImage();
+            this.btEnvModify = new YamuiButtonImage();
+            this.btStopExecution = new YamuiButtonImage();
+            this.btBringProcessToFront = new YamuiButtonImage();
+            this.filterbox = new YamuiFilterBox();
+            this.yamuiList = new YamuiFilteredTypeTreeList();
             this.SuspendLayout();
             // 
             // toolTipHtml
@@ -78,7 +80,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // lbNbErrors
             // 
-            this.lbNbErrors.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbNbErrors.Function = FontFunction.Small;
             this.lbNbErrors.Location = new System.Drawing.Point(70, 23);
             this.lbNbErrors.Margin = new System.Windows.Forms.Padding(3);
             this.lbNbErrors.Name = "lbNbErrors";
@@ -91,7 +93,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.lbErrorText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbErrorText.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbErrorText.Function = FontFunction.Small;
             this.lbErrorText.Location = new System.Drawing.Point(93, 23);
             this.lbErrorText.Margin = new System.Windows.Forms.Padding(3);
             this.lbErrorText.Name = "lbErrorText";
@@ -132,7 +134,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.lbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbStatus.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbStatus.Function = FontFunction.Small;
             this.lbStatus.Location = new System.Drawing.Point(112, 1);
             this.lbStatus.Margin = new System.Windows.Forms.Padding(3);
             this.lbStatus.Name = "lbStatus";
@@ -158,7 +160,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(2, 1);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -169,7 +171,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel3.Function = FontFunction.Heading;
             this.yamuiLabel3.Location = new System.Drawing.Point(2, 93);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel3.Name = "yamuiLabel3";
@@ -196,7 +198,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lbDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbDirectory.BackColor = System.Drawing.Color.Transparent;
-            this.lbDirectory.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbDirectory.Function = FontFunction.Small;
             this.lbDirectory.Location = new System.Drawing.Point(30, 117);
             this.lbDirectory.Margin = new System.Windows.Forms.Padding(3);
             this.lbDirectory.Name = "lbDirectory";
@@ -223,7 +225,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(2, 47);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -235,7 +237,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.lblEnv.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblEnv.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lblEnv.Function = FontFunction.Small;
             this.lblEnv.Location = new System.Drawing.Point(4, 69);
             this.lblEnv.Margin = new System.Windows.Forms.Padding(3);
             this.lblEnv.Name = "lblEnv";
@@ -380,7 +382,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiButtonImage btEnvModify;
         private YamuiButtonImage btStopExecution;
         private YamuiButtonImage btBringProcessToFront;
-        private YamuiFramework.Controls.YamuiList.YamuiFilterBox filterbox;
-        private YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList yamuiList;
+        private YamuiFilterBox filterbox;
+        private YamuiFilteredTypeTreeList yamuiList;
     }
 }

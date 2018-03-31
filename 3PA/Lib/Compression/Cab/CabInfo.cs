@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace WixToolset.Dtf.Compression.Cab {
+namespace _3PA.Lib.Compression.Cab {
     /// <summary>
     /// Object representing a cabinet file on disk; provides access to
     /// file-based operations on the cabinet file.

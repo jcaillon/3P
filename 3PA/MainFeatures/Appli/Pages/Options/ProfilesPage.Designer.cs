@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.Controls.YamuiList;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Controls.YamuiList;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class ProfilesPage {
@@ -27,21 +29,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiFilteredTypeTreeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
-            this.yamuiScrollList1 = new YamuiFramework.Controls.YamuiList.YamuiScrollList();
-            this.yamuiFilteredTypeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeList();
-            this.btMinus = new YamuiFramework.Controls.YamuiButton();
-            this.btPlus = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiButton4 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiButton3 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
+            this.yamuiFilteredTypeTreeList1 = new YamuiFilteredTypeTreeList();
+            this.yamuiScrollList1 = new YamuiScrollList();
+            this.yamuiFilteredTypeList1 = new YamuiFilteredTypeList();
+            this.btMinus = new YamuiButton();
+            this.btPlus = new YamuiButton();
+            this.yamuiButton4 = new YamuiButton();
+            this.yamuiButton3 = new YamuiButton();
+            this.yamuiButton2 = new YamuiButton();
             this.flFilter1 = new YamuiTextBox();
-            this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
-            this.YamuiFilteredList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredList();
-            this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.htmlToolTip1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.yamuiButton1 = new YamuiButton();
+            this.YamuiFilteredList1 = new YamuiFilteredList();
+            this.yamuiLabel3 = new YamuiLabel();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.htmlToolTip1 = new HtmlToolTip();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -208,7 +210,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel3.Function = FontFunction.Heading;
             this.yamuiLabel3.Location = new System.Drawing.Point(0, 131);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel3.Name = "yamuiLabel3";
@@ -219,7 +221,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 59);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -230,7 +232,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -264,7 +266,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiFilteredList YamuiFilteredList1;
         private YamuiTextBox flFilter1;
         private YamuiButton yamuiButton1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip1;
+        private HtmlToolTip htmlToolTip1;
         private YamuiButton yamuiButton2;
         private YamuiButton yamuiButton3;
         private YamuiButton yamuiButton4;

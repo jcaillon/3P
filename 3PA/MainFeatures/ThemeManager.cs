@@ -24,8 +24,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
-using YamuiFramework.Themes;
+using Yamui.Framework.Helper;
+using Yamui.Framework.Themes;
 using _3PA.MainFeatures.AutoCompletionFeature;
 using _3PA._Resource;
 

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetEnvironment {
@@ -27,73 +28,73 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.htmlLabel16 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel15 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel14 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.flListAliases = new YamuiFramework.Controls.YamuiTextBox();
-            this.flCanDoTblName = new YamuiFramework.Controls.YamuiTextBox();
-            this.htmlLabel13 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.flCanDoTblType = new YamuiFramework.Controls.YamuiTextBox();
-            this.htmlLabel12 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft8 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox8 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright8 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.htmlLabel11 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft7 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox7 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright7 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.htmlLabel10 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btDbView = new YamuiFramework.Controls.YamuiButton();
-            this.btDbDeleteDownload = new YamuiFramework.Controls.YamuiButton();
-            this.btDbDownload = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.flSuffix = new YamuiFramework.Controls.YamuiTextBox();
-            this.flLabel = new YamuiFramework.Controls.YamuiTextBox();
-            this.txLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
-            this.htmlLabel8 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.flExtraPf = new YamuiFramework.Controls.YamuiTextBox();
-            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft2 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btright2 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
-            this.flExtraProPath = new YamuiFramework.Controls.YamuiTextBox();
-            this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft3 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox3 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright3 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft4 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright4 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.tgCompLocally = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
-            this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft5 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright5 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.flCmdLine = new YamuiFramework.Controls.YamuiTextBox();
-            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft6 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btright6 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btDelete = new YamuiFramework.Controls.YamuiButton();
-            this.flName = new YamuiFramework.Controls.YamuiTextBox();
-            this.btEdit = new YamuiFramework.Controls.YamuiButton();
-            this.btAdd = new YamuiFramework.Controls.YamuiButton();
-            this.btCopy = new YamuiFramework.Controls.YamuiButton();
-            this.btSave = new YamuiFramework.Controls.YamuiButton();
-            this.btCancel = new YamuiFramework.Controls.YamuiButton();
-            this.areaDb = new YamuiFramework.Controls.YamuiArea();
-            this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
-            this.cbName = new YamuiFramework.Controls.YamuiComboBox();
-            this.areaLeftButtons = new YamuiFramework.Controls.YamuiArea();
+            this.toolTip = new HtmlToolTip();
+            this.htmlLabel16 = new HtmlLabel();
+            this.htmlLabel15 = new HtmlLabel();
+            this.htmlLabel14 = new HtmlLabel();
+            this.flListAliases = new YamuiTextBox();
+            this.flCanDoTblName = new YamuiTextBox();
+            this.htmlLabel13 = new HtmlLabel();
+            this.flCanDoTblType = new YamuiTextBox();
+            this.htmlLabel12 = new HtmlLabel();
+            this.btleft8 = new YamuiButtonImage();
+            this.textbox8 = new YamuiTextBox();
+            this.btright8 = new YamuiButtonImage();
+            this.htmlLabel11 = new HtmlLabel();
+            this.btleft7 = new YamuiButtonImage();
+            this.textbox7 = new YamuiTextBox();
+            this.btright7 = new YamuiButtonImage();
+            this.htmlLabel10 = new HtmlLabel();
+            this.htmlLabel9 = new HtmlLabel();
+            this.htmlLabel1 = new HtmlLabel();
+            this.btDbView = new YamuiButton();
+            this.btDbDeleteDownload = new YamuiButton();
+            this.btDbDownload = new YamuiButton();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.linkurl = new HtmlLabel();
+            this.flSuffix = new YamuiTextBox();
+            this.flLabel = new YamuiTextBox();
+            this.txLabel = new HtmlLabel();
+            this.yamuiLabel4 = new YamuiLabel();
+            this.yamuiLabel3 = new YamuiLabel();
+            this.htmlLabel8 = new HtmlLabel();
+            this.flExtraPf = new YamuiTextBox();
+            this.htmlLabel2 = new HtmlLabel();
+            this.btleft2 = new YamuiButtonImage();
+            this.btright2 = new YamuiButtonImage();
+            this.textbox2 = new YamuiTextBox();
+            this.flExtraProPath = new YamuiTextBox();
+            this.htmlLabel3 = new HtmlLabel();
+            this.btleft3 = new YamuiButtonImage();
+            this.textbox3 = new YamuiTextBox();
+            this.btright3 = new YamuiButtonImage();
+            this.htmlLabel4 = new HtmlLabel();
+            this.btleft4 = new YamuiButtonImage();
+            this.textbox4 = new YamuiTextBox();
+            this.btright4 = new YamuiButtonImage();
+            this.tgCompLocally = new YamuiButtonToggle();
+            this.lblLocally = new YamuiLabel();
+            this.htmlLabel5 = new HtmlLabel();
+            this.btleft5 = new YamuiButtonImage();
+            this.textbox5 = new YamuiTextBox();
+            this.btright5 = new YamuiButtonImage();
+            this.htmlLabel6 = new HtmlLabel();
+            this.flCmdLine = new YamuiTextBox();
+            this.htmlLabel7 = new HtmlLabel();
+            this.btleft6 = new YamuiButtonImage();
+            this.textbox6 = new YamuiTextBox();
+            this.btright6 = new YamuiButtonImage();
+            this.btDelete = new YamuiButton();
+            this.flName = new YamuiTextBox();
+            this.btEdit = new YamuiButton();
+            this.btAdd = new YamuiButton();
+            this.btCopy = new YamuiButton();
+            this.btSave = new YamuiButton();
+            this.btCancel = new YamuiButton();
+            this.areaDb = new YamuiArea();
+            this.cbSuffix = new YamuiComboBox();
+            this.cbName = new YamuiComboBox();
+            this.areaLeftButtons = new YamuiArea();
             this.SuspendLayout();
             // 
             // toolTip
@@ -507,7 +508,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -572,7 +573,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel4
             // 
             this.yamuiLabel4.AutoSize = true;
-            this.yamuiLabel4.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel4.Function = FontFunction.Heading;
             this.yamuiLabel4.Location = new System.Drawing.Point(0, 113);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel4.Name = "yamuiLabel4";
@@ -584,7 +585,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.yamuiLabel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.yamuiLabel3.Function = FontFunction.Small;
             this.yamuiLabel3.Location = new System.Drawing.Point(610, 148);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel3.Name = "yamuiLabel3";
@@ -863,7 +864,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // lblLocally
             // 
             this.lblLocally.AutoSize = true;
-            this.lblLocally.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lblLocally.Function = FontFunction.Small;
             this.lblLocally.Location = new System.Drawing.Point(193, 414);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";

@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     public partial class ZipEngine {
         /// <summary>
         /// Extracts files from a zip archive or archive chain.

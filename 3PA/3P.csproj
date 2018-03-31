@@ -326,7 +326,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
-    <Content Include="_Resource\Dependencies\YamuiFramework.dll" />
+    <Content Include="_Resource\Dependencies\Yamui.Framework.dll" />
     <Content Include="_Resource\Images\Appli\Clock.png" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoError.ico" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoMandatory.ico" />
@@ -772,15 +772,16 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
+    <ProjectReference Include="..\Yamui.Framework\Yamui.Framework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
-      <Name>YamuiFramework</Name>
+      <Name>Yamui.Framework</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo [INFO] End of build for 3P
+
+md "$(SolutionDir)Releases" &gt;nul 2&gt;nul
 
 set NPPFOLDERNAME=3P_notepad++
 set CPUNAME=x86
@@ -794,6 +795,11 @@ set RELEASENAME=3P_x64.zip
 call :copytonotepad
 call :ziprelease
 
+if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
+	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
+)
+
+
 exit 0
 
 
@@ -805,12 +811,10 @@ echo [INFO] Zipping release Releases\%25RELEASENAME%25
 WHERE 7z &gt;nul 2&gt;nul
 IF not "%25ERRORLEVEL%25" == "0" (
 	echo 7z.exe not found in the path, can't create the .zip releases
-	goto :label_end
+	exit 1
 )
 
-md "$(SolutionDir)Releases" &gt;nul 2&gt;nul
 del /Q "$(SolutionDir)Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
-
 
 echo [INFO] Adding netFrameworkChecker\NetFrameworkChecker.exe
 
@@ -830,9 +834,8 @@ exit /b 0
 REM copy files to the notepad++ folder for dev purposes
 :copytonotepad
 
-echo [INFO] Copying output files to ..\%25NPPFOLDERNAME%25\plugins\
-
 if exist "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\" ( 
+	echo [INFO] Copying output files to ..\%25NPPFOLDERNAME%25\plugins\
 	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetFileName)" &gt;nul
 	if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
 		copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
@@ -848,11 +851,9 @@ exit /b 0
 	DllExport -action Update
 )
 
-echo [INFO] Copying YamuiFramework\bin\$(ConfigurationName)\YamuiFramework.dll to 3PA\_Resource\Dependencies\YamuiFramework.dll
-
+echo [INFO] Copying Yamui.Framework.dll
 md "$(SolutionDir)3PA\_Resource\Dependencies\" &gt;nul 2&gt;nul
-
-copy /Y "$(SolutionDir)YamuiFramework\bin\$(ConfigurationName)\YamuiFramework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\YamuiFramework.dll" &gt;nul
+copy /Y "$(SolutionDir)Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\Yamui.Framework.dll" &gt;nul
 if not "%25ERRORLEVEL%25" == "0" (
 	echo [ERROR] COPY ERROR
 	exit 1

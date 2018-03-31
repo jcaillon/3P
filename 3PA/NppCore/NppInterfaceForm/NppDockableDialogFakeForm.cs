@@ -21,7 +21,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore.NppInterfaceForm {

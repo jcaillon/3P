@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 using _3PA.MainFeatures.Appli.Pages.Options;
 
 namespace _3PA.MainFeatures.Appli.Pages.Actions {
@@ -28,45 +29,45 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.btOpenHook = new YamuiFramework.Controls.YamuiButton();
-            this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.lbl_deployDir = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btStart = new YamuiFramework.Controls.YamuiButton();
-            this.btReset = new YamuiFramework.Controls.YamuiButton();
-            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.toggleAutoUpdateSourceDir = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.htmlLabel11 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.toggleOnlyGenerateRcode = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.btSeeRules = new YamuiFramework.Controls.YamuiButton();
-            this.lblCurEnv = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel8 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btDelete = new YamuiFramework.Controls.YamuiButton();
-            this.btSaveAs = new YamuiFramework.Controls.YamuiButton();
-            this.btSave = new YamuiFramework.Controls.YamuiButton();
-            this.cbName = new YamuiFramework.Controls.YamuiComboBox();
-            this.btRules = new YamuiFramework.Controls.YamuiButton();
-            this.lbl_rules = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.title = new YamuiFramework.Controls.YamuiLabel();
-            this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btUndo = new YamuiFramework.Controls.YamuiButtonImage();
-            this.fl_directory = new YamuiFramework.Controls.YamuiTextBox();
-            this.btOpen = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btHistoric = new YamuiFramework.Controls.YamuiButtonImage();
-            this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.toggleRecurs = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.toggleMono = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.fl_nbProcess = new YamuiFramework.Controls.YamuiTextBox();
-            this.btCancel = new YamuiFramework.Controls.YamuiButton();
-            this.btReport = new YamuiFramework.Controls.YamuiButton();
-            this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
-            this.btTest = new YamuiFramework.Controls.YamuiButton();
+            this.tooltip = new HtmlToolTip();
+            this.btOpenHook = new YamuiButton();
+            this.htmlLabel5 = new HtmlLabel();
+            this.lbl_deployDir = new HtmlLabel();
+            this.btStart = new YamuiButton();
+            this.btReset = new YamuiButton();
+            this.htmlLabel7 = new HtmlLabel();
+            this.toggleAutoUpdateSourceDir = new YamuiButtonToggle();
+            this.htmlLabel11 = new HtmlLabel();
+            this.toggleOnlyGenerateRcode = new YamuiButtonToggle();
+            this.btSeeRules = new YamuiButton();
+            this.lblCurEnv = new HtmlLabel();
+            this.htmlLabel9 = new HtmlLabel();
+            this.htmlLabel8 = new HtmlLabel();
+            this.btDelete = new YamuiButton();
+            this.btSaveAs = new YamuiButton();
+            this.btSave = new YamuiButton();
+            this.cbName = new YamuiComboBox();
+            this.btRules = new YamuiButton();
+            this.lbl_rules = new HtmlLabel();
+            this.lbl_report = new HtmlLabel();
+            this.linkurl = new HtmlLabel();
+            this.title = new YamuiLabel();
+            this.btBrowse = new YamuiButtonImage();
+            this.btUndo = new YamuiButtonImage();
+            this.fl_directory = new YamuiTextBox();
+            this.btOpen = new YamuiButtonImage();
+            this.btHistoric = new YamuiButtonImage();
+            this.htmlLabel3 = new HtmlLabel();
+            this.htmlLabel2 = new HtmlLabel();
+            this.toggleRecurs = new YamuiButtonToggle();
+            this.htmlLabel1 = new HtmlLabel();
+            this.toggleMono = new YamuiButtonToggle();
+            this.htmlLabel4 = new HtmlLabel();
+            this.fl_nbProcess = new YamuiTextBox();
+            this.btCancel = new YamuiButton();
+            this.btReport = new YamuiButton();
+            this.progressBar = new YamuiProgressBar();
+            this.btTest = new YamuiButton();
             this.SuspendLayout();
             // 
             // tooltip
@@ -427,7 +428,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // title
             // 
             this.title.AutoSize = true;
-            this.title.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.title.Function = FontFunction.Heading;
             this.title.Location = new System.Drawing.Point(0, 0);
             this.title.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.title.Name = "title";

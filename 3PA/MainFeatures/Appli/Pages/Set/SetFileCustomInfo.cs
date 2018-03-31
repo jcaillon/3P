@@ -20,7 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamuiFramework.Controls;
+using Yamui.Framework.Controls;
 using _3PA.Lib;
 using _3PA.MainFeatures.ModificationsTag;
 using _3PA.NppCore;

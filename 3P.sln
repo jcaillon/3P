@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3P", "3PA\3P.csproj", "{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamuiFramework", "YamuiFramework\YamuiFramework.csproj", "{0A4BE330-B2BB-43A5-B392-15DCE4736E55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yamui.Framework", "Yamui.Framework\Yamui.Framework.csproj", "{0A4BE330-B2BB-43A5-B392-15DCE4736E55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

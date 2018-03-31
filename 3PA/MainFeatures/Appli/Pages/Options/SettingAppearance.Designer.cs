@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class SettingAppearance {
@@ -27,15 +28,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.cbSyntax = new YamuiFramework.Controls.YamuiComboBox();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.cbApplication = new YamuiFramework.Controls.YamuiComboBox();
-            this._simplePanelAccentColor = new YamuiFramework.Controls.YamuiSimplePanel();
-            this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
-            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.linkurl = new HtmlLabel();
+            this.htmlLabel1 = new HtmlLabel();
+            this.htmlLabel7 = new HtmlLabel();
+            this.cbSyntax = new YamuiComboBox();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.cbApplication = new YamuiComboBox();
+            this._simplePanelAccentColor = new YamuiSimplePanel();
+            this.yamuiLabel20 = new YamuiLabel();
+            this.toolTip = new HtmlToolTip();
             this.SuspendLayout();
             // 
             // linkurl
@@ -93,7 +94,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 222);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -125,7 +126,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel20
             // 
             this.yamuiLabel20.AutoSize = true;
-            this.yamuiLabel20.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel20.Function = FontFunction.Heading;
             this.yamuiLabel20.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel20.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel20.Name = "yamuiLabel20";

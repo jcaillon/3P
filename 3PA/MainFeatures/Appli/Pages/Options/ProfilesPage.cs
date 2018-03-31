@@ -20,8 +20,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Controls;
-using YamuiFramework.Controls.YamuiList;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Controls.YamuiList;
 using _3PA.Lib;
 using _3PA._Resource;
 

@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.IO;
 using System.Runtime.Serialization;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// Base exception class for compression operations. Compression libraries should
     /// derive subclass exceptions with more specific error information relevent to the

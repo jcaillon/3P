@@ -19,7 +19,7 @@
 #endregion
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 
 namespace _3PA.NppCore.NppInterfaceForm {
     /// <summary>

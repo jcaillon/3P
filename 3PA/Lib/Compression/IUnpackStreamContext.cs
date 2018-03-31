@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.IO;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// This interface provides the methods necessary for the <see cref="CompressionEngine"/> to open
     /// and close streams for archives and files. The implementor of this interface can use any

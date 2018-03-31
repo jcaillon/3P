@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.IO;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// Wraps a source stream and offsets all read/write/seek calls by a given value.
     /// </summary>

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Controls.YamuiList;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     partial class CodeExplorerForm {
@@ -27,12 +29,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.filterbox = new YamuiFramework.Controls.YamuiList.YamuiFilterBox();
-            this.yamuiList = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.lbCurrentScope = new YamuiFramework.Controls.YamuiLabel();
-            this.pbCurrentScope = new YamuiFramework.Controls.YamuiPictureBox();
+            this.toolTipHtml = new HtmlToolTip();
+            this.filterbox = new YamuiFilterBox();
+            this.yamuiList = new YamuiFilteredTypeTreeList();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.lbCurrentScope = new YamuiLabel();
+            this.pbCurrentScope = new YamuiPictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbCurrentScope)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,7 +75,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(2, 1);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -85,7 +87,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // 
             this.lbCurrentScope.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbCurrentScope.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lbCurrentScope.Function = FontFunction.Small;
             this.lbCurrentScope.Location = new System.Drawing.Point(128, 1);
             this.lbCurrentScope.Margin = new System.Windows.Forms.Padding(3);
             this.lbCurrentScope.Name = "lbCurrentScope";
@@ -125,8 +127,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         #endregion
 
         private HtmlToolTip toolTipHtml;
-        private YamuiFramework.Controls.YamuiList.YamuiFilterBox filterbox;
-        private YamuiFramework.Controls.YamuiList.YamuiFilteredTypeTreeList yamuiList;
+        private YamuiFilterBox filterbox;
+        private YamuiFilteredTypeTreeList yamuiList;
         private YamuiLabel yamuiLabel2;
         private YamuiLabel lbCurrentScope;
         private YamuiPictureBox pbCurrentScope;

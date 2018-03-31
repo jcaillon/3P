@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.Appli.Pages {
     partial class Template {

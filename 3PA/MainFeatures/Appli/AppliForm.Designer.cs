@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli {
     partial class AppliForm {
@@ -26,7 +26,7 @@ namespace _3PA.MainFeatures.Appli {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.labelTitle = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.labelTitle = new HtmlLabel();
             this.SuspendLayout();
             // 
             // labelTitle

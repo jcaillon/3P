@@ -20,7 +20,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore {

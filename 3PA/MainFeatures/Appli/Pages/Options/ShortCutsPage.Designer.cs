@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class ShortCutsPage {
@@ -27,10 +28,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.static_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.static_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.static_title = new YamuiFramework.Controls.YamuiLabel();
+            this.tooltip = new HtmlToolTip();
+            this.static_name = new HtmlLabel();
+            this.static_keys = new HtmlLabel();
+            this.static_title = new YamuiLabel();
             this.SuspendLayout();
             // 
             // tooltip
@@ -83,7 +84,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // static_title
             // 
             this.static_title.AutoSize = true;
-            this.static_title.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.static_title.Function = FontFunction.Heading;
             this.static_title.Location = new System.Drawing.Point(0, 0);
             this.static_title.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.static_title.Name = "static_title";

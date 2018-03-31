@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     [SuppressUnmanagedCodeSecurity]
     internal static class SafeNativeMethods {
         [DllImport("kernel32.dll", SetLastError = true)]

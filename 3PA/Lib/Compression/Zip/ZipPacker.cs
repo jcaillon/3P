@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     public partial class ZipEngine {
         /// <summary>
         /// Creates a zip archive or chain of zip archives.

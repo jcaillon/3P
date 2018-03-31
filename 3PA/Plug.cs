@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;

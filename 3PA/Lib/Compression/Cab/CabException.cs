@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Globalization;
 using System.Resources;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace WixToolset.Dtf.Compression.Cab {
+namespace _3PA.Lib.Compression.Cab {
     /// <summary>
     /// Exception class for cabinet operations.
     /// </summary>

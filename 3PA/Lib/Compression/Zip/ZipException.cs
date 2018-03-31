@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     /// <summary>
     /// Exception class for zip operations.
     /// </summary>

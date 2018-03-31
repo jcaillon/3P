@@ -17,9 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.Collections.Generic;
 
-namespace WixToolset.Dtf.Compression.Cab {
+namespace _3PA.Lib.Compression.Cab {
     /// <summary>
     /// Generic class for managing allocations of integer handles
     /// for objects of a certain type.

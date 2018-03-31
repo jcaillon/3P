@@ -17,7 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// Specifies the compression level ranging from minimum compresion to
     /// maximum compression, or no compression at all.

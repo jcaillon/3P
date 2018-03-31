@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// Stream context used to extract a single file from an archive into a memory stream.
     /// </summary>

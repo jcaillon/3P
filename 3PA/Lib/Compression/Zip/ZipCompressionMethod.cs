@@ -17,9 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.Diagnostics.CodeAnalysis;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     /// <summary>
     /// Identifies the compression method or &quot;algorithm&quot;
     /// used for a single file within a zip archive.

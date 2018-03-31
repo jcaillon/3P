@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace WixToolset.Dtf.Compression.Cab {
+namespace _3PA.Lib.Compression.Cab {
     internal abstract class CabWorker : IDisposable {
         internal const string CabStreamName = "%%CAB%%";
 

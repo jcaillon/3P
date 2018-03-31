@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using WixToolset.Dtf.Compression;
 using _3PA.MainFeatures.Pro.Deploy;
 
 namespace _3PA.Lib.Compression.Prolib {

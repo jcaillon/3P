@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -24,9 +25,8 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using _3PA.MainFeatures.Pro;
 
-namespace WixToolset.Dtf.Compression {
+namespace _3PA.Lib.Compression {
     /// <summary>
     /// Abstract object representing a compressed archive on disk;
     /// provides access to file-based operations on the archive.

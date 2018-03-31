@@ -19,7 +19,7 @@
 #endregion
 using System;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.NppCore;
 using _3PA.WindowsCore;
 

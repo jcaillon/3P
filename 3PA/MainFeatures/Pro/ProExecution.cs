@@ -24,7 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Pro.Deploy;

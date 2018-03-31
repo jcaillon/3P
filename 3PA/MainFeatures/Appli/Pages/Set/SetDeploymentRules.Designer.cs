@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetDeploymentRules {
@@ -27,12 +28,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.bt_import = new YamuiFramework.Controls.YamuiButton();
-            this.bt_modify = new YamuiFramework.Controls.YamuiButton();
-            this.html_list = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.linkurl = new HtmlLabel();
+            this.bt_import = new YamuiButton();
+            this.bt_modify = new YamuiButton();
+            this.html_list = new HtmlLabel();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.toolTip = new HtmlToolTip();
             this.SuspendLayout();
             // 
             // scrollPanel
@@ -95,7 +96,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";

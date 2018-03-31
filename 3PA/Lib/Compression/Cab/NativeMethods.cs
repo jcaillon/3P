@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 
-namespace WixToolset.Dtf.Compression.Cab {
+namespace _3PA.Lib.Compression.Cab {
     /// <summary>
     /// Native DllImport methods and related structures and constants used for
     /// cabinet creation and extraction via cabinet.dll.

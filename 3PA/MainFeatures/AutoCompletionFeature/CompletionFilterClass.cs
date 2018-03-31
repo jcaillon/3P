@@ -17,7 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using YamuiFramework.Controls.YamuiList;
+
+using Yamui.Framework.Controls.YamuiList;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Parser.Pro;
 

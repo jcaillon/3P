@@ -83,9 +83,9 @@ namespace _3PA._Resource {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] YamuiFramework {
+        internal static byte[] Yamui_Framework {
             get {
-                object obj = ResourceManager.GetObject("YamuiFramework", resourceCulture);
+                object obj = ResourceManager.GetObject("Yamui_Framework", resourceCulture);
                 return ((byte[])(obj));
             }
         }

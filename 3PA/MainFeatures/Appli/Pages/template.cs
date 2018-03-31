@@ -17,7 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using YamuiFramework.Controls;
+
+using Yamui.Framework.Controls;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages {

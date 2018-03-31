@@ -20,9 +20,9 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.HtmlRenderer.Core.Core.Entities;
+using Yamui.Framework.HtmlRenderer.WinForms;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;
 

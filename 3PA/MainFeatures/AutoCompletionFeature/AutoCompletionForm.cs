@@ -21,8 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Controls.YamuiList;
-using YamuiFramework.Helper;
+using Yamui.Framework.Controls.YamuiList;
+using Yamui.Framework.Helper;
 using _3PA.NppCore.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.AutoCompletionFeature {

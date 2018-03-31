@@ -1,1 +1,0 @@
-﻿http://code.google.com/p/dot-net-transitions/wiki/CodingWithTransitions#Adding_the_Transitions_library_to_your_project

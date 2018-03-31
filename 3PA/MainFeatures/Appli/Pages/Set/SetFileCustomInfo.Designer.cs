@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetFileCustomInfo {
@@ -28,36 +29,36 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetFileCustomInfo));
-            this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.bt_delete = new YamuiFramework.Controls.YamuiButton();
-            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.lb_SaveState = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.cb_info = new YamuiFramework.Controls.YamuiComboBox();
-            this.fl_appliName = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_appliVersion = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_workPackage = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_bugId = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_correctionNb = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_correctionDate = new YamuiFramework.Controls.YamuiTextBox();
-            this.fl_correctionDesc = new YamuiFramework.Controls.YamuiTextBox();
-            this.bt_ok = new YamuiFramework.Controls.YamuiButton();
-            this.bt_cancel = new YamuiFramework.Controls.YamuiButton();
-            this.bt_today = new YamuiFramework.Controls.YamuiButton();
-            this.bt_default = new YamuiFramework.Controls.YamuiButton();
-            this.bt_clear = new YamuiFramework.Controls.YamuiButton();
-            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.btTemplate = new YamuiFramework.Controls.YamuiButton();
-            this.bt_SaveState = new YamuiFramework.Controls.YamuiPictureBox();
+            this.lbl_about = new HtmlLabel();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.bt_delete = new YamuiButton();
+            this.htmlLabel7 = new HtmlLabel();
+            this.lb_FileName = new HtmlLabel();
+            this.lb_SaveState = new HtmlLabel();
+            this.htmlLabel9 = new HtmlLabel();
+            this.htmlLabel6 = new HtmlLabel();
+            this.htmlLabel5 = new HtmlLabel();
+            this.htmlLabel4 = new HtmlLabel();
+            this.htmlLabel3 = new HtmlLabel();
+            this.htmlLabel2 = new HtmlLabel();
+            this.htmlLabel1 = new HtmlLabel();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.cb_info = new YamuiComboBox();
+            this.fl_appliName = new YamuiTextBox();
+            this.fl_appliVersion = new YamuiTextBox();
+            this.fl_workPackage = new YamuiTextBox();
+            this.fl_bugId = new YamuiTextBox();
+            this.fl_correctionNb = new YamuiTextBox();
+            this.fl_correctionDate = new YamuiTextBox();
+            this.fl_correctionDesc = new YamuiTextBox();
+            this.bt_ok = new YamuiButton();
+            this.bt_cancel = new YamuiButton();
+            this.bt_today = new YamuiButton();
+            this.bt_default = new YamuiButton();
+            this.bt_clear = new YamuiButton();
+            this.toolTip = new HtmlToolTip();
+            this.btTemplate = new YamuiButton();
+            this.bt_SaveState = new YamuiPictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).BeginInit();
             this.SuspendLayout();
             // 
@@ -115,7 +116,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -281,7 +282,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 105);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel1.Name = "yamuiLabel1";

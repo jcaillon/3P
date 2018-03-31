@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Fonts;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class ExportPage {
@@ -28,20 +29,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportPage));
-            this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.topAuto = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btDownloadAll = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btRefresh = new YamuiFramework.Controls.YamuiButtonImage();
-            this.topDistant = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.topLocDate = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btHistoric = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btOpen = new YamuiFramework.Controls.YamuiButtonImage();
-            this.fl_directory = new YamuiFramework.Controls.YamuiTextBox();
-            this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.tooltip = new HtmlToolTip();
+            this.topAuto = new HtmlLabel();
+            this.btDownloadAll = new YamuiButtonImage();
+            this.btRefresh = new YamuiButtonImage();
+            this.topDistant = new HtmlLabel();
+            this.topLocDate = new HtmlLabel();
+            this.htmlLabel3 = new HtmlLabel();
+            this.btHistoric = new YamuiButtonImage();
+            this.btOpen = new YamuiButtonImage();
+            this.fl_directory = new YamuiTextBox();
+            this.btBrowse = new YamuiButtonImage();
+            this.yamuiLabel2 = new YamuiLabel();
+            this.lbl_about = new HtmlLabel();
+            this.yamuiLabel1 = new YamuiLabel();
             this.SuspendLayout();
             // 
             // tooltip
@@ -198,7 +199,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Function = FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 124);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -223,7 +224,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel1.Function = FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";

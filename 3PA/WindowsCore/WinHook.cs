@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Helper;
 using _3PA.Lib;
 
 namespace _3PA.WindowsCore {

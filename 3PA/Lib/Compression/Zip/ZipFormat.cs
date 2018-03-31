@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -24,7 +25,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     [Flags]
     internal enum ZipFileFlags : ushort {
         None = 0x0000,

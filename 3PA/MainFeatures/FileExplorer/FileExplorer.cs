@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using YamuiFramework.Controls.YamuiList;
+using Yamui.Framework.Controls.YamuiList;
 using _3PA.MainFeatures.Appli;
 using _3PA.NppCore;
 using _3PA.NppCore.NppInterfaceForm;

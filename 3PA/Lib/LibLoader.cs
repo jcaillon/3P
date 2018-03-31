@@ -19,7 +19,7 @@
 #endregion
 using System;
 using System.Reflection;
-using YamuiFramework.Themes;
+using Yamui.Framework.Themes;
 using _3PA.MainFeatures;
 using _3PA._Resource;
 
@@ -41,7 +41,7 @@ namespace _3PA.Lib {
                     var assName = args.Name.Substring(0, commaIdx);
                     switch (assName) {
                         case "YamuiFramework":
-                            return Assembly.Load(DependenciesResources.YamuiFramework);
+                            return Assembly.Load(DependenciesResources.Yamui_Framework);
                         default:
                             return null;
                     }

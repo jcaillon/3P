@@ -19,8 +19,8 @@
 #endregion
 using System.Collections.Generic;
 using System.Linq;
-using YamuiFramework.Controls.YamuiList;
-using YamuiFramework.Helper;
+using Yamui.Framework.Controls.YamuiList;
+using Yamui.Framework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser.Pro;
 using _3PA.NppCore;

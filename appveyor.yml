@@ -2,6 +2,10 @@ version: '{branch}.{build}'
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
+install:
+- cmd: git submodule update --init --recursive
+before_build:
+- cmd: DllExport -action Update
 build:
   project: 3P.sln
   verbosity: minimal
@@ -27,6 +31,6 @@ notifications:
 - provider: Email
   to:
   - greenzest@gmail.com
-  on_build_success: true
+  on_build_success: false
   on_build_failure: true
   on_build_status_changed: false

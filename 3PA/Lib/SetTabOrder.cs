@@ -19,8 +19,8 @@
 #endregion
 using System.Collections;
 using System.Windows.Forms;
-using YamuiFramework.Controls;
-using YamuiFramework.Helper;
+using Yamui.Framework.Controls;
+using Yamui.Framework.Helper;
 
 namespace _3PA.Lib {
 

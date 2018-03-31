@@ -1,6 +1,29 @@
-## Build info : ##
+## Source code :
 
-### How to configure DLLExport ###
+> This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
+
+### Getting the Source Code
+
+First, you'll need to clone the repo from the GitHub repository. To do this using the command-line version of Git,
+you'll need to issue the following command in your terminal:
+
+    git clone --recursive https://github.com/jcaillon/3P.git
+
+If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you wil have to check the `recursive` box when cloning.
+
+### Updating the Source Code
+
+To correctly update ALL the source code, you need to do an extra command after the classic `git pull` to also update the submodules :
+
+    git pull
+    git submodule update
+
+If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need to select **Git Sync...** in the menu. Once you do that, you'll need to click the **Pull** and **Submodule Update** buttons in the following dialog.
+
+
+## Build info :
+
+### How to configure DLLExport
 
 - Execute `DllExport.bat -action Configure`
 - This download packages\DllExport.1.6.0
@@ -11,9 +34,9 @@
 - If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
 
 
-## When releasing (Note to myself) : ##
+## When releasing (Note to myself) :
 
-### Manual chores ###
+### Manual chores
 
 - Change the dll version of 3P in AssemblyInfo.cs, the format should be vX.X.X.X with v(major).(minor).(revision).(lastdigit) ; *the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)*
 - Check the default Config + UserCommunication.Notify()
@@ -25,7 +48,7 @@
   - past the body from the `NEXT_RELEASE_NOTES.md` file
   - Publish the release!
 
-### Done automatically by appveyor ###
+### Done automatically by appveyor
 
 - Clean/Rebuild in release mode, not debug for both x86 and x64 versions
 - Create 2 .zip in the release on github :
@@ -33,12 +56,16 @@
   - "3P_x64.zip" containg the 3P.dll (64 bits!) and eventually the .pdb file
 
 
-## Update Notepad++ plugin manager ##
+## Update Notepad++ plugin manager
 
 - For the x86 version, it happens here : https://npppm.bruderste.in/
 - For the x64 version, at the moment, it happens here : https://github.com/bruderstein/npp-plugins-x64
 
-### How to test the plugin manager ###
+### How to test the plugin manager
+
+Dev list : http://nppxmldev.bruderste.in/pm/xml/plugins.zip
+
+Normal list : http://nppxml.bruderste.in/pm/xml/plugins.zip
 
 Mock the files download by the plugin manager with fiddler :
 
@@ -88,7 +115,7 @@ copy plugins.xml PluginManagerPlugins.xml
 7z a "plugins.zip" "PluginManagerPlugins.xml"
 ```
 
-### x32 plugin xml ###
+### x32 plugin xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -120,7 +147,7 @@ copy plugins.xml PluginManagerPlugins.xml
 </plugins>
 ```
 
-### x64 plugin xml ###
+### x64 plugin xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

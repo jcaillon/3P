@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
-using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using Yamui.Framework.Forms;
+using Yamui.Framework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.NppCore;
 

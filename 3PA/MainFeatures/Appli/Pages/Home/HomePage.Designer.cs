@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.WinForms;
+using Yamui.Framework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
     partial class HomePage {
@@ -27,7 +26,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.html = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.html = new HtmlLabel();
             this.SuspendLayout();
             // 
             // html

@@ -19,7 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using YamuiFramework.Controls.YamuiList;
+using Yamui.Framework.Controls.YamuiList;
 
 #pragma warning disable 1570
 

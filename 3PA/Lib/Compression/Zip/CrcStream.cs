@@ -17,11 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
+
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace WixToolset.Dtf.Compression.Zip {
+namespace _3PA.Lib.Compression.Zip {
     /// <summary>
     /// Wraps a source stream and calcaluates a CRC over all bytes that are read or written.
     /// </summary>

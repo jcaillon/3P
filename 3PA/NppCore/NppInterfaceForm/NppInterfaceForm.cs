@@ -21,8 +21,8 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
-using YamuiFramework.Helper;
+using Yamui.Framework.Forms;
+using Yamui.Framework.Helper;
 
 namespace _3PA.NppCore.NppInterfaceForm {
     /// <summary>
