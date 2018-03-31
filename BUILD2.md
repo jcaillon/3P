@@ -1,3 +1,5 @@
+# BUILD
+
 ## Source code :
 
 > This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
@@ -33,6 +35,14 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 - Read all the info here : https://github.com/3F/DllExport
 - If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
 
+## Manual build command
+
+```
+"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
+```
+
+
+# RELEASE
 
 ## When releasing (Note to myself) :
 
@@ -55,6 +65,7 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
   - "3P.zip" containing the 3P.dll (32 bits) and eventually the .pdb file
   - "3P_x64.zip" containg the 3P.dll (64 bits!) and eventually the .pdb file
 
+# DEPLOYMENT TEST
 
 ## Update Notepad++ plugin manager
 

@@ -4,11 +4,9 @@ configuration: Release
 platform: Any CPU
 install:
 - cmd: git submodule update --init --recursive
-before_build:
-- cmd: DllExport -action Update
 build:
   project: 3P.sln
-  verbosity: minimal
+  verbosity: detailed
 artifacts:
 - path: Releases\3P.zip
   name: 3P.zip
