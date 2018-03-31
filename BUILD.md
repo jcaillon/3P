@@ -51,7 +51,7 @@ Using [coverity](https://scan.coverity.com/download?tab=csharp)
 ```
 cd 3P
 cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
-7z a 3P.zip ./cov-int/*
+7z a 3P.zip ./cov-int*
 ```
 
 # RELEASE

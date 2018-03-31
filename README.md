@@ -3,6 +3,7 @@
 ## An OpenEdge ABL (formerly 4GL Progress) code editor / IDE running on notepad++
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv?svg=true)](https://ci.appveyor.com/project/jcaillon/3p)
+[![Coverity status](https://scan.coverity.com/projects/15362/badge.svg)](https://scan.coverity.com/projects/jcaillon-3p)
 [![GitHub release](https://img.shields.io/github/release/jcaillon/3P.svg)](https://github.com/jcaillon/3P/releases/latest)
 [![Total downloads](https://img.shields.io/github/downloads/jcaillon/3P/total.svg)](https://github.com/jcaillon/3P/releases)
 
