@@ -1,8 +1,9 @@
 # BUILD
 
-## Source code :
+## Notes :
 
 > This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
+> I'm currently using visual studio 2017 and can not guarantee the build on prior versions
 
 ### Getting the Source Code
 

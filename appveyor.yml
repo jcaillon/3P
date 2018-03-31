@@ -6,7 +6,7 @@ install:
 - cmd: git submodule update --init --recursive
 build:
   project: 3P.sln
-  verbosity: detailed
+  verbosity: minimal
 artifacts:
 - path: Releases\3P.zip
   name: 3P.zip
