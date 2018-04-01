@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Yamui.Framework.Helper;
@@ -43,23 +44,14 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-
-            User.SendComment("hello", "https://api.github.com/repos/3pUser/yolo/issues/1/comments");
+            UserCommunication.Notify(Oetools.Utilities.Poc1.Test1());
+            //User.SendComment("hello", "https://api.github.com/repos/3pUser/yolo/issues/1/comments");
         }
         
         public static void DebugTest2() {
 
-            var exec = new ProExecutionTableCrc {
-                NeedDatabaseConnection = true
-            };
-            exec.OnExecutionOk += execution => {
-                var sb = new StringBuilder();
-                foreach (var tab in ((ProExecutionTableCrc)execution).GetTableCrc()) {
-                    sb.Append(tab.QualifiedTableName + " -> " + tab.Crc + "<br>");
-                }
-                UserCommunication.Notify(sb.ToString());
-            };
-            exec.Start();
+            UserCommunication.Notify(nameof(_3PA._Resource));
+            UserCommunication.Notify(string.Join("<br>", Assembly.GetExecutingAssembly().GetManifestResourceNames()));
         }
 
         public static void DebugTest3() {

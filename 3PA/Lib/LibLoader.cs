@@ -18,32 +18,31 @@
 // ========================================================================
 #endregion
 using System;
+using System.IO;
 using System.Reflection;
 using Yamui.Framework.Themes;
 using _3PA.MainFeatures;
-using _3PA._Resource;
 
 namespace _3PA.Lib {
     internal static class LibLoader {
+
         /// <summary>
         /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
         /// to the program
         /// Subscribe to the following event on start :
         /// AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
         public static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
             try {
                 var commaIdx = args.Name.IndexOf(",", StringComparison.CurrentCultureIgnoreCase);
                 if (commaIdx > 0) {
                     var assName = args.Name.Substring(0, commaIdx);
-                    switch (assName) {
-                        case "YamuiFramework":
-                            return Assembly.Load(DependenciesResources.Yamui_Framework);
-                        default:
-                            return null;
+                    var sourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(_3PA)}.{nameof(_Resource)}.{nameof(_Resource.Dependencies)}.{assName}.dll");
+                    if (sourceStream == null)
+                        return null;
+                    using(var memoryStream = new MemoryStream()) {
+                        sourceStream.CopyTo(memoryStream);
+                        return  Assembly.Load(memoryStream.ToArray());
                     }
                 }
             } catch (Exception e) {

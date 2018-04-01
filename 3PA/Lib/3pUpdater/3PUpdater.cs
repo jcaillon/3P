@@ -23,10 +23,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using _3PA.MainFeatures;
-using _3PA._Resource;
+using _3PA._Resource.Dependencies;
 
 namespace _3PA.Lib._3pUpdater {
     internal class _3PUpdater {
+
         #region private fields
 
         private static _3PUpdater _instance;
@@ -106,7 +107,7 @@ namespace _3PA.Lib._3pUpdater {
         private void ExecuteUpdateAsync() {
             try {
                 // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                if (Utils.FileWriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? DependenciesResources._3pUpdater_user : DependenciesResources._3pUpdater)) {
+                if (Utils.FileWriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? DependenciesResources._3pUpdater_user : DependenciesResources._3pUpdater_admin)) {
                     // execute it, don't wait for the end
                     var process = new Process {StartInfo = {FileName = Config.FileUpdaterExe, WindowStyle = ProcessWindowStyle.Hidden}};
                     process.Start();

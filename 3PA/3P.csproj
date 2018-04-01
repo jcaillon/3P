@@ -311,22 +311,24 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="_Resource\Dependencies\DependenciesResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DependenciesResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="_Resource\HtmlResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>HtmlResources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="_Resource\DependenciesResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DependenciesResources.resx</DependentUpon>
     </Compile>
     <Compile Include="_Resource\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
-    <Content Include="_Resource\Dependencies\Yamui.Framework.dll" />
+    <Content Include="Lib\3pUpdater\3pUpdater_admin.exe" />
+    <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
+    <EmbeddedResource Include="_Resource\Dependencies\Yamui.Framework.dll" />
     <Content Include="_Resource\Images\Appli\Clock.png" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoError.ico" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoMandatory.ico" />
@@ -731,7 +733,7 @@
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="_Resource\DependenciesResources.resx">
+    <EmbeddedResource Include="_Resource\Dependencies\DependenciesResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>DependenciesResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -756,8 +758,6 @@
     <Content Include="_Resource\Html\Pages\home.html" />
     <Content Include="_Resource\Html\StyleSheet.css" />
     <Content Include="_Resource\Html\Pages\getting_started.txt" />
-    <Content Include="Lib\3pUpdater\3pUpdater.exe" />
-    <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -772,6 +772,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj">
+      <Project>{245b6aa2-4f7a-4d51-9c9b-104d59161603}</Project>
+      <Name>Oetools.Packager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Oetools.Packager\Oetools.Utilities\Oetools.Utilities\Oetools.Utilities.csproj">
+      <Project>{d8ef6334-d168-47a5-ac96-7b3bb40f61c6}</Project>
+      <Name>Oetools.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Yamui.Framework\Yamui.Framework\Yamui.Framework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>Yamui.Framework</Name>
@@ -779,7 +787,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo [INFO] End of build for 3P
+    <PostBuildEvent>
+echo [INFO] End of build for 3P
 
 md "$(SolutionDir)Releases" &gt;nul 2&gt;nul
 
@@ -846,18 +855,38 @@ exit /b 0
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>if not exist "$(SolutionDir)packages" ( 
+    <PreBuildEvent>
+if not exist "$(SolutionDir)packages" ( 
 	echo [INFO] Getting needed package
 	DllExport -action Update
 )
 
-echo [INFO] Copying Yamui.Framework.dll
-md "$(SolutionDir)3PA\_Resource\Dependencies\" &gt;nul 2&gt;nul
-copy /Y "$(SolutionDir)Yamui.Framework\Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\Yamui.Framework.dll" &gt;nul
+
+echo [INFO] Copying .dll dependencies
+
+del /Q "$(ProjectDir)_Resource\Dependencies\*.dll" &gt;nul 2&gt;nul
+md "$(ProjectDir)_Resource\Dependencies\" &gt;nul 2&gt;nul
+
+copy /Y "$(SolutionDir)Yamui.Framework\Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
 if not "%25ERRORLEVEL%25" == "0" (
 	echo [ERROR] COPY ERROR
-	exit 1
-)</PreBuildEvent>
+	REM exit 1
+)
+
+copy /Y "$(SolutionDir)Oetools.Packager\Oetools.Packager\bin\$(ConfigurationName)\net461\Oetools.Packager.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
+if not "%25ERRORLEVEL%25" == "0" (
+    echo [ERROR] COPY ERROR
+    REM exit 1
+)
+
+copy /Y "$(SolutionDir)Oetools.Packager\Oetools.Utilities\Oetools.Utilities\bin\$(ConfigurationName)\net461\Oetools.Utilities.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
+if not "%25ERRORLEVEL%25" == "0" (
+    echo [ERROR] COPY ERROR
+    REM exit 1
+)
+
+exit 0
+</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <DllExportIdent>8319FAEE-D7D1-4E76-8ABC-3B96D32BAD6F</DllExportIdent>

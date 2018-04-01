@@ -40,9 +40,20 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 ## Manual build command
 
 ```
-"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
+"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
 ```
 
+## Additionnal remarks 
+
+*Why are the libraries like Oetools.Packager targetting explicitly net461 AND netstandard2.0?*
+
+This question is legit, according to this [net-implementation-support table](https://docs.microsoft.com/en-us/dotnet/standard/net-standard#net-implementation-support), we should be able to make our libraries target netstandard2.0 and that's it. Since our application is targetting v4.6.1 and since v4.6.1 implements netstandard2.0 we should be good. But nop! This is explained here :
+
+- https://www.youtube.com/watch?v=u67Eu_IgEMs&list=PLRAdsfhKI4OWx321A_pr-7HhRNk7wOLLY&index=8
+- https://stackoverflow.com/questions/47365136/why-does-my-net-standard-nuget-package-trigger-so-many-dependencies/47366401#47366401
+- also for reference on pb with nuget : https://github.com/dotnet/standard/issues/481
+
+So yeah. I have to explicitly target net461.
 
 # ANALYZE
 
@@ -50,7 +61,7 @@ Using [coverity](https://scan.coverity.com/download?tab=csharp)
 
 ```
 cd 3P
-cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild 3P.sln /verbosity:minimal
+cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
 7z a 3P.zip ./cov-int*
 ```
 
