@@ -11,7 +11,9 @@
 
 you'll need to issue the following command in your terminal:
 
-    git clone --recursive https://github.com/jcaillon/3P.git
+```git
+git clone --recursive https://github.com/jcaillon/3P.git
+```
 
 If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you wil have to check the `recursive` box when cloning.
 
@@ -19,10 +21,12 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you wil have
 
 To correctly update ALL the source code, you need to do an extra command after the classic `git pull` to also update the submodules :
 
-    git pull
-    git submodule update
+```git
+git pull
+git submodule update --recursive
+```
 
-If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need to select **Git Sync...** in the menu. Once you do that, you'll need to click the **Pull** and **Submodule Update** buttons in the following dialog.
+If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need to select **Submodules update** in the menu.
 
 
 ## Build info :
@@ -39,7 +43,11 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 
 ## Manual build command
 
-```
+Get nuget : https://www.nuget.org/downloads
+
+```bat
+nuget restore Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj
+nuget restore Oetools.Packager\Oetools.Utilities\Oetools.Utilities\Oetools.Utilities.csproj
 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
 ```
 
@@ -59,7 +67,7 @@ So yeah. I have to explicitly target net461.
 
 Using [coverity](https://scan.coverity.com/download?tab=csharp)
 
-```
+```bat
 cd 3P
 cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
 7z a 3P.zip ./cov-int*
