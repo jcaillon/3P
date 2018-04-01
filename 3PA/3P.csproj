@@ -10,7 +10,7 @@
     <RootNamespace>_3PA</RootNamespace>
     <AssemblyName>3P</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -772,7 +772,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Yamui.Framework\Yamui.Framework.csproj">
+    <ProjectReference Include="..\Yamui.Framework\Yamui.Framework\Yamui.Framework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>Yamui.Framework</Name>
     </ProjectReference>
@@ -853,7 +853,7 @@ exit /b 0
 
 echo [INFO] Copying Yamui.Framework.dll
 md "$(SolutionDir)3PA\_Resource\Dependencies\" &gt;nul 2&gt;nul
-copy /Y "$(SolutionDir)Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\Yamui.Framework.dll" &gt;nul
+copy /Y "$(SolutionDir)Yamui.Framework\Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(SolutionDir)3PA\_Resource\Dependencies\Yamui.Framework.dll" &gt;nul
 if not "%25ERRORLEVEL%25" == "0" (
 	echo [ERROR] COPY ERROR
 	exit 1
