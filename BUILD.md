@@ -1,11 +1,10 @@
 # BUILD
 
-## Notes :
+## Notes
 
 > This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
 >
-> I'm currently using visual studio 2017 and can not guarantee the build on prior versions
-
+> You will need visual studio 2017 and/or msbuild 15 for this project
 
 ### Getting the Source Code
 
@@ -28,8 +27,7 @@ git submodule update --recursive
 
 If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need to select **Submodules update** in the menu.
 
-
-## Build info :
+## Build info
 
 ### How to configure DLLExport
 
@@ -38,20 +36,20 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 - Select your .sln solution file
 - Choose a namespace for the DllExport : `RGiesecke.DllExport` and target x86 + x64
 - Click apply
-- Read all the info here : https://github.com/3F/DllExport
-- If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
+- Read all the info here : <https://github.com/3F/DllExport>
+- If missing a lib/exe when building, install [MS BUILD TOOL for visual studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321)
 
 ## Manual build command
 
-Get nuget : https://www.nuget.org/downloads
+Get nuget : <https://www.nuget.org/downloads>
 
 ```bat
-nuget restore Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj
-nuget restore Oetools.Packager\Oetools.Utilities\Oetools.Utilities\Oetools.Utilities.csproj
-"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
+git submodule update --init --recursive
+nuget restore -recursive
+build.cmd 3P.sln /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild /verbosity:minimal
 ```
 
-## Additionnal remarks 
+## Additionnal remarks
 
 *Why are the libraries like Oetools.Packager targetting explicitly net461 AND netstandard2.0?*
 
