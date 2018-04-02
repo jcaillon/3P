@@ -75,7 +75,7 @@
       Include="@(DependenciesDll ->'%(Relativedir)%(filename)%(extension)')" 
       Condition="('%(DependenciesDll.Extension)' == '.dll' Or '%(DependenciesDll.Extension)' == '.pdb')">-->
     </ItemGroup>
-    <Message Importance="high" Text="[INFO] Embedding resources : %0D  @(DependenciesDll, '%0D  ')"/>
+    <Message Importance="high" Text="[INFO] Embedding resources : %0A  @(DependenciesDll, '%0A  ')"/>
   </Target>
 
   <!-- Create zip release -->
@@ -90,7 +90,7 @@
       InputFileNames="@(ZipFiles)"
       OutputFileName="$(ReleaseDirectory)\$(ReleaseName)"
       OverwriteExistingFile="true" />
-    <Message Importance="high" Text="[INFO] Zipping %0D  @(ZipFiles, '%0D  ') %0D  -> into $(ReleaseDirectory)\$(ReleaseName)"/>
+    <Message Importance="high" Text="[INFO] Zipping %0A  @(ZipFiles, '%0A  ') %0A  -> into $(ReleaseDirectory)\$(ReleaseName)"/>
   </Target>
 
   <!-- Copy to notepad++ folder -->
@@ -106,7 +106,7 @@
       DestinationFolder="$(SolutionDir)..\$(NotepadFolderName)\plugins\"
       OverwriteReadOnlyFiles="true">
     </Copy>
-    <Message Importance="high" Text="[INFO] Copying %0D  @(OutputFiles, '%0D  ') %0D  -> to $(SolutionDir)..\$(NotepadFolderName)\plugins"/>
+    <Message Importance="high" Text="[INFO] Copying %0A  @(OutputFiles, '%0A  ') %0A  -> to $(SolutionDir)..\$(NotepadFolderName)\plugins"/>
   </Target>
 
   <!-- Self embedded .pdb file -->
