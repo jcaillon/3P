@@ -328,7 +328,6 @@
     </Compile>
     <Content Include="Lib\3pUpdater\3pUpdater_admin.exe" />
     <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
-    <EmbeddedResource Include="_Resource\Dependencies\Yamui.Framework.dll" />
     <Content Include="_Resource\Images\Appli\Clock.png" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoError.ico" />
     <Content Include="_Resource\Images\ErrorProviderIcons\IcoMandatory.ico" />
@@ -760,18 +759,14 @@
     <Content Include="_Resource\Html\Pages\getting_started.txt" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\Oetools.AblParser\Oetools.AblParser\Oetools.AblParser.csproj">
+      <Project>{c2aa4cdf-5c0e-4c74-9e73-bb6da770f793}</Project>
+      <Name>Oetools.AblParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Oetools.Debugger\Oetools.Debugger\Oetools.Debugger.csproj">
+      <Project>{93e229bf-bcfa-42c7-81cd-ecb6dc49ed37}</Project>
+      <Name>Oetools.Debugger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj">
       <Project>{245b6aa2-4f7a-4d51-9c9b-104d59161603}</Project>
       <Name>Oetools.Packager</Name>
@@ -787,108 +782,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-echo [INFO] End of build for 3P
-
-md "$(SolutionDir)Releases" &gt;nul 2&gt;nul
-
-set NPPFOLDERNAME=3P_notepad++
-set CPUNAME=x86
-set RELEASENAME=3P.zip
-call :copytonotepad
-call :ziprelease
-
-set NPPFOLDERNAME=3P_notepad++x64
-set CPUNAME=x64
-set RELEASENAME=3P_x64.zip
-call :copytonotepad
-call :ziprelease
-
-if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
-)
-
-
-exit 0
-
-
-REM zip release
-:ziprelease
-
-echo [INFO] Zipping release Releases\%25RELEASENAME%25
-
-WHERE 7z &gt;nul 2&gt;nul
-IF not "%25ERRORLEVEL%25" == "0" (
-	echo 7z.exe not found in the path, can't create the .zip releases
-	exit 1
-)
-
-del /Q "$(SolutionDir)Releases\%25RELEASENAME%25" &gt;nul 2&gt;nul
-
-echo [INFO] Adding netFrameworkChecker\NetFrameworkChecker.exe
-
-7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(SolutionDir)netFrameworkChecker\NetFrameworkChecker.exe" &gt;nul
-
-echo [INFO] Adding bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)
-
-7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" &gt;nul
-if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-    if "$(ConfigurationName)" == "Debug" (
-	    7z a "$(SolutionDir)Releases\%25RELEASENAME%25" "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" &gt;nul
-    )
-)
-exit /b 0
-
-
-REM copy files to the notepad++ folder for dev purposes
-:copytonotepad
-
-if exist "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\" ( 
-	echo [INFO] Copying output files to ..\%25NPPFOLDERNAME%25\plugins\
-	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetFileName)" &gt;nul
-	if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-		copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
-	)
-)
-
-exit /b 0
-</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-if not exist "$(SolutionDir)packages" ( 
-	echo [INFO] Getting needed package
-	DllExport -action Update
-)
-
-
-echo [INFO] Copying .dll dependencies
-
-del /Q "$(ProjectDir)_Resource\Dependencies\*.dll" &gt;nul 2&gt;nul
-md "$(ProjectDir)_Resource\Dependencies\" &gt;nul 2&gt;nul
-
-copy /Y "$(SolutionDir)Yamui.Framework\Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
-if not "%25ERRORLEVEL%25" == "0" (
-	echo [ERROR] COPY ERROR
-	REM exit 1
-)
-
-copy /Y "$(SolutionDir)Oetools.Packager\Oetools.Packager\bin\$(ConfigurationName)\net461\Oetools.Packager.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
-if not "%25ERRORLEVEL%25" == "0" (
-    echo [ERROR] COPY ERROR
-    REM exit 1
-)
-
-copy /Y "$(SolutionDir)Oetools.Packager\Oetools.Utilities\Oetools.Utilities\bin\$(ConfigurationName)\net461\Oetools.Utilities.dll" "$(ProjectDir)_Resource\Dependencies\" &gt;nul
-if not "%25ERRORLEVEL%25" == "0" (
-    echo [ERROR] COPY ERROR
-    REM exit 1
-)
-
-exit 0
-</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
     <DllExportIdent>8319FAEE-D7D1-4E76-8ABC-3B96D32BAD6F</DllExportIdent>
     <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
     <DllExportNamespace>RGiesecke.DllExport</DllExportNamespace>
@@ -902,6 +795,8 @@ exit 0
     <DllExportTimeout>30000</DllExportTimeout>
     <DllExportPeCheck>2</DllExportPeCheck>
   </PropertyGroup>
+  <!-- Using custom targets file to do extra operations on this project -->
+  <Import Project="$(MSBuildProjectDirectory)\3P.targets" />
   <Import Project="$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets" Condition="Exists('$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets')" Label="8337224c9ad9e356" />
   <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
     <Warning Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="We can't find 'DllExport.bat' in '$(SolutionDir)' - https://github.com/3F/DllExport" />

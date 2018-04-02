@@ -33,16 +33,25 @@ namespace _3PA.Lib {
         /// AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
         /// </summary>
         public static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
+            // see code https://msdn.microsoft.com/en-us/library/d4tc2453(v=vs.110).aspx
             try {
                 var commaIdx = args.Name.IndexOf(",", StringComparison.CurrentCultureIgnoreCase);
                 if (commaIdx > 0) {
                     var assName = args.Name.Substring(0, commaIdx);
-                    var sourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(_3PA)}.{nameof(_Resource)}.{nameof(_Resource.Dependencies)}.{assName}.dll");
-                    if (sourceStream == null)
+                    var dllSourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(_3PA)}.{assName}.dll");
+                    var pdbSourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(_3PA)}.{assName}.pdb");
+                    if (dllSourceStream == null)
                         return null;
-                    using(var memoryStream = new MemoryStream()) {
-                        sourceStream.CopyTo(memoryStream);
-                        return  Assembly.Load(memoryStream.ToArray());
+                    using (var dllMemoryStream = new MemoryStream()) {
+                        dllSourceStream.CopyTo(dllMemoryStream);
+                        if (pdbSourceStream == null) {
+                            return Assembly.Load(dllMemoryStream.ToArray());
+                        } else {
+                            using (var pdbMemoryStream = new MemoryStream()) {
+                                pdbSourceStream.CopyTo(pdbMemoryStream);
+                                return Assembly.Load(dllMemoryStream.ToArray(), pdbMemoryStream.ToArray());
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {

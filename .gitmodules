@@ -4,3 +4,9 @@
 [submodule "Oetools.Packager"]
 	path = Oetools.Packager
 	url = https://github.com/jcaillon/Oetools.Packager.git
+[submodule "Oetools.AblParser"]
+	path = Oetools.AblParser
+	url = https://github.com/jcaillon/Oetools.AblParser.git
+[submodule "Oetools.Debugger"]
+	path = Oetools.Debugger
+	url = https://github.com/jcaillon/Oetools.Debugger.git

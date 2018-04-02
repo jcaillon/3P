@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Help : https://docs.microsoft.com/en-us/visualstudio/msbuild/walkthrough-using-msbuild -->
+
+  <!-- Setting properties -->
+  <PropertyGroup>
+    <CpuName Condition="'$(CpuName)' == ''">x86</CpuName>
+    <NotepadFolderName Condition="'$(NotepadFolderName)' == ''">3P_notepad++</NotepadFolderName>
+    <ReleaseName Condition="'$(ReleaseName)' == ''">3P.zip</ReleaseName>
+    <ReleaseDirectory>$(SolutionDir)Releases</ReleaseDirectory>
+    <StringDate>$([System.DateTime]::Now.ToString('yyyyMMdd'))</StringDate>
+  </PropertyGroup>
+
+
+  <!-- Pre-build actions -->
+  <Target
+    Name="PreBuildActions"
+    BeforeTargets="PreBuildEvent">
+    <Message Importance="high" Text="[INFO] Pre-build events..." />
+    <!--<CallTarget Targets="RestorePackage"></CallTarget>-->
+    <CallTarget Targets="RestoreDllExport"></CallTarget>
+    <CallTarget Targets="AddEmbeddedDependencies"></CallTarget>
+  </Target>
+
+  <!-- Post-build actions -->
+  <Target
+    Name="PostBuildActions"
+    AfterTargets="Build">
+    <Message Importance="high" Text="[INFO] Post-build events..." />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="CreateReleaseZip" Properties="NotepadFolderName=3P_notepad++;CpuName=x86;ReleaseName=3P.zip" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="CopyToNotepad" Properties="NotepadFolderName=3P_notepad++;CpuName=x86;ReleaseName=3P.zip" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="CreateReleaseZip" Properties="NotepadFolderName=3P_notepad++x64;CpuName=x64;ReleaseName=3P_x64.zip" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="CopyToNotepad" Properties="NotepadFolderName=3P_notepad++x64;CpuName=x64;ReleaseName=3P_x64.zip" />
+  </Target>
+
+  <!-- forces a nuget restore before the build -->
+  <Target Name="RestorePackage">
+    <Message Importance="high" Text="[INFO] Restoring packages for project $(MSBuildProjectName)" />
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="restore"></MSBuild>
+  </Target>
+
+  <!-- check the presence of the packages folder need for dllexport -->
+  <Target
+    Name="RestoreDllExport"
+    Condition="!Exists('$(SolutionDir)packages')" >
+    <Warning Text="[WARNING] $(SolutionDir)packages not found, restoring it..." />
+    <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="We can't find 'DllExport.bat' in '$(SolutionDir)' - https://github.com/3F/DllExport" />
+    <Exec Command="pushd &quot;$(SolutionDir)&quot; &amp; DllExport -action Update" />
+  </Target>
+
+  <!-- embedded dll dependencies -->
+  <Target Name="AddEmbeddedDependencies">
+    <ItemGroup>
+      <!-- didn't find a better solution than to put full path... -->
+      <ReferencedOutputFiles Include="$(SolutionDir)Yamui.Framework\Yamui.Framework\bin\$(ConfigurationName)\Yamui.Framework.*"></ReferencedOutputFiles>
+      <ReferencedOutputFiles Include="$(SolutionDir)Oetools.Packager\Oetools.Packager\bin\$(ConfigurationName)\net461\Oetools.Packager.*"></ReferencedOutputFiles>
+      <ReferencedOutputFiles Include="$(SolutionDir)Oetools.Packager\Oetools.Utilities\Oetools.Utilities\bin\$(ConfigurationName)\net461\Oetools.Utilities.*"></ReferencedOutputFiles>
+      <ReferencedOutputFiles Include="$(SolutionDir)Oetools.AblParser\Oetools.AblParser\bin\$(ConfigurationName)\net461\Oetools.AblParser.*"></ReferencedOutputFiles>
+      <ReferencedOutputFiles Include="$(SolutionDir)Oetools.Debugger\Oetools.Debugger\bin\$(ConfigurationName)\net461\Oetools.Debugger.*"></ReferencedOutputFiles>
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(ReferencedOutputFiles)"
+      DestinationFolder="$(ProjectDir)_Resource\"
+      OverwriteReadOnlyFiles="true"></Copy>
+    <ItemGroup>
+      <DependenciesDll Include="_Resource\*.dll" />
+      <DependenciesDll Include="_Resource\*.pdb" />
+      <EmbeddedResource
+        Include="@(DependenciesDll)"
+        Condition="('%(DependenciesDll.Extension)' == '.dll' Or '%(DependenciesDll.Extension)' == '.pdb')">
+        <LogicalName>$(RootNamespace).%(DependenciesDll.Filename)%(DependenciesDll.Extension)</LogicalName>
+      </EmbeddedResource>
+      <!--<EmbeddedResource 
+      Include="@(DependenciesDll ->'%(Relativedir)%(filename)%(extension)')" 
+      Condition="('%(DependenciesDll.Extension)' == '.dll' Or '%(DependenciesDll.Extension)' == '.pdb')">-->
+    </ItemGroup>
+    <Message Importance="high" Text="[INFO] Embedding resources : %0D  @(DependenciesDll, '%0D  ')"/>
+  </Target>
+
+  <!-- Create zip release -->
+  <Target Name="CreateReleaseZip">
+    <ItemGroup>
+      <ZipFiles Include="$(SolutionDir)netFrameworkChecker\NetFrameworkChecker.exe" />
+      <ZipFiles Include="$(OutputPath)$(CpuName)\$(TargetName).dll" />
+      <ZipFiles Include="$(OutputPath)$(CpuName)\$(TargetName).pdb" />
+    </ItemGroup>
+    <MakeDir Directories="$(ReleaseDirectory)"/>
+    <Zip
+      InputFileNames="@(ZipFiles)"
+      OutputFileName="$(ReleaseDirectory)\$(ReleaseName)"
+      OverwriteExistingFile="true" />
+    <Message Importance="high" Text="[INFO] Zipping %0D  @(ZipFiles, '%0D  ') %0D  -> into $(ReleaseDirectory)\$(ReleaseName)"/>
+  </Target>
+
+  <!-- Copy to notepad++ folder -->
+  <Target
+    Name="CopyToNotepad"
+    Condition="Exists('$(SolutionDir)..\$(NotepadFolderName)')">
+    <ItemGroup>
+      <OutputFiles Include="$(OutputPath)$(CpuName)\$(TargetName).dll"></OutputFiles>
+      <OutputFiles Include="$(OutputPath)$(CpuName)\$(TargetName).pdb"></OutputFiles>
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(OutputFiles)"
+      DestinationFolder="$(SolutionDir)..\$(NotepadFolderName)\plugins\"
+      OverwriteReadOnlyFiles="true">
+    </Copy>
+    <Message Importance="high" Text="[INFO] Copying %0D  @(OutputFiles, '%0D  ') %0D  -> to $(SolutionDir)..\$(NotepadFolderName)\plugins"/>
+  </Target>
+
+  <!-- Self embedded .pdb file -->
+  <!--
+    <Target Name="Prebuild">
+    <CallTarget Targets="Clean" />
+    <MSBuild Projects="$(SolutionPath)" Targets="Build" Properties="Configuration=Debug;IgnoreRecursion=true" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <_IgnoreRecursion Include="$(IgnoreRecursion)"/>
+    </ItemGroup>
+    <CallTarget Targets="Prebuild" Condition="'%(_IgnoreRecursion.Identity)' != 'true'" />
+    <CreateItem Include="$(TargetDir)\**\*.*">
+      <Output TaskParameter="Include" ItemName="OutputFiles" />
+    </CreateItem>
+    <ItemGroup>
+      <EmbeddedResource Include="@(OutputFiles)" Condition="('%(OutputFiles.Extension)' == '.dll' Or '%(OutputFiles.Extension)' == '.pdb')">
+        <LogicalName>%(OutputFiles.DestinationSubDirectory)%(OutputFiles.Filename)%(OutputFiles.Extension)</LogicalName>
+      </EmbeddedResource>
+    </ItemGroup>
+    <Message Importance="high" Text="Embedding: @(OutputFiles->'%(Filename)%(Extension)', ', ')" />
+  </Target>
+  -->
+
+  <!-- defines the Zip task -->
+  <UsingTask TaskName="Zip" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <InputFileNames ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <OutputFileName ParameterType="System.String" Required="true" />
+      <OverwriteExistingFile ParameterType="System.Boolean" Required="false" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.IO.Compression" />
+      <Using Namespace="System.IO.Compression" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[        
+        const int BufferSize = 64 * 1024;
+ 
+        var buffer = new byte[BufferSize];
+        var fileMode = OverwriteExistingFile ? FileMode.Create : FileMode.CreateNew;
+ 
+        using (var outputFileStream = new FileStream(OutputFileName, fileMode))
+        {
+          using (var archive = new ZipArchive(outputFileStream, ZipArchiveMode.Create))
+          {
+            foreach (var inputFileName in InputFileNames.Select(f => f.ItemSpec))
+            {
+              var archiveEntry = archive.CreateEntry(Path.GetFileName(inputFileName));
+ 
+              using (var fs = new FileStream(inputFileName, FileMode.Open))
+              {
+                using (var zipStream = archiveEntry.Open())
+                {
+                  int bytesRead = -1;
+                  while ((bytesRead = fs.Read(buffer, 0, BufferSize)) > 0)
+                  {
+                    zipStream.Write(buffer, 0, bytesRead);
+                  }
+                }
+              }
+            }
+          }
+        }        
+      ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+
+</Project>

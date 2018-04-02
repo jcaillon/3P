@@ -4,8 +4,8 @@ configuration: Release
 platform: Any CPU
 install:
 - cmd: git submodule update --init --recursive
-- cmd: nuget restore Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj
-- cmd: nuget restore Oetools.Packager\Oetools.Utilities\Oetools.Utilities\Oetools.Utilities.csproj
+before_build:
+- cmd: nuget restore -recursive
 build:
   project: 3P.sln
   verbosity: minimal
