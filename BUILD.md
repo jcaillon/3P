@@ -45,7 +45,7 @@ Get nuget : <https://www.nuget.org/downloads>
 
 ```bat
 git submodule update --init --recursive
-nuget restore -recursive
+build.cmd /t:restore
 build.cmd 3P.sln /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild /verbosity:minimal
 ```
 

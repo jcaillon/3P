@@ -5,7 +5,7 @@ platform: Any CPU
 install:
 - cmd: git submodule update --init --recursive
 before_build:
-- cmd: nuget restore -recursive
+- cmd: msbuild /t:restore
 build:
   project: 3P.sln
   verbosity: minimal
