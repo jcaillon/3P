@@ -12,7 +12,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             // info we will extract from the current statement :
             string name = null;
             string parsedReturnType = null;
-            string extend = null;
+            int extent = 0;
             ParseFlag flags = 0;
             StringBuilder parameters = new StringBuilder();
             List<ParsedDefine> parametersList = null;
@@ -48,8 +48,9 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         if (token is TokenWord) {
                             if (token.Value.EqualsCi("private"))
                                 flags |= ParseFlag.Private;
-                            if (token.Value.EqualsCi("extent"))
-                                flags |= ParseFlag.Extent;
+                            if (token.Value.EqualsCi("extent")) {
+                                extent = GetExtentNumber(2);
+                            }
 
                             // we didn't match any opening (, but we found a forward
                             if (token.Value.EqualsCi("forward"))
@@ -58,8 +59,6 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                 state = 100;
                         } else if (token is TokenSymbol && token.Value.Equals("("))
                             state = 3;
-                        else if (flags.HasFlag(ParseFlag.Extent) && token is TokenNumber)
-                            extend = token.Value;
                         break;
                     case 3:
                         // read parameters, define a ParsedDefineItem for each
@@ -96,7 +95,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     EndBlockLine = token.Line,
                     EndBlockPosition = token.EndPosition,
                     Flags = flags,
-                    Extend = extend,
+                    Extent = extent,
                     ParametersString = parameters.ToString()
                 };
                 if (!_functionPrototype.ContainsKey(name))
@@ -123,7 +122,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 createdImp = new ParsedImplementation(name, functionToken, parsedReturnType) {
                     EndPosition = token.EndPosition,
                     Flags = flags,
-                    Extend = extend,
+                    Extent = extent,
                     ParametersString = parameters.ToString()
                 };
 
@@ -141,7 +140,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         // boolean to know if the implementation matches the prototype
                         createdImp.PrototypeUpdated = (
                             createdImp.Flags == proto.Flags &&
-                            createdImp.Extend.EqualsCi(proto.Extend) &&
+                            createdImp.Extent.Equals(proto.Extent) &&
                             createdImp.TempReturnType.EqualsCi(proto.TempReturnType) &&
                             createdImp.ParametersString.EqualsCi(proto.ParametersString));
                     }

@@ -10,7 +10,7 @@
     <RootNamespace>_3PA</RootNamespace>
     <AssemblyName>3P</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>

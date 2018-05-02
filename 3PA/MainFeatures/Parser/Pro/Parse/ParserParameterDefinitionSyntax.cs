@@ -34,6 +34,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             ParsedAsLike paramAsLike = ParsedAsLike.None;
             string paramPrimitiveType = "";
             string parameterFor = "";
+            int extent = 0;
             var parametersList = new List<ParsedDefine>();
 
             int state = 0;
@@ -118,14 +119,14 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
                     case 99:
                         // matching parameters "," that indicates a next param
-                        if (token is TokenWord && token.Value.EqualsCi("extent"))
-                            flags |= ParseFlag.Extent;
+                        if (token is TokenWord && token.Value.EqualsCi("extent")) {
+                            extent = GetExtentNumber(2);
 
-                        else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
+                        } else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
 
                             // create a variable for this function scope
                             if (!string.IsNullOrEmpty(paramName)) {
-                                parametersList.Add(NewParsedDefined(paramName, flags, functionToken, token, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor));
+                                parametersList.Add(NewParsedDefined(paramName, flags, functionToken, token, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, extent));
                             }
 
                             paramName = "";
@@ -133,6 +134,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                             paramPrimitiveType = "";
                             parameterFor = "";
                             flags = 0;
+                            extent = 0;
 
                             if (token.Value.Equals(","))
                                 state = 0;

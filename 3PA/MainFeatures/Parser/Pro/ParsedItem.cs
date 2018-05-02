@@ -159,9 +159,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
     [Flags]
     internal enum ParseFlag : ulong {
         // indicates that the parsed item is not coming from the originally parsed source (= from .i)
-        FromInclude = 1,
+        FromInclude = 1 << 0,
         // Local/File define the scope of a defined variable...
-        LocalScope = 2,
+        LocalScope = 1 << 1,
         FileScope = 4,
         Parameter = 8,
         // is used for keywords
@@ -397,9 +397,9 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParsedPrimitiveType ReturnType { get; set; }
 
         /// <summary>
-        /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
+        /// is the return-type "EXTENT [x]" (0 if not extented)
         /// </summary>
-        public string Extend { get; set; }
+        public int Extent { get; set; }
 
         /// <summary>
         /// We keep the string formed with the parameters, it allows us to quickly identify if a prototype is up 
@@ -699,6 +699,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
         /// </summary>
         public ParsedPrimitiveType PrimitiveType { get; set; }
 
+        public int Extent { get; }
+
         /// <summary>
         /// first word after "view-as"
         /// </summary>
@@ -708,13 +710,14 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs)
+        public ParsedDefine(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, int extent)
             : base(name, token) {
             AsLike = asLike;
             Left = left;
             Type = type;
             TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
+            Extent = extent;
         }
     }
 
@@ -841,7 +844,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedBuffer(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) : base(name, token, asLike, left, type, tempPrimitiveType, viewAs) {
+        public ParsedBuffer(string name, Token token, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) : base(name, token, asLike, left, type, tempPrimitiveType, viewAs, 0) {
             BufferFor = bufferFor;
         }
     }
@@ -960,11 +963,13 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParseFlag Flags { get; set; }
         public string InitialValue { get; set; }
         public string Description { get; set; }
+        public int Extent { get; set; }
 
         /// <summary>
         /// contains as or like in lowercase
         /// </summary>
         public ParsedAsLike AsLike { get; set; }
+
 
         public ParsedField(string name, string lcTempPrimitiveType, string format, int order, ParseFlag flags, string initialValue, string description, ParsedAsLike asLike) : base(name) {
             TempPrimitiveType = lcTempPrimitiveType;

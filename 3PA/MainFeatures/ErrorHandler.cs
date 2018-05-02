@@ -126,7 +126,7 @@ namespace _3PA.MainFeatures {
                 toAppend.AppendLine("============================================================");
                 toAppend.AppendLine("WHAT : " + info.message);
                 toAppend.AppendLine("WHEN : " + DateTime.Now.ToString(CultureInfo.CurrentCulture));
-                toAppend.AppendLine("WHERE : " + info.originMethod + ", line " + info.originLine);
+                toAppend.AppendLine("WHERE : " + AssemblyInfo.Version + ", " + info.originMethod + ", line " + info.originLine);
                 toAppend.AppendLine("DETAILS : ");
                 foreach (var line in info.fullException.Split('\n')) {
                     toAppend.AppendLine("    " + line.Trim());
