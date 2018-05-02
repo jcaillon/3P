@@ -3,6 +3,8 @@
 
 ### Improvements :###
 
+- #220 : Extent indicator on tooltips for variables, parameters, fields and function return types
+
 
 ### Fixed issues :###
 

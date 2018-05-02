@@ -24,6 +24,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             string tempPrimitiveType = "";
             string viewAs = "";
             string bufferFor = "";
+            int extent = 0;
             _lastTokenWasSpace = true;
             StringBuilder left = new StringBuilder();
 
@@ -196,8 +197,10 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
                         if (lowerToken.Equals("view-as")) state = 13;
-                        if (lowerToken.Equals("extent"))
-                            flags |= ParseFlag.Extent;
+                        if (lowerToken.Equals("extent")) {
+                            extent = GetExtentNumber(2);
+                        }
+
                         break;
                     case 13:
                         // define variable : match a view-as
@@ -238,7 +241,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                 break;
                             case "extent":
                                 // a field is extent:
-                                currentField.Flags = currentField.Flags | ParseFlag.Extent;
+                                currentField.Extent = GetExtentNumber(2);
                                 break;
                             default:
                                 // matches a LIKE table
@@ -404,7 +407,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             } else {              
                 // other DEFINE
 
-                var newDefine = NewParsedDefined(name, flags, defineToken, token, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor);
+                var newDefine = NewParsedDefined(name, flags, defineToken, token, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, extent);
                 AddParsedItem(newDefine, defineToken.OwnerNumber);
 
                 // case of a parameters, add it to the current scope (if procedure)
@@ -421,7 +424,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// Create a new parsed define item according to its type
         /// </summary>
-        private ParsedDefine NewParsedDefined(string name, ParseFlag flags, Token defineToken, Token endToken, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor) {
+        private ParsedDefine NewParsedDefined(string name, ParseFlag flags, Token defineToken, Token endToken, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, int extent) {
 
             // set flags
             flags |=  GetCurrentBlock<ParsedScopeBlock>() is ParsedFile ? ParseFlag.FileScope : ParseFlag.LocalScope;
@@ -439,7 +442,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 };
             }
 
-            var newDefine = new ParsedDefine(name, defineToken, asLike, left, type, tempPrimitiveType, viewAs) {
+            var newDefine = new ParsedDefine(name, defineToken, asLike, left, type, tempPrimitiveType, viewAs, extent) {
                 Flags = flags,
                 EndPosition = endToken.EndPosition
             };
@@ -447,5 +450,17 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             return newDefine;
         }
 
+        private int GetExtentNumber(int peekAt) {
+            int extent;
+            var extentNumber = PeekAtNextNonType<TokenWhiteSpace>(peekAt);
+            if (extentNumber is TokenNumber) {
+                if (!int.TryParse(extentNumber.Value, out extent)) {
+                    extent = 0;
+                }
+            } else {
+                extent = -1;
+            }
+            return extent;
+        }
     }
 }

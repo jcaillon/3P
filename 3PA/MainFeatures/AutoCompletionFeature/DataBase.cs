@@ -252,11 +252,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         break;
                     case 'F':
                         // field
-                        //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
+                        //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/x>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
                         if (splitted.Length != 12 || currentTable == null)
                             return;
                         var flags = splitted[6].Equals("1") ? ParseFlag.Mandatory : 0;
-                        if (splitted[7].Equals("1")) flags = flags | ParseFlag.Extent;
                         if (splitted[8].Equals("1")) flags = flags | ParseFlag.Index;
                         if (splitted[9].Equals("1")) flags = flags | ParseFlag.Primary;
                         var curField = new ParsedField(
@@ -268,6 +267,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                             splitted[10],
                             splitted[11],
                             ParsedAsLike.None);
+                        curField.Extent = int.Parse(splitted[7]);
                         curField.PrimitiveType = ParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempPrimitiveType);
                         currentTable.Fields.Add(curField);
                         break;
