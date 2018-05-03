@@ -50,7 +50,15 @@ namespace _3PA.MainFeatures.Pro {
                     iloop++;
 
                     // do not indent &ANALYZE-SUSPEND blocks
-                    if (block.ScopeType == ParsedScopeType.PreProcBlock) {
+                    if (block.ScopeType == ParsedScopeType.PreProcAnalyzeBlock) {
+                        if (block.Line == curLine - 1) {
+                            if (!output.ContainsKey(block.Line)) {
+                                output.Add(block.Line, new LineInfo(0, 0));
+                            }
+                            if (block.EndBlockLine > block.Line && !output.ContainsKey(block.EndBlockLine)) {
+                                output.Add(block.EndBlockLine, new LineInfo(0, 0));
+                            }
+                        }
                         continue;
                     }
 
