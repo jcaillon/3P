@@ -144,7 +144,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
         Method,
         Constructor,
         
-        PreProcBlock,
+        PreProcAnalyzeBlock,
         PreProcIfBlock,
         SimpleBlock,
     }
@@ -316,7 +316,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             visitor.Visit(this);
         }
 
-        public ParsedScopePreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.PreProcBlock) {}
+        public ParsedScopePreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.PreProcAnalyzeBlock) {}
     }
 
 

@@ -229,40 +229,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     }
                 }
             }
-
-            // pre processed directive (&analyze-suspend, &analyze-resume, &scop/glob-define, &undefine)
-            else if (token is TokenPreProcDirective) {
-
-                if (token.Value.ToLower().Equals("&analyze-resume")) {
-
-                    // end of a preprocessed (UIB / appbuilder) directive
-                    if (token.OwnerNumber == 0) {
-                        // it marks the end of an appbuilder block, it can only be at a root/File level
-                        if (!(GetCurrentBlock<ParsedScopeBlock>() is ParsedFile)) {
-                            _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
-                        }
-
-                        if (!CloseBlock<ParsedScopePreProcBlock>(token)) {
-                            // we match an end w/o beggining, flag a mismatch
-                            _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
-                        }
-                    }
-                }
-
-                // should be the first word of a statement (otherwise this probably doesn't compile anyway!)
-                if (token.OwnerNumber == 0 && _context.CurrentStatement.WordCount > 0) {
-                    _parserErrors.Add(new ParserError(ParserErrorType.UibBlockStartMustBeNewStatement, token, _context.BlockStack.Count, _parsedIncludes));
-                }
-
-                // can create a new block if it is a UIB directive (&analyse-suspend) or create a preproc variable (and &undefine a variable)
-                var newBlock = CreateParsedPreProcDirective(token);
-                if (newBlock != null) {
-                    _context.BlockStack.Push(newBlock);
-                }
-                    
-                NewStatement(PeekAt(0)); // new statement is done on the EOL
-            }
-
+            
             // potential function call
             else if (token is TokenSymbol && token.Value.Equals("(")) {
                 var prevToken = PeekAtNextNonType<TokenWhiteSpace>(0, true);
@@ -314,10 +281,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
             // pre processed if statement
             else if (tokenIsPreProcDirective) {
-
-
+                
                 var directiveLower = token.Value.ToLower();
-                bool matched = true;
                 switch (directiveLower) {
                     case "&endif":
                     case "&else":
@@ -368,11 +333,45 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         break;
 
                     default:
-                        matched = false;
+                        // pre processed directive (&analyze-suspend, &analyze-resume, &scop/glob-define, &undefine)
+
+                        var lowerValue = token.Value.ToLower();
+                        if (lowerValue.Equals("&analyze-resume")) {
+
+                            // end of a preprocessed (UIB / appbuilder) directive
+                            if (token.OwnerNumber == 0) {
+                                // it marks the end of an appbuilder block, it can only be at a root/File level
+                                if (!(GetCurrentBlock<ParsedScopeBlock>() is ParsedFile)) {
+                                    _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
+                                }
+
+                                if (!CloseBlock<ParsedScopePreProcBlock>(token)) {
+                                    // we match an end w/o beggining, flag a mismatch
+                                    _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
+                                }
+                            }
+                        } else {
+
+                            if (!lowerValue.StartsWith("&analyze")) {
+                                // should be the first word of a statement (otherwise this probably doesn't compile anyway!)
+                                if (token.OwnerNumber == 0 && _context.CurrentStatement.WordCount > 0) {
+                                    _parserErrors.Add(new ParserError(ParserErrorType.UibBlockStartMustBeNewStatement, token, _context.BlockStack.Count, _parsedIncludes));
+                                }
+                            }
+
+                            // can create a new block if it is a UIB directive (&analyse-suspend) or create a preproc variable (and &undefine a variable)
+                            var newBlock = CreateParsedPreProcDirective(token);
+                            if (newBlock != null) {
+                                _context.BlockStack.Push(newBlock);
+                            }
+                        }
+
+                        if (token.OwnerNumber != 0 || _context.CurrentStatement.WordCount == 0) {
+                            NewStatement(PeekAt(0)); // new statement is done on the EOL
+                        }
                         break;
                 }
-                if (matched)
-                    MoveNext();
+                MoveNext();
 
             // End of line
             } else if (token is TokenEol) {
@@ -399,8 +398,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
         /// <summary>
         /// Allows to specify that the topmost block of the given type for the current stack must be closed.
-        /// We fill in info on the block (ending position/line) as well as setting the correct depth for each line
-        /// of this block
+        /// We fill in info on the block (ending position/line)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="token"></param>
