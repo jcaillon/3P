@@ -78,7 +78,6 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         case "finally":
                         case "interface":
                         case "method":
-                        case "editing":
                             // case of a THEN DO: for instance, we dont want to keep 2 block (=2 indent), we pop the THEN block
                             // and only keep the DO block
                             var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
@@ -189,8 +188,9 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                     break;
                             }
                             break;
+                        case "editing":
                         case "do":
-                            // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:)
+                            // matches a do in the middle of a statement (after a ON CHOOSE OF xx DO:) or an EDITING phrase
                             var newBlock = new ParsedScopeSimpleBlock(token.Value, token);
                             var lastOnblock = _context.LastOnBlock as ParsedOnStatement;
                             // last ON scope started during the current statement, we are on the case of a ON CHOOSE OF xx DO:
