@@ -16,7 +16,7 @@ deploy:
   release: $(APPVEYOR_REPO_TAG_NAME)
   description: Copy the content of NEXT_RELEASE_NOTES.md here :)
   auth_token:
-    secure: xE+f8rczPCfechI3U6gncyX2HWWVXN96l6RQ+XlVrWo+0YKf32phrXSzQ6WYEGEs
+    secure: 8rFG2X11nZArE5N8zrYpGcSfP9XTvaMwZ9DIho9DjaR2GPFv0J+BU7qdvA2UCzUi
   artifact: Releases\3P.zip,Releases\3P_x64.zip
   draft: true
   prerelease: true
