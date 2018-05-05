@@ -29,7 +29,11 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 
 ## Build info
 
+If missing a lib/exe when building, install [MS BUILD TOOL for visual studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321)
+
 ### How to configure DLLExport
+
+This is already done, you shouldn't have to do this except if you want to change the export configuration.
 
 - Execute `DllExport.bat -action Configure`
 - This download packages\DllExport.1.6.0
@@ -37,15 +41,12 @@ If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need 
 - Choose a namespace for the DllExport : `RGiesecke.DllExport` and target x86 + x64
 - Click apply
 - Read all the info here : <https://github.com/3F/DllExport>
-- If missing a lib/exe when building, install [MS BUILD TOOL for visual studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321)
 
 ## Manual build command
 
-Get nuget : <https://www.nuget.org/downloads>
-
 ```bat
 git submodule update --init --recursive
-build.cmd /t:restore
+build.cmd /t:restore /verbosity:minimal
 build.cmd 3P.sln /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild /verbosity:minimal
 ```
 
