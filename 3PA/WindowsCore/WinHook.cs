@@ -207,7 +207,7 @@ namespace _3PA.WindowsCore {
         /// </summary>
         public event MessageHandler GetMessage;
 
-        public delegate void MessageHandler(Win32Api.MSG message, out bool handled);
+        public delegate bool MessageHandler(Win32Api.MSG message, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
