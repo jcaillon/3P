@@ -340,27 +340,6 @@ namespace _3PA {
                     break;
             }
 
-            // HACK: The following is to handle the MOVE/RESIZE event of npp's window. 
-            // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
-            switch (message) {
-                case WinApi.Messages.WM_NCLBUTTONDOWN:
-                    if (!WinApi.GetWindowRect(Npp.CurrentSci.Handle).Contains(Cursor.Position)) {
-                        MouseMonitor.Instance.Add(WinApi.Messages.WM_MOUSEMOVE);
-                    }
-                    break;
-                case WinApi.Messages.WM_LBUTTONUP:
-                case WinApi.Messages.WM_NCLBUTTONUP:
-                    if (MouseMonitor.Instance.Remove(WinApi.Messages.WM_MOUSEMOVE)) {
-                        if (OnNppWindowsMove != null)
-                            OnNppWindowsMove();
-                    }
-                    break;
-                case WinApi.Messages.WM_MOUSEMOVE:
-                    if (OnNppWindowsMove != null)
-                        OnNppWindowsMove();
-                    break;
-            }
-
             return false;
         }
 
@@ -459,6 +438,16 @@ namespace _3PA {
             return null;
         }
 
+        #endregion
+
+        #region On Hwnd Message Repaint
+        public static bool HwndMessageHandler(Win32Api.MSG message, out bool handled)
+        {
+            if (OnNppWindowsMove != null)
+                OnNppWindowsMove();   
+            handled = true;
+            return true;
+        }
         #endregion
 
         #endregion
