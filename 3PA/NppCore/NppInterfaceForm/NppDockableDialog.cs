@@ -91,7 +91,11 @@ namespace _3PA.NppCore.NppInterfaceForm {
                 // initialize if not done
                 if (_fakeForm == null) {
                     // register fake form to Npp
-                    _fakeForm = new NppDockableDialogFakeForm();
+                    _fakeForm = new NppDockableDialogFakeForm
+                    {
+                        Dock = System.Windows.Forms.DockStyle.Fill
+                    };
+
                     NppTbData nppTbData = new NppTbData {
                         hClient = _fakeForm.Handle,
                         pszName = AssemblyInfo.AssemblyProduct + " - " + _dialogDescription,
@@ -103,17 +107,24 @@ namespace _3PA.NppCore.NppInterfaceForm {
                     Npp.RegisterDockableDialog(nppTbData);
                     _fakeForm.OnDockableDialogClose += FormOnOnDockableDialogClose;
                     InitForm();
-                    IsVisible = true;
+                    IsVisible = true; 
                 } else {
                     if (IsVisible) {
                         Npp.HideDockableDialog(_fakeForm.Handle);
                         IsVisible = false;
                     } else {
                         Npp.ShowDockableDialog(_fakeForm.Handle);
+                        InitForm();
                         IsVisible = true;
                     }
                 }
-                Form.RefreshPosAndLoc();
+                
+                // Dock the NppDialog at _fakeform
+                Form.TopLevel = false;
+                Form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                Form.Dock = System.Windows.Forms.DockStyle.Fill;
+                _fakeForm.Controls.Add(Form);
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error loading " + _dialogDescription);
             }

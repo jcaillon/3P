@@ -41,7 +41,6 @@ namespace _3PA.NppCore.NppInterfaceForm {
     internal class NppDockableDialogForm : Form {
         #region fields
 
-        private Rectangle _masterRectangle;
         private Form _masterForm;
         private bool _forceClose;
 
@@ -81,24 +80,19 @@ namespace _3PA.NppCore.NppInterfaceForm {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.Opaque, true);
-
             FormBorderStyle = FormBorderStyle.None;
             ControlBox = false;
             ShowInTaskbar = false;
-            StartPosition = FormStartPosition.Manual;
             AutoScaleMode = AutoScaleMode.None;
+            WindowState = FormWindowState.Maximized;
         }
 
         public NppDockableDialogForm(Form formToCover) : this() {
             _masterForm = formToCover;
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
             _masterForm.Closed += MasterFormOnClosed;
-            _masterForm.ClientSizeChanged += RefreshPosAndLoc;
-            _masterForm.LocationChanged += RefreshPosAndLoc;
-            _masterForm.LostFocus += RefreshPosAndLoc;
-            _masterForm.GotFocus += RefreshPosAndLoc;
-
-            Location = _masterForm.PointToScreen(Point.Empty);
+            _masterForm.SizeChanged += Cover_OnVisibleChanged;
+            _masterForm.Paint += Cover_OnVisibleChanged;
             ClientSize = _masterForm.ClientSize;
 
             Show(_masterForm);
@@ -109,15 +103,13 @@ namespace _3PA.NppCore.NppInterfaceForm {
                 WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
-            // register to Npp
-            Npp.RegisterToNpp(Handle);
+            // register to Npp                        
+            Npp.RegisterToNpp(Owner.Handle);
 
-            Plug.OnNppWindowsMove += RefreshPosAndLoc;
         }
 
         protected override void Dispose(bool disposing) {
             try {
-                Plug.OnNppWindowsMove -= RefreshPosAndLoc;
 
                 if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                     int value = 0;
@@ -139,43 +131,11 @@ namespace _3PA.NppCore.NppInterfaceForm {
 
         #endregion
 
-        #region RefreshPosAndLoc
-
-        public void RefreshPosAndLoc() {
-            if (Owner == null)
-                return;
-
-            var rect = WinApi.GetWindowRect(_masterForm.Handle);
-
-            // update location
-            if (_masterRectangle.Location != rect.Location) {
-                Location = Owner.PointToScreen(Point.Empty);
-            }
-
-            // update size
-            if (ClientSize != Owner.ClientSize) {
-                ClientSize = Owner.ClientSize;
-            }
-
-            if (Visible != Owner.Visible) {
-                Visible = Owner.Visible;
-            }
-
-            _masterRectangle = rect;
-        }
-
-        #endregion
-
         #region On event handlers
-
-        private void RefreshPosAndLoc(object sender, EventArgs e) {
-            RefreshPosAndLoc();
-        }
 
         private void Cover_OnVisibleChanged(object sender, EventArgs eventArgs) {
             if (Owner == null)
                 return;
-
             Visible = Owner.Visible;
             if (!Visible) {
                 // get it out of the screen or it might be visible through low opacity... trust me

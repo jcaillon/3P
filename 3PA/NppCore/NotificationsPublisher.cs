@@ -319,22 +319,11 @@ namespace _3PA.NppCore {
                 MouseMonitor.Instance.Install();
             }
 
-            // Install messaging hook
-            if (!CallWndProcMonitor.Instance.IsInstalled)
-            {
-                CallWndProcMonitor.Instance.Clear();
-                CallWndProcMonitor.Instance.Add(
-                    WinApi.Messages.WM_PAINT
-                    );
-                CallWndProcMonitor.Instance.GetMessage += Plug.HwndMessageHandler;
-                CallWndProcMonitor.Instance.Install();
-            }
         }
 
         private static void UninstallHooks() {
             KeyboardMonitor.Instance.Uninstall();
             MouseMonitor.Instance.Uninstall();
-            CallWndProcMonitor.Instance.Uninstall();
         }
 
         #endregion
