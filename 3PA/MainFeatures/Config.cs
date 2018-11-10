@@ -608,7 +608,11 @@ namespace _3PA.MainFeatures {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getBugs&softName=3p"; }
         }
 
-        public static int PostPingEveryXMin = 3 * 60;
+        public static string GetPingUrl {
+            get { return @"http://bit.ly/2zS1mVJ"; }
+        }
+
+        public static int PostPingEveryXMin = 24 * 60;
 
 
         /// <summary>

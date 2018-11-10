@@ -36,13 +36,10 @@ namespace _3PA.Lib {
             try {
                 // ping once x hours
                 if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.PostPingEveryXMin)) {
-                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
+                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.GetPingUrl);
                     webServiceJson.OnInitHttpWebRequest += request => {
                         request.Proxy = Config.Instance.GetWebClientProxy();
                     };
-                    webServiceJson.AddToReq("UUID", UniqueId);
-                    webServiceJson.AddToReq("userName", Name);
-                    webServiceJson.AddToReq("version", AssemblyInfo.Version);
                     webServiceJson.OnRequestEnded += req => {
                         if (req.StatusCodeResponse != HttpStatusCode.OK) {
                             if (Config.IsDeveloper)
