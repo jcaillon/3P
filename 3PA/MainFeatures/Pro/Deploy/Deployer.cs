@@ -466,13 +466,13 @@ namespace _3PA.MainFeatures.Pro.Deploy {
         private string ReplaceVariablesIn(string input) {
             if (input.ContainsFast("<")) {
                 var fr = new FastReplacer("<", ">", false);
-                fr.Append(input);
+                fr.Append(input.Replace("<<", $"{(char) 2}").Replace(">>", $"{(char) 3}"));
                 // special replacement
                 fr.Replace(@"<ROOT>", input.StartsWith(":") ? Regex.Escape(_sourceDirectory) : _sourceDirectory);
                 foreach (var variableRule in DeployVarList) {
                     fr.Replace(variableRule.VariableName, variableRule.Path);
                 }
-                return fr.ToString();
+                return fr.ToString().Replace($"{(char) 2}", "<").Replace($"{(char) 3}", ">");
             }
             return input;
         }

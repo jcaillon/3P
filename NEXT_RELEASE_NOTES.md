@@ -1,19 +1,28 @@
-Hello folks,
+Hello everyone,
 
-This is yet another small release in the stable branch. It doesn't bring new features, but instead tries to stabilize the v1.8.x version of 3P.
+Quick release to fix small issues reported recently.
 
-In the meantime, i've been pretty busy in the development branch of 3P, working on the GUI framework and modularizing components of 3P for external usage (like the parser and the deployer/mass compiler for instance). A lot of goodies that will come with the next beta version v1.9; if you wish to preview these features and help me debug 3P, don't forget that you can switch to the beta branch of updates in the option page.
+### Improvements ###
 
-### Important notes : ###
+- \#238: added the possibility to use `<` and `>` in regexes without them being interpreted as variables by doubling them in the deployment rules configuration. This allows to have string exclusion in regexes like: `:^.*(?<<!srv)\.(p|cls)$`
 
-I've slightly lowered the requirement from .net 4.6.2 to .net 4.6.1 for the simple reason that this latter version is more commonly used and that 4.6.2 doesn't bring interesting features for me.
+### Fixed issues ###
 
-### Improvements : ###
+- \#237: typo on disclaimer
+- \#235: the username/password configured for the http proxy were not sent correctly to the proxy
+- \#236: you can now use an external directory for your datadigger installation (`options` > `Misc.` > `External tools`)
 
-- #220 : Extent indicator on tooltips for variables, parameters, fields and function return types
+### Sakoe ###
 
-### Fixed issues : ###
+If you like 3P, you should take a look at my next upcoming project : [SAKOE](https://github.com/jcaillon/Oetools.Sakoe), the **S**wiss **A**rmy **K**nife for **O**pen**E**dge. 
 
-- #237: typo on disclamimer
-- #235: the username/password configured for the http proxy were not sent to the proxy
-- #236: you can now use an external directory for your datadigger installation
+It's a command line interface, multi-purpose tool that will *hopefully* be useful to any openedge developer:
+
+- It will provide various utilities (like simplified database manipulation, reversed XCODE, a better prolib interface and much more!)
+- It is designated to be used in a CI (continuous integration) pipeline and will automate build tasks (similarly to ant/maven/msbuild and tools alike)
+
+There are no releases yet, but it will be available soon.
+
+If you like it, don't forget to **STAR IT** on github as it helps a lot for visibility on the platform. Same goes for 3P by the way! :D
+
+Enjoy!
