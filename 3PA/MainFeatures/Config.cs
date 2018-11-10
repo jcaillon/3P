@@ -464,6 +464,19 @@ namespace _3PA.MainFeatures {
             public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
 
             #endregion
+            
+            #region EXTERNAL TOOLS
+
+            [Config(Label = "Custom directory for the DataDigger installation",
+                Tooltip = "Use this option to specify an external path where 3P can find a custom installation of DataDigger",
+                GroupName = "External tools")]
+            public string ExternalDirectoryPathForDataDiggerInstallation = "";
+
+            public string GetDataDiggerDirectory() {
+                return !string.IsNullOrEmpty(ExternalDirectoryPathForDataDiggerInstallation) ? ExternalDirectoryPathForDataDiggerInstallation : DataDiggerFolder;
+            }
+
+            #endregion
 
             // set to false when the plugin starts, and to true when it stops; if false when it starts then npp crashed
             public bool NppStoppedCorrectly; 

@@ -619,7 +619,7 @@ namespace _3PA.Lib {
         /// <summary>
         /// Returns the folder path in which prolint is installed
         /// </summary>
-        public string ApplicationFolder { get { return Config.DataDiggerFolder; } }
+        public string ApplicationFolder { get { return Config.Instance.GetDataDiggerDirectory(); } }
 
         #endregion
 
@@ -628,7 +628,7 @@ namespace _3PA.Lib {
         public DataDiggerUpdaterWrapper() {
 
             UpdatedSoftName = "DataDigger";
-            FolderUnzip = Config.DataDiggerFolder;
+            FolderUnzip = Config.Instance.GetDataDiggerDirectory();
             HowToInstallManually = "<br><br><i>If you wish to manually install " + UpdatedSoftName + ", you have to : <br><ul><li>Download the latest release on " + "https://github.com/patrickTingen/DataDigger/releases".ToHtmlLink("GITHUB") + "</li><li>Extract its content to " + ApplicationFolder.ToHtmlLink() + "</li></ul></i>";
 
             var localVersion = "v0";
