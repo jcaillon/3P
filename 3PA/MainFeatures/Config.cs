@@ -513,9 +513,8 @@ namespace _3PA.MainFeatures {
             public IWebProxy GetWebClientProxy() {
                 if (WebUseProxy && !string.IsNullOrEmpty(WebProxyUri)) {
                     return new WebProxy(WebProxyUri) {
-                        Credentials = new NetworkCredential(WebProxyUsername ?? "", WebProxyPassword ?? ""),
                         UseDefaultCredentials = false,
-                        BypassProxyOnLocal = true
+                        Credentials = string.IsNullOrEmpty(WebProxyUsername) ? null : new NetworkCredential(WebProxyUsername, WebProxyPassword)
                     };
                 }
                 IWebProxy proxy = WebRequest.DefaultWebProxy;
