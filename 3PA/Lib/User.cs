@@ -109,7 +109,7 @@ namespace _3PA.Lib {
             wb.OnInitHttpWebRequest += request => {
                 request.Proxy = Config.Instance.GetWebClientProxy();
                 request.UserAgent = "3pUser";
-                request.Headers.Add("Authorization", "Basic " + Config.GitHubToken);
+                request.Headers.Add("Authorization", "Token " + Config.GitHubToken);
             };
             wb.AddToReq("body", message);
             wb.OnRequestEnded += json => { UserCommunication.Notify((json.ResponseException != null ? json.ResponseException.ToString() : "") + "\r\n" + json.StatusCodeResponse + ":" + (json.StatusDescriptionResponse ?? "") + "\r\n" + (json.JsonResponse ?? "")); };
