@@ -464,6 +464,19 @@ namespace _3PA.MainFeatures {
             public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
 
             #endregion
+            
+            #region EXTERNAL TOOLS
+
+            [Config(Label = "Custom directory for the DataDigger installation",
+                Tooltip = "Use this option to specify an external path where 3P can find a custom installation of DataDigger",
+                GroupName = "External tools")]
+            public string ExternalDirectoryPathForDataDiggerInstallation = "";
+
+            public string GetDataDiggerDirectory() {
+                return !string.IsNullOrEmpty(ExternalDirectoryPathForDataDiggerInstallation) ? ExternalDirectoryPathForDataDiggerInstallation : DataDiggerFolder;
+            }
+
+            #endregion
 
             // set to false when the plugin starts, and to true when it stops; if false when it starts then npp crashed
             public bool NppStoppedCorrectly; 
@@ -513,9 +526,8 @@ namespace _3PA.MainFeatures {
             public IWebProxy GetWebClientProxy() {
                 if (WebUseProxy && !string.IsNullOrEmpty(WebProxyUri)) {
                     return new WebProxy(WebProxyUri) {
-                        Credentials = new NetworkCredential(WebProxyUsername ?? "", WebProxyPassword ?? ""),
                         UseDefaultCredentials = false,
-                        BypassProxyOnLocal = true
+                        Credentials = string.IsNullOrEmpty(WebProxyUsername) ? null : new NetworkCredential(WebProxyUsername, WebProxyPassword)
                     };
                 }
                 IWebProxy proxy = WebRequest.DefaultWebProxy;
@@ -596,7 +608,11 @@ namespace _3PA.MainFeatures {
             get { return @"https://greenzest.000webhostapp.com/ws/1.6.4/?action=getBugs&softName=3p"; }
         }
 
-        public static int PostPingEveryXMin = 3 * 60;
+        public static string GetPingUrl {
+            get { return @"http://bit.ly/2zS1mVJ"; }
+        }
+
+        public static int PostPingEveryXMin = 24 * 60;
 
 
         /// <summary>
@@ -726,7 +742,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static string GitHubToken {
-            get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; }
+            get { return @"MmViMDJlNWVlYWZlMTIzNGIxN2VmOTkxMGQ1NzljMTRkM2E1ZDEyMw=="; }
         }
         
         public static int UpdateCheckEveryXMin = 12 * 60;

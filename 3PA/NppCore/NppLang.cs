@@ -258,6 +258,8 @@ namespace _3PA.NppCore {
                                             continue;
                                         parameters.Add(attrname.Value);
                                     }
+                                    // improve description formatting
+                                    descr = descr.Replace("\n", "<br>");
                                     overloads.Add(new NppKeyword.NppOverload {
                                         ReturnValue = retVal,
                                         Description = descr,

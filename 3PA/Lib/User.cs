@@ -20,6 +20,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -36,13 +37,10 @@ namespace _3PA.Lib {
             try {
                 // ping once x hours
                 if (Utils.IsLastCallFromMoreThanXMinAgo("Ping", Config.PostPingEveryXMin)) {
-                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PostPingWebWervice);
+                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.GetPingUrl);
                     webServiceJson.OnInitHttpWebRequest += request => {
                         request.Proxy = Config.Instance.GetWebClientProxy();
                     };
-                    webServiceJson.AddToReq("UUID", UniqueId);
-                    webServiceJson.AddToReq("userName", Name);
-                    webServiceJson.AddToReq("version", AssemblyInfo.Version);
                     webServiceJson.OnRequestEnded += req => {
                         if (req.StatusCodeResponse != HttpStatusCode.OK) {
                             if (Config.IsDeveloper)
@@ -112,7 +110,7 @@ namespace _3PA.Lib {
             wb.OnInitHttpWebRequest += request => {
                 request.Proxy = Config.Instance.GetWebClientProxy();
                 request.UserAgent = "3pUser";
-                request.Headers.Add("Authorization", "Basic " + Config.GitHubToken);
+                request.Headers.Add("Authorization", "Token " + Encoding.ASCII.GetString(Convert.FromBase64String(Config.GitHubToken)));
             };
             wb.AddToReq("body", message);
             wb.OnRequestEnded += json => { UserCommunication.Notify((json.ResponseException != null ? json.ResponseException.ToString() : "") + "\r\n" + json.StatusCodeResponse + ":" + (json.StatusDescriptionResponse ?? "") + "\r\n" + (json.JsonResponse ?? "")); };

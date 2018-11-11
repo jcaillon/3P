@@ -766,8 +766,8 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // add the datadigger folder to the propath
-            _propath = Config.DataDiggerFolder + "," + _propath;
-            _processStartDir = Config.DataDiggerFolder;
+            _propath = Config.Instance.GetDataDiggerDirectory() + "," + _propath;
+            _processStartDir = Config.Instance.GetDataDiggerDirectory();
 
             return true;
         }

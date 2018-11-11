@@ -98,8 +98,16 @@ namespace _3PA {
             AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
 
             // catch unhandled errors to log them
-            AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
+            // Add the event handler for handling UI thread exceptions to the event.
             Application.ThreadException += ErrorHandler.ThreadErrorHandler;
+
+            // Set the unhandled exception mode to force all Windows Forms 
+            // errors to go through our handler.
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+            // Add the event handler for handling non-UI thread exceptions to the event. 
+            AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
+
             TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
         }
 
