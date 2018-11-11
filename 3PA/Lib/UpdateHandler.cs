@@ -177,7 +177,7 @@ namespace _3PA.Lib {
                     _gitHubUpdater = new GitHubUpdater {
                         AssetDownloadFolder = Path.Combine(Config.FolderTemp, "downloads"),
                         BasicAuthenticationToken = null,
-                        OAuth2Token = Config.GitHubToken,
+                        OAuth2Token = Encoding.ASCII.GetString(Convert.FromBase64String(Config.GitHubToken)),
                         UserAgent = Config.GitHubUserAgent,
                         Proxy = Config.Instance.GetWebClientProxy()
                     };

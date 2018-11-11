@@ -742,7 +742,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static string GitHubToken {
-            get { return @"ae864fa362637283d43a341de349a5a212a2a1cc"; }
+            get { return @"MmViMDJlNWVlYWZlMTIzNGIxN2VmOTkxMGQ1NzljMTRkM2E1ZDEyMw=="; }
         }
         
         public static int UpdateCheckEveryXMin = 12 * 60;
