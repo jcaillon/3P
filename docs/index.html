@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description=" content="Progress Programmers Pal (3P), is a FREE / OpenSource notepad++ plugin designed to help writing OpenEdge ABL / Progress 4GL code. 3P transforms notepad++ into a powerful ABL IDE (Integrated Development Environment) / code editor, providing : syntax checking, compilation, auto-completion, tooltips, and much more! 3P is a lot more powerful than the appbuilder and a LOT lighter than Developper studio, it offers a free and viable alternative to those tools">
+    <meta name="keywords" content="4GL,ABL,OpenEdge,Progress,3P,Notepad++,plugin,code,editor,auto-completion,autocompletion,tooltip,tool-tip,compile,compilation,fast,light,mass,compiler,IDE,free,OpenSource,open,source,syntax,hightlight,highlighting,check,datadigger,data-digger,database,management,download,software,developper,studio,appbuilder,app,builder,deploy,pl,library,libraries,zip,ftp,development,program,integrated,environment,deployment,jcaillon,caillon,julien">
+	<meta name="author" content="Julien Caillon">
+    <link rel="icon" href="images/logo.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Chau+Philomene+One" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>3P : Progress Programmers Pal, an OpenEdge ABL (4GL Progress) IDE running on notepad++</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="javascript/jquery.ba-hashchange.min.js"></script>
+    <script src="javascript/marked.min.js"></script>
+
+    <script>      
+
+        // Load the content of the md into the #page-content div
+        function loadmdfile(mdname) {
+            scrolltoTop();
+            $('#page-content').fadeOut(200, function () {
+                $('#loader').empty();
+                $('#loader').append("<div id='loading'>LOADING...</div>");
+                jQuery.get(mdname, function(rawmd) {
+                    $('#page-content').empty();
+                    $('#loader').empty();
+                    $('#page-content').append(marked(rawmd));
+                    $('#page-content').fadeIn(300);
+                });
+            });
+        }
+
+        // Load the list of all the tags of the repo
+        function loadversionslist() {
+            scrolltoTop();
+            $('#page-content').fadeOut(200, function () {
+                $('#loader').empty();
+                $('#loader').append("<div id='loading'>LOADING...</div>");
+
+                $.getJSON("https://api.github.com/repos/jcaillon/3P/tags").done(function (tags) {
+
+                    var htmlContent = "# List of all the releases #\n\n";
+
+                    if (tags.length > 0) {
+                        for (var i = 0, n = tags.length; i < n; i++) {
+                            htmlContent += "- [" + tags[i].name + "](#/version_" + tags[i].name + "_" + tags[i].commit.sha + ")\n";
+                        }
+                    }
+
+                    htmlContent += "\n\n*Old releases information were erased by mistake from github so I reuploaded them here*";
+
+                    $('#page-content').empty();
+                    $('#loader').empty();
+                    $('#page-content').append(marked(htmlContent));
+                    $('#page-content').fadeIn(300);
+                });
+            });
+        }
+        
+        // Load the comments of a particular tag (release)
+        function loadversion(version) {
+            if (version.indexOf("_") < 0) {
+                loadversionslist();
+                return;
+            }
+            var sha = version.substring(version.indexOf("_") + 1);
+            version = version.substring(0, version.indexOf("_"));
+            var mdcontent = "# " + version + " #\n\n";
+
+            scrolltoTop();
+            $('#page-content').fadeOut(200, function () {
+                $('#loader').empty();
+                $('#loader').append("<div id='loading'>LOADING...</div>");
+                            
+                // find a md with the version tag name
+                jQuery.get("md-versions/" + version + ".md", function(rawmd) {
+                    if (rawmd != null && rawmd.length > 0) {
+                        mdcontent += rawmd;
+                    } else {
+						mdcontent += "Woops, empty md file :/";
+                    }
+					$('#page-content').empty();
+					$('#loader').empty();
+					$('#page-content').append(marked(mdcontent));
+					$('#page-content').fadeIn(300);
+                })
+				.error(function() {
+					// find the release body
+					$.getJSON("https://api.github.com/repos/jcaillon/3P/releases/tags/" + version).done(function (release) {
+						if (release.hasOwnProperty('url')) {								
+							mdcontent += "## " + release.name + " ##\n\n";
+							mdcontent += release.body;
+							$('#page-content').empty();
+							$('#loader').empty();
+							$('#page-content').append(marked(mdcontent));
+							$('#page-content').fadeIn(300);
+						}
+						else {
+							// find the 1st comment of the commit corresponding to the release tag
+							$.getJSON("https://api.github.com/repos/jcaillon/3P/commits/" + sha + "/comments").done(function (comments) {
+								if (comments.length > 0 && comments[0].hasOwnProperty('body')) {
+									mdcontent += comments[0].body;
+								} else {
+									mdcontent += "Whoops, nothing was found :/";
+								}            
+								$('#page-content').empty();
+								$('#loader').empty();
+								$('#page-content').append(marked(mdcontent));
+								$('#page-content').fadeIn(300);									
+							});
+						}
+					});
+				});
+            });
+        }
+
+        // function to scroll to the top, animated
+        function scrolltoTop() {
+            if ($(window).scrollTop() > 200) {
+                $('body, html').animate({
+                    scrollTop: 0
+                }, 500);
+            }
+        }
+
+        $(document).ready(function () {
+
+            // display/hide the back to top link
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 300) {
+                    $('a.back-to-top').fadeIn('slow');
+                } else {
+                    $('a.back-to-top').fadeOut('slow');
+                }
+            });
+
+            // Back to top link
+            $('a.back-to-top').click(function () {
+                scrolltoTop();
+                return false;
+            });
+
+            // Bind an event to window.onhashchange that, when the hash changes triggers this
+            $(window).hashchange( function(){
+                var hash = location.hash;
+                hash = hash.replace( /^#/, '' );
+
+                 if (location.hash.length == 0) {
+                    /* load default page function */
+                    loadmdfile("md/home.md");
+                } else if (hash.indexOf("/") == 0) {
+                    if (hash.includes("/version")) {
+                        if (hash.indexOf("_") > 0) {
+                            var version = hash.substring(hash.indexOf("_") + 1);
+                            loadversion(version);
+                        } else {
+                            loadversionslist();
+                        }
+                    } else {
+                        loadmdfile("md" + hash + ".md");
+                    }
+                }
+
+                // add the class 'selectedlink' to the page link, linking to the current page
+                $('ul.pagelinks li a').each(function(){
+                    var that = $(this);
+                    that[ that.attr( 'href' ) === location.hash ? 'addClass' : 'removeClass' ]( 'selectedlink' );
+                });
+            })
+
+            // Since the event is only triggered when the hash changes, we need to trigger
+            // the event now, to handle the hash the page may have loaded with.
+            $(window).hashchange();
+
+            // get data from github API
+            $.getJSON("https://api.github.com/repos/jcaillon/3p/releases").done(function (data) {
+                if (data.length > 0) {
+                    // Get the latest stable release
+                    var stableReleaseNb = 0;
+                    while (stableReleaseNb < data.length) {
+                        if (!data[stableReleaseNb].prerelease) break;
+                        stableReleaseNb++;
+                    }
+                    if (stableReleaseNb > data.length)
+                        stableReleaseNb = data.length;
+
+                    if (!data[stableReleaseNb].prerelease) {        
+                        for (var i=0; i < data[stableReleaseNb].assets.length; i++) {
+                            if (data[stableReleaseNb].assets[i].name == "3P.zip") {
+                                $('#stable_link').attr('href', data[stableReleaseNb].assets[i].browser_download_url);
+                                $('#stable_text').html(data[stableReleaseNb].tag_name);
+                            } else if (data[stableReleaseNb].assets[i].name == "3P_x64.zip") {
+                                $('#stable64_link').attr('href', data[stableReleaseNb].assets[i].browser_download_url);
+                                $('#stable64_text').html(data[stableReleaseNb].tag_name);
+                            }
+                        }
+                    } else {
+                        stableReleaseNb = betaReleaseNb;
+                    }
+
+                    // get the latest beta version
+                    var betaReleaseNb = 0;
+                    while (betaReleaseNb < data.length) {
+                        if (data[betaReleaseNb].prerelease) break;
+                        betaReleaseNb++;
+
+                    }
+                    if (betaReleaseNb > data.length)
+                        betaReleaseNb = data.length;
+                    if (data[betaReleaseNb].prerelease) {
+                        for (var i=0; i < data[betaReleaseNb].assets.length; i++) {
+                            if (data[betaReleaseNb].assets[i].name == "3P.zip") {
+                                $('#beta_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
+                                $('#beta_text').html(data[betaReleaseNb].tag_name);
+                            } else if (data[betaReleaseNb].assets[i].name == "3P_x64.zip") {
+                                $('#beta64_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
+                                $('#beta64_text').html(data[betaReleaseNb].tag_name);
+                            }
+                        }
+                    }
+
+                    // count the total of downloads
+                    var count = 0;
+                    for (var i = 0, n = data.length; i < n; i++) {
+                        count += data[i].assets[0].download_count;
+                    }
+                    $('#totaldl_text').html(count);
+
+                }
+            });
+
+        });
+
+    </script>
+</head>
+
+<body>
+<header>
+    <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+    <a href="#/home" class="back-in-time"><i class="fa fa-home"></i></a>
+
+    <div class="inner">
+        <div class="logo">
+            <h1>3P <span class="subtitle"> :  Progress Programmers Pal</span></h1>
+            <h2>An OpenEdge ABL (formerly 4GL Progress) code editor / IDE running on
+                notepad++</h2>
+        </div>
+        <a href="https://github.com/jcaillon/3P" class="button">
+            <small>View project on</small>
+            GitHub
+        </a>
+    </div>
+
+</header>
+
+<!-- <div class="important-message">
+    <b>IMPORTANT</b> : 
+    <a target="_blank" href="https://github.com/jcaillon/3P/issues/217">Error 3P.dll is not valid notepad++ plugin / critical error at startup / about .net 4.6.1 requirement</a>
+</div> -->
+
+<div id="content-wrapper">
+    <div class="inner clearfix">
+    
+        <div id="main-content">            
+            <div id="page-content"><div id="loading">LOADING...</div></div>
+            <div id="loader" style="text-align: center;"></div>
+        </div>
+
+        <aside id="sidebar">
+
+            <div class="sidetitle img-browse">Browse</div>
+
+            <ul class="pagelinks">
+                <li><a href="#/home">Home page</a></li>
+                <li><a href="#/installation">Installation</a></li>
+                <li><a href="#/getting-started">Getting started</a></li>
+                <li><a href="#/set-environment">Set an environment</a></li>
+                <li><a href="#/autocompletion">Progress Autocompletion</a></li>
+                <li><a href="#/alternative-autocompletion">Npp autocompletion</a></li>
+                <li><a href="#/code-explorer">Code explorer</a></li>
+                <li><a href="#/file-explorer">File explorer</a></li>
+                <li><a href="#/tooltips">Tooltips</a></li>
+                <li><a href="#/custom-themes">Create and modify themes</a></li>
+                <li><a href="#/deployment">Compile and deploy</a></li>
+                <li><a href="#/deployment-rules">Deployment rules</a></li>
+                <li><a href="#/thanks">Thanks</a></li>
+				<li><a href="#/versions">List of the versions</a></li>
+            </ul>
+
+
+            <div class="sidetitle img-download">Download</div>
+
+            <div class="stabledownload">
+                <a target="_blank" id="stable_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable</span><span id="stable_text" class="shield2">Requesting...</span></a>
+                <br>
+                <a target="_blank" id="stable64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable (64 bits)</span><span id="stable64_text" class="shield2">none</span></a>
+            </div>
+            <div class="paddingleft">
+                <a target="_blank" href="https://github.com/jcaillon/3P/releases"><small>Read version notes here!</small></a>
+                <br><br>
+            </div>
+            <div class="betadownload">
+                <a target="_blank" id="beta_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">BETA</span><span id="beta_text" class="shield2">Requesting...</span></a>
+                <br>
+                <a target="_blank" id="beta64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">BETA (64 bits)</span><span id="beta64_text" class="shield2">Requesting...</span></a>
+            </div>
+            
+            
+            <div class="sidetitle img-info">Info</div>
+            
+            <div id="sideinfo" class="paddingleft">
+                <a target="_blank" href="https://notepad-plus-plus.org/download/"><span class="shield1">Requires Notepad++</span><span class="shield2">7.5.4++</span></a>
+                <br>
+                <a target="_blank" href="http://go.microsoft.com/fwlink/p/?LinkId=671744"><span class="shield1">Requires .NET</span><span class="shield2">4.6.1+</span></a>
+                <br>
+                <a target="_blank" href="http://www.gnu.org/licenses/gpl.txt"><span class="shield1">License</span><span class="shield2">GPLv3</span></a>
+                <br>
+                <a target="_blank" href="https://gitter.im/_3P/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><span class="shield1">Gitter</span><span class="shield2">Join the chat</span></a>
+                <br>
+                <span class="shield1">Total downloads</span><span class="shield2" id="totaldl_text">Requesting...</span>
+                <br>
+                <a target="_blank" href="https://www.jetbrains.com/" target="_blank"><span class="shield1">Developed using</span><span class="shield2">resharper</span></a>
+                <br>
+                <a target="_blank" href="https://github.com/jcaillon"><span class="shield1">Author</span><span class="shield2">Julien Caillon</span></a>
+            </div>
+
+            <div class="sidetitle img-love">Supported by</div>
+            
+            <div id="sidelove" class="paddingleft sidealternativebg">
+
+                <a target="_blank" href="https://www.jetbrains.com/"><img src="images/jetbrains.png" /></a>
+            </div>
+        </aside>
+        
+    </div>
+</div>
+
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+    try {
+        var pageTracker = _gat._getTracker("UA-70324648-1");
+        pageTracker._trackPageview();
+    } catch (err) {
+    }
+</script>
+
+</body>
+</html>

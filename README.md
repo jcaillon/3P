@@ -7,7 +7,7 @@
 [![Total downloads](https://img.shields.io/github/downloads/jcaillon/3P/total.svg)](https://github.com/jcaillon/3P/releases)
 
 [![GPLv3 licence](https://img.shields.io/badge/License-GPLv3-74A5C2.svg)](https://github.com/jcaillon/3P/blob/master/COPYING.GPLv3.txt)
-[![.net 4.6.1+ required](https://img.shields.io/badge/Requires%20.NET-4.6.1+-C8597A.svg)](http://go.microsoft.com/fwlink/?LinkId=671743)
+[![.net 4.6.1+ required](https://img.shields.io/badge/Requires%20.NET-4.6.1+-C8597A.svg)](https://www.microsoft.com/en-us/download/details.aspx?id=49982)
 [![Notepad++ v7.5.4+ required](https://img.shields.io/badge/Requires%20Notepad++-v7.5.4+-865FC5.svg)](https://notepad-plus-plus.org/download/)
 [![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/_3P/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
