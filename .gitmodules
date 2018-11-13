@@ -1,12 +1,12 @@
 [submodule "Yamui.Framework"]
 	path = Yamui.Framework
-	url = https://github.com/jcaillon/Yamui.Framework.git
+	url = ../Yamui.Framework.git
 [submodule "Oetools.Packager"]
 	path = Oetools.Packager
-	url = https://github.com/jcaillon/Oetools.Packager.git
+	url = ../Oetools.Packager.git
 [submodule "Oetools.AblParser"]
 	path = Oetools.AblParser
-	url = https://github.com/jcaillon/Oetools.AblParser.git
+	url = ../Oetools.AblParser.git
 [submodule "Oetools.Debugger"]
 	path = Oetools.Debugger
-	url = https://github.com/jcaillon/Oetools.Debugger.git
+	url = ../Oetools.Debugger.git
