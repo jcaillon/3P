@@ -1,12 +1,12 @@
 [submodule "Yamui.Framework"]
 	path = Yamui.Framework
 	url = ../Yamui.Framework.git
-[submodule "Oetools.Packager"]
-	path = Oetools.Packager
-	url = ../Oetools.Packager.git
 [submodule "Oetools.AblParser"]
 	path = Oetools.AblParser
 	url = ../Oetools.AblParser.git
 [submodule "Oetools.Debugger"]
 	path = Oetools.Debugger
 	url = ../Oetools.Debugger.git
+[submodule "Oetools.Builder"]
+	path = Oetools.Builder
+	url = ../Oetools.Builder.git
