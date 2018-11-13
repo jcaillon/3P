@@ -44,7 +44,6 @@ namespace _3PA.Tests {
         #region Debug test
 
         public static void DebugTest1() {
-            UserCommunication.Notify(Oetools.Utilities.Poc1.Test1());
             //User.SendComment("hello", "https://api.github.com/repos/3pUser/yolo/issues/1/comments");
         }
         

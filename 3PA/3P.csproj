@@ -49,7 +49,8 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <LangVersion>6</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -766,14 +767,6 @@
     <ProjectReference Include="..\Oetools.Debugger\Oetools.Debugger\Oetools.Debugger.csproj">
       <Project>{93e229bf-bcfa-42c7-81cd-ecb6dc49ed37}</Project>
       <Name>Oetools.Debugger</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Oetools.Packager\Oetools.Packager\Oetools.Packager.csproj">
-      <Project>{245b6aa2-4f7a-4d51-9c9b-104d59161603}</Project>
-      <Name>Oetools.Packager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Oetools.Packager\Oetools.Utilities\Oetools.Utilities\Oetools.Utilities.csproj">
-      <Project>{d8ef6334-d168-47a5-ac96-7b3bb40f61c6}</Project>
-      <Name>Oetools.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Yamui.Framework\Yamui.Framework\Yamui.Framework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
