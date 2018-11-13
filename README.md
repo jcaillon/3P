@@ -17,6 +17,10 @@
 
 Old releases information can be found [here on the website](https://jcaillon.github.io/3P/#/versions)
 
+## Build information
+
+Details/help on [how to build this project](docs/BUILD.md).
+
 ## IMPORTANT MESSAGE ##
 
 **The 3P updater is UNAVAILABLE for all the versions prior to v1.8.1!!!**

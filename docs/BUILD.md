@@ -1,19 +1,82 @@
-## Build info : ##
+# BUILD
 
-### How to configure DLLExport ###
+## Notes
+
+> This repository uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)!
+>
+> You will need visual studio 2017 and/or msbuild 15 for this project
+
+### Getting the Source Code
+
+you'll need to issue the following command in your terminal:
+
+```git
+git clone --recursive https://github.com/jcaillon/3P.git
+```
+
+If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you wil have to check the `recursive` box when cloning.
+
+### Updating the Source Code
+
+To correctly update ALL the source code, you need to do an extra command after the classic `git pull` to also update the submodules :
+
+```git
+git pull
+git submodule update --recursive
+```
+
+If you are using [TortoiseGit](https://tortoisegit.org) on Windows, you'll need to select **Submodules update** in the menu.
+
+## Build info
+
+If missing a lib/exe when building, install [MS BUILD TOOL for visual studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321)
+
+### How to configure DLLExport
+
+This is already done, you shouldn't have to do this except if you want to change the export configuration.
 
 - Execute `DllExport.bat -action Configure`
 - This download packages\DllExport.1.6.0
 - Select your .sln solution file
 - Choose a namespace for the DllExport : `RGiesecke.DllExport` and target x86 + x64
 - Click apply
-- Read all the info here : https://github.com/3F/DllExport
-- If missing a lib/exe when building, install [MS BUILD TOOL 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159) / [SDK .net 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53321) / [win 10 SDK](https://developer.microsoft.com/windows/downloads/windows-10-sdk)
+- Read all the info here : <https://github.com/3F/DllExport>
 
+## Manual build command
 
-## When releasing (Note to myself) : ##
+```bat
+git submodule update --init --recursive
+build.cmd /t:restore /verbosity:minimal
+build.cmd 3P.sln /p:Configuration=Release /p:Platform="Any CPU" /t:Rebuild /verbosity:minimal
+```
 
-### Manual chores ###
+## Additionnal remarks
+
+*Why are the libraries like Oetools.Packager targetting explicitly net461 AND netstandard2.0?*
+
+This question is legit, according to this [net-implementation-support table](https://docs.microsoft.com/en-us/dotnet/standard/net-standard#net-implementation-support), we should be able to make our libraries target netstandard2.0 and that's it. Since our application is targetting v4.6.1 and since v4.6.1 implements netstandard2.0 we should be good. But nop! This is explained here :
+
+- https://www.youtube.com/watch?v=u67Eu_IgEMs&list=PLRAdsfhKI4OWx321A_pr-7HhRNk7wOLLY&index=8
+- https://stackoverflow.com/questions/47365136/why-does-my-net-standard-nuget-package-trigger-so-many-dependencies/47366401#47366401
+- also for reference on pb with nuget : https://github.com/dotnet/standard/issues/481
+
+So yeah. I have to explicitly target net461.
+
+# ANALYZE
+
+Using [coverity](https://scan.coverity.com/download?tab=csharp)
+
+```bat
+cd 3P
+cov-build --dir cov-int "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe" 3P.sln /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /verbosity:minimal
+7z a 3P.zip ./cov-int*
+```
+
+# RELEASE
+
+## When releasing (Note to myself) :
+
+### Manual chores
 
 - Change the dll version of 3P in AssemblyInfo.cs, the format should be vX.X.X.X with v(major).(minor).(revision).(lastdigit) ; *the last digit of the dll's version indicates if it's a pre-release build (1) or stable build (0)*
 - Check the default Config + UserCommunication.Notify()
@@ -25,20 +88,25 @@
   - past the body from the `NEXT_RELEASE_NOTES.md` file
   - Publish the release!
 
-### Done automatically by appveyor ###
+### Done automatically by appveyor
 
 - Clean/Rebuild in release mode, not debug for both x86 and x64 versions
 - Create 2 .zip in the release on github :
   - "3P.zip" containing the 3P.dll (32 bits) and eventually the .pdb file
   - "3P_x64.zip" containg the 3P.dll (64 bits!) and eventually the .pdb file
 
+# DEPLOYMENT TEST
 
-## Update Notepad++ plugin manager ##
+## Update Notepad++ plugin manager
 
 - For the x86 version, it happens here : https://npppm.bruderste.in/
 - For the x64 version, at the moment, it happens here : https://github.com/bruderstein/npp-plugins-x64
 
-### How to test the plugin manager ###
+### How to test the plugin manager
+
+Dev list : http://nppxmldev.bruderste.in/pm/xml/plugins.zip
+
+Normal list : http://nppxml.bruderste.in/pm/xml/plugins.zip
 
 Mock the files download by the plugin manager with fiddler :
 
@@ -88,7 +156,7 @@ copy plugins.xml PluginManagerPlugins.xml
 7z a "plugins.zip" "PluginManagerPlugins.xml"
 ```
 
-### x32 plugin xml ###
+### x32 plugin xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -120,7 +188,7 @@ copy plugins.xml PluginManagerPlugins.xml
 </plugins>
 ```
 
-### x64 plugin xml ###
+### x64 plugin xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
