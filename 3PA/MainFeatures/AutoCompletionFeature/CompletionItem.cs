@@ -215,6 +215,8 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                         return new ProcedureCompletionItem();
                     case CompletionType.ExternalProcedure:
                         return new ExternalProcedureCompletionItem();
+                    case CompletionType.Method:
+                        return new MethodCompletionItem();
 
                     case CompletionType.LangWord:
                         return new LangWordCompletionItem();
@@ -273,6 +275,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         LangFunction,
         Word,
         Number,
+        Method
     }
 
     /// <summary>
@@ -400,6 +403,52 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
                 toDisplay.Append("Function defined in an external procedure or is a web service operation");
             }
 
+            return toDisplay.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Method
+    /// </summary>
+    internal class MethodCompletionItem : CompletionItem
+    {
+        public override CompletionType Type
+        {
+            get { return CompletionType.Method; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Method; }
+        }
+
+        public ParsedMethod ParsedMethod
+        {
+            get { return ParsedBaseItem as ParsedMethod; }
+        }
+
+        public override string ToString()
+        {
+            var toDisplay = new StringBuilder();
+            toDisplay.Append(HtmlHelper.FormatSubtitle("RETURN TYPE"));
+            toDisplay.Append(HtmlHelper.HtmlFormatRowParam(ParseFlag.Output, "Returns " + HtmlHelper.FormatSubString($"{ParsedMethod.ReturnType}")));
+            toDisplay.Append(HtmlHelper.FormatSubtitle("OF CLASS"));
+            toDisplay.Append(HtmlHelper.HtmlFormatRowParam(ParseFlag.LocalScope, HtmlHelper.FormatSubString($"{ParsedMethod.ClassName}")));
+            
+
+            toDisplay.Append(HtmlHelper.FormatSubtitle("PARAMETERS"));
+            if (ParsedMethod.Parameters != null && ParsedMethod.Parameters.Count > 0)
+            {
+                foreach (var parameter in ParsedMethod.Parameters)
+                {
+                    toDisplay.Append(HtmlHelper.HtmlFormatRowParam(parameter.Flags, parameter.Name + " as " + HtmlHelper.FormatSubString(parameter.PrimitiveType.ToString())));
+                }
+            }
+            else
+            {
+                toDisplay.Append("None");
+            }
+            
             return toDisplay.ToString();
         }
     }

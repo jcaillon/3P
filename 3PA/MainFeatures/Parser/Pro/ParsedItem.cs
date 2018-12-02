@@ -141,9 +141,12 @@ namespace _3PA.MainFeatures.Parser.Pro {
         Function,
         OnEvent,
         Class,
+        Interface,
         Method,
         Constructor,
-        
+        Destructor,
+        Property,
+        Event,
         PreProcAnalyzeBlock,
         PreProcIfBlock,
         SimpleBlock,
@@ -1027,135 +1030,233 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
     #region OOP classes
 
-    /*
     /// <summary>
-    /// Class
+    /// IClassMember
     /// </summary>
-    internal class ParsedClass : ParsedScopeBlock {
+    internal interface IParsedClassMember
+    {
+        /// <summary>
+        /// </summary>
+        string ClassName { get; }
+
+        /// <summary>
+        /// </summary>
+        ParsedScopeType ParentScopeType { get; }
+    }
+
+    /// <summary>
+    /// ClassMember
+    /// </summary>
+    internal class ParsedClassMember : ParsedScopeBlock, IParsedClassMember
+    {
+        public override void Accept(IParserVisitor visitor)
+        {
+            // no visits
+        }
+
+        /// <summary>
+        /// </summary>
+        public string ClassName { get; private set; }
+
+        /// <summary>
+        /// </summary>
+        public ParsedScopeType ParentScopeType { get; private set; }
+
+        public ParsedClassMember(string name, Token token, ParsedScopeType scopeType, ParsedScope parentScope)
+            : base(name, token, scopeType) {            
+            ClassName = parentScope.Name;
+            ParentScopeType = parentScope.ScopeType;
+            if ((parentScope.ScopeType == ParsedScopeType.Class) || (parentScope.ScopeType == ParsedScopeType.Interface))
+                (parentScope as ParsedInterface).Members.Add(this);            
+        }
+    }
+
+    /// <summary>
+    /// Interface
+    /// </summary>
+    internal class ParsedInterface : ParsedScopeBlock
+    {
         /// <summary>
         /// Super type name
         /// </summary>
         public string Inherits { get; private set; }
+
+        public List<IParsedClassMember> Members { get; private set; }
+
+        public override void Accept(IParserVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public ParsedInterface(string name, Token token, string inherits)
+            : this(name, token, ParsedScopeType.Interface, inherits)
+        {   
+        }
+
+        protected ParsedInterface(string name, Token token, ParsedScopeType scopeType, string inherits)
+            : base(name, token, scopeType)
+        {
+            Inherits = inherits;
+            Members = new List<IParsedClassMember>();
+        }
+    }
+
+    /// <summary>
+    /// Class
+    /// </summary>
+    internal class ParsedClass : ParsedInterface {        
         /// <summary>
         /// List of interfaces name
         /// </summary>
         public List<string> Implements { get; private set; }
 
-        public ParseFlag Flags { get; private set; }
-
-        public List<ParsedMethod> Methods { get; set; }
-
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedClass(string name, Token token)
-            : base(name, token, ParsedScopeType.Class) {
+        public ParsedClass(string name, Token token, string inherits, List<string> implements)
+            : base(name, token, ParsedScopeType.Class, inherits) {
+            Implements = implements;            
         }
     }
 
+    
     /// <summary>
     /// Method/Constructor
     /// Constructor are very identical to method so they use the same parse object,
     /// but we differentiate them with ParsedScopeType
     /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
     /// </summary>
-    internal class ParsedMethod : ParsedScopeBlock {
+    internal class ParsedMethod : ParsedClassMember {
 
         /// <summary>
         /// Return type or VOID
         /// </summary>
-        public string ReturnType { get; private set; }
+        public string TempReturnType { get; private set; }
+
+        public ParsedPrimitiveType ReturnType { get; set; }
 
         /// <summary>
         /// </summary>
-        
+        public List<ParsedDefine> Parameters { get; set; }       
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedMethod(string name, Token token, ParsedScopeType type)
-            : base(name, token, type) {
+        public ParsedMethod(string name, Token token, ParsedScope parentScope, string returnType)
+            : base(name, token, ParsedScopeType.Method, parentScope) {
+            TempReturnType = returnType;            
         }
     }
 
+    
     /// <summary>
     /// Constructor
     /// Constructor are very identical to method so they use the same parse object,
     /// but we differentiate them with ParsedScopeType
     /// </summary>
-    internal class ParsedConstructor : ParsedScopeBlock {
+    internal class ParsedConstructor : ParsedClassMember {
 
         /// <summary>
-        /// Return type or VOID
         /// </summary>
-        public string ReturnType { get; private set; }
-
-        /// <summary>
-        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
-        /// </summary>
-        public ParseFlag Flags { get; private set; }
+        public List<ParsedDefine> Parameters { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedConstructor(string name, Token token)
-            : base(name, token, ParsedScopeType.Constructor) {
+        public ParsedConstructor(string name, Token token, ParsedScope parentScope)
+            : base(name, token, ParsedScopeType.Constructor, parentScope) {
         }
     }
 
     /// <summary>
-    /// Method
+    /// Destructor    
     /// </summary>
-    internal class ParsedMethod : ParsedScopeBlock {
-
-        /// <summary>
-        /// Return type or VOID
-        /// </summary>
-        public string ReturnType { get; private set; }
-
-        /// <summary>
-        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
-        /// </summary>
-        public ParseFlag Flags { get; private set; }
-
-        public override void Accept(IParserVisitor visitor) {
+    internal class ParsedDestructor : ParsedClassMember
+    {
+        public override void Accept(IParserVisitor visitor)
+        {
             visitor.Visit(this);
         }
 
-        public ParsedMethod(string name, Token token)
-            : base(name, token, ParsedScopeType.Method) {
+        public ParsedDestructor(string name, Token token, ParsedScope parentScope)
+            : base(name, token, ParsedScopeType.Constructor, parentScope)
+        {
         }
     }
 
     /// <summary>
-    /// Method/Constructor
-    /// Constructor are very identical to method so they use the same parse object,
-    /// but we differentiate them with ParsedScopeType
+    /// ClassDefine
     /// </summary>
-    internal class ParsedMethod : ParsedScopeBlock {
+    internal abstract class ParsedClassDefine : ParsedDefine, IParsedClassMember
+    {
+        public override void Accept(IParserVisitor visitor)
+        {
+            // no visits
+        }
+
+        /// <summary>
+        /// </summary>
+        public string ClassName { get; private set; }
+
+        /// <summary>
+        /// </summary>
+        public ParsedScopeType ParentScopeType { get; private set; }
+
+        public ParsedClassDefine(string name, Token token, ParsedScope parentScope, ParseDefineType parseDefineType, string tempPrimitiveType)
+            : base(name, token, ParsedAsLike.None, "", parseDefineType, tempPrimitiveType, "", 0) {            
+            ClassName = parentScope.Name;
+            ParentScopeType = parentScope.ScopeType;
+            if ((parentScope.ScopeType == ParsedScopeType.Class) || (parentScope.ScopeType == ParsedScopeType.Interface))
+                (parentScope as ParsedInterface).Members.Add(this);
+        }
+    }
+
+    /// <summary>
+    /// Property
+    /// </summary>
+    internal class ParsedProperty : ParsedClassDefine
+    {
+        public override void Accept(IParserVisitor visitor)
+        {
+            visitor.Visit(this);
+        }  
+
+        /// <summary>       
+        /// </summary>
+        public string GetString { get; set; }
+        public string SetString { get; set; }
+
+        public ParsedProperty(string name, Token token, ParsedScope parentScope, string tempPrimitiveType)
+            : base(name, token, parentScope, ParseDefineType.Property, tempPrimitiveType)
+        {            
+            GetString = "";
+            SetString = "";
+        }
+    }
+    
+    /// <summary>
+    /// Class event
+    /// </summary>
+    internal class ParsedClassEvent : ParsedClassDefine
+    {
 
         /// <summary>
         /// Return type or VOID
         /// </summary>
         public string ReturnType { get; private set; }
 
-        /// <summary>
-        /// Flags : [ PRIVATE | PROTECTED | PUBLIC ][ STATIC | ABSTRACT ] [OVERRIDE] [FINAL]
-        /// </summary>
-        public ParseFlag Flags { get; private set; }
-
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedMethod(string name, Token token, ParsedScopeType type)
-            : base(name, token, type) {
+        public ParsedClassEvent(string name, Token token, ParsedScope parentScope, string returnType)
+            : base(name, token, parentScope, ParseDefineType.Event, "") {
+            ReturnType = returnType;
         }
-    }
-    */
+    }  
 
     #endregion
 }

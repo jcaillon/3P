@@ -38,6 +38,13 @@ namespace _3PA.MainFeatures.Parser.Pro.Visit {
         void Visit(ParsedFunctionCall pars);
         void Visit(ParsedFoundTableUse pars);
         void Visit(ParsedEvent pars);
+        void Visit(ParsedClass pars);
+        void Visit(ParsedInterface pars);
+        void Visit(ParsedMethod pars);
+        void Visit(ParsedConstructor pars);
+        void Visit(ParsedDestructor pars);
+        void Visit(ParsedProperty pars);
+        void Visit(ParsedClassEvent pars);
         void PostVisit();
         void Visit(ParsedUsedPreProcVariable pars);
     }
