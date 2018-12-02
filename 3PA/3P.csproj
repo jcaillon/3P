@@ -49,7 +49,8 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <LangVersion>6</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -184,6 +185,11 @@
     <Compile Include="Lib\RecurentAction.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParsedLineInfo.cs" />
     <Compile Include="MainFeatures\Parser\Pro\ParserError.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParsedStatementClass.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParsedStatementConstructor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParsedStatementDestructor.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParsedStatementInterface.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\ParsedStatementMethod.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementOnEvent.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementDefine.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPreprocDirective.cs" />
