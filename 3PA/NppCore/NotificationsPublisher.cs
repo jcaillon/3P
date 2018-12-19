@@ -50,6 +50,8 @@ namespace _3PA.NppCore {
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi { get; set; }
 
+        private static volatile int _currentCaret = 0;
+
         #endregion
 
         #region Npp notifications
@@ -134,6 +136,19 @@ namespace _3PA.NppCore {
                                     if (!undo && !redo) {
                                         // if the text has changed
                                         unsafe {
+                                            var nbCarets = Sci.Selection.Count;
+                                            if (_currentCaret > 0) {
+                                                _currentCaret++;
+                                                if (_currentCaret <= nbCarets) {
+                                                    return;
+                                                }
+                                                // then it is the first caret again, we can handle the char
+                                                _currentCaret = 0;
+                                            } 
+                                            if (nbCarets > 1) {
+                                                _currentCaret++;
+                                            }
+
                                             // only 1 char appears to be modified
                                             if (nc.length <= 2) {
                                                 // get the char

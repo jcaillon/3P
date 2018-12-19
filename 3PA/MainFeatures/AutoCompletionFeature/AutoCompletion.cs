@@ -393,7 +393,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             }
 
             if (firstSeparator == null) {
-                // we didn't match a known separator just before the keyword;
+                // we didn't match a known separator just before the keyword
                 // this means we want to display the entire list of keywords
 
                 if (CurrentActiveTypes != ActiveTypes.All) {
@@ -551,12 +551,14 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         }
 
         /// <summary>
-        /// Yields all the children of a list of item
+        /// Yields all the children of a list of item-
         /// </summary>
         private static IEnumerable<CompletionItem> GetAllChildrenItems(IEnumerable<CompletionItem> collection) {
-            foreach (CompletionItem item in collection)
-            foreach (var completionItem in item.Children)
-                yield return completionItem;
+            foreach (CompletionItem item in collection) {
+                foreach (var completionItem in item.Children) {
+                    yield return completionItem;
+                }
+            }
         }
 
         /// <summary>

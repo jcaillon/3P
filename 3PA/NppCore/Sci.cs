@@ -1152,7 +1152,25 @@ namespace _3PA.NppCore {
         /// returns the new position of the caret
         /// </summary>
         public static int ReplaceWordWrapped(string keyword, HashSet<char> additionalWordChar, int offset) {
-            return ModifyTextAroundCaret(offset - GetWord(additionalWordChar, CurrentPosition + offset).Length, offset, keyword);
+            BeginUndoAction();
+            int newCaretPos = 0;
+            // for each selection
+            for (var i = 0; i < Selection.Count; i++) {
+                var selection = GetSelection(i);
+                var curPos = selection.Caret;
+                
+                var offsetStart = offset - GetWord(additionalWordChar, curPos + offset).Length;
+                var offsetEnd = offset;
+
+                SetTextByRange(curPos + offsetStart, curPos + offsetEnd, keyword);
+                // reposition carret
+                curPos = curPos - (offsetEnd - offsetStart) + keyword.Length;
+                selection.SetPosition(curPos);
+                if (i == 0)
+                    newCaretPos = curPos;
+            }
+            EndUndoAction();
+            return newCaretPos;
         }
 
         /// <summary>
