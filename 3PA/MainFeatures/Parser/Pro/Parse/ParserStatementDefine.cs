@@ -23,7 +23,11 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             ParseDefineType type = ParseDefineType.None;
             string tempPrimitiveType = "";
             string viewAs = "";
-            string bufferFor = "";
+            string bufferFor = "";            
+            string getModifier = "";
+            string setModifier = "";
+            string tempModifier = "";           
+
             int extent = 0;
             _lastTokenWasSpace = true;
             StringBuilder left = new StringBuilder();
@@ -41,12 +45,32 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             var indexFields = new List<string>();
             ParsedIndexFlag indexFlags = ParsedIndexFlag.None;
             var indexSort = "+"; // + for ascending, - for descending
-
+           
             Token token;
+            Token nextToken;
+            Token prevToken;            
             int state = 0;
             do {
-                token = PeekAt(1); // next token
-                if (token is TokenEos) break;
+                token = PeekAt(1); // next token                     
+                if (token is TokenEos)
+                {
+                    if (state == 14)
+                        continue;                    
+                    nextToken = PeekAtNextType<TokenWord>(1);                    
+                    if (!(nextToken is TokenWord))
+                        break;
+                    if (nextToken.Value.ToLower() == "get")
+                        continue;
+                    if (nextToken.Value.ToLower() == "set")
+                        continue;
+                    if (nextToken.Value.ToLower() == "private")
+                        continue;
+                    if (nextToken.Value.ToLower() == "protected")
+                        continue;
+                    if (nextToken.Value.ToLower() == "public")
+                        continue;                    
+                    break;
+                }
                 if (token is TokenComment) continue;
                 string lowerToken;
                 bool matchedLikeTable = false;
@@ -62,16 +86,22 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                             case "button":
                             case "dataset":
                             case "frame":
-                            case "query":
-                            case "event":
+                            case "query":                            
                             case "image":
                             case "menu":
-                            case "rectangle":
-                            case "property":
+                            case "rectangle":                            
                             case "sub-menu":
                             case "parameter":
                                 if (!Enum.TryParse(lowerToken, true, out type))
                                     type = ParseDefineType.None;
+                                state++;
+                                break;
+                            case "event":
+                                type = ParseDefineType.Event;
+                                state++;
+                                break;
+                            case "property":
+                                type = ParseDefineType.Property;
                                 state++;
                                 break;
                             case "data-source":
@@ -143,7 +173,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         // matching the name
                         if (!(token is TokenWord)) break;
                         name = token.Value;
-                        if (type == ParseDefineType.Variable) 
+                        if ((type == ParseDefineType.Variable)|| (type == ParseDefineType.Property))
                             state = 10;
                         if (type == ParseDefineType.Buffer) {
                             tempPrimitiveType = "buffer";
@@ -200,7 +230,26 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         if (lowerToken.Equals("extent")) {
                             extent = GetExtentNumber(2);
                         }
-
+                        if (type == ParseDefineType.Property)
+                        {                            
+                            if ((lowerToken=="get")||(lowerToken=="set"))
+                            {
+                                prevToken = PeekAtNextNonType<TokenWhiteSpace>(0, true);
+                                nextToken = PeekAtNextNonType<TokenWhiteSpace>(1);
+                                if (prevToken is TokenWord)
+                                    tempModifier = String.Format("{0} {1}", prevToken.Value.ToUpper(), lowerToken.ToUpper());
+                                else
+                                    tempModifier = lowerToken.ToUpper();   
+                                
+                                if (nextToken is TokenSymbol && nextToken.Value.Equals("("))                                                        
+                                    state = 14;
+                               
+                                if (lowerToken == "get")
+                                    getModifier = tempModifier;
+                                else
+                                    setModifier = tempModifier;
+                            }                            
+                        }
                         break;
                     case 13:
                         // define variable : match a view-as
@@ -209,7 +258,16 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         viewAs = token.Value;
                         state = 99;
                         break;
-
+                    case 14:
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        if ((lowerToken=="get")||(lowerToken=="set"))
+                        {
+                            prevToken = PeekAtNextNonType<TokenWhiteSpace>(0, true);
+                            if ((prevToken is TokenWord)&&(prevToken.Value.ToLower()=="end"))                          
+                                state = 12;                                                       
+                        }                        
+                        break;
                     case 20:
                         // define temp-table
                         if (!(token is TokenWord)) break;
@@ -386,7 +444,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         break;
                 }
             } while (MoveNext());
-
+            
             if (state <= 1)
                 return;
 
@@ -404,7 +462,19 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
                 AddParsedItem(newTable, defineToken.OwnerNumber);
 
-            } else {              
+            }
+            else if (type == ParseDefineType.Property)
+            {
+                var newProperty = new ParsedProperty(name, defineToken, GetCurrentBlock<ParsedScope>(), tempPrimitiveType)
+                {
+                    Flags = flags,                    
+                    EndPosition = token.EndPosition,
+                    GetString = getModifier,
+                    SetString = setModifier                    
+                };                
+                AddParsedItem(newProperty, defineToken.OwnerNumber);
+            }
+            else {              
                 // other DEFINE
 
                 var newDefine = NewParsedDefined(name, flags, defineToken, token, asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, extent);
@@ -441,6 +511,17 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     PrimitiveType = ParsedPrimitiveType.Buffer
                 };
             }
+           
+
+            if (type == ParseDefineType.Event)
+            {
+                return new ParsedClassEvent(name, defineToken, GetCurrentBlock<ParsedScope>(), tempPrimitiveType)
+                {
+                    Flags = flags,
+                    EndPosition = endToken.EndPosition
+                };
+            }
+
 
             var newDefine = new ParsedDefine(name, defineToken, asLike, left, type, tempPrimitiveType, viewAs, extent) {
                 Flags = flags,

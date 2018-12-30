@@ -181,7 +181,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
                         return new ProcedureCodeItem();
                     case CodeExplorerIconType.ExternalProcedure:
                         return new ExternalProcedureCodeItem();
-
+                    case CodeExplorerIconType.Interface:
+                        return new InterfaceCodeItem();
+                    case CodeExplorerIconType.Class:
+                        return new ClassCodeItem();
+                    case CodeExplorerIconType.Method:
+                        return new MethodCodeItem();
+                    case CodeExplorerIconType.Constructor:
+                        return new ConstructorCodeItem();
+                    case CodeExplorerIconType.Destructor:
+                        return new DestructorCodeItem();
+                    case CodeExplorerIconType.Property:
+                        return new PropertyCodeItem();
+                    case CodeExplorerIconType.Event:
+                        return new EventCodeItem();
                     default:
                         throw new Exception("Missing type " + type + " for the factory!");
                 }
@@ -273,7 +286,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         PreprocessedVariable,
         TempTableUsed,
-        TableUsed
+        TableUsed,        
+        Interface,
+        Class,
+        Method,
+        Constructor,
+        Destructor,
+        Property,
+        Event
     }
 
     internal class RootCodeItem : CodeItem {
@@ -303,6 +323,97 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         public override Image ItemTypeImage {
             get { return ImageResources.Procedure; }
+        }
+    }
+
+    internal class InterfaceCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Interface; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Interface; }
+        }
+    }
+
+    internal class ClassCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Class; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Class; }
+        }
+    }
+
+    internal class MethodCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Method; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Method; }
+        }
+    }
+
+    internal class ConstructorCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Constructor; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Constructor; }
+        }
+    }
+
+    internal class DestructorCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Destructor; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Constructor; }
+        }
+    }
+
+    internal class PropertyCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Property; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.Property; }
+        }
+    }
+
+    internal class EventCodeItem : CodeItem
+    {
+        public override CodeExplorerIconType Type
+        {
+            get { return CodeExplorerIconType.Event; }
+        }
+
+        public override Image ItemTypeImage
+        {
+            get { return ImageResources.OnEvent; }
         }
     }
 

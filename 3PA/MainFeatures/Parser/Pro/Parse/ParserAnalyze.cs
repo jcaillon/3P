@@ -70,14 +70,9 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                         case "repeat":
                         case "do":
                         case "case":
-                        case "catch":
-                        case "class":
-                        case "property":
-                        case "constructor":
-                        case "destructor":
-                        case "finally":
-                        case "interface":
-                        case "method":
+                        case "catch":                        
+                        case "property":                        
+                        case "finally":                                                
                             // case of a THEN DO: for instance, we dont want to keep 2 block (=2 indent), we pop the THEN block
                             // and only keep the DO block
                             var topScope = _context.BlockStack.Peek() as ParsedScopeOneStatementIndentBlock;
@@ -102,6 +97,59 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                     // we matched an end with no begin
                                     _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
                                 }
+                            }
+                            break;
+                        case "interface":
+                            // parse a class definition
+                            var newInterface = CreateParsedInterface(token);
+                            if (newInterface != null)
+                            {
+                                if (_context.BlockStack.Any(info => info.ScopeType != ParsedScopeType.Root))
+                                    _parserErrors.Add(new ParserError(ParserErrorType.ForbiddenNestedBlockStart, token, _context.BlockStack.Count, _parsedIncludes));
+                                _context.BlockStack.Push(newInterface);
+                            }
+                            break;
+                        case "class":
+                            // parse a class definition
+                            var newClass = CreateParsedClass(token);
+                            if (newClass != null)
+                            {
+                                if (_context.BlockStack.Any(info => info.ScopeType != ParsedScopeType.Root))
+                                    _parserErrors.Add(new ParserError(ParserErrorType.ForbiddenNestedBlockStart, token, _context.BlockStack.Count, _parsedIncludes));
+                                _context.BlockStack.Push(newClass);
+                            }
+                            break;
+                        case "method":
+                            // parse a method definition
+                            ParsedScope currentScope;
+                            currentScope = _context.BlockStack.Peek();
+                            var newMethod = CreateParsedMethod(token, currentScope);
+                            if (newMethod != null)
+                            {
+                                if (currentScope.ScopeType != ParsedScopeType.Class && currentScope.ScopeType != ParsedScopeType.Interface)
+                                    _parserErrors.Add(new ParserError(ParserErrorType.MethodOutsideOfClassScope, token, _context.BlockStack.Count, _parsedIncludes));
+                                if (currentScope.ScopeType == ParsedScopeType.Class)
+                                    _context.BlockStack.Push(newMethod);
+                            }
+                            break;
+                        case "constructor":
+                            // parse a constructor definition
+                            var newConstructor = CreateParsedConstructor(token, _context.BlockStack.Peek());
+                            if (newConstructor != null)
+                            {
+                                if (_context.BlockStack.Peek().ScopeType != ParsedScopeType.Class && _context.BlockStack.Peek().ScopeType != ParsedScopeType.Interface)
+                                    _parserErrors.Add(new ParserError(ParserErrorType.MethodOutsideOfClassScope, token, _context.BlockStack.Count, _parsedIncludes));
+                                _context.BlockStack.Push(newConstructor);
+                            }
+                            break;
+                        case "destructor":
+                            // parse a destructor definition
+                            var newDestructor = CreateParsedDestructor(token, _context.BlockStack.Peek());
+                            if (newDestructor != null)
+                            {
+                                if (_context.BlockStack.Peek().ScopeType != ParsedScopeType.Class && _context.BlockStack.Peek().ScopeType != ParsedScopeType.Interface)
+                                    _parserErrors.Add(new ParserError(ParserErrorType.MethodOutsideOfClassScope, token, _context.BlockStack.Count, _parsedIncludes));
+                                _context.BlockStack.Push(newDestructor);
                             }
                             break;
                         case "define":

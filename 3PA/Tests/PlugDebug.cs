@@ -310,6 +310,41 @@ namespace _3PA.Tests {
             AppendEverything(pars);
         }
 
+        public void Visit(ParsedInterface pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedClass pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedMethod pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedConstructor pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedDestructor pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedProperty pars)
+        {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedClassEvent pars)
+        {
+            AppendEverything(pars);
+        }
+
         public void Visit(ParsedIncludeFile pars) {
             AppendEverything(pars);
         }

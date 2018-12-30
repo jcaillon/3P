@@ -503,6 +503,140 @@ namespace _3PA.MainFeatures.Parser.Pro.Visit {
         }
 
         /// <summary>
+        /// Interfaces
+        /// </summary>
+        public void Visit(ParsedInterface pars)
+        {
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Interface);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = null;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+
+            _nodeDictionary.Add(pars.Name, newNode);
+            PushToCodeExplorer(null, newNode);
+        }
+
+        /// <summary>
+        /// Classes
+        /// </summary>
+        public void Visit(ParsedClass pars)
+        {
+            // to code explorer                        
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Class);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.SubText = null;                      
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+
+            _nodeDictionary.Add(pars.Name, newNode);
+            PushToCodeExplorer(null, newNode);           
+        }
+
+        /// <summary>
+        /// Methods
+        /// </summary>
+        public void Visit(ParsedMethod pars)
+        {
+            pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.TempReturnType, false);
+
+            // to code explorer
+            var classNode = GetExplorerListNode(pars.ClassName, CodeExplorerIconType.Block);
+            var parentNode = GetExplorerListNode("Methods", CodeExplorerIconType.Method, classNode);
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Method);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;            
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToCodeExplorer(parentNode, newNode);
+
+            // to completion data
+            var method = CompletionItem.Factory.New(CompletionType.Method);
+            method.DisplayText = pars.Name;
+            method.ParsedBaseItem = pars;
+            method.FromParser = true;
+            method.SubText = null;
+            method.Ranking = AutoCompletion.FindRankingOfParsedItem(pars.Name);
+            method.Flags = pars.Flags;
+            PushToAutoCompletion(method, pars);
+        }
+
+        /// <summary>
+        /// Constructors
+        /// </summary>
+        public void Visit(ParsedConstructor pars)
+        {
+            // to code explorer
+            var classNode = GetExplorerListNode(pars.ClassName, CodeExplorerIconType.Block);
+            var parentNode = GetExplorerListNode("Constructors", CodeExplorerIconType.Constructor, classNode);
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Constructor);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToCodeExplorer(parentNode, newNode);
+        }
+
+        /// <summary>
+        /// Destructors
+        /// </summary>
+        public void Visit(ParsedDestructor pars)
+        {
+            // to code explorer
+            var classNode = GetExplorerListNode(pars.ClassName, CodeExplorerIconType.Block);
+            var parentNode = GetExplorerListNode("Destructors", CodeExplorerIconType.Destructor, classNode);
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Destructor);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToCodeExplorer(parentNode, newNode);
+        }
+
+        /// <summary>
+        /// Properties
+        /// </summary>
+        public void Visit(ParsedProperty pars)
+        {
+            pars.PrimitiveType = ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like);
+
+            // to code explorer
+            var classNode = GetExplorerListNode(pars.ClassName, CodeExplorerIconType.Block);
+            var parentNode = GetExplorerListNode("Properties", CodeExplorerIconType.Property, classNode);
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Property);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToCodeExplorer(parentNode, newNode);
+        }
+
+        /// <summary>
+        /// Class events
+        /// </summary>
+        public void Visit(ParsedClassEvent pars)
+        {
+            // to code explorer
+            var classNode = GetExplorerListNode(pars.ClassName, CodeExplorerIconType.Block);
+            var parentNode = GetExplorerListNode("Events", CodeExplorerIconType.Event, classNode);
+            var newNode = CodeItem.Factory.New(CodeExplorerIconType.Event);
+            newNode.DisplayText = pars.Name;
+            newNode.Flags = pars.Flags;
+            newNode.DocumentOwner = pars.FilePath;
+            newNode.GoToLine = pars.Line;
+            newNode.GoToColumn = pars.Column;
+            PushToCodeExplorer(parentNode, newNode);
+        }
+
+        /// <summary>
         /// Preprocessed variables
         /// </summary>
         /// <param name="pars"></param>

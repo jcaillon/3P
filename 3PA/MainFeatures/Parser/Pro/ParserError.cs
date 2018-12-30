@@ -74,5 +74,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
         [Description("&IF pre-processed statement missing an &ENDIF")]
         MissingPreprocEndIf,
+
+        [Description("Methods only allowed inside class scope")]
+        MethodOutsideOfClassScope,
     }
 }
