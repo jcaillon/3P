@@ -27,9 +27,9 @@ using System.Windows.Forms;
 
 namespace _3PA.NppCore {
     /*
-     * THIS FILE TARGETS NOTEPAD++ 7.3.3
-     * Everything in this file was taken from header files of notepad++
-     * https://github.com/notepad-plus-plus/notepad-plus-plus/commit/388c430e215f6099923906aa9fa79c5aa820b347
+     * THIS FILE TARGETS NOTEPAD v7.6.3
+     * Everything in this file was taken from header files of notepad
+     * https://github.com/notepad-plus-plus/notepad-plus-plus/commit/1a356c20199172d12b50ddb8c8321a42ced99cf9
      */
 
     [StructLayout(LayoutKind.Sequential)]
@@ -43,7 +43,6 @@ namespace _3PA.NppCore {
     public struct FuncItem {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
         public string _itemName;
-
         public Action _pFunc;
         public int _cmdID;
         public bool _init2Check;
@@ -74,7 +73,6 @@ namespace _3PA.NppCore {
             Right = right;
             Bottom = bottom;
         }
-
         public int Left;
         public int Top;
         public int Right;
@@ -219,6 +217,80 @@ namespace _3PA.NppCore {
             return (IsCtrl ? "Ctrl+" : "") + (IsShift ? "Shift+" : "") + (IsAlt ? "Alt+" : "") + Enum.GetName(typeof(Keys), _key);
         }
     }
+    
+    /// <summary>
+    /// Notepad++ messages for dockable dialogs
+    /// </summary>
+    /// <remarks>
+    /// PowerEditor/src/WinControls/DockingWnd/Docking.h
+    /// </remarks>
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [Flags]
+    internal enum NppTbMsg : uint {
+        // defines for docking manager
+        CONT_LEFT = 0,
+        CONT_RIGHT = 1,
+        CONT_TOP = 2,
+        CONT_BOTTOM = 3,
+        DOCKCONT_MAX = 4,
+
+        // mask params for plugins of internal dialogs
+        DWS_ICONTAB = 0x00000001, // Icon for tabs are available
+        DWS_ICONBAR = 0x00000002, // Icon for icon bar are available (currently not supported)
+        DWS_ADDINFO = 0x00000004, // Additional information are in use
+        DWS_PARAMSALL = (DWS_ICONTAB | DWS_ICONBAR | DWS_ADDINFO),
+
+        // default docking values for first call of plugin
+        DWS_DF_CONT_LEFT = (CONT_LEFT << 28), // default docking on left
+        DWS_DF_CONT_RIGHT = (CONT_RIGHT << 28), // default docking on right
+        DWS_DF_CONT_TOP = (CONT_TOP << 28), // default docking on top
+        DWS_DF_CONT_BOTTOM = (CONT_BOTTOM << 28), // default docking on bottom
+        DWS_DF_FLOATING = 0x80000000 // default state is floating
+    }
+    
+    /// <summary>
+    /// Messages sent from dockable dialogs windows
+    /// From PowerEditor\src\WinControls\DockingWnd\dockingResource.h
+    /// </summary>
+    [Flags]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    internal enum DockMgrMsg : uint {
+        IDB_CLOSE_DOWN = 137,
+        IDB_CLOSE_UP = 138,
+        IDD_CONTAINER_DLG = 139,
+        IDC_TAB_CONT = 1027,
+        IDC_CLIENT_TAB = 1028,
+        IDC_BTN_CAPTION = 1050,
+
+        DMM_MSG = 0x5000,
+        DMM_CLOSE = (DMM_MSG + 1),
+        DMM_DOCK = (DMM_MSG + 2),
+        DMM_FLOAT = (DMM_MSG + 3),
+        DMM_DOCKALL = (DMM_MSG + 4),
+        DMM_FLOATALL = (DMM_MSG + 5),
+        DMM_MOVE = (DMM_MSG + 6),
+        DMM_UPDATEDISPINFO = (DMM_MSG + 7),
+        DMM_GETIMAGELIST = (DMM_MSG + 8),
+        DMM_GETICONPOS = (DMM_MSG + 9),
+        DMM_DROPDATA = (DMM_MSG + 10),
+        DMM_MOVE_SPLITTER = (DMM_MSG + 11),
+        DMM_CANCEL_MOVE = (DMM_MSG + 12),
+        DMM_LBUTTONUP = (DMM_MSG + 13),
+
+        DMN_FIRST = 1050,
+        DMN_CLOSE = (DMN_FIRST + 1),
+        //nmhdr.code = DWORD(DMN_CLOSE, 0));
+        //nmhdr.hwndFrom = hwndNpp;
+        //nmhdr.idFrom = ctrlIdNpp;
+        DMN_DOCK = (DMN_FIRST + 2),
+        DMN_FLOAT = (DMN_FIRST + 3),
+        //nmhdr.code = DWORD(DMN_XXX, int newContainer);
+        //nmhdr.hwndFrom = hwndNpp;
+        //nmhdr.idFrom = ctrlIdNpp;
+        DMN_SWITCHIN =  (DMN_FIRST + 4),
+        DMN_SWITCHOFF =  (DMN_FIRST + 5),
+        DMN_FLOATDROPPED =  (DMN_FIRST + 6),
+    }
 
     /// <summary>
     /// All notepad++ lang type, extracted from PowerEditor\src\MISC\PluginsManager\Notepad_plus_msgs.h
@@ -226,7 +298,7 @@ namespace _3PA.NppCore {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal enum NppLangType {
         L_TEXT,
-        L_PHP,
+        L_PHP ,
         L_C,
         L_CPP,
         L_CS,
@@ -289,6 +361,27 @@ namespace _3PA.NppCore {
         L_SREC,
         L_IHEX,
         L_TEHEX,
+        L_SWIFT,
+        L_ASN1,
+        L_AVS,
+        L_BLITZBASIC,
+        L_PUREBASIC,
+        L_FREEBASIC,
+        L_CSOUND,
+        L_ERLANG,
+        L_ESCRIPT,
+        L_FORTH,
+        L_LATEX,
+        L_MMIXAL,
+        L_NIMROD,
+        L_NNCRONTAB,
+        L_OSCRIPT,
+        L_REBOL,
+        L_REGISTRY,
+        L_RUST,
+        L_SPICE,
+        L_TXT2TAGS,
+        L_VISUALPROLOG,
         L_EXTERNAL
     }
 
@@ -296,103 +389,103 @@ namespace _3PA.NppCore {
     /// This dictionary is extracted from \PowerEditor\src\ScitillaComponent\ScintillaEditView.cpp
     /// It allows to get the REAL lang name from the lang name returned by npp message NPPM_GETLANGUAGENAME
     /// </summary>
+    /// <remarks>
+    /// ^{TEXT\("([^"]+)"\).*?TEXT\("([^"]+)"\)
+    /// </remarks>
     internal static class NppLangTypeInternal {
-        public static readonly Dictionary<string, string> Dictionary = new Dictionary<string, string> {
-            {"normal text", "normal"},
-            {"php", "php"},
-            {"c", "c"},
-            {"c++", "cpp"},
-            {"c#", "cs"},
-            {"objective-c", "objc"},
-            {"java", "java"},
-            {"rc", "rc"},
-            {"html", "html"},
-            {"xml", "xml"},
-            {"makefile", "makefile"},
-            {"pascal", "pascal"},
-            {"batch", "batch"},
+        public static readonly Dictionary<string, string> Dictionary = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
+            {"ASN.1", "asn1"},
+            {"ASP", "asp"},
+            {"ActionScript", "actionscript"},
+            {"Ada", "ada"},
+            {"Assembly", "asm"},
+            {"AutoIt", "autoit"},
+            {"AviSynth", "avs"},
+            {"BaanC", "baanc"},
+            {"Batch", "batch"},
+            {"BlitzBasic", "blitzbasic"},
+            {"C", "c"},
+            {"C#", "cs"},
+            {"C++", "cpp"},
+            {"CAML", "caml"},
+            {"CMake", "cmake"},
+            {"COBOL", "cobol"},
+            {"CSS", "css"},
+            {"CoffeeScript", "coffeescript"},
+            {"Csound", "csound"},
+            {"D", "d"},
+            {"Diff", "diff"},
+            {"ESCRIPT", "escript"},
+            {"Erlang", "erlang"},
+            {"External", "ext"},
+            {"Forth", "forth"},
+            {"Fortran fixed form", "fortran77"},
+            {"Fortran free form", "fortran"},
+            {"FreeBasic", "freebasic"},
+            {"Gui4Cli", "gui4cli"},
+            {"HTML", "html"},
+            {"Haskell", "haskell"},
+            {"Inno Setup", "inno"},
+            {"Intel HEX", "ihex"},
+            {"Internal Search", "searchResult"},
+            {"JSP", "jsp"},
+            {"Java", "java"},
+            {"JavaScript", "javascript"},
+            //{"JavaScript", "javascript.js"},
+            {"KiXtart", "kix"},
+            {"LaTeX", "latex"},
+            {"Lisp", "lisp"},
+            {"Lua", "lua"},
+            {"MATLAB", "matlab"},
+            {"MMIXAL", "mmixal"},
+            {"Makefile", "makefile"},
+            {"NFO", "nfo"},
+            {"NSIS", "nsis"},
+            {"Nimrod", "nimrod"},
+            {"Nncrontab", "nncrontab"},
+            {"Normal text", "normal"},
+            {"OScript", "oscript"},
+            {"Objective-C", "objc"},
+            {"PHP", "php"},
+            {"Pascal", "pascal"},
+            {"Perl", "perl"},
+            {"PostScript", "postscript"},
+            {"PowerShell", "powershell"},
+            {"Properties file", "props"},
+            {"PureBasic", "purebasic"},
+            {"Python", "python"},
+            {"R", "r"},
+            {"RC", "rc"},
+            {"REBOL", "rebol"},
+            {"Ruby", "ruby"},
+            {"Rust", "rust"},
+            {"S-Record", "srec"},
+            {"SQL", "sql"},
+            {"Scheme", "scheme"},
+            {"Shell", "bash"},
+            {"Smalltalk", "smalltalk"},
+            {"Spice", "spice"},
+            {"Swift", "swift"},
+            {"TCL", "tcl"},
+            {"TeX", "tex"},
+            {"Tektronix extended HEX", "tehex"},
+            {"VHDL", "vhdl"},
+            {"Verilog", "verilog"},
+            {"Visual Basic", "vb"},
+            {"Visual Prolog", "visualprolog"},
+            {"XML", "xml"},
+            {"YAML", "yaml"},
             {"ini", "ini"},
-            {"nfo", "nfo"},
-            {"udf", "udf"},
-            {"asp", "asp"},
-            {"sql", "sql"},
-            {"visual basic", "vb"},
-            {"css", "css"},
-            {"perl", "perl"},
-            {"python", "python"},
-            {"lua", "lua"},
-            {"tex", "tex"},
-            {"fortran free form", "fortran"},
-            {"shell", "bash"},
-            {"actionscript", "actionscript"},
-            {"nsis", "nsis"},
-            {"tcl", "tcl"},
-            {"lisp", "lisp"},
-            {"scheme", "scheme"},
-            {"assembly", "asm"},
-            {"diff", "diff"},
-            {"properties file", "props"},
-            {"postscript", "postscript"},
-            {"ruby", "ruby"},
-            {"smalltalk", "smalltalk"},
-            {"vhdl", "vhdl"},
-            {"kixtart", "kix"},
-            {"autoit", "autoit"},
-            {"caml", "caml"},
-            {"ada", "ada"},
-            {"verilog", "verilog"},
-            {"matlab", "matlab"},
-            {"haskell", "haskell"},
-            {"inno setup", "inno"},
-            {"internal search", "searchresult"},
-            {"cmake", "cmake"},
-            {"yaml", "yaml"},
-            {"cobol", "cobol"},
-            {"gui4cli", "gui4cli"},
-            {"d", "d"},
-            {"powershell", "powershell"},
-            {"r", "r"},
-            {"jsp", "jsp"},
-            {"coffeescript", "coffeescript"},
             {"json", "json"},
-            {"javascript", "javascript.js"},
-            {"fortran fixed form", "fortran77"},
-            {"baanc", "baanc"},
-            {"s-record", "srec"},
-            {"intel hex", "ihex"},
-            {"tektronix extended hex", "tehex"},
-            {"external", "ext"}
+            {"registry", "registry"},
+            {"txt2tags", "txt2tags"},
+            {"udf", "udf"},
         };
     }
 
     /// <summary>
-    /// Notepad++ messages for dockable dialogs
-    /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    [Flags]
-    internal enum NppTbMsg : uint {
-        // defines for docking manager
-        CONT_LEFT = 0,
-        CONT_RIGHT = 1,
-        CONT_TOP = 2,
-        CONT_BOTTOM = 3,
-        DOCKCONT_MAX = 4,
-        // mask params for plugins of internal dialogs
-        DWS_ICONTAB = 0x00000001, // Icon for tabs are available
-        DWS_ICONBAR = 0x00000002, // Icon for icon bar are available (currently not supported)
-        DWS_ADDINFO = 0x00000004, // Additional information are in use
-        DWS_PARAMSALL = (DWS_ICONTAB | DWS_ICONBAR | DWS_ADDINFO),
-        // default docking values for first call of plugin
-        DWS_DF_CONT_LEFT = (CONT_LEFT << 28), // default docking on left
-        DWS_DF_CONT_RIGHT = (CONT_RIGHT << 28), // default docking on right
-        DWS_DF_CONT_TOP = (CONT_TOP << 28), // default docking on top
-        DWS_DF_CONT_BOTTOM = (CONT_BOTTOM << 28), // default docking on bottom
-        DWS_DF_FLOATING = 0x80000000 // default state is floating
-    }
-
-    /// <summary>
     /// All Notepad++ messages
-    /// Messages extracted from PowerEditor\src\MISC\PluginsManager\Notepad_plus_msgs.h v7.3.3
+    /// Messages extracted from PowerEditor\src\MISC\PluginsManager\Notepad_plus_msgs.h
     /// http://notepad-plus.sourceforge.net/uk/plugins-HOWTO.php
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -738,11 +831,18 @@ namespace _3PA.NppCore {
         NPPM_DISABLEAUTOUPDATE = (NPPMSG + 95), // 2119 in decimal
         // VOID NPPM_DISABLEAUTOUPDATE(0, 0),
 
-        NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED = (NPPMSG + 97),
-        // BOOL NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED(0, 0/1),
-        // Allows plugins to programmatically disable the autocompletion shown when typing characters
-        // the user can still call the autocompletion window manually
-        // Return : the previous status (true if disabled, false otherwise),
+        NPPM_REMOVESHORTCUTBYCMDID = (NPPMSG + 96), // 2120 in decimal
+        // BOOL NPPM_REMOVESHORTCUTASSIGNMENT(int cmdID)
+        // removes the assigned shortcut mapped to cmdID
+        // returned value : TRUE if function call is successful, otherwise FALSE
+
+        NPPM_GETPLUGINHOMEPATH = (NPPMSG + 97),
+        // INT NPPM_GETPLUGINHOMEPATH(size_t strLen, TCHAR *pluginRootPath)
+        // Get plugin home root path. It's useful if plugins want to get its own path
+        // by appending <pluginFolderName> which is the name of plugin without extension part.
+        // Returns the number of TCHAR copied/to copy.
+        // Users should call it with pluginRootPath be NULL to get the required number of TCHAR (not including the terminating nul character),
+        // allocate pluginRootPath buffer with the return value + 1, then call it again to get the path.
 
         RUNCOMMAND_USER = (WM_USER + 3000),
         VAR_NOT_RECOGNIZED = 0,
@@ -1643,44 +1743,5 @@ namespace _3PA.NppCore {
         Western_European_OEM_US = NppMenuCmd.IDM_FORMAT_DOS_437,
         Western_European_Windows_1252 = NppMenuCmd.IDM_FORMAT_WIN_1252,
         Western_European_Windows_1258 = NppMenuCmd.IDM_FORMAT_WIN_1258
-    }
-
-    /// <summary>
-    /// Messages sent from dockable dialogs windows
-    /// From PowerEditor\src\WinControls\DockingWnd\dockingResource.h
-    /// </summary>
-    [Flags]
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal enum DockMgrMsg : uint {
-        IDB_CLOSE_DOWN = 137,
-        IDB_CLOSE_UP = 138,
-        IDD_CONTAINER_DLG = 139,
-        IDC_TAB_CONT = 1027,
-        IDC_CLIENT_TAB = 1028,
-        IDC_BTN_CAPTION = 1050,
-        DMM_MSG = 0x5000,
-        DMM_CLOSE = (DMM_MSG + 1),
-        DMM_DOCK = (DMM_MSG + 2),
-        DMM_FLOAT = (DMM_MSG + 3),
-        DMM_DOCKALL = (DMM_MSG + 4),
-        DMM_FLOATALL = (DMM_MSG + 5),
-        DMM_MOVE = (DMM_MSG + 6),
-        DMM_UPDATEDISPINFO = (DMM_MSG + 7),
-        DMM_GETIMAGELIST = (DMM_MSG + 8),
-        DMM_GETICONPOS = (DMM_MSG + 9),
-        DMM_DROPDATA = (DMM_MSG + 10),
-        DMM_MOVE_SPLITTER = (DMM_MSG + 11),
-        DMM_CANCEL_MOVE = (DMM_MSG + 12),
-        DMM_LBUTTONUP = (DMM_MSG + 13),
-        DMN_FIRST = 1050,
-        DMN_CLOSE = (DMN_FIRST + 1),
-        //nmhdr.code = DWORD(DMN_CLOSE, 0));
-        //nmhdr.hwndFrom = hwndNpp;
-        //nmhdr.idFrom = ctrlIdNpp;
-        DMN_DOCK = (DMN_FIRST + 2),
-        DMN_FLOAT = (DMN_FIRST + 3)
-        //nmhdr.code = DWORD(DMN_XXX, int newContainer);
-        //nmhdr.hwndFrom = hwndNpp;
-        //nmhdr.idFrom = ctrlIdNpp;
     }
 }

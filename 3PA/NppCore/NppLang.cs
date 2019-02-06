@@ -33,7 +33,7 @@ namespace _3PA.NppCore {
     /// <summary>
     /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
     /// supported by npp; this file list the extensions for each lang as well as the keywords
-    /// Once this is read, we can then read the file in $NPPINSTALL/plugins/APIs/ named "language_name.xml"
+    /// Once this is read, we can then read the file in $NPPINSTALL/autoCompletion/ (previously $NPPINSTALL/plugins/APIs/ for versions inferior to 7.6.2) named "language_name.xml"
     /// that contains the extra keywords for the autocompletion
     /// Documentation here http://docs.notepad-plus-plus.org/index.php/Auto_Completion
     /// </summary>
@@ -90,14 +90,14 @@ namespace _3PA.NppCore {
 
             // from langs.xml
             try {
-                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppLangsXml)).RootNode["Languages"].SubNodes);
+                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppLangsXml)).RootNode["Languages"]?.SubNodes);
             } catch (Exception e) {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppLangsXml);
             }
 
             // from stylers.xml
             try {
-                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppStylersXml)).RootNode["LexerStyles"].SubNodes);
+                FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppStylersXml)).RootNode["LexerStyles"]?.SubNodes);
             } catch (Exception e) {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppStylersXml);
             }
@@ -107,6 +107,9 @@ namespace _3PA.NppCore {
         /// fill the _langNames and _langDescriptions dictionaries
         /// </summary>
         private void FillDictionaries(List<NanoXmlNode> elements, bool fromUserDefinedLang = false) {
+            if (elements == null) {
+                return;
+            }
             foreach (var lang in elements) {
                 var nameAttr = lang.GetAttribute(@"name");
                 var extAttr = lang.GetAttribute(@"ext");

@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
+using YamuiFramework.HtmlRenderer.Core.Core;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 using _3PA.MainFeatures;
@@ -201,7 +202,6 @@ namespace _3PA.NppCore {
         /// </summary>
         public static void OpenNewDocument(string text) {
             RunCommand(NppMenuCmd.IDM_FILE_NEW);
-            //GrabFocus();
         }
 
         /// <summary>
@@ -212,21 +212,21 @@ namespace _3PA.NppCore {
         }
 
         /// <summary>
-        /// Switch to a document, can be already opended or not
+        /// Switch to a document, can be already opened or not
         /// </summary>
         public static void Goto(string document, int line = -1, int column = -1) {
             Goto(document, -1, line, column, true);
         }
 
         /// <summary>
-        /// Switch to a document, can be already opended or not
+        /// Switch to a document, can be already opened or not
         /// </summary>
         public static void GotoPos(string document, int position) {
             Goto(document, position, -1, -1, true);
         }
 
         /// <summary>
-        /// Switch to a document, can be already opended or not, can decide to remember the current position to jump back to it
+        /// Switch to a document, can be already opened or not, can decide to remember the current position to jump back to it
         /// </summary>
         public static void Goto(string document, int position, int line, int column, bool saveHistoric) {
             if (!File.Exists(document)) {
@@ -506,6 +506,11 @@ namespace _3PA.NppCore {
         #endregion
 
         #region Npp properties
+        
+        private static string _configDir;
+        private static string _installationDir;
+        private static string _pluginsConfigDir;
+        private static string _nppVersion;
 
         /// <summary>
         /// full path of directory where located Notepad++ binary
@@ -513,9 +518,12 @@ namespace _3PA.NppCore {
         /// <returns></returns>
         public static string SoftwareInstallDirectory {
             get {
-                var buffer = new StringBuilder(Win32Api.MaxPath);
-                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNPPDIRECTORY, Win32Api.MaxPath, buffer);
-                return buffer.ToString();
+                if (string.IsNullOrEmpty(_installationDir)) {
+                    var buffer = new StringBuilder(Win32Api.MaxPath);
+                    Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNPPDIRECTORY, Win32Api.MaxPath, buffer);
+                    _installationDir = buffer.ToString();
+                }
+                return _installationDir;
             }
         }
 
@@ -531,28 +539,36 @@ namespace _3PA.NppCore {
         /// Returns the current version of notepad++ (format vX.X.X)
         /// </summary>
         /// <returns></returns>
-        public static string SoftwareVersion {
+        public static string SoftwareStringVersion {
             get {
                 if (string.IsNullOrEmpty(_nppVersion)) {
                     var nppVersion = Win32Api.SendMessage(Handle, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt64();
                     var lowWord = (nppVersion & 0x0000FFFF).ToString();
-                    _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (String.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
+                    _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
                 }
                 return _nppVersion;
             }
         }
-
-        private static string _nppVersion;
-
+        
         /// <summary>
-        /// full path of directory where located Notepad++ binary
+        /// Returns the current version of notepad++
+        /// </summary>
+        /// <returns></returns>
+        public static Version SoftwareVersion => Utils.StringToVersion(_nppVersion);
+        
+        /// <summary>
+        /// full path of directory where notepad++ stores the plugins config.
+        /// Can either be in %APPDATA%/plugins or in the install_directory/plugins if doLocalConf.xml exists.
         /// </summary>
         /// <returns></returns>
         public static string SoftwarePluginConfigDirectory {
             get {
-                var buffer = new StringBuilder(Win32Api.MaxPath);
-                Win32Api.SendMessage(Handle, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
-                return buffer.ToString();
+                if (string.IsNullOrEmpty(_pluginsConfigDir)) {
+                    var buffer = new StringBuilder(Win32Api.MaxPath);
+                    Win32Api.SendMessage(Handle, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32Api.MaxPath, buffer);
+                    _pluginsConfigDir = buffer.ToString();
+                }
+                return _pluginsConfigDir;
             }
         }
 
@@ -570,28 +586,36 @@ namespace _3PA.NppCore {
             }
         }
 
-        private static string _configDir;
-
         /// <summary>
-        /// The path to the choice file, containing the path to the cloud directory
+        /// Default location of all the user configuration files:
+        /// config.xml, userDefineLang.xml, contextMenu.xml, langs.xml, shortcuts.xml, stylers.xml, themes/, cloud/, plugins/, functionList.xml, session.xml
+        /// Can either be located in %APPDATA% or in the install directory if doLocalConf.xml exists).
+        /// </summary>
+        public static string SoftwareDefaultConfigDirectory {
+            get { return Path.GetFullPath(Path.Combine(SoftwarePluginConfigDirectory, @"..\..\")); }
+        }
+        
+        /// <summary>
+        /// The path to the choice file, containing the path to the cloud directory.
+        /// The cloud directory is preferred instead of <see cref="SoftwareDefaultConfigDirectory"/> for the following files:
+        /// config.xml, userDefineLang.xml, contextMenu.xml, langs.xml, shortcuts.xml, stylers.xml
         /// </summary>
         public static string FileNppCloudChoice {
-            get { return Path.GetFullPath(Path.Combine(FolderNppDefaultBaseConf, @"cloud\choice")); }
+            get { return Path.GetFullPath(Path.Combine(SoftwareDefaultConfigDirectory, @"cloud\choice")); }
         }
 
         /// <summary>
-        /// default location of all the basic configuration files
-        /// </summary>
-        public static string FolderNppDefaultBaseConf {
-            get { return Path.GetFullPath(Path.Combine(ConfigDirectory, @"..\..\..\")); }
-        }
-
-        /// <summary>
-        /// Folder to plugins\Apis
+        /// Folder to .xml files containing auto-completion keywords and functions for various languages.
         /// This is always taken in the notepad++ installation directory!
         /// </summary>
         public static string FolderNppAutocompApis {
-            get { return Path.GetFullPath(Path.Combine(SoftwareInstallDirectory, @"plugins\APIs")); }
+            get {
+                var output = Path.Combine(SoftwareInstallDirectory, @"autoCompletion");
+                if (Directory.Exists(output)) {
+                    return output;
+                }
+                return Path.Combine(SoftwareInstallDirectory, @"plugins\APIs");
+            }
         }
 
         #endregion

@@ -140,7 +140,7 @@ namespace _3PA.NppCore {
             public void Reload() {
 
                 // get the base folder
-                FolderBaseConf = FolderNppDefaultBaseConf;
+                FolderBaseConf = SoftwareDefaultConfigDirectory;
                 if (File.Exists(FileNppCloudChoice)) {
                     var cloudpath = Utils.ReadAllText(FileNppCloudChoice, Encoding.Default);
                     if (Directory.Exists(cloudpath)) {
