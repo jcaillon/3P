@@ -33,6 +33,7 @@ using _3PA.MainFeatures;
 using _3PA.WindowsCore;
 
 namespace _3PA.NppCore {
+
     internal static partial class Npp {
 
         #region CurrentScintilla (scintilla instance)

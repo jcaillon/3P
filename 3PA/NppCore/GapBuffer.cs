@@ -25,6 +25,7 @@ using System.Globalization;
 using System.Threading;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// Represents a strongly typed collection of objects that can be accessed by index. Insertions and 
     /// deletions to the collection near the same relative index are optimized.

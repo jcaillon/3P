@@ -24,6 +24,7 @@ using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// For every scintilla message that involves a position, the expect position (expected by scintilla) is the
     /// BYTE position, not the CHAR position (as anyone would assume at first!)
@@ -39,6 +40,7 @@ namespace _3PA.NppCore {
     /// on a 200Mo document sounds good enough to me...
     /// </remarks>
     internal class DocumentLines {
+
         #region Fields
 
         /// <summary>

@@ -29,6 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -168,9 +169,26 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static bool IsDirectoryWritable(string dirPath) {
             try {
-                File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose);
+                if (IsElevated) {
+                    // maybe we would be able to write it because we are admin at the moment...
+                    return false;
+                }
+                var tempPath = Path.Combine(dirPath, Path.GetRandomFileName());
+                File.WriteAllText(tempPath, "");
+                File.Delete(tempPath);
                 return true;
-            } catch {
+            } catch (Exception) {
+                return false;
+            }
+        }
+
+        private static bool IsElevated {
+            get {
+                try {
+                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+                } catch (Exception) {
+                    // ignored
+                }
                 return false;
             }
         }
@@ -551,6 +569,22 @@ namespace _3PA.Lib {
         #endregion
 
         #region Misc
+
+        /// <summary>
+        /// Converts a valid version string to a version object. (vX.X.X.X-suffix)
+        /// </summary>
+        /// <param name="versionString"></param>
+        /// <returns></returns>
+        public static Version StringToVersion(string versionString) {
+            var idx = versionString.IndexOf('-');
+            versionString = idx > 0 ? versionString.Substring(0, idx) : versionString;
+            versionString = versionString.TrimStart('v');
+            var nbDots = versionString.Length - versionString.Replace(".", "").Length;
+            for (int i = 0; i < 3 - nbDots; i++) {
+                versionString += ".0";
+            }
+            return new Version(versionString);
+        }
 
         /// <summary>
         /// Allows to know how many files of each file type there is

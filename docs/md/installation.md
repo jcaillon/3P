@@ -1,6 +1,6 @@
 # Installation #
 
-*<small>Last update of this page : 13/11/2018</small>*
+*<small>Last update of this page : 06/02/2019</small>*
 
 ## Install Notepad++ ##
 
@@ -17,28 +17,27 @@ If you don't know which version you currently have, no worries, just follow the 
 
 ### Automatic with the plugin manager ###
 
-*The plugin manager is no longer installed with notepad++ but you can download and install the latest version [here](https://github.com/bruderstein/nppPluginManager/releases)*.
+Automatically install 3P through the plugin manager of notepad++:
 
-Automatically install 3P through the plugin manager of notepad++ :
+* Menu `Plugins` then click on `Plugin Admin...`.
 
-* `PLUGINS > PLUGIN MANAGER > SHOW PLUGIN MANAGER`
-* Look for **3P** in the available list of plugins, check it and press install :
+![image](content_images/installation/plugin_admins.png)
 
-![image](content_images/installation/plugin_manager.png)
+* Look for **3P** in the available list of plugins, check it and press install.
 
-* The program `NetFrameworkChecker.exe` will be started to check that you have the required .net version (it will not even show if you have the required version)
-* Choose `YES` when asked to restart notepad++ and allow the program `updated/gpup.exe` to be executed if windows warns you
+![image](content_images/installation/install_3P.png)
 
-![image](content_images/installation/warning.png)
+* A confirmation is asked to allow to exit notepad++.
+* The program `NetFrameworkChecker.exe` will be started to check that you have the required .net version (it will not even show if you have the required version).
 
 ### Manual installation of 3P ###
 
-* Stop notepad++
-* Download the [latest version](https://github.com/jcaillon/3P/releases/latest) of 3P (direct download button available on the menu on your right)
-* Go to your notepad++ installation folder (usually %programfiles%\Notepad++), you should see a `/plugins/` folder
-* Unzip the content of the downloaded package into the aforementioned folder (`/plugins/3P.dll` should now exist)
-* Optionally, you can execute `NetFrameworkChecker.exe` to check if you have the required .net version to run 3P
-* start notepad++
+* Stop notepad++.
+* Download the [latest version](https://github.com/jcaillon/3P/releases/latest) of 3P (direct download button available on the menu on your right).
+* Go to your notepad++ installation folder (usually %programfiles%\Notepad++), you should see a `/plugins/` folder.
+* Create a new subfolder `3P` and unzip the content of the downloaded package into it: `/plugins/3P/3P.dll` should now exist. *Note: for older notepad++ version <= v7.6, unzip the content directly to the plugins folder*.
+* Optionally, you can execute `NetFrameworkChecker.exe` to check if you have the required .net version to run 3P.
+* Start notepad++.
 
 ## <font color='#CD7918'>Troubleshooting</font> ##
 

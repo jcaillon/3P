@@ -73,7 +73,7 @@ namespace _3PA.NppCore {
                             return;
 
                         case (uint) NppNotif.NPPN_READY:
-                            // notify plugins that all the procedures of launch of notepad++ are done
+                            // notify plugins that all the procedures of launch of notepad are done
                             ActionsAfterUpdateUi = new Queue<Action>();
                             Npp.UpdateCurrentSci(); // init current scintilla
                             UiThread.Init();

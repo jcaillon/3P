@@ -29,6 +29,7 @@ using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletionFeature;
 
 namespace _3PA.NppCore {
+
     /// <summary>
     /// This class allows to read the file $NPPDIR/langs.xml that contains the different languages
     /// supported by npp; this file list the extensions for each lang as well as the keywords
