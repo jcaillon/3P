@@ -82,7 +82,7 @@ namespace _3PA.Lib._3pUpdater {
             File.AppendAllText(Config.FileUpdaterLst, string.Join("\t", from, to) + "\r\n", Encoding.Default);
 
             // test if the destination directory is writable
-            SubscribeToShutdownEvent(Utils.IsDirectoryWritable(Path.GetDirectoryName(to)) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights);
+            SubscribeToShutdownEvent(Utils.FilePathHasWritePermission(to) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights);
 
             return true;
         }

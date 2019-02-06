@@ -28,6 +28,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
@@ -162,35 +163,66 @@ namespace _3PA.Lib {
             return true;
         }
 
-        /// <summary>
-        /// Checks if a directory is writable as is
+	    /// <summary>
+        /// Returns true if a file path is writable with the current user.
         /// </summary>
-        /// <param name="dirPath"></param>
-        /// <returns></returns>
-        public static bool IsDirectoryWritable(string dirPath) {
+        /// <param name="directoryPath">Full path to file to test.</param>
+        /// <returns>State [bool]</returns>
+        public static bool DirectoryPathHasWritePermission(string directoryPath) {
+            if (string.IsNullOrEmpty(directoryPath)) {
+                return false;
+            }
+            var accessRight = FileSystemRights.Write;
+            while (!Directory.Exists(directoryPath)) {
+                directoryPath = Path.GetDirectoryName(directoryPath);
+                accessRight = FileSystemRights.CreateDirectories | FileSystemRights.Write;
+            }
             try {
-                if (IsElevated) {
-                    // maybe we would be able to write it because we are admin at the moment...
-                    return false;
-                }
-                var tempPath = Path.Combine(dirPath, Path.GetRandomFileName());
-                File.WriteAllText(tempPath, "");
-                File.Delete(tempPath);
-                return true;
-            } catch (Exception) {
+                return IsCurrentUserMatchingRule(File.GetAccessControl(directoryPath).GetAccessRules(true, true, typeof(SecurityIdentifier)), accessRight);
+            } catch {
                 return false;
             }
         }
-
-        private static bool IsElevated {
-            get {
-                try {
-                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
-                } catch (Exception) {
-                    // ignored
-                }
+	
+	    /// <summary>
+        /// Returns true if a file path is writable with the current user.
+        /// </summary>
+        /// <param name="filePath">Full path to file to test.</param>
+        /// <returns>State [bool]</returns>
+        public static bool FilePathHasWritePermission(string filePath) {
+            if (string.IsNullOrEmpty(filePath)) {
                 return false;
             }
+            FileSystemRights accessRight;
+            if (!File.Exists(filePath)) {
+				filePath = Path.GetDirectoryName(filePath);
+                accessRight = FileSystemRights.CreateFiles;					
+	            while (!Directory.Exists(filePath)) {
+	                filePath = Path.GetDirectoryName(filePath);
+	                accessRight = FileSystemRights.CreateDirectories | FileSystemRights.CreateFiles;
+	            }
+            } else {
+                accessRight = FileSystemRights.Write;
+            }
+            try {
+                return IsCurrentUserMatchingRule(File.GetAccessControl(filePath).GetAccessRules(true, true, typeof(SecurityIdentifier)), accessRight);
+            } catch {
+                return false;
+            }
+        }
+		
+		
+        private static bool IsCurrentUserMatchingRule(AuthorizationRuleCollection rules, FileSystemRights accessRight) {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            foreach (FileSystemAccessRule rule in rules) {
+                if (identity?.Groups != null && identity.Groups.Contains(rule.IdentityReference)) {
+                    if ((accessRight & rule.FileSystemRights) == accessRight) {
+                        if (rule.AccessControlType == AccessControlType.Allow)
+                            return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
