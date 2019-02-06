@@ -162,6 +162,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             bool expectingFirstArg = true;
             string argName = null;
             int argNumber = 1;
+            // TODO: issue here, we should not pass the parameters sent to _parsedIncludes[bracketToken.OwnerNumber], only the actual Scoped preproc...
             var parameters = new Dictionary<string, string>(_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables, StringComparer.CurrentCultureIgnoreCase); // the scoped variable of this procedure will be available in the include file
 
             var state = 0;
@@ -195,8 +196,11 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                 expectingFirstArg = false;
                                 // case of a {file.i "arg1" arg2}
                             } else if (!(token is TokenEol || token is TokenWhiteSpace)) {
-                                if (!parameters.ContainsKey(argNumber.ToString()))
+                                if (!parameters.ContainsKey(argNumber.ToString())) {
                                     parameters.Add(argNumber.ToString(), GetTokenStrippedValue(token));
+                                } else {
+                                    parameters[argNumber.ToString()] = GetTokenStrippedValue(token);
+                                }
                                 argNumber++;
                                 expectingFirstArg = false;
                             }
@@ -207,8 +211,12 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                     if (token is TokenPreProcDirective)
                                         argName = token.Value;
                                 } else if (!(token is TokenEol || token is TokenWhiteSpace || token.Value == "=")) {
-                                    if (!parameters.ContainsKey(argName))
+                                    if (!parameters.ContainsKey(argName)) {
                                         parameters.Add(argName, GetTokenStrippedValue(token));
+                                    } else {
+                                        parameters[argName] = GetTokenStrippedValue(token);
+                                    }
+
                                     argName = null;
                                 }
                             } else if (!(token is TokenEol || token is TokenWhiteSpace)) {
@@ -251,6 +259,16 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
                 // did we already parsed this file in a previous parse session?
                 if (SavedTokenizerInclude.ContainsKey(parsedInclude.FullFilePath)) {
+                    // if we find 2 consecutives includes with the same parameters, its probably an infinite loop
+                    var lastIncludeListParameters = _parsedIncludes.LastOrDefault();
+                    if (lastIncludeListParameters != null) {
+                        // TODO: Very bad comparison, to fix later!!!
+                        var lastIncludeParameters = string.Join(",", lastIncludeListParameters.ScopedPreProcVariables.Keys) + string.Join(",", lastIncludeListParameters.ScopedPreProcVariables.Values);
+                        var currentIncludeParameters = string.Join(",", parsedInclude.ScopedPreProcVariables.Keys) + string.Join(",", parsedInclude.ScopedPreProcVariables.Values);
+                        if (currentIncludeParameters.Equals(lastIncludeParameters)) {
+                            return null;
+                        }
+                    }
                     proTokenizer = SavedTokenizerInclude[parsedInclude.FullFilePath];
                 } else {
                     // Parse it

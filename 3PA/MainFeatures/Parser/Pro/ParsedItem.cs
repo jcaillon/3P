@@ -604,6 +604,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
     /// include file parsed item
     /// </summary>
     internal class ParsedIncludeFile : ParsedItem {
+
         /// <summary>
         /// The dictionary contains the association between parameter name -> value
         /// passed with the include file; either 1->value or & name->value 
