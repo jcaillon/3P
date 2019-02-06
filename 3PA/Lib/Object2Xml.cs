@@ -242,17 +242,18 @@ namespace _3PA.Lib {
 
         private static XElement DictToXml(Dictionary<string, string> inputDict, string elmName, string subElmName, bool valueInAttribute = false) {
             XElement outElm = new XElement(elmName);
-            Dictionary<string, string>.KeyCollection keys = inputDict.Keys;
-            foreach (string key in keys) {
-                XElement inner = new XElement(subElmName);
-                if (valueInAttribute) {
-                    inner.Add(new XAttribute(KeyString, key));
-                    inner.Add(new XAttribute(ValueString, inputDict[key]));
-                } else {
-                    inner.Add(new XElement(KeyString, key));
-                    inner.Add(new XElement(ValueString, inputDict[key]));
+            foreach (string key in inputDict.Keys.ToList()) {
+                if (inputDict.ContainsKey(key)) {
+                    XElement inner = new XElement(subElmName);
+                    if (valueInAttribute) {
+                        inner.Add(new XAttribute(KeyString, key));
+                        inner.Add(new XAttribute(ValueString, inputDict[key]));
+                    } else {
+                        inner.Add(new XElement(KeyString, key));
+                        inner.Add(new XElement(ValueString, inputDict[key]));
+                    }
+                    outElm.Add(inner);
                 }
-                outElm.Add(inner);
             }
             return outElm;
         }
