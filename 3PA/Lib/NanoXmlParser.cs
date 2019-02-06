@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 
 namespace _3PA.Lib {
+
     /// <summary>
     /// Credits go to https://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser
     /// Base class containing useful features for all XML classes
@@ -168,6 +169,10 @@ namespace _3PA.Lib {
         private List<NanoXmlAttribute> _attributes = new List<NanoXmlAttribute>();
 
         internal NanoXmlNode(string str, ref int i) {
+            if (string.IsNullOrEmpty(str)) {
+                return;
+            }
+
             _name = ParseAttributes(str, ref i, _attributes, '>', '/');
 
             if (str[i] == '/') {

@@ -49,7 +49,8 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <LangVersion>6</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -833,9 +834,9 @@ REM copy files to the notepad++ folder for dev purposes
 echo [INFO] Copying output files to ..\%25NPPFOLDERNAME%25\plugins\
 
 if exist "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\" ( 
-	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetFileName)" &gt;nul
+	copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetFileName)" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName)\$(TargetFileName)" &gt;nul
 	if exist "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" (
-		copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName).pdb") &gt;nul
+		copy /Y "$(ProjectDir)bin\$(ConfigurationName)\%25CPUNAME%25\$(TargetName).pdb" "$(SolutionDir)..\%25NPPFOLDERNAME%25\plugins\$(TargetName)\$(TargetName).pdb") &gt;nul
 	)
 )
 

@@ -99,8 +99,7 @@ namespace _3PA.Lib {
             get { return Path.GetFileName(_assembly.Location); }
         }
 
-        public static string GetAttributeValue<TAttr>(Func<TAttr,
-            string> resolveFunc, string defaultResult = null) where TAttr : Attribute {
+        public static string GetAttributeValue<TAttr>(Func<TAttr, string> resolveFunc, string defaultResult = null) where TAttr : Attribute {
             object[] attributes = _assembly.GetCustomAttributes(typeof(TAttr), false);
             if (attributes.Length > 0)
                 return resolveFunc((TAttr) attributes[0]);
