@@ -201,10 +201,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 new ParsedIncludeFile(
                     "root",
                     rootToken,
-                    // the preprocessed variable {0} equals to the filename...
-                    new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
-                        {"0", Path.GetFileName(FilePathBeingParsed)}
-                    },
+                    null,
                     _filePathBeingParsed,
                     null)
             );

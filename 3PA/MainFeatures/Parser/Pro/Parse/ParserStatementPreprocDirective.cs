@@ -134,7 +134,10 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 AddParsedItem(newVar, directiveToken.OwnerNumber);
 
                 // add it to the know variables (either to the global scope or to the local scope)
-                SetPreProcVariableValue(flags.HasFlag(ParseFlag.Global) ? 0 : directiveToken.OwnerNumber, variableName, newVar.Value);
+                // Difference between &global and &scope:
+                // The &scope will be available until the compiler finishes the current file (propagated downward in the include stack)
+                // The &global will be available until the compiler finishes the current compilation session (propagated upward and downward the include stack)
+                SetDefinedPreProcVariable(flags.HasFlag(ParseFlag.Global) ? 0 : directiveToken.OwnerNumber, $"&{variableName}", newVar.Value);
             }
 
             // we directly set the new token position there (it will be the EOL after this directive)

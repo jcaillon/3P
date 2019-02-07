@@ -34,7 +34,7 @@ namespace _3PA.MainFeatures.Parser.Pro {
             TriggerLine = triggerToken.Line;
             TriggerPosition = triggerToken.StartPosition;
             StackCount = stackCount;
-            FullFilePath = includeFiles[triggerToken.OwnerNumber].FullFilePath;
+            FullFilePath = includeFiles[triggerToken.OwnerNumber].IncludeFilePath;
         }
     }
 

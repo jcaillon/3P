@@ -495,7 +495,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         private void AddParsedItem(ParsedItem item, ushort ownerNumber) {
             // add external flag + include line if needed
             if (ownerNumber > 0 && ownerNumber < _parsedIncludes.Count) {
-                item.FilePath = _parsedIncludes[ownerNumber].FullFilePath;
+                item.FilePath = _parsedIncludes[ownerNumber].IncludeFilePath;
                 item.IncludeLine = _parsedIncludes[ownerNumber].Line;
                 item.Flags |= ParseFlag.FromInclude;
             } else {

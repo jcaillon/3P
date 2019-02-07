@@ -30,9 +30,15 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             // we check if the token + posAhead will be an include that needs to be replaced
             var toReplaceToken = PeekAt(posAhead);
 
-            HashSet<string> replacedName = null; // keep track of replacement here
+            byte nbOfNestedReplacements = 0;
 
             while (toReplaceToken is TokenInclude || toReplaceToken is TokenPreProcVariable) {
+                // a ~ is the escape character for an include or a pre-proc variable
+                var previousToken = PeekAt(posAhead - 1);
+                if (previousToken is TokenSymbol && previousToken.Value.Equals("~")) {
+                    break;
+                }
+                
                 // replace the {include} present within this {include}
                 var count = 1;
                 while (true) {
@@ -45,7 +51,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
                 count++; // number of tokens composing this include
 
-                // get the caracteristics of this include
+                // get the characteristics of this include
                 string replaceName = null;
                 ParsedIncludeFile parsedInclude = null;
                 string preprocValue = null;
@@ -53,7 +59,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     if (toReplaceToken is TokenInclude) {
                         parsedInclude = CreateParsedIncludeFile(toReplaceToken, posAhead, posAhead + count - 1);
                         if (parsedInclude != null)
-                            replaceName = !string.IsNullOrEmpty(parsedInclude.FullFilePath) ? parsedInclude.FullFilePath : parsedInclude.Name;
+                            replaceName = !string.IsNullOrEmpty(parsedInclude.IncludeFilePath) ? parsedInclude.IncludeFilePath : parsedInclude.Name;
                     } else {
                         replaceName = (toReplaceToken.Value == "{" ? "" : "&") + PeekAt(posAhead + 1).Value;
                         preprocValue = CreateUsedPreprocVariable(toReplaceToken, replaceName);
@@ -69,19 +75,31 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 if (string.IsNullOrEmpty(replaceName))
                     break;
 
-                // make sure to not replace the same include in the same replacement loop, if we do that
-                // this means we will go into an infinite loop case of a {&{&one}} with one=two and two=one
-                if (replacedName == null)
-                    replacedName = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) {_parsedIncludes[0].FullFilePath};
-                if (replacedName.Contains(replaceName))
+                // Handle the compiler message: Nested recursion limit of 255 exceeded in preprocessor expansion. (2936)
+                // It happens when:
+                // &GLOBAL-DEFINE name1 ~{&name2}
+                // &GLOBAL-DEFINE name2 ~{&name1}
+                // {&name1}
+                if (++nbOfNestedReplacements >= 255) {
                     break;
-                replacedName.Add(replaceName);
+                }
 
                 var prevToken = PeekAt(posAhead - 1);
 
                 // get the list of tokens that will replace this include
                 List<Token> valueTokens;
                 if (toReplaceToken is TokenInclude) {
+                    // Handle the compiler message: Nested recursion limit of 255 exceeded in preprocessor expansion. (2936)
+                    // This will happen if you have an include that calls itself for instance
+                    var includeStackSize = 0;
+                    var parentInclude = parsedInclude.Parent;
+                    while (parentInclude != null) {
+                        includeStackSize++;
+                        parentInclude = parentInclude.Parent;
+                    }
+                    if (includeStackSize >= 255) {
+                        break;
+                    }
                     valueTokens = GetIncludeFileTokens(prevToken as TokenString, parsedInclude);
                 } else {
                     valueTokens = GetPreProcVariableTokens(prevToken as TokenString, toReplaceToken, preprocValue);
@@ -162,8 +180,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             bool expectingFirstArg = true;
             string argName = null;
             int argNumber = 1;
-            // TODO: issue here, we should not pass the parameters sent to _parsedIncludes[bracketToken.OwnerNumber], only the actual Scoped preproc...
-            var parameters = new Dictionary<string, string>(_parsedIncludes[bracketToken.OwnerNumber].ScopedPreProcVariables, StringComparer.CurrentCultureIgnoreCase); // the scoped variable of this procedure will be available in the include file
+            var parameters = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
             var state = 0;
             for (int i = startPos + 1; i <= endPos - 1; i++) {
@@ -235,13 +252,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 // try to find the file in the propath
                 var fullFilePath = FindIncludeFullPath(fileName);
 
-                // always add the parameter "0" which it the filename
-                if (parameters.ContainsKey("0"))
-                    parameters["0"] = Path.GetFileName(fullFilePath ?? fileName);
-                else
-                    parameters.Add("0", Path.GetFileName(fullFilePath ?? fileName));
-
-                newInclude = new ParsedIncludeFile(fileName, bracketToken, parameters, fullFilePath, _parsedIncludes[bracketToken.OwnerNumber]);
+                newInclude = new ParsedIncludeFile(fileName, bracketToken, parameters, fullFilePath ?? fileName, _parsedIncludes[bracketToken.OwnerNumber]);
 
                 AddParsedItem(newInclude, bracketToken.OwnerNumber);
             }
@@ -254,31 +265,21 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// </summary>
         private List<Token> GetIncludeFileTokens(TokenString previousTokenString, ParsedIncludeFile parsedInclude) {
             // Parse the include file ?
-            if (!string.IsNullOrEmpty(parsedInclude.FullFilePath)) {
+            if (!string.IsNullOrEmpty(parsedInclude.IncludeFilePath)) {
                 ProTokenizer proTokenizer;
 
                 // did we already parsed this file in a previous parse session?
-                if (SavedTokenizerInclude.ContainsKey(parsedInclude.FullFilePath)) {
-                    // if we find 2 consecutives includes with the same parameters, its probably an infinite loop
-                    var lastIncludeListParameters = _parsedIncludes.LastOrDefault();
-                    if (lastIncludeListParameters != null) {
-                        // TODO: Very bad comparison, to fix later!!!
-                        var lastIncludeParameters = string.Join(",", lastIncludeListParameters.ScopedPreProcVariables.Keys) + string.Join(",", lastIncludeListParameters.ScopedPreProcVariables.Values);
-                        var currentIncludeParameters = string.Join(",", parsedInclude.ScopedPreProcVariables.Keys) + string.Join(",", parsedInclude.ScopedPreProcVariables.Values);
-                        if (currentIncludeParameters.Equals(lastIncludeParameters)) {
-                            return null;
-                        }
-                    }
-                    proTokenizer = SavedTokenizerInclude[parsedInclude.FullFilePath];
+                if (SavedTokenizerInclude.ContainsKey(parsedInclude.IncludeFilePath)) {
+                    proTokenizer = SavedTokenizerInclude[parsedInclude.IncludeFilePath];
                 } else {
                     // Parse it
                     if (previousTokenString != null && !string.IsNullOrEmpty(previousTokenString.Value)) {
-                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.FullFilePath), previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'');
+                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.IncludeFilePath), previousTokenString.Value[0] == '"', previousTokenString.Value[0] == '\'');
                     } else {
-                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.FullFilePath));
+                        proTokenizer = new ProTokenizer(Utils.ReadAllText(parsedInclude.IncludeFilePath));
                     }
-                    if (!SavedTokenizerInclude.ContainsKey(parsedInclude.FullFilePath))
-                        SavedTokenizerInclude.Add(parsedInclude.FullFilePath, proTokenizer);
+                    if (!SavedTokenizerInclude.ContainsKey(parsedInclude.IncludeFilePath))
+                        SavedTokenizerInclude.Add(parsedInclude.IncludeFilePath, proTokenizer);
                 }
 
                 _parsedIncludes.Add(parsedInclude);
@@ -317,13 +318,14 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 valueTokens = new ProTokenizer(value).GetTokensList.ToList();
             }
 
-            // Remove EOF
+            // Remove EOF and change owner number
             List<Token> copiedTokens = new List<Token>();
             for (int i = 0; i < valueTokens.Count - 1; i++) {
                 var copiedToken = valueTokens[i].Copy(bracketToken.Line, bracketToken.Column, bracketToken.StartPosition, bracketToken.EndPosition);
                 copiedToken.OwnerNumber = bracketToken.OwnerNumber;
                 copiedTokens.Add(copiedToken);
             }
+            
             return copiedTokens;
         }
 
@@ -349,22 +351,18 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <summary>
         /// set a preprocessed variable to its owner. Input ownerNumber to 0 for a global variable
         /// </summary>
-        private void SetPreProcVariableValue(int ownerNumber, string variableName, string variableValue) {
-            if (_parsedIncludes[ownerNumber].ScopedPreProcVariables.ContainsKey("&" + variableName))
-                _parsedIncludes[ownerNumber].ScopedPreProcVariables["&" + variableName] = variableValue;
-            else
-                _parsedIncludes[ownerNumber].ScopedPreProcVariables.Add("&" + variableName, variableValue);
+        /// <param name="ownerNumber"></param>
+        /// <param name="variableName">starts with &</param>
+        /// <param name="variableValue"></param>
+        private void SetDefinedPreProcVariable(int ownerNumber, string variableName, string variableValue) {
+            _parsedIncludes[ownerNumber].SetDefinedPreProcVariable(variableName, variableValue);
         }
 
         /// <summary>
         /// Get a preprocessed variable value
         /// </summary>
         private string GetPreProcVariableValue(int ownerNumber, string variableName) {
-            if (_parsedIncludes[ownerNumber].ScopedPreProcVariables.ContainsKey(variableName))
-                return _parsedIncludes[ownerNumber].ScopedPreProcVariables[variableName];
-            if (_parsedIncludes[0].ScopedPreProcVariables.ContainsKey(variableName))
-                return _parsedIncludes[0].ScopedPreProcVariables[variableName];
-            return null;
+            return _parsedIncludes[ownerNumber].GetScopedPreProcVariableValue(variableName);
         }
     }
 }

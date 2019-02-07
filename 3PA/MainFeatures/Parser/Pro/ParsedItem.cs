@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using _3PA.MainFeatures.Parser.Pro.Visit;
 
 namespace _3PA.MainFeatures.Parser.Pro {
@@ -606,17 +607,19 @@ namespace _3PA.MainFeatures.Parser.Pro {
     internal class ParsedIncludeFile : ParsedItem {
 
         /// <summary>
-        /// The dictionary contains the association between parameter name -> value
-        /// passed with the include file; either 1->value or & name->value 
-        /// depending on the way parameters were passed to the include
-        /// During parsing, 
-        /// we will inject those tokens in place of the {& varname}
-        /// 
-        /// Contains a dictionary in which each variable name known corresponds to its value
-        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
-        /// or & DEFINE variables from the current file
+        /// Contains a dictionary in which each preproc variable name known corresponds to its value.
+        /// Contains only the preproc values that were defined with & SCOPED-DEFINE or & GLOBAL-DEFINE.
         /// </summary>
-        public Dictionary<string, string> ScopedPreProcVariables { get; set; }
+        public Dictionary<string, string> DefinedPreProcVariables { get; private set; }
+
+        /// <summary>
+        /// Contains a dictionary in which each preproc variable name known corresponds to its value.
+        /// Contains only the preproc values passed to the include file at call.
+        /// - either position based: {1}->SHARED
+        /// - or name based: {& name}->_extension
+        /// depending on the way parameters were passed to the include.
+        /// </summary>
+        public Dictionary<string, string> ParametersPreProcVariables { get; }
 
         /// <summary>
         /// if null, that means this ParsedIncludeFile is actually the procedure being parsed,
@@ -625,19 +628,65 @@ namespace _3PA.MainFeatures.Parser.Pro {
         public ParsedIncludeFile Parent { get; private set; }
 
         /// <summary>
-        /// Full path of the include file (when actually found in the propath null otherwise)
+        /// File path of the include file (when actually found in the propath, name of the include otherwise)
         /// </summary>
-        public string FullFilePath { get; private set; }
+        public string IncludeFilePath { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, Token token, Dictionary<string, string> scopedPreProcVariables, string fullFilePath, ParsedIncludeFile parent)
+        public ParsedIncludeFile(string name, Token token, Dictionary<string, string> parametersPreProcVariables, string includeFilePath, ParsedIncludeFile parent)
             : base(name, token) {
-            ScopedPreProcVariables = scopedPreProcVariables;
-            FullFilePath = fullFilePath;
+            ParametersPreProcVariables = parametersPreProcVariables;
+            IncludeFilePath = includeFilePath;
             Parent = parent;
+        }
+
+        /// <summary>
+        /// Returns the value of a given preproc variable.
+        /// </summary>
+        /// <param name="variableName">Can be a position e.g. "1" or a name e.g. "& name"</param>
+        /// <returns></returns>
+        public string GetScopedPreProcVariableValue(string variableName) {
+            if (string.IsNullOrEmpty(variableName)) {
+                return null;
+            }
+            if (variableName.Equals("0")) {
+                return string.IsNullOrEmpty(IncludeFilePath) ? null : Path.GetFileName(IncludeFilePath);
+            }
+            // &scoped-define variables prevail over preproc parameters passed to the include
+            if (DefinedPreProcVariables != null && DefinedPreProcVariables.ContainsKey(variableName)) {
+                return DefinedPreProcVariables[variableName];
+            }
+            if (ParametersPreProcVariables != null && ParametersPreProcVariables.ContainsKey(variableName)) {
+                return ParametersPreProcVariables[variableName];
+            }
+            // search for the value in parent scope
+            // the global preproc, available to the whole include stack, are defined in the "root" include (which is the compiled program).
+            var parentInclude = Parent;
+            while (parentInclude != null) {
+                if (parentInclude.DefinedPreProcVariables != null && parentInclude.DefinedPreProcVariables.ContainsKey(variableName)) {
+                    return parentInclude.DefinedPreProcVariables[variableName];
+                }
+                parentInclude = parentInclude.Parent;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Set a new defined preproc variable belonging to that include (the base parsed program is also an include!)
+        /// </summary>
+        /// <param name="variableName"></param>
+        /// <param name="variableValue"></param>
+        public void SetDefinedPreProcVariable(string variableName, string variableValue) {
+            if (DefinedPreProcVariables == null) {
+                DefinedPreProcVariables = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+            }
+            if (DefinedPreProcVariables.ContainsKey( variableName))
+                DefinedPreProcVariables[variableName] = variableValue;
+            else
+                DefinedPreProcVariables.Add(variableName, variableValue);
         }
     }
 

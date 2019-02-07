@@ -7,7 +7,7 @@
 - \#250: Crash during shutdown due to modified collection
 - \#249: Admin rights required to update 3P for notepad++ version 7.6.1 to 7.6.2
 - \#252: From notepad++ v7.6.2, autocompletion .xml files were moved to $installdir/autoCompletion
-- \#227: Infinite loop on includes calling the same include
+- \#227: Infinite loop on includes calling the same include (huge thanks to @slegian for his precious help)
 
 ### Recent changes in notepad++ ###
 

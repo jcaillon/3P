@@ -226,7 +226,7 @@ namespace _3PA.NppCore {
                 _keywords = new List<NppKeyword>();
                 var uniqueKeywords = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
-                // get keywords from plugins/Apis/
+                // get keywords from plugins/Apis/ or autoCompletion/
                 // FORMAT :
                 // <AutoComplete language="C++">
                 //    <Environment ignoreCase="no" startFunc="(" stopFunc=")" paramSeparator="," terminal=";" additionalWordChar = "."/>
