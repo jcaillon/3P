@@ -47,7 +47,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <LangVersion>6</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>
     </CodeAnalysisRuleSet>
@@ -198,6 +198,7 @@
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementPublish.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserParameterDefinitionSyntax.cs" />
     <Compile Include="MainFeatures\Parser\Pro\Parse\ParserStatementSubscribe.cs" />
+    <Compile Include="MainFeatures\Parser\Pro\Parse\UoePreprocessedExpressionEvaluator.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxFolding.cs" />
     <Compile Include="NppCore\NppLang.cs" />
     <Compile Include="MainFeatures\HtmlHelper.cs" />

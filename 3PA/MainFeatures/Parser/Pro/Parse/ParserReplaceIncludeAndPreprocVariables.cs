@@ -13,6 +13,10 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// In case of {include.i}, we will read the file and tokenize it, then we will have the list of token we need to replace.
         /// </summary>
         private bool ReplaceIncludeAndPreprocVariablesAhead(int posAhead) {
+            if (_context.InFalsePreProcIfBlock) {
+                return false;
+            }
+            
             /*
             { include-file
                 [ argument ... | {&argument-name = "argument-value" } ... ] }

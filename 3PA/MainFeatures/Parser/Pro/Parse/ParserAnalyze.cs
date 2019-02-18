@@ -39,8 +39,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 return;
 
             // matching a word
-            if (token is TokenWord) {
-                var lowerTok = token.Value.ToLower();
+            if (token is TokenWord && !_context.InFalsePreProcIfBlock) {
+                var lowerTok =  token.Value.ToLower();
 
                 // first word of a statement
                 if (_context.CurrentStatement.WordCount == 1 || _context.ReadNextWordAsStatementStart) {
@@ -287,8 +287,12 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                     case "&endif":
                     case "&else":
                     case "&elseif":
-                        // pop a block stack
-                        var currentIfBlock = _context.BlockStack.Peek() as ParsedScopePreProcIfBlock;
+                        if (_context.InFalsePreProcIfBlock) {
+                            // we were in false if block so we did not replace ahead, do it now
+                            ReplaceIncludeAndPreprocVariablesAhead(1);
+                            ReplaceIncludeAndPreprocVariablesAhead(2);
+                        }
+                        _context.InFalsePreProcIfBlock = false;
                         if (!CloseBlock<ParsedScopePreProcIfBlock>(token)) {
                             // we match an end w/o beggining, flag a mismatch
                             _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedPreProcEndIf, token, _context.BlockStack.Count, _parsedIncludes));
@@ -300,17 +304,14 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                 break;
                             case "&else":
                                 // push a block to stack
-                                var newElse = CreateParsedIfEndIfPreProc(token, _context.CurrentStatement.WordCount > 0);
+                                var newElse = CreateParsedIfEndIfPreProc(token, _context.LastPreprocIfwasTrue);
                                 _context.BlockStack.Push(newElse);
-                                if (!_context.LastPreprocIfwasTrue && currentIfBlock != null) {
-                                    // fill info on the else from the previous if/elseif
-                                    newElse.ExpressionResult = true;
-                                }
                                 NewStatement(token);
+                                _context.InFalsePreProcIfBlock = !newElse.ExpressionResult;
                                 break;
                             case "&elseif":
                                 // push a block to stack
-                                var newElseIf = CreateParsedIfEndIfPreProc(token, _context.CurrentStatement.WordCount > 0);
+                                var newElseIf = CreateParsedIfEndIfPreProc(token, _context.LastPreprocIfwasTrue);
                                 _context.BlockStack.Push(newElseIf);
                                 _context.LastPreprocIfwasTrue = _context.LastPreprocIfwasTrue || newElseIf.ExpressionResult;
                                 break;
@@ -319,15 +320,17 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
 
                     case "&then":
                         // &then without a &if or &elseif
-                        if (GetCurrentBlock<ParsedScopePreProcIfBlock>() == null) {
+                        var currentPreProcIfBlock = GetCurrentBlock<ParsedScopePreProcIfBlock>();
+                        if (currentPreProcIfBlock == null) {
                             _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedPreprocThen, token, _context.BlockStack.Count, _parsedIncludes));
                         }
                         NewStatement(token);
+                        _context.InFalsePreProcIfBlock = currentPreProcIfBlock != null && !currentPreProcIfBlock.ExpressionResult;
                         break;
 
                     case "&if":
                         // push a block to stack
-                        var newIf = CreateParsedIfEndIfPreProc(token, _context.CurrentStatement.WordCount > 0);
+                        var newIf = CreateParsedIfEndIfPreProc(token, false);
                         _context.BlockStack.Push(newIf);
                         _context.LastPreprocIfwasTrue = newIf.ExpressionResult;
                         break;

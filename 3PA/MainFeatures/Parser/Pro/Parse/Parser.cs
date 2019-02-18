@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using YamuiFramework.Helper;
 using _3PA.Lib;
@@ -407,6 +406,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             /// one of the if expression hsa been true. If not, we know that the &amp;else block will be true
             /// </summary>
             public bool LastPreprocIfwasTrue { get; set; }
+            
+            public bool InFalsePreProcIfBlock { get; set; }
 
             public bool CurrentStatementIsEnded { get; set; }
         }
