@@ -47,12 +47,11 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <exception cref="Exception"></exception>
         public static bool IsExpressionTrue(string preprocExpression, Func<string, int> definedFunc = null) {
             preprocExpression = preprocExpression.Trim().ToLower();
+            preprocExpression = ReplaceDefinedFunction(preprocExpression, definedFunc, out bool usedDefinedProc);
             
             if (_expressionResults.ContainsKey(preprocExpression)) {
                 return _expressionResults[preprocExpression];
             }
-
-            preprocExpression = ReplaceDefinedFunction(preprocExpression, definedFunc, out bool usedDefinedProc);
 
             if (CanEvaluateFromString(preprocExpression, out bool result)) {
                 if (!usedDefinedProc) { // defined() depends on the current context (which var is defined at this line), so don't store.
