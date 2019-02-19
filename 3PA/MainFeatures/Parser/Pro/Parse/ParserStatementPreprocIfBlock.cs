@@ -4,31 +4,7 @@ using System.Text;
 
 namespace _3PA.MainFeatures.Parser.Pro.Parse {
     internal partial class Parser {
-        
-        private void SkipUntilEndOfPreProcIfBlock() {
-            
-            //int i = 0;
-            //Token token;
-            //do {
-            //    i++;
-            //    token = PeekAt(i);
-            //    if (token is TokenPreProcDirective) {
-            //        
-            //    }
-            //} while (!(token is TokenEof));
-//
-            //// we directly set the new token position there (it will be just 1 token before the &THEN)
-            //_tokenPos += i - 1;
-//
-            //AddLineInfo(PeekAt(0));
-//
-            //// since we didn't use MoveNext we also manually replace the includes ahead
-            //ReplaceIncludeAndPreprocVariablesAhead(1);
-            //ReplaceIncludeAndPreprocVariablesAhead(2);
-            
-        }
-
-        
+                
         /// <summary>
         /// Matches a &amp;IF expression &amp;THEN pre-processed statement (extractes the evaluated expression in BlockDescription)
         /// </summary>
@@ -47,7 +23,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 do {
                     i++;
                     // need to replace in case we use for instance a {&var} in a scope-define value
-                    ReplaceIncludeAndPreprocVariablesAhead(i);
+                    ReplaceIncludeAndPreprocVariablesAhead(i + 1);
                     var token = PeekAt(i);
                     if (token is TokenComment)
                         continue;
@@ -64,7 +40,6 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 AddLineInfo(PeekAt(0));
 
                 // since we didn't use MoveNext we also manually replace the includes ahead
-                ReplaceIncludeAndPreprocVariablesAhead(1);
                 ReplaceIncludeAndPreprocVariablesAhead(2);
 
                 foreach (var token in expressionTokens) {
@@ -72,7 +47,9 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 }
                 
                 try { 
-                    expressionResult = !lastPreProcIfBlockWasTrue && UoePreprocessedExpressionEvaluator.IsExpressionTrue(expression.ToString());
+                    expressionResult = !lastPreProcIfBlockWasTrue && UoePreprocessedExpressionEvaluator.IsExpressionTrue(expression.ToString(), s => {
+                        return _parsedIncludes[ifToken.OwnerNumber].GetScopedPreProcVariableDefinedLevel(s);
+                    });
                 } catch (Exception e) {
                     ErrorHandler.LogError(e);
                     expressionResult = false;

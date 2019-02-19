@@ -36,22 +36,28 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
     /// Administrate an openedge database.
     /// </summary>
     public class UoePreprocessedExpressionEvaluator : IDisposable {
-        private static readonly Dictionary<string, bool> _expressionResults = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
+        private static readonly Dictionary<string, bool> _expressionResults = new Dictionary<string, bool>();
 
         /// <summary>
         /// Returns true if the given pre-processed expression evaluates to true.
         /// </summary>
         /// <param name="preprocExpression"></param>
+        /// <param name="definedFunc"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static bool IsExpressionTrue(string preprocExpression) {
-            preprocExpression = preprocExpression.Trim();
+        public static bool IsExpressionTrue(string preprocExpression, Func<string, int> definedFunc = null) {
+            preprocExpression = preprocExpression.Trim().ToLower();
+            
             if (_expressionResults.ContainsKey(preprocExpression)) {
                 return _expressionResults[preprocExpression];
             }
 
+            preprocExpression = ReplaceDefinedFunction(preprocExpression, definedFunc, out bool usedDefinedProc);
+
             if (CanEvaluateFromString(preprocExpression, out bool result)) {
-                _expressionResults.Add(preprocExpression, result);
+                if (!usedDefinedProc) { // defined() depends on the current context (which var is defined at this line), so don't store.
+                    _expressionResults.Add(preprocExpression, result);
+                }
                 return result;
             }
             
@@ -108,10 +114,6 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public bool IsTrue(string preProcExpression) {
-            if (CanEvaluateFromString(preProcExpression, out bool result)) {
-                return result;
-            }
-
             var content = $"&IF {preProcExpression} &THEN\nPUT UNFORMATTED \"true\".\n&ELSE\nPUT UNFORMATTED \"false\".\n&ENDIF";
             var procedurePath = Path.Combine(Config.FolderTemp, $"preproc_eval_{Path.GetRandomFileName()}.p");
             File.WriteAllText(procedurePath, content, Encoding.Default);
@@ -120,10 +122,9 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 var args = new ProcessArgs().Append("-p").Append(procedurePath);
                 Progres.WorkingDirectory = Config.FolderTemp;
                 var executionOk = Progres.TryExecute(args);
-                if (!executionOk || !bool.TryParse(Progres.StandardOutput.ToString(), out result)) {
+                if (!executionOk || !bool.TryParse(Progres.StandardOutput.ToString(), out bool result)) {
                     throw new Exception(Progres.BatchOutputString);
                 }
-
                 return result;
             } finally {
                 File.Delete(procedurePath);
@@ -131,29 +132,46 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
         }
 
         public static bool CanEvaluateFromString(string preProcExpression, out bool isExpressionTrue) {
-            if (preProcExpression.Equals("true", StringComparison.CurrentCultureIgnoreCase)) {
+            if (preProcExpression.Equals("true", StringComparison.Ordinal)) {
                 isExpressionTrue = true;
                 return true;
             }
 
-            if (preProcExpression.Equals("false", StringComparison.CurrentCultureIgnoreCase)) {
+            if (preProcExpression.Equals("false", StringComparison.Ordinal)) {
                 isExpressionTrue = false;
                 return true;
             }
-
+            
             if (int.TryParse(preProcExpression, out int result)) {
                 isExpressionTrue = result > 0;
                 return true;
-            }
-
+            }           
+                
             var splitEqual = preProcExpression.Split('=');
-            if (splitEqual.Length == 2 && splitEqual[0].TrimEnd().Equals(splitEqual[1].TrimStart(), StringComparison.CurrentCultureIgnoreCase)) {
+            if (splitEqual.Length == 2 && splitEqual[0].TrimEnd().Equals(splitEqual[1].TrimStart(), StringComparison.Ordinal)) {
                 isExpressionTrue = true;
                 return true;
             }
-
+            
+            
             isExpressionTrue = false;
             return false;
+        }
+
+        public static string ReplaceDefinedFunction(string preProcExpression, Func<string, int> definedFunc, out bool usedDefinedProc) {
+            usedDefinedProc = false;
+                
+            // DEFINED(EXCLUDE-btGetSessionNomPasoeCourant) = 0
+            if (definedFunc != null && preProcExpression.StartsWith("defined(", StringComparison.Ordinal)) {
+                var closingParenthesisIdx = preProcExpression.IndexOf(')', 8);
+                if (closingParenthesisIdx > 0) {
+                    var varName = preProcExpression.Substring(8, closingParenthesisIdx - 8).Trim();
+                    preProcExpression = $"{definedFunc($"&{varName}")}{preProcExpression.Substring(closingParenthesisIdx + 1)}";
+                    usedDefinedProc = true;
+                }
+            }
+            
+            return preProcExpression;
         }
 
         /// <summary>

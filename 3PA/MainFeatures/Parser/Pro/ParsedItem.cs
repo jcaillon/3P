@@ -608,7 +608,8 @@ namespace _3PA.MainFeatures.Parser.Pro {
 
         /// <summary>
         /// Contains a dictionary in which each preproc variable name known corresponds to its value.
-        /// Contains only the preproc values that were defined with & SCOPED-DEFINE or & GLOBAL-DEFINE.
+        /// Contains only the preproc values that were defined with & SCOPED-DEFINE.
+        /// Values defined with & GLOBAL-DEFINE are stored in the "base" include file (i.e. the file being compiled).
         /// </summary>
         public Dictionary<string, string> DefinedPreProcVariables { get; private set; }
 
@@ -672,6 +673,41 @@ namespace _3PA.MainFeatures.Parser.Pro {
                 parentInclude = parentInclude.Parent;
             }
             return null;
+        }
+
+        /// <summary>
+        /// This function returns a value of 1 if the argument was a name defined with the & GLOBAL-DEFINE directive;
+        /// a value of 2 if the argument was passed as an include file parameter;
+        /// and a value of 3 if the argument was a name defined with the & SCOPED-DEFINE directive.
+        /// If the argument was not defined and was not an include file parameter, then this function returns a value of 0.
+        /// </summary>
+        /// <param name="variableName">Can be a position e.g. "1" or a name e.g. "& name"</param>
+        /// <returns></returns>
+        public int GetScopedPreProcVariableDefinedLevel(string variableName) {
+            // TODO: this does not work correctly because we can't distinguish between a scope variable on root file and a global variable.
+            if (string.IsNullOrEmpty(variableName)) {
+                return 0;
+            }
+            if (variableName.Equals("0")) {
+                return 2;
+            }
+            // &scoped-define variables prevail over preproc parameters passed to the include
+            if (DefinedPreProcVariables != null && DefinedPreProcVariables.ContainsKey(variableName)) {
+                return 3;
+            }
+            if (ParametersPreProcVariables != null && ParametersPreProcVariables.ContainsKey(variableName)) {
+                return 2;
+            }
+            // search for the value in parent scope
+            // the global preproc, available to the whole include stack, are defined in the "root" include (which is the compiled program).
+            var parentInclude = Parent;
+            while (parentInclude != null) {
+                if (parentInclude.DefinedPreProcVariables != null && parentInclude.DefinedPreProcVariables.ContainsKey(variableName)) {
+                    return 1;
+                }
+                parentInclude = parentInclude.Parent;
+            }
+            return 0;
         }
 
         /// <summary>
