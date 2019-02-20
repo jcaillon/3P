@@ -411,7 +411,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 _context.BlockStack.Pop();
             }
             var currentBlock = _context.BlockStack.Peek() as T;
-            if (currentBlock != null) {
+            if (currentBlock != null && _context.BlockStack.Count > 1) {
                 currentBlock.EndBlockLine = token.Line;
                 currentBlock.EndBlockPosition = token.EndPosition;
                 _context.BlockStack.Pop();
@@ -499,7 +499,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             // add external flag + include line if needed
             if (ownerNumber > 0 && ownerNumber < _parsedIncludes.Count) {
                 item.FilePath = _parsedIncludes[ownerNumber].IncludeFilePath;
-                item.IncludeLine = _parsedIncludes[ownerNumber].Line;
+                item.IncludeLine = _parsedIncludes[ownerNumber].GetLineDefinitionInCompiledFile();
                 item.Flags |= ParseFlag.FromInclude;
             } else {
                 item.FilePath = _filePathBeingParsed;
