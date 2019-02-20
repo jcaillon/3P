@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using _3PA.MainFeatures.Parser.Pro;
@@ -33,7 +35,13 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             if (lineInfos != null) {
                 var lineInfoCopy = new Dictionary<int, ParsedLineInfo>(lineInfos);
                 Task.Factory.StartNew(() => {
-                    UiThread.Invoke(() => SetFolding(ProCodeFormat.GetIndentation(lineInfoCopy)));
+                    UiThread.Invoke(() => {
+                        try {
+                            SetFolding(ProCodeFormat.GetIndentation(lineInfoCopy));
+                        } catch (Exception e) {
+                            ErrorHandler.LogError(e);
+                        }
+                    });
                 });
             }
         }

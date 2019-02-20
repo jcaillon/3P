@@ -724,6 +724,21 @@ namespace _3PA.MainFeatures.Parser.Pro {
             else
                 DefinedPreProcVariables.Add(variableName, variableValue);
         }
+        
+        /// <summary>
+        /// Returns the line in the base file were this include was included
+        /// (if you have base.p -> inc1.i -> inc2.i and you are currently in inc2.i, will return the line were inc1.i is defined in base.p)
+        /// </summary>
+        /// <returns></returns>
+        public int GetLineDefinitionInCompiledFile() {
+            // search for the value in parent scope
+            // the global preproc, available to the whole include stack, are defined in the "root" include (which is the compiled program).
+            var firstInclude = this;
+            while (firstInclude.Parent?.Parent != null) {
+                firstInclude = firstInclude.Parent;
+            }
+            return firstInclude.Line;
+        }
     }
 
     /// <summary>

@@ -589,6 +589,10 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
         public override bool SurvivesFilter(int currentLine, ParsedScopeBlock currentScope) {
             var output = true;
             if (currentLine >= 0) {
+                if (ParsedPreProcVariable.Flags.HasFlag(ParseFlag.Global)) {
+                    return ParsedPreProcVariable.IncludeLine >= 0 ? currentLine >= ParsedPreProcVariable.IncludeLine : currentLine >= ParsedPreProcVariable.Line;
+                    // TODO: handle undefine correctly
+                }
                 // if preproc, check line of definition and undefine
                 output = currentLine >= (ParsedPreProcVariable.IncludeLine >= 0 ? ParsedPreProcVariable.IncludeLine : ParsedPreProcVariable.Line);
                 if (ParsedPreProcVariable.UndefinedLine > 0)

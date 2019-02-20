@@ -7,7 +7,10 @@
 - \#250: Crash during shutdown due to modified collection
 - \#249: Admin rights required to update 3P for notepad++ version 7.6.1 to 7.6.2
 - \#252: From notepad++ v7.6.2, autocompletion .xml files were moved to $installdir/autoCompletion
-- \#227: Infinite loop on includes calling the same include (huge thanks to @slegian for his precious help)
+- \#227: Infinite loop on includes calling the same include (huge thanks to simi aka @slegian for his precious help)
+- \#206: 3P can now evaluate pre-processed expression in &IF statements and ignore definitions made in false blocks
+- &GLOBAL-DEFINE variables defined in includes now correctly appear in the autocompletion
+- \#233: Parser error on unbalanced DO / END blocks
 
 ### Recent changes in notepad++ ###
 

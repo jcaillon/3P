@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
     /// Administrate an openedge database.
     /// </summary>
     public class UoePreprocessedExpressionEvaluator : IDisposable {
-        private static readonly Dictionary<string, bool> _expressionResults = new Dictionary<string, bool>();
+        private static readonly Dictionary<string, bool> ExpressionResults = new Dictionary<string, bool>();
 
         /// <summary>
         /// Returns true if the given pre-processed expression evaluates to true.
@@ -49,22 +49,22 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
             preprocExpression = preprocExpression.Trim().ToLower();
             preprocExpression = ReplaceDefinedFunction(preprocExpression, definedFunc, out bool usedDefinedProc);
             
-            if (_expressionResults.ContainsKey(preprocExpression)) {
-                return _expressionResults[preprocExpression];
+            if (ExpressionResults.ContainsKey(preprocExpression)) {
+                return ExpressionResults[preprocExpression];
             }
 
             if (CanEvaluateFromString(preprocExpression, out bool result)) {
                 if (!usedDefinedProc) { // defined() depends on the current context (which var is defined at this line), so don't store.
-                    _expressionResults.Add(preprocExpression, result);
+                    ExpressionResults.Add(preprocExpression, result);
                 }
                 return result;
             }
             
-            if (ProEnvironment.Current?.ProwinPath != null) {
+            if (!string.IsNullOrEmpty(ProEnvironment.Current?.ProwinPath)) {
                 var dlcPath = Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..");
                 using (var ev = new UoePreprocessedExpressionEvaluator(dlcPath)) {
                     result = ev.IsTrue(preprocExpression);
-                    _expressionResults.Add(preprocExpression, result);
+                    ExpressionResults.Add(preprocExpression, result);
                     return result;
                 }
             }
