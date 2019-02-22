@@ -353,6 +353,15 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                                     _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, token, _context.BlockStack.Count, _parsedIncludes));
                                 }
                             }
+                            
+                            // info we will extract from the current statement :
+                            while (MoveNext()) {
+                                var nextToken = PeekAt(0); // next token
+                                if (nextToken is TokenEol) break;
+                            }
+                            
+                            NewStatement(PeekAt(0)); // new statement is done on the EOL
+                            break;
                         } else {
 
                             if (!lowerValue.StartsWith("&analyze")) {

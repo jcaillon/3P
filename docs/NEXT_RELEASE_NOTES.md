@@ -11,6 +11,7 @@
 - \#206: 3P can now evaluate pre-processed expression in &IF statements and ignore definitions made in false blocks
 - &GLOBAL-DEFINE variables defined in includes now correctly appear in the autocompletion
 - \#233: Parser error on unbalanced DO / END blocks
+- \#254: Parser error for &ANALYZE-RESUME followed by a block name
 
 ### Recent changes in notepad++ ###
 
