@@ -12,6 +12,7 @@
 - &GLOBAL-DEFINE variables defined in includes now correctly appear in the autocompletion
 - \#233: Parser error on unbalanced DO / END blocks
 - \#254: Parser error for &ANALYZE-RESUME followed by a block name
+- \#242: Download datadigger in the custom folder specified in the options (if not aleady installed)
 
 ### Recent changes in notepad++ ###
 

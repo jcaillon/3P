@@ -304,6 +304,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Sci.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
             Keywords.Instance.ResetCompletionItems(); // when changing case
             DataBase.Instance.ResetCompletionItems();
+            Updater<DataDiggerUpdaterWrapper>.Reset();
         }
 
         /// <summary>

@@ -53,6 +53,8 @@ namespace _3PA.Lib {
 
         #endregion
 
+        public static void Reset() => _updaterWrapper = null;
+
     }
 
     internal abstract class UpdaterWrapper {
