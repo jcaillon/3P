@@ -233,8 +233,11 @@
                     // count the total of downloads
                     var count = 0;
                     for (var i = 0, n = data.length; i < n; i++) {
-                        count += data[i].assets[0].download_count;
+						for (var j=0; i < data[i].assets.length; j++) {
+							count += data[i].assets[j].download_count;
+                        }                        
                     }
+                    
                     $('#totaldl_text').html(count);
 
                 }
