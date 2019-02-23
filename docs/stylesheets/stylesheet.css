@@ -545,7 +545,6 @@ aside div.sidetitle {
   text-indent: 4px;
   background: #1C2125;
   padding: 5px 10px;
-  margin-bottom: 8px;
 }
 
 aside div.img-download {
@@ -579,34 +578,36 @@ aside div.betadownload {
   background: transparent url(../images/trial_version_48px.png) 1px center no-repeat;
   padding-left: 48px;
   min-height: 50px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  display: none;
 }
 
-aside div.paddingleft {
-  padding-left: 10px;
+aside div.content {
+  padding: 10px;
 }
 
 aside ul.pagelinks {
   font-size: 14px;
   color: #67CB7A;
   list-style-type: none;
-  padding-left: 10px;
+  padding-left: 0px;
+  margin: 0px;
 }
 
-#sideinfo {
+aside a.selectedlink {
+  font-weight: bold;
+  color: #CD7918;
+}
+
+aside div.sidealternativebgnotepad {
   background: #374248 url(../images/notepad_and_3P.png) center bottom no-repeat;
   padding-bottom: 200px;
 }
 
-
-.sidealternativebg {
+aside div.sidealternativebg {
   background-color: #374248;
 }
 
-.selectedlink {
-  font-weight: bold;
-  color: #CD7918;
-}
 
 aside span.shield1 {
     font-family: 'Open Sans', sans-serif;

@@ -214,21 +214,24 @@
                     while (betaReleaseNb < data.length) {
                         if (data[betaReleaseNb].prerelease) break;
                         betaReleaseNb++;
-
                     }
                     if (betaReleaseNb > data.length)
                         betaReleaseNb = data.length;
-                    if (data[betaReleaseNb].prerelease) {
-                        for (var i=0; i < data[betaReleaseNb].assets.length; i++) {
-                            if (data[betaReleaseNb].assets[i].name == "3P.zip") {
-                                $('#beta_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
-                                $('#beta_text').html(data[betaReleaseNb].tag_name);
-                            } else if (data[betaReleaseNb].assets[i].name == "3P_x64.zip") {
-                                $('#beta64_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
-                                $('#beta64_text').html(data[betaReleaseNb].tag_name);
-                            }
-                        }
-                    }
+
+                	if (betaReleaseNb <= stableReleaseNb) {
+                		$('#betadownload_div').show();
+	                    if (data[betaReleaseNb].prerelease) {
+	                        for (var i=0; i < data[betaReleaseNb].assets.length; i++) {
+	                            if (data[betaReleaseNb].assets[i].name == "3P.zip") {
+	                                $('#beta_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
+	                                $('#beta_text').html(data[betaReleaseNb].tag_name);
+	                            } else if (data[betaReleaseNb].assets[i].name == "3P_x64.zip") {
+	                                $('#beta64_link').attr('href', data[betaReleaseNb].assets[i].browser_download_url);
+	                                $('#beta64_text').html(data[betaReleaseNb].tag_name);
+	                            }
+	                        }
+	                    }
+	                }
 
                     // count the total of downloads
                     var count = 0;
@@ -286,45 +289,48 @@
 
             <div class="sidetitle img-browse">Browse</div>
 
-            <ul class="pagelinks">
-                <li><a href="#/home">Home page</a></li>
-                <li><a href="#/installation">Installation</a></li>
-                <li><a href="#/getting-started">Getting started</a></li>
-                <li><a href="#/set-environment">Set an environment</a></li>
-                <li><a href="#/autocompletion">Progress Autocompletion</a></li>
-                <li><a href="#/alternative-autocompletion">Npp autocompletion</a></li>
-                <li><a href="#/code-explorer">Code explorer</a></li>
-                <li><a href="#/file-explorer">File explorer</a></li>
-                <li><a href="#/tooltips">Tooltips</a></li>
-                <li><a href="#/custom-themes">Create and modify themes</a></li>
-                <li><a href="#/deployment">Compile and deploy</a></li>
-                <li><a href="#/deployment-rules">Deployment rules</a></li>
-                <li><a href="#/thanks">Thanks</a></li>
-				<li><a href="#/versions">List of the versions</a></li>
-            </ul>
+			<div class="content sidealternativebg">
+	            <ul class="pagelinks">
+	                <li><a href="#/home">Home page</a></li>
+	                <li><a href="#/installation">Installation</a></li>
+	                <li><a href="#/getting-started">Getting started</a></li>
+	                <li><a href="#/set-environment">Set an environment</a></li>
+	                <li><a href="#/autocompletion">Progress Autocompletion</a></li>
+	                <li><a href="#/alternative-autocompletion">Npp autocompletion</a></li>
+	                <li><a href="#/code-explorer">Code explorer</a></li>
+	                <li><a href="#/file-explorer">File explorer</a></li>
+	                <li><a href="#/tooltips">Tooltips</a></li>
+	                <li><a href="#/custom-themes">Create and modify themes</a></li>
+	                <li><a href="#/deployment">Compile and deploy</a></li>
+	                <li><a href="#/deployment-rules">Deployment rules</a></li>
+	                <li><a href="#/thanks">Thanks</a></li>
+					<li><a href="#/versions">List of the versions</a></li>
+	            </ul>
+        	</div>
 
 
             <div class="sidetitle img-download">Download</div>
 
-            <div class="stabledownload">
-                <a target="_blank" id="stable_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable</span><span id="stable_text" class="shield2">Requesting...</span></a>
-                <br>
-                <a target="_blank" id="stable64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable (64 bits)</span><span id="stable64_text" class="shield2">none</span></a>
-            </div>
-            <div class="paddingleft">
-                <a target="_blank" href="https://github.com/jcaillon/3P/releases"><small>Read version notes here!</small></a>
-                <br><br>
-            </div>
-            <div class="betadownload">
-                <a target="_blank" id="beta_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">BETA</span><span id="beta_text" class="shield2">Requesting...</span></a>
-                <br>
-                <a target="_blank" id="beta64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">BETA (64 bits)</span><span id="beta64_text" class="shield2">Requesting...</span></a>
+			<div class="content sidealternativebg">
+	            <div class="stabledownload">
+	                <a target="_blank" id="stable_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable</span><span id="stable_text" class="shield2">?</span></a>
+	                <br>
+	                <a target="_blank" id="stable64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Stable (64 bits)</span><span id="stable64_text" class="shield2">?</span></a>
+	            </div>
+	            <div class="betadownload" id="betadownload_div">
+	                <a target="_blank" id="beta_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Beta</span><span id="beta_text" class="shield2">?</span></a>
+	                <br>
+	                <a target="_blank" id="beta64_link" href="https://github.com/jcaillon/3P/releases/latest"><span class="shield1">Beta (64 bits)</span><span id="beta64_text" class="shield2">?</span></a>
+	            </div>
+	            <div>
+	                <a target="_blank" href="https://github.com/jcaillon/3P/releases"><small>Read version notes here!</small></a>
+	            </div>
             </div>
             
             
             <div class="sidetitle img-info">Info</div>
             
-            <div id="sideinfo" class="paddingleft">
+            <div class="content sidealternativebgnotepad">
                 <a target="_blank" href="https://notepad-plus-plus.org/download/"><span class="shield1">Requires Notepad++</span><span class="shield2">7.5.4++</span></a>
                 <br>
                 <a target="_blank" href="http://go.microsoft.com/fwlink/p/?LinkId=671744"><span class="shield1">Requires .NET</span><span class="shield2">4.6.1+</span></a>
@@ -333,17 +339,17 @@
                 <br>
                 <a target="_blank" href="https://gitter.im/_3P/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><span class="shield1">Gitter</span><span class="shield2">Join the chat</span></a>
                 <br>
-                <span class="shield1">Total downloads</span><span class="shield2" id="totaldl_text">Requesting...</span>
+                <span class="shield1">Total downloads</span><span class="shield2" id="totaldl_text">?</span>
                 <br>
                 <a target="_blank" href="https://www.jetbrains.com/" target="_blank"><span class="shield1">Developed using</span><span class="shield2">resharper</span></a>
                 <br>
                 <a target="_blank" href="https://github.com/jcaillon"><span class="shield1">Author</span><span class="shield2">Julien Caillon</span></a>
             </div>
 
+
             <div class="sidetitle img-love">Supported by</div>
             
-            <div id="sidelove" class="paddingleft sidealternativebg">
-
+            <div class="content sidealternativebg">
                 <a target="_blank" href="https://www.jetbrains.com/"><img src="images/jetbrains.png" /></a>
             </div>
         </aside>
