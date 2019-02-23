@@ -26,6 +26,6 @@ Since v7.6.x, there has been some changes regarding the plugins location:
 
 Hopefully, the latest change is final.
 
-I've updated the 3P documentation to reflect those changes. If you update to the latest version of notepad++ from an older version (<= 7.6), you will have to manually place the `3P.dll` into a `3P` sub folder of your `plugins` folder. Otherwise, 3P will simply not be loaded.
+I've updated the 3P documentation to reflect those changes. If you update to the latest version of notepad++ from an older version (<= 7.6), you will have to manually place the `3P.dll` into a `3P` sub folder of your `plugins` folder. Otherwise, 3P will simply not be loaded. Alternatively, you can reinstall 3P from the new "plugins admin" menu in notepad++.
 
 Enjoy!
