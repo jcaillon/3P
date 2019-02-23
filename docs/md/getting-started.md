@@ -6,7 +6,7 @@
 
 Everything starts with 3P's main menu :
 
-![image](https://raw.githubusercontent.com/jcaillon/3P/gh-pages/content_images/getting-started-0.png)
+![image](content_images/getting-started-0.png)
 
 All 3P's features are accessible from this menu, this is the main entry point. Once you are familiar with the software, you can use the direct shortcuts.
 
@@ -27,12 +27,12 @@ Read the info below concerning the page `SET` > `ENVIRONMENT` :
 
 *The following screenshots might not be up to date with the latest version of 3P, however the general idea will still be true*
 
-![image](https://raw.githubusercontent.com/jcaillon/3P/gh-pages/content_images/getting-started-1.png)
+![image](content_images/getting-started-1.png)
 
 ---
 
-![image](https://raw.githubusercontent.com/jcaillon/3P/gh-pages/content_images/getting-started-2.png)
+![image](content_images/getting-started-2.png)
 
 ---
 
-![image](https://raw.githubusercontent.com/jcaillon/3P/gh-pages/content_images/getting-started-3.png)
+![image](content_images/getting-started-3.png)

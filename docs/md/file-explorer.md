@@ -4,7 +4,7 @@
 
 * The file explorer has several purposes, the first one is to show the user the errors on a specific file after a compilation, a check syntax or a prolint :
 
-![image](https://raw.githubusercontent.com/jcaillon/3P/gh-pages/content_images/file_explorer_filestatus.png)
+![image](content_images/file_explorer_filestatus.png)
 
 * The user can quickly navigate to the next/previous error, it can also clear all the error (this only has a visual effect obviously; 3P doesn't code for you... yet)
 
