@@ -233,8 +233,10 @@
                     // count the total of downloads
                     var count = 0;
                     for (var i = 0, n = data.length; i < n; i++) {
-						for (var j=0; i < data[i].assets.length; j++) {
-							count += data[i].assets[j].download_count;
+						for (var j=0, m = data[i].assets.length; j < m; j++) {
+							if (data[i].assets[j].hasOwnProperty('download_count')) {
+								count += data[i].assets[j].download_count;
+							}
                         }                        
                     }
                     
