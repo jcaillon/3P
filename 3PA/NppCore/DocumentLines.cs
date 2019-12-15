@@ -107,11 +107,11 @@ namespace _3PA.NppCore {
         public void Reset() {
             Init();
             var scn = new SCNotification {
-                linesAdded = SciGetLineCount() - 1,
-                position = 0,
-                length = SciGetLength()
+                linesAdded = new IntPtr(SciGetLineCount() - 1),
+                position = IntPtr.Zero,
+                length = new IntPtr(SciGetLength())
             };
-            scn.text = Api.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            scn.text = Api.Send(SciMsg.SCI_GETRANGEPOINTER, scn.position, scn.length);
             OnScnModified(scn, true, Sci.Encoding);
         }
 
@@ -153,16 +153,16 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <param name="scn"></param>
         private void OnDeletedText(SCNotification scn) {
-            var startLine = SciLineFromPosition(scn.position);
-            if (scn.linesAdded == 0) {
-                var delCharLenght = GetCharCount(scn.text, scn.length);
+            var startLine = SciLineFromPosition(scn.position.ToInt32());
+            if (scn.linesAdded == IntPtr.Zero) {
+                var delCharLenght = GetCharCount(scn.text, scn.length.ToInt32());
                 SetHoleInLine(startLine, -delCharLenght);
             } else {
                 var lineByteStart = SciPositionFromLine(startLine);
                 var lineByteLength = SciLineLength(startLine);
                 var delCharLenght = -(GetCharCount(lineByteStart, lineByteLength) - LineCharLength(startLine));
                 FillTheHole();
-                for (int i = 0; i < -scn.linesAdded; i++) {
+                for (int i = 0; i < -scn.linesAdded.ToInt32(); i++) {
                     delCharLenght += LineCharLength(startLine + 1);
                     _linesList.RemoveAt(startLine + 1);
                 }
@@ -176,9 +176,9 @@ namespace _3PA.NppCore {
         /// </summary>
         /// <param name="scn"></param>
         private void OnInsertedText(SCNotification scn) {
-            var startLine = SciLineFromPosition(scn.position);
-            if (scn.linesAdded == 0) {
-                var insCharLenght = GetCharCount(scn.text, scn.length);
+            var startLine = SciLineFromPosition(scn.position.ToInt32());
+            if (scn.linesAdded == IntPtr.Zero) {
+                var insCharLenght = GetCharCount(scn.text, scn.length.ToInt32());
                 SetHoleInLine(startLine, insCharLenght);
             } else {
                 var startCharPos = CharPositionFromLine(startLine);
@@ -187,7 +187,7 @@ namespace _3PA.NppCore {
                 var lineCharLenght = GetCharCount(lineByteStart, lineByteLength);
                 var insCharLenght = lineCharLenght - LineCharLength(startLine);
                 FillTheHole();
-                for (int i = 0; i < scn.linesAdded; i++) {
+                for (int i = 0; i < scn.linesAdded.ToInt32(); i++) {
                     startCharPos += lineCharLenght;
                     var line = startLine + i + 1;
                     lineByteStart += lineByteLength;
@@ -196,7 +196,7 @@ namespace _3PA.NppCore {
                     insCharLenght += lineCharLenght;
                     _linesList.Insert(line, startCharPos);
                 }
-                SetHoleInLine(startLine + scn.linesAdded, insCharLenght);
+                SetHoleInLine(startLine + scn.linesAdded.ToInt32(), insCharLenght);
                 FillTheHole();
 
                 // We should not have a null length, but we actually can :
@@ -205,7 +205,7 @@ namespace _3PA.NppCore {
                 // so in that case, we need to refresh the info when the text is actually inserted, that is after updateui
                 // Clarification : the notification sent is correct (nb lines > 0, length, text are ok), but calling SciLineLength
                 // will always return 0 at this moment!
-                if (scn.length > 0 && TextLength == 0)
+                if (scn.length.ToInt32() > 0 && TextLength == 0)
                     NotificationsPublisher.ActionsAfterUpdateUi.Enqueue(Reset);
             }
         }

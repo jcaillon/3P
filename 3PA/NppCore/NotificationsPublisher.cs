@@ -150,21 +150,21 @@ namespace _3PA.NppCore {
                                             }
 
                                             // only 1 char appears to be modified
-                                            if (nc.length <= 2) {
+                                            if (nc.length.ToInt32() <= 2) {
                                                 // get the char
                                                 var bytes = (byte*) nc.text;
-                                                var arrbyte = new byte[nc.length];
+                                                var arrbyte = new byte[nc.length.ToInt32()];
                                                 int index;
-                                                for (index = 0; index < nc.length; index++)
+                                                for (index = 0; index < nc.length.ToInt32(); index++)
                                                     arrbyte[index] = bytes[index];
                                                 var c = encoding.GetChars(arrbyte);
                                                 var cLength = c.Length;
                                                 // do we really have a 1 char input?
                                                 if (cLength == 1 || (cLength == 2 && c[0] == '\r')) {
                                                     if (insertedText) {
-                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded(c[0], nc.position));
+                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharAdded(c[0], nc.position.ToInt32()));
                                                     } else {
-                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position));
+                                                        ActionsAfterUpdateUi.Enqueue(() => Plug.OnCharDeleted(c[0], nc.position.ToInt32()));
                                                     }
                                                     singleCharModification = true;
                                                 }
@@ -178,7 +178,7 @@ namespace _3PA.NppCore {
 
                             case (uint) SciNotif.SCN_STYLENEEDED:
                                 // if we use the contained lexer, we will receive this notification and we will have to style the text
-                                Plug.OnStyleNeeded(Sci.GetEndStyled(), nc.position);
+                                Plug.OnStyleNeeded(Sci.GetEndStyled(), nc.position.ToInt32());
                                 return;
 
                             case (uint) SciNotif.SCN_MARGINCLICK:
