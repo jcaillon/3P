@@ -150,12 +150,13 @@ namespace _3PA.NppCore {
                                             }
 
                                             // only 1 char appears to be modified
-                                            if (nc.length.ToInt32() <= 2) {
+                                            var ncLength = nc.length.ToInt32();
+                                            if (ncLength <= 2) {
                                                 // get the char
                                                 var bytes = (byte*) nc.text;
-                                                var arrbyte = new byte[nc.length.ToInt32()];
+                                                var arrbyte = new byte[ncLength];
                                                 int index;
-                                                for (index = 0; index < nc.length.ToInt32(); index++)
+                                                for (index = 0; index < ncLength; index++)
                                                     arrbyte[index] = bytes[index];
                                                 var c = encoding.GetChars(arrbyte);
                                                 var cLength = c.Length;
