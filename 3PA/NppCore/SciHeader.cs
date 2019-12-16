@@ -37,17 +37,17 @@ namespace _3PA.NppCore {
     [StructLayout(LayoutKind.Sequential)]
     public struct SCNotification {
         public Sci_NotifyHeader nmhdr;
-        public int position; /* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
+        public IntPtr position; /* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
         public int ch; /* SCN_CHARADDED, SCN_KEY */
         public int modifiers; /* SCN_KEY */
         public int modificationType; /* SCN_MODIFIED */
         public IntPtr text; /* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
-        public int length; /* SCN_MODIFIED */
-        public int linesAdded; /* SCN_MODIFIED */
+        public IntPtr length; /* SCN_MODIFIED */
+        public IntPtr linesAdded; /* SCN_MODIFIED */
         public int message; /* SCN_MACRORECORD */
         public IntPtr wParam; /* SCN_MACRORECORD */
         public IntPtr lParam; /* SCN_MACRORECORD */
-        public int line; /* SCN_MODIFIED */
+        public IntPtr line; /* SCN_MODIFIED */
         public int foldLevelNow; /* SCN_MODIFIED */
         public int foldLevelPrev; /* SCN_MODIFIED */
         public int margin; /* SCN_MARGINCLICK */
@@ -55,7 +55,7 @@ namespace _3PA.NppCore {
         public int x; /* SCN_DWELLSTART, SCN_DWELLEND */
         public int y; /* SCN_DWELLSTART, SCN_DWELLEND */
         public int token; /* SCN_MODIFIED with SC_MOD_CONTAINER */
-        public int annotationLinesAdded; /* SC_MOD_CHANGEANNOTATION */
+        public IntPtr annotationLinesAdded; /* SC_MOD_CHANGEANNOTATION */
         public int updated; /* SCN_UPDATEUI */
         public int listCompletionMethod; /* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
 

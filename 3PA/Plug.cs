@@ -691,9 +691,9 @@ namespace _3PA {
             // click on the error margin
             if (nc.margin == OpenedFilesInfo.ErrorMarginNumber) {
                 // if it's an error symbol that has been clicked, the error on the line will be cleared
-                if (!OpenedFilesInfo.ClearLineErrors(Sci.LineFromPosition(nc.position))) {
+                if (!OpenedFilesInfo.ClearLineErrors(Sci.LineFromPosition(nc.position.ToInt32()))) {
                     // if nothing has been cleared, we go to the next error position
-                    OpenedFilesInfo.GoToNextError(Sci.LineFromPosition(nc.position));
+                    OpenedFilesInfo.GoToNextError(Sci.LineFromPosition(nc.position.ToInt32()));
                 }
             }
         }
