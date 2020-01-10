@@ -900,7 +900,7 @@ namespace _3PA.MainFeatures.AutoCompletionFeature {
             if (NppKeyword.Overloads != null) {
                 toDisplay.Append(HtmlHelper.FormatSubtitle("OVERLOADS"));
                 foreach (var overload in NppKeyword.Overloads) {
-                    toDisplay.Append("<div>" + overload.Description + "</div>");
+                    toDisplay.Append("<div>" + overload.Description.RegexReplace("&#x(0+)a;", "<br/>") + "</div>");
                     toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
                     toDisplay.Append("<b>" + DisplayText + "</b> (");
                     toDisplay.Append(string.Join(", ", overload.Params));
