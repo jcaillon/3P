@@ -101,6 +101,17 @@ namespace _3PA.NppCore {
             } catch (Exception e) {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppStylersXml);
             }
+
+            // from directory userDefineLangs/
+            try {
+                var filenames = Directory.GetFiles(Npp.ConfXml.DirectoryNppUserDefineLangs, "*.xml");
+                var nodes = filenames.Select(filename => new NanoXmlDocument(Utils.ReadAllText(filename)).RootNode["UserLang"]);
+                FillDictionaries(nodes.ToList());
+            }
+            catch (Exception e) {
+                ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppLangsXml);
+            }
+
         }
 
         /// <summary>
