@@ -100,6 +100,10 @@ namespace _3PA.NppCore {
             /// </summary>
             public bool MultiSelectionEnabled { get; private set; }
 
+            public string DirectoryNppUserDefineLangs {
+                get { return Path.Combine(FolderBaseConf, @"userDefineLangs"); }
+            }
+
             public string FileNppUserDefinedLang {
                 get { return Path.Combine(FolderBaseConf, @"userDefineLang.xml"); }
             }
