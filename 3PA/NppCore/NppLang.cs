@@ -82,8 +82,9 @@ namespace _3PA.NppCore {
 
             // from userDefinedLang.xml
             try {
-                if (File.Exists(Npp.ConfXml.FileNppUserDefinedLang))
-                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, true);
+                if (File.Exists(Npp.ConfXml.FileNppUserDefinedLang)) {
+                    FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes, Npp.ConfXml.FileNppUserDefinedLang);
+                }
             } catch (Exception e) {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppUserDefinedLang);
             }
@@ -102,14 +103,15 @@ namespace _3PA.NppCore {
                 ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppStylersXml);
             }
 
-            // from directory userDefineLangs/
-            try {
-                var filenames = Directory.GetFiles(Npp.ConfXml.DirectoryNppUserDefineLangs, "*.xml");
-                var nodes = filenames.Select(filename => new NanoXmlDocument(Utils.ReadAllText(filename)).RootNode["UserLang"]);
-                FillDictionaries(nodes.ToList());
-            }
-            catch (Exception e) {
-                ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppLangsXml);
+            // from directory userDefineLangs/            
+            if (Directory.Exists(Npp.ConfXml.DirectoryNppUserDefineLangs)) {
+                foreach(var file in Directory.GetFiles(Npp.ConfXml.DirectoryNppUserDefineLangs, "*.xml")) {
+                    try {
+                        FillDictionaries(new NanoXmlDocument(Utils.ReadAllText(file)).RootNode.SubNodes, file);
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e, "Error parsing " + Npp.ConfXml.FileNppLangsXml);
+                    }
+                }
             }
 
         }
@@ -117,7 +119,7 @@ namespace _3PA.NppCore {
         /// <summary>
         /// fill the _langNames and _langDescriptions dictionaries
         /// </summary>
-        private void FillDictionaries(List<NanoXmlNode> elements, bool fromUserDefinedLang = false) {
+        private void FillDictionaries(IEnumerable<NanoXmlNode> elements, string userLangFilePath = null) {
             if (elements == null) {
                 return;
             }
@@ -129,7 +131,7 @@ namespace _3PA.NppCore {
                     if (!_langDescriptions.ContainsKey(langName)) {
                         _langDescriptions.Add(langName, new LangDescription {
                             LangName = langName,
-                            IsUserLang = fromUserDefinedLang
+                            UserLangFilePath = userLangFilePath
                         });
                         foreach (var ext in extAttr.Value.Split(' ')) {
                             var langExt = "." + ext.ToLower();
@@ -187,10 +189,9 @@ namespace _3PA.NppCore {
             /// </summary>
             public string LangName { get; set; }
 
-            /// <summary>
-            /// Language read from userDefinedLang.xml
-            /// </summary>
-            public bool IsUserLang { get; set; }
+            public bool IsUserLang => !string.IsNullOrEmpty(UserLangFilePath);
+
+            public string UserLangFilePath { get; set; }
 
             public string commentLine { get; set; }
             public string commentStart { get; set; }
@@ -305,7 +306,7 @@ namespace _3PA.NppCore {
 
                 if (IsUserLang) {
                     try {
-                        var langElement = new NanoXmlDocument(Utils.ReadAllText(Npp.ConfXml.FileNppUserDefinedLang)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
+                        var langElement = new NanoXmlDocument(Utils.ReadAllText(UserLangFilePath)).RootNode.SubNodes.FirstOrDefault(x => x.GetAttribute("name").Value.EqualsCi(LangName));
                         if (langElement != null) {
                             // get the list of keywords from userDefinedLang.xml
                             foreach (var descendant in langElement["KeywordLists"].SubNodes) {
