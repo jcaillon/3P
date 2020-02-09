@@ -74,8 +74,10 @@ namespace _3PA.MainFeatures.Pro {
             /// </summary>
             [XmlElement(ElementName = "BaseCompilationPath")]
             public string BaseCompilationPath = "";
+            
+            public string ProwinPath;
 
-            public string ProwinPath = "";
+
             public string CmdLineParameters = "";
             public string LogFilePath = "";
 
@@ -350,16 +352,22 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Misc
 
+            public string ProwinExePath {
+                get {
+                    return string.IsNullOrEmpty(ProwinPath) ? ProwinPath : Environment.ExpandEnvironmentVariables(ProwinPath);
+                }
+            }
+
             /// <summary>
             /// Returns the path to prolib.exe considering the path to prowin.exe
             /// </summary>
             public string ProlibPath {
-                get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
+                get { return string.IsNullOrEmpty(ProwinExePath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinExePath) ?? "", @"prolib.exe"); }
             }
 
             // use C:\progress\client\v1160_dv\dlc\version to know the version? -> MESSAGE PROVERSION
             public bool CanProwinUseNoSplash {
-                get { return (ProwinPath ?? "").Contains("1160"); }
+                get { return (ProwinExePath ?? "").Contains("1160"); }
             }
 
             #endregion

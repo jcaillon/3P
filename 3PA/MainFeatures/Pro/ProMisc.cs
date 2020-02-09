@@ -207,8 +207,8 @@ namespace _3PA.MainFeatures.Pro {
             var helpPath = Config.Instance.GlobalHelpFilePath;
 
             // Try to find the help file from the prowin32.exe location
-            if (File.Exists(ProEnvironment.Current.ProwinPath)) {
-                var versionHelpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
+            if (File.Exists(ProEnvironment.Current.ProwinExePath)) {
+                var versionHelpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinExePath) ?? "", "..", "prohelp", "lgrfeng.chm"));
                 if (File.Exists(versionHelpPath))
                     helpPath = versionHelpPath;
             }

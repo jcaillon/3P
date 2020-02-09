@@ -60,8 +60,8 @@ namespace _3PA.MainFeatures.Parser.Pro.Parse {
                 return result;
             }
             
-            if (!string.IsNullOrEmpty(ProEnvironment.Current?.ProwinPath)) {
-                var dlcPath = Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..");
+            if (!string.IsNullOrEmpty(ProEnvironment.Current?.ProwinExePath)) {
+                var dlcPath = Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinExePath) ?? "", "..");
                 using (var ev = new UoePreprocessedExpressionEvaluator(dlcPath)) {
                     result = ev.IsTrue(preprocExpression);
                     ExpressionResults.Add(preprocExpression, result);

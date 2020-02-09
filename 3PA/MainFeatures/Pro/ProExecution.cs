@@ -299,7 +299,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (ProEnv.CanProwinUseNoSplash) {
                     _exeParameters.Append(" -nosplash");
                 } else {
-                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"));
+                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinExePath) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinExePath) ?? "", "splashscreen-3p-disabled.bmp"));
                 }
             }
             _exeParameters.Append(" -p " + _runnerPath.Quoter());
@@ -375,7 +375,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // check prowin32.exe
             if (!File.Exists(ProEnv.ProwinPath)) {
-                return "The file path to Prowin.exe is incorrect : <div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + "</div>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>";
+                return "The file path to Prowin.exe is incorrect : <div class='ToolTipcodeSnippet'>" + ProEnv.ProwinExePath + "</div>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>";
             }
 
             return null;
@@ -426,7 +426,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // restore splashscreen
                 if (!string.IsNullOrEmpty(ProEnv.ProwinPath))
-                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinPath) ?? "", "splashscreen.bmp"));
+                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProEnv.ProwinExePath) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProEnv.ProwinExePath) ?? "", "splashscreen.bmp"));
 
             } catch (Exception) {
                 // dont care
@@ -472,7 +472,7 @@ namespace _3PA.MainFeatures.Pro {
 
                 // if log not found then something is messed up!
                 if (string.IsNullOrEmpty(_logPath) || !File.Exists(_logPath)) {
-                    UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + " " + _exeParameters + "</div><b>Temporary directory :</b><br>" + _localTempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Progress execution", "Critical error", args => {
+                    UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProEnv.ProwinExePath + " " + _exeParameters + "</div><b>Temporary directory :</b><br>" + _localTempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Progress execution", "Critical error", args => {
                         if (args.Link.Equals("go")) {
                             Appli.Appli.GoToPage(PageNames.SetEnvironment);
                             UserCommunication.CloseUniqueNotif("ExecutionFailed");
