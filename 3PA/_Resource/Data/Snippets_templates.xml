@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Frame name" enabled="true" id="com.openedge.pdt.text.template.fr" name="&amp;FR">{&amp;FRAME-NAME} ${cursor}</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Global define  " enabled="true" id="com.openedge.pdt.text.template.gl" name="&amp;GL">&amp;GLOBAL-DEFINE ${cursor}</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Scoped define  " enabled="true" id="com.openedge.pdt.text.template.sc" name="&amp;SC">&amp;SCOPED-DEFINE ${cursor}</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Business Rules: Decision Service Connection" enabled="true" id="com.progress.openedge.pdt.corticon.BRCONNECT" name="BR-CONNECT">using OpenEdge.BusinessRules.DecisionService.&#13;
+using OpenEdge.BusinessRules.RulesServerConnectionParameters.&#13;
+using OpenEdge.BusinessRules.RulesServerConnection.&#13;
+using Progress.Json.ObjectModel.JsonObject.&#13;
+using Progress.Lang.AppError.&#13;
+&#13;
+define variable oOptions as JsonObject no-undo.&#13;
+define variable oParams as RulesServerConnectionParameters no-undo.&#13;
+define variable oConnection as RulesServerConnection no-undo.&#13;
+define variable ${decisionservice} as DecisionService no-undo.&#13;
+define variable dVersion as decimal no-undo.&#13;
+define variable cServiceName as character no-undo.&#13;
+&#13;
+oOptions = new JsonObject().&#13;
+oOptions:Add('URL', '${url}').&#13;
+oParams = new RulesServerConnectionParameters(oOptions).&#13;
+oConnection = new RulesServerConnection(oParams).&#13;
+dVersion = ${version}.&#13;
+cServiceName = '${servicename}'.&#13;
+&#13;
+${decisionservice} = new DecisionService(oConnection, cServiceName, dVersion).&#13;
+&#13;
+catch oAppError as AppError:&#13;
+    message &#13;
+        oAppError:ReturnValue&#13;
+        view-as alert-box.&#13;
+end catch.&#13;
+</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Business Rules: Call Get Messages" enabled="true" id="com.progress.openedge.pdt.corticon.BRGETMSG" name="BR-GETMSG">{OpenEdge/BusinessRules/ttRulesMessage.i}&#13;
+&#13;
+define variable hBuffer as handle no-undo.&#13;
+&#13;
+/* get the messages */&#13;
+${decisionserviceref}:GetMessages(output table RulesMessage).&#13;
+&#13;
+for each RulesMessage:&#13;
+    hBuffer = ${datasethandle}:get-buffer-handle(RulesMessage.TableName).&#13;
+    if not valid-handle(hBuffer) then&#13;
+        next.                &#13;
+    &#13;
+    hBuffer:find-by-rowid(to-rowid(RulesMessage.DataKeyValue)) no-error.&#13;
+    /* work with data here */    &#13;
+end.&#13;
+&#13;
+catch oAppError as AppError:&#13;
+    message &#13;
+    oAppError:ReturnValue&#13;
+    view-as alert-box.&#13;
+end catch.&#13;
+</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Business Rules: Invoke Decision Service" enabled="true" id="com.progress.openedge.pdt.corticon.BRINVOKE" name="BR-INVOKE">using Progress.Lang.AppError.&#13;
+&#13;
+define variable hAppData as handle no-undo.&#13;
+&#13;
+/* separate line in case of static reference like dataset dsData:handle */&#13;
+hAppData = ${datasethandle}.&#13;
+&#13;
+/* Invoke the decision service */&#13;
+${decisionserviceref}:InvokeService(input-output dataset-handle hAppData by-reference).&#13;
+&#13;
+catch oAppError as AppError:&#13;
+    message &#13;
+    oAppError:ReturnValue&#13;
+    view-as alert-box.&#13;
+end catch.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Catch block   " enabled="true" id="com.openedge.pdt.text.template.catch" name="CATCH">CATCH ${cursor} AS Progress.Lang.Error :
+		${line_selection}${cursor}
+END CATCH.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Comment  " enabled="true" id="com.openedge.pdt.text.template.cmt" name="CMT">/* ${cursor} */</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Event with delegate  " enabled="true" id="com.openedge.pdt.text.template.ded" name="DED">DEFINE EVENT ${EventName} DELEGATE ${DelegateType}.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Event with signature " enabled="true" id="com.openedge.pdt.text.template.des" name="DES">DEFINE EVENT ${EventName} SIGNATURE ${ReturnType} ( ${Parameters } ).</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Method Signature   " enabled="true" id="com.openedge.pdt.text.template.dms" name="DMS">METHOD PUBLIC ${ReturnType} ${MethodName}().</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Property definition   " enabled="true" id="com.openedge.pdt.text.template.dpy" name="DPY">DEFINE PUBLIC PROPERTY ${Name} AS ${DataType} NO-UNDO
+GET.
+SET.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Character variable  " enabled="true" id="com.openedge.pdt.text.template.dvchs" name="DSVCH">DEFINE STATIC VARIABLE ${cursor} AS CHARACTER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Class variable  " enabled="true" id="com.openedge.pdt.text.template.dvcls" name="DSVCL">DEFINE STATIC VARIABLE ${cursor} AS Progress.Lang.Object NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Com-handle variable" enabled="true" id="com.openedge.pdt.text.template.dvcms" name="DSVCM">DEFINE STATIC VARIABLE ${cursor} AS COM-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Decimal variable  " enabled="true" id="com.openedge.pdt.text.template.dvdes" name="DSVDE">DEFINE STATIC VARIABLE ${cursor} AS DECIMAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Datetime variable" enabled="true" id="com.openedge.pdt.text.template.dvdms" name="DSVDM">DEFINE STATIC VARIABLE ${cursor} AS DATETIME NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Date variable  " enabled="true" id="com.openedge.pdt.text.template.dvdts" name="DSVDT">DEFINE STATIC VARIABLE ${cursor} AS DATE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Datetime-tz variable" enabled="true" id="com.openedge.pdt.text.template.dvdtzs" name="DSVDTZ">DEFINE STATIC VARIABLE ${cursor} AS DATETIME-TZ NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Handle variable " enabled="true" id="com.openedge.pdt.text.template.dvhns" name="DSVHN">DEFINE STATIC VARIABLE ${cursor} AS HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Int64 variable" enabled="true" id="com.openedge.pdt.text.template.dvi6s" name="DSVI6">DEFINE STATIC VARIABLE ${cursor} AS INT64 NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Integer variable  " enabled="true" id="com.openedge.pdt.text.template.dvins" name="DSVIN">DEFINE STATIC VARIABLE ${cursor} AS INTEGER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Longchar variable" enabled="true" id="com.openedge.pdt.text.template.dvlcs" name="DSVLC">DEFINE STATIC VARIABLE ${cursor} AS LONGCHAR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Logical variable  " enabled="true" id="com.openedge.pdt.text.template.dvlgs" name="DSVLG">DEFINE STATIC VARIABLE ${cursor} AS LOGICAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Mem Pointer variable  " enabled="true" id="com.openedge.pdt.text.template.dvmps" name="DSVMP">DEFINE STATIC VARIABLE ${cursor} AS MEMPTR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Raw variable" enabled="true" id="com.openedge.pdt.text.template.dvrs" name="DSVR">DEFINE STATIC VARIABLE ${cursor} AS RAW NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Recid variable" enabled="true" id="com.openedge.pdt.text.template.dvrcs" name="DSVRC">DEFINE STATIC VARIABLE ${cursor} AS RECID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static ROWID variable  " enabled="true" id="com.openedge.pdt.text.template.dvris" name="DSVRI">DEFINE STATIC VARIABLE ${cursor} AS ROWID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Static Widget variable  " enabled="true" id="com.openedge.pdt.text.template.dvwhs" name="DSVWH">DEFINE STATIC VARIABLE ${cursor} AS WIDGET-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Character variable  " enabled="true" id="com.openedge.pdt.text.template.dvch" name="DVCH">DEFINE VARIABLE ${cursor} AS CHARACTER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Class variable  " enabled="true" id="com.openedge.pdt.text.template.dvcl" name="DVCL">DEFINE VARIABLE ${cursor} AS Progress.Lang.Object NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Com-handle variable" enabled="true" id="com.openedge.pdt.text.template.dvcm" name="DVCM">DEFINE VARIABLE ${cursor} AS COM-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Decimal variable  " enabled="true" id="com.openedge.pdt.text.template.dvde" name="DVDE">DEFINE VARIABLE ${cursor} AS DECIMAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime variable" enabled="true" id="com.openedge.pdt.text.template.dvdm" name="DVDM">DEFINE VARIABLE ${cursor} AS DATETIME NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Date variable  " enabled="true" id="com.openedge.pdt.text.template.dvdt" name="DVDT">DEFINE VARIABLE ${cursor} AS DATE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime-tz variable" enabled="true" id="com.openedge.pdt.text.template.dvdtz" name="DVDTZ">DEFINE VARIABLE ${cursor} AS DATETIME-TZ NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Handle variable " enabled="true" id="com.openedge.pdt.text.template.dvhn" name="DVHN">DEFINE VARIABLE ${cursor} AS HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Int64 variable" enabled="true" id="com.openedge.pdt.text.template.dvi6" name="DVI6">DEFINE VARIABLE ${cursor} AS INT64 NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Integer variable  " enabled="true" id="com.openedge.pdt.text.template.dvin" name="DVIN">DEFINE VARIABLE ${cursor} AS INTEGER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Longchar variable" enabled="true" id="com.openedge.pdt.text.template.dvlc" name="DVLC">DEFINE VARIABLE ${cursor} AS LONGCHAR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Logical variable  " enabled="true" id="com.openedge.pdt.text.template.dvlg" name="DVLG">DEFINE VARIABLE ${cursor} AS LOGICAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Mem Pointer variable  " enabled="true" id="com.openedge.pdt.text.template.dvmp" name="DVMP">DEFINE VARIABLE ${cursor} AS MEMPTR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Raw variable" enabled="true" id="com.openedge.pdt.text.template.dvr" name="DVR">DEFINE VARIABLE ${cursor} AS RAW NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Recid variable" enabled="true" id="com.openedge.pdt.text.template.dvrc" name="DVRC">DEFINE VARIABLE ${cursor} AS RECID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="ROWID variable  " enabled="true" id="com.openedge.pdt.text.template.dvri" name="DVRI">DEFINE VARIABLE ${cursor} AS ROWID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Widget variable  " enabled="true" id="com.openedge.pdt.text.template.dvwh" name="DVWH">DEFINE VARIABLE ${cursor} AS WIDGET-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Finally block   " enabled="true" id="com.openedge.pdt.text.template.finally" name="FINALLY">FINALLY:
+    	${line_selection}${cursor}	
+END FINALLY.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Character INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopch" name="IOPCH">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS CHARACTER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Com-handle INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iopcm" name="IOPCM">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS COM-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Decimal INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopde" name="IOPDE">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS DECIMAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iopdm" name="IOPDM">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS DATETIME NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Date INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopdt" name="IOPDT">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS DATE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime-tz INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iopdtz" name="IOPDTZ">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS DATETIME-TZ NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Handle INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iophn" name="IOPHN">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Int64 INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iopi6" name="IOPI6">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS INT64 NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Integer INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopin" name="IOPIN">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS INTEGER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Logical INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ioplg" name="IOPLG">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS LOGICAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Memptr INPUT-OUTPUT parameter   " enabled="true" id="com.openedge.pdt.text.template.iopmp" name="IOPMP">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS MEMPTR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Raw INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iopvr" name="IOPR">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS RAW NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Recid INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ioprc" name="IOPRC">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS RECID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="ROWID INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopri" name="IOPRI">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS ROWID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Widget INPUT-OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iopwh" name="IOPWH">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS WIDGET NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Character INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipch" name="IPCH">DEFINE INPUT  PARAMETER ${cursor} AS CHARACTER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Longchar INPUT-OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ioplc" name="IPCLC">DEFINE INPUT-OUTPUT PARAMETER ${cursor} AS LONGCHAR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Com-handle INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ipcm" name="IPCM">DEFINE INPUT  PARAMETER ${cursor} AS COM-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Decimal INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipde" name="IPDE">DEFINE INPUT  PARAMETER ${cursor} AS DECIMAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ipdm" name="IPDM">DEFINE INPUT  PARAMETER ${cursor} AS DATETIME NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Date INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipdt" name="IPDT">DEFINE INPUT  PARAMETER ${cursor} AS DATE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime-tz INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ipdtz" name="IPDTZ">DEFINE INPUT  PARAMETER ${cursor} AS DATETIME-TZ NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Handle INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iphn" name="IPHN">DEFINE INPUT  PARAMETER ${cursor} AS HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Int64 INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ipi6" name="IPI6">DEFINE INPUT  PARAMETER ${cursor} AS INT64 NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Integer INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipin" name="IPIN">DEFINE INPUT  PARAMETER ${cursor} AS INTEGER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Longchar INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iplc" name="IPLC">DEFINE INPUT  PARAMETER ${cursor} AS LONGCHAR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Logical INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.iplg" name="IPLG">DEFINE INPUT  PARAMETER ${cursor} AS LOGICAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Memptr INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipmp" name="IPMP">DEFINE INPUT  PARAMETER ${cursor} AS MEMPTR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Raw INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.ipvr" name="IPR">DEFINE INPUT  PARAMETER ${cursor} AS RAW NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Recid INPUT parameter" enabled="true" id="com.openedge.pdt.text.template.iprc" name="IPRC">DEFINE INPUT  PARAMETER ${cursor} AS RECID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="ROWID INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipri" name="IPRI">DEFINE INPUT  PARAMETER ${cursor} AS ROWID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Widget INPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ipwh" name="IPWH">DEFINE INPUT  PARAMETER ${cursor} AS WIDGET NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Message  " enabled="true" id="com.openedge.pdt.text.template.mes" name="MES">MESSAGE ${cursor}
+VIEW-AS ALERT-BOX.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Character OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opch" name="OPCH">DEFINE OUTPUT PARAMETER ${cursor} AS CHARACTER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Com-handle OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.opcm" name="OPCM">DEFINE OUTPUT PARAMETER ${cursor} AS COM-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Decimal OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opde" name="OPDE">DEFINE OUTPUT PARAMETER ${cursor} AS DECIMAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.opdm" name="OPDM">DEFINE OUTPUT PARAMETER ${cursor} AS DATETIME NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Date OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opdt" name="OPDT">DEFINE OUTPUT PARAMETER ${cursor} AS DATE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Datetime-tz OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.opdtz" name="OPDTZ">DEFINE OUTPUT PARAMETER ${cursor} AS DATETIME-TZ NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Handle OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.ophn" name="OPHN">DEFINE OUTPUT PARAMETER ${cursor} AS HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Int64 OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.opi6" name="OPI6">DEFINE OUTPUT PARAMETER ${cursor} AS INT64 NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Integer OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opin" name="OPIN">DEFINE OUTPUT PARAMETER ${cursor} AS INTEGER NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Longchar OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.oplc" name="OPLC">DEFINE OUTPUT PARAMETER ${cursor} AS LONGCHAR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Logical OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.oplg" name="OPLG">DEFINE OUTPUT PARAMETER ${cursor} AS LOGICAL NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Memptr OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opmp" name="OPMP">DEFINE OUTPUT PARAMETER ${cursor} AS MEMPTR NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Raw OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.opvr" name="OPR">DEFINE OUTPUT PARAMETER ${cursor} AS RAW NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Recid OUTPUT parameter" enabled="true" id="com.openedge.pdt.text.template.oprc" name="OPRC">DEFINE OUTPUT PARAMETER ${cursor} AS RECID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="ROWID OUTPUT parameter  " enabled="true" id="com.openedge.pdt.text.template.opri" name="OPRI">DEFINE OUTPUT PARAMETER ${cursor} AS ROWID NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.editor.templates" deleted="false" description="Widget OUTPUT parameter   " enabled="true" id="com.openedge.pdt.text.template.opwh" name="OPWH">DEFINE OUTPUT PARAMETER ${cursor} AS WIDGET-HANDLE NO-UNDO.</template>
+<template autoinsert="true" context="com.openedge.pdt.text.webspeed.templates" deleted="false" description="WebSpeed Blank Template" enabled="true" id="com.openedge.pdt.text.webpseed.blank" name="WebSpeed Blank">&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;META NAME="AUTHOR" CONTENT="Your Name"&gt;
+&lt;TITLE&gt;WebSpeed Script&lt;/TITLE&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+/* Create an unnamed pool to store all the widgets created by this procedure.
+   This is a good default which assures that this procedure's triggers and
+   internal procedures will execute in this procedure's storage, and that
+   proper cleanup will occur on deletion of the procedure. */
+CREATE WIDGET-POOL.
+&lt;/SCRIPT&gt;
+&lt;/HEAD&gt;
+
+&lt;BODY&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  /*------------------------------------------------------------------
+    File:
+    Description:
+    Created:
+  -------------------------------------------------------------------*/
+
+&lt;/SCRIPT&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</template>
+<template autoinsert="true" context="com.openedge.pdt.text.webspeed.templates" deleted="false" description="WebSpeed Frameset Template" enabled="true" id="com.openedge.pdt.text.webspeed.frameset" name="WebSpeed Frameset">&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;WebSpeed Frameset&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;FRAMESET ROWS="25%,75%"&gt;
+  &lt;FRAME SRC="`RootURL`/assist/blank.html" NAME="FS_header"
+    MARGINWIDTH="5" MARGINHEIGHT="3"&gt;
+  &lt;FRAMESET COLS="33%,67%"&gt;
+    &lt;FRAME SRC="`RootURL`/assist/blank.html" NAME="FS_index"
+      MARGINWIDTH="5" MARGINHEIGHT="3"&gt;
+    &lt;FRAME SRC="`RootURL`/assist/blank.html" NAME="FS_main"
+      MARGINWIDTH="5" MARGINHEIGHT="3"&gt;
+  &lt;/FRAMESET&gt;
+  &lt;NOFRAMES&gt;
+    &lt;BODY&gt;
+    &lt;P&gt;This web page uses frames, but your browser doesn't support them.&lt;/P&gt;
+    &lt;/BODY&gt;
+  &lt;/NOFRAMES&gt;
+&lt;/FRAMESET&gt;
+&lt;/HTML&gt;</template>
+<template autoinsert="true" context="com.openedge.pdt.text.webspeed.templates" deleted="false" description="WebSpeed Main Template" enabled="true" id="com.openedge.pdt.text.webspeed.main" name="WebSpeed Main">&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;META NAME="AUTHOR" CONTENT="Your Name"&gt;
+&lt;TITLE&gt;Welcome to Your Application&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+
+&lt;BODY&gt;
+&lt;H1 STYLE="text-align: center"&gt;
+  &lt;BR&gt;Welcome to &lt;SPAN STYLE="COLOR : #0000FF;"&gt;Your Application&lt;/SPAN&gt;&lt;BR&gt;
+&lt;/H1&gt;
+&lt;HR STYLE="width: 70%"&gt;
+
+&lt;P STYLE="text-align: center"&gt;
+Host:&lt;STRONG&gt; `SERVER_NAME`  &lt;/STRONG&gt;&lt;BR&gt;
+Browser:&lt;STRONG&gt; `REMOTE_HOST`  &lt;/STRONG&gt;&lt;BR&gt;
+Date:&lt;STRONG&gt; `STRING(TODAY,&amp;quot;99-99-9999&amp;quot;)`  &lt;/STRONG&gt;
+&lt;/P&gt;
+&lt;HR STYLE="width: 70%"&gt;
+
+&lt;/BODY&gt;
+&lt;/HTML&gt;</template>
+<template autoinsert="true" context="com.openedge.pdt.text.webspeed.templates" deleted="false" description="WebSpeed Report Template" enabled="true" id="com.openedge.pdt.text.webspeed.reporttemplate" name="WebSpeed Report">&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Browse&lt;/TITLE&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+/* Create an unnamed pool to store all the widgets created by this procedure.
+   This is a good default which assures that this procedure's triggers and
+   internal procedures will execute in this procedure's storage, and that
+   proper cleanup will occur on deletion of the procedure. */
+CREATE WIDGET-POOL.
+&lt;/SCRIPT&gt;
+&lt;/HEAD&gt;
+&lt;BODY STYLE="background-color: #FFFFFF"&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  /*--------------------------------------------------------------------
+    Template: browse.html
+
+    Description: Browse a Database Table.
+
+      Modify the "&amp;SCOPE-DEFINE..." lines to customize this browse.
+      The "Main Fields" section describes the "&amp;SCOPE-DEFINE..."
+      Preprocessor reference fields.
+
+      This template will list Customers associated with the Sports
+      database, listing them in Name order.
+
+      A "Jump To" can be entered to start the search listing at the
+      first customer name which is equal to or greater than the
+      "Jump To" value entered.
+
+      A Sales Rep. filter can be used to list only those Customers
+      associated with the Sales Rep. filter field.  To implement
+      the filter the browse can be called via:
+
+         http://.../browse.html?salesRep=sls
+
+      In this example, the "Result List" will display only those
+      Customers that contain Sales Rep. "sls".
+
+      The "Jump To" user input field can be bypassed via:
+
+         http://.../browse.html?NoJumpForm=yes
+
+      This will start the "Result List" display output at the first
+      Customer record.
+
+      The Query can also begin the "Result List" display at the first
+      Customer record if the "Jump To" value is left blank.
+
+      The Sales Rep. filter and the NoJumpForm can be combined:
+
+         http://.../browse.html?salesRep=sls&amp;NoJumpForm=yes
+
+      This will begin the "Result List" display with the first Customer
+      that contains Sales Rep. "sls".
+
+    Main Fields: Preprocessor references have been used to define the
+                 main fields associated with this browse.
+
+      Query-Table    - The name of the table to browse.
+      Query-Field    - The field to be used to define the Query output
+                       Sort order.  This field is also used by the
+                       "Jump To" functionality.  This field must be
+                       the main component of an Index associated with
+                       the Table.
+      Query-Index    - The name of the Index where Query-Field is the
+                       main component.
+      Filter-Field   - The field to be used as a filter.  For large
+                       database tables this field should be the main
+                       component of an index.
+      Display-Fields - The fields to be displayed in "Result List".
+      Result-Rows    - The number of Rows to display in "Result List".
+
+
+    Performance Considerations:
+
+      For large database Tables where the Filter Field will be used
+      consideration should be given to the creation of an index and
+      program modifications to improve the performance of the browse.
+
+      The index should contain the Filter Field as the main component
+      and the Query Field as the secondary field within the index.
+
+      The following programming modifications should then be made:
+
+        1. A Preprocessor reference should be added:
+
+           &amp;SCOPE-DEFINE Filter-Index   'xxxxxx'
+
+           where 'xxxxxx' is the name of the index consisting of the
+           Filter Field and the Query Field.
+
+        2. The OPEN QUERY statement associated with the Filter Field
+           should be modified as follows:
+
+           OPEN QUERY Browse-Qry FOR EACH {&amp;Query-Table}
+             WHERE {&amp;Query-Table}.{&amp;Filter-Field} = {&amp;Filter-Field}-key
+             USE-INDEX {&amp;Filter-Index} NO-LOCK.
+
+        3. The FIND LAST associated with the Filter Field should be
+           modified as follows:
+
+           FIND LAST {&amp;Query-Table}
+             WHERE {&amp;Query-Table}.{&amp;Filter-Field} = {&amp;Filter-Field}-key
+               USE-INDEX {&amp;Filter-Index} NO-LOCK NO-ERROR.
+
+        4. The FIND FIRST can also be modified in a similar fashion
+           to the FIND LAST depending on how the Browse will be
+           utilized.  The FIND FIRST as presently written will perform
+           adequately.
+
+    The browse has been defined to support character data types for
+    the Query-Field and the Filter-Field.  The programming logic may
+    need to be modified to support other data types.
+
+  --------------------------------------------------------------------*/
+
+  /* Modify the "&amp;SCOPE-DEFINE..." lines to customize this browse. */
+
+  &amp;SCOPED-DEFINE Query-Table    Customer
+  &amp;SCOPED-DEFINE Query-Field    Name
+  &amp;SCOPED-DEFINE Query-Index    Name
+  &amp;SCOPED-DEFINE Filter-Field   Salesrep
+  &amp;SCOPED-DEFINE Display-Fields "  &lt;TR&gt;&lt;TD&gt;" Name "&lt;/TD&gt;&lt;TD&gt;" Custnum "&lt;/TD&gt;&lt;/TR&gt;"
+  &amp;SCOPED-DEFINE Result-Rows    10
+
+  DEFINE VARIABLE jumpto-value        AS CHARACTER  NO-UNDO.
+  DEFINE VARIABLE {&amp;Filter-Field}-key AS CHARACTER  NO-UNDO.
+  DEFINE VARIABLE repo-to             AS INTEGER    NO-UNDO.
+  DEFINE VARIABLE i-count             AS INTEGER    NO-UNDO.
+  DEFINE VARIABLE JumpForm            AS CHARACTER  NO-UNDO.
+  DEFINE VARIABLE TmpUrl              AS CHARACTER  NO-UNDO.
+  DEFINE VARIABLE DelimiterField      AS CHARACTER  NO-UNDO.
+
+  /* Get all the fields from the input */
+  ASSIGN
+    JumpForm            = get-field("NoJumpForm":U)
+    jumpto-value        = get-field("jumpto-name":U)
+    repo-to             = INTEGER(get-field("repo-to":U)) NO-ERROR.
+  {&amp;Filter-Field}-key = get-field("{&amp;Filter-Field}":U).
+
+  /* Display "Jump To" Form.  This form will not be displayed if
+     "NoJumpForm=yes" requested */
+  IF JumpForm eq "":U THEN DO:
+&lt;/SCRIPT&gt;
+
+&lt;FORM ACTION="`SelfURL`" METHOD="POST" NAME="JumpForm"&gt;
+  &lt;INPUT TYPE="hidden" NAME="repo-to" VALUE="-1000"&gt;
+  &lt;INPUT TYPE="hidden" NAME="`'{&amp;amp;Filter-Field}'`" VALUE="`{&amp;amp;Filter-Field}-key`"&gt;
+  &lt;DIV STYLE="text-align: center;"&gt;
+  &lt;P&gt;&lt;STRONG&gt;Jump to:
+    &lt;INPUT TYPE="text" SIZE="20" NAME="jumpto-name" VALUE="`jumpto-value`"&gt;
+    &lt;INPUT TYPE="submit" NAME="submit-jumpto" VALUE="Submit"&gt;
+    &lt;/STRONG&gt;&lt;/P&gt;&lt;/DIV&gt;
+  &lt;HR&gt;
+&lt;/FORM&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  END. /* Close of "IF JumpForm eq "":U THEN DO:" */
+&lt;/SCRIPT&gt;
+
+&lt;P STYLE="text-align: center;"&gt;&lt;STRONG&gt;Results List:&lt;/STRONG&gt;&lt;/P&gt;
+
+&lt;DIV STYLE="text-align: center;"&gt;
+&lt;TABLE BORDER="2"&gt;
+  &lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+
+    /* Define the Query */
+    DEFINE QUERY Browse-Qry FOR {&amp;Query-Table} SCROLLING.
+
+    IF {&amp;Filter-Field}-key eq "":U THEN
+      /* Open the Query for all the records associated with the Table.
+         No Filter Field specified */
+      OPEN QUERY Browse-Qry FOR EACH {&amp;Query-Table}
+        USE-INDEX {&amp;Query-Index} NO-LOCK.
+    ELSE
+      /* Open the Query for only those records meeting the Filter Field
+         selection criteria */
+      OPEN QUERY Browse-Qry FOR EACH {&amp;Query-Table}
+        WHERE {&amp;Query-Table}.{&amp;Filter-Field} = {&amp;Filter-Field}-key NO-LOCK
+        BY {&amp;Query-Field}.
+
+    /* "Jump To" form posted.  Find the first record that meets the
+       "Jump To" criteria.  This works correctly if "Jump To" blank */
+    IF repo-to eq -1000 THEN DO:
+      IF {&amp;Filter-Field}-key eq "":U THEN
+        /* Find the first record meeting "Jump To" criteria.
+           No Filter Field specified */
+        FIND FIRST {&amp;Query-Table}
+          WHERE {&amp;Query-Table}.{&amp;Query-Field} &gt;= jumpto-value
+          USE-INDEX {&amp;Query-Index} NO-LOCK NO-ERROR.
+      ELSE
+        /* Find the first record meeting "Jump To" criteria AND
+           Filter Field criteria */
+        FIND FIRST {&amp;Query-Table}
+          WHERE {&amp;Query-Table}.{&amp;Query-Field} &gt;= jumpto-value
+            AND {&amp;Query-Table}.{&amp;Filter-Field} = {&amp;Filter-Field}-key
+          USE-INDEX {&amp;Query-Index} NO-LOCK NO-ERROR.
+      IF AVAILABLE {&amp;Query-Table} THEN
+        /* Reposition the Query to the record meeting the selection
+           criteria */
+        REPOSITION Browse-Qry TO ROWID ROWID({&amp;Query-Table}).
+      ELSE
+        /* No record found meeting selection criteria.  Reposition to
+           the first record */
+        REPOSITION Browse-Qry TO ROW 1.
+    END. /* Close of "IF repo-to eq -1000 THEN DO:" */
+    /* First, Prev, Next, Last navigation selected or "NoJumpForm=yes"
+       requested */
+    ELSE DO:
+      IF repo-to &gt; 0 THEN DO:
+        /* Reposition the Query to the Row requested to by
+           the Navigation selection */
+        REPOSITION Browse-Qry TO ROW repo-to.
+        GET NEXT Browse-Qry NO-LOCK.
+        /* If attempted to reposition past the last record, then set
+           repo-to to execute Last navigation functionaltiy */
+        IF NOT AVAILABLE {&amp;Query-Table} THEN repo-to = -999.
+      END.
+      /* Last navigation */
+      IF repo-to eq -999 THEN DO:
+        IF {&amp;Filter-Field}-key eq "":U THEN
+          /* Find last record in Table using Query-Index to maintain
+             appropriate Sort order.  No Filter Field criteria */
+          FIND LAST {&amp;Query-Table}
+            USE-INDEX {&amp;Query-Index} NO-LOCK NO-ERROR.
+        ELSE
+          /* Find last record in Table meeting Filter Field criteria.
+             Use Query-Index to maintain Sort order */
+          FIND LAST {&amp;Query-Table}
+            WHERE {&amp;Query-Table}.{&amp;Filter-Field} = {&amp;Filter-Field}-key
+              USE-INDEX {&amp;Query-Index} NO-LOCK NO-ERROR.
+        /* Reposition the Query to the record found */
+        REPOSITION Browse-Qry TO ROWID ROWID({&amp;Query-Table}).
+        /* Calculate back to display the correct "Result List"
+           output Rows */
+        repo-to = CURRENT-RESULT-ROW("Browse-Qry":U) - {&amp;Result-Rows} + 1.
+      END.
+      /* Reposition to the requested Row.  If repo-to &lt; 1 then Query
+         will be repositioned to the first record */
+      REPOSITION Browse-Qry TO ROW repo-to.
+    END. /* Close of "If repo-to eq -1000 THEN DO:...ELSE DO:" */
+
+    /* Output the number of requested Rows to "Result List" */
+    DO i-count = 1 to {&amp;Result-Rows}:
+      GET NEXT Browse-Qry NO-LOCK.
+      IF AVAILABLE {&amp;Query-Table} THEN
+        /* Output the requested Display Fields */
+        {&amp;OUT} {&amp;Display-Fields} SKIP.
+      ELSE
+        /* Reached End of Query */
+        LEAVE.
+    END. /* Close of "DO i-count = 1 to {&amp;Result-Rows}:" */
+  &lt;/SCRIPT&gt;
+&lt;/TABLE&gt;
+&lt;/DIV&gt;
+
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  /* If Not the End of the Query, Increment Reposition pointer
+     for Navigation.  If End of Query, force Query to start from
+     beginning */
+  repo-to = (IF NOT AVAILABLE {&amp;Query-Table} THEN -1
+             ELSE CURRENT-RESULT-ROW("Browse-Qry":U) + 1).
+
+  /* Display Navigation Links unless we are waiting for the very
+     first "Jump To" to be submitted */
+  IF repo-to ne 0 THEN DO:
+    ASSIGN
+      TmpUrl         = url-format(?,'jumpto-name,{&amp;Filter-field},NoJumpForm',?)
+      DelimiterField = (IF INDEX(TmpUrl,"?") &gt; 0 THEN ? ELSE "?").
+&lt;/SCRIPT&gt;
+&lt;DIV STYLE="text-align: center;"&gt;
+&lt;TABLE BORDER="2"&gt;
+  &lt;TR&gt;
+    &lt;TD&gt;
+      &lt;A HREF="`TmpUrl%20+%20url-field('repo-to','1',DelimiterField)`"
+        onMouseOver="window.status='First `{&amp;amp;Result-Rows}`'; return true"
+        onMouseOut="window.status=''; return true"&gt;
+      &lt;IMG SRC="`RootURL`/images/first-au.gif" STYLE="border: 0; width: 16; height:16;"&gt;&lt;/A&gt;
+    &lt;/TD&gt;
+    &lt;TD&gt;
+      &lt;A HREF="`TmpUrl%20+%20url-field('repo-to',string(repo-to%20-%20({&amp;amp;result-rows}%20*%202)),DelimiterField)`"
+        onMouseOver="window.status='Prev `{&amp;amp;Result-Rows}`'; return true"
+        onMouseOut="window.status=''; return true"&gt;
+      &lt;IMG SRC="`RootURL`/images/prev-au.gif" STYLE="border: 0; width: 16; height:16;"&gt;&lt;/A&gt;
+    &lt;/TD&gt;
+    &lt;TD&gt;
+      &lt;A HREF="`TmpUrl%20+%20url-field('repo-to',string(repo-to),DelimiterField)`"
+        onMouseOver="window.status='Next `{&amp;amp;Result-Rows}`'; return true"
+        onMouseOut="window.status=''; return true"&gt;
+      &lt;IMG SRC="`RootURL`/images/next-au.gif" STYLE="border: 0; width: 16; height:16;"&gt;&lt;/A&gt;
+    &lt;/TD&gt;
+    &lt;TD&gt;
+      &lt;A HREF="`TmpUrl%20+%20url-field('repo-to','-999',DelimiterField)`"
+        onMouseOver="window.status='Last `{&amp;amp;Result-Rows}`'; return true"
+        onMouseOut="window.status=''; return true"&gt;
+      &lt;IMG SRC="`RootURL`/images/last-au.gif" STYLE="border: 0; width: 16; height:16;"&gt;&lt;/A&gt;
+    &lt;/TD&gt;
+  &lt;/TR&gt;
+&lt;/TABLE&gt;
+&lt;/DIV&gt;
+&lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  END. /* Close of "IF repo-to ne 0 THEN DO:" */
+&lt;/SCRIPT&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</template>
+<template autoinsert="true" context="com.openedge.pdt.text.webspeed.templates" deleted="false" description="WebSpeed Table Template" enabled="true" id="com.openedge.pdt.text.webspeed.table" name="WebSpeed Table">&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"&gt;
+  &lt;TABLE BORDER="0"&gt;
+  &lt;CAPTION STYLE="caption-side: left;"&gt;Enter Your Table Caption Here&lt;/CAPTION&gt;
+  &lt;TR&gt;
+    &lt;TH STYLE="text-align: left;"&gt;Column Heading 1&lt;/TH&gt;
+    &lt;TH STYLE="text-align: left;"&gt;Column Heading 2&lt;/TH&gt;
+  &lt;/TR&gt;
+
+  &lt;SCRIPT LANGUAGE="SpeedScript"&gt;
+  /*------------------------------------------------------------------
+    File:
+    Description:
+    Author:
+    Created
+    ------------------------------------------------------------------
+
+    OVERVIEW:
+    Customized this file and call from WebSpeed as either
+    a) a custom tag in an HTML Mapping file. For example:
+
+       &lt;!--WSTAG NAME="mytbl" FILE="table.r" --&gt;
+
+                          -OR-
+
+       &lt;!--WSTAG NAME="mytbl" FILE="table.w" --&gt;
+
+    b) call directly in another SpeedScript file
+
+       RUN table.r.   -OR-  RUN table.w.
+
+    NOTE:
+    This file should not be opened up in Front Page or any other
+    authoring tool that may add an HTML, HEAD, META, and BODY tag
+    around the TABLE tag in this template.
+
+    CUSTOMIZATION:
+    The pieces of this template that should/can be customized include:
+
+	o Table Caption
+	  -location               :  top of the template file
+	  -default value          :  "Enter Your Table Caption Here"
+
+    o Table Row (for Heading Cells)
+	  -location               :  top of the template file
+	  -default attributes     :  no attributes have been specified
+      -note                   :  add row attributes as needed
+
+	o Table Heading(s)
+	  -location               :  top of the template file
+	  -default no. of headings:  2
+	  -default column headings:  "Column Heading 1" "Column Heading 2"
+      -default attributes     :  STYLE="text-align: left;"
+      -note                   :  add additional columns, headings
+                                 heading attributes
+
+    o Table Row (for Data Cells)
+	  -location               :  defined in the FOR EACH section of the
+                                 template
+	  -default attributes     :  STYLE="text-align: left; vertical-align: middle;"
+      -note                   :  add row attributes as needed
+
+    o Table Data
+      -location               :  TD-ATTRIBUTES 'SpeedScript'
+                                 PREPROCESSOR defined after this comment
+	  -default attributes     :  STYLE="text-align: left; vertical-align: middle; white-space: no-wrap;"
+                                 ROWSPAN="1", COLSPAN="1"
+	  -note                   :  add attributes as needed
+
+    o Database Table
+	  -location               :  defined in DB-TABLE 'SpeedScript'
+                                 PREPROCESSOR after this comment
+	  -default value          :  customer (from PROGRESS sports database)
+      -note                   :  modify for application database
+
+	o Database Field(s)
+      -location               :  defined in DB-FIELD1 and DB-FIELD2
+                                 'SpeedScript' PREPROCESSORS after this comment
+      -default value          :  name, phone (from the customer
+                                 table in the PROGRESS sports database)
+      -note                   :  modify for application database
+                                 and optionally define additional
+                                 fields (the number of fields defined should
+                                 match the number of columns in the table
+
+    o Output of Table Data
+      -location               :  FOR EACH section of template
+      -default value          :  DB-TABLE, DB-FIELD1, and DB-FIELD2
+                                 'SpeedScript' PREPROCESSOR values are output
+      -note                   :  add DB-FIELD# 'SpeedScript' PREPROCESSORS if
+                                 additional ones have been defined
+  -------------------------------------------------------------------*/
+
+  /* PREPROCESSOR Definitions */
+
+  /* Data Cell Attributes */
+  &amp;SCOPED-DEFINE TD-ATTRIBUTES 'style="text-align: left; vertical-align: middle; white-space: no-wrap;"'
+
+  /* Database Table and Fields from which data is to be retrieved to
+     populate the HTML Table.  The table and field currently listed
+     are ones that are associated with the sports database.  Customize
+     these preprocessors to suit the table being output. */
+  &amp;SCOPED-DEFINE DB-TABLE       customer
+  &amp;SCOPED-DEFINE DB-FIELD1      name
+  &amp;SCOPED-DEFINE DB-FIELD2      phone
+
+  /* Outputting Data Cell Tags and Data Values */
+  FOR EACH {&amp;DB-TABLE}:
+  &lt;/SCRIPT&gt;
+
+  &lt;TR STYLE="text-align: left; vertical-align: middle;"&gt;
+    &lt;TD {&amp;TD-ATTRIBUTES}&gt; ` {&amp;DB-FIELD1} ` &lt;/TD&gt;
+    &lt;TD {&amp;TD-ATTRIBUTES}&gt; ` {&amp;DB-FIELD2} ` &lt;/TD&gt;
+  &lt;/TR&gt;
+
+  &lt;!--WSS END. --&gt;
+  
+&lt;/TABLE&gt;
+
+</template></templates>
