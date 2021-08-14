@@ -235,7 +235,7 @@ namespace _3PA {
             // check if npp version is meeting current recommended version
             if (!string.IsNullOrEmpty(Npp.SoftwareStringVersion) && !Npp.SoftwareStringVersion.IsHigherOrEqualVersionThan(Config.RequiredNppVersion)) {
                 if (!Config.Instance.NppOutdatedVersion) {
-                    UserCommunication.Notify("This version of 3P has been developed for Notepad++ " + Config.RequiredNppVersion + ", your version (" + Npp.SoftwareStringVersion + ") is outdated.<br><br>Using an outdated version, you might encounter bugs that would not occur otherwise.<br>Try to update your version of Notepad++ as soon as possible, or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the latest version of Notepad++ here</a>", MessageImg.MsgHighImportance, "Outdated version", "3P requirements are not met");
+                    UserCommunication.Notify("This version of 3P has been tested with Notepad++ " + Config.RequiredNppVersion + ", your version (" + Npp.SoftwareStringVersion + ") is outdated.<br><br>Using an outdated version, you might encounter bugs that would not occur otherwise.<br>Try to update your version of Notepad++ as soon as possible, or use 3P knowning their might be compatibility risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the latest version of Notepad++ here</a>", MessageImg.MsgHighImportance, "Outdated version", "3P requirements are not met");
                     Config.Instance.NppOutdatedVersion = true;
                 }
             } else
