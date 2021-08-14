@@ -36,5 +36,5 @@
 /.idea
 /3PA/*.DotSettings
 /*.suo
-/packages/DllExport.1.6.0
+/packages
 /.vs/**
