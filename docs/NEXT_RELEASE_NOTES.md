@@ -1,8 +1,8 @@
 
 ### Improvements ###
 
-- 
+- Fixed notepad++ compatiblity version (tested for 8.1.3)
 
 ### Fixed issues ###
 
-- Fixed notepad++ compatiblity version (tested for 8.1.3)
+- Fixed build issue with outdated version of DllExport
