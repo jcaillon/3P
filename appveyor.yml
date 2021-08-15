@@ -15,8 +15,9 @@ deploy:
   tag: $(APPVEYOR_REPO_TAG_NAME)
   release: $(APPVEYOR_REPO_TAG_NAME)
   description: Copy the content of NEXT_RELEASE_NOTES.md here :)
+  # https://ci.appveyor.com/tools/encrypt
   auth_token:
-    secure: 8rFG2X11nZArE5N8zrYpGcSfP9XTvaMwZ9DIho9DjaR2GPFv0J+BU7qdvA2UCzUi
+    secure: F3cm5vwqQUGAClxzUV2Z2ltmQtRyDJLQalZ3lC0CUkxA6N4AGmNu1Bf4DKgmXXzU
   artifact: Releases\3P.zip,Releases\3P_x64.zip
   draft: true
   prerelease: true
