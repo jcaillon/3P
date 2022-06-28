@@ -1,0 +1,51 @@
+# All text files should have the "lf" (Unix) line endings
+* text eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.sln text
+*.yml text
+*.yaml text
+*.md text
+*.csproj text
+*.user text
+*.cs text
+*.manifest text
+*.txt text
+*.resx text
+*.json text
+*.p text
+*.xml text
+*.css text
+*.html text
+*.js text
+*.nuspec text
+
+
+# Text files that should be normalized to crlf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files that should not be normalized or diffed
+
+*.jar binary
+*.exe binary
+*.dll binary
+*.pdb binary
+*.pfx binary
+*.snk binary
+
+*.png binary
+*.gif binary
+*.jpg binary
+*.bmp binary
+*.ico binary
+
+*.chm binary
+*.7z  binary
+*.zip binary
+
+*.pptx binary
+*.xlsx binary
+

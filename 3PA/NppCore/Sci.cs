@@ -1731,7 +1731,11 @@ namespace _3PA.NppCore {
             get { return (Lexer) Api.Send(SciMsg.SCI_GETLEXER); }
             set {
                 var lexer = (int) value;
-                Api.Send(SciMsg.SCI_SETLEXER, new IntPtr(lexer));
+                if (Npp.SoftwareStringVersion.IsHigherOrEqualVersionThan("v8.4.0")) {
+                    Api.Send(SciMsg.SCI_SETILEXER, IntPtr.Zero, new IntPtr(lexer));
+                } else {
+                    Api.Send(SciMsg.SCI_SETLEXER, new IntPtr(lexer));
+                }
             }
         }
 
@@ -1750,15 +1754,6 @@ namespace _3PA.NppCore {
                 fixed (byte* bp = bytes) {
                     Api.Send(SciMsg.SCI_GETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
                     return GetString(new IntPtr(bp), length, Encoding.ASCII);
-                }
-            }
-            set {
-                if (String.IsNullOrEmpty(value)) {
-                    Api.Send(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, IntPtr.Zero);
-                } else {
-                    var bytes = GetBytes(value, Encoding.ASCII, true);
-                    fixed (byte* bp = bytes)
-                        Api.Send(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
                 }
             }
         }

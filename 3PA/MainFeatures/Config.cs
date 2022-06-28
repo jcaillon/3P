@@ -550,7 +550,7 @@ namespace _3PA.MainFeatures {
         #region public fields
 
         public static string RequiredNppVersion {
-            get { return "v8.1.3"; }
+            get { return "v8.4.2"; }
         }
         
         /// <summary>

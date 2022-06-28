@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("3P - Progress Programmers Pal - Julien Caillon")]
 [assembly: AssemblyDescription("Progress Programmers Pal")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("LeCavalierCasta")]
+[assembly: AssemblyCompany("Noyacode")]
 [assembly: AssemblyProduct("3P")]
 [assembly: AssemblyCopyright("Copyright (c) 2018 - Julien Caillon - GNU General Public License v3")]
 [assembly: AssemblyTrademark("")]
@@ -54,5 +54,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.8.7.0")]
+[assembly: AssemblyVersion("1.8.8.0")]
 //[assembly: AssemblyFileVersion("1.5.3.1")]
