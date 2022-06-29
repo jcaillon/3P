@@ -1,3 +1,3 @@
 ### Fixed issues ###
 
-- Fix #294: 3P is not compatible with notepad++ v8.4+
+- Fix #295: bold/italic not resetted when switching syntax highlighting theme

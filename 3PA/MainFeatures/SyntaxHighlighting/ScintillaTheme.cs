@@ -178,10 +178,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             if (styleItem.ForeColor != Color.Transparent)
                 nppStyle.ForeColor = styleItem.ForeColor;
 
-            if (styleItem.FontType > 0) {
-                nppStyle.Bold = styleItem.FontType.IsBitSet(1);
-                nppStyle.Italic = styleItem.FontType.IsBitSet(2);
-            }
+            nppStyle.Bold = styleItem.FontType.IsBitSet(1);
+            nppStyle.Italic = styleItem.FontType.IsBitSet(2);
 
             if (!string.IsNullOrEmpty(styleItem.FontName))
                 nppStyle.Font = styleItem.FontName;
