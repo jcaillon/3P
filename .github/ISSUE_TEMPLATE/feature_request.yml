@@ -20,16 +20,14 @@ body:
     id: problem
     attributes:
       label: Is your feature request related to a problem? Please describe.
-      description: 
-            A clear and concise description of what the problem. Ex. I'm always frustrated when.
+      description: A clear and concise description of what the problem. Ex. I'm always frustrated when.
     validations:
       required: false
   - type: textarea
     id: alternatives
     attributes:
       label: Describe alternatives you've considered
-      description: 
-            A clear and concise description of any alternative solutions or features you've considered.
+      description: A clear and concise description of any alternative solutions or features you've considered.
     validations:
       required: false
   - type: input
@@ -43,7 +41,7 @@ body:
     id: Snapshots
     attributes:
       label: Additional context, snapshots, or images
-      description: Add any other context or screenshots about the feature request. | 
-      Add attach images which can help explain the feature, and a description of what to look for in the image(s).
+      description: "Add any other context or screenshots about the feature request.\n
+      Add attach images which can help explain the feature, and a description of what to look for in the image(s)."
     validations:
       required: false      
