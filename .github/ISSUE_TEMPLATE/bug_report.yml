@@ -1,0 +1,63 @@
+name: 🐞 New Bug Report
+description: Create a bug report
+title: "🐞[Bug]: "
+labels: [Bug]
+assignees: "jcaillon"
+body:
+  - type: markdown
+    attributes:
+      value: |
+       Thank you for taking the time to fill out this bug report!
+       Fields marked with an asterisk (*) are required, and remaining fields are optional, but we encourage their usage.
+  - type: textarea
+    id: feature
+    attributes:
+      label: Please enter a clear and concise description of the issue.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: What Operating System (OS)?
+      placeholder: e.g. Windows 10, Windows 11, MacOS, Linux, Any
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: What version of 3P?
+      placeholder: e.g. v1.8.8, 1.8.7
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: What are the steps used to reproduce this issue? | 
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true      
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What was the expected behavior?
+    validations:
+      required: true      
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happend?
+    validations:
+      required: true      
+  - type: textarea
+    id: snapshots
+    attributes:
+      label: Snapshot(s)
+      description: Optionally attach snapshot(s) which displays the bug.
+    validations:
+      required: false      

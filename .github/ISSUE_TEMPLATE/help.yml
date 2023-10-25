@@ -1,0 +1,36 @@
+name: Help
+description: Post question about 3P
+title: "[Help]: "
+labels: [Question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+       Fields marked with an asterisk (*) are required, and remaining fields are optional, but we encourage their usage.
+  - type: textarea
+    id: feature
+    attributes:
+      label: Please enter a clear and concise detailed question.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: What Operating System (OS)?
+      placeholder: e.g. Windows, MacOS, Linux
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: What version of 3P?
+      placeholder: e.g. 1.0, 1.1
+    validations:
+      required: true
+  - type: textarea
+    id: snapshots
+    attributes:
+      label: Snapshot(s)
+      description: Optionally attach snapshot(s) which helps describe the question.
+    validations:
+      required: false    
