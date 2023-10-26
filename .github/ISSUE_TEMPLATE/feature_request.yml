@@ -30,13 +30,6 @@ body:
       description: A clear and concise description of any alternative solutions or features you've considered.
     validations:
       required: false
-  - type: input
-    id: os
-    attributes:
-      label: Is it OS specific?
-      placeholder: e.g. Windows, MacOS, Linux, Any
-    validations:
-      required: true
   - type: textarea
     id: Snapshots
     attributes:
