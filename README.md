@@ -1,5 +1,8 @@
 # 3P: Progress Programmers Pal #
 
+> [!WARNING]
+> This repository and software is no longer maintain. You can download it and use it but no further fixes or features will be added.
+
 ## An OpenEdge ABL (formerly 4GL Progress) code editor / IDE running on notepad++ ##
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xo6ysno53ht2spjv?svg=true)](https://ci.appveyor.com/project/jcaillon/3p)
